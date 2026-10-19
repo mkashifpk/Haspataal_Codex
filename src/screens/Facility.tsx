@@ -3,13 +3,43 @@ import { useState } from "react";
 import * as facility from "../generated/facility_profile";
 import contract from "../../contracts/facility_profile.json";
 import { Details, ErrorBox, Field, LoadState, useLoad } from "../components";
+import { api } from "../bridge";
+import {
+  createFacilityAttempt,
+  storedFacilityAttempt,
+  storeFacilityAttempt,
+  removeFacilityAttempt,
+  mayRetryFacilityAttempt,
+  definitiveFacilityRefusal,
+  type PendingFacilityApply,
+} from "../facility-recovery";
 export function Facility({
   revision,
   onChanged,
+  storageScope,
 }: {
   revision: number;
   onChanged: () => void;
+  storageScope: string;
 }) {
+  const storageKey = `haspataal.facility-apply:${storageScope}`;
+  const [loadedAttempt] = useState(() => {
+    try {
+      return {
+        pending: storedFacilityAttempt(localStorage, storageKey),
+        error: undefined,
+      };
+    } catch (error) {
+      return { pending: undefined, error };
+    }
+  });
+  const [pending, setPending] = useState<PendingFacilityApply | undefined>(
+    loadedAttempt.pending,
+  );
+  const [checked, setChecked] = useState<{
+    revision: number;
+    history: facility.EstablishmentChangeOut[];
+  }>();
   const r = useLoad(async () => {
     const [est, profiles, msds, staff, history, confirmations, documents] =
       await Promise.all([
@@ -36,11 +66,13 @@ export function Facility({
     [saved, setSaved] = useState("");
   const states = contract.schemas.CapabilityMoveIn.properties.state.enum;
   const change = () => {
+    if (pending) return;
     setPreview(undefined);
     setSnapshot(undefined);
     setAcks([]);
   };
   async function doPreview() {
+    if (pending || loadedAttempt.error) return;
     setBusy(true);
     setError(undefined);
     try {
@@ -62,31 +94,95 @@ export function Facility({
       setBusy(false);
     }
   }
-  async function apply() {
-    if (!snapshot || !preview) return;
+  function clearPending(attempt = pending) {
+    if (!attempt) return;
+    removeFacilityAttempt(localStorage, storageKey, attempt);
+    setPending(storedFacilityAttempt(localStorage, storageKey));
+    setChecked(undefined);
+  }
+  async function checkOutcome() {
     setBusy(true);
     setError(undefined);
     try {
-      const d = await facility.applyChange({
-        ...snapshot,
-        expected_revision: preview.revision,
-        acknowledged: acks,
-      });
+      const [est, history] = await Promise.all([
+        facility.getEstablishment(),
+        facility.listChanges({ limit: 100 }),
+      ]);
+      setChecked({ revision: est.revision, history });
+    } catch (e) {
+      setError(e);
+    } finally {
+      setBusy(false);
+    }
+  }
+  async function apply() {
+    if (busy || loadedAttempt.error) return;
+    if (pending && (!checked || !mayRetryFacilityAttempt(pending))) return;
+    if (!pending && (!snapshot || !preview)) return;
+    setBusy(true);
+    setError(undefined);
+    let activeAttempt = pending;
+    try {
+      const other = storedFacilityAttempt(localStorage, storageKey);
+      if (!pending && other) {
+        setPending(other);
+        setChecked(undefined);
+        return;
+      }
+      const attempt =
+        pending ||
+        createFacilityAttempt(
+          {
+            ...snapshot!,
+            expected_revision: preview!.revision,
+            acknowledged: [...acks],
+          },
+          preview!,
+        );
+      // Save the exact action before the first write. A reply can be lost even
+      // if the server commits, or this window is reloaded immediately afterwards.
+      storeFacilityAttempt(localStorage, storageKey, attempt);
+      activeAttempt = attempt;
+      setPending(attempt);
+      setChecked(undefined);
+      const d = await api<facility.EstablishmentChangeOut>(
+        "POST",
+        "/establishment/changes",
+        attempt.body,
+        { idempotent: true, key: attempt.key },
+      );
+      clearPending(attempt);
       setSaved(`Change ${d.change_id} applied. Revision ${d.revision}.`);
-      change();
+      setPreview(undefined);
+      setSnapshot(undefined);
+      setAcks([]);
       setMoves({});
       setEditing(false);
+      setReason("");
       await r.reload();
       onChanged();
     } catch (e) {
       setError(e);
-      change();
+      if (definitiveFacilityRefusal(e)) {
+        try {
+          clearPending(activeAttempt);
+          setPreview(undefined);
+          setSnapshot(undefined);
+          setAcks([]);
+          await r.reload();
+        } catch (storageError) {
+          setError(storageError);
+        }
+      }
     } finally {
       setBusy(false);
     }
   }
   return (
-    <>
+    <div
+      data-unsaved={editing || Object.keys(moves).length > 0 || !!reason}
+      data-write-pending={busy || !!pending || !!loadedAttempt.error}
+    >
       <div className="section-heading">
         <div>
           <h1>{tr("Facility profile & services")}</h1>
@@ -104,6 +200,7 @@ export function Facility({
       <div className="tabs">
         {["Profile & services", "Staff & duties", "History"].map((t) => (
           <button
+            data-help="facility.tabs"
             key={t}
             className={tab === t ? "selected" : ""}
             onClick={() => setTab(t)}
@@ -114,6 +211,97 @@ export function Facility({
       </div>
       <LoadState {...r} retry={r.reload} />
       <ErrorBox error={error} />
+      <ErrorBox error={loadedAttempt.error} />
+      {pending && (
+        <section className="card" role="status">
+          <h2>{tr("Facility change outcome needs checking")}</h2>
+          <p>
+            {tr(
+              "The original request is retained. Do not submit a new change until its outcome is known.",
+            )}
+          </p>
+          <p>
+            {tr("Previewed revision")}: {pending.body.expected_revision} ·{" "}
+            {pending.body.reason}
+          </p>
+          <Details
+            value={{
+              profile: pending.body.profile,
+              capabilities: pending.body.capabilities,
+              acknowledged: pending.body.acknowledged,
+            }}
+          />
+          <button
+            data-help="facility.recovery"
+            disabled={busy}
+            onClick={checkOutcome}
+          >
+            {tr("Check server status and history")}
+          </button>
+          {checked && (
+            <>
+              <p>
+                {tr("Current server revision")}: {checked.revision}
+              </p>
+              <details>
+                <summary data-help="facility.recovery">
+                  {tr("Review recent server history")}
+                </summary>
+                <Details value={checked.history} />
+              </details>
+              <p>
+                {tr(
+                  "History is for review; matching text alone does not prove which request completed. Retry uses only the original request.",
+                )}
+              </p>
+              <button
+                data-help="facility.recovery"
+                disabled={busy || !mayRetryFacilityAttempt(pending)}
+                onClick={apply}
+              >
+                {tr("Retry original request")}
+              </button>
+              <button
+                data-help="facility.recovery"
+                disabled={busy}
+                onClick={() => {
+                  if (
+                    !window.confirm(
+                      tr(
+                        "Only close after verifying the outcome in server history or with your administrator. This does not undo a change. Continue?",
+                      ),
+                    )
+                  )
+                    return;
+                  try {
+                    clearPending();
+                    setPreview(undefined);
+                    setSnapshot(undefined);
+                    setAcks([]);
+                    setSaved(
+                      tr(
+                        "Attempt closed after manual review. Preview again before any new change.",
+                      ),
+                    );
+                    void r.reload();
+                  } catch (e) {
+                    setError(e);
+                  }
+                }}
+              >
+                {tr("Close reviewed attempt")}
+              </button>
+            </>
+          )}
+          {!mayRetryFacilityAttempt(pending) && (
+            <p>
+              {tr(
+                "The safe retry period has ended or the clock changed. Review history with your administrator; do not resend this request.",
+              )}
+            </p>
+          )}
+        </section>
+      )}
       {saved && (
         <p className="notice" role="status">
           {saved}
@@ -141,7 +329,7 @@ export function Facility({
               <h2>{tr("Service and profile changes")}</h2>
               {r.data.history.map((h) => (
                 <details key={h.change_id}>
-                  <summary>
+                  <summary data-help="facility.tabs">
                     {h.changed_at} · {h.changed_by_name} · {h.reason}
                   </summary>
                   <Details value={h} />
@@ -174,7 +362,9 @@ export function Facility({
                 )}
                 <p>{r.data.msds.suggestion.note}</p>
                 <details>
-                  <summary>{tr("Ward count and licence review")}</summary>
+                  <summary data-help="facility.tabs">
+                    {tr("Ward count and licence review")}
+                  </summary>
                   <Details
                     value={{
                       wards: r.data.msds.suggestion.wards,
@@ -183,6 +373,8 @@ export function Facility({
                   />
                 </details>
                 <button
+                  data-help="facility.profile"
+                  disabled={busy || !!pending || !!loadedAttempt.error}
                   onClick={() => {
                     setEditing(!editing);
                     setProfile({
@@ -208,178 +400,194 @@ export function Facility({
                 }}
                 onChange={change}
               >
-                {editing && (
-                  <section className="card">
-                    <h2>{tr("Category on the licence")}</h2>
-                    <div className="form-grid">
-                      <Field label={tr("PHC category")}>
-                        <select
-                          value={profile.category}
-                          onChange={(e) => {
-                            const p = r.data!.profiles.find(
-                              (p) => p.code === e.target.value,
-                            )!;
-                            setProfile({ ...profile, category: p.code });
-                            setMoves(
-                              Object.fromEntries(
-                                p.preset
-                                  .filter(
-                                    (c) => !r.data!.est.active.includes(c),
-                                  )
-                                  .map((c) => [c, "Active"]),
-                              ),
-                            );
-                          }}
-                        >
-                          {r.data.profiles.map((p) => (
-                            <option key={p.code} value={p.code}>
-                              {p.label}
-                            </option>
-                          ))}
-                        </select>
-                      </Field>
-                      <Field label={tr("PHC registration / licence number")}>
-                        <input
-                          required
-                          maxLength={60}
-                          value={profile.registration_number}
-                          onChange={(e) =>
-                            setProfile({
-                              ...profile,
-                              registration_number: e.target.value,
-                            })
-                          }
-                        />
-                      </Field>
-                      <Field label={tr("Effective date")}>
-                        <input
-                          type="date"
-                          required
-                          value={profile.effective_from}
-                          onChange={(e) =>
-                            setProfile({
-                              ...profile,
-                              effective_from: e.target.value,
-                            })
-                          }
-                        />
-                      </Field>
-                      <Field label={tr("Licensed beds")}>
-                        <input
-                          type="number"
-                          min={0}
-                          max={5000}
-                          value={profile.licensed_beds ?? ""}
-                          onChange={(e) =>
-                            setProfile({
-                              ...profile,
-                              licensed_beds:
-                                e.target.value === ""
-                                  ? null
-                                  : Number(e.target.value),
-                            })
-                          }
-                        />
-                      </Field>
-                      <Field label={tr("Licence document")}>
-                        <select
-                          value={profile.licence_document_id ?? ""}
-                          onChange={(e) =>
-                            setProfile({
-                              ...profile,
-                              licence_document_id: e.target.value
-                                ? Number(e.target.value)
-                                : null,
-                            })
-                          }
-                        >
-                          <option value="">{tr("No document selected")}</option>
-                          {r.data.documents.map((d) => (
-                            <option key={d.document_id} value={d.document_id}>
-                              {d.title} · {d.reference_no}
-                            </option>
-                          ))}
-                        </select>
-                      </Field>
-                      <Field
-                        label={tr(
-                          "Reason if category differs from bed suggestion",
-                        )}
-                      >
-                        <textarea
-                          maxLength={1000}
-                          value={profile.reason || ""}
-                          onChange={(e) =>
-                            setProfile({ ...profile, reason: e.target.value })
-                          }
-                        />
-                      </Field>
-                    </div>
-                    <p className="muted">
-                      {tr(
-                        "Profile presets are suggestions. Review every service before previewing.",
-                      )}
-                    </p>
-                  </section>
-                )}
-                <h2>{tr("Services")}</h2>
-                <div className="service-grid">
-                  {r.data.est.capabilities.map((c) => (
-                    <article className="card" key={c.capability}>
-                      <span className="badge">{c.state}</span>
-                      <h3>{c.label}</h3>
-                      <p>{c.purpose}</p>
-                      {c.requires.length > 0 && (
-                        <p>
-                          {tr("Requires:")}
-                          {c.requires.join(", ")}
-                        </p>
-                      )}
-                      {c.outstanding.map((o) => (
-                        <p key={o.kind}>
-                          {o.count} {o.label} — {o.how}
-                        </p>
-                      ))}
-                      {c.declaration_note && (
-                        <p className="notice">{c.declaration_note}</p>
-                      )}
-                      {c.implemented && (
-                        <Field label={tr("Proposed state")}>
+                <fieldset disabled={busy || !!pending || !!loadedAttempt.error}>
+                  {editing && (
+                    <section className="card">
+                      <h2>{tr("Category on the licence")}</h2>
+                      <div className="form-grid">
+                        <Field label={tr("PHC category")}>
                           <select
-                            value={moves[c.capability] || c.state}
-                            onChange={(e) =>
-                              setMoves((m) => {
-                                const next = { ...m };
-                                if (e.target.value === c.state)
-                                  delete next[c.capability];
-                                else next[c.capability] = e.target.value;
-                                return next;
-                              })
-                            }
+                            data-help="facility.profile"
+                            value={profile.category}
+                            onChange={(e) => {
+                              const p = r.data!.profiles.find(
+                                (p) => p.code === e.target.value,
+                              )!;
+                              setProfile({ ...profile, category: p.code });
+                              setMoves(
+                                Object.fromEntries(
+                                  p.preset
+                                    .filter(
+                                      (c) => !r.data!.est.active.includes(c),
+                                    )
+                                    .map((c) => [c, "Active"]),
+                                ),
+                              );
+                            }}
                           >
-                            {states.map((s) => (
-                              <option key={s}>{s}</option>
+                            {r.data.profiles.map((p) => (
+                              <option key={p.code} value={p.code}>
+                                {p.label}
+                              </option>
                             ))}
                           </select>
                         </Field>
-                      )}
-                    </article>
-                  ))}
-                </div>
-                <section className="card">
-                  <Field label={tr("Reason for change")}>
-                    <textarea
-                      required
-                      minLength={3}
-                      maxLength={1000}
-                      value={reason}
-                      onChange={(e) => setReason(e.target.value)}
-                    />
-                  </Field>
-                  <button className="primary" disabled={busy}>
-                    {tr("Preview change")}
-                  </button>
-                </section>
+                        <Field label={tr("PHC registration / licence number")}>
+                          <input
+                            data-help="facility.profile"
+                            required
+                            maxLength={60}
+                            value={profile.registration_number}
+                            onChange={(e) =>
+                              setProfile({
+                                ...profile,
+                                registration_number: e.target.value,
+                              })
+                            }
+                          />
+                        </Field>
+                        <Field label={tr("Effective date")}>
+                          <input
+                            data-help="facility.profile"
+                            type="date"
+                            required
+                            value={profile.effective_from}
+                            onChange={(e) =>
+                              setProfile({
+                                ...profile,
+                                effective_from: e.target.value,
+                              })
+                            }
+                          />
+                        </Field>
+                        <Field label={tr("Licensed beds")}>
+                          <input
+                            data-help="facility.profile"
+                            type="number"
+                            min={0}
+                            max={5000}
+                            value={profile.licensed_beds ?? ""}
+                            onChange={(e) =>
+                              setProfile({
+                                ...profile,
+                                licensed_beds:
+                                  e.target.value === ""
+                                    ? null
+                                    : Number(e.target.value),
+                              })
+                            }
+                          />
+                        </Field>
+                        <Field label={tr("Licence document")}>
+                          <select
+                            data-help="facility.profile"
+                            value={profile.licence_document_id ?? ""}
+                            onChange={(e) =>
+                              setProfile({
+                                ...profile,
+                                licence_document_id: e.target.value
+                                  ? Number(e.target.value)
+                                  : null,
+                              })
+                            }
+                          >
+                            <option value="">
+                              {tr("No document selected")}
+                            </option>
+                            {r.data.documents.map((d) => (
+                              <option key={d.document_id} value={d.document_id}>
+                                {d.title} · {d.reference_no}
+                              </option>
+                            ))}
+                          </select>
+                        </Field>
+                        <Field
+                          label={tr(
+                            "Reason if category differs from bed suggestion",
+                          )}
+                        >
+                          <textarea
+                            data-help="facility.profile"
+                            maxLength={1000}
+                            value={profile.reason || ""}
+                            onChange={(e) =>
+                              setProfile({ ...profile, reason: e.target.value })
+                            }
+                          />
+                        </Field>
+                      </div>
+                      <p className="muted">
+                        {tr(
+                          "Profile presets are suggestions. Review every service before previewing.",
+                        )}
+                      </p>
+                    </section>
+                  )}
+                  <h2>{tr("Services")}</h2>
+                  <div className="service-grid">
+                    {r.data.est.capabilities.map((c) => (
+                      <article className="card" key={c.capability}>
+                        <span className="badge">{c.state}</span>
+                        <h3>{c.label}</h3>
+                        <p>{c.purpose}</p>
+                        {c.requires.length > 0 && (
+                          <p>
+                            {tr("Requires:")}
+                            {c.requires.join(", ")}
+                          </p>
+                        )}
+                        {c.outstanding.map((o) => (
+                          <p key={o.kind}>
+                            {o.count} {o.label} — {o.how}
+                          </p>
+                        ))}
+                        {c.declaration_note && (
+                          <p className="notice">{c.declaration_note}</p>
+                        )}
+                        {c.implemented && (
+                          <Field label={tr("Proposed state")}>
+                            <select
+                              data-help="facility.services"
+                              value={moves[c.capability] || c.state}
+                              onChange={(e) =>
+                                setMoves((m) => {
+                                  const next = { ...m };
+                                  if (e.target.value === c.state)
+                                    delete next[c.capability];
+                                  else next[c.capability] = e.target.value;
+                                  return next;
+                                })
+                              }
+                            >
+                              {states.map((s) => (
+                                <option key={s}>{s}</option>
+                              ))}
+                            </select>
+                          </Field>
+                        )}
+                      </article>
+                    ))}
+                  </div>
+                  <section className="card">
+                    <Field label={tr("Reason for change")}>
+                      <textarea
+                        data-help="facility.services"
+                        required
+                        minLength={3}
+                        maxLength={1000}
+                        value={reason}
+                        onChange={(e) => setReason(e.target.value)}
+                      />
+                    </Field>
+                    <button
+                      data-help="facility.preview"
+                      className="primary"
+                      disabled={busy}
+                    >
+                      {tr("Preview change")}
+                    </button>
+                  </section>
+                </fieldset>
               </form>
               {preview && (
                 <section className="card">
@@ -395,6 +603,8 @@ export function Facility({
                   {preview.acknowledgements.map((a) => (
                     <label className="check" key={a.code}>
                       <input
+                        data-help="facility.preview"
+                        disabled={busy || !!pending}
                         type="checkbox"
                         checked={acks.includes(a.code)}
                         onChange={(e) =>
@@ -409,9 +619,12 @@ export function Facility({
                     </label>
                   ))}
                   <button
+                    data-help="facility.preview"
                     className="primary"
                     disabled={
                       busy ||
+                      !!pending ||
+                      !!loadedAttempt.error ||
                       !preview.allowed ||
                       preview.acknowledgements.some(
                         (a) => !acks.includes(a.code),
@@ -430,6 +643,6 @@ export function Facility({
           )}
         </>
       )}
-    </>
+    </div>
   );
 }

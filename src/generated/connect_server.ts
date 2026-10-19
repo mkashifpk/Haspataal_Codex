@@ -44,12 +44,12 @@ export interface TerminalIdentityOut {
   card_printer_address?: string | null;
 }
 
-/** How terminals reach and trust this server — works before login — GET /api/v1/meta/server-info (permissions: any logged-in user). */
+/** How terminals reach and trust this server — works before login — GET /api/v1/meta/server-info (who may call: public: no login (works before login)). */
 export function serverInfo(): Promise<ServerInfoOut> {
   return api<ServerInfoOut>("GET", `/meta/server-info`, undefined);
 }
 
-/** Identify this terminal (location + mapped printers) — works before login — GET /api/v1/terminals/whoami (permissions: any logged-in user). */
+/** Identify this terminal (location + mapped printers) — works before login — GET /api/v1/terminals/whoami (who may call: public: no login (works before login)). */
 export function whoami(): Promise<TerminalIdentityOut> {
   return api<TerminalIdentityOut>("GET", `/terminals/whoami`, undefined);
 }

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { api, call, resetRequests } from "./bridge";
-import type { MeOut, LicenseStatusOut } from "./generated/login";
+import type { MeOut, LicenseStatusOut, HealthOut } from "./generated/login";
 import type { EstablishmentOut } from "./generated/facility_profile";
 import type { HandbookOut } from "./generated/help_center";
 import { Details, ErrorBox, Modal } from "./components";
@@ -16,6 +16,7 @@ import { PatientSearch } from "./screens/PatientSearch";
 import { Registration } from "./screens/Registration";
 import { Help } from "./screens/Help";
 import { setLanguage } from "./i18n";
+import { hasUnsavedChanges } from "./unsaved";
 const labels: Record<string, [string, string, string]> = {
   app_shell: ["Workspace home", "کام کی جگہ", "⌂"],
   workspace_picker: ["Workspaces", "کام کی جگہیں", "▦"],
@@ -46,6 +47,8 @@ export function App() {
     [workspace, setWorkspace] = useState<string | null>(null),
     [screen, setScreen] = useState("connect_server"),
     [license, setLicense] = useState<LicenseStatusOut>(),
+    [loginHealth, setLoginHealth] = useState<HealthOut>(),
+    [healthError, setHealthError] = useState<unknown>(),
     [est, setEst] = useState<EstablishmentOut>(),
     [outline, setOutline] = useState<HandbookOut>(),
     [meta, setMeta] = useState<any>(),
@@ -54,6 +57,7 @@ export function App() {
     [stream, setStream] = useState("Connecting"),
     [error, setError] = useState<unknown>(),
     [helpOpen, setHelpOpen] = useState(false),
+    [helpPage, setHelpPage] = useState<string>(),
     [infoOpen, setInfoOpen] = useState(false),
     [logoutOpen, setLogoutOpen] = useState(false),
     [maintenance, setMaintenance] = useState<any>(),
@@ -78,7 +82,15 @@ export function App() {
       setPrefs(s.prefs);
       if (first.current) {
         first.current = false;
-        setScreen(s.server ? "login" : "connect_server");
+        setScreen(
+          !s.server
+            ? "connect_server"
+            : s.user
+              ? s.workspace
+                ? "app_shell"
+                : "workspace_picker"
+              : "login",
+        );
       }
     } catch (e) {
       setError(e);
@@ -187,6 +199,7 @@ export function App() {
         setCritical(undefined);
         setMaintenance(undefined);
         setHelpOpen(false);
+        setHelpPage(undefined);
         setLogoutOpen(false);
         setScreen("login");
         setNotice(e.reason);
@@ -195,6 +208,9 @@ export function App() {
       if (e.type === "prefs") setPrefs({ ...e.prefs });
       if (e.type === "connection") setConnected(e.connected);
       if (e.type === "permissions") {
+        setOutline(undefined);
+        setHelpOpen(false);
+        setHelpPage(undefined);
         setUser(e.user);
         void refreshData();
       }
@@ -240,7 +256,7 @@ export function App() {
   useEffect(() => {
     if (user && !user.must_change_password) {
       void call("stream").catch(setError);
-      if (loaded.current) void refreshData();
+      void refreshData();
     }
   }, [user?.user_id, user?.must_change_password, workspace, refreshData]);
   useEffect(() => {
@@ -266,10 +282,32 @@ export function App() {
   }, [server?.current, license?.reason]);
   useEffect(() => {
     if (user || !server) return;
-    const ping = () => api("GET", "/health/live").catch(() => {});
+    let cancelled = false;
+    let timer: ReturnType<typeof setTimeout>;
+    setLoginHealth(undefined);
+    setHealthError(undefined);
+    const ping = async () => {
+      try {
+        await api("GET", "/health/live");
+        const health = await api<HealthOut>("GET", "/health");
+        if (!cancelled) {
+          setLoginHealth(health);
+          setHealthError(undefined);
+        }
+      } catch (e) {
+        if (!cancelled) {
+          setLoginHealth(undefined);
+          setHealthError(e);
+        }
+      } finally {
+        if (!cancelled) timer = setTimeout(ping, 5000);
+      }
+    };
     void ping();
-    const id = setInterval(ping, 5000);
-    return () => clearInterval(id);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
   }, [user?.user_id, server?.current]);
   useEffect(() => {
     document.documentElement.lang = prefs.language;
@@ -277,14 +315,32 @@ export function App() {
     document.documentElement.dataset.theme = prefs.theme;
   }, [prefs, ur]);
   useEffect(() => {
+    const deepLink = () => {
+      if (!window.location.hash.startsWith("#help/")) return;
+      try {
+        const requested = decodeURIComponent(window.location.hash.slice(6));
+        setHelpPage(
+          requested.startsWith("screens/") ? requested.slice(8) : requested,
+        );
+        setHelpOpen(true);
+      } catch {
+        setError(new Error("This handbook link is invalid."));
+      }
+    };
+    window.addEventListener("hashchange", deepLink);
+    deepLink();
+    return () => window.removeEventListener("hashchange", deepLink);
+  }, []);
+  useEffect(() => {
     const key = (e: KeyboardEvent) => {
       if (e.key === "F1") {
         e.preventDefault();
+        setHelpPage(undefined);
         setHelpOpen(true);
       }
       if ((e.ctrlKey || e.metaKey) && e.key === ",") {
         e.preventDefault();
-        navigate("settings");
+        if (navigate("settings")) setLogoutOpen(false);
       }
       if ((e.ctrlKey || e.metaKey) && ["+", "=", "-", "0"].includes(e.key))
         e.preventDefault();
@@ -292,20 +348,7 @@ export function App() {
     document.addEventListener("keydown", key);
     return () => document.removeEventListener("keydown", key);
   });
-  const dirty = () =>
-    !!document.querySelector('[data-unsaved="true"]') ||
-    [
-      ...document.querySelectorAll("main input, main textarea, main select"),
-    ].some(
-      (n: any) =>
-        n.name &&
-        !["password", "username", "current", "new", "confirm"].includes(
-          n.name,
-        ) &&
-        (n.type === "checkbox"
-          ? n.checked !== n.defaultChecked
-          : n.value !== n.defaultValue && n.tagName !== "SELECT"),
-    );
+  const dirty = hasUnsavedChanges;
   function navigate(next: string) {
     if (
       next !== screen &&
@@ -314,17 +357,18 @@ export function App() {
       setNotice(
         "Finish or retry the pending action before leaving this screen.",
       );
-      return;
+      return false;
     }
     if (
       next !== screen &&
       dirty() &&
       !window.confirm("Leave this screen and discard unsaved input?")
     )
-      return;
+      return false;
     setScreen(next);
     setError(undefined);
     setNotice("");
+    return true;
   }
   async function selectWorkspace(code: string, newWindow = false) {
     if (!newWindow && document.querySelector('[data-write-pending="true"]')) {
@@ -418,7 +462,7 @@ export function App() {
     : "";
   return (
     <div className="app">
-      <a href="#content" className="skip">
+      <a data-help="shell.navigation" href="#content" className="skip">
         Skip to content
       </a>
       <header className="topbar">
@@ -450,14 +494,25 @@ export function App() {
                 : t("Connected", "رابطہ قائم")
               : t("Offline", "رابطہ منقطع")}
           </span>
-          <button title="This terminal" onClick={() => setInfoOpen(true)}>
+          <button
+            data-help="shell.terminal"
+            title="This terminal"
+            onClick={() => setInfoOpen(true)}
+          >
             ⓘ
           </button>
-          <button onClick={() => setHelpOpen(true)}>
+          <button
+            data-help="shell.help"
+            onClick={() => {
+              setHelpPage(undefined);
+              setHelpOpen(true);
+            }}
+          >
             {t("Help · F1", "مدد · F1")}
           </button>
           {!user && server && (
             <button
+              data-help="shell.settings"
               onClick={() =>
                 navigate(screen === "settings" ? "login" : "settings")
               }
@@ -467,6 +522,7 @@ export function App() {
           )}
           {user && (
             <button
+              data-help="shell.logout"
               className="avatar"
               onClick={() => setLogoutOpen(true)}
               title={user.display_name}
@@ -507,6 +563,7 @@ export function App() {
             <nav aria-label="Main navigation">
               {nav.map((id) => (
                 <button
+                  data-help="shell.navigation"
                   className={screen === id ? "active" : ""}
                   key={id}
                   onClick={() => navigate(id)}
@@ -529,7 +586,10 @@ export function App() {
                   "طبی کام کی جگہیں اگلے مراحل میں آئیں گی۔",
                 )}
               </p>
-              <button onClick={() => setLogoutOpen(true)}>
+              <button
+                data-help="shell.logout"
+                onClick={() => setLogoutOpen(true)}
+              >
                 {t("Sign out", "سائن آؤٹ")}
               </button>
             </div>
@@ -570,6 +630,8 @@ export function App() {
             ) : (
               <Login
                 connected={connected}
+                health={loginHealth}
+                healthError={healthError}
                 hospital={server.hospital}
                 onLogin={refreshState}
               />
@@ -617,12 +679,16 @@ export function App() {
                         </span>
                         <div className="actions">
                           <button
+                            data-help="workspace.open"
                             className="primary"
                             onClick={() => selectWorkspace(w.code)}
                           >
                             {t("Open workspace →", "کام کی جگہ کھولیں")}
                           </button>
-                          <button onClick={() => selectWorkspace(w.code, true)}>
+                          <button
+                            data-help="workspace.open"
+                            onClick={() => selectWorkspace(w.code, true)}
+                          >
                             {t("Open in new window", "نئی ونڈو میں کھولیں")}
                           </button>
                         </div>
@@ -661,6 +727,7 @@ export function App() {
                       )
                       .map((id) => (
                         <button
+                          data-help="shell.navigation"
                           className="home-card"
                           onClick={() => navigate(id)}
                           key={id}
@@ -697,6 +764,7 @@ export function App() {
               )}
               {screen === "notifications" && (
                 <Notifications
+                  timeZone={meta?.hospital_timezone}
                   revision={revision}
                   onRefresh={refreshData}
                   onRoute={route}
@@ -718,10 +786,18 @@ export function App() {
                 <Registration user={user} revision={revision} />
               )}
               {screen === "report_incident" && (
-                <Incidents user={user} revision={revision} />
+                <Incidents
+                  user={user}
+                  revision={revision}
+                  timeZone={meta?.hospital_timezone}
+                />
               )}
               {screen === "facility_profile" && (
-                <Facility revision={revision} onChanged={refreshData} />
+                <Facility
+                  revision={revision}
+                  onChanged={refreshData}
+                  storageScope={`${server.fingerprint}:${user.user_id}`}
+                />
               )}
             </>
           )}
@@ -737,9 +813,19 @@ export function App() {
       {helpOpen && (
         <Help
           screen={screen}
+          initialPage={helpPage}
           outline={outline}
           language={prefs.language}
-          onClose={() => setHelpOpen(false)}
+          onClose={() => {
+            setHelpOpen(false);
+            setHelpPage(undefined);
+            if (window.location.hash.startsWith("#help/"))
+              history.replaceState(
+                null,
+                "",
+                window.location.pathname + window.location.search,
+              );
+          }}
         />
       )}{" "}
       {infoOpen && (
@@ -756,23 +842,38 @@ export function App() {
       )}
       {logoutOpen && (
         <Modal
-          title={t("Finish your session", "نشست ختم کریں")}
+          title={t("Your account", "آپ کا اکاؤنٹ")}
           onClose={() => setLogoutOpen(false)}
         >
           <p>
             {t(
-              "Unsaved work will be discarded.",
-              "غیر محفوظ کام ضائع ہو جائے گا۔",
+              "Before signing out, finish or discard unsaved form input. Retained Facility requests stay with this account and hospital.",
+              "سائن آؤٹ سے پہلے غیر محفوظ فارم مکمل یا ترک کریں۔ ہسپتال کی محفوظ درخواستیں اسی اکاؤنٹ اور ہسپتال کے ساتھ رہتی ہیں۔",
             )}
           </p>
           <div className="actions">
-            <button onClick={() => setLogoutOpen(false)}>Keep working</button>
             <button
+              data-help="shell.settings"
+              onClick={() => {
+                if (navigate("settings")) setLogoutOpen(false);
+              }}
+            >
+              {t("Settings", "ترتیبات")}
+            </button>
+            <button
+              data-help="shell.logout"
+              onClick={() => setLogoutOpen(false)}
+            >
+              Keep working
+            </button>
+            <button
+              data-help="shell.logout"
               onClick={() => call("logout", { all: true }).catch(setError)}
             >
               Sign out everywhere
             </button>
             <button
+              data-help="shell.logout"
               className="primary"
               onClick={() => call("logout", { all: false }).catch(setError)}
             >
@@ -788,6 +889,7 @@ export function App() {
             {maintenance.message || "The server is undergoing maintenance."}
           </p>
           <button
+            data-help="shell.maintenance"
             onClick={() =>
               api("GET", "/meta/settings")
                 .then((s) =>
@@ -798,7 +900,9 @@ export function App() {
           >
             Check again
           </button>
-          <button onClick={() => setLogoutOpen(true)}>Sign out</button>
+          <button data-help="shell.logout" onClick={() => setLogoutOpen(true)}>
+            Sign out
+          </button>
         </div>
       )}
       {critical && (
@@ -809,7 +913,11 @@ export function App() {
           onClose={() => setCritical(undefined)}
         >
           <Details value={critical} />
-          <button className="primary" onClick={() => setCritical(undefined)}>
+          <button
+            data-help="shell.critical"
+            className="primary"
+            onClick={() => setCritical(undefined)}
+          >
             Acknowledge on this terminal
           </button>
         </Modal>

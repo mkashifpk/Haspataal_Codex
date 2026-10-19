@@ -1,7 +1,7 @@
 {
   "screen_id": "registration",
-  "contract_fingerprint": "bde3c5f94776075b2abd",
-  "knowledge_revision": "933cb79d7aa9f9b7",
+  "contract_fingerprint": "0b5ab90e400dfbb822d3",
+  "knowledge_revision": "318d65bdd91cd873",
   "delivery_gate": {
     "required": true,
     "status": "required",
@@ -242,11 +242,18 @@
       }
     ],
     "related_workflows": [
+      "clinical-and-prescriptions",
       "consent",
+      "duty-rosters-and-attendance",
       "emergency-department",
+      "facility-and-it",
       "facility-profile-and-services",
+      "incidents-and-sentinel-events",
       "inpatient-and-discharge",
-      "opd-reception"
+      "laboratory-and-radiology",
+      "opd-reception",
+      "operating-theater",
+      "personnel-records"
     ]
   },
   "rules_in_force": null,
@@ -256,7 +263,7 @@
     "workspace": "reception",
     "phase": "P2",
     "position": 14,
-    "points": 74,
+    "points": 77,
     "capabilities": [
       "realtime",
       "patient_context",
@@ -321,7 +328,7 @@
     "note": "`forward`: a dependency on a later phase; use the demo data or a scenario (sandbox_scenario) until that screen exists. `ordering: false`: a hand-off or a hint, not a reason to wait."
   },
   "definition_of_done": {
-    "points": 74,
+    "points": 77,
     "items": [
       {
         "id": "ep:POST /patients/{patient_id}/documents",
@@ -374,6 +381,12 @@
       {
         "id": "ep:GET /opd-queues/reception-dashboard",
         "label": "GET /opd-queues/reception-dashboard",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:GET /staff/lookup",
+        "label": "GET /staff/lookup",
         "points": 3,
         "claimed": false
       },
@@ -538,7 +551,8 @@
           "details_fields": [
             "any_of",
             "required"
-          ]
+          ],
+          "details_from": "POST /api/v1/admin/departments"
         },
         {
           "code": "IDEMPOTENCY_CONFLICT",
@@ -549,7 +563,8 @@
           "source": [
             "seen_in_tests"
           ],
-          "details_fields": []
+          "details_fields": [],
+          "details_from": "POST /api/v1/reception/registrations"
         },
         {
           "code": "NOT_FOUND",
@@ -563,7 +578,8 @@
           ],
           "details_fields": [
             "resource"
-          ]
+          ],
+          "details_from": "PUT /api/v1/admin/printers/{printer_id}"
         },
         {
           "code": "PAYLOAD_TOO_LARGE",
@@ -575,7 +591,8 @@
             "documented",
             "seen_in_tests"
           ],
-          "details_fields": []
+          "details_fields": [],
+          "details_from": "PUT /api/v1/settings/me"
         },
         {
           "code": "UNSUPPORTED_MEDIA_TYPE",
@@ -589,7 +606,8 @@
           ],
           "details_fields": [
             "allowed"
-          ]
+          ],
+          "details_from": "POST /api/v1/patients/{patient_id}/documents"
         },
         {
           "code": "VALIDATION_ERROR",
@@ -601,7 +619,8 @@
             "documented",
             "seen_in_tests"
           ],
-          "details_fields": []
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
         }
       ],
       "parameters": [
@@ -846,7 +865,8 @@
           "details_fields": [
             "any_of",
             "required"
-          ]
+          ],
+          "details_from": "POST /api/v1/admin/departments"
         },
         {
           "code": "NOT_FOUND",
@@ -859,7 +879,8 @@
           ],
           "details_fields": [
             "resource"
-          ]
+          ],
+          "details_from": "PUT /api/v1/admin/printers/{printer_id}"
         }
       ],
       "parameters": [
@@ -943,7 +964,8 @@
           "details_fields": [
             "any_of",
             "required"
-          ]
+          ],
+          "details_from": "POST /api/v1/admin/departments"
         },
         {
           "code": "WORKSPACE_NOT_ALLOWED",
@@ -957,7 +979,8 @@
           "details_fields": [
             "allowed",
             "workspace"
-          ]
+          ],
+          "details_from": "GET /api/v1/auth/me"
         }
       ],
       "parameters": [
@@ -1196,7 +1219,8 @@
           ],
           "details_fields": [
             "status"
-          ]
+          ],
+          "details_from": "POST /api/v1/finance/cash-shifts/{shift_id}/close"
         }
       ],
       "parameters": [
@@ -1343,7 +1367,8 @@
           ],
           "details_fields": [
             "outstanding"
-          ]
+          ],
+          "details_from": "POST /api/v1/reception/registrations"
         },
         {
           "code": "CAPABILITY_INACTIVE",
@@ -1355,7 +1380,8 @@
             "documented",
             "seen_in_tests"
           ],
-          "details_fields": []
+          "details_fields": [],
+          "details_from": "POST /api/v1/er/visits"
         },
         {
           "code": "DISCOUNT_CEILING_EXCEEDED",
@@ -1373,6 +1399,7 @@
             "next_step",
             "requested_pct"
           ],
+          "details_from": "POST /api/v1/reception/registrations",
           "next_step": "POST /api/v1/opd-tickets/{ticket_id}/vip-waiver-request {\"reason\": \"...\", \"waiver_pct\": <1-100>}"
         },
         {
@@ -1384,7 +1411,8 @@
           "source": [
             "seen_in_tests"
           ],
-          "details_fields": []
+          "details_fields": [],
+          "details_from": "POST /api/v1/reception/registrations"
         },
         {
           "code": "PATIENT_MERGED_CANNOT_TRANSACT",
@@ -1396,7 +1424,8 @@
             "documented",
             "seen_in_tests"
           ],
-          "details_fields": []
+          "details_fields": [],
+          "details_from": "POST /api/v1/patients/{patient_id}/death"
         },
         {
           "code": "REFERENCE_NOT_FOUND",
@@ -1409,7 +1438,8 @@
           ],
           "details_fields": [
             "ward_id"
-          ]
+          ],
+          "details_from": "POST /api/v1/pharmacy/storage-checks"
         },
         {
           "code": "SHIFT_NOT_OPEN",
@@ -1422,7 +1452,8 @@
           ],
           "details_fields": [
             "status"
-          ]
+          ],
+          "details_from": "POST /api/v1/finance/cash-shifts/{shift_id}/close"
         }
       ],
       "parameters": [
@@ -1956,6 +1987,145 @@
         "filters": [],
         "note": null
       }
+    },
+    {
+      "endpoint": "GET /staff/lookup",
+      "summary": "Find a staff member for a form (badge facts only)",
+      "access": {
+        "authentication": "user",
+        "permissions": [],
+        "permissions_mode": "all",
+        "who": "any logged-in user"
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "UNAUTHENTICATED",
+          "http_status": 401,
+          "message": "Authentication is required.",
+          "retryable": false,
+          "ui_action": "Refresh the token once; if that fails return to login.",
+          "source": [
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "GET /api/v1/settings/sections"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "q",
+          "in": "query",
+          "required": true,
+          "description": "Part of the name, or the start of the employee number",
+          "schema": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 80,
+            "description": "Part of the name, or the start of the employee number",
+            "title": "Q"
+          }
+        },
+        {
+          "name": "department_id",
+          "in": "query",
+          "required": false,
+          "description": "Only this department",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Only this department",
+            "title": "Department Id"
+          }
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "maximum": 20,
+            "minimum": 1,
+            "default": 20,
+            "title": "Limit"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_StaffLookupOut__"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [
+          {
+            "name": "limit",
+            "required": false,
+            "type": "integer",
+            "default": 20,
+            "minimum": 1,
+            "maximum": 20
+          }
+        ],
+        "search": [
+          {
+            "name": "q",
+            "required": true,
+            "type": "string",
+            "min_length": 2,
+            "description": "Part of the name, or the start of the employee number"
+          }
+        ],
+        "filters": [
+          {
+            "name": "department_id",
+            "required": false,
+            "type": "integer",
+            "description": "Only this department"
+          }
+        ],
+        "note": "Lists are bounded by `limit` (no cursor paging): ask for what the screen shows, filter on the server."
+      }
     }
   ],
   "realtime": {
@@ -1989,7 +2159,8 @@
           "GET /patients/{patient_id}/documents",
           "GET /finance/service-catalog",
           "GET /opd-tickets/{ticket_id}/print-payload",
-          "GET /opd-queues/reception-dashboard"
+          "GET /opd-queues/reception-dashboard",
+          "GET /staff/lookup"
         ]
       }
     ],
@@ -2721,6 +2892,7 @@
       "PAYLOAD_TOO_LARGE": "The uploaded file is too large.",
       "REFERENCE_NOT_FOUND": "A referenced record does not exist.",
       "SHIFT_NOT_OPEN": "Open a cash shift before handling cash.",
+      "UNAUTHENTICATED": "Authentication is required.",
       "UNSUPPORTED_MEDIA_TYPE": "This file type is not allowed.",
       "VALIDATION_ERROR": "The request is invalid.",
       "WORKSPACE_NOT_ALLOWED": "This window's workspace (X-Active-Workspace) is not one of yours."
@@ -2993,6 +3165,22 @@
           "receptionist",
           "triage_nurse"
         ]
+      },
+      {
+        "id": "case:GET /staff/lookup",
+        "call": "GET /api/v1/staff/lookup",
+        "summary": "Find a staff member for a form (badge facts only)",
+        "denied": {
+          "as_one_of": [],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "UNAUTHENTICATED",
+          "VALIDATION_ERROR"
+        ],
+        "as_one_of": [
+          "any logged-in user"
+        ]
       }
     ],
     "service_cases": [
@@ -3169,6 +3357,15 @@
         ],
         "permissions_mode": "all",
         "access": null
+      },
+      {
+        "id": "registration::GET /staff/lookup",
+        "task": "Find a staff member for a form (badge facts only)",
+        "call": "GET /staff/lookup",
+        "is_action": false,
+        "permissions": [],
+        "permissions_mode": "all",
+        "access": "any logged-in user"
       }
     ],
     "rules_to_explain": [
@@ -3234,6 +3431,11 @@
         "code": "SHIFT_NOT_OPEN",
         "message": "Open a cash shift before handling cash.",
         "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      },
+      {
+        "code": "UNAUTHENTICATED",
+        "message": "Authentication is required.",
+        "ui_action": "Refresh the token once; if that fails return to login."
       },
       {
         "code": "UNSUPPORTED_MEDIA_TYPE",
@@ -3311,9 +3513,19 @@
   },
   "workflows": [
     {
+      "slug": "clinical-and-prescriptions",
+      "title": "Consultation, e-prescriptions & pharmacy dispensing",
+      "recipe": "get_workflow_recipe('clinical-and-prescriptions')"
+    },
+    {
       "slug": "consent",
       "title": "Consent (MSDS)",
       "recipe": "get_workflow_recipe('consent')"
+    },
+    {
+      "slug": "duty-rosters-and-attendance",
+      "title": "Duty rosters, roll call, badges & attendance",
+      "recipe": "get_workflow_recipe('duty-rosters-and-attendance')"
     },
     {
       "slug": "emergency-department",
@@ -3321,9 +3533,19 @@
       "recipe": "get_workflow_recipe('emergency-department')"
     },
     {
+      "slug": "facility-and-it",
+      "title": "Facility operations, badge stations & IT administration",
+      "recipe": "get_workflow_recipe('facility-and-it')"
+    },
+    {
       "slug": "facility-profile-and-services",
       "title": "Facility settings: the PHC profile and the clinical services",
       "recipe": "get_workflow_recipe('facility-profile-and-services')"
+    },
+    {
+      "slug": "incidents-and-sentinel-events",
+      "title": "Incidents, sentinel events and the action register (MSDS)",
+      "recipe": "get_workflow_recipe('incidents-and-sentinel-events')"
     },
     {
       "slug": "inpatient-and-discharge",
@@ -3331,9 +3553,24 @@
       "recipe": "get_workflow_recipe('inpatient-and-discharge')"
     },
     {
+      "slug": "laboratory-and-radiology",
+      "title": "Laboratory & radiology",
+      "recipe": "get_workflow_recipe('laboratory-and-radiology')"
+    },
+    {
       "slug": "opd-reception",
       "title": "OPD reception, queues & re-routing",
       "recipe": "get_workflow_recipe('opd-reception')"
+    },
+    {
+      "slug": "operating-theater",
+      "title": "Operating theater",
+      "recipe": "get_workflow_recipe('operating-theater')"
+    },
+    {
+      "slug": "personnel-records",
+      "title": "Personnel records (MSDS)",
+      "recipe": "get_workflow_recipe('personnel-records')"
     }
   ],
   "scenarios": [
@@ -3783,6 +4020,32 @@
           "request_id": "f3df6bd01d0744bcba669be6164c5704"
         }
       }
+    },
+    "GET /staff/lookup": {
+      "request": {
+        "path": "/api/v1/staff/lookup",
+        "query": {
+          "q": "sana look"
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": [
+            {
+              "employee_id": 2,
+              "emp_number": "EMP-2026-0002",
+              "full_name": "Sana Lookuptest",
+              "designation": "Officer",
+              "department_name": null
+            }
+          ],
+          "meta": {
+            "server_time": "2026-10-18T11:40:23.634678+00:00"
+          },
+          "request_id": "d101388fcfb7459b8049d5fca80fe22d"
+        }
+      }
     }
   },
   "schemas": {
@@ -4128,6 +4391,31 @@
         "request_id"
       ],
       "title": "Envelope[list[ServiceListItemOut]]"
+    },
+    "Envelope_list_StaffLookupOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/StaffLookupOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[StaffLookupOut]]"
     },
     "HTTPValidationError": {
       "properties": {
@@ -7665,6 +7953,47 @@
         "doctor_name"
       ],
       "title": "ServiceListItemOut"
+    },
+    "StaffLookupOut": {
+      "properties": {
+        "employee_id": {
+          "type": "integer",
+          "title": "Employee Id"
+        },
+        "emp_number": {
+          "type": "string",
+          "title": "Emp Number"
+        },
+        "full_name": {
+          "type": "string",
+          "title": "Full Name"
+        },
+        "designation": {
+          "type": "string",
+          "title": "Designation"
+        },
+        "department_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Department Name"
+        }
+      },
+      "type": "object",
+      "required": [
+        "employee_id",
+        "emp_number",
+        "full_name",
+        "designation",
+        "department_name"
+      ],
+      "title": "StaffLookupOut",
+      "description": "One active staff member as a picker shows them (GET /staff/lookup): the facts on their badge, nothing else."
     },
     "TicketPayIn": {
       "properties": {

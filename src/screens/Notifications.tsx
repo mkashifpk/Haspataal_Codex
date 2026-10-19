@@ -2,18 +2,22 @@ import { tr } from "../i18n";
 import { useEffect, useState } from "react";
 import * as notifications from "../generated/notifications";
 import { Empty, ErrorBox, LoadState, useLoad } from "../components";
+import { formatHospitalTime, hospitalTimeZoneError } from "../hospital-time";
 export function Notifications({
   revision,
   onRefresh,
   onRoute,
+  timeZone,
 }: {
   revision: number;
   onRefresh: () => void;
   onRoute: (s: string) => void;
+  timeZone?: string;
 }) {
   const [unread, setUnread] = useState(false),
     [error, setError] = useState<unknown>(),
     [busy, setBusy] = useState(false);
+  const zoneProblem = hospitalTimeZoneError(timeZone);
   const r = useLoad(
     () => notifications.inbox({ unread_only: unread, limit: 50 }),
     [unread, revision],
@@ -40,6 +44,7 @@ export function Notifications({
           </p>
         </div>
         <button
+          data-help="notifications.read"
           disabled={busy || !r.data?.some((n) => !n.is_read)}
           onClick={() => run(notifications.readAll)}
         >
@@ -48,6 +53,7 @@ export function Notifications({
       </div>
       <label className="check">
         <input
+          data-help="notifications.filter"
           type="checkbox"
           checked={unread}
           onChange={(e) => setUnread(e.target.checked)}
@@ -55,6 +61,7 @@ export function Notifications({
         {tr("Unread only")}
       </label>
       <ErrorBox error={error} />
+      <ErrorBox error={zoneProblem} />
       <LoadState {...r} retry={r.reload} />
       {r.data?.length === 0 && <Empty>{tr("You’re all caught up.")}</Empty>}
       <div className="notification-list">
@@ -66,10 +73,15 @@ export function Notifications({
             <span className="badge">{n.severity}</span>
             <h3>{n.title}</h3>
             <p>{n.body}</p>
-            <small>{new Date(n.created_at).toLocaleString()}</small>
+            <small>
+              {zoneProblem
+                ? tr("Hospital timezone unavailable")
+                : formatHospitalTime(n.created_at, timeZone!)}
+            </small>
             <div className="actions">
               {!n.is_read && (
                 <button
+                  data-help="notifications.read"
                   disabled={busy}
                   onClick={() =>
                     run(() => notifications.markRead(n.notification_id))
@@ -79,7 +91,10 @@ export function Notifications({
                 </button>
               )}
               {n.action_url && (
-                <button onClick={() => onRoute(n.action_url!)}>
+                <button
+                  data-help="notifications.open"
+                  onClick={() => onRoute(n.action_url!)}
+                >
                   {tr("Open related item")}
                 </button>
               )}
@@ -89,6 +104,7 @@ export function Notifications({
       </div>
       {r.data && r.data.length >= 50 && (
         <button
+          data-help="notifications.filter"
           disabled={busy}
           onClick={async () => {
             setBusy(true);

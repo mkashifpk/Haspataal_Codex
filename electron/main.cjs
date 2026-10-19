@@ -16,6 +16,8 @@ const WebSocket = require("ws");
 const { request, checkedRoot } = require("./transport.cjs");
 const { discover } = require("./discovery.cjs");
 const { validate, permissionAllows } = require("./contract.cjs");
+const { createPreferenceQueue } = require("./preference-queue.cjs");
+const { isDegradedHealthResponse } = require("./health-response.cjs");
 let server = null,
   auth = null,
   refreshFlight = null,
@@ -36,7 +38,12 @@ const bundles = fs
   );
 const operations = bundles.flatMap((b) => b.endpoints || []);
 const schemas = Object.assign({}, ...bundles.map((b) => b.schemas || {}));
-let preferencesFlight = Promise.resolve();
+let preferenceContext = 0;
+const queuePrefs = createPreferenceQueue({
+  read: () => prefs,
+  write: savePrefs,
+  context: () => preferenceContext,
+});
 const mac = Object.values(os.networkInterfaces())
   .flat()
   .find(
@@ -73,6 +80,7 @@ function state() {
   return { server: publicServer(), connected, user: auth?.user || null, prefs };
 }
 function clearSession(reason = "Signed out") {
+  preferenceContext++;
   clearTimeout(refreshTimer);
   auth = null;
   refreshFlight = null;
@@ -262,9 +270,13 @@ async function api(method, p, body, workspace, key, retried = false) {
       broadcast({ type: "permissions", user: auth.user });
     }
   }
-  if (r.status >= 400) return errorResult(r);
+  const degradedHealth = isDegradedHealthResponse(p, r.status, r.body);
+  if (r.status >= 400 && !degradedHealth) return errorResult(r);
   const responseSchema = Object.values(
-    op?.responses?.[String(r.status)]?.content || {},
+    (
+      op?.responses?.[String(r.status)] ||
+      (degradedHealth ? op?.responses?.["200"] : undefined)
+    )?.content || {},
   )[0]?.schema;
   const problems = responseSchema
     ? validate(r.body, responseSchema, schemas)
@@ -281,15 +293,11 @@ async function api(method, p, body, workspace, key, retried = false) {
       },
       request_id: r.body?.request_id,
     };
-  if (
-    !r.body ||
-    typeof r.body !== "object" ||
-    (!p.startsWith("/health") && !("data" in r.body))
-  )
+  if (!r.body || typeof r.body !== "object" || !("data" in r.body))
     return errorResult(r);
   return {
     ok: true,
-    data: p.startsWith("/health") ? r.body : r.body.data,
+    data: r.body.data,
     meta: r.body.meta,
     request_id: r.body.request_id,
   };
@@ -350,7 +358,7 @@ function applyZoom(value) {
   broadcast({ type: "prefs", prefs });
   return zoom;
 }
-async function savePrefs(value) {
+async function savePrefs(value, owner) {
   if (value.ui_scale_pct !== undefined)
     value.ui_scale_pct = Math.max(
       100,
@@ -359,6 +367,8 @@ async function savePrefs(value) {
   if (auth) {
     const r = await api("PUT", "/settings/me", value);
     if (!r.ok) return r;
+    if (owner !== preferenceContext)
+      throw new Error("The session changed while saving preferences.");
     prefs = r.data;
     auth.user.preferences = prefs;
   } else {
@@ -488,12 +498,12 @@ function createWindow(workspace = null) {
     ) {
       event.preventDefault();
       if (input.type === "keyDown")
-        savePrefs({
+        queuePrefs((current) => ({
           ui_scale_pct:
             input.key === "0"
               ? 100
-              : prefs.ui_scale_pct + (input.key === "-" ? -10 : 10),
-        })
+              : current.ui_scale_pct + (input.key === "-" ? -10 : 10),
+        }))
           .then((r) => {
             if (!r.ok) broadcast({ type: "error", ...r });
           })
@@ -748,6 +758,7 @@ ipcMain.handle("terminal", async (event, action, args = {}) => {
       const r = await raw("POST", "/auth/login", args);
       if (r.status !== 200) return errorResult(r);
       acceptTokens(r.body.data);
+      preferenceContext++;
       prefs = auth.user.preferences;
       applyZoom(prefs.ui_scale_pct);
       await refreshAddresses();
@@ -774,9 +785,7 @@ ipcMain.handle("terminal", async (event, action, args = {}) => {
       return { ok: true };
     }
     if (action === "prefs") {
-      const task = preferencesFlight.then(() => savePrefs(args));
-      preferencesFlight = task.catch(() => {});
-      return await task;
+      return await queuePrefs(args);
     }
     if (action === "workspace") {
       if (
@@ -824,8 +833,21 @@ ipcMain.handle("terminal", async (event, action, args = {}) => {
       return { ok: true, data: { saved: !result.canceled } };
     }
     if (action === "print-help") {
-      win.webContents.print({ silent: false });
-      return { ok: true };
+      return await new Promise((resolve) => {
+        win.webContents.print({ silent: false }, (success, failureReason) => {
+          resolve(
+            success
+              ? { ok: true }
+              : {
+                  ok: false,
+                  error: {
+                    code: "PRINT_FAILED",
+                    message: failureReason || "The handbook was not printed.",
+                  },
+                },
+          );
+        });
+      });
     }
     throw new Error("Unsupported terminal action");
   } catch (e) {

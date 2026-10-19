@@ -1,7 +1,7 @@
 {
   "screen_id": "login",
-  "contract_fingerprint": "bde3c5f94776075b2abd",
-  "knowledge_revision": "933cb79d7aa9f9b7",
+  "contract_fingerprint": "0b5ab90e400dfbb822d3",
+  "knowledge_revision": "318d65bdd91cd873",
   "delivery_gate": {
     "required": true,
     "status": "required",
@@ -33,8 +33,8 @@
       }
     ],
     "zoom": {
-      "min_pct": 100.0,
-      "max_pct": 250.0,
+      "min_pct": 100,
+      "max_pct": 250,
       "reset_pct": 100,
       "keys": [
         "Ctrl + or Ctrl = (zoom in)",
@@ -188,8 +188,8 @@
     "workflow": "§10",
     "rule_objects": [
       {
-        "id": "rule:7d6e009a4a",
-        "text": "Before showing the form, ping GET /health/live every 5 s; if it fails show 'LAN / server unreachable' (cable, Wi-Fi, server) instead of hanging.",
+        "id": "rule:0a37b50feb",
+        "text": "Before showing the form, ping GET /health/live every 5 s; if it fails show 'LAN / server unreachable' (cable, Wi-Fi, server) instead of hanging. When it answers, GET /health says whether the server is degraded (HTTP 503, its database down: 'The server is starting or has a problem: ask IT'), in maintenance, or licensed (license.state).",
         "cites": []
       },
       {
@@ -232,7 +232,7 @@
     "workspace": "*",
     "phase": "P1",
     "position": 2,
-    "points": 57,
+    "points": 63,
     "capabilities": [
       "realtime",
       "f1_help",
@@ -259,7 +259,7 @@
     "note": "`forward`: a dependency on a later phase; use the demo data or a scenario (sandbox_scenario) until that screen exists. `ordering: false`: a hand-off or a hint, not a reason to wait."
   },
   "definition_of_done": {
-    "points": 57,
+    "points": 63,
     "items": [
       {
         "id": "ep:POST /auth/login",
@@ -286,14 +286,26 @@
         "claimed": false
       },
       {
+        "id": "ep:GET /health/live",
+        "label": "GET /health/live",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:GET /health",
+        "label": "GET /health",
+        "points": 3,
+        "claimed": false
+      },
+      {
         "id": "ev:system.license",
         "label": "system.license",
         "points": 2,
         "claimed": false
       },
       {
-        "id": "rule:7d6e009a4a",
-        "label": "Before showing the form, ping GET /health/live every 5 s; if it fails show 'LAN / server unreachable' (cable, Wi-Fi, server) instead of hanging.",
+        "id": "rule:0a37b50feb",
+        "label": "Before showing the form, ping GET /health/live every 5 s; if it fails show 'LAN / server unreachable' (cable, Wi-Fi, server) instead of hanging. When it answers, GET /health says whether the server is degraded (HTTP 503, its database down: 'The server is starting or has a problem: ask IT'), in maintenance, or licensed (license.state).",
         "points": 2,
         "claimed": false
       },
@@ -425,7 +437,8 @@
             "documented",
             "seen_in_tests"
           ],
-          "details_fields": []
+          "details_fields": [],
+          "details_from": "POST /api/v1/auth/login"
         },
         {
           "code": "ACCOUNT_EXPIRED",
@@ -436,7 +449,8 @@
           "source": [
             "seen_in_tests"
           ],
-          "details_fields": []
+          "details_fields": [],
+          "details_from": "GET /api/v1/msds/profile"
         },
         {
           "code": "ACCOUNT_LOCKED",
@@ -450,7 +464,8 @@
           ],
           "details_fields": [
             "retry_after_seconds"
-          ]
+          ],
+          "details_from": "POST /api/v1/auth/login"
         },
         {
           "code": "INVALID_CREDENTIALS",
@@ -462,7 +477,8 @@
             "documented",
             "seen_in_tests"
           ],
-          "details_fields": []
+          "details_fields": [],
+          "details_from": "POST /api/v1/auth/login"
         },
         {
           "code": "LICENSE_INVALID",
@@ -478,7 +494,8 @@
             "reason",
             "state",
             "vendor"
-          ]
+          ],
+          "details_from": "POST /api/v1/auth/login"
         },
         {
           "code": "PASSWORD_CHANGE_REQUIRED",
@@ -489,7 +506,8 @@
           "source": [
             "documented"
           ],
-          "details_fields": []
+          "details_fields": [],
+          "details_from": "GET /api/v1/auth/workspaces"
         },
         {
           "code": "RATE_LIMITED",
@@ -503,7 +521,8 @@
           ],
           "details_fields": [
             "retry_after_seconds"
-          ]
+          ],
+          "details_from": "POST /api/v1/auth/login"
         }
       ],
       "parameters": [],
@@ -636,7 +655,8 @@
           "source": [
             "documented"
           ],
-          "details_fields": []
+          "details_fields": [],
+          "details_from": "POST /api/v1/auth/login"
         },
         {
           "code": "PASSWORD_POLICY",
@@ -647,7 +667,8 @@
           "source": [
             "documented"
           ],
-          "details_fields": []
+          "details_fields": [],
+          "details_from": null
         },
         {
           "code": "VALIDATION_ERROR",
@@ -658,7 +679,8 @@
           "source": [
             "seen_in_tests"
           ],
-          "details_fields": []
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
         }
       ],
       "parameters": [],
@@ -756,7 +778,8 @@
             "reason",
             "state",
             "vendor"
-          ]
+          ],
+          "details_from": "POST /api/v1/auth/login"
         }
       ],
       "parameters": [],
@@ -768,6 +791,84 @@
             "application/json; charset=utf-8": {
               "schema": {
                 "$ref": "#/components/schemas/Envelope_LicenseStatusOut_"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "object",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "GET /health/live",
+      "summary": "Is the server there? (unauthenticated, no database)",
+      "access": {
+        "authentication": "public",
+        "permissions": [],
+        "permissions_mode": "all",
+        "who": "public: no login (works before login)"
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_LiveOut_"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "object",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "GET /health",
+      "summary": "Server health (unauthenticated; used by the login screen)",
+      "access": {
+        "authentication": "public",
+        "permissions": [],
+        "permissions_mode": "all",
+        "who": "public: no login (works before login)"
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_HealthOut_"
+              }
+            }
+          }
+        },
+        "503": {
+          "description": "degraded: the database is down",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_HealthOut_"
               }
             }
           }
@@ -797,7 +898,9 @@
         "emitted_by_operations": [],
         "refresh": [
           "GET /terminals/whoami",
-          "GET /meta/license"
+          "GET /meta/license",
+          "GET /health/live",
+          "GET /health"
         ]
       }
     ],
@@ -905,6 +1008,18 @@
     {
       "values": [
         "ok",
+        "degraded"
+      ],
+      "column": null,
+      "used_at": "GET /health.status",
+      "labels": {
+        "ok": "Ok",
+        "degraded": "Degraded"
+      }
+    },
+    {
+      "values": [
+        "ok",
         "grace",
         "locked",
         "dev"
@@ -916,6 +1031,18 @@
         "grace": "Grace",
         "locked": "Locked",
         "dev": "Dev"
+      }
+    },
+    {
+      "values": [
+        "up",
+        "down"
+      ],
+      "column": null,
+      "used_at": "GET /health.components.database",
+      "labels": {
+        "up": "Up",
+        "down": "Down"
       }
     }
   ],
@@ -953,6 +1080,7 @@
     },
     "wording_quoted_in_rules": [
       "LAN / server unreachable",
+      "The server is starting or has a problem: ask IT",
       "s location and printers, the login screen"
     ],
     "note": "Server-owned strings only: the error messages (English), the workspace labels (English and Urdu) and the wording the rules quote. The UI's own copy and its Urdu are yours (decision H08)."
@@ -1032,6 +1160,32 @@
         "as_one_of": [
           "any logged-in user"
         ]
+      },
+      {
+        "id": "case:GET /health/live",
+        "call": "GET /health/live",
+        "summary": "Is the server there? (unauthenticated, no database)",
+        "denied": {
+          "as_one_of": [],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [],
+        "as_one_of": [
+          "any logged-in user"
+        ]
+      },
+      {
+        "id": "case:GET /health",
+        "call": "GET /health",
+        "summary": "Server health (unauthenticated; used by the login screen)",
+        "denied": {
+          "as_one_of": [],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [],
+        "as_one_of": [
+          "any logged-in user"
+        ]
       }
     ],
     "service_cases": [],
@@ -1066,8 +1220,8 @@
         }
       ],
       "zoom": {
-        "min_pct": 100.0,
-        "max_pct": 250.0,
+        "min_pct": 100,
+        "max_pct": 250,
         "reset_pct": 100,
         "keys": [
           "Ctrl + or Ctrl = (zoom in)",
@@ -1089,7 +1243,7 @@
       }
     ],
     "acceptance_rules": [
-      "Before showing the form, ping GET /health/live every 5 s; if it fails show 'LAN / server unreachable' (cable, Wi-Fi, server) instead of hanging.",
+      "Before showing the form, ping GET /health/live every 5 s; if it fails show 'LAN / server unreachable' (cable, Wi-Fi, server) instead of hanging. When it answers, GET /health says whether the server is degraded (HTTP 503, its database down: 'The server is starting or has a problem: ask IT'), in maintenance, or licensed (license.state).",
       "License banner: GET /meta/license on this screen (and data.license after login, the system.license event, every 10 min). state grace = persistent banner with message, days_left and the vendor contact on EVERY screen, work continues; state locked = only the Super Admin can log in, others get LICENSE_INVALID at login and token refresh (show message + details.vendor).",
       "Show the terminal MAC/IP overlay (Ctrl+Shift+I or an info icon) from GET /terminals/whoami for IT support.",
       "A Settings button (and Ctrl+,) opens the Settings window before login: GET /settings/sections without a token answers signed_in false and the This terminal tier only (connection and LAN diagnostics, this terminal's location and printers, the login screen's language and zoom). It writes nothing on the server.",
@@ -1140,10 +1294,28 @@
         "permissions": [],
         "permissions_mode": "all",
         "access": "public: no login (works before login)"
+      },
+      {
+        "id": "login::GET /health/live",
+        "task": "Is the server there? (unauthenticated, no database)",
+        "call": "GET /health/live",
+        "is_action": false,
+        "permissions": [],
+        "permissions_mode": "all",
+        "access": "public: no login (works before login)"
+      },
+      {
+        "id": "login::GET /health",
+        "task": "Server health (unauthenticated; used by the login screen)",
+        "call": "GET /health",
+        "is_action": false,
+        "permissions": [],
+        "permissions_mode": "all",
+        "access": "public: no login (works before login)"
       }
     ],
     "rules_to_explain": [
-      "Before showing the form, ping GET /health/live every 5 s; if it fails show 'LAN / server unreachable' (cable, Wi-Fi, server) instead of hanging.",
+      "Before showing the form, ping GET /health/live every 5 s; if it fails show 'LAN / server unreachable' (cable, Wi-Fi, server) instead of hanging. When it answers, GET /health says whether the server is degraded (HTTP 503, its database down: 'The server is starting or has a problem: ask IT'), in maintenance, or licensed (license.state).",
       "License banner: GET /meta/license on this screen (and data.license after login, the system.license event, every 10 min). state grace = persistent banner with message, days_left and the vendor contact on EVERY screen, work continues; state locked = only the Super Admin can log in, others get LICENSE_INVALID at login and token refresh (show message + details.vendor).",
       "Show the terminal MAC/IP overlay (Ctrl+Shift+I or an info icon) from GET /terminals/whoami for IT support.",
       "A Settings button (and Ctrl+,) opens the Settings window before login: GET /settings/sections without a token answers signed_in false and the This terminal tier only (connection and LAN diagnostics, this terminal's location and printers, the login screen's language and zoom). It writes nothing on the server.",
@@ -1595,6 +1767,55 @@
           "request_id": "2bfe38d64a214518ab603e120d65cf1a"
         }
       }
+    },
+    "GET /health/live": {
+      "request": {
+        "path": "/health/live"
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": {
+            "status": "alive"
+          },
+          "meta": {
+            "server_time": "2026-10-18T14:28:46.081674+00:00"
+          },
+          "request_id": "1fa09c2ee06f448bb1b9edf984e6626e"
+        }
+      }
+    },
+    "GET /health": {
+      "request": {
+        "path": "/health"
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": {
+            "status": "ok",
+            "version": "1.0.0",
+            "server_time": "2026-10-18T14:18:16.041303+00:00",
+            "components": {
+              "database": "up",
+              "realtime": "up"
+            },
+            "maintenance_mode": false,
+            "license": {
+              "state": "grace",
+              "reason": "hardware_changed",
+              "detail": "This server's hardware does not match its license...",
+              "grace_until": "2026-10-04T08:00:00+00:00",
+              "days_left": 2
+            },
+            "uptime_seconds": 11
+          },
+          "meta": {
+            "server_time": "2026-10-18T14:18:16.041383+00:00"
+          },
+          "request_id": "29b037b63815475aaa7d4834788a416b"
+        }
+      }
     }
   },
   "schemas": {
@@ -1620,6 +1841,27 @@
       ],
       "title": "ChangePasswordIn"
     },
+    "Envelope_HealthOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/HealthOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[HealthOut]"
+    },
     "Envelope_LicenseStatusOut_": {
       "properties": {
         "data": {
@@ -1640,6 +1882,27 @@
         "request_id"
       ],
       "title": "Envelope[LicenseStatusOut]"
+    },
+    "Envelope_LiveOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/LiveOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[LiveOut]"
     },
     "Envelope_LoginOut_": {
       "properties": {
@@ -1716,6 +1979,156 @@
       },
       "type": "object",
       "title": "HTTPValidationError"
+    },
+    "HealthComponentsOut": {
+      "properties": {
+        "database": {
+          "type": "string",
+          "enum": [
+            "up",
+            "down"
+          ],
+          "title": "Database"
+        },
+        "realtime": {
+          "type": "string",
+          "enum": [
+            "up",
+            "down"
+          ],
+          "title": "Realtime",
+          "description": "The database listener behind the WebSocket events"
+        }
+      },
+      "type": "object",
+      "required": [
+        "database",
+        "realtime"
+      ],
+      "title": "HealthComponentsOut"
+    },
+    "HealthLicenseOut": {
+      "properties": {
+        "state": {
+          "type": "string",
+          "enum": [
+            "ok",
+            "grace",
+            "locked",
+            "dev"
+          ],
+          "title": "State"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "type": "string",
+              "const": ""
+            },
+            {
+              "type": "string",
+              "enum": [
+                "hardware_changed",
+                "license_missing",
+                "license_invalid",
+                "license_outdated",
+                "license_expired",
+                "hardware_unreadable",
+                "check_failed",
+                "standby_main_active",
+                "standby_check_failed",
+                "standby_invalid"
+              ]
+            }
+          ],
+          "title": "Reason",
+          "description": "Empty when there is nothing to report"
+        },
+        "detail": {
+          "type": "string",
+          "title": "Detail",
+          "description": "One sentence for people"
+        },
+        "grace_until": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Grace Until"
+        },
+        "days_left": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Days Left"
+        }
+      },
+      "type": "object",
+      "required": [
+        "state",
+        "reason",
+        "detail",
+        "grace_until",
+        "days_left"
+      ],
+      "title": "HealthLicenseOut",
+      "description": "The license summary of GET /health (GET /meta/license has the whole state, the vendor's contact included)."
+    },
+    "HealthOut": {
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "ok",
+            "degraded"
+          ],
+          "title": "Status",
+          "description": "degraded, answered with HTTP 503: the database is down"
+        },
+        "version": {
+          "type": "string",
+          "title": "Version"
+        },
+        "server_time": {
+          "type": "string",
+          "title": "Server Time"
+        },
+        "components": {
+          "$ref": "#/components/schemas/HealthComponentsOut"
+        },
+        "maintenance_mode": {
+          "type": "boolean",
+          "title": "Maintenance Mode"
+        },
+        "license": {
+          "$ref": "#/components/schemas/HealthLicenseOut"
+        },
+        "uptime_seconds": {
+          "type": "integer",
+          "title": "Uptime Seconds"
+        }
+      },
+      "type": "object",
+      "required": [
+        "status",
+        "version",
+        "server_time",
+        "components",
+        "maintenance_mode",
+        "license",
+        "uptime_seconds"
+      ],
+      "title": "HealthOut",
+      "description": "GET /health: the login screen's connection check and the Settings window's This terminal section."
     },
     "LicenseStatusOut": {
       "properties": {
@@ -1854,6 +2267,21 @@
       ],
       "title": "LicenseStatusOut",
       "description": "The server's license state (licensing.public_view): no hardware details."
+    },
+    "LiveOut": {
+      "properties": {
+        "status": {
+          "type": "string",
+          "const": "alive",
+          "title": "Status"
+        }
+      },
+      "type": "object",
+      "required": [
+        "status"
+      ],
+      "title": "LiveOut",
+      "description": "GET /health/live: the server answers (no database is touched)."
     },
     "LoginIn": {
       "properties": {

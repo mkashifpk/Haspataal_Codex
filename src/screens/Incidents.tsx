@@ -1,5 +1,12 @@
+import { StaffPicker } from "../StaffPicker";
 import { tr } from "../i18n";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import {
+  formatHospitalTime,
+  hospitalTimeInput,
+  hospitalTimeToUtc,
+  hospitalTimeZoneError,
+} from "../hospital-time";
 import * as incidents from "../generated/report_incident";
 import contract from "../../contracts/report_incident.json";
 import { api, call } from "../bridge";
@@ -38,6 +45,7 @@ function Lookup({
       <Field label={label}>
         {query && (
           <input
+            data-help="incident.lookup"
             value={q}
             onChange={(e) => setQ(e.target.value)}
             disabled={!allowed}
@@ -54,6 +62,7 @@ function Lookup({
       ) : (
         <>
           <button
+            data-help="incident.lookup"
             type="button"
             disabled={busy || (query && q.length < 2)}
             onClick={async () => {
@@ -82,6 +91,7 @@ function Lookup({
           <ErrorBox error={error} />
           {rows && (
             <select
+              data-help="incident.lookup"
               required
               aria-label={`Select ${label}`}
               value={chosen}
@@ -110,7 +120,15 @@ function Lookup({
     </div>
   );
 }
-export function Incidents({ user, revision }: { user: any; revision: number }) {
+export function Incidents({
+  user,
+  revision,
+  timeZone,
+}: {
+  user: any;
+  revision: number;
+  timeZone?: string;
+}) {
   const r = useLoad(
     async () => ({
       types: await incidents.listTypes({ active_only: true }),
@@ -121,11 +139,33 @@ export function Incidents({ user, revision }: { user: any; revision: number }) {
   );
   const [error, setError] = useState<unknown>(),
     [busy, setBusy] = useState(false),
+    [dirty, setDirty] = useState(false),
     [saved, setSaved] = useState<incidents.IncidentDetailOut>(),
     [detail, setDetail] = useState<incidents.IncidentDetailOut>(),
     [affected, setAffected] = useState("None"),
     [type, setType] = useState(""),
     [ids, setIds] = useState<Record<string, number>>({});
+  const [draftZone, setDraftZone] = useState(timeZone);
+  const [when, setWhen] = useState(() =>
+    !hospitalTimeZoneError(timeZone)
+      ? hospitalTimeInput(Date.now(), timeZone!)
+      : "",
+  );
+  useEffect(() => {
+    if (!dirty && !hospitalTimeZoneError(timeZone)) {
+      setDraftZone(timeZone);
+      setWhen(hospitalTimeInput(Date.now(), timeZone!));
+    }
+  }, [timeZone, dirty]);
+  const zoneProblem =
+    hospitalTimeZoneError(timeZone) ||
+    (dirty && draftZone !== timeZone
+      ? new Error(
+          tr(
+            "The hospital timezone changed. Reopen this form and review its time before submitting.",
+          ),
+        )
+      : undefined);
   const selected = r.data?.types.find((t) => t.type_code === type);
   const schema = contract.schemas.IncidentIn.properties;
   const can = (p: string) => user.permissions.includes(p);
@@ -137,6 +177,7 @@ export function Incidents({ user, revision }: { user: any; revision: number }) {
     return (
       <Field label={label}>
         <select
+          data-help="incident.classify"
           name={key}
           {...(key === "affected"
             ? {
@@ -172,6 +213,7 @@ export function Incidents({ user, revision }: { user: any; revision: number }) {
           </p>
         </div>
         <button
+          data-help="incident.reference"
           onClick={() =>
             call("download", { path: "/incidents/sentinel-list/pdf" }).catch(
               setError,
@@ -183,6 +225,7 @@ export function Incidents({ user, revision }: { user: any; revision: number }) {
       </div>
       <LoadState {...r} retry={r.reload} />
       <ErrorBox error={error} />
+      <ErrorBox error={zoneProblem} />
       {saved && (
         <p role="status" className="notice">
           {tr("Report")}
@@ -193,6 +236,9 @@ export function Incidents({ user, revision }: { user: any; revision: number }) {
       )}
       <form
         className="card"
+        data-unsaved={dirty}
+        data-write-pending={busy}
+        onChangeCapture={() => setDirty(true)}
         onSubmit={async (e) => {
           e.preventDefault();
           const form = e.currentTarget,
@@ -200,9 +246,11 @@ export function Incidents({ user, revision }: { user: any; revision: number }) {
           setBusy(true);
           setError(undefined);
           try {
-            const occurred = new Date(
+            if (zoneProblem) throw zoneProblem;
+            const occurred = hospitalTimeToUtc(
               String(d.get("occurred_at")),
-            ).toISOString();
+              timeZone!,
+            );
             const body: any = {
               ...Object.fromEntries(d),
               ...ids,
@@ -224,6 +272,8 @@ export function Incidents({ user, revision }: { user: any; revision: number }) {
             setType("");
             setIds({});
             setAffected("None");
+            setDirty(false);
+            setWhen(hospitalTimeInput(Date.now(), timeZone!));
             await r.reload();
           } catch (err) {
             setError(err);
@@ -232,11 +282,12 @@ export function Incidents({ user, revision }: { user: any; revision: number }) {
           }
         }}
       >
-        <fieldset disabled={busy || !r.data}>
+        <fieldset disabled={busy || !r.data || !!zoneProblem}>
           <legend>{tr("What happened")}</legend>
           <div className="form-grid">
             <Field label={tr("Incident type")}>
               <select
+                data-help="incident.classify"
                 required
                 value={type}
                 onChange={(e) => {
@@ -268,20 +319,21 @@ export function Incidents({ user, revision }: { user: any; revision: number }) {
             </Field>
             {enumSelect("kind", "Incident or near miss")}
             {enumSelect("harm", "Harm")}
-            <Field label={tr("When it happened")}>
+            <Field
+              label={tr("When it happened")}
+              hint={timeZone || tr("Hospital timezone unavailable")}
+            >
               <input
+                data-help="incident.whenwhere"
                 name="occurred_at"
                 type="datetime-local"
                 required
-                defaultValue={new Date(
-                  Date.now() - new Date().getTimezoneOffset() * 60000,
-                )
-                  .toISOString()
-                  .slice(0, 16)}
+                value={when}
+                onChange={(e) => setWhen(e.target.value)}
               />
             </Field>
             <Field label={tr("Department")}>
-              <select name="department_id">
+              <select data-help="incident.whenwhere" name="department_id">
                 <option value="">{tr("Not recorded")}</option>
                 {r.data?.departments.map((d) => (
                   <option key={d.department_id} value={d.department_id}>
@@ -292,6 +344,7 @@ export function Incidents({ user, revision }: { user: any; revision: number }) {
             </Field>
             <Field label={tr("Ward / location")}>
               <input
+                data-help="incident.whenwhere"
                 name="location"
                 maxLength={300}
                 placeholder={tr("Ward, bed or place")}
@@ -310,13 +363,18 @@ export function Incidents({ user, revision }: { user: any; revision: number }) {
             />
           )}{" "}
           {affected === "Staff" && (
-            <Lookup
+            <StaffPicker
               label={tr("Staff member")}
-              path="/hr/employees"
-              idField="employee_id"
-              labelFields={["emp_number", "full_name", "designation"]}
-              onSelect={(id) => setIds({ ...ids, employee_id: id })}
-              allowed={can("hr.employee.view")}
+              required
+              value={ids.employee_id}
+              onSelect={(id) =>
+                setIds((current) => {
+                  const next = { ...current };
+                  if (id) next.employee_id = id;
+                  else delete next.employee_id;
+                  return next;
+                })
+              }
             />
           )}{" "}
           {selected?.area === "Medication" && (
@@ -351,7 +409,9 @@ export function Incidents({ user, revision }: { user: any; revision: number }) {
             </div>
           )}
           <details>
-            <summary>{tr("Link a death record, if relevant")}</summary>
+            <summary data-help="incident.reference">
+              {tr("Link a death record, if relevant")}
+            </summary>
             <Lookup
               label={tr("Death record")}
               path="/deaths"
@@ -371,6 +431,7 @@ export function Incidents({ user, revision }: { user: any; revision: number }) {
             hint={tr("Facts, not opinions or blame.")}
           >
             <textarea
+              data-help="incident.narrative"
               required
               minLength={10}
               maxLength={8000}
@@ -380,6 +441,7 @@ export function Incidents({ user, revision }: { user: any; revision: number }) {
           </Field>
           <Field label={tr("What was done at once")}>
             <textarea
+              data-help="incident.narrative"
               required
               minLength={3}
               maxLength={4000}
@@ -388,12 +450,17 @@ export function Incidents({ user, revision }: { user: any; revision: number }) {
             />
           </Field>
           <label className="check">
-            <input type="checkbox" name="reporter_confidential" />
+            <input
+              data-help="incident.narrative"
+              type="checkbox"
+              name="reporter_confidential"
+            />
             {tr(
               "Keep my name confidential (visible only to incident managers)",
             )}
           </label>
           <button
+            data-help="incident.submit"
             className="primary"
             disabled={
               busy ||
@@ -411,6 +478,7 @@ export function Incidents({ user, revision }: { user: any; revision: number }) {
       )}
       {r.data?.reports.map((i) => (
         <button
+          data-help="incident.submit"
           className="list-row"
           key={i.incident_id}
           onClick={() =>
@@ -421,7 +489,10 @@ export function Incidents({ user, revision }: { user: any; revision: number }) {
             {i.incident_number} · {i.type_name}
           </strong>
           <span>
-            {i.status} · {i.occurred_at}
+            {i.status} ·{" "}
+            {zoneProblem
+              ? i.occurred_at
+              : formatHospitalTime(i.occurred_at, timeZone!)}
           </span>
         </button>
       ))}

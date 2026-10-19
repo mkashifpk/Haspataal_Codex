@@ -46,15 +46,17 @@ export interface ApprovalOut {
   /** Decided by its own requester, the Owner of a solo practice (audit H-5); a risk item records it */
   solo_self_approved: boolean;
   requested_at: string;
+  /** Whether you may approve or reject it now, by the rule the decision applies: show the buttons only when true (a type's own rule may still refuse, e.g. a large cash drop's decider is never the shift's cashier: DUAL_CONTROL_SAME_PERSON) */
+  can_decide: boolean;
+  /** Why you may not decide it, when can_decide is false; null when you may */
+  decide_blocked: "decided" | "missing_permission" | "own_request" | null;
+  /** On your own pending request: forbidden, or allowed_with_note for the Owner of a solo practice (solo_practice_mode on, nobody else holds the permission; a note is required and a risk item records it); null on anyone else's request or a decided one */
+  self_decision: "forbidden" | "allowed_with_note" | null;
 }
 
 export interface DecisionIn {
   /** Required when rejecting */
   note?: string | null;
-  /** Dual control: co-signer username (large cash) */
-  second_approver_username?: string | null;
-  /** Dual control: co-signer password */
-  second_approver_password?: string | null;
   /** Ward indent partial approval: [{"ward_indent_item_id": 1, "qty_approved": 5}] */
   items?: Record<string, unknown>[] | null;
 }
@@ -94,6 +96,12 @@ export interface ApprovalDecisionOut {
   /** Decided by its own requester, the Owner of a solo practice (audit H-5); a risk item records it */
   solo_self_approved: boolean;
   requested_at: string;
+  /** Whether you may approve or reject it now, by the rule the decision applies: show the buttons only when true (a type's own rule may still refuse, e.g. a large cash drop's decider is never the shift's cashier: DUAL_CONTROL_SAME_PERSON) */
+  can_decide: boolean;
+  /** Why you may not decide it, when can_decide is false; null when you may */
+  decide_blocked: "decided" | "missing_permission" | "own_request" | null;
+  /** On your own pending request: forbidden, or allowed_with_note for the Owner of a solo practice (solo_practice_mode on, nobody else holds the permission; a note is required and a risk item records it); null on anyone else's request or a decided one */
+  self_decision: "forbidden" | "allowed_with_note" | null;
   effect: ApprovalEffectOut;
 }
 
@@ -142,7 +150,7 @@ export interface WaiverRefundOrderOut {
   row_version: number;
 }
 
-/** Approval queue visible to me (or my own requests with mine=true) — GET /api/v1/approvals (permissions: any logged-in user). */
+/** Approval queue visible to me (or my own requests with mine=true) — GET /api/v1/approvals (who may call: any logged-in user: the pending requests whose required_permission they hold, or their own with mine=true). */
 export function listApprovals(query?: {
   status?: "Pending" | "Approved" | "Rejected" | "Cancelled";
   mine?: boolean;
@@ -151,12 +159,12 @@ export function listApprovals(query?: {
   return api<ApprovalOut[]>("GET", withQuery(`/approvals`, query), undefined);
 }
 
-/** One approval request — GET /api/v1/approvals/{request_id} (permissions: any logged-in user). */
+/** One approval request — GET /api/v1/approvals/{request_id} (who may call: the request's requester or a holder of its required_permission; anyone else gets FORBIDDEN). */
 export function getApproval(request_id: number): Promise<ApprovalOut> {
   return api<ApprovalOut>("GET", `/approvals/${request_id}`, undefined);
 }
 
-/** Approve (applies the effect atomically) — POST /api/v1/approvals/{request_id}/approve (permissions: any logged-in user). */
+/** Approve (applies the effect atomically) — POST /api/v1/approvals/{request_id}/approve (who may call: the holder of the request's required_permission, never its requester (SELF_APPROVAL_FORBIDDEN)). */
 export function approve(
   request_id: number,
   body: DecisionIn,
@@ -168,7 +176,7 @@ export function approve(
   );
 }
 
-/** Reject (unfreezes the subject) — POST /api/v1/approvals/{request_id}/reject (permissions: any logged-in user). */
+/** Reject (unfreezes the subject) — POST /api/v1/approvals/{request_id}/reject (who may call: the holder of the request's required_permission, never its requester (SELF_APPROVAL_FORBIDDEN)). */
 export function reject(
   request_id: number,
   body: DecisionIn,
@@ -180,7 +188,7 @@ export function reject(
   );
 }
 
-/** Requester withdraws a pending request — POST /api/v1/approvals/{request_id}/cancel (permissions: any logged-in user). */
+/** Requester withdraws a pending request — POST /api/v1/approvals/{request_id}/cancel (who may call: the requester only). */
 export function cancel(
   request_id: number,
   body: DecisionIn,

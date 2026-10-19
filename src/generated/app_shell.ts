@@ -38,6 +38,10 @@ export interface HospitalSettingsOut {
   lab_require_payment_before_sample: boolean;
   password_min_length: number;
   maintenance_mode: boolean;
+  /** A cash drop or a payable settlement at or above this needs a second, different person's credentials on the finance screens */
+  large_cash_settlement_threshold: number;
+  /** A one-person practice: the Owner who is the only possible approver may decide their own refund, waiver or credit (the approval's self_decision says when) */
+  solo_practice_mode: boolean;
 }
 
 export interface WorkspaceInfoOut {
@@ -75,37 +79,37 @@ export interface EventInfoOut {
   presentation: "interrupt" | "banner" | "logout" | null;
 }
 
-/** Rotate the refresh token and get a new access token — POST /api/v1/auth/refresh (permissions: any logged-in user). */
+/** Rotate the refresh token and get a new access token — POST /api/v1/auth/refresh (who may call: public: no login (works before login)). */
 export function refresh(body: RefreshIn): Promise<TokenPair> {
   return api<TokenPair>("POST", `/auth/refresh`, body);
 }
 
-/** End this session (or all sessions) — POST /api/v1/auth/logout (permissions: any logged-in user). */
+/** End this session (or all sessions) — POST /api/v1/auth/logout (who may call: any logged-in user, for their own account (also before a forced password change where allowed)). */
 export function logout(body: LogoutIn): Promise<LogoutOut> {
   return api<LogoutOut>("POST", `/auth/logout`, body);
 }
 
-/** All enumerated values, introspected from database CHECK constraints — GET /api/v1/meta/enums (permissions: any logged-in user). */
+/** All enumerated values, introspected from database CHECK constraints — GET /api/v1/meta/enums (who may call: any logged-in user). */
 export function enums(): Promise<Record<string, string[]>> {
   return api<Record<string, string[]>>("GET", `/meta/enums`, undefined);
 }
 
-/** Non-sensitive hospital settings for UI display — GET /api/v1/meta/settings (permissions: any logged-in user). */
+/** Non-sensitive hospital settings for UI display — GET /api/v1/meta/settings (who may call: any logged-in user). */
 export function publicSettings(): Promise<HospitalSettingsOut> {
   return api<HospitalSettingsOut>("GET", `/meta/settings`, undefined);
 }
 
-/** UI workspaces and the screens each should contain — GET /api/v1/meta/workspaces (permissions: any logged-in user). */
+/** UI workspaces and the screens each should contain — GET /api/v1/meta/workspaces (who may call: any logged-in user). */
 export function workspaces(): Promise<WorkspaceInfoOut[]> {
   return api<WorkspaceInfoOut[]>("GET", `/meta/workspaces`, undefined);
 }
 
-/** Every error code the API can return — GET /api/v1/meta/error-codes (permissions: any logged-in user). */
+/** Every error code the API can return — GET /api/v1/meta/error-codes (who may call: public: no login (works before login)). */
 export function errorCodes(): Promise<ErrorCodeOut[]> {
   return api<ErrorCodeOut[]>("GET", `/meta/error-codes`, undefined);
 }
 
-/** Realtime WebSocket event catalogue — GET /api/v1/meta/events (permissions: any logged-in user). */
+/** Realtime WebSocket event catalogue — GET /api/v1/meta/events (who may call: public: no login (works before login)). */
 export function events(): Promise<EventInfoOut[]> {
   return api<EventInfoOut[]>("GET", `/meta/events`, undefined);
 }

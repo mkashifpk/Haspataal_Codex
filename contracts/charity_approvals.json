@@ -1,7 +1,7 @@
 {
   "screen_id": "charity_approvals",
-  "contract_fingerprint": "bde3c5f94776075b2abd",
-  "knowledge_revision": "933cb79d7aa9f9b7",
+  "contract_fingerprint": "0b5ab90e400dfbb822d3",
+  "knowledge_revision": "318d65bdd91cd873",
   "delivery_gate": {
     "required": true,
     "status": "required",
@@ -33,8 +33,8 @@
       }
     ],
     "zoom": {
-      "min_pct": 100.0,
-      "max_pct": 250.0,
+      "min_pct": 100,
+      "max_pct": 250,
       "reset_pct": 100,
       "keys": [
         "Ctrl + or Ctrl = (zoom in)",
@@ -608,7 +608,8 @@
           "details_fields": [
             "any_of",
             "required"
-          ]
+          ],
+          "details_from": "POST /api/v1/admin/departments"
         },
         {
           "code": "NOT_FOUND",
@@ -622,7 +623,8 @@
           ],
           "details_fields": [
             "resource"
-          ]
+          ],
+          "details_from": "PUT /api/v1/admin/printers/{printer_id}"
         }
       ],
       "parameters": [
@@ -689,7 +691,8 @@
           "source": [
             "documented"
           ],
-          "details_fields": []
+          "details_fields": [],
+          "details_from": null
         },
         {
           "code": "DUAL_CONTROL_SAME_PERSON",
@@ -701,7 +704,8 @@
             "documented",
             "seen_in_tests"
           ],
-          "details_fields": []
+          "details_fields": [],
+          "details_from": "POST /api/v1/prescriptions/{prescription_id}/dispense"
         },
         {
           "code": "FORBIDDEN",
@@ -715,7 +719,8 @@
           "details_fields": [
             "any_of",
             "required"
-          ]
+          ],
+          "details_from": "POST /api/v1/admin/departments"
         },
         {
           "code": "LAST_OWNER",
@@ -726,7 +731,8 @@
           "source": [
             "documented"
           ],
-          "details_fields": []
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/users/{user_id}/roles"
         },
         {
           "code": "SELF_APPROVAL_FORBIDDEN",
@@ -738,7 +744,8 @@
             "documented",
             "seen_in_tests"
           ],
-          "details_fields": []
+          "details_fields": [],
+          "details_from": "POST /api/v1/risk/findings/{risk_event_id}/review"
         },
         {
           "code": "SELF_ROLE_CHANGE_FORBIDDEN",
@@ -750,7 +757,8 @@
             "documented",
             "seen_in_tests"
           ],
-          "details_fields": []
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/users/{user_id}/roles"
         },
         {
           "code": "VALIDATION_ERROR",
@@ -762,7 +770,8 @@
             "documented",
             "seen_in_tests"
           ],
-          "details_fields": []
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
         }
       ],
       "parameters": [
@@ -820,21 +829,6 @@
             "nullable": true,
             "max_length": 1000,
             "description": "Required when rejecting"
-          },
-          {
-            "pointer": "/second_approver_username",
-            "type": "string",
-            "required": false,
-            "nullable": true,
-            "description": "Dual control: co-signer username (large cash)"
-          },
-          {
-            "pointer": "/second_approver_password",
-            "type": "string",
-            "required": false,
-            "nullable": true,
-            "description": "Dual control: co-signer password",
-            "sensitive": "never log, store or keep it after the call"
           },
           {
             "pointer": "/items",
@@ -889,7 +883,8 @@
           "source": [
             "documented"
           ],
-          "details_fields": []
+          "details_fields": [],
+          "details_from": null
         },
         {
           "code": "VALIDATION_ERROR",
@@ -900,7 +895,8 @@
           "source": [
             "seen_in_tests"
           ],
-          "details_fields": []
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
         }
       ],
       "parameters": [
@@ -958,21 +954,6 @@
             "nullable": true,
             "max_length": 1000,
             "description": "Required when rejecting"
-          },
-          {
-            "pointer": "/second_approver_username",
-            "type": "string",
-            "required": false,
-            "nullable": true,
-            "description": "Dual control: co-signer username (large cash)"
-          },
-          {
-            "pointer": "/second_approver_password",
-            "type": "string",
-            "required": false,
-            "nullable": true,
-            "description": "Dual control: co-signer password",
-            "sensitive": "never log, store or keep it after the call"
           },
           {
             "pointer": "/items",
@@ -1319,6 +1300,32 @@
         "rejected": "Rejected",
         "cancelled": "Cancelled"
       }
+    },
+    {
+      "values": [
+        "decided",
+        "missing_permission",
+        "own_request"
+      ],
+      "column": null,
+      "used_at": "GET /approvals[].decide_blocked",
+      "labels": {
+        "decided": "Decided",
+        "missing_permission": "Missing permission",
+        "own_request": "Own request"
+      }
+    },
+    {
+      "values": [
+        "forbidden",
+        "allowed_with_note"
+      ],
+      "column": null,
+      "used_at": "GET /approvals[].self_decision",
+      "labels": {
+        "forbidden": "Forbidden",
+        "allowed_with_note": "Allowed with note"
+      }
     }
   ],
   "states": [
@@ -1470,8 +1477,8 @@
         }
       ],
       "zoom": {
-        "min_pct": 100.0,
-        "max_pct": 250.0,
+        "min_pct": 100,
+        "max_pct": 250,
         "reset_pct": 100,
         "keys": [
           "Ctrl + or Ctrl = (zoom in)",
@@ -1824,11 +1831,11 @@
               "approval_type": "LargeCashDrop",
               "required_permission": "finance.cash_drop.second_approve",
               "requester_id": 4,
-              "requester_name": "u8df78ca5af",
+              "requester_name": "u6fdafb9454",
               "subject_type": "cash_drop",
               "subject_id": 1,
               "patient_id": null,
-              "amount": 2000.0,
+              "amount": 2000,
               "summary": "Second approval: cash drop Rs. 2000.00 (shift 1, MainReception)",
               "payload_jsonb": {},
               "is_elevated": false,
@@ -1838,13 +1845,16 @@
               "decided_at": null,
               "decision_note": null,
               "solo_self_approved": false,
-              "requested_at": "2026-10-17T03:28:13.557841+00:00"
+              "requested_at": "2026-10-18T11:19:36.973403+00:00",
+              "can_decide": true,
+              "decide_blocked": null,
+              "self_decision": null
             }
           ],
           "meta": {
-            "server_time": "2026-10-17T03:28:13.580868+00:00"
+            "server_time": "2026-10-18T11:19:37.021367+00:00"
           },
-          "request_id": "90514d9cb4914940a931073e64defe9b"
+          "request_id": "fb81a79f101548f58248b706a6a533b7"
         }
       }
     },
@@ -1864,7 +1874,7 @@
             "subject_type": "vip_waiver_request",
             "subject_id": 1,
             "patient_id": 2,
-            "amount": 1000.0,
+            "amount": 1000,
             "summary": "Pre-consult VIP waiver 100% (Rs. 1000.00) for ticket OPD-2026-000002: Trustee relative",
             "payload_jsonb": {
               "ticket_id": 2,
@@ -1877,12 +1887,15 @@
             "decided_at": null,
             "decision_note": null,
             "solo_self_approved": false,
-            "requested_at": "2026-10-17T03:28:57.500169+00:00"
+            "requested_at": "2026-10-18T11:21:26.291512+00:00",
+            "can_decide": true,
+            "decide_blocked": null,
+            "self_decision": null
           },
           "meta": {
-            "server_time": "2026-10-17T03:28:57.532296+00:00"
+            "server_time": "2026-10-18T11:21:26.344242+00:00"
           },
-          "request_id": "e8150c405b5c4ea48b8ef37a6f755fc8"
+          "request_id": "7b60529ee5bf42269627256fdb0dc900"
         }
       }
     },
@@ -1899,7 +1912,7 @@
             "approval_type": "WardIndent",
             "required_permission": "approval.ward_indent.approve",
             "requester_id": 12,
-            "requester_name": "u85dd311f3e",
+            "requester_name": "uc6a8f1ef7a",
             "subject_type": "ward_indent",
             "subject_id": 1,
             "patient_id": null,
@@ -1909,20 +1922,23 @@
             "is_elevated": false,
             "status": "Approved",
             "decided_by": 11,
-            "decided_by_name": "u12c9a09239",
-            "decided_at": "2026-10-17T03:09:06.258282+00:00",
+            "decided_by_name": "u7bfdac5fe0",
+            "decided_at": "2026-10-18T12:06:35.914622+00:00",
             "decision_note": null,
             "solo_self_approved": false,
-            "requested_at": "2026-10-17T03:09:06.225134+00:00",
+            "requested_at": "2026-10-18T12:06:35.837712+00:00",
+            "can_decide": false,
+            "decide_blocked": "decided",
+            "self_decision": null,
             "effect": {
               "indent": "approved",
               "partial": false
             }
           },
           "meta": {
-            "server_time": "2026-10-17T03:09:06.276879+00:00"
+            "server_time": "2026-10-18T12:06:35.989565+00:00"
           },
-          "request_id": "814f37c031814663b4545d937421964b"
+          "request_id": "36d21ea5fdbd44f09891295343f31486"
         }
       }
     },
@@ -1945,7 +1961,7 @@
             "subject_type": "vip_waiver_request",
             "subject_id": 1,
             "patient_id": 1,
-            "amount": 1000.0,
+            "amount": 1000,
             "summary": "Pre-consult VIP waiver 100% (Rs. 1000.00) for ticket OPD-2026-000001: Owner guest",
             "payload_jsonb": {
               "ticket_id": 1,
@@ -1954,19 +1970,22 @@
             "is_elevated": false,
             "status": "Rejected",
             "decided_by": 5,
-            "decided_by_name": "uf9f345d094",
-            "decided_at": "2026-10-17T03:29:11.541942+00:00",
+            "decided_by_name": "u577c8951e0",
+            "decided_at": "2026-10-18T11:22:13.944869+00:00",
             "decision_note": "not eligible",
             "solo_self_approved": false,
-            "requested_at": "2026-10-17T03:29:11.469618+00:00",
+            "requested_at": "2026-10-18T11:22:13.844212+00:00",
+            "can_decide": false,
+            "decide_blocked": "decided",
+            "self_decision": null,
             "effect": {
               "waiver": "not approved"
             }
           },
           "meta": {
-            "server_time": "2026-10-17T03:29:11.571426+00:00"
+            "server_time": "2026-10-18T11:22:13.979062+00:00"
           },
-          "request_id": "bc674b88f53c4dbeafd414e31181e57e"
+          "request_id": "b61634f88dbd4a90a7d083cbc5ea23fc"
         }
       }
     }
@@ -2117,6 +2136,44 @@
           "format": "date-time",
           "title": "Requested At"
         },
+        "can_decide": {
+          "type": "boolean",
+          "title": "Can Decide",
+          "description": "Whether you may approve or reject it now, by the rule the decision applies: show the buttons only when true (a type's own rule may still refuse, e.g. a large cash drop's decider is never the shift's cashier: DUAL_CONTROL_SAME_PERSON)"
+        },
+        "decide_blocked": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "decided",
+                "missing_permission",
+                "own_request"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Decide Blocked",
+          "description": "Why you may not decide it, when can_decide is false; null when you may"
+        },
+        "self_decision": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "forbidden",
+                "allowed_with_note"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Self Decision",
+          "description": "On your own pending request: forbidden, or allowed_with_note for the Owner of a solo practice (solo_practice_mode on, nobody else holds the permission; a note is required and a risk item records it); null on anyone else's request or a decided one"
+        },
         "effect": {
           "$ref": "#/components/schemas/ApprovalEffectOut"
         }
@@ -2142,6 +2199,9 @@
         "decision_note",
         "solo_self_approved",
         "requested_at",
+        "can_decide",
+        "decide_blocked",
+        "self_decision",
         "effect"
       ],
       "title": "ApprovalDecisionOut",
@@ -2491,6 +2551,44 @@
           "type": "string",
           "format": "date-time",
           "title": "Requested At"
+        },
+        "can_decide": {
+          "type": "boolean",
+          "title": "Can Decide",
+          "description": "Whether you may approve or reject it now, by the rule the decision applies: show the buttons only when true (a type's own rule may still refuse, e.g. a large cash drop's decider is never the shift's cashier: DUAL_CONTROL_SAME_PERSON)"
+        },
+        "decide_blocked": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "decided",
+                "missing_permission",
+                "own_request"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Decide Blocked",
+          "description": "Why you may not decide it, when can_decide is false; null when you may"
+        },
+        "self_decision": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "forbidden",
+                "allowed_with_note"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Self Decision",
+          "description": "On your own pending request: forbidden, or allowed_with_note for the Owner of a solo practice (solo_practice_mode on, nobody else holds the permission; a note is required and a risk item records it); null on anyone else's request or a decided one"
         }
       },
       "type": "object",
@@ -2513,7 +2611,10 @@
         "decided_at",
         "decision_note",
         "solo_self_approved",
-        "requested_at"
+        "requested_at",
+        "can_decide",
+        "decide_blocked",
+        "self_decision"
       ],
       "title": "ApprovalOut",
       "description": "An approval request (service.APPROVAL_COLS)."
@@ -2532,30 +2633,6 @@
           ],
           "title": "Note",
           "description": "Required when rejecting"
-        },
-        "second_approver_username": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "title": "Second Approver Username",
-          "description": "Dual control: co-signer username (large cash)"
-        },
-        "second_approver_password": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "title": "Second Approver Password",
-          "description": "Dual control: co-signer password"
         },
         "items": {
           "anyOf": [

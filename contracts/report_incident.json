@@ -1,7 +1,7 @@
 {
   "screen_id": "report_incident",
-  "contract_fingerprint": "bde3c5f94776075b2abd",
-  "knowledge_revision": "933cb79d7aa9f9b7",
+  "contract_fingerprint": "0b5ab90e400dfbb822d3",
+  "knowledge_revision": "318d65bdd91cd873",
   "delivery_gate": {
     "required": true,
     "status": "required",
@@ -33,8 +33,8 @@
       }
     ],
     "zoom": {
-      "min_pct": 100.0,
-      "max_pct": 250.0,
+      "min_pct": 100,
+      "max_pct": 250,
       "reset_pct": 100,
       "keys": [
         "Ctrl + or Ctrl = (zoom in)",
@@ -183,8 +183,8 @@
     "workflow": "MSDS CQI 106, 107",
     "rule_objects": [
       {
-        "id": "rule:41153b7273",
-        "text": "A button on every workspace's toolbar. Form: the type (GET /incident-types, grouped by area, sentinel types marked), incident or near miss, harm, when (now by default) and where (department, ward, place), who was affected (a patient: search by MRN; staff: the employee), what happened (facts, not blame) and what was done at once; 'Keep my name confidential' (reporter_confidential).",
+        "id": "rule:efef10e8e1",
+        "text": "A button on every workspace's toolbar. Form: the type (GET /incident-types, grouped by area, sentinel types marked), incident or near miss, harm, when (now by default) and where (department, ward, place), who was affected (a patient: search by MRN; staff: GET /staff/lookup, any reporter may use it), what happened (facts, not blame) and what was done at once; 'Keep my name confidential' (reporter_confidential).",
         "cites": []
       },
       {
@@ -204,8 +204,16 @@
       }
     ],
     "related_workflows": [
+      "clinical-and-prescriptions",
       "complaints",
+      "duty-rosters-and-attendance",
+      "facility-and-it",
       "incidents-and-sentinel-events",
+      "inpatient-and-discharge",
+      "laboratory-and-radiology",
+      "opd-reception",
+      "operating-theater",
+      "personnel-records",
       "surgical-care"
     ]
   },
@@ -216,7 +224,7 @@
     "workspace": "*",
     "phase": "P1",
     "position": 9,
-    "points": 52,
+    "points": 55,
     "capabilities": [
       "patient_context",
       "idempotent_writes",
@@ -303,7 +311,7 @@
     "note": "`forward`: a dependency on a later phase; use the demo data or a scenario (sandbox_scenario) until that screen exists. `ordering: false`: a hand-off or a hint, not a reason to wait."
   },
   "definition_of_done": {
-    "points": 52,
+    "points": 55,
     "items": [
       {
         "id": "ep:GET /incident-types",
@@ -336,8 +344,14 @@
         "claimed": false
       },
       {
-        "id": "rule:41153b7273",
-        "label": "A button on every workspace's toolbar. Form: the type (GET /incident-types, grouped by area, sentinel types marked), incident or near miss, harm, when (now by default) and where (department, ward, place), who was affected (a patient: search by MRN; staff: the employee), what happened (facts, not blame) and what was done at once; 'Keep my name confidential' (reporter_confidential).",
+        "id": "ep:GET /staff/lookup",
+        "label": "GET /staff/lookup",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "rule:efef10e8e1",
+        "label": "A button on every workspace's toolbar. Form: the type (GET /incident-types, grouped by area, sentinel types marked), incident or near miss, harm, when (now by default) and where (department, ward, place), who was affected (a patient: search by MRN; staff: GET /staff/lookup, any reporter may use it), what happened (facts, not blame) and what was done at once; 'Keep my name confidential' (reporter_confidential).",
         "points": 2,
         "claimed": false
       },
@@ -600,7 +614,8 @@
             "documented",
             "seen_in_tests"
           ],
-          "details_fields": []
+          "details_fields": [],
+          "details_from": "POST /api/v1/incidents"
         },
         {
           "code": "INCIDENT_SCREENING_DECIDED",
@@ -613,7 +628,8 @@
           ],
           "details_fields": [
             "screening_key"
-          ]
+          ],
+          "details_from": "POST /api/v1/incident-screening/dismiss"
         },
         {
           "code": "INCIDENT_TYPE_INACTIVE",
@@ -625,7 +641,8 @@
             "documented",
             "seen_in_tests"
           ],
-          "details_fields": []
+          "details_fields": [],
+          "details_from": "POST /api/v1/incidents"
         },
         {
           "code": "REFERENCE_NOT_FOUND",
@@ -638,7 +655,8 @@
           ],
           "details_fields": [
             "ward_id"
-          ]
+          ],
+          "details_from": "POST /api/v1/pharmacy/storage-checks"
         },
         {
           "code": "VALIDATION_ERROR",
@@ -649,7 +667,8 @@
           "source": [
             "seen_in_tests"
           ],
-          "details_fields": []
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
         }
       ],
       "parameters": [
@@ -1340,7 +1359,8 @@
           "details_fields": [
             "any_of",
             "required"
-          ]
+          ],
+          "details_from": "POST /api/v1/admin/departments"
         }
       ],
       "parameters": [
@@ -1425,6 +1445,145 @@
         "media": [
           "application/octet-stream"
         ]
+      }
+    },
+    {
+      "endpoint": "GET /staff/lookup",
+      "summary": "Find a staff member for a form (badge facts only)",
+      "access": {
+        "authentication": "user",
+        "permissions": [],
+        "permissions_mode": "all",
+        "who": "any logged-in user"
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "UNAUTHENTICATED",
+          "http_status": 401,
+          "message": "Authentication is required.",
+          "retryable": false,
+          "ui_action": "Refresh the token once; if that fails return to login.",
+          "source": [
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "GET /api/v1/settings/sections"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "q",
+          "in": "query",
+          "required": true,
+          "description": "Part of the name, or the start of the employee number",
+          "schema": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 80,
+            "description": "Part of the name, or the start of the employee number",
+            "title": "Q"
+          }
+        },
+        {
+          "name": "department_id",
+          "in": "query",
+          "required": false,
+          "description": "Only this department",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Only this department",
+            "title": "Department Id"
+          }
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "maximum": 20,
+            "minimum": 1,
+            "default": 20,
+            "title": "Limit"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_StaffLookupOut__"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [
+          {
+            "name": "limit",
+            "required": false,
+            "type": "integer",
+            "default": 20,
+            "minimum": 1,
+            "maximum": 20
+          }
+        ],
+        "search": [
+          {
+            "name": "q",
+            "required": true,
+            "type": "string",
+            "min_length": 2,
+            "description": "Part of the name, or the start of the employee number"
+          }
+        ],
+        "filters": [
+          {
+            "name": "department_id",
+            "required": false,
+            "type": "integer",
+            "description": "Only this department"
+          }
+        ],
+        "note": "Lists are bounded by `limit` (no cursor paging): ask for what the screen shows, filter on the server."
       }
     }
   ],
@@ -1809,6 +1968,7 @@
       "INCIDENT_SCREENING_DECIDED": "This screening item is not on the list: it was reported or dismissed already, or is outside the screening window.",
       "INCIDENT_TYPE_INACTIVE": "This incident type is no longer on the hospital's list.",
       "REFERENCE_NOT_FOUND": "A referenced record does not exist.",
+      "UNAUTHENTICATED": "Authentication is required.",
       "VALIDATION_ERROR": "The request is invalid."
     },
     "wording_quoted_in_rules": [
@@ -2006,6 +2166,22 @@
         "as_one_of": [
           "any logged-in user"
         ]
+      },
+      {
+        "id": "case:GET /staff/lookup",
+        "call": "GET /api/v1/staff/lookup",
+        "summary": "Find a staff member for a form (badge facts only)",
+        "denied": {
+          "as_one_of": [],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "UNAUTHENTICATED",
+          "VALIDATION_ERROR"
+        ],
+        "as_one_of": [
+          "any logged-in user"
+        ]
       }
     ],
     "service_cases": [],
@@ -2040,8 +2216,8 @@
         }
       ],
       "zoom": {
-        "min_pct": 100.0,
-        "max_pct": 250.0,
+        "min_pct": 100,
+        "max_pct": 250,
         "reset_pct": 100,
         "keys": [
           "Ctrl + or Ctrl = (zoom in)",
@@ -2058,7 +2234,7 @@
     "workspace_guide": "get_handbook_outline('*')",
     "realtime": [],
     "acceptance_rules": [
-      "A button on every workspace's toolbar. Form: the type (GET /incident-types, grouped by area, sentinel types marked), incident or near miss, harm, when (now by default) and where (department, ward, place), who was affected (a patient: search by MRN; staff: the employee), what happened (facts, not blame) and what was done at once; 'Keep my name confidential' (reporter_confidential).",
+      "A button on every workspace's toolbar. Form: the type (GET /incident-types, grouped by area, sentinel types marked), incident or near miss, harm, when (now by default) and where (department, ward, place), who was affected (a patient: search by MRN; staff: GET /staff/lookup, any reporter may use it), what happened (facts, not blame) and what was done at once; 'Keep my name confidential' (reporter_confidential).",
       "Medication errors: the stage and the medicine; theatre events: the operation and the phase (INCIDENT_DETAILS_REQUIRED). Send an Idempotency-Key: a double click must not report twice.",
       "After sending: show the incident number and 'The Quality Officer will review it'. 'My reports' = GET /incidents?mine=true.",
       "Link 'What to report' to GET /incidents/sentinel-list/pdf."
@@ -2121,10 +2297,19 @@
         "permissions": [],
         "permissions_mode": "all",
         "access": "any logged-in user"
+      },
+      {
+        "id": "report_incident::GET /staff/lookup",
+        "task": "Find a staff member for a form (badge facts only)",
+        "call": "GET /staff/lookup",
+        "is_action": false,
+        "permissions": [],
+        "permissions_mode": "all",
+        "access": "any logged-in user"
       }
     ],
     "rules_to_explain": [
-      "A button on every workspace's toolbar. Form: the type (GET /incident-types, grouped by area, sentinel types marked), incident or near miss, harm, when (now by default) and where (department, ward, place), who was affected (a patient: search by MRN; staff: the employee), what happened (facts, not blame) and what was done at once; 'Keep my name confidential' (reporter_confidential).",
+      "A button on every workspace's toolbar. Form: the type (GET /incident-types, grouped by area, sentinel types marked), incident or near miss, harm, when (now by default) and where (department, ward, place), who was affected (a patient: search by MRN; staff: GET /staff/lookup, any reporter may use it), what happened (facts, not blame) and what was done at once; 'Keep my name confidential' (reporter_confidential).",
       "Medication errors: the stage and the medicine; theatre events: the operation and the phase (INCIDENT_DETAILS_REQUIRED). Send an Idempotency-Key: a double click must not report twice.",
       "After sending: show the incident number and 'The Quality Officer will review it'. 'My reports' = GET /incidents?mine=true.",
       "Link 'What to report' to GET /incidents/sentinel-list/pdf."
@@ -2155,6 +2340,11 @@
         "code": "REFERENCE_NOT_FOUND",
         "message": "A referenced record does not exist.",
         "ui_action": "Show field errors from details.fields / the message."
+      },
+      {
+        "code": "UNAUTHENTICATED",
+        "message": "Authentication is required.",
+        "ui_action": "Refresh the token once; if that fails return to login."
       },
       {
         "code": "VALIDATION_ERROR",
@@ -2222,14 +2412,54 @@
   },
   "workflows": [
     {
+      "slug": "clinical-and-prescriptions",
+      "title": "Consultation, e-prescriptions & pharmacy dispensing",
+      "recipe": "get_workflow_recipe('clinical-and-prescriptions')"
+    },
+    {
       "slug": "complaints",
       "title": "Complaints (MSDS)",
       "recipe": "get_workflow_recipe('complaints')"
     },
     {
+      "slug": "duty-rosters-and-attendance",
+      "title": "Duty rosters, roll call, badges & attendance",
+      "recipe": "get_workflow_recipe('duty-rosters-and-attendance')"
+    },
+    {
+      "slug": "facility-and-it",
+      "title": "Facility operations, badge stations & IT administration",
+      "recipe": "get_workflow_recipe('facility-and-it')"
+    },
+    {
       "slug": "incidents-and-sentinel-events",
       "title": "Incidents, sentinel events and the action register (MSDS)",
       "recipe": "get_workflow_recipe('incidents-and-sentinel-events')"
+    },
+    {
+      "slug": "inpatient-and-discharge",
+      "title": "Admission, beds, nursing & discharge",
+      "recipe": "get_workflow_recipe('inpatient-and-discharge')"
+    },
+    {
+      "slug": "laboratory-and-radiology",
+      "title": "Laboratory & radiology",
+      "recipe": "get_workflow_recipe('laboratory-and-radiology')"
+    },
+    {
+      "slug": "opd-reception",
+      "title": "OPD reception, queues & re-routing",
+      "recipe": "get_workflow_recipe('opd-reception')"
+    },
+    {
+      "slug": "operating-theater",
+      "title": "Operating theater",
+      "recipe": "get_workflow_recipe('operating-theater')"
+    },
+    {
+      "slug": "personnel-records",
+      "title": "Personnel records (MSDS)",
+      "recipe": "get_workflow_recipe('personnel-records')"
     },
     {
       "slug": "surgical-care",
@@ -2476,6 +2706,32 @@
         "content_type": "application/pdf",
         "bytes": 9867
       }
+    },
+    "GET /staff/lookup": {
+      "request": {
+        "path": "/api/v1/staff/lookup",
+        "query": {
+          "q": "sana look"
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": [
+            {
+              "employee_id": 2,
+              "emp_number": "EMP-2026-0002",
+              "full_name": "Sana Lookuptest",
+              "designation": "Officer",
+              "department_name": null
+            }
+          ],
+          "meta": {
+            "server_time": "2026-10-18T11:40:23.634678+00:00"
+          },
+          "request_id": "d101388fcfb7459b8049d5fca80fe22d"
+        }
+      }
     }
   },
   "schemas": {
@@ -2626,6 +2882,31 @@
         "request_id"
       ],
       "title": "Envelope[list[IncidentTypeOut]]"
+    },
+    "Envelope_list_StaffLookupOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/StaffLookupOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[StaffLookupOut]]"
     },
     "HTTPValidationError": {
       "properties": {
@@ -4868,6 +5149,47 @@
       ],
       "title": "QualityActionOut",
       "description": "A corrective or preventive action of the hospital's register (MSDS IMS 162, CQI 83, 107)."
+    },
+    "StaffLookupOut": {
+      "properties": {
+        "employee_id": {
+          "type": "integer",
+          "title": "Employee Id"
+        },
+        "emp_number": {
+          "type": "string",
+          "title": "Emp Number"
+        },
+        "full_name": {
+          "type": "string",
+          "title": "Full Name"
+        },
+        "designation": {
+          "type": "string",
+          "title": "Designation"
+        },
+        "department_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Department Name"
+        }
+      },
+      "type": "object",
+      "required": [
+        "employee_id",
+        "emp_number",
+        "full_name",
+        "designation",
+        "department_name"
+      ],
+      "title": "StaffLookupOut",
+      "description": "One active staff member as a picker shows them (GET /staff/lookup): the facts on their badge, nothing else."
     },
     "ValidationError": {
       "properties": {

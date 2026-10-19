@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { StaffPicker } from "../StaffPicker";
 import { api, ApiError } from "../bridge";
 import { ErrorBox, Field, LoadState, useLoad } from "../components";
 import * as registration from "../generated/registration";
@@ -47,11 +48,6 @@ export function Registration({
   const [billing, setBilling] = useState<"Cash" | "Panel">("Cash");
   const [panelId, setPanelId] = useState("");
   const [member, setMember] = useState("");
-  const [staffQuery, setStaffQuery] = useState("");
-  const [staffRows, setStaffRows] = useState<
-    { employee_id: number; emp_number: string; full_name: string }[]
-  >([]);
-  const [staffError, setStaffError] = useState<unknown>();
   const [discount, setDiscount] = useState("0");
   const [discountReason, setDiscountReason] = useState("");
   const [payNow, setPayNow] = useState(false);
@@ -89,6 +85,11 @@ export function Registration({
   const [actionPending, setActionPending] = useState(false);
   const [documentsPending, setDocumentsPending] = useState(false);
   const [error, setError] = useState<unknown>();
+  const referenceField =
+    error instanceof ApiError &&
+    error.response.error?.code === "REFERENCE_NOT_FOUND"
+      ? error.response.error.details?.field
+      : undefined;
   const [result, setResult] = useState<registration.RegistrationOut>();
   const contextId =
     result?.patient_id || patientRecord?.patient_id || selected?.patient_id;
@@ -296,8 +297,6 @@ export function Registration({
     setBilling("Cash");
     setPanelId("");
     setMember("");
-    setStaffQuery("");
-    setStaffRows([]);
     setDiscount("0");
     setDiscountReason("");
     setPayNow(false);
@@ -752,65 +751,16 @@ export function Registration({
                       </>
                     )}
                   </div>
-                  <Field label={tr("Staff member (payroll link)")}>
-                    <input
-                      value={staffQuery}
-                      disabled={!user.permissions.includes("hr.employee.view")}
-                      onChange={(e) => {
-                        setStaffQuery(e.target.value);
-                        setStaffRows([]);
-                        setExtras((x) => ({ ...x, linked_employee_id: null }));
-                      }}
-                    />
-                  </Field>
-                  {user.permissions.includes("hr.employee.view") && (
-                    <>
-                      <button
-                        type="button"
-                        disabled={staffQuery.length < 2}
-                        onClick={async () => {
-                          try {
-                            setStaffRows(
-                              await api(
-                                "GET",
-                                `/hr/employees?q=${encodeURIComponent(staffQuery)}&limit=30`,
-                              ),
-                            );
-                            setStaffError(undefined);
-                          } catch (e) {
-                            setStaffError(e);
-                          }
-                        }}
-                      >
-                        {tr("Find staff member")}
-                      </button>
-                      <ErrorBox error={staffError} />
-                      <select
-                        aria-label={tr("Select staff member")}
-                        value={extras.linked_employee_id || ""}
-                        onChange={(e) =>
-                          setExtras((x) => ({
-                            ...x,
-                            linked_employee_id: Number(e.target.value) || null,
-                          }))
-                        }
-                      >
-                        <option value="">{tr("No staff link")}</option>
-                        {staffRows.map((r) => (
-                          <option value={r.employee_id} key={r.employee_id}>
-                            {r.emp_number} · {r.full_name}
-                          </option>
-                        ))}
-                      </select>
-                    </>
-                  )}
-                  {!user.permissions.includes("hr.employee.view") && (
-                    <p className="fine muted">
-                      {tr(
-                        "Staff payroll linking requires an authorized employee lookup. It is unavailable for reception until backend issue resolution.",
-                      )}
-                    </p>
-                  )}
+                  <StaffPicker
+                    label={tr("Staff member (payroll link)")}
+                    value={extras.linked_employee_id}
+                    invalid={referenceField === "linked_employee_id"}
+                    onSelect={(id) => {
+                      setExtras((x) => ({ ...x, linked_employee_id: id }));
+                      if (referenceField === "linked_employee_id")
+                        setError(undefined);
+                    }}
+                  />
                   <label>
                     <input
                       type="checkbox"
@@ -829,6 +779,11 @@ export function Registration({
                     <Field label={tr("OPD service")}>
                       <select
                         aria-label={tr("OPD service")}
+                        aria-invalid={[
+                          "service_id",
+                          "doctor_id",
+                          "department_id",
+                        ].includes(String(referenceField))}
                         required
                         value={serviceId}
                         onChange={(e) => setServiceId(e.target.value)}

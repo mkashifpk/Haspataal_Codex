@@ -123,32 +123,32 @@ export interface AdminChangeRequestOut {
   decided_at: string | null;
 }
 
-/** The Settings window: the tiers and sections this caller may open (also before login) — GET /api/v1/settings/sections (permissions: any logged-in user). */
+/** The Settings window: the tiers and sections this caller may open (also before login) — GET /api/v1/settings/sections (who may call: public: no login (works before login); a logged-in caller also gets what their permissions open). */
 export function getSections(): Promise<SettingsSectionsOut> {
   return api<SettingsSectionsOut>("GET", `/settings/sections`, undefined);
 }
 
-/** My preferences (theme, language, UI scale, PDF download) — GET /api/v1/settings/me (permissions: any logged-in user). */
+/** My preferences (theme, language, UI scale, PDF download) — GET /api/v1/settings/me (who may call: any logged-in user, for their own account (also before a forced password change where allowed)). */
 export function getPrefs(): Promise<MyPreferencesOut> {
   return api<MyPreferencesOut>("GET", `/settings/me`, undefined);
 }
 
-/** Update my preferences (only the fields you send) — PUT /api/v1/settings/me (permissions: any logged-in user). */
+/** Update my preferences (only the fields you send) — PUT /api/v1/settings/me (who may call: any logged-in user, for their own account (also before a forced password change where allowed)). */
 export function putPrefs(body: PreferencesIn): Promise<MyPreferencesOut> {
   return api<MyPreferencesOut>("PUT", `/settings/me`, body);
 }
 
-/** Change my password (same as /auth/change-password) — POST /api/v1/settings/me/change-password (permissions: any logged-in user). */
+/** Change my password (same as /auth/change-password) — POST /api/v1/settings/me/change-password (who may call: any logged-in user, for their own account (also before a forced password change where allowed)). */
 export function changePassword(body: ChangePasswordIn): Promise<TokenPair> {
   return api<TokenPair>("POST", `/settings/me/change-password`, body);
 }
 
-/** Hospital policy settings — GET /api/v1/admin/settings (permissions: admin.settings.manage). */
+/** Hospital policy settings — GET /api/v1/admin/settings (who may call: holders of admin.settings.manage). */
 export function settings(): Promise<SettingOut[]> {
   return api<SettingOut[]>("GET", `/admin/settings`, undefined);
 }
 
-/** Change a policy setting (type-checked, audited) — PUT /api/v1/admin/settings/{key} (permissions: admin.settings.manage). */
+/** Change a policy setting (type-checked, audited) — PUT /api/v1/admin/settings/{key} (who may call: holders of admin.settings.manage). */
 export function updateSetting(
   key: string,
   body: SettingIn,
@@ -156,7 +156,7 @@ export function updateSetting(
   return api<SettingRowOut>("PUT", `/admin/settings/${key}`, body);
 }
 
-/** Request a control-setting or privileged-access change (applied at once for an Owner) — POST /api/v1/admin/change-requests (permissions: any logged-in user). */
+/** Request a control-setting or privileged-access change (applied at once for an Owner) — POST /api/v1/admin/change-requests (who may call: admin.settings.manage for a setting, admin.user.manage for a user's roles, admin.role_matrix.update for a role's permissions (the service checks)). */
 export function createChangeRequest(
   body: ChangeRequestIn,
 ): Promise<AdminChangeRequestOut> {
@@ -165,7 +165,7 @@ export function createChangeRequest(
   });
 }
 
-/** Control-setting and privileged-access change requests — GET /api/v1/admin/change-requests (permissions: admin.settings.manage, admin.user.manage, admin.role_matrix.update, approval.policy_change.approve, approval.privileged_access.approve). */
+/** Control-setting and privileged-access change requests — GET /api/v1/admin/change-requests (who may call: holders of admin.settings.manage or admin.user.manage or admin.role_matrix.update or approval.policy_change.approve or approval.privileged_access.approve). */
 export function listChangeRequests(query?: {
   status?: string | null;
   limit?: number;
@@ -177,7 +177,7 @@ export function listChangeRequests(query?: {
   );
 }
 
-/** One control-setting or privileged-access change request — GET /api/v1/admin/change-requests/{change_request_id} (permissions: admin.settings.manage, admin.user.manage, admin.role_matrix.update, approval.policy_change.approve, approval.privileged_access.approve). */
+/** One control-setting or privileged-access change request — GET /api/v1/admin/change-requests/{change_request_id} (who may call: holders of admin.settings.manage or admin.user.manage or admin.role_matrix.update or approval.policy_change.approve or approval.privileged_access.approve). */
 export function getChangeRequest(
   change_request_id: number,
 ): Promise<AdminChangeRequestOut> {

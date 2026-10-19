@@ -675,7 +675,16 @@ export interface ReceptionCashBackOut {
   amount: number;
 }
 
-/** Upload a patient document (PDF/JPEG/PNG) — POST /api/v1/patients/{patient_id}/documents (permissions: patient.document.upload). */
+/** One active staff member as a picker shows them (GET /staff/lookup): the facts on their badge, nothing else. */
+export interface StaffLookupOut {
+  employee_id: number;
+  emp_number: string;
+  full_name: string;
+  designation: string;
+  department_name: string | null;
+}
+
+/** Upload a patient document (PDF/JPEG/PNG) — POST /api/v1/patients/{patient_id}/documents (who may call: holders of patient.document.upload). */
 export function uploadDocument(
   patient_id: number,
   body: FormData,
@@ -688,7 +697,7 @@ export function uploadDocument(
   );
 }
 
-/** List patient documents — GET /api/v1/patients/{patient_id}/documents (permissions: patient.document.view). */
+/** List patient documents — GET /api/v1/patients/{patient_id}/documents (who may call: holders of patient.document.view). */
 export function listDocuments(
   patient_id: number,
 ): Promise<PatientDocumentOut[]> {
@@ -699,7 +708,7 @@ export function listDocuments(
   );
 }
 
-/** Download a patient document — GET /api/v1/patient-documents/{document_id}/download (permissions: patient.document.view). */
+/** Download a patient document — GET /api/v1/patient-documents/{document_id}/download (who may call: holders of patient.document.view). */
 export function downloadDocument(document_id: number): Promise<unknown> {
   return api<unknown>(
     "GET",
@@ -708,12 +717,12 @@ export function downloadDocument(document_id: number): Promise<unknown> {
   );
 }
 
-/** Register a patient (full intake form) — POST /api/v1/patients (permissions: patient.create). */
+/** Register a patient (full intake form) — POST /api/v1/patients (who may call: holders of patient.create). */
 export function createPatient(body: PatientCreate): Promise<PatientDetailOut> {
   return api<PatientDetailOut>("POST", `/patients`, body, { idempotent: true });
 }
 
-/** Collect payment for an unpaid ticket (then queues it) — POST /api/v1/opd-tickets/{ticket_id}/pay (permissions: finance.payment.collect). */
+/** Collect payment for an unpaid ticket (then queues it) — POST /api/v1/opd-tickets/{ticket_id}/pay (who may call: holders of finance.payment.collect). */
 export function pay(
   ticket_id: number,
   body: TicketPayIn,
@@ -723,14 +732,14 @@ export function pay(
   });
 }
 
-/** Register + OPD slip + payment + queue token (atomic) — POST /api/v1/reception/registrations (permissions: opd.ticket.create). */
+/** Register + OPD slip + payment + queue token (atomic) — POST /api/v1/reception/registrations (who may call: holders of opd.ticket.create). */
 export function register(body: RegistrationIn): Promise<RegistrationOut> {
   return api<RegistrationOut>("POST", `/reception/registrations`, body, {
     idempotent: true,
   });
 }
 
-/** Hospital service prices (lab prices live in the lab catalogue) — GET /api/v1/finance/service-catalog (permissions: any logged-in user). */
+/** Hospital service prices (lab prices live in the lab catalogue) — GET /api/v1/finance/service-catalog (who may call: any logged-in user). */
 export function serviceCatalog(query?: {
   category?: string | null;
 }): Promise<ServiceListItemOut[]> {
@@ -741,7 +750,7 @@ export function serviceCatalog(query?: {
   );
 }
 
-/** OPD slip print payload (text + barcode + QR) — GET /api/v1/opd-tickets/{ticket_id}/print-payload (permissions: opd.ticket.view). */
+/** OPD slip print payload (text + barcode + QR) — GET /api/v1/opd-tickets/{ticket_id}/print-payload (who may call: holders of opd.ticket.view). */
 export function printPayload(
   ticket_id: number,
 ): Promise<PrintOut_OpdSlipFieldsOut_> {
@@ -752,11 +761,24 @@ export function printPayload(
   );
 }
 
-/** All queues, deferred tickets, pending approvals, cash-back prompts — GET /api/v1/opd-queues/reception-dashboard (permissions: opd.queue.view). */
+/** All queues, deferred tickets, pending approvals, cash-back prompts — GET /api/v1/opd-queues/reception-dashboard (who may call: holders of opd.queue.view). */
 export function receptionDashboard(): Promise<ReceptionDashboardOut> {
   return api<ReceptionDashboardOut>(
     "GET",
     `/opd-queues/reception-dashboard`,
+    undefined,
+  );
+}
+
+/** Find a staff member for a form (badge facts only) — GET /api/v1/staff/lookup (who may call: any logged-in user). */
+export function lookupStaff(query: {
+  q: string;
+  department_id?: number | null;
+  limit?: number;
+}): Promise<StaffLookupOut[]> {
+  return api<StaffLookupOut[]>(
+    "GET",
+    withQuery(`/staff/lookup`, query),
     undefined,
   );
 }

@@ -250,21 +250,21 @@ export const help: Record<string, HelpPage> = {
     steps: [
       "Choose Pending, Approved, Rejected or Cancelled. My requests shows your own requests and their awaiting-approval state.",
       "Select a request to load its current details. Read the requester, amount and payload. Policy and access requests show current and requested values.",
-      "Enter a decision note. Reject and Cancel require a note in this UI. Approve is shown only when your permission matches and you are not the requester.",
+      "Read the server decision eligibility. Approve and Reject are shown only when can_decide is true. Reject and Cancel require a note in this UI; an allowed solo-practice self-decision also requires a note.",
       "Review the confirmation dialog. Confirm sends the decision; success shows the effects returned by the server. Another person may already have decided: reload and inspect the current state.",
-      "Self-approval and AP-payment approval are disabled pending backend issue #2. The client does not infer the solo-practice exception or co-signer rules.",
+      "Your own request usually awaits another approver. The server may allow a solo-practice self-decision with a note. No co-signer is entered in this queue; the server enforces type-specific separation of duties.",
     ],
     stepsUr: [
       "منتظر، منظور، مسترد یا منسوخ حالت منتخب کریں۔ میری درخواستیں آپ کے اپنے کام کی حالت دکھاتی ہیں۔",
       "درخواست کھول کر درخواست کنندہ، رقم اور تفصیل پڑھیں۔ پالیسی اور رسائی کی درخواست میں موجودہ اور مطلوبہ قدر دیکھیں۔",
-      "فیصلے کا نوٹ لکھیں۔ مسترد اور منسوخ کرنے کے لیے نوٹ لازم ہے۔ مناسب اجازت اور دوسرے درخواست کنندہ کی صورت میں منظوری دکھتی ہے۔",
+      "سرور کی بتائی اہلیت دیکھیں۔ اجازت ہونے پر ہی منظور اور مسترد کے بٹن دکھتے ہیں۔ مسترد، منسوخ اور مجاز تنہا پریکٹس میں اپنے فیصلے کے لیے نوٹ لازم ہے۔",
       "تصدیق کے مکالمے کا جائزہ لیں۔ کامیابی پر سرور کے بتائے اثرات دکھتے ہیں۔ پہلے فیصلہ ہو چکا ہو تو تازہ حالت دیکھیں۔",
-      "اپنی درخواست اور AP ادائیگی کی منظوری بیک اینڈ مسئلہ 2 تک بند ہیں۔ کلائنٹ قواعد کا اندازہ نہیں لگاتا۔",
+      "اپنی درخواست عموماً دوسرے منظوری کنندہ کی منتظر ہوتی ہے۔ سرور مخصوص تنہا پریکٹس میں نوٹ کے ساتھ اجازت دے سکتا ہے۔ اس قطار میں شریک دستخط کنندہ درج نہیں ہوتا؛ الگ ذمہ داری کے قواعد سرور نافذ کرتا ہے۔",
     ],
     faq: [
       [
         "Can I approve my own request?",
-        "Ordinarily no. The server documents a solo-practice exception but does not yet expose eligibility before deciding. That action is disabled until issue #2 is resolved.",
+        "Ordinarily no. Only when the server returns can_decide and self_decision allowed_with_note may a solo-practice requester decide with a note. The decision is audited. Otherwise wait for another approver.",
       ],
       [
         "What if a decision response is lost?",
@@ -274,7 +274,7 @@ export const help: Record<string, HelpPage> = {
     faqUr: [
       [
         "کیا اپنی درخواست منظور کر سکتا ہوں؟",
-        "عام طور پر نہیں۔ سرور کی مخصوص تنہا پریکٹس رعایت کی اہلیت ابھی نہیں ملتی۔ مسئلہ 2 حل ہونے تک یہ عمل بند ہے۔",
+        "عام طور پر نہیں۔ صرف سرور کی واضح اجازت اور تنہا پریکٹس میں نوٹ کی شرط کے ساتھ اپنی درخواست پر فیصلہ ہو سکتا ہے۔ فیصلے کا آڈٹ ہوتا ہے۔ ورنہ دوسرے منظوری کنندہ کا انتظار کریں۔",
       ],
       [
         "فیصلے کا جواب نہ ملے تو؟",
@@ -341,8 +341,8 @@ export const help: Record<string, HelpPage> = {
         "An uncertain retry with exactly the same payload reuses its action key during this app session. After closing the app, read My reports before submitting again.",
       ],
       [
-        "Why can I not select affected staff?",
-        "The current backend requires HR-directory permission for staff search. This is reported as issue #3; the app does not substitute a name or invent an ID.",
+        "How do I select affected staff?",
+        "Search active staff by name or employee number, then select the matching badge identity. Every signed-in reporter can use this minimal lookup without access to confidential HR records.",
       ],
     ],
     faqUr: [
@@ -351,13 +351,13 @@ export const help: Record<string, HelpPage> = {
         "اسی سیشن میں بالکل یکساں غیر یقینی درخواست وہی کلید استعمال کرتی ہے۔ ایپ دوبارہ کھولنے کے بعد پہلے میری رپورٹس دیکھیں۔",
       ],
       [
-        "متاثرہ ملازم منتخب کیوں نہیں ہوتا؟",
-        "بیک اینڈ ملازم تلاش کے لیے ایچ آر اجازت مانگتا ہے۔ مسئلہ 3 رپورٹ ہے؛ ایپ فرضی شناخت نہیں دیتی۔",
+        "متاثرہ ملازم کیسے منتخب کروں؟",
+        "نام یا ملازم نمبر سے فعال عملہ تلاش کرکے درست شناخت منتخب کریں۔ ہر لاگ ان رپورٹر خفیہ ایچ آر ریکارڈ کی اجازت کے بغیر یہ محدود تلاش استعمال کر سکتا ہے۔",
       ],
     ],
   },
   facility_profile: {
-    title: "Facility profile and services",
+    title: "Facility profile & services",
     titleUr: "ہسپتال کا پروفائل اور خدمات",
     purpose:
       "For authorized facility administrators: preview and apply the category and service changes recorded on the licence.",

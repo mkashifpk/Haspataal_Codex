@@ -357,7 +357,16 @@ export interface IncidentOut {
   analysis_overdue: boolean;
 }
 
-/** What to report: the incident types — GET /api/v1/incident-types (permissions: any logged-in user). */
+/** One active staff member as a picker shows them (GET /staff/lookup): the facts on their badge, nothing else. */
+export interface StaffLookupOut {
+  employee_id: number;
+  emp_number: string;
+  full_name: string;
+  designation: string;
+  department_name: string | null;
+}
+
+/** What to report: the incident types — GET /api/v1/incident-types (who may call: any logged-in user). */
 export function listTypes(query?: {
   area?:
     | "Clinical"
@@ -381,14 +390,14 @@ export function listTypes(query?: {
   );
 }
 
-/** Report an incident, an adverse event or a near miss — POST /api/v1/incidents (permissions: incident.report). */
+/** Report an incident, an adverse event or a near miss — POST /api/v1/incidents (who may call: holders of incident.report). */
 export function report(body: IncidentIn): Promise<IncidentDetailOut> {
   return api<IncidentDetailOut>("POST", `/incidents`, body, {
     idempotent: true,
   });
 }
 
-/** The incident register — GET /api/v1/incidents (permissions: incident.view, incident.report, ot.clinical_statistics.view). */
+/** The incident register — GET /api/v1/incidents (who may call: holders of incident.view or incident.report or ot.clinical_statistics.view). */
 export function listIncidents(query?: {
   status?:
     "Reported" | "UnderReview" | "Analysed" | "Closed" | "Withdrawn" | null;
@@ -420,12 +429,25 @@ export function listIncidents(query?: {
   return api<IncidentOut[]>("GET", withQuery(`/incidents`, query), undefined);
 }
 
-/** One incident — GET /api/v1/incidents/{incident_id} (permissions: any logged-in user). */
+/** One incident — GET /api/v1/incidents/{incident_id} (who may call: incident.view, the reporter and the investigator; ot.clinical_statistics.view for theatre adverse events). */
 export function getIncident(incident_id: number): Promise<IncidentDetailOut> {
   return api<IncidentDetailOut>("GET", `/incidents/${incident_id}`, undefined);
 }
 
-/** The list of sentinel events and how to report (PDF) — GET /api/v1/incidents/sentinel-list/pdf (permissions: any logged-in user). */
+/** The list of sentinel events and how to report (PDF) — GET /api/v1/incidents/sentinel-list/pdf (who may call: any logged-in user). */
 export function sentinelListPdf(): Promise<unknown> {
   return api<unknown>("GET", `/incidents/sentinel-list/pdf`, undefined);
+}
+
+/** Find a staff member for a form (badge facts only) — GET /api/v1/staff/lookup (who may call: any logged-in user). */
+export function lookupStaff(query: {
+  q: string;
+  department_id?: number | null;
+  limit?: number;
+}): Promise<StaffLookupOut[]> {
+  return api<StaffLookupOut[]>(
+    "GET",
+    withQuery(`/staff/lookup`, query),
+    undefined,
+  );
 }

@@ -1,12 +1,22 @@
 import { tr } from "./i18n";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  cloneElement,
+  isValidElement,
+  type ReactNode,
+  type ReactElement,
+} from "react";
 import { ApiError } from "./bridge";
 export function ErrorBox({ error }: { error: unknown }) {
   if (!error) return null;
   const r = error instanceof ApiError ? error.response : undefined;
   return (
     <div className="error" role="alert">
-      <strong>{error instanceof Error ? error.message : String(error)}</strong>
+      <strong>
+        {tr(error instanceof Error ? error.message : String(error))}
+      </strong>
       {r && (
         <small>
           {r.error?.code}
@@ -68,7 +78,11 @@ export function Modal({
     <dialog ref={ref} onCancel={onClose}>
       <div className="dialog-head">
         <h2>{title}</h2>
-        <button onClick={onClose} aria-label={tr("Close")}>
+        <button
+          data-help="common.close"
+          onClick={onClose}
+          aria-label={tr("Close")}
+        >
           ×
         </button>
       </div>
@@ -85,10 +99,22 @@ export function Field({
   children: ReactNode;
   hint?: string;
 }) {
+  // An enclosing label also contains a select's option text. Give the native
+  // control its exact visible label so assistive tools identify it reliably.
+  const control =
+    isValidElement(children) &&
+    typeof children.type === "string" &&
+    ["input", "select", "textarea"].includes(children.type)
+      ? cloneElement(children as ReactElement<{ "aria-label"?: string }>, {
+          "aria-label":
+            (children.props as { "aria-label"?: string })["aria-label"] ||
+            label,
+        })
+      : children;
   return (
     <label className="field">
       <span>{label}</span>
-      {children}
+      {control}
       {hint && <small>{hint}</small>}
     </label>
   );
@@ -144,7 +170,11 @@ export function LoadState({
         </p>
       )}
       <ErrorBox error={error} />
-      {!!error && <button onClick={retry}>{tr("Try again")}</button>}
+      {!!error && (
+        <button data-help="common.retry" onClick={retry}>
+          {tr("Try again")}
+        </button>
+      )}
     </>
   );
 }

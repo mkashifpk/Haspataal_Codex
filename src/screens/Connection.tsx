@@ -22,7 +22,11 @@ export function Connection({ onConnected }: { onConnected: () => void }) {
     }
   }
   return (
-    <section className="connection card">
+    <section
+      className="connection card"
+      data-unsaved={!!url || !!expected}
+      data-write-pending={busy}
+    >
       <span className="eyebrow">{tr("FIRST CONNECTION")}</span>
       <h1>{tr("Your hospital, connected.")}</h1>
       <p className="muted">
@@ -32,6 +36,7 @@ export function Connection({ onConnected }: { onConnected: () => void }) {
       </p>
       <ErrorBox error={error} />
       <button
+        data-help="connection.discover"
         disabled={busy}
         onClick={() =>
           run(async () => {
@@ -51,6 +56,7 @@ export function Connection({ onConnected }: { onConnected: () => void }) {
       )}
       {found.map((s) => (
         <button
+          data-help="connection.discover"
           className="server-choice"
           key={s.server_name}
           onClick={() => {
@@ -72,6 +78,7 @@ export function Connection({ onConnected }: { onConnected: () => void }) {
       >
         <Field label={tr("Hospital server address")}>
           <input
+            data-help="connection.trust"
             type="url"
             required
             value={url}
@@ -82,7 +89,11 @@ export function Connection({ onConnected }: { onConnected: () => void }) {
             }}
           />
         </Field>
-        <button className="primary" disabled={busy || !url}>
+        <button
+          data-help="connection.trust"
+          className="primary"
+          disabled={busy || !url}
+        >
           {tr("Check server identity")}
         </button>
       </form>
@@ -105,6 +116,7 @@ export function Connection({ onConnected }: { onConnected: () => void }) {
           <code className="fingerprint">{fingerprint}</code>
           <Field label={tr("Fingerprint supplied by IT")}>
             <input
+              data-help="connection.trust"
               required
               value={expected}
               onChange={(e) => setExpected(e.target.value)}
@@ -112,6 +124,7 @@ export function Connection({ onConnected }: { onConnected: () => void }) {
             />
           </Field>
           <button
+            data-help="connection.trust"
             className="primary"
             disabled={
               busy ||

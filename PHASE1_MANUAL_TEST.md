@@ -1,0 +1,16 @@
+# Phase 1: manual checks for the four fixes
+
+Use the real DEV terminal and your authorized demo accounts. Run `npm start` after `npm run build`. Record your name, date, new record/change numbers and actual outcomes. These instructions are not a claim of human acceptance.
+
+| Fix | Manual check | Expected result |
+| --- | --- | --- |
+| Login health | Open login and wait for the server check. When the backend team supplies a degraded DEV state, revisit login. | Healthy: “Hospital server ready.” Database unavailable: “The server is starting or has a problem: ask IT”, with sign-in disabled. Network failure is identified as a server/connectivity problem, not a password error. Checks repeat and recover when the server recovers. |
+| Hospital times | Set the workstation to a different timezone. Read Notifications; open Report an incident and inspect “When it happened”. Verify a submitted fresh synthetic incident's saved time. | Notification times show the configured hospital timezone. The incident field names that timezone and saves the entered hospital wall time as UTC, independent of the workstation timezone. Missing/changed/invalid timezone never silently falls back to local time. |
+| Facility recovery | As a permitted administrator, preview and apply an appropriate DEV change. For an interrupted response, reopen Facility, including after restarting the app and signing in again. | Original request is retained; new changes are blocked. “Check server status and history” only reads records. “Retry original request” resends the same payload/key within 24 hours. A confirmed refusal needs another preview. Closing a reviewed attempt asks for confirmation and does not undo anything or declare a change successful. |
+| Avatar Settings | Open the avatar account menu, then Settings; try again with an edited Facility/policy draft. | Settings opens and the account dialog closes. A cancelled draft-discard prompt keeps the form and account dialog. A pending Facility outcome blocks navigation until reconciled. |
+
+Facility recovery also separates records by hospital/account and gives each action its own durable key. Do not use matching reason text alone as proof of completion: inspect the actual history/revision and returned result. After the safe retry period, the original request cannot be resent from this UI; reconcile it with the administrator before closing the hold.
+
+Automated verification covers real healthy health reads, the avatar route, real timezone metadata with a Los Angeles workstation setting, and retained recovery controls against real preview/history reads. The recovery UI test stores an **unsent client draft** and never clicks Apply or Retry; it proves retention and read-only recovery, not an actual lost committed reply. HTTP 503, rejection classification, DST conversion and original-request integrity are covered by unit tests. Controlled degraded/uncertain-commit scenarios and actual human business journeys remain yours to verify.
+
+The earlier full P1 acceptance cases (all account landings, forced password change, banners, revocation across windows, real approvals/handovers, profile/service refresh and Urdu review) remain listed in `PHASE1_IMPLEMENTATION_REVIEW.md`. Backend documentation issue #7 is separate from these four frontend fixes.

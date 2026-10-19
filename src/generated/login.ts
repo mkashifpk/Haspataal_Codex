@@ -137,22 +137,77 @@ export interface TokenPair {
   refresh_expires_in: number;
 }
 
-/** Log in (returns tokens, profile, roles, workspaces) — POST /api/v1/auth/login (permissions: any logged-in user). */
+/** GET /health/live: the server answers (no database is touched). */
+export interface LiveOut {
+  status: "alive";
+}
+
+/** GET /health: the login screen's connection check and the Settings window's This terminal section. */
+export interface HealthOut {
+  /** degraded, answered with HTTP 503: the database is down */
+  status: "ok" | "degraded";
+  version: string;
+  server_time: string;
+  components: HealthComponentsOut;
+  maintenance_mode: boolean;
+  license: HealthLicenseOut;
+  uptime_seconds: number;
+}
+
+export interface HealthComponentsOut {
+  database: "up" | "down";
+  /** The database listener behind the WebSocket events */
+  realtime: "up" | "down";
+}
+
+/** The license summary of GET /health (GET /meta/license has the whole state, the vendor's contact included). */
+export interface HealthLicenseOut {
+  state: "ok" | "grace" | "locked" | "dev";
+  /** Empty when there is nothing to report */
+  reason:
+    | ""
+    | "hardware_changed"
+    | "license_missing"
+    | "license_invalid"
+    | "license_outdated"
+    | "license_expired"
+    | "hardware_unreadable"
+    | "check_failed"
+    | "standby_main_active"
+    | "standby_check_failed"
+    | "standby_invalid";
+  /** One sentence for people */
+  detail: string;
+  grace_until: string | null;
+  days_left: number | null;
+}
+
+/** Log in (returns tokens, profile, roles, workspaces) — POST /api/v1/auth/login (who may call: public: no login (works before login)). */
 export function login(body: LoginIn): Promise<LoginOut> {
   return api<LoginOut>("POST", `/auth/login`, body);
 }
 
-/** Identify this terminal (location + mapped printers) — works before login — GET /api/v1/terminals/whoami (permissions: any logged-in user). */
+/** Identify this terminal (location + mapped printers) — works before login — GET /api/v1/terminals/whoami (who may call: public: no login (works before login)). */
 export function whoami(): Promise<TerminalIdentityOut> {
   return api<TerminalIdentityOut>("GET", `/terminals/whoami`, undefined);
 }
 
-/** Change own password — POST /api/v1/auth/change-password (permissions: any logged-in user). */
+/** Change own password — POST /api/v1/auth/change-password (who may call: any logged-in user, for their own account (also before a forced password change where allowed)). */
 export function changePassword(body: ChangePasswordIn): Promise<TokenPair> {
   return api<TokenPair>("POST", `/auth/change-password`, body);
 }
 
-/** The server's license state: show a banner when it needs attention — works before login — GET /api/v1/meta/license (permissions: any logged-in user). */
+/** The server's license state: show a banner when it needs attention — works before login — GET /api/v1/meta/license (who may call: public: no login (works before login)). */
 export function licenseStatus(): Promise<LicenseStatusOut> {
   return api<LicenseStatusOut>("GET", `/meta/license`, undefined);
+}
+
+/** Is the server there? (unauthenticated, no database) — GET /health/live (who may call: public: no login (works before login)). */
+export function liveHealthLiveGet(): Promise<LiveOut> {
+  return api<LiveOut>("GET", `/health/live`, undefined);
+}
+
+/** Server health (unauthenticated; used by the login screen) — GET /health (who may call: public: no login (works before login)). */
+export function healthHealthGet(): Promise<HealthOut> {
+  return api<HealthOut>("GET", `/health`, undefined);
 }

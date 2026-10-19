@@ -2,14 +2,19 @@ import { tr } from "../i18n";
 import { useEffect, useState } from "react";
 import { ApiError, call } from "../bridge";
 import { ErrorBox, Field } from "../components";
+import type { HealthOut } from "../generated/login";
 export function Login({
   onLogin,
   connected,
   hospital,
+  health,
+  healthError,
 }: {
   onLogin: () => void;
   connected: boolean;
   hospital: string;
+  health?: HealthOut;
+  healthError?: unknown;
 }) {
   const [error, setError] = useState<unknown>(),
     [busy, setBusy] = useState(false),
@@ -40,6 +45,27 @@ export function Login({
           {tr("Use the account provided by your hospital.")}
         </p>
         <ErrorBox error={error} />
+        <ErrorBox error={healthError} />
+        <p
+          role="status"
+          className={health?.status === "degraded" ? "notice" : "muted"}
+        >
+          {healthError || !connected
+            ? tr(
+                "Cannot reach or check the hospital server. This is not a password error.",
+              )
+            : !health
+              ? tr("Checking the hospital server…")
+              : health.status === "degraded"
+                ? tr(
+                    "The server is starting or has a problem: ask IT. Its database is unavailable.",
+                  )
+                : health.maintenance_mode
+                  ? tr(
+                      "Hospital maintenance is in progress. Sign-in restrictions are enforced by the server.",
+                    )
+                  : tr("Hospital server ready.")}
+        </p>
         <form
           onSubmit={async (e) => {
             e.preventDefault();
@@ -70,6 +96,7 @@ export function Login({
         >
           <Field label={tr("Username")}>
             <input
+              data-help="login.credentials"
               name="username"
               autoComplete="username"
               required
@@ -80,6 +107,7 @@ export function Login({
           </Field>
           <Field label={tr("Password")}>
             <input
+              data-help="login.credentials"
               name="password"
               type="password"
               autoComplete="current-password"
@@ -88,8 +116,16 @@ export function Login({
             />
           </Field>
           <button
+            data-help="login.credentials"
             className="primary wide"
-            disabled={busy || !connected || seconds > 0}
+            disabled={
+              busy ||
+              !connected ||
+              !health ||
+              !!healthError ||
+              health.status === "degraded" ||
+              seconds > 0
+            }
           >
             {busy
               ? "Signing in…"
@@ -112,6 +148,7 @@ export function Login({
 }
 export function ChangePassword({ onDone }: { onDone: () => void }) {
   const [error, setError] = useState<unknown>(),
+    [dirty, setDirty] = useState(false),
     [busy, setBusy] = useState(false);
   return (
     <section className="card narrow">
@@ -119,6 +156,9 @@ export function ChangePassword({ onDone }: { onDone: () => void }) {
       <p>{tr("Choose a new password before continuing.")}</p>
       <ErrorBox error={error} />
       <form
+        data-unsaved={dirty}
+        data-write-pending={busy}
+        onChangeCapture={() => setDirty(true)}
         onSubmit={async (e) => {
           e.preventDefault();
           const f = e.currentTarget,
@@ -134,10 +174,12 @@ export function ChangePassword({ onDone }: { onDone: () => void }) {
               new_password: d.get("new"),
             });
             f.reset();
+            setDirty(false);
             onDone();
           } catch (err) {
             setError(err);
             f.reset();
+            setDirty(false);
           } finally {
             setBusy(false);
           }
@@ -145,6 +187,7 @@ export function ChangePassword({ onDone }: { onDone: () => void }) {
       >
         <Field label={tr("Current password")}>
           <input
+            data-help="login.password"
             name="current"
             type="password"
             required
@@ -153,6 +196,7 @@ export function ChangePassword({ onDone }: { onDone: () => void }) {
         </Field>
         <Field label={tr("New password")}>
           <input
+            data-help="login.password"
             name="new"
             type="password"
             required
@@ -163,13 +207,14 @@ export function ChangePassword({ onDone }: { onDone: () => void }) {
         </Field>
         <Field label={tr("Confirm new password")}>
           <input
+            data-help="login.password"
             name="confirm"
             type="password"
             required
             autoComplete="new-password"
           />
         </Field>
-        <button className="primary" disabled={busy}>
+        <button data-help="login.password" className="primary" disabled={busy}>
           {tr("Change password")}
         </button>
       </form>

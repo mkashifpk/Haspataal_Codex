@@ -31,8 +31,6 @@ export const registrationUr: Record<string, string> = {
   Panel: "پینل",
   "Choose a panel": "پینل منتخب کریں",
   "Panel member number": "پینل رکنیت نمبر",
-  "Staff payroll linking requires an authorized employee lookup. It is unavailable for reception until backend issue resolution.":
-    "تنخواہ کے ساتھ ملازم جوڑنے کے لیے مجاز تلاش ضروری ہے۔ بیک اینڈ مسئلہ حل ہونے تک استقبالیہ پر یہ سہولت دستیاب نہیں۔",
   "Patient record only — no OPD visit":
     "صرف مریض کا ریکارڈ — او پی ڈی وزٹ نہیں",
   "Register patient only": "صرف مریض درج کریں",

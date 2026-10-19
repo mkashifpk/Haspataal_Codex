@@ -8,6 +8,7 @@ import type {
   AdminChangeRequestOut,
 } from "../generated/settings";
 import { ChangePassword } from "./Login";
+import { hasUnsavedChanges } from "../unsaved";
 export function Settings({
   user,
   prefs,
@@ -55,13 +56,28 @@ export function Settings({
               <h3>{t.label}</h3>
               {t.sections.map((s) => (
                 <button
+                  data-help="settings.sections"
                   key={s.key}
                   className={chosen === s.key ? "selected" : ""}
-                  onClick={() =>
+                  onClick={() => {
+                    if (document.querySelector('[data-write-pending="true"]')) {
+                      setError(
+                        new Error(tr("Wait for the pending action to finish.")),
+                      );
+                      return;
+                    }
+                    if (
+                      chosen !== s.key &&
+                      hasUnsavedChanges() &&
+                      !window.confirm(
+                        tr("Discard unsaved input and change section?"),
+                      )
+                    )
+                      return;
                     s.screen === "facility_profile"
                       ? onFacility()
-                      : setSection(s.key)
-                  }
+                      : setSection(s.key);
+                  }}
                 >
                   {s.label}
                   {s.danger ? " ⚠" : ""}
@@ -82,6 +98,7 @@ export function Settings({
               </p>
               <Field label={tr("Language")}>
                 <select
+                  data-help="settings.display"
                   value={prefs.language}
                   disabled={busy}
                   onChange={(e) => save({ language: e.target.value })}
@@ -92,6 +109,7 @@ export function Settings({
               </Field>
               <Field label={tr("Theme")}>
                 <select
+                  data-help="settings.display"
                   value={prefs.theme}
                   disabled={busy}
                   onChange={(e) => save({ theme: e.target.value })}
@@ -107,6 +125,7 @@ export function Settings({
                 hint={tr("Ctrl/Cmd +, − and 0 use this same setting.")}
               >
                 <input
+                  data-help="settings.zoom"
                   aria-label={tr("Display size")}
                   type="range"
                   min="100"
@@ -120,6 +139,7 @@ export function Settings({
                 />
               </Field>
               <button
+                data-help="settings.zoom"
                 onClick={() => save({ ui_scale_pct: 100 })}
                 disabled={busy}
               >
@@ -128,6 +148,7 @@ export function Settings({
               {user && (
                 <Field label={tr("Download a set of documents")}>
                   <select
+                    data-help="settings.downloads"
                     value={prefs.pdf_download}
                     disabled={busy}
                     onChange={(e) => save({ pdf_download: e.target.value })}
@@ -181,7 +202,11 @@ export function Diagnostics() {
           "Check server health, addresses, certificate identity and licence.",
         )}
       </p>
-      <button onClick={r.reload} disabled={r.loading}>
+      <button
+        data-help="settings.diagnostics"
+        onClick={r.reload}
+        disabled={r.loading}
+      >
         {tr("Test connection")}
       </button>
       <LoadState {...r} retry={r.reload} />
@@ -214,7 +239,12 @@ function Policy() {
     [busy, setBusy] = useState(false),
     [message, setMessage] = useState("");
   return (
-    <>
+    <div
+      data-unsaved={
+        !!selected && (value !== JSON.stringify(selected.value) || !!reason)
+      }
+      data-write-pending={busy}
+    >
       <h2>{tr("Hospital policy")}</h2>
       <p className="muted">
         {tr(
@@ -231,9 +261,17 @@ function Policy() {
       <div className="policy-list">
         {r.data?.settings.map((s) => (
           <button
+            data-help="settings.policy"
             className="list-row"
+            disabled={busy}
             key={s.key}
             onClick={() => {
+              if (
+                selected &&
+                (value !== JSON.stringify(selected.value) || !!reason) &&
+                !window.confirm(tr("Discard unsaved input and change section?"))
+              )
+                return;
               setSelected(s);
               setValue(JSON.stringify(s.value));
               setReason("");
@@ -302,6 +340,7 @@ function Policy() {
             )}
           >
             <textarea
+              data-help="settings.policy"
               required
               value={value}
               onChange={(e) => setValue(e.target.value)}
@@ -310,6 +349,7 @@ function Policy() {
           {selected.is_control && (
             <Field label={tr("Reason")}>
               <textarea
+                data-help="settings.policy"
                 required
                 minLength={3}
                 maxLength={500}
@@ -319,10 +359,19 @@ function Policy() {
             </Field>
           )}
           <div className="actions">
-            <button type="button" onClick={() => setSelected(undefined)}>
+            <button
+              data-help="settings.policy"
+              type="button"
+              disabled={busy}
+              onClick={() => setSelected(undefined)}
+            >
               {tr("Cancel")}
             </button>
-            <button className="primary" disabled={busy}>
+            <button
+              data-help="settings.policy"
+              className="primary"
+              disabled={busy}
+            >
               {tr("Save policy")}
             </button>
           </div>
@@ -331,12 +380,12 @@ function Policy() {
       <h3>{tr("Recent change requests")}</h3>
       {r.data?.requests.map((q) => (
         <details key={q.change_request_id}>
-          <summary>
+          <summary data-help="settings.requests">
             {q.setting_key || q.kind} · {q.status}
           </summary>
           <Details value={q} />
         </details>
       ))}
-    </>
+    </div>
   );
 }

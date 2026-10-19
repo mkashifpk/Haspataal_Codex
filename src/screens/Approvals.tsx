@@ -1,5 +1,6 @@
+import { approvalControls } from "../approval-policy";
 import { tr } from "../i18n";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import * as approvals from "../generated/approval_queue";
 import {
   Details,
@@ -29,6 +30,40 @@ export function Approvals({
     [busy, setBusy] = useState(false),
     [effect, setEffect] = useState<unknown>(),
     [confirm, setConfirm] = useState<"approve" | "reject" | "cancel">();
+  const [detailBusy, setDetailBusy] = useState(false);
+  const detailGeneration = useRef(0);
+  async function loadSelected(id: number, reset = false) {
+    if (reset && busy) return;
+    if (
+      reset &&
+      selected &&
+      note.trim() &&
+      !window.confirm(tr("Discard unsaved input and change section?"))
+    )
+      return;
+    const generation = ++detailGeneration.current;
+    setDetailBusy(true);
+    if (reset) {
+      setSelected(undefined);
+      setNote("");
+      setConfirm(undefined);
+      setError(undefined);
+    }
+    try {
+      const current = await approvals.getApproval(id);
+      if (generation === detailGeneration.current) setSelected(current);
+    } catch (cause) {
+      if (generation === detailGeneration.current) {
+        setSelected(undefined);
+        setError(cause);
+      }
+    } finally {
+      if (generation === detailGeneration.current) setDetailBusy(false);
+    }
+  }
+  useEffect(() => {
+    if (selected) void loadSelected(selected.request_id);
+  }, [revision]);
   const r = useLoad(
     () => approvals.listApprovals({ mine, status, limit: 100 }),
     [mine, status, revision],
@@ -37,13 +72,38 @@ export function Approvals({
     (x) => !charity || x.approval_type === "PharmacyCharityOverride",
   );
   async function decide() {
-    if (!selected || !confirm) return;
+    if (!selected || !confirm || busy || detailBusy) return;
+    const allowed = (a: approvals.ApprovalOut) => {
+      const c = approvalControls(a, user.user_id, note);
+      return confirm === "approve"
+        ? c.canApprove
+        : confirm === "reject"
+          ? c.canReject
+          : c.canCancel;
+    };
+    if (!allowed(selected)) return;
+    setError(undefined);
     setBusy(true);
     try {
+      const fresh = await approvals.getApproval(selected.request_id);
+      if (!allowed(fresh)) {
+        setSelected(fresh);
+        setConfirm(undefined);
+        setError(
+          new Error(
+            tr(
+              "This request changed or you can no longer decide it. Review its current state.",
+            ),
+          ),
+        );
+        await r.reload();
+        return;
+      }
       const d = await approvals[confirm](selected.request_id, {
-        note: note || null,
+        note: note.trim() || null,
       });
       setEffect(d.effect);
+      ++detailGeneration.current;
       setSelected(undefined);
       setConfirm(undefined);
       await r.reload();
@@ -51,12 +111,16 @@ export function Approvals({
       setError(e);
       setConfirm(undefined);
       await r.reload();
+      await loadSelected(selected.request_id);
     } finally {
       setBusy(false);
     }
   }
+  const controls = selected
+    ? approvalControls(selected, user.user_id, note)
+    : null;
   return (
-    <>
+    <div data-unsaved={!!note.trim() && !!selected} data-write-pending={busy}>
       <div className="section-heading">
         <div>
           <h1>{charity ? "Charity approvals" : "Approvals"}</h1>
@@ -68,6 +132,7 @@ export function Approvals({
       <div className="filters">
         <label className="check">
           <input
+            data-help="approval.filter"
             type="checkbox"
             checked={mine}
             onChange={(e) => setMine(e.target.checked)}
@@ -75,6 +140,7 @@ export function Approvals({
           {tr("My requests")}
         </label>
         <select
+          data-help="approval.filter"
           aria-label={tr("Approval status")}
           value={status}
           onChange={(e) => setStatus(e.target.value as typeof status)}
@@ -103,20 +169,13 @@ export function Approvals({
         <div>
           {rows?.map((a) => (
             <button
+              data-help="approval.review"
               className={
                 "list-row " +
                 (selected?.request_id === a.request_id ? "selected" : "")
               }
               key={a.request_id}
-              onClick={async () => {
-                try {
-                  setSelected(await approvals.getApproval(a.request_id));
-                  setNote("");
-                  setError(undefined);
-                } catch (e) {
-                  setError(e);
-                }
-              }}
+              onClick={() => void loadSelected(a.request_id, true)}
             >
               <span className="badge">{a.approval_type}</span>
               <strong>{a.summary}</strong>
@@ -132,6 +191,9 @@ export function Approvals({
         {selected && (
           <section className="card">
             <h2>{selected.summary}</h2>
+            {detailBusy && (
+              <p role="status">{tr("Refreshing approval eligibility…")}</p>
+            )}
             <p>
               {tr("Requested by")}
               {selected.requester_name}
@@ -142,6 +204,9 @@ export function Approvals({
               hint={tr("A note is required when rejecting or cancelling.")}
             >
               <textarea
+                data-help="approval.review"
+                aria-label={tr("Decision note")}
+                disabled={busy || detailBusy}
                 maxLength={1000}
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
@@ -149,46 +214,50 @@ export function Approvals({
             </Field>
             {selected.status === "Pending" && (
               <>
-                {selected.requester_id === user.user_id && (
+                {!selected.can_decide && (
                   <p className="notice">
                     {tr(
-                      "Self-approval is unavailable until the server exposes eligibility for its solo-practice exception (backend issue #2). You can cancel your request.",
+                      selected.decide_blocked === "missing_permission"
+                        ? "You do not have permission to decide this request."
+                        : "Awaiting another approver.",
                     )}
                   </p>
                 )}
-                {selected.approval_type === "APPayment" && (
+                {controls?.approveNeedsNote && (
                   <p className="notice">
                     {tr(
-                      "Approval is unavailable pending the server’s co-signer requirement contract (backend issue #2).",
+                      "The server allows a solo-practice self-decision. A note is required and the decision is audited.",
                     )}
                   </p>
                 )}
                 <div className="actions">
-                  {selected.requester_id === user.user_id ? (
+                  {selected.requester_id === user.user_id && (
                     <button
-                      disabled={!note}
+                      data-help="approval.decide"
+                      disabled={busy || detailBusy || !controls?.canCancel}
                       onClick={() => setConfirm("cancel")}
                     >
                       {tr("Cancel request")}
                     </button>
-                  ) : (
-                    user.permissions.includes(selected.required_permission) && (
-                      <>
-                        <button
-                          disabled={!note}
-                          onClick={() => setConfirm("reject")}
-                        >
-                          {tr("Reject")}
-                        </button>
-                        <button
-                          className="primary"
-                          disabled={selected.approval_type === "APPayment"}
-                          onClick={() => setConfirm("approve")}
-                        >
-                          {tr("Approve")}
-                        </button>
-                      </>
-                    )
+                  )}
+                  {controls?.showDecisions && (
+                    <>
+                      <button
+                        data-help="approval.decide"
+                        disabled={busy || detailBusy || !controls.canReject}
+                        onClick={() => setConfirm("reject")}
+                      >
+                        {tr("Reject")}
+                      </button>
+                      <button
+                        data-help="approval.decide"
+                        className="primary"
+                        disabled={busy || detailBusy || !controls.canApprove}
+                        onClick={() => setConfirm("approve")}
+                      >
+                        {tr("Approve")}
+                      </button>
+                    </>
                   )}
                 </div>
               </>
@@ -205,16 +274,25 @@ export function Approvals({
           <p>{note || "No decision note."}</p>
           <p>{tr("This applies the decision on the hospital server.")}</p>
           <div className="actions">
-            <button disabled={busy} onClick={() => setConfirm(undefined)}>
+            <button
+              data-help="approval.decide"
+              disabled={busy}
+              onClick={() => setConfirm(undefined)}
+            >
               {tr("Go back")}
             </button>
-            <button className="primary" disabled={busy} onClick={decide}>
+            <button
+              data-help="approval.decide"
+              className="primary"
+              disabled={busy}
+              onClick={decide}
+            >
               {tr("Confirm")}
               {confirm}
             </button>
           </div>
         </Modal>
       )}
-    </>
+    </div>
   );
 }

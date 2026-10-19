@@ -55,7 +55,7 @@ export const registrationHelp: HelpPage = {
     ],
     [
       "Can reception link staff payroll?",
-      "This optional field is currently blocked by backend issue #5: reception lacks a permitted staff lookup. Do not type database employee IDs or guess a staff record.",
+      "Yes. Search active staff by name or employee number, then select the matching badge details. This lookup does not expose confidential HR records. Leave it unselected when the patient is not staff; never type or guess a database ID.",
     ],
   ],
   faqUr: [
@@ -89,7 +89,7 @@ export const registrationHelp: HelpPage = {
     ],
     [
       "کیا استقبالیہ تنخواہ کا ملازم جوڑ سکتا ہے؟",
-      "یہ اختیاری خانہ بیک اینڈ مسئلہ نمبر پانچ کی وجہ سے بند ہے: استقبالیہ کے لیے مجاز ملازم تلاش دستیاب نہیں۔ ڈیٹابیس آئی ڈی یا اندازے سے ملازم درج نہ کریں۔",
+      "جی ہاں۔ نام یا ملازم نمبر سے فعال عملہ تلاش کرکے درست شناخت منتخب کریں۔ اس تلاش میں خفیہ ایچ آر ریکارڈ نہیں آتا۔ غیر ملازم مریض کے لیے خانہ خالی چھوڑیں؛ ڈیٹابیس آئی ڈی درج یا اندازہ نہ کریں۔",
     ],
   ],
 };

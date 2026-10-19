@@ -4,6 +4,50 @@ export function setLanguage(value: string) {
   language = value;
 }
 const ur: Record<string, string> = {
+  "Review recent server history": "سرور کی حالیہ تاریخ کا جائزہ لیں",
+  "Cannot reach or check the hospital server. This is not a password error.":
+    "ہسپتال سرور تک رسائی یا جانچ ممکن نہیں۔ یہ پاس ورڈ کی خطا نہیں۔",
+  "Checking the hospital server…": "ہسپتال سرور کی جانچ جاری ہے…",
+  "The server is starting or has a problem: ask IT. Its database is unavailable.":
+    "سرور شروع ہو رہا ہے یا مسئلہ ہے: آئی ٹی سے رابطہ کریں۔ ڈیٹابیس دستیاب نہیں۔",
+  "Hospital maintenance is in progress. Sign-in restrictions are enforced by the server.":
+    "ہسپتال میں دیکھ بھال جاری ہے۔ لاگ اِن کی پابندی سرور نافذ کرتا ہے۔",
+  "Hospital server ready.": "ہسپتال سرور تیار ہے۔",
+  "Hospital timezone unavailable": "ہسپتال کا ٹائم زون دستیاب نہیں",
+  "Hospital timezone is unavailable. Refresh before recording a time.":
+    "ہسپتال کا ٹائم زون دستیاب نہیں۔ وقت درج کرنے سے پہلے تازہ کریں۔",
+  "The hospital supplied an invalid timezone. Contact IT.":
+    "ہسپتال نے غیر درست ٹائم زون دیا ہے۔ آئی ٹی سے رابطہ کریں۔",
+  "Enter a valid hospital date and time.":
+    "ہسپتال کی درست تاریخ اور وقت درج کریں۔",
+  "This time does not exist in the hospital timezone. Check the date and time.":
+    "یہ وقت ہسپتال کے ٹائم زون میں موجود نہیں۔ تاریخ اور وقت چیک کریں۔",
+  "This time is ambiguous in the hospital timezone. Ask IT to confirm the correct occurrence before reporting.":
+    "ہسپتال کے ٹائم زون میں یہ وقت دو بار آتا ہے۔ رپورٹ سے پہلے آئی ٹی سے درست وقت کی تصدیق کرائیں۔",
+  "The hospital timezone changed. Reopen this form and review its time before submitting.":
+    "ہسپتال کا ٹائم زون بدل گیا۔ فارم دوبارہ کھول کر ارسال سے پہلے وقت چیک کریں۔",
+  "Facility change outcome needs checking":
+    "ہسپتال کی تبدیلی کا نتیجہ چیک کرنا ہے",
+  "The original request is retained. Do not submit a new change until its outcome is known.":
+    "اصل درخواست محفوظ ہے۔ نتیجہ معلوم ہونے تک نئی تبدیلی نہ بھیجیں۔",
+  "Previewed revision": "پیش منظر کی ترمیم",
+  "Check server status and history": "سرور کی حالت اور تاریخ چیک کریں",
+  "Current server revision": "سرور کی موجودہ ترمیم",
+  "History is for review; matching text alone does not prove which request completed. Retry uses only the original request.":
+    "تاریخ جائزے کے لیے ہے؛ صرف ملتا متن درخواست کی تکمیل ثابت نہیں کرتا۔ دوبارہ کوشش صرف اصل درخواست بھیجتی ہے۔",
+  "Retry original request": "اصل درخواست دوبارہ بھیجیں",
+  "Close reviewed attempt": "جائزہ شدہ کوشش بند کریں",
+  "Only close after verifying the outcome in server history or with your administrator. This does not undo a change. Continue?":
+    "سرور کی تاریخ یا ایڈمن سے نتیجہ چیک کرکے ہی بند کریں۔ اس سے تبدیلی واپس نہیں ہوتی۔ جاری رکھیں؟",
+  "Attempt closed after manual review. Preview again before any new change.":
+    "دستی جائزے کے بعد کوشش بند ہوئی۔ نئی تبدیلی سے پہلے پیش منظر دوبارہ دیکھیں۔",
+  "The safe retry period has ended or the clock changed. Review history with your administrator; do not resend this request.":
+    "محفوظ دوبارہ کوشش کی مدت ختم یا گھڑی بدل گئی ہے۔ ایڈمن کے ساتھ تاریخ دیکھیں؛ یہ درخواست دوبارہ نہ بھیجیں۔",
+  "The saved Facility attempt is invalid. Ask IT to reconcile it before changing the facility.":
+    "ہسپتال کی محفوظ کوشش درست نہیں۔ تبدیلی سے پہلے آئی ٹی سے نتیجہ چیک کرائیں۔",
+  "Wait for the pending action to finish.": "جاری عمل مکمل ہونے دیں۔",
+  "Discard unsaved input and change section?":
+    "غیر محفوظ اندراج چھوڑ کر حصہ بدلیں؟",
   "Review the request and its consequences before deciding.":
     "فیصلے سے پہلے درخواست اور اس کے اثرات کا جائزہ لیں۔",
   "My requests": "میری درخواستیں",
@@ -15,10 +59,18 @@ const ur: Record<string, string> = {
   "Decision note": "فیصلے کا نوٹ",
   "A note is required when rejecting or cancelling.":
     "مسترد یا منسوخ کرنے کے لیے نوٹ لازم ہے۔",
-  "Self-approval is unavailable until the server exposes eligibility for its solo-practice exception (backend issue #2). You can cancel your request.":
-    "اپنی درخواست کی منظوری بیک اینڈ مسئلہ 2 حل ہونے تک دستیاب نہیں۔ آپ درخواست منسوخ کر سکتے ہیں۔",
-  "Approval is unavailable pending the server’s co-signer requirement contract (backend issue #2).":
-    "دوسرے منظوری کنندہ کی ضرورت کا سرور معاہدہ نامکمل ہے؛ مسئلہ 2 تک منظوری بند ہے۔",
+  "Awaiting another approver.": "دوسرے منظوری کنندہ کا انتظار ہے۔",
+  "You do not have permission to decide this request.":
+    "آپ کو اس درخواست پر فیصلہ کرنے کی اجازت نہیں۔",
+  "The server allows a solo-practice self-decision. A note is required and the decision is audited.":
+    "سرور نے تنہا پریکٹس میں اپنی درخواست پر فیصلے کی اجازت دی ہے۔ نوٹ لازم ہے اور فیصلے کا آڈٹ ہوگا۔",
+  "Refreshing approval eligibility…": "فیصلے کی اہلیت تازہ کی جا رہی ہے…",
+  "This request changed or you can no longer decide it. Review its current state.":
+    "درخواست بدل گئی ہے یا آپ اب فیصلہ نہیں کر سکتے۔ موجودہ حالت دیکھیں۔",
+  "Search active staff by name or employee number.":
+    "نام یا ملازم نمبر سے فعال عملہ تلاش کریں۔",
+  "Select a staff member": "ملازم منتخب کریں",
+  "No active staff match this search.": "اس تلاش سے کوئی فعال ملازم نہیں ملا۔",
   "Cancel request": "درخواست منسوخ کریں",
   Reject: "مسترد کریں",
   Approve: "منظور کریں",

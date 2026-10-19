@@ -1,7 +1,7 @@
 {
   "screen_id": "app_shell",
-  "contract_fingerprint": "bde3c5f94776075b2abd",
-  "knowledge_revision": "933cb79d7aa9f9b7",
+  "contract_fingerprint": "0b5ab90e400dfbb822d3",
+  "knowledge_revision": "318d65bdd91cd873",
   "delivery_gate": {
     "required": true,
     "status": "required",
@@ -33,8 +33,8 @@
       }
     ],
     "zoom": {
-      "min_pct": 100.0,
-      "max_pct": 250.0,
+      "min_pct": 100,
+      "max_pct": 250,
       "reset_pct": 100,
       "keys": [
         "Ctrl + or Ctrl = (zoom in)",
@@ -208,7 +208,10 @@
         "cites": []
       }
     ],
-    "related_workflows": []
+    "related_workflows": [
+      "finance-and-owner",
+      "refunds-waivers-credit"
+    ]
   },
   "rules_in_force": null,
   "build_order": {
@@ -405,7 +408,8 @@
             "reason",
             "state",
             "vendor"
-          ]
+          ],
+          "details_from": "POST /api/v1/auth/login"
         },
         {
           "code": "REFRESH_TOKEN_REUSED",
@@ -417,7 +421,8 @@
             "documented",
             "seen_in_tests"
           ],
-          "details_fields": []
+          "details_fields": [],
+          "details_from": "POST /api/v1/auth/refresh"
         },
         {
           "code": "TOKEN_REVOKED",
@@ -428,7 +433,8 @@
           "source": [
             "seen_in_tests"
           ],
-          "details_fields": []
+          "details_fields": [],
+          "details_from": "GET /api/v1/auth/workspaces"
         }
       ],
       "parameters": [],
@@ -974,8 +980,8 @@
         }
       ],
       "zoom": {
-        "min_pct": 100.0,
-        "max_pct": 250.0,
+        "min_pct": 100,
+        "max_pct": 250,
         "reset_pct": 100,
         "keys": [
           "Ctrl + or Ctrl = (zoom in)",
@@ -1163,7 +1169,18 @@
     ],
     "workspace_guide": "get_handbook_outline('*')"
   },
-  "workflows": [],
+  "workflows": [
+    {
+      "slug": "finance-and-owner",
+      "title": "Cash shifts, payables, receivables, owner dashboards & risk",
+      "recipe": "get_workflow_recipe('finance-and-owner')"
+    },
+    {
+      "slug": "refunds-waivers-credit",
+      "title": "Refunds, VIP waivers & credit (Udhaar)",
+      "recipe": "get_workflow_recipe('refunds-waivers-credit')"
+    }
+  ],
   "scenarios": [],
   "decisions": [
     {
@@ -1396,22 +1413,24 @@
         "status": 200,
         "body": {
           "data": {
-            "hospital_name": "City Hospital",
+            "hospital_name": "Haspataal Hospital",
             "hospital_address": "",
             "hospital_phone": "",
             "hospital_timezone": "Asia/Karachi",
             "currency_code": "PKR",
             "ticket_validity_hours": 72,
-            "reception_max_discount_pct": 10,
-            "opd_require_payment_before_queue": true,
             "lab_require_payment_before_sample": true,
             "password_min_length": 10,
-            "maintenance_mode": false
+            "maintenance_mode": false,
+            "reception_max_discount_pct": 10,
+            "opd_require_payment_before_queue": true,
+            "large_cash_settlement_threshold": 100000,
+            "solo_practice_mode": true
           },
           "meta": {
-            "server_time": "2026-09-27T17:40:44.053092+00:00"
+            "server_time": "2026-10-18T11:25:32.718927+00:00"
           },
-          "request_id": "2f02b046f87e4cfdaad0b53701ea35d2"
+          "request_id": "251d05b446844fc0a49d301f183b0eb8"
         }
       }
     },
@@ -1841,6 +1860,16 @@
         "maintenance_mode": {
           "type": "boolean",
           "title": "Maintenance Mode"
+        },
+        "large_cash_settlement_threshold": {
+          "type": "number",
+          "title": "Large Cash Settlement Threshold",
+          "description": "A cash drop or a payable settlement at or above this needs a second, different person's credentials on the finance screens"
+        },
+        "solo_practice_mode": {
+          "type": "boolean",
+          "title": "Solo Practice Mode",
+          "description": "A one-person practice: the Owner who is the only possible approver may decide their own refund, waiver or credit (the approval's self_decision says when)"
         }
       },
       "type": "object",
@@ -1855,7 +1884,9 @@
         "opd_require_payment_before_queue",
         "lab_require_payment_before_sample",
         "password_min_length",
-        "maintenance_mode"
+        "maintenance_mode",
+        "large_cash_settlement_threshold",
+        "solo_practice_mode"
       ],
       "title": "HospitalSettingsOut",
       "description": "The non-sensitive hospital settings every screen may show (the policy values are in admin settings)."
