@@ -1,0 +1,115 @@
+import { tr } from "../i18n";
+import { useEffect, useState } from "react";
+import * as notifications from "../generated/notifications";
+import { Empty, ErrorBox, LoadState, useLoad } from "../components";
+export function Notifications({
+  revision,
+  onRefresh,
+  onRoute,
+}: {
+  revision: number;
+  onRefresh: () => void;
+  onRoute: (s: string) => void;
+}) {
+  const [unread, setUnread] = useState(false),
+    [error, setError] = useState<unknown>(),
+    [busy, setBusy] = useState(false);
+  const r = useLoad(
+    () => notifications.inbox({ unread_only: unread, limit: 50 }),
+    [unread, revision],
+  );
+  async function run(fn: () => Promise<unknown>) {
+    setBusy(true);
+    try {
+      await fn();
+      await r.reload();
+      onRefresh();
+    } catch (e) {
+      setError(e);
+    } finally {
+      setBusy(false);
+    }
+  }
+  return (
+    <>
+      <div className="section-heading">
+        <div>
+          <h1>{tr("Notifications")}</h1>
+          <p className="muted">
+            {tr("Updates and requests from your hospital.")}
+          </p>
+        </div>
+        <button
+          disabled={busy || !r.data?.some((n) => !n.is_read)}
+          onClick={() => run(notifications.readAll)}
+        >
+          {tr("Mark all as read")}
+        </button>
+      </div>
+      <label className="check">
+        <input
+          type="checkbox"
+          checked={unread}
+          onChange={(e) => setUnread(e.target.checked)}
+        />
+        {tr("Unread only")}
+      </label>
+      <ErrorBox error={error} />
+      <LoadState {...r} retry={r.reload} />
+      {r.data?.length === 0 && <Empty>{tr("You’re all caught up.")}</Empty>}
+      <div className="notification-list">
+        {r.data?.map((n) => (
+          <article
+            className={"card notification " + (n.is_read ? "read" : "")}
+            key={n.notification_id}
+          >
+            <span className="badge">{n.severity}</span>
+            <h3>{n.title}</h3>
+            <p>{n.body}</p>
+            <small>{new Date(n.created_at).toLocaleString()}</small>
+            <div className="actions">
+              {!n.is_read && (
+                <button
+                  disabled={busy}
+                  onClick={() =>
+                    run(() => notifications.markRead(n.notification_id))
+                  }
+                >
+                  {tr("Mark as read")}
+                </button>
+              )}
+              {n.action_url && (
+                <button onClick={() => onRoute(n.action_url!)}>
+                  {tr("Open related item")}
+                </button>
+              )}
+            </div>
+          </article>
+        ))}
+      </div>
+      {r.data && r.data.length >= 50 && (
+        <button
+          disabled={busy}
+          onClick={async () => {
+            setBusy(true);
+            setError(undefined);
+            try {
+              const next = await notifications.inbox({
+                unread_only: unread,
+                before_id: r.data!.at(-1)!.notification_id,
+                limit: 50,
+              });
+              r.setData([...r.data!, ...next]);
+            } catch (e) {
+              setError(e);
+            } finally {
+              setBusy(false);
+            }
+          }}
+        >
+          {tr("Load older notifications")}
+        </button>
+      )}
+    </>
+  );
+}

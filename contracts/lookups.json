@@ -1,0 +1,1648 @@
+{
+  "endpoints": [
+    {
+      "method": "GET",
+      "path": "/api/v1/patients/search",
+      "summary": "Returning-patient lookup by name / phone / CNIC / MRN",
+      "tags": [
+        "Patients"
+      ],
+      "permissions": [
+        "patient.search"
+      ],
+      "permissions_mode": "all",
+      "idempotency_key": false,
+      "description": "Each hit includes `outstanding` → show the red **OUTSTANDING BALANCE: RS. X** banner when\n`has_outstanding_ar` is true (workflow §1.2). Merged profiles are hidden (their master is shown).\n\n**Required permission:** `patient.search`\n\n**Required permission:** `patient.search`",
+      "roles_allowed": [
+        "accountant",
+        "admissions_officer",
+        "anaesthetist",
+        "billing_admin",
+        "cashier",
+        "clinic_director",
+        "clinical_specialist",
+        "doctor",
+        "head_nurse",
+        "hospital_admin",
+        "hospital_director",
+        "ipc_nurse",
+        "lab_technician",
+        "lab_verifier",
+        "ot_admin",
+        "ot_nurse",
+        "owner",
+        "pharmacist",
+        "quality_officer",
+        "radiographer",
+        "radiologist",
+        "receptionist",
+        "surgeon",
+        "triage_nurse",
+        "ward_nurse",
+        "zakat_officer"
+      ],
+      "parameters": [
+        {
+          "name": "q",
+          "in": "query",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 100,
+            "title": "Q"
+          }
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "maximum": 100,
+            "minimum": 1,
+            "default": 20,
+            "title": "Limit"
+          }
+        }
+      ],
+      "request_body": null,
+      "request_content_type": null,
+      "response_schema": {
+        "title": "Envelope[list[PatientSearchHitOut]]",
+        "properties": {
+          "data": {
+            "items": {
+              "title": "PatientSearchHitOut",
+              "properties": {
+                "patient_id": {
+                  "type": "integer",
+                  "title": "Patient Id"
+                },
+                "photo_document_id": {
+                  "anyOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Photo Document Id",
+                  "description": "The newest Patient Photo of the merge chain, for the identity check; null when none was taken (it is optional). GET /patient-documents/{document_id}/download"
+                },
+                "mrn": {
+                  "type": "string",
+                  "title": "Mrn"
+                },
+                "registration_type": {
+                  "type": "string",
+                  "enum": [
+                    "Regular",
+                    "LabOnly",
+                    "TraumaTemp",
+                    "Merged"
+                  ],
+                  "title": "Registration Type"
+                },
+                "full_name": {
+                  "type": "string",
+                  "title": "Full Name"
+                },
+                "father_or_husband_name": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Father Or Husband Name"
+                },
+                "gender": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "male",
+                        "female",
+                        "other",
+                        "unknown"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Gender"
+                },
+                "dob": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "format": "date"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Dob"
+                },
+                "age_years": {
+                  "anyOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Age Years"
+                },
+                "age_recorded_on": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "format": "date"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Age Recorded On",
+                  "description": "When age_years was recorded (the age grows from that date)"
+                },
+                "mobile": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Mobile"
+                },
+                "cnic": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Cnic"
+                },
+                "address": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Address"
+                },
+                "emergency_contact_name": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Emergency Contact Name"
+                },
+                "emergency_contact_phone": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Emergency Contact Phone"
+                },
+                "blood_group": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "A+",
+                        "A-",
+                        "B+",
+                        "B-",
+                        "AB+",
+                        "AB-",
+                        "O+",
+                        "O-",
+                        "Unknown"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Blood Group"
+                },
+                "allergies": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Allergies"
+                },
+                "billing_category": {
+                  "type": "string",
+                  "enum": [
+                    "Cash",
+                    "Panel"
+                  ],
+                  "title": "Billing Category"
+                },
+                "panel_id": {
+                  "anyOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Panel Id"
+                },
+                "panel_name": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Panel Name"
+                },
+                "panel_member_no": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Panel Member No"
+                },
+                "temp_identifier": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Temp Identifier",
+                  "description": "Unknown-trauma label, e.g. \"Unknown Male 3\""
+                },
+                "merged_into_id": {
+                  "anyOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Merged Into Id"
+                },
+                "linked_employee_id": {
+                  "anyOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Linked Employee Id"
+                },
+                "is_deceased": {
+                  "type": "boolean",
+                  "title": "Is Deceased"
+                },
+                "death_id": {
+                  "anyOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Death Id",
+                  "description": "The death record (GET /deaths/{death_id}) when the death is recorded"
+                },
+                "death_at": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Death At"
+                },
+                "mlc_numbers": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array",
+                  "title": "Mlc Numbers",
+                  "description": "Medico-legal case numbers of this person: show a MEDICO-LEGAL banner when not empty (MSDS 154: the record is clearly so marked)"
+                },
+                "created_at": {
+                  "type": "string",
+                  "format": "date-time",
+                  "title": "Created At"
+                },
+                "row_version": {
+                  "type": "integer",
+                  "title": "Row Version"
+                },
+                "outstanding": {
+                  "$ref": "#/components/schemas/OutstandingBannerOut"
+                }
+              },
+              "type": "object",
+              "required": [
+                "patient_id",
+                "photo_document_id",
+                "mrn",
+                "registration_type",
+                "full_name",
+                "father_or_husband_name",
+                "gender",
+                "dob",
+                "age_years",
+                "age_recorded_on",
+                "mobile",
+                "cnic",
+                "address",
+                "emergency_contact_name",
+                "emergency_contact_phone",
+                "blood_group",
+                "allergies",
+                "billing_category",
+                "panel_id",
+                "panel_name",
+                "panel_member_no",
+                "temp_identifier",
+                "merged_into_id",
+                "linked_employee_id",
+                "is_deceased",
+                "death_id",
+                "death_at",
+                "mlc_numbers",
+                "created_at",
+                "row_version",
+                "outstanding"
+              ]
+            },
+            "type": "array",
+            "title": "Data"
+          },
+          "meta": {
+            "title": "Meta",
+            "properties": {
+              "server_time": {
+                "type": "string",
+                "title": "Server Time",
+                "description": "Server clock (UTC). Use it to detect terminal clock skew."
+              },
+              "page": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Page"
+              },
+              "page_size": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Page Size"
+              },
+              "total_count": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Total Count"
+              },
+              "next_cursor": {
+                "title": "Next Cursor"
+              }
+            },
+            "type": "object",
+            "required": [
+              "server_time"
+            ]
+          },
+          "request_id": {
+            "type": "string",
+            "title": "Request Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data",
+          "meta",
+          "request_id"
+        ]
+      },
+      "recorded_example": {
+        "request": {
+          "path": "/api/v1/patients/search",
+          "query": {
+            "q": "MRN-2026-000001"
+          }
+        },
+        "response": {
+          "status": 200,
+          "body": {
+            "data": [
+              {
+                "patient_id": 1,
+                "mrn": "MRN-2026-000001",
+                "registration_type": "Regular",
+                "full_name": "Ali Khan",
+                "father_or_husband_name": null,
+                "gender": "male",
+                "dob": null,
+                "age_years": 40,
+                "age_recorded_on": "2026-10-13",
+                "mobile": "03008475071",
+                "cnic": null,
+                "address": null,
+                "emergency_contact_name": null,
+                "emergency_contact_phone": null,
+                "blood_group": null,
+                "allergies": null,
+                "billing_category": "Cash",
+                "panel_id": null,
+                "panel_name": null,
+                "panel_member_no": null,
+                "temp_identifier": null,
+                "merged_into_id": null,
+                "linked_employee_id": null,
+                "is_deceased": false,
+                "created_at": "2026-10-13T12:08:52.472447+00:00",
+                "row_version": 1,
+                "death_id": null,
+                "death_at": null,
+                "photo_document_id": null,
+                "mlc_numbers": [],
+                "outstanding": {
+                  "has_outstanding_ar": true,
+                  "outstanding_ar_balance": 600,
+                  "ar_block_applies": true,
+                  "banner_text": "OUTSTANDING BALANCE: RS. 600.00"
+                }
+              }
+            ],
+            "meta": {
+              "server_time": "2026-10-13T12:08:52.761124+00:00"
+            },
+            "request_id": "6242014455454f27be1f7598e9d88090"
+          }
+        },
+        "errors_seen": [
+          "FORBIDDEN"
+        ]
+      },
+      "errors": [
+        {
+          "code": "FORBIDDEN",
+          "http_status": 403,
+          "message": "You do not have permission to do this.",
+          "retryable": false,
+          "category": "auth",
+          "ui_action": "Explain and hide the action (check x-permissions)."
+        }
+      ],
+      "errors_seen_in_tests": [
+        "FORBIDDEN"
+      ],
+      "used_by_screens": [
+        "patient_search",
+        "trauma_merge",
+        "record_complaint_reception",
+        "record_complaint_admissions",
+        "record_complaint_ward",
+        "record_complaint_er",
+        "home_visit_record",
+        "msds_inspection_pack",
+        "msds_inspection_pack_owner",
+        "msds_inspection_pack_inspector"
+      ],
+      "used_by_workflows": [
+        "opd-reception",
+        "phc-inspection",
+        "refunds-waivers-credit"
+      ],
+      "typescript_example": "// Returning-patient lookup by name / phone / CNIC / MRN  (permissions: patient.search)\nexport const search = () =>\n  api(\"GET\", `/patients/search`, undefined);   // api(): see get_guide('envelope-and-errors')",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "patient.search"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of patient.search",
+        "roles_allowed": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier",
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "ipc_nurse",
+          "lab_technician",
+          "lab_verifier",
+          "ot_admin",
+          "ot_nurse",
+          "owner",
+          "pharmacist",
+          "quality_officer",
+          "radiographer",
+          "radiologist",
+          "receptionist",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse",
+          "zakat_officer"
+        ]
+      },
+      "write_semantics": null,
+      "emits_events": [],
+      "list": {
+        "returns": "list",
+        "paging": [
+          {
+            "name": "limit",
+            "required": false,
+            "type": "integer",
+            "default": 20,
+            "minimum": 1,
+            "maximum": 100
+          }
+        ],
+        "search": [
+          {
+            "name": "q",
+            "required": true,
+            "type": "string",
+            "min_length": 2
+          }
+        ],
+        "filters": [],
+        "note": "Lists are bounded by `limit` (no cursor paging): ask for what the screen shows, filter on the server."
+      },
+      "cross_field_rules": {},
+      "errors_detail": [
+        {
+          "code": "FORBIDDEN",
+          "http_status": 403,
+          "message": "You do not have permission to do this.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "any_of",
+            "required"
+          ]
+        }
+      ],
+      "endpoint": "GET /patients/search"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/hr/employees",
+      "summary": "Search employees",
+      "tags": [
+        "HR"
+      ],
+      "permissions": [
+        "hr.employee.view"
+      ],
+      "permissions_mode": "all",
+      "idempotency_key": false,
+      "description": "**Required permission:** `hr.employee.view`\n\n**Required permission:** `hr.employee.view`",
+      "roles_allowed": [
+        "clinic_director",
+        "hospital_admin",
+        "hospital_director",
+        "hr_admin",
+        "owner",
+        "super_admin"
+      ],
+      "parameters": [
+        {
+          "name": "q",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Q"
+          }
+        },
+        {
+          "name": "status",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          }
+        },
+        {
+          "name": "department_id",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Department Id"
+          }
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "maximum": 500,
+            "minimum": 1,
+            "default": 100,
+            "title": "Limit"
+          }
+        }
+      ],
+      "request_body": null,
+      "request_content_type": null,
+      "response_schema": {
+        "title": "Envelope[list[EmployeeSearchItemOut]]",
+        "properties": {
+          "data": {
+            "items": {
+              "title": "EmployeeSearchItemOut",
+              "properties": {
+                "employee_id": {
+                  "type": "integer",
+                  "title": "Employee Id"
+                },
+                "emp_number": {
+                  "type": "string",
+                  "title": "Emp Number"
+                },
+                "full_name": {
+                  "type": "string",
+                  "title": "Full Name"
+                },
+                "designation": {
+                  "type": "string",
+                  "title": "Designation"
+                },
+                "department_name": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Department Name"
+                },
+                "employment_status": {
+                  "type": "string",
+                  "enum": [
+                    "Draft",
+                    "Awaiting_IT_Provisioning",
+                    "Active",
+                    "Suspended",
+                    "Resigned",
+                    "Terminated"
+                  ],
+                  "title": "Employment Status"
+                },
+                "staff_category": {
+                  "type": "string",
+                  "enum": [
+                    "Clinical",
+                    "Nursing",
+                    "Administrative",
+                    "Technical",
+                    "SupportZeroInterface",
+                    "Visiting"
+                  ],
+                  "title": "Staff Category"
+                },
+                "contract_type": {
+                  "type": "string",
+                  "enum": [
+                    "Permanent",
+                    "Contract",
+                    "Visiting"
+                  ],
+                  "title": "Contract Type"
+                },
+                "mobile": {
+                  "type": "string",
+                  "title": "Mobile"
+                },
+                "supervisor_name": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Supervisor Name"
+                }
+              },
+              "type": "object",
+              "required": [
+                "employee_id",
+                "emp_number",
+                "full_name",
+                "designation",
+                "department_name",
+                "employment_status",
+                "staff_category",
+                "contract_type",
+                "mobile",
+                "supervisor_name"
+              ]
+            },
+            "type": "array",
+            "title": "Data"
+          },
+          "meta": {
+            "title": "Meta",
+            "properties": {
+              "server_time": {
+                "type": "string",
+                "title": "Server Time",
+                "description": "Server clock (UTC). Use it to detect terminal clock skew."
+              },
+              "page": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Page"
+              },
+              "page_size": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Page Size"
+              },
+              "total_count": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Total Count"
+              },
+              "next_cursor": {
+                "title": "Next Cursor"
+              }
+            },
+            "type": "object",
+            "required": [
+              "server_time"
+            ]
+          },
+          "request_id": {
+            "type": "string",
+            "title": "Request Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data",
+          "meta",
+          "request_id"
+        ]
+      },
+      "recorded_example": {
+        "request": {
+          "path": "/api/v1/hr/employees",
+          "query": {
+            "q": "EMP-2026-0004"
+          }
+        },
+        "response": {
+          "status": 200,
+          "body": {
+            "data": [
+              {
+                "employee_id": 4,
+                "emp_number": "EMP-2026-0004",
+                "full_name": "Sana Tariq",
+                "designation": "Staff Nurse",
+                "department_name": null,
+                "employment_status": "Draft",
+                "staff_category": "Nursing",
+                "contract_type": "Permanent",
+                "mobile": "03001234567",
+                "supervisor_name": null
+              }
+            ],
+            "meta": {
+              "server_time": "2026-09-27T17:37:41.032128+00:00"
+            },
+            "request_id": "be41a1605ed14af988071b2bd89c46df"
+          }
+        },
+        "errors_seen": [
+          "FORBIDDEN"
+        ]
+      },
+      "errors": [
+        {
+          "code": "FORBIDDEN",
+          "http_status": 403,
+          "message": "You do not have permission to do this.",
+          "retryable": false,
+          "category": "auth",
+          "ui_action": "Explain and hide the action (check x-permissions)."
+        }
+      ],
+      "errors_seen_in_tests": [
+        "FORBIDDEN"
+      ],
+      "used_by_screens": [
+        "staff_directory",
+        "personnel_files_hr",
+        "orientation_job_descriptions",
+        "clinical_privileges"
+      ],
+      "used_by_workflows": [],
+      "typescript_example": "// Search employees  (permissions: hr.employee.view)\nexport const search = () =>\n  api(\"GET\", `/hr/employees`, undefined);   // api(): see get_guide('envelope-and-errors')",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "hr.employee.view"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of hr.employee.view",
+        "roles_allowed": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "hr_admin",
+          "owner",
+          "super_admin"
+        ]
+      },
+      "write_semantics": null,
+      "emits_events": [],
+      "list": {
+        "returns": "list",
+        "paging": [
+          {
+            "name": "limit",
+            "required": false,
+            "type": "integer",
+            "default": 100,
+            "minimum": 1,
+            "maximum": 500
+          }
+        ],
+        "search": [
+          {
+            "name": "q",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "filters": [
+          {
+            "name": "status",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "department_id",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "note": "Lists are bounded by `limit` (no cursor paging): ask for what the screen shows, filter on the server."
+      },
+      "cross_field_rules": {},
+      "errors_detail": [
+        {
+          "code": "FORBIDDEN",
+          "http_status": 403,
+          "message": "You do not have permission to do this.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "any_of",
+            "required"
+          ]
+        }
+      ],
+      "endpoint": "GET /hr/employees"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/drugs/search",
+      "summary": "Formulary search with live stock colour",
+      "tags": [
+        "Pharmacy"
+      ],
+      "permissions": [
+        "pharmacy.formulary.view"
+      ],
+      "permissions_mode": "all",
+      "idempotency_key": false,
+      "description": "`stock_status`: InStock (🟢) / Low (🟡) / OutOfStock (🔴, show greyed out). Keep live with\n`pharmacy.stock.updated`.\n\n**Required permission:** `pharmacy.formulary.view`\n\n**Required permission:** `pharmacy.formulary.view`",
+      "roles_allowed": [
+        "anaesthetist",
+        "clinical_specialist",
+        "doctor",
+        "head_nurse",
+        "ot_admin",
+        "ot_nurse",
+        "pharmacist",
+        "pharmacy_admin",
+        "surgeon",
+        "triage_nurse",
+        "ward_nurse"
+      ],
+      "parameters": [
+        {
+          "name": "q",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "type": "string",
+            "maxLength": 100,
+            "default": "",
+            "title": "Q"
+          }
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "maximum": 100,
+            "default": 30,
+            "title": "Limit"
+          }
+        }
+      ],
+      "request_body": null,
+      "request_content_type": null,
+      "response_schema": {
+        "title": "Envelope[list[DrugStockOut]]",
+        "properties": {
+          "data": {
+            "items": {
+              "title": "DrugStockOut",
+              "properties": {
+                "drug_id": {
+                  "type": "integer",
+                  "title": "Drug Id"
+                },
+                "code": {
+                  "type": "string",
+                  "title": "Code"
+                },
+                "name": {
+                  "type": "string",
+                  "title": "Name"
+                },
+                "generic_name": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Generic Name"
+                },
+                "strength": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Strength"
+                },
+                "form": {
+                  "type": "string",
+                  "enum": [
+                    "Tablet",
+                    "Capsule",
+                    "Syrup",
+                    "Suspension",
+                    "Injection",
+                    "Infusion",
+                    "Cream",
+                    "Ointment",
+                    "Drops",
+                    "Inhaler",
+                    "Suppository",
+                    "Powder",
+                    "Consumable",
+                    "Device",
+                    "Other"
+                  ],
+                  "title": "Form"
+                },
+                "unit": {
+                  "type": "string",
+                  "title": "Unit"
+                },
+                "schedule": {
+                  "type": "string",
+                  "enum": [
+                    "OTC",
+                    "ScheduleG",
+                    "ScheduleH",
+                    "ScheduleX",
+                    "HospitalOnly"
+                  ],
+                  "title": "Schedule"
+                },
+                "is_otc_allowed": {
+                  "type": "boolean",
+                  "title": "Is Otc Allowed"
+                },
+                "barcode": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Barcode"
+                },
+                "low_stock_threshold": {
+                  "type": "number",
+                  "title": "Low Stock Threshold"
+                },
+                "is_active": {
+                  "type": "boolean",
+                  "title": "Is Active"
+                },
+                "high_alert_category": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "ConcentratedElectrolyte",
+                        "Chemotherapy",
+                        "Anticoagulant",
+                        "Insulin",
+                        "Opioid",
+                        "Sedative",
+                        "NeuromuscularBlocker",
+                        "Inotrope",
+                        "Thrombolytic",
+                        "Psychotropic",
+                        "HighCost",
+                        "Other"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "High Alert Category",
+                  "description": "Set: a high-alert medicine (MSDS 56): show it in red; a second person checks it when dispensed and given"
+                },
+                "is_restricted": {
+                  "type": "boolean",
+                  "title": "Is Restricted",
+                  "description": "Prescribed only with the RestrictedPrescribing privilege (MSDS 52)"
+                },
+                "lasa_with": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array",
+                  "title": "Lasa With",
+                  "description": "Medicines it looks or sounds like: warn when one is picked"
+                },
+                "qty_available": {
+                  "type": "number",
+                  "title": "Qty Available",
+                  "description": "Non-expired stock"
+                },
+                "next_expiry": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "format": "date"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Next Expiry"
+                },
+                "stock_status": {
+                  "type": "string",
+                  "enum": [
+                    "InStock",
+                    "Low",
+                    "OutOfStock"
+                  ],
+                  "title": "Stock Status",
+                  "description": "OutOfStock: show the drug greyed out"
+                }
+              },
+              "type": "object",
+              "required": [
+                "drug_id",
+                "code",
+                "name",
+                "generic_name",
+                "strength",
+                "form",
+                "unit",
+                "schedule",
+                "is_otc_allowed",
+                "barcode",
+                "low_stock_threshold",
+                "is_active",
+                "high_alert_category",
+                "is_restricted",
+                "lasa_with",
+                "qty_available",
+                "next_expiry",
+                "stock_status"
+              ],
+              "description": "A drug with its live stock (view v_drug_stock): what e-prescription search shows."
+            },
+            "type": "array",
+            "title": "Data"
+          },
+          "meta": {
+            "title": "Meta",
+            "properties": {
+              "server_time": {
+                "type": "string",
+                "title": "Server Time",
+                "description": "Server clock (UTC). Use it to detect terminal clock skew."
+              },
+              "page": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Page"
+              },
+              "page_size": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Page Size"
+              },
+              "total_count": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Total Count"
+              },
+              "next_cursor": {
+                "title": "Next Cursor"
+              }
+            },
+            "type": "object",
+            "required": [
+              "server_time"
+            ]
+          },
+          "request_id": {
+            "type": "string",
+            "title": "Request Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data",
+          "meta",
+          "request_id"
+        ]
+      },
+      "recorded_example": {
+        "request": {
+          "path": "/api/v1/drugs/search",
+          "query": {
+            "q": "Insulin"
+          }
+        },
+        "response": {
+          "status": 200,
+          "body": {
+            "data": [
+              {
+                "drug_id": 3,
+                "code": "INSN",
+                "name": "Insulin NPH",
+                "generic_name": null,
+                "strength": null,
+                "form": "Injection",
+                "unit": "unit",
+                "schedule": "HospitalOnly",
+                "is_otc_allowed": false,
+                "barcode": "8931440574755",
+                "low_stock_threshold": 0,
+                "is_active": true,
+                "high_alert_category": null,
+                "is_restricted": false,
+                "lasa_with": [
+                  "Insulin regular"
+                ],
+                "qty_available": 50,
+                "next_expiry": "2099-01-01",
+                "stock_status": "InStock"
+              },
+              {
+                "drug_id": 2,
+                "code": "INSR",
+                "name": "Insulin regular",
+                "generic_name": null,
+                "strength": null,
+                "form": "Injection",
+                "unit": "unit",
+                "schedule": "HospitalOnly",
+                "is_otc_allowed": false,
+                "barcode": "8991682543668",
+                "low_stock_threshold": 0,
+                "is_active": true,
+                "high_alert_category": "Insulin",
+                "is_restricted": false,
+                "lasa_with": [
+                  "Insulin NPH"
+                ],
+                "qty_available": 50,
+                "next_expiry": "2099-01-01",
+                "stock_status": "InStock"
+              }
+            ],
+            "meta": {
+              "server_time": "2026-09-30T15:01:45.066819+00:00"
+            },
+            "request_id": "3c9f279059e64b359f9c572408414e0b"
+          }
+        }
+      },
+      "errors": [],
+      "errors_seen_in_tests": [],
+      "used_by_screens": [
+        "eprescription",
+        "ward_indent",
+        "otc",
+        "verbal_orders_ward",
+        "verbal_orders_er",
+        "own_medicines_pharmacy",
+        "medication_safety_setup"
+      ],
+      "used_by_workflows": [
+        "clinical-and-prescriptions",
+        "medication-safety"
+      ],
+      "typescript_example": "// Formulary search with live stock colour  (permissions: pharmacy.formulary.view)\nexport const search = () =>\n  api(\"GET\", `/drugs/search`, undefined);   // api(): see get_guide('envelope-and-errors')",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "pharmacy.formulary.view"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of pharmacy.formulary.view",
+        "roles_allowed": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "ot_admin",
+          "ot_nurse",
+          "pharmacist",
+          "pharmacy_admin",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ]
+      },
+      "write_semantics": null,
+      "emits_events": [],
+      "list": {
+        "returns": "list",
+        "paging": [
+          {
+            "name": "limit",
+            "required": false,
+            "type": "integer",
+            "default": 30,
+            "maximum": 100
+          }
+        ],
+        "search": [
+          {
+            "name": "q",
+            "required": false,
+            "type": "string",
+            "default": ""
+          }
+        ],
+        "filters": [],
+        "note": "Lists are bounded by `limit` (no cursor paging): ask for what the screen shows, filter on the server."
+      },
+      "cross_field_rules": {},
+      "errors_detail": [],
+      "endpoint": "GET /drugs/search"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/admin/departments",
+      "summary": "Departments",
+      "tags": [
+        "Super Admin"
+      ],
+      "permissions": [],
+      "permissions_mode": "all",
+      "idempotency_key": false,
+      "access": {
+        "authentication": "user",
+        "permissions": [],
+        "permissions_mode": "all",
+        "who": "any logged-in user"
+      },
+      "description": "",
+      "roles_allowed": [],
+      "parameters": [],
+      "request_body": null,
+      "request_content_type": null,
+      "response_schema": {
+        "title": "Envelope[list[DepartmentOut]]",
+        "properties": {
+          "data": {
+            "items": {
+              "title": "DepartmentOut",
+              "properties": {
+                "department_id": {
+                  "type": "integer",
+                  "title": "Department Id"
+                },
+                "code": {
+                  "type": "string",
+                  "title": "Code"
+                },
+                "name": {
+                  "type": "string",
+                  "title": "Name"
+                },
+                "is_clinical": {
+                  "type": "boolean",
+                  "title": "Is Clinical"
+                },
+                "is_active": {
+                  "type": "boolean",
+                  "title": "Is Active"
+                },
+                "row_version": {
+                  "type": "integer",
+                  "title": "Row Version"
+                }
+              },
+              "type": "object",
+              "required": [
+                "department_id",
+                "code",
+                "name",
+                "is_clinical",
+                "is_active",
+                "row_version"
+              ]
+            },
+            "type": "array",
+            "title": "Data"
+          },
+          "meta": {
+            "title": "Meta",
+            "properties": {
+              "server_time": {
+                "type": "string",
+                "title": "Server Time",
+                "description": "Server clock (UTC). Use it to detect terminal clock skew."
+              },
+              "page": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Page"
+              },
+              "page_size": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Page Size"
+              },
+              "total_count": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Total Count"
+              },
+              "next_cursor": {
+                "title": "Next Cursor"
+              }
+            },
+            "type": "object",
+            "required": [
+              "server_time"
+            ]
+          },
+          "request_id": {
+            "type": "string",
+            "title": "Request Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data",
+          "meta",
+          "request_id"
+        ]
+      },
+      "recorded_example": {
+        "request": {
+          "path": "/api/v1/admin/departments"
+        },
+        "response": {
+          "status": 200,
+          "body": {
+            "data": [
+              {
+                "department_id": 1,
+                "code": "CARD",
+                "name": "Cardiology & Vascular",
+                "is_clinical": true,
+                "is_active": true,
+                "row_version": 2
+              }
+            ],
+            "meta": {
+              "server_time": "2026-09-27T17:34:24.417658+00:00"
+            },
+            "request_id": "0fb46c874eb4440b84f3f45f315569b9"
+          }
+        }
+      },
+      "errors": [],
+      "errors_seen_in_tests": [],
+      "used_by_screens": [
+        "ipc_audits",
+        "it_console"
+      ],
+      "used_by_workflows": [],
+      "typescript_example": "// Departments  (permissions: any logged-in user)\nexport const departments = () =>\n  api(\"GET\", `/admin/departments`, undefined);   // api(): see get_guide('envelope-and-errors')",
+      "write_semantics": null,
+      "emits_events": [],
+      "list": {
+        "returns": "list",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      },
+      "cross_field_rules": {},
+      "errors_detail": [],
+      "endpoint": "GET /admin/departments"
+    }
+  ]
+}

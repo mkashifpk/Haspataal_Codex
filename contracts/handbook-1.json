@@ -1,0 +1,141 @@
+{
+  "unknowns": [],
+  "mandate": "F1 contextual help and detailed FAQs for every supported role are compulsory. Deliver the staff handbook with every screen and workspace; without these the workspace is unfinished, in English and Urdu, as a localhost-only searchable help site filtered by GET /meta/handbook.",
+  "pages_to_write": {
+    "screens": 268,
+    "workspaces": 30,
+    "page_ids": "screens/<screen id>, workspaces/<workspace code>"
+  },
+  "excluded_screens": [],
+  "special_delivery": [
+    {
+      "screen": "badge_station_kiosk",
+      "page": "screens/badge_station_kiosk",
+      "audience": "station operators, supervisors and authorized setup staff",
+      "how": "Operator job aid in authorized staff help or training material; no kiosk login."
+    }
+  ],
+  "languages": [
+    "en",
+    "ur"
+  ],
+  "rbac": "GET /meta/handbook (the server lists the pages this user may read)",
+  "tools": [
+    "get_handbook_outline(workspace) for required sections and role FAQ task coverage",
+    "get_ui_quality_brief(workspace=...) for delivery checks and human review",
+    "get_screen(id) for the rules and endpoints behind a screen",
+    "what_changed to know which pages to revise after a backend update"
+  ],
+  "guide": "# The end-user handbook\n\nThe hospital buys Haspataal to run the hospital, not to train staff on software. The vendor's decision (4 October 2026):\n**every frontend ships, with its screens, the handbook that teaches the hospital's staff how to use them**, as a searchable\nhelp site inside the app, and **the server decides what each employee may read**. A receptionist opens Help and finds the\nreception screens, step by step, in her language; she never sees how a pharmacist dispenses or how the owner reads the\nP&L, because the server never lists those pages for her.\n\nThe backend gives you the table of contents, the rules and the tasks of every screen; you write the pages for the UI you\nbuild. The MCP server's `get_end_user_handbook_brief` returns this guide and the numbers; `get_handbook_outline(workspace)`\nreturns what each page must cover.\n\n## 1. What to write\n\n| Page | Id | Content |\n|---|---|---|\n| One per **screen** | `screens/<screen id>` (the id of the screen catalogue, `GET /meta/handbook` → `screens[].id`) | What the screen is for (its `purpose`); who uses it; **step by step, one section per task** (`tasks[]`: where to click, what to type, what happens next, the printed output); what the system refuses and why (`rules[]` in user words: \"the dose cannot be given without scanning the wristband\"); the messages the user may see and what to do (the error codes of the screen's calls: `explain_error` in the MCP server gives the message and the UI action); the related screens |\n| One per **workspace** | `workspaces/<code>` | A day in each role, every supported job task, detailed role-specific FAQs, shared screens, handovers to other roles (reception → doctor → pharmacy), troubleshooting and the glossary; see W1-W5 below |\n| The **home** | `index` | The user's own workspaces first (`yours`), a search box, \"What's new\" since the last version |\n| Shared | `screens/<id>` for login, the launcher, settings, notifications, approvals, incident reporting | as any screen |\n\nRules of the text: written for a nurse or a clerk, never for a developer (no endpoint names, no JSON); every step names\nthe control as the UI labels it; one screenshot per task of **your** UI (with the demo hospital's data, never a real\npatient); **English and Urdu** both, the user's language (`GET /settings/me` → `language`) chosen at login, Noto Nastaliq\nUrdu bundled (the rule of the `settings` screen); short sentences; the same words as the UI.\n\nEvery interactive screen needs documentation, including the badge-station kiosk. Its page is an operator job aid\nreached from authorized staff help or supplied as training material; it does not add a kiosk login or teach staff\nto handle station keys. Staff whose work uses only a physical badge tap still need no new software screen.\n\nDo not declare a screen or workspace complete until these pages and their delivery checks are complete. The\n[UI-quality contract](16-ui-quality.md) defines the completion gate; MCP outlines supply the backend's tasks,\nwhile the frontend team adds the actual controls, screenshots and frontend-only behaviour of its app.\n\n## 2. RBAC: the server decides\n\nAfter login (and after a role change) call `GET /meta/handbook`. The answer is the handbook's table of contents **for\nthis user**:\n\n```json\n{ \"user\": \"Ayesha (Reception)\", \"roles\": [\"receptionist\"], \"pages\": 14,\n  \"workspaces\": [ { \"code\": \"reception\", \"label\": \"Reception & Front Desk\", \"label_ur\": \"استقبالیہ\", \"yours\": true,\n                    \"page\": \"workspaces/reception\",\n                    \"screens\": [ { \"id\": \"registration\", \"title\": \"Patient registration\", \"page\": \"screens/registration\",\n                                   \"tasks\": [ { \"method\": \"POST\", \"path\": \"/reception/registrations\",\n                                                \"summary\": \"Register a patient and open an OPD ticket\", \"is_action\": true } ],\n                                   \"rules\": [ \"...\" ], \"events\": [ \"opd.queue.updated\" ] } ] } ],\n  \"shared_screens\": [ { \"id\": \"login\", \"title\": \"Login\", \"page\": \"screens/login\", \"tasks\": [] } ] }\n```\n\nA screen of the user's own workspaces (`yours`) is listed when the server lets the user call at least one of its endpoints;\na screen of another workspace only when the user may call every endpoint of it that needs a permission (a shared read such\nas the patient lookup does not pull a clinical screen into a cashier's handbook); its `tasks` are the calls the user may\nmake (the same permissions that gate the screen itself). **Show only the pages listed; build the search index only\nover them; never link or search a page that is not in the answer.** A page the user may not read is simply absent, for\nthem. Admin set-up pages, money pages and clinical pages therefore reach only the roles that hold them.\n\n## 3. The localhost-only searchable site\n\n* The pages are a **static site** generated at the app's build from your Markdown (MkDocs Material or any generator with a\n  client-side search index), one build per language, bundled inside the app.\n* The help window loads it from an **HTTP server bound to 127.0.0.1 on an ephemeral port**, or a custom `app://` protocol\n  of the app: never on the LAN, never on the hospital server, never on the internet. It works offline.\n* The window filters the navigation and the search index with the answer of `GET /meta/handbook` (a small script reads\n  the allowed page ids at start). Deep links: \"Help\" in the avatar menu opens `index`; the \"?\" button of a screen opens\n  `screens/<its id>`; a workspace tile's \"How this workspace works\" opens `workspaces/<code>`.\n* **F1 is compulsory** on every keyboard-capable frontend. In a workspace window it opens the current screen's page from\n  the outline of **that window's workspace**: `GET /meta/handbook?workspace=<the window's workspace>`. The help home and\n  the search index then cover that workspace and the shared screens only, even for a user with several roles. On the\n  workspace launcher, F1 uses the outline without the parameter. It works while a field or dialog has focus too; on the\n  launcher it opens the permitted workspace guide or handbook home. Handle the key in the app so the browser/OS help does not open instead. Opening and closing help preserves\n  unsaved work and returns focus. Keep a visible Help control for touch devices and keyboards using Fn+F1.\n  Before login or while locked, show only public login/recovery help. A badge kiosk opens a safe operator job aid,\n  never staff-only pages or station credentials; it still needs no added login.\n* Print-friendly: provide a short task job aid or role induction sheet as well as the complete printable guide.\n  Keep the full instructions and FAQs intact; do not omit necessary explanations to fit a page count. The printable\n  guide is one PDF per workspace and language, compiled from the same pages as F1 (never a separate text):\n  `GET /meta/handbook?workspace=<code>&print=true` gives `print_edition.cover` (the hospital, its PHC number and\n  category, the workspace, the version and the date) and `print_edition.chapters` (the workspace page, its screens, the\n  shared screens, the FAQ) in print order. Put a table of contents after the cover, and the version and the date in\n  every page footer.\n\n## 4. Keeping it current\n\nThe page ids are the screen ids, so the handbook follows the catalogue: `what_changed` (the MCP server) lists the screens\nadded or changed since the version your pages were written for; `get_screen(id)` gives the current rules and calls. Revise\nthe pages with the screens, in the same release.\n\n## 5. Why the server, not the app, decides\n\nThe hospital's owner is responsible for who learns what about money, patients and staff. The screen catalogue and the\npermissions live in the backend (every UI shows the same screens to the same roles), so the handbook's table of contents\nis one more answer the server computes from them, with no copy of the rules in any frontend to drift.\n\n## 6. Required screen content\n\nThe MCP outline reads the following requirements directly. Their ids also let frontend coverage checks refer to\nthe requirement without copying its text into another standard.\n\n### S1. Purpose and audience\n\nExplain what this screen accomplishes, when to use it, who uses it and how to open it. State the patient, visit,\nshift or other context the user must verify. Name the expected result in staff language.\n\n### S2. Step by step (one per task, where to click)\n\nFor every supported task give prerequisites, permissions or approvals, exact navigation and control labels,\nwhat to enter or select, validation, the ordered steps and how to recognize completion. Include demo screenshots,\nprinted output and the next task or handover. Link to the corresponding workspace FAQ answer.\n\n### S3. Every control and its effects\n\nMaintain a control inventory covering buttons, fields, selectors, tabs, menus, filters, sorting, scanners, shortcuts,\ndialogs and navigation. For each user-facing control explain its label and purpose, when it is available, required\ninput, immediate effect, whether it saves or only changes the view, any confirmation, and what cancellation does.\nDescribe resulting data/state changes, notifications, printed output and consequences for other staff where relevant.\nInclude controls without API calls. Group repeated controls only when their behaviour is genuinely identical.\n\n### S4. States and feedback\n\nExplain loading, no results, pending approval, success, stale data, denied actions and unavailable services. Describe\nautomatic realtime updates and how staff recognize that displayed information has changed. Explain disabled controls\nand how to meet their prerequisites. Document only states and effects the implemented UI and backend support.\n\n### S5. Messages, mistakes and recovery\n\nExplain the messages staff can encounter, why an action is refused and the permitted next step. Cover corrections,\nduplicate clicks, a lost reply, concurrent changes, leaving unsaved work, session expiry, lost connection and printer\nor scanner problems where applicable. Say what may have been saved, what to check before retrying and whom to contact.\nNever promise unsupported undo or automatic offline submission. Use staff wording, not API paths or JSON.\n\n### S6. Language and visual examples\n\nSupply English and Urdu pages matching the app's labels and reading direction, with legible demo-data screenshots\nfor each task and no real patient information. Keep terminology consistent across UI, FAQs and screenshots. Record\ntranslation review status; a draft must not be represented as approved clinical wording.\n\n### S7. Related help and delivery\n\nLink to the role's workspace guide, related tasks and handovers. F1 and contextual Help must open this screen's page.\nVerify offline access, search, deep links, print-friendly output and the server's permission filtering. Update the\npage, control inventory and FAQ links in the same release as the UI; retain the review evidence required by Q6.\n\n## 7. Required workspace content\n\n### W1. A day in each role\n\nExplain the workspace's purpose and each role that uses it, how to enter or switch workspaces, start and finish a\nshift, and the typical order of work. State what the role may do and what requires another role, without presenting\nrole names as the app's permission checks. Include shared and linked screens needed to finish the job.\n\n### W2. Complete job-task index\n\nList every job task supported for each role in this workspace. Map each task to a detailed FAQ answer and the\nrelevant screen instructions. Reconcile this inventory with the catalogue's tasks, permissions, playbooks, shared\nscreens and the actual UI, including frontend-only tasks. Do not claim that a list of API operations alone covers\neverything staff need to learn. Mark unsupported requests explicitly rather than inventing a workflow.\n\n### W3. Detailed role-specific FAQ\n\nFor every supported task answer \"How do I ...?\" in the user's language. Each answer must give when to use it,\nprerequisites, exact navigation and labels, ordered steps, what each action changes, the expected outcome, common\nmistakes/refusals and recovery, approvals or handovers and links to screen help. Include exceptions and follow-up\nquestions from the tested journey. Shared answers may be linked, but distinguish differences between roles and\npermissions. Short generic advice or an unexplained link is insufficient.\n\nThis FAQ is compulsory for every supported role in the workspace, including its shared tasks. Missing answers,\nmissing English/Urdu coverage or an unreviewed FAQ keep the workspace unfinished, even when its API calls work.\n\nThe FAQ answers at least every question of `faq_seed` for the workspace (`GET /meta/handbook?workspace=<code>` →\n`faq_seed`; the MCP server's `get_handbook_outline` gives the same list): one per error a screen of the workspace can\nmeet and one per state machine its screens move. They are the minimum, not the whole FAQ.\n\n### W4. Handovers, exceptions and troubleshooting\n\nExplain what to do when work is waiting for another role, who acts next, how to find the request later and how to\nrecognize completion or refusal. Cover the workspace's applicable problems: unavailable devices or network, a locked\nsession, conflicting edits, a correction, an uncertain submission and an unfinished shift. Refer to the hospital's\napproved downtime procedure where required; do not invent clinical or financial policy.\n\n### W5. Glossary and guided practice\n\nDefine the workspace's staff-facing terms consistently with the UI. Provide a complete practice journey using newly\ncreated synthetic records on the DEV server, covering the relevant screens, role boundaries and help navigation.\nA named human reviewer must follow the [workspace acceptance checklist](17-workspace-review-checklist.md)\nusing the handbook and check that the FAQ enables the role's work. Keep both languages, screenshots, task index\nand help links current with the implemented workspace.",
+  "screen_requirements": [
+    {
+      "id": "S1",
+      "title": "Purpose and audience",
+      "instruction": "Explain what this screen accomplishes, when to use it, who uses it and how to open it. State the patient, visit,\nshift or other context the user must verify. Name the expected result in staff language."
+    },
+    {
+      "id": "S2",
+      "title": "Step by step (one per task, where to click)",
+      "instruction": "For every supported task give prerequisites, permissions or approvals, exact navigation and control labels,\nwhat to enter or select, validation, the ordered steps and how to recognize completion. Include demo screenshots,\nprinted output and the next task or handover. Link to the corresponding workspace FAQ answer."
+    },
+    {
+      "id": "S3",
+      "title": "Every control and its effects",
+      "instruction": "Maintain a control inventory covering buttons, fields, selectors, tabs, menus, filters, sorting, scanners, shortcuts,\ndialogs and navigation. For each user-facing control explain its label and purpose, when it is available, required\ninput, immediate effect, whether it saves or only changes the view, any confirmation, and what cancellation does.\nDescribe resulting data/state changes, notifications, printed output and consequences for other staff where relevant.\nInclude controls without API calls. Group repeated controls only when their behaviour is genuinely identical."
+    },
+    {
+      "id": "S4",
+      "title": "States and feedback",
+      "instruction": "Explain loading, no results, pending approval, success, stale data, denied actions and unavailable services. Describe\nautomatic realtime updates and how staff recognize that displayed information has changed. Explain disabled controls\nand how to meet their prerequisites. Document only states and effects the implemented UI and backend support."
+    },
+    {
+      "id": "S5",
+      "title": "Messages, mistakes and recovery",
+      "instruction": "Explain the messages staff can encounter, why an action is refused and the permitted next step. Cover corrections,\nduplicate clicks, a lost reply, concurrent changes, leaving unsaved work, session expiry, lost connection and printer\nor scanner problems where applicable. Say what may have been saved, what to check before retrying and whom to contact.\nNever promise unsupported undo or automatic offline submission. Use staff wording, not API paths or JSON."
+    },
+    {
+      "id": "S6",
+      "title": "Language and visual examples",
+      "instruction": "Supply English and Urdu pages matching the app's labels and reading direction, with legible demo-data screenshots\nfor each task and no real patient information. Keep terminology consistent across UI, FAQs and screenshots. Record\ntranslation review status; a draft must not be represented as approved clinical wording."
+    },
+    {
+      "id": "S7",
+      "title": "Related help and delivery",
+      "instruction": "Link to the role's workspace guide, related tasks and handovers. F1 and contextual Help must open this screen's page.\nVerify offline access, search, deep links, print-friendly output and the server's permission filtering. Update the\npage, control inventory and FAQ links in the same release as the UI; retain the review evidence required by Q6."
+    }
+  ],
+  "workspace_requirements": [
+    {
+      "id": "W1",
+      "title": "A day in each role",
+      "instruction": "Explain the workspace's purpose and each role that uses it, how to enter or switch workspaces, start and finish a\nshift, and the typical order of work. State what the role may do and what requires another role, without presenting\nrole names as the app's permission checks. Include shared and linked screens needed to finish the job."
+    },
+    {
+      "id": "W2",
+      "title": "Complete job-task index",
+      "instruction": "List every job task supported for each role in this workspace. Map each task to a detailed FAQ answer and the\nrelevant screen instructions. Reconcile this inventory with the catalogue's tasks, permissions, playbooks, shared\nscreens and the actual UI, including frontend-only tasks. Do not claim that a list of API operations alone covers\neverything staff need to learn. Mark unsupported requests explicitly rather than inventing a workflow."
+    },
+    {
+      "id": "W3",
+      "title": "Detailed role-specific FAQ",
+      "instruction": "For every supported task answer \"How do I ...?\" in the user's language. Each answer must give when to use it,\nprerequisites, exact navigation and labels, ordered steps, what each action changes, the expected outcome, common\nmistakes/refusals and recovery, approvals or handovers and links to screen help. Include exceptions and follow-up\nquestions from the tested journey. Shared answers may be linked, but distinguish differences between roles and\npermissions. Short generic advice or an unexplained link is insufficient.\n\nThis FAQ is compulsory for every supported role in the workspace, including its shared tasks. Missing answers,\nmissing English/Urdu coverage or an unreviewed FAQ keep the workspace unfinished, even when its API calls work.\n\nThe FAQ answers at least every question of `faq_seed` for the workspace (`GET /meta/handbook?workspace=<code>` →\n`faq_seed`; the MCP server's `get_handbook_outline` gives the same list): one per error a screen of the workspace can\nmeet and one per state machine its screens move. They are the minimum, not the whole FAQ."
+    },
+    {
+      "id": "W4",
+      "title": "Handovers, exceptions and troubleshooting",
+      "instruction": "Explain what to do when work is waiting for another role, who acts next, how to find the request later and how to\nrecognize completion or refusal. Cover the workspace's applicable problems: unavailable devices or network, a locked\nsession, conflicting edits, a correction, an uncertain submission and an unfinished shift. Refer to the hospital's\napproved downtime procedure where required; do not invent clinical or financial policy."
+    },
+    {
+      "id": "W5",
+      "title": "Glossary and guided practice",
+      "instruction": "Define the workspace's staff-facing terms consistently with the UI. Provide a complete practice journey using newly\ncreated synthetic records on the DEV server, covering the relevant screens, role boundaries and help navigation.\nA named human reviewer must follow the [workspace acceptance checklist](17-workspace-review-checklist.md)\nusing the handbook and check that the FAQ enables the role's work. Keep both languages, screenshots, task index\nand help links current with the implemented workspace."
+    }
+  ],
+  "delivery_gate": {
+    "required": true,
+    "status": "required",
+    "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+    "compulsory": [
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+        "points": 2
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+        "points": 3
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+        "points": 2
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+        "points": 4
+      }
+    ],
+    "zoom": {
+      "min_pct": 100.0,
+      "max_pct": 250.0,
+      "reset_pct": 100,
+      "keys": [
+        "Ctrl + or Ctrl = (zoom in)",
+        "Ctrl - (zoom out)",
+        "Ctrl 0 (reset to 100 %)",
+        "Command on macOS"
+      ],
+      "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+    },
+    "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')). Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+    "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+  },
+  "contract_fingerprint": "bde3c5f94776075b2abd",
+  "knowledge_revision": "933cb79d7aa9f9b7"
+}
