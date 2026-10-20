@@ -6,7 +6,7 @@ import { ErrorBox, Modal } from "../components";
 import {
   controlGuides,
   foundationJourney,
-  phase1Screens,
+  deliveredHelpScreens as phase1Screens,
   workspaceFocus,
 } from "../foundation-help";
 import { foundationErrors } from "../foundation-errors";

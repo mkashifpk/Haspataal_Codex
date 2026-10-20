@@ -349,6 +349,28 @@ export function App() {
     return () => document.removeEventListener("keydown", key);
   });
   const dirty = hasUnsavedChanges;
+  function signOut(all: boolean) {
+    if (document.querySelector('[data-write-pending="true"]')) {
+      setNotice(
+        t(
+          "Wait for the pending action to finish.",
+          "جاری عمل مکمل ہونے کا انتظار کریں۔",
+        ),
+      );
+      return;
+    }
+    if (
+      dirty() &&
+      !window.confirm(
+        t(
+          "Sign out and discard unsaved input?",
+          "سائن آؤٹ کرکے غیر محفوظ اندراج ختم کریں؟",
+        ),
+      )
+    )
+      return;
+    void call("logout", { all }).catch(setError);
+  }
   function navigate(next: string) {
     if (
       next !== screen &&
@@ -777,7 +799,12 @@ export function App() {
                 <Approvals user={user} revision={revision} charity />
               )}
               {screen === "my_cash_shift" && (
-                <CashShift user={user} revision={revision} />
+                <CashShift
+                  user={user}
+                  revision={revision}
+                  timeZone={meta?.hospital_timezone}
+                  currency={meta?.currency_code}
+                />
               )}
               {screen === "patient_search" && (
                 <PatientSearch user={user} revision={revision} />
@@ -847,8 +874,8 @@ export function App() {
         >
           <p>
             {t(
-              "Before signing out, finish or discard unsaved form input. Retained Facility requests stay with this account and hospital.",
-              "سائن آؤٹ سے پہلے غیر محفوظ فارم مکمل یا ترک کریں۔ ہسپتال کی محفوظ درخواستیں اسی اکاؤنٹ اور ہسپتال کے ساتھ رہتی ہیں۔",
+              "Finish pending actions before signing out. Resolve uncertain cash-shift requests while this window is open. Unsaved input needs your confirmation before it is discarded. Retained Facility requests stay with this account and hospital.",
+              "سائن آؤٹ سے پہلے جاری عمل مکمل کریں۔ غیر یقینی کیش شفٹ کا نتیجہ اسی کھلی ونڈو میں واضح کریں۔ غیر محفوظ اندراج ختم کرنے سے پہلے تصدیق ہوگی۔ ہسپتال کی محفوظ درخواستیں اسی اکاؤنٹ اور ہسپتال کے ساتھ رہتی ہیں۔",
             )}
           </p>
           <div className="actions">
@@ -866,16 +893,13 @@ export function App() {
             >
               Keep working
             </button>
-            <button
-              data-help="shell.logout"
-              onClick={() => call("logout", { all: true }).catch(setError)}
-            >
+            <button data-help="shell.logout" onClick={() => signOut(true)}>
               Sign out everywhere
             </button>
             <button
               data-help="shell.logout"
               className="primary"
-              onClick={() => call("logout", { all: false }).catch(setError)}
+              onClick={() => signOut(false)}
             >
               Sign out
             </button>

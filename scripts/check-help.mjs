@@ -4,7 +4,7 @@ import { parse } from "@babel/parser";
 import {
   controlGuides,
   foundationJourney,
-  phase1Screens,
+  deliveredHelpScreens,
   workspaceFocus,
 } from "../src/foundation-help.ts";
 import { foundationErrors } from "../src/foundation-errors.ts";
@@ -25,7 +25,7 @@ export function checkHelp({
         n.declaration?.declarations?.some((d) => d.id.name === "help"),
     )
     .declaration.declarations.find((d) => d.id.name === "help").init.properties;
-  for (const id of phase1Screens) {
+  for (const id of deliveredHelpScreens) {
     const page = pages.find((p) => p.key.name === id);
     assert(page, `Missing page ${id}`);
     for (const key of [
@@ -113,7 +113,7 @@ export function checkHelp({
     bilingual(guide.title, id);
     bilingual(guide.body, id);
     assert(
-      guide.screens.every((s) => phase1Screens.includes(s)),
+      guide.screens.every((s) => deliveredHelpScreens.includes(s)),
       `${id}: broken screen link`,
     );
   }
@@ -143,6 +143,7 @@ export function checkHelp({
       "Incidents",
       "Facility",
       "Help",
+      "CashShift",
     ].map((n) => `src/screens/${n}.tsx`),
   ];
   const used = new Set(),
@@ -186,7 +187,7 @@ export function checkHelp({
   // Screenshots and sections are referenceable by screen ID, never unrestricted
   // server page titles. Check the runtime permission boundary remains explicit.
   return {
-    screens: phase1Screens.length,
+    screens: deliveredHelpScreens.length,
     controls: inventory.length,
     controlGroups: used.size,
     faqSeeds: catalogue.faq.length,

@@ -18,6 +18,8 @@ export const phase1Screens = [
   "workspace_picker",
 ];
 const approvalScreens = ["approval_queue", "charity_approvals"];
+// Coverage grows screen by screen; Phase 1 acceptance remains separate.
+export const deliveredHelpScreens = [...phase1Screens, "my_cash_shift"];
 const g = (
   screens: string[],
   title: Bilingual,
@@ -26,6 +28,44 @@ const g = (
 // IDs are also attached to the actual controls. The build rejects missing
 // mappings and empty translations instead of treating a page as coverage.
 export const controlGuides: Record<string, ControlGuide> = {
+  "cash.refresh": g(
+    ["my_cash_shift"],
+    ["Refresh / Show my current shift", "تازہ کریں / میری موجودہ شفٹ"],
+    [
+      "Refresh reads the shift, its ledger and terminal counter again; it never opens or closes a drawer. Show my current shift returns from a reviewed closed shift to the current server result. Review the shift number, cashier, counter, business date, hospital time and transaction amounts. Empty collections mean no entries were returned, not a zero balance inferred after an error. There is no cash-shift event guarantee: use Refresh before decisions.",
+      "تازہ کریں شفٹ، کھاتہ اور ٹرمینل کاؤنٹر دوبارہ پڑھتا ہے؛ دراز کھولتا یا بند نہیں کرتا۔ میری موجودہ شفٹ سے جائزہ شدہ بند شفٹ کے بجائے موجودہ نتیجہ دکھتا ہے۔ نمبر، کیشیئر، کاؤنٹر، کاروباری تاریخ، ہسپتال کا وقت اور رقوم چیک کریں۔ خالی کھاتہ خطا کے بعد فرضی صفر نہیں ہے۔ فیصلے سے پہلے تازہ کریں۔",
+    ],
+  ),
+  "cash.open": g(
+    ["my_cash_shift"],
+    ["Opening float / Open cash shift", "ابتدائی فلوٹ / کیش شفٹ کھولیں"],
+    [
+      "Counter staff with permission open My cash shift before cash work. Verify Terminal cash counter; it comes from the terminal mapping and cannot be changed here. A missing/wrong mapping needs IT. With no current open shift, enter a finite nonnegative Opening float and choose Open cash shift once. Wait for the server's shift number. An uncertain answer freezes the original counter, amount and request identity for review. Never start a replacement action to repair a failed follow-up read.",
+      "مجاز کاؤنٹر عملہ نقد کام سے پہلے میری کیش شفٹ کھولے۔ ٹرمینل کا کیش کاؤنٹر چیک کریں؛ اسے یہاں نہیں بدلا جا سکتا۔ غلط یا غائب ترتیب آئی ٹی درست کرے۔ کھلی شفٹ نہ ہو تو درست غیر منفی ابتدائی فلوٹ درج کرکے ایک بار کیش شفٹ کھولیں۔ سرور کے نمبر کا انتظار کریں۔ غیر یقینی جواب پر اصل کاؤنٹر، رقم اور شناخت جائزے تک رکتی ہے۔ پڑھنے کی خطا کے لیے نیا عمل نہ کریں۔",
+    ],
+  ),
+  "cash.close": g(
+    ["my_cash_shift"],
+    [
+      "Counted cash / Close shift / Go back",
+      "گنی ہوئی نقدی / شفٹ بند کریں / واپس",
+    ],
+    [
+      "On your open shift at the mapped counter, count physical cash excluding the opening float. Enter Counted cash in drawer (zero is allowed), choose Close shift, compare shift/counter and amounts, then Confirm & Close Shift. Go back or Close dismisses confirmation without saving and keeps the amount. PendingCollection is server-confirmed closure, not accountant verification. A refused or lost close answer must be checked against the original shift; it is never blindly repeated. Another counter or missing identity blocks closing here.",
+      "مقررہ کاؤنٹر کی اپنی کھلی شفٹ میں ابتدائی فلوٹ نکال کر نقد گنیں۔ دراز میں گنی ہوئی نقدی درج کریں، صفر بھی درست ہے۔ شفٹ بند کریں، نمبر، کاؤنٹر اور رقم دیکھیں پھر تصدیق کریں۔ واپس یا بند سے کچھ محفوظ نہیں ہوتا اور رقم رہتی ہے۔ وصولی کا انتظار اکاؤنٹنٹ کی تصدیق نہیں۔ انکار یا گم جواب پر اصل شفٹ چیک کریں، اندھا دوبارہ ارسال نہ کریں۔ دوسرے کاؤنٹر یا نامعلوم شناخت پر بندش رکے گی۔",
+    ],
+  ),
+  "cash.recovery": g(
+    ["my_cash_shift"],
+    [
+      "Check original shift / Retry original opening / Close reviewed attempt",
+      "اصل شفٹ چیک / اصل افتتاح دوبارہ / جائزہ شدہ کوشش بند",
+    ],
+    [
+      "Keep this window open when an answer is uncertain: this action is in memory only. Check original shift only reads the server. A missing current shift alone cannot prove failure. Within 24 hours Retry original opening repeats the identical counter, float and request identity; it is unavailable after expiry or a clock reversal. There is no retry button for closure. Inspect the original shift with your supervisor, then Close reviewed attempt and confirm only after reconciliation. This clears the hold without declaring success or undoing anything. A new close may be considered only after the original still reads Open. Before closing/reloading the app, record the shift number and ask your supervisor to reconcile on the server; never create a new opening just because the reply was lost.",
+      "جواب غیر یقینی ہو تو ونڈو کھلی رکھیں؛ عمل صرف میموری میں ہے۔ اصل شفٹ چیک صرف سرور پڑھتا ہے۔ موجودہ شفٹ نہ ملنا ناکامی کا ثبوت نہیں۔ چوبیس گھنٹے کے اندر اصل افتتاح دوبارہ وہی کاؤنٹر، فلوٹ اور شناخت بھیجتا ہے؛ مدت یا گھڑی الٹنے پر دستیاب نہیں۔ بندش دوبارہ بھیجنے کا بٹن نہیں۔ نگران کے ساتھ اصل شفٹ دیکھیں، نتیجہ واضح ہو تو جائزہ شدہ کوشش بند کی تصدیق کریں؛ یہ کامیابی یا واپسی کا اعلان نہیں۔ اصل شفٹ کھلی ملے تب نئی بندش سوچیں۔ ایپ بند کرنے سے پہلے نمبر لکھیں اور نگران سے سرور پر مطابقت کرائیں۔",
+    ],
+  ),
   "facility.recovery": g(
     ["facility_profile"],
     [
@@ -38,7 +78,7 @@ export const controlGuides: Record<string, ControlGuide> = {
     ],
   ),
   "common.close": g(
-    phase1Screens,
+    deliveredHelpScreens,
     ["Close · × / Escape", "بند کریں · × / Escape"],
     [
       "Close dismisses the current dialog and restores its previous keyboard focus. It does not save a form or confirm an approval. A submitting decision cannot be dismissed until the response returns. Closing Help keeps the underlying draft.",
@@ -46,7 +86,7 @@ export const controlGuides: Record<string, ControlGuide> = {
     ],
   ),
   "common.retry": g(
-    phase1Screens,
+    deliveredHelpScreens,
     ["Try again", "دوبارہ کوشش کریں"],
     [
       "After checking the visible loading error and restoring connection or permissions, Try again reloads that view. It does not repeat a form submission. If the same error persists, give the displayed reference to IT or the responsible supervisor.",
@@ -95,8 +135,8 @@ export const controlGuides: Record<string, ControlGuide> = {
       "نام کا بٹن، سائن آؤٹ، کام جاری رکھیں، ہر جگہ سائن آؤٹ",
     ],
     [
-      "Finish or deliberately discard drafts before signing out. The avatar or Sign out opens a confirmation: Keep working closes it, Sign out ends this shared terminal session, and Sign out everywhere revokes your other sessions too. All windows sharing this session return to login. Signing out never saves unfinished forms.",
-      "سائن آؤٹ سے پہلے مسودہ مکمل کریں یا جان بوجھ کر چھوڑیں۔ نام کا بٹن یا سائن آؤٹ تصدیق کھولتا ہے: کام جاری رکھیں سے بند ہوتا ہے، سائن آؤٹ سے یہ ٹرمینل سیشن ختم ہوتا ہے، ہر جگہ سائن آؤٹ سے دوسرے سیشن بھی ختم ہوتے ہیں۔ اس سیشن کی تمام ونڈوز لاگ اِن پر لوٹتی ہیں۔ نامکمل فارم محفوظ نہیں ہوتے۔",
+      "Finish or deliberately discard drafts before signing out. Pending actions block sign-out; resolve uncertain cash-shift requests while their window stays open. Unsaved drafts require confirmation before being discarded. The avatar or Sign out opens a confirmation: Keep working closes it, Sign out ends this shared terminal session, and Sign out everywhere revokes your other sessions too. All windows sharing this session return to login. Signing out never saves unfinished forms.",
+      "سائن آؤٹ سے پہلے مسودہ مکمل کریں یا جان بوجھ کر چھوڑیں۔ جاری عمل پر سائن آؤٹ رکتا ہے؛ غیر یقینی کیش شفٹ اسی کھلی ونڈو میں واضح کریں۔ مسودہ ختم کرنے سے پہلے تصدیق لازم ہے۔ نام کا بٹن یا سائن آؤٹ تصدیق کھولتا ہے: کام جاری رکھیں سے بند ہوتا ہے، سائن آؤٹ سے یہ ٹرمینل سیشن ختم ہوتا ہے، ہر جگہ سائن آؤٹ سے دوسرے سیشن بھی ختم ہوتے ہیں۔ اس سیشن کی تمام ونڈوز لاگ اِن پر لوٹتی ہیں۔ نامکمل فارم محفوظ نہیں ہوتے۔",
     ],
   ),
   "shell.maintenance": g(

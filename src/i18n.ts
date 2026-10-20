@@ -4,6 +4,38 @@ export function setLanguage(value: string) {
   language = value;
 }
 const ur: Record<string, string> = {
+  Invoice: "انوائس",
+  "Terminal cash counter": "ٹرمینل کا کیش کاؤنٹر",
+  "Not mapped — ask IT": "مقرر نہیں — آئی ٹی سے پوچھیں",
+  "Ask IT to map this terminal to a cash counter before opening a shift.":
+    "شفٹ کھولنے سے پہلے آئی ٹی سے اس ٹرمینل کا کیش کاؤنٹر مقرر کروائیں۔",
+  "The cash counter comes from this terminal's mapping. Ask IT if it is incorrect.":
+    "کیش کاؤنٹر اس ٹرمینل کی ترتیب سے آتا ہے۔ غلط ہو تو آئی ٹی سے رابطہ کریں۔",
+  "Cash shift recovery": "کیش شفٹ کی بحالی",
+  "Check the original shift before continuing":
+    "آگے بڑھنے سے پہلے اصل شفٹ چیک کریں",
+  "The result needs review. Do not start a replacement action. Keep this window open; this attempt is held in memory only.":
+    "نتیجے کا جائزہ لازم ہے۔ متبادل عمل نہ کریں۔ یہ ونڈو کھلی رکھیں؛ کوشش صرف میموری میں ہے۔",
+  "An opening retry uses the exact original amount, counter and request identity within 24 hours.":
+    "افتتاح کی دوبارہ کوشش چوبیس گھنٹے میں اصل رقم، کاؤنٹر اور درخواست کی شناخت استعمال کرتی ہے۔",
+  "A close request is never automatically retried. Read the original shift and review its status first.":
+    "بندش خودکار دوبارہ نہیں ہوتی۔ پہلے اصل شفٹ پڑھیں اور حالت دیکھیں۔",
+  "Check original shift": "اصل شفٹ چیک کریں",
+  "Retry original opening": "اصل افتتاح دوبارہ بھیجیں",
+  "Server status checked": "سرور کی حالت پڑھی گئی",
+  "No open shift was returned. This alone does not prove the original action failed.":
+    "کھلی شفٹ نہیں ملی۔ صرف یہ اصل عمل کی ناکامی کا ثبوت نہیں۔",
+  "The returned shift does not match this attempt. Contact your supervisor.":
+    "واپس آنے والی شفٹ اس کوشش سے مطابقت نہیں رکھتی۔ نگران سے رابطہ کریں۔",
+  "The original opening cannot be retried after 24 hours or a clock change. Check with your supervisor.":
+    "چوبیس گھنٹے یا گھڑی بدلنے کے بعد اصل افتتاح دوبارہ نہیں ہو سکتا۔ نگران سے پوچھیں۔",
+  "Confirm that you checked the original shift with your supervisor. This clears the hold only; it does not declare success or undo anything.":
+    "تصدیق کریں کہ نگران کے ساتھ اصل شفٹ چیک کر لی ہے۔ یہ صرف روک ہٹاتا ہے؛ کامیابی یا واپسی کا اعلان نہیں۔",
+  "Recovery hold cleared after review. Check the current shift before starting another action.":
+    "جائزے کے بعد بحالی کی روک ہٹی۔ نیا عمل شروع کرنے سے پہلے موجودہ شفٹ چیک کریں۔",
+  "Show my current shift": "میری موجودہ شفٹ دکھائیں",
+  "This shift belongs to another counter, or the terminal mapping is unavailable. Check with your supervisor before handling cash here.":
+    "یہ شفٹ دوسرے کاؤنٹر کی ہے یا ٹرمینل کی ترتیب دستیاب نہیں۔ یہاں نقد کام سے پہلے نگران سے پوچھیں۔",
   "Review recent server history": "سرور کی حالیہ تاریخ کا جائزہ لیں",
   "Cannot reach or check the hospital server. This is not a password error.":
     "ہسپتال سرور تک رسائی یا جانچ ممکن نہیں۔ یہ پاس ورڈ کی خطا نہیں۔",

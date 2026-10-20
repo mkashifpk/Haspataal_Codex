@@ -3,11 +3,24 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import { checkHelp } from "../scripts/check-help.mjs";
 const read = (file) => fs.readFileSync(file, "utf8");
-test("all Phase 1 controls, tasks, role guides and FAQ seeds have bilingual help", () => {
+test("all delivered controls, tasks, role guides and FAQ seeds have bilingual help", () => {
   const result = checkHelp({ media: false });
-  assert.equal(result.screens, 11);
+  assert.equal(result.screens, 12);
   assert(result.controls > 90);
   assert.equal(result.workspaceGuides, 30);
+});
+test("the first Phase 2 screen cannot add an uncovered cash control", () => {
+  assert.throws(
+    () =>
+      checkHelp({
+        media: false,
+        read: (file) =>
+          file === "src/screens/CashShift.tsx"
+            ? read(file).replace('data-help="cash.open"', "")
+            : read(file),
+      }),
+    /missing\/broken control help mapping/,
+  );
 });
 test("a new unmapped interactive control fails the delivery check", () => {
   assert.throws(

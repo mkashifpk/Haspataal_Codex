@@ -1,0 +1,251 @@
+{
+  "contract_fingerprint": "0b5ab90e400dfbb822d3",
+  "knowledge_revision": "318d65bdd91cd873",
+  "source": "MCP get_endpoint GET /finance/cash-shifts/{shift_id}, 2026-10-20",
+  "endpoints": [
+    {
+      "endpoint": "GET /finance/cash-shifts/{shift_id}",
+      "summary": "Shift summary (expected cash by transaction type)",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "finance.shift.operate",
+          "finance.shift.view_all"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of finance.shift.operate or finance.shift.view_all",
+        "roles_allowed": [
+          "accountant",
+          "cashier",
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "pharmacist",
+          "receptionist"
+        ]
+      },
+      "parameters": [
+        {
+          "name": "shift_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Shift Id"
+          }
+        }
+      ],
+      "idempotency_key": false,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json": {
+              "schema": {
+                "title": "Envelope[CashShiftSummaryOut]",
+                "properties": {
+                  "data": {
+                    "title": "CashShiftSummaryOut",
+                    "properties": {
+                      "shift_id": {
+                        "type": "integer",
+                        "title": "Shift Id"
+                      },
+                      "user_id": {
+                        "type": "integer",
+                        "title": "User Id"
+                      },
+                      "node": {
+                        "type": "string",
+                        "enum": [
+                          "MainReception",
+                          "PharmacyCounter",
+                          "LabReception",
+                          "IPDBilling",
+                          "EmergencyCounter",
+                          "CashierDesk"
+                        ],
+                        "title": "Node",
+                        "description": "The cash counter"
+                      },
+                      "terminal_id": {
+                        "anyOf": [
+                          {
+                            "type": "integer"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ],
+                        "title": "Terminal Id"
+                      },
+                      "opening_float": {
+                        "type": "number",
+                        "title": "Opening Float"
+                      },
+                      "expected_cash": {
+                        "type": "number",
+                        "title": "Expected Cash"
+                      },
+                      "declared_cash": {
+                        "anyOf": [
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ],
+                        "title": "Declared Cash"
+                      },
+                      "status": {
+                        "type": "string",
+                        "enum": [
+                          "Open",
+                          "PendingCollection",
+                          "Verified"
+                        ],
+                        "title": "Status"
+                      },
+                      "opened_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "title": "Opened At"
+                      },
+                      "closed_at": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ],
+                        "title": "Closed At"
+                      },
+                      "business_date": {
+                        "type": "string",
+                        "format": "date",
+                        "title": "Business Date"
+                      },
+                      "cashier_name": {
+                        "type": "string",
+                        "title": "Cashier Name"
+                      },
+                      "by_type": {
+                        "items": {
+                          "$ref": "#/components/schemas/ShiftTotalOut"
+                        },
+                        "type": "array",
+                        "title": "By Type"
+                      },
+                      "non_cash": {
+                        "items": {
+                          "$ref": "#/components/schemas/NonCashTotalOut"
+                        },
+                        "type": "array",
+                        "title": "Non Cash"
+                      },
+                      "cash_drop": {
+                        "anyOf": [
+                          {
+                            "$ref": "#/components/schemas/CashDropOut"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "type": "object",
+                    "required": [
+                      "shift_id",
+                      "user_id",
+                      "node",
+                      "terminal_id",
+                      "opening_float",
+                      "expected_cash",
+                      "declared_cash",
+                      "status",
+                      "opened_at",
+                      "closed_at",
+                      "business_date",
+                      "cashier_name",
+                      "by_type",
+                      "non_cash",
+                      "cash_drop"
+                    ],
+                    "description": "A shift with the expected cash by transaction type, non-cash collections and its cash drop."
+                  },
+                  "meta": {
+                    "title": "Meta",
+                    "properties": {
+                      "server_time": {
+                        "type": "string",
+                        "title": "Server Time",
+                        "description": "Server clock (UTC). Use it to detect terminal clock skew."
+                      },
+                      "page": {
+                        "anyOf": [
+                          {
+                            "type": "integer"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ],
+                        "title": "Page"
+                      },
+                      "page_size": {
+                        "anyOf": [
+                          {
+                            "type": "integer"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ],
+                        "title": "Page Size"
+                      },
+                      "total_count": {
+                        "anyOf": [
+                          {
+                            "type": "integer"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ],
+                        "title": "Total Count"
+                      },
+                      "next_cursor": {
+                        "title": "Next Cursor"
+                      }
+                    },
+                    "type": "object",
+                    "required": [
+                      "server_time"
+                    ]
+                  },
+                  "request_id": {
+                    "type": "string",
+                    "title": "Request Id"
+                  }
+                },
+                "type": "object",
+                "required": [
+                  "data",
+                  "meta",
+                  "request_id"
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}
