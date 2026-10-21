@@ -1,5 +1,5 @@
 import { tr } from "../i18n";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { call } from "../bridge";
 import { ErrorBox, Field } from "../components";
 export function Connection({ onConnected }: { onConnected: () => void }) {
@@ -10,7 +10,10 @@ export function Connection({ onConnected }: { onConnected: () => void }) {
     [error, setError] = useState<unknown>(),
     [busy, setBusy] = useState(false),
     [searched, setSearched] = useState(false);
+  const running = useRef(false);
   async function run(fn: () => Promise<void>) {
+    if (running.current) return;
+    running.current = true;
     setBusy(true);
     setError(undefined);
     try {
@@ -18,6 +21,7 @@ export function Connection({ onConnected }: { onConnected: () => void }) {
     } catch (e) {
       setError(e);
     } finally {
+      running.current = false;
       setBusy(false);
     }
   }
@@ -35,6 +39,7 @@ export function Connection({ onConnected }: { onConnected: () => void }) {
         )}
       </p>
       <ErrorBox error={error} />
+      {busy && <p role="status">{tr("Checking hospital connection…")}</p>}
       <button
         data-help="connection.discover"
         disabled={busy}
@@ -58,13 +63,18 @@ export function Connection({ onConnected }: { onConnected: () => void }) {
         <button
           data-help="connection.discover"
           className="server-choice"
-          key={s.server_name}
+          key={s.server_name + "|" + s.ca_fingerprint_sha256}
+          disabled={busy}
           onClick={() => {
             setUrl(s.urls[0]);
             setFingerprint("");
+            setExpected("");
           }}
         >
           {s.hospital_name} — {s.server_name} · {s.version}
+          <span className="fingerprint" dir="ltr">
+            {s.ca_fingerprint_sha256}
+          </span>
         </button>
       ))}
       <form
@@ -81,11 +91,13 @@ export function Connection({ onConnected }: { onConnected: () => void }) {
             data-help="connection.trust"
             type="url"
             required
+            disabled={busy}
             value={url}
             placeholder={tr("https://HMS-SERVER")}
             onChange={(e) => {
               setUrl(e.target.value);
               setFingerprint("");
+              setExpected("");
             }}
           />
         </Field>
@@ -113,11 +125,15 @@ export function Connection({ onConnected }: { onConnected: () => void }) {
               "Compare this fingerprint with the Control Center’s “Connect terminals” card.",
             )}
           </p>
-          <code className="fingerprint">{fingerprint}</code>
+          <code className="fingerprint" dir="ltr">
+            {fingerprint}
+          </code>
           <Field label={tr("Fingerprint supplied by IT")}>
             <input
               data-help="connection.trust"
               required
+              disabled={busy}
+              dir="ltr"
               value={expected}
               onChange={(e) => setExpected(e.target.value)}
               autoComplete="off"

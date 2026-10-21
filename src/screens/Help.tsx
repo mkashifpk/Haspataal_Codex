@@ -43,7 +43,9 @@ export function Help({
       : ["connect_server", "login", "settings", "help_center"],
   );
   const screenPages = Object.entries(help).filter(([id]) => allowed.has(id));
-  const workspaces = outline?.workspaces || [];
+  const workspaces = [...(outline?.workspaces || [])].sort(
+    (a, b) => Number(b.yours) - Number(a.yours),
+  );
   const selectedWorkspace = workspaces.find((w) => w.page === selected);
   const page = allowed.has(selected) ? help[selected] : undefined;
   const publicControls = new Set([
@@ -56,11 +58,21 @@ export function Help({
     Object.entries(controlGuides).filter(
       ([key, g]) =>
         g.screens.includes(id) &&
+        (!key.startsWith("settings.it.") || allowed.has("it_console")) &&
         (outline || id !== "settings" || publicControls.has(key)),
     );
   const searchText = (id: string) =>
     JSON.stringify([
-      help[id],
+      !outline && id === "settings"
+        ? {
+            title: help[id].title,
+            titleUr: help[id].titleUr,
+            steps: help[id].steps.filter((_, i) => [0, 1, 3].includes(i)),
+            stepsUr: help[id].stepsUr.filter((_, i) => [0, 1, 3].includes(i)),
+            faq: help[id].faq.slice(1),
+            faqUr: help[id].faqUr.slice(1),
+          }
+        : help[id],
       controlsFor(id),
       catalogue.faq
         .filter((f) => f.screen_id === id)
@@ -221,38 +233,91 @@ export function Help({
             )}
           </span>
           <ErrorBox error={error} />
-          {page ? (
+          {selected === "home" ? (
+            <>
+              <h1>{t("Your handbook", "آپ کا رہنما")}</h1>
+              <p>
+                {t(
+                  "Search the permitted pages or choose your workspace guide. Your workspaces appear first.",
+                  "مجاز صفحات تلاش کریں یا اپنے کام کی جگہ کا رہنما منتخب کریں۔ آپ کی جگہیں پہلے دکھتی ہیں۔",
+                )}
+              </p>
+              {workspaces.map((w) => (
+                <button
+                  key={w.code}
+                  data-help="help.links"
+                  onClick={() => open(w.page)}
+                >
+                  {ur ? w.label_ur : w.label}
+                </button>
+              ))}
+            </>
+          ) : page ? (
             <>
               <h1>{ur ? page.titleUr : page.title}</h1>
-              <p className="lead">{ur ? page.purposeUr : page.purpose}</p>
+              <p className="lead">
+                {!outline && selected === "settings"
+                  ? t(
+                      "Before sign-in: check this terminal's connection, identity and display preferences.",
+                      "سائن اِن سے پہلے: اس ٹرمینل کا رابطہ، شناخت اور ڈسپلے دیکھیں۔",
+                    )
+                  : ur
+                    ? page.purposeUr
+                    : page.purpose}
+              </p>
               <h2>{t("Steps and controls", "مراحل اور کنٹرول")}</h2>
               {instructions(selected)}
               <h2>{t("Frequently asked questions", "عام سوالات")}</h2>
-              {(ur ? page.faqUr : page.faq).map(([q, a]) => (
-                <section key={q}>
-                  <h3>{q}</h3>
-                  <p>{a}</p>
-                </section>
-              ))}
+              {(ur ? page.faqUr : page.faq)
+                .filter((_, i) => outline || selected !== "settings" || i > 0)
+                .map(([q, a]) => (
+                  <section key={q}>
+                    <h3>{q}</h3>
+                    <p>{a}</p>
+                  </section>
+                ))}
               {outline && faq(selected)}
-              {phase1Screens.includes(selected) && (
+              {phase1Screens.includes(selected) &&
+                (outline || selected !== "settings") && (
+                  <figure className="handbook-example">
+                    <img
+                      src={
+                        new URL(
+                          `handbook/${selected}-${ur ? "ur" : "en"}.png`,
+                          document.baseURI,
+                        ).href
+                      }
+                      alt={t(
+                        `${page.title} — synthetic DEV example`,
+                        `${page.titleUr} — فرضی ڈیَو مثال`,
+                      )}
+                    />
+                    <figcaption>
+                      {t(
+                        "Synthetic DEV screen example. Your records and available actions depend on permissions and current server state.",
+                        "فرضی ڈیَو صفحے کی مثال۔ آپ کے ریکارڈ اور اقدامات اجازت اور سرور کی موجودہ حالت پر ہیں۔",
+                      )}
+                    </figcaption>
+                  </figure>
+                )}
+              {selected === "settings" && allowed.has("it_console") && (
                 <figure className="handbook-example">
                   <img
                     src={
                       new URL(
-                        `handbook/${selected}-${ur ? "ur" : "en"}.png`,
+                        `handbook/settings-it-${ur ? "ur" : "en"}.png`,
                         document.baseURI,
                       ).href
                     }
                     alt={t(
-                      `${page.title} — synthetic DEV example`,
-                      `${page.titleUr} — فرضی ڈیَو مثال`,
+                      "Settings system hardware — synthetic DEV example",
+                      "نظام کے آلات — فرضی ڈیَو مثال",
                     )}
                   />
                   <figcaption>
                     {t(
-                      "Synthetic DEV screen example. Your records and available actions depend on permissions and current server state.",
-                      "فرضی ڈیَو صفحے کی مثال۔ آپ کے ریکارڈ اور اقدامات اجازت اور سرور کی موجودہ حالت پر ہیں۔",
+                      "Authorized system sections. No credentials are shown in this example.",
+                      "مجاز نظام کے حصے۔ اس مثال میں کوئی خفیہ کوائف نہیں۔",
                     )}
                   </figcaption>
                 </figure>
@@ -286,8 +351,8 @@ export function Help({
               </h1>
               <p className="notice">
                 {t(
-                  "Scope: the eleven Phase 1 screens. Later clinical, financial and system-setup journeys are outside this guide. Available tasks below follow your current combined permissions; a role name never grants an action.",
-                  "دائرہ: پہلے مرحلے کے گیارہ صفحات۔ بعد کے طبی، مالی اور سسٹم ترتیب کے کام اس رہنما سے باہر ہیں۔ نیچے کام آپ کی موجودہ مجموعی اجازت پر ہیں؛ کردار کا نام خود اجازت نہیں دیتا۔",
+                  "Scope: the eleven Phase 1 screens, including the permitted System (IT) parts of Settings. Later clinical, financial and other IT workspace journeys remain outside this guide. Available tasks follow your combined permissions; a role name never grants an action.",
+                  "دائرہ: پہلے مرحلے کے گیارہ صفحات اور ترتیبات کے مجاز نظام (آئی ٹی) حصے۔ بعد کے طبی، مالی اور دیگر آئی ٹی کام رہنما سے باہر ہیں۔ کام موجودہ مجموعی اجازت پر ہیں؛ کردار کا نام خود اجازت نہیں دیتا۔",
                 )}
               </p>
               <p className="lead">

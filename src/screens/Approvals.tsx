@@ -32,6 +32,19 @@ export function Approvals({
     [confirm, setConfirm] = useState<"approve" | "reject" | "cancel">();
   const [detailBusy, setDetailBusy] = useState(false);
   const detailGeneration = useRef(0);
+  const deciding = useRef(false);
+  const getControls = (row: approvals.ApprovalOut) => {
+    const base = approvalControls(row, user.user_id, note);
+    if (!charity) return base;
+    const own = row.requester_id === user.user_id;
+    return {
+      ...base,
+      canCancel: false,
+      showDecisions: base.showDecisions && !own,
+      canApprove: base.canApprove && !own,
+      canReject: base.canReject && !own,
+    };
+  };
   async function loadSelected(id: number, reset = false) {
     if (reset && busy) return;
     if (
@@ -68,13 +81,13 @@ export function Approvals({
     () => approvals.listApprovals({ mine, status, limit: 100 }),
     [mine, status, revision],
   );
-  const rows = r.data?.filter(
-    (x) => !charity || x.approval_type === "PharmacyCharityOverride",
-  );
+  // The server scopes the list by the account's permissions. Do not silently
+  // discard a supported welfare request by guessing an approval-type allowlist.
+  const rows = r.data;
   async function decide() {
-    if (!selected || !confirm || busy || detailBusy) return;
+    if (!selected || !confirm || busy || deciding.current || detailBusy) return;
     const allowed = (a: approvals.ApprovalOut) => {
-      const c = approvalControls(a, user.user_id, note);
+      const c = getControls(a);
       return confirm === "approve"
         ? c.canApprove
         : confirm === "reject"
@@ -82,6 +95,7 @@ export function Approvals({
           : c.canCancel;
     };
     if (!allowed(selected)) return;
+    deciding.current = true;
     setError(undefined);
     setBusy(true);
     try {
@@ -113,17 +127,16 @@ export function Approvals({
       await r.reload();
       await loadSelected(selected.request_id);
     } finally {
+      deciding.current = false;
       setBusy(false);
     }
   }
-  const controls = selected
-    ? approvalControls(selected, user.user_id, note)
-    : null;
+  const controls = selected ? getControls(selected) : null;
   return (
     <div data-unsaved={!!note.trim() && !!selected} data-write-pending={busy}>
       <div className="section-heading">
         <div>
-          <h1>{charity ? "Charity approvals" : "Approvals"}</h1>
+          <h1>{tr(charity ? "Charity approvals" : "Approvals")}</h1>
           <p className="muted">
             {tr("Review the request and its consequences before deciding.")}
           </p>
@@ -146,7 +159,9 @@ export function Approvals({
           onChange={(e) => setStatus(e.target.value as typeof status)}
         >
           {["Pending", "Approved", "Rejected", "Cancelled"].map((s) => (
-            <option key={s}>{s}</option>
+            <option key={s} value={s}>
+              {tr(s)}
+            </option>
           ))}
         </select>
       </div>
@@ -175,6 +190,7 @@ export function Approvals({
                 (selected?.request_id === a.request_id ? "selected" : "")
               }
               key={a.request_id}
+              aria-label={`${tr("Request")} ${a.request_id}: ${a.summary}`}
               onClick={() => void loadSelected(a.request_id, true)}
             >
               <span className="badge">{a.approval_type}</span>
@@ -183,7 +199,8 @@ export function Approvals({
                 {a.requester_name} · {a.amount ?? "—"}
               </span>
               <small>
-                {a.status === "Pending" ? "Awaiting approval" : a.status}
+                #{a.request_id} ·{" "}
+                {tr(a.status === "Pending" ? "Awaiting approval" : a.status)}
               </small>
             </button>
           ))}
@@ -231,7 +248,7 @@ export function Approvals({
                   </p>
                 )}
                 <div className="actions">
-                  {selected.requester_id === user.user_id && (
+                  {!charity && selected.requester_id === user.user_id && (
                     <button
                       data-help="approval.decide"
                       disabled={busy || detailBusy || !controls?.canCancel}
@@ -267,7 +284,9 @@ export function Approvals({
       </div>
       {confirm && (
         <Modal
-          title={`${confirm[0].toUpperCase() + confirm.slice(1)} this request?`}
+          title={tr(
+            `${confirm[0].toUpperCase() + confirm.slice(1)} this request?`,
+          )}
           onClose={() => !busy && setConfirm(undefined)}
         >
           <p>{selected?.summary}</p>
@@ -287,8 +306,7 @@ export function Approvals({
               disabled={busy}
               onClick={decide}
             >
-              {tr("Confirm")}
-              {confirm}
+              {tr("Confirm")} {tr(confirm[0].toUpperCase() + confirm.slice(1))}
             </button>
           </div>
         </Modal>

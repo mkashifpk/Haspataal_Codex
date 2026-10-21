@@ -1,6 +1,6 @@
 import { StaffPicker } from "../StaffPicker";
 import { tr } from "../i18n";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   formatHospitalTime,
   hospitalTimeInput,
@@ -10,6 +10,12 @@ import {
 import * as incidents from "../generated/report_incident";
 import contract from "../../contracts/report_incident.json";
 import { api, call } from "../bridge";
+import {
+  writeAttempt,
+  canRetryWrite,
+  definiteWriteRefusal,
+  type WriteAttempt,
+} from "../write-attempt";
 import {
   Details,
   Empty,
@@ -40,6 +46,7 @@ function Lookup({
     [error, setError] = useState<unknown>(),
     [busy, setBusy] = useState(false),
     [chosen, setChosen] = useState("");
+  const lookupGeneration = useRef(0);
   return (
     <div className="lookup">
       <Field label={label}>
@@ -47,7 +54,13 @@ function Lookup({
           <input
             data-help="incident.lookup"
             value={q}
-            onChange={(e) => setQ(e.target.value)}
+            onChange={(e) => {
+              lookupGeneration.current++;
+              setQ(e.target.value);
+              setRows(undefined);
+              setChosen("");
+              onSelect(0);
+            }}
             disabled={!allowed}
             placeholder={tr("Search by name or number")}
           />
@@ -66,6 +79,7 @@ function Lookup({
             type="button"
             disabled={busy || (query && q.length < 2)}
             onClick={async () => {
+              const generation = ++lookupGeneration.current;
               setBusy(true);
               setError(undefined);
               try {
@@ -78,7 +92,7 @@ function Lookup({
                 );
                 if (!Array.isArray(d))
                   throw new Error("Lookup response is not a list");
-                setRows(d);
+                if (generation === lookupGeneration.current) setRows(d);
               } catch (e) {
                 setError(e);
               } finally {
@@ -146,6 +160,41 @@ export function Incidents({
     [type, setType] = useState(""),
     [ids, setIds] = useState<Record<string, number>>({});
   const [draftZone, setDraftZone] = useState(timeZone);
+  const submitting = useRef(false),
+    detailGeneration = useRef(0);
+  const formRef = useRef<HTMLFormElement>(null);
+  const [pendingReport, setPendingReport] =
+    useState<WriteAttempt<incidents.IncidentIn>>();
+  async function sendReport(attempt: WriteAttempt<incidents.IncidentIn>) {
+    if (submitting.current || !canRetryWrite(attempt)) return;
+    submitting.current = true;
+    setBusy(true);
+    setError(undefined);
+    setPendingReport(attempt);
+    try {
+      const result = await api<incidents.IncidentDetailOut>(
+        "POST",
+        "/incidents",
+        attempt.body,
+        { key: attempt.key },
+      );
+      setSaved(result);
+      setPendingReport(undefined);
+      formRef.current?.reset();
+      setType("");
+      setIds({});
+      setAffected("None");
+      setDirty(false);
+      setWhen(hospitalTimeInput(Date.now(), timeZone!));
+      await r.reload();
+    } catch (cause) {
+      setError(cause);
+      if (definiteWriteRefusal(cause)) setPendingReport(undefined);
+    } finally {
+      submitting.current = false;
+      setBusy(false);
+    }
+  }
   const [when, setWhen] = useState(() =>
     !hospitalTimeZoneError(timeZone)
       ? hospitalTimeInput(Date.now(), timeZone!)
@@ -235,15 +284,16 @@ export function Incidents({
         </p>
       )}
       <form
+        ref={formRef}
         className="card"
         data-unsaved={dirty}
-        data-write-pending={busy}
+        data-write-pending={busy || !!pendingReport}
         onChangeCapture={() => setDirty(true)}
         onSubmit={async (e) => {
           e.preventDefault();
+          if (submitting.current || pendingReport) return;
           const form = e.currentTarget,
             d = new FormData(form);
-          setBusy(true);
           setError(undefined);
           try {
             if (zoneProblem) throw zoneProblem;
@@ -266,23 +316,15 @@ export function Incidents({
               throw new Error("Select the affected patient first.");
             if (affected === "Staff" && !body.employee_id)
               throw new Error("Select the affected staff member first.");
-            const result = await incidents.report(body);
-            setSaved(result);
-            form.reset();
-            setType("");
-            setIds({});
-            setAffected("None");
-            setDirty(false);
-            setWhen(hospitalTimeInput(Date.now(), timeZone!));
-            await r.reload();
+            await sendReport(writeAttempt(body));
           } catch (err) {
             setError(err);
-          } finally {
-            setBusy(false);
           }
         }}
       >
-        <fieldset disabled={busy || !r.data || !!zoneProblem}>
+        <fieldset
+          disabled={busy || !!pendingReport || !r.data || !!zoneProblem}
+        >
           <legend>{tr("What happened")}</legend>
           <div className="form-grid">
             <Field label={tr("Incident type")}>
@@ -472,6 +514,41 @@ export function Incidents({
           </button>
         </fieldset>
       </form>
+      {pendingReport && !busy && (
+        <section className="notice" role="status">
+          <h2>{tr("Report outcome needs checking")}</h2>
+          <p>
+            {tr(
+              "Keep this window open. Check My reports; the original report may already exist. Retrying sends the identical report with its original request identity, never a new report. After 24 hours ask the Quality Officer to reconcile it.",
+            )}
+          </p>
+          <button data-help="incident.recovery" onClick={() => void r.reload()}>
+            {tr("Check My reports")}
+          </button>
+          <button
+            data-help="incident.recovery"
+            disabled={!canRetryWrite(pendingReport)}
+            onClick={() => void sendReport(pendingReport)}
+          >
+            {tr("Retry original report")}
+          </button>
+          <button
+            data-help="incident.recovery"
+            onClick={() => {
+              if (
+                window.confirm(
+                  tr(
+                    "Only clear this hold after the responsible supervisor has reconciled the original report. This does not report success or undo anything. Continue?",
+                  ),
+                )
+              )
+                setPendingReport(undefined);
+            }}
+          >
+            {tr("Close reviewed attempt")}
+          </button>
+        </section>
+      )}
       <h2>{tr("My reports")}</h2>
       {r.data?.reports.length === 0 && (
         <Empty>{tr("You have no incident reports yet.")}</Empty>
@@ -481,9 +558,16 @@ export function Incidents({
           data-help="incident.submit"
           className="list-row"
           key={i.incident_id}
-          onClick={() =>
-            incidents.getIncident(i.incident_id).then(setDetail).catch(setError)
-          }
+          onClick={async () => {
+            const generation = ++detailGeneration.current;
+            setDetail(undefined);
+            try {
+              const current = await incidents.getIncident(i.incident_id);
+              if (generation === detailGeneration.current) setDetail(current);
+            } catch (cause) {
+              if (generation === detailGeneration.current) setError(cause);
+            }
+          }}
         >
           <strong>
             {i.incident_number} · {i.type_name}

@@ -1,5 +1,5 @@
 import { tr } from "../i18n";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ApiError, call } from "../bridge";
 import { ErrorBox, Field } from "../components";
 import type { HealthOut } from "../generated/login";
@@ -25,6 +25,7 @@ export function Login({
     return () => clearInterval(t);
   }, []);
   const seconds = Math.max(0, Math.ceil((until - now) / 1000));
+  const submitting = useRef(false);
   return (
     <div className="login-layout">
       <section className="welcome">
@@ -69,6 +70,17 @@ export function Login({
         <form
           onSubmit={async (e) => {
             e.preventDefault();
+            if (
+              submitting.current ||
+              busy ||
+              !connected ||
+              !health ||
+              healthError ||
+              health.status === "degraded" ||
+              seconds
+            )
+              return;
+            submitting.current = true;
             const f = e.currentTarget,
               data = new FormData(f);
             setBusy(true);
@@ -90,6 +102,7 @@ export function Login({
               }
               (f.elements.namedItem("password") as HTMLInputElement).value = "";
             } finally {
+              submitting.current = false;
               setBusy(false);
             }
           }}
@@ -100,6 +113,7 @@ export function Login({
               name="username"
               autoComplete="username"
               required
+              disabled={busy}
               minLength={3}
               maxLength={64}
               autoFocus
@@ -112,6 +126,7 @@ export function Login({
               type="password"
               autoComplete="current-password"
               required
+              disabled={busy}
               maxLength={256}
             />
           </Field>
@@ -128,16 +143,16 @@ export function Login({
             }
           >
             {busy
-              ? "Signing in…"
+              ? tr("Signing in…")
               : seconds
-                ? `Try again in ${seconds}s`
-                : "Sign in →"}
+                ? `${tr("Try again in")} ${seconds}s`
+                : tr("Sign in →")}
           </button>
         </form>
         <p className="fine">
           {connected
-            ? "✓ Connected to the hospital server"
-            : "Server unreachable — check your cable or Wi-Fi."}
+            ? tr("✓ Connected to the hospital server")
+            : tr("Server unreachable — check your cable or Wi-Fi.")}
         </p>
         <p className="fine">
           {tr("Need access? Contact your hospital’s IT team.")}
@@ -146,10 +161,17 @@ export function Login({
     </div>
   );
 }
-export function ChangePassword({ onDone }: { onDone: () => void }) {
+export function ChangePassword({
+  onDone,
+  settings = false,
+}: {
+  onDone: () => void;
+  settings?: boolean;
+}) {
   const [error, setError] = useState<unknown>(),
     [dirty, setDirty] = useState(false),
     [busy, setBusy] = useState(false);
+  const submitting = useRef(false);
   return (
     <section className="card narrow">
       <h2>{tr("Change your password")}</h2>
@@ -161,17 +183,21 @@ export function ChangePassword({ onDone }: { onDone: () => void }) {
         onChangeCapture={() => setDirty(true)}
         onSubmit={async (e) => {
           e.preventDefault();
+          if (submitting.current) return;
           const f = e.currentTarget,
             d = new FormData(f);
           if (d.get("new") !== d.get("confirm")) {
-            setError(new Error("New passwords do not match"));
+            setError(new Error(tr("New passwords do not match")));
             return;
           }
           setBusy(true);
+          submitting.current = true;
+          setError(undefined);
           try {
             await call("change-password", {
               current_password: d.get("current"),
               new_password: d.get("new"),
+              settings,
             });
             f.reset();
             setDirty(false);
@@ -181,6 +207,7 @@ export function ChangePassword({ onDone }: { onDone: () => void }) {
             f.reset();
             setDirty(false);
           } finally {
+            submitting.current = false;
             setBusy(false);
           }
         }}
@@ -191,6 +218,7 @@ export function ChangePassword({ onDone }: { onDone: () => void }) {
             name="current"
             type="password"
             required
+            disabled={busy}
             autoComplete="current-password"
           />
         </Field>
@@ -200,6 +228,7 @@ export function ChangePassword({ onDone }: { onDone: () => void }) {
             name="new"
             type="password"
             required
+            disabled={busy}
             minLength={8}
             maxLength={256}
             autoComplete="new-password"
@@ -211,6 +240,7 @@ export function ChangePassword({ onDone }: { onDone: () => void }) {
             name="confirm"
             type="password"
             required
+            disabled={busy}
             autoComplete="new-password"
           />
         </Field>

@@ -25,6 +25,51 @@ The handoff must contain:
 
 Never put access tokens, refresh tokens, MCP keys, passwords, private certificate material, or real patient information in the handoff. Record where authorized local configuration is obtained, rather than copying its contents. Git does not preserve chat history, process state, ignored files, or backend database state; record the necessary non-secret context explicitly.
 
+## Haspataal: required progress reporting
+
+Use this repository's Haspataal MCP connection (haspataal_project in Codex,
+haspataal in other agents). At the start of every session, call my_progress and
+progress_proposals for the connected implementation. Read returned review feedback.
+Read overview and get_guide('connecting-your-coding-agent') for the full backend
+workflow; use get_screen_bundle and get_ui_quality_brief before building each screen.
+
+After implementing or materially updating any screen, submit propose_progress
+without waiting for the developer to ask. Do this before moving to another
+workspace or giving your final handoff. A workspace needs a separate proposal
+for every screen with newly implemented, tested rubric items.
+
+Use the current rubric fingerprint and item IDs from get_screen_bundle/my_progress,
+the connected implementation_id, the tested commit or identifiable build, and
+readable Markdown evidence: changed files, checks run and results, and limitations.
+Report only items actually implemented and tested. Partial work is reportable;
+leave untested items out and describe missing human review honestly. Never invent
+test results, a human review, a worksheet or approval.
+
+First check accepted claims and progress_proposals: do not resubmit unchanged work
+already accepted or awaiting review. Reuse the same request_id and identical payload
+when retrying a lost response; use a new request_id for changed evidence or a new build.
+Verify the saved proposal with progress_proposals. In your handoff, name the proposal
+IDs and say "awaiting human review on /docs -> My progress".
+
+If submission fails, keep the exact payload and request_id in the repository without
+credentials, report the blocker, and retry at the next session. Never say progress
+was posted until the server confirms it. If no item is ready, explain why; do not
+submit empty or invented claims merely to satisfy this rule.
+
+Proposals earn no points. Only the human's authenticated portal review can accept
+claims; agents must never approve their own proposals or nominate an implementation.
+
+## Mandatory MCP implementation workflow
+
+- Use `overview` once per session and `get_build_roadmap()` before choosing implementation work; build in dependency order.
+- Before each screen, read `get_screen_bundle`, `get_ui_quality_brief` and `get_design_principles`; read omitted bundle sections before finishing. For a workspace journey, use its workspace quality brief and handbook outline too.
+- Use `get_endpoint`, `generate_typescript` and `validate_request` for real request contracts; use workflow recipes, real DEV scenarios and `screen_test_plan` for appropriate verification. After backend updates call `what_changed` and refresh affected contracts, rubric items and help.
+- One complete app must support every catalogue workspace/screen, facility profile and service. Use server `GET /establishment -> views`, `establishment.changed` and service capability gates at runtime; never branch on facility category or equate one profile with full completion.
+- Ship contextual F1, English/Urdu screen and workspace guidance, detailed role FAQs, and shared keyboard/Settings zoom (100–250%, reset 100%) with each screen. Named human fresh-data journey/translation review remains required; missing evidence means pending.
+- Read backend issue answers at session start with `my_backend_issues`; retest Fixed reports once `overview.server_build >= fixed_in`. Check existing reports before submitting one reproduced backend finding; keep frontend defects in the frontend tracker.
+- Use `open_decisions` for human-owned choices. Preserve permission-based access and `pdf_download` for document sets (separate PDFs or one combined PDF, never ZIP).
+- Keep DEV attribution tied to the verified developer and implementation; attribution is not authentication. Keep MCP secrets out of the app. Consult `get_terminal_installer_blueprint` when shipping the signed, self-contained Windows installer.
+
 ## Project requirements
 
 - Use the real Haspataal MCP contracts and DEV/demo backend. Do not hide backend bugs, missing fields, broken contracts, missing MCP functionality, or TODOs with client-side mocks, fabricated records, local success states, or guessed identifiers.

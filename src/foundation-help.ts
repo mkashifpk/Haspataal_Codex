@@ -28,6 +28,87 @@ const g = (
 // IDs are also attached to the actual controls. The build rejects missing
 // mappings and empty translations instead of treating a page as coverage.
 export const controlGuides: Record<string, ControlGuide> = {
+  "settings.it.read": g(
+    ["settings"],
+    ["System sections, user search and audit", "نظام، صارف تلاش اور لاگ"],
+    [
+      "Open Settings > System (IT). Your server permissions decide the available sections. Users, roles and access reads HR's submitted provisioning queue, users, role matrix and sign-in audit. Find user searches the server by name/username; Account state limits to active/inactive; up to 100 matches are shown, so refine a full list. Sign-in failures only filters the latest 200 audit events. Empty HR queue means no submitted employee needs a login; it never authorizes inventing an employee ID. Open user rereads the selected real account. Hardware reads terminal, printer and badge-station mappings; Server health reads actual database/worker/disk/realtime diagnostics. Refresh checks the server again, never repeats a change. Errors stay visible and do not turn into empty-success data.",
+      "ترتیبات > نظام (آئی ٹی) کھولیں۔ سرور کی اجازتیں دستیاب حصے طے کرتی ہیں۔ صارف، کردار اور رسائی میں ایچ آر کی جمع شدہ قطار، صارف، اجازتیں اور سائن اِن لاگ آتے ہیں۔ صارف تلاش نام یا یوزرنیم سے سرور پر ہوتی ہے؛ حالت سے فعال یا غیر فعال چنیں۔ زیادہ سے زیادہ سو نتائج ہیں، بھری فہرست پر تلاش محدود کریں۔ صرف ناکامیوں میں تازہ دو سو لاگ ہیں۔ خالی قطار نئی فرضی ملازم شناخت بنانے کی اجازت نہیں۔ صارف کھولیں منتخب اصل اکاؤنٹ دوبارہ پڑھتا ہے۔ ہارڈویئر اصل ٹرمینل، پرنٹر اور بیج ترتیب؛ صحت اصل ڈیٹابیس، ورکر، ڈسک اور رابطہ پڑھتی ہے۔ تازہ کرنا تبدیلی دوبارہ نہیں کرتا۔ خرابی کو خالی کامیابی نہیں دکھایا جاتا۔",
+    ],
+  ),
+  "settings.it.fields": g(
+    ["settings"],
+    ["System change fields", "نظام کی تبدیلی کے خانے"],
+    [
+      "Select the actual HR employee before Provision login; use the server's role checklist and a unique username. New installation: Create the first Owner is offered only while the server says it is needed; enter their real authorized personnel details and extra roles. Nobody may provision SupportZeroInterface staff: they use badge stations. For devices enter the actual terminal MAC, location and printer names; choose only real department/printer mappings. Badge stations without RFID may use BarcodeScanner; station identity, location/action type and any ward/bed references must describe the actual installation. Review inactive/deactivation choices carefully. The form preserves value types and server enumerations; a refused reference is an error, never a guessed replacement. Required fields and the exact emergency phrase must be complete before review.",
+      "لاگ اِن دینے سے پہلے ایچ آر کا اصل ملازم چنیں؛ سرور کی کردار فہرست اور منفرد یوزرنیم استعمال کریں۔ نئی تنصیب پر سرور کے درکار بتانے تک پہلا مالک بنائیں دستیاب ہے؛ مجاز اصل کوائف اور اضافی کردار دیں۔ بغیر انٹرفیس مددگار عملہ بیج استعمال کرتا ہے، لاگ اِن نہیں۔ آلات کے لیے اصل میک، مقام، پرنٹر اور حقیقی شعبہ چنیں۔ آر ایف آئی ڈی نہ ہو تو بارکوڈ اسکینر چن سکتے ہیں؛ اسٹیشن، مقام، کام اور وارڈ یا بیڈ اصل تنصیب کے ہوں۔ غیر فعال کرنے کا انتخاب غور سے دیکھیں۔ قسمیں اور سرور کی فہرست برقرار ہیں؛ غلط حوالہ پر فرضی متبادل نہیں۔ لازمی خانے اور ہنگامی عین عبارت مکمل کرکے جائزہ لیں۔",
+    ],
+  ),
+  "settings.it.access": g(
+    ["settings"],
+    [
+      "Roles, permission requests and Owner handover",
+      "کردار، اجازت کی درخواست اور مالک",
+    ],
+    [
+      "Open a user's roles or expand a role in the matrix before changing access. Request role change selects the proposed complete role list for someone else, requires a reason, and sends an Owner change request. Request permission change similarly submits the complete permission list for that role. The server decides Pending versus Applied; Pending is Waiting for an Owner, not completed access. Never remove your own roles or try to bypass LAST_OWNER/SELF_ROLE_CHANGE_FORBIDDEN. Refresh actual users/matrix and request status after the Owner's decision. A privileged provisioning refusal means provision permitted ordinary roles first, then request the extra access through the Owner; never invent a local success.",
+      "رسائی بدلنے سے پہلے صارف کے کردار یا میٹرکس میں کردار کھولیں۔ کردار کی درخواست دوسرے صارف کی مکمل مجوزہ فہرست اور وجہ مالک کو بھیجتی ہے۔ اجازت کی درخواست بھی کردار کی مکمل فہرست بھیجتی ہے۔ منتظر یا لاگو سرور طے کرتا ہے؛ منتظر کا مطلب مالک کا انتظار ہے، مکمل رسائی نہیں۔ اپنے کردار بدلنے، آخری مالک ہٹانے یا سرور کی پابندی سے بچنے کی کوشش نہ کریں۔ مالک کے فیصلے پر اصل صارف، میٹرکس اور درخواست تازہ پڑھیں۔ استحقاقی کردار کی فراہمی منع ہو تو پہلے مجاز عام کردار دیں، پھر مالک کو درخواست کریں؛ مقامی کامیابی نہ بنائیں۔",
+    ],
+  ),
+  "settings.it.actions": g(
+    ["settings"],
+    ["Review and confirm system changes", "نظام کی تبدیلی کا جائزہ اور تصدیق"],
+    [
+      "Review system change opens a confirmation showing the exact selected target and submitted values. Go back returns to the draft; Confirm system change sends once and stays disabled while pending. Device edits reread their current mapping before replacement; a detected change requires reloading, and no atomic server-version guarantee is invented. Deactivate/reactivate requires a reason. Issue temporary password ends that user's sessions; End user's sessions also affects sessions opened since any prior attempt, so neither action is auto-repeated. Maintenance blocks non-admin work: coordinate with hospital staff first. Emergency-only Force global logout ends every hospital session and requires the exact typed FORCE GLOBAL LOGOUT phrase plus a reason and confirmation. No global action is performed by merely opening or reading these panels.",
+      "نظام کی تبدیلی کا جائزہ منتخب ہدف اور بھیجے جانے والے کوائف کی تصدیق کھولتا ہے۔ واپس پر مسودہ رہتا ہے؛ تصدیق ایک بار بھیجتی اور انتظار میں بند رہتی ہے۔ آلے کی ترمیم سے پہلے اصل ترتیب پڑھی جاتی ہے؛ فرق پر دوبارہ لوڈ کریں، سرور کی ایٹمی ورژن ضمانت کا دعویٰ نہیں۔ غیر فعال یا بحال پر وجہ دیں۔ عارضی پاس ورڈ صارف کے سیشن ختم کرتا ہے؛ سیشن ختم کرنا بھی بعد کے سیشن متاثر کر سکتا ہے، اس لیے خود نہیں دہرایا جاتا۔ دیکھ بھال عام عملہ روکتی ہے؛ پہلے اطلاع و رابطہ کریں۔ ہنگامی عالمی سائن آؤٹ سب کے سیشن ختم کرتا ہے اور عین FORCE GLOBAL LOGOUT، وجہ اور تصدیق چاہتا ہے۔ صرف حصہ کھولنے یا پڑھنے سے کوئی عالمی تبدیلی نہیں ہوتی۔",
+    ],
+  ),
+  "settings.it.recovery": g(
+    ["settings"],
+    ["Unknown system change outcome", "نظام کی تبدیلی کا نامعلوم نتیجہ"],
+    [
+      "Keep this window open after an uncertain reply. The original action/body/key is held in memory and navigation/new changes are blocked. Reload system records and open the exact user/device/request; reconcile with the responsible administrator. Only operations whose contract supplies an idempotency key offer Retry original request with the same body/key inside 24 hours. An unversioned replacement, provisioning, password reset, session revocation or station-key rotation is never blindly retried. A lost credential result cannot be recovered by repeating provisioning: inspect the account/station and require a deliberate new reset/rotation only if necessary after review. Close reviewed attempt clears the hold after supervisor reconciliation; it does not claim success or undo a change. Closing the app loses this in-memory hold.",
+      "غیر یقینی جواب پر ونڈو کھلی رکھیں۔ اصل عمل، کوائف اور شناخت میموری میں رکتی اور نئی تبدیلی یا نقل و حرکت بند ہے۔ نظام کے ریکارڈ تازہ کرکے عین صارف، آلہ یا درخواست ذمہ دار منتظم کے ساتھ واضح کریں۔ صرف معاہدے میں شناختی کلید والے عمل چوبیس گھنٹے کے اندر وہی کوائف اور کلید دوبارہ بھیج سکتے ہیں۔ بے ورژن تبدیلی، لاگ اِن، پاس ورڈ، سیشن یا اسٹیشن کلید اندھا دھند نہیں دہرائی جاتی۔ گم شدہ کوائف کا جواب نئی فراہمی سے واپس نہیں ملتا؛ ریکارڈ دیکھ کر ضرورت ہو تو جائزے کے بعد الگ ری سیٹ یا گردش کریں۔ جائزہ شدہ کوشش بند روک ہٹاتا ہے، کامیابی یا واپسی نہیں۔ ایپ بند ہونے پر یہ میموری کی روک ختم ہوتی ہے۔",
+    ],
+  ),
+  "settings.it.secret": g(
+    ["settings"],
+    ["Once-only credential slip", "صرف ایک بار دکھنے والے خفیہ کوائف"],
+    [
+      "Provisioning, password reset and station-key rotation may return a credential once. Copy credential is an explicit copy to this computer's clipboard; protect and clear it after private delivery. Print credential slip opens the native print dialog for this already-confirmed result. A failed print never issues a second password/key or repeats the write: reprint the same open slip. Closing the dialog or I have secured the credential clears its in-memory display; it is never saved to browser storage, preferences or a journal. The new user must change a temporary password on first sign-in; the Owner's personnel file still needs its CNIC copy. If the first response was lost, reconcile the record with IT before a deliberate new reset, never pretend the missing password was retrieved.",
+      "فراہمی، پاس ورڈ ری سیٹ یا اسٹیشن کلید ایک بار خفیہ کوائف واپس دے سکتی ہے۔ نقل کرنا اسی کمپیوٹر کے کلپ بورڈ پر آپ کا واضح انتخاب ہے؛ نجی حوالگی کے بعد اسے محفوظ طور پر صاف کریں۔ پرچی چھاپنا اسی تصدیق شدہ نتیجے کا مقامی پرنٹ ڈائیلاگ ہے۔ پرنٹ ناکامی نیا پاس ورڈ یا کلید نہیں بناتی؛ وہی کھلی پرچی دوبارہ چھاپیں۔ بند کرنے یا محفوظ کر لیا سے میموری کا منظر صاف ہوتا ہے؛ براؤزر، ترجیحات یا جرنل میں نہیں رکھا جاتا۔ نیا صارف پہلے سائن اِن پر پاس ورڈ بدلے؛ مالک کی فائل کو شناختی کارڈ نقل اب بھی چاہیے۔ پہلا جواب گم ہو تو آئی ٹی سے اصل ریکارڈ واضح کرکے ضرورت پر الگ ری سیٹ کریں، گم شدہ پاس ورڈ ملنے کا دعویٰ نہ کریں۔",
+    ],
+  ),
+  "incident.recovery": g(
+    ["report_incident"],
+    [
+      "Check My reports / Retry original report / Close reviewed attempt",
+      "میری رپورٹیں / اصل رپورٹ دوبارہ / جائزہ شدہ کوشش بند",
+    ],
+    [
+      "A lost report reply freezes the original report and request identity in this window. Check My reports and open the actual record with the Quality Officer. Within 24 hours Retry original report sends that identical request and can replay its first result, never a replacement report. After expiry or clock reversal ask the Quality Officer to reconcile it. Close reviewed attempt clears only the hold after their review; it neither claims success nor undoes a report. Keep the window open: this recovery is in memory only.",
+      "رپورٹ کا جواب گم ہو تو اصل رپورٹ اور شناخت اسی ونڈو میں رکتی ہے۔ کوالٹی افسر کے ساتھ میری رپورٹیں میں اصل ریکارڈ کھولیں۔ چوبیس گھنٹے کے اندر اصل رپورٹ دوبارہ وہی درخواست بھیجتی ہے، نیا متبادل نہیں بناتی۔ مدت یا گھڑی الٹنے پر کوالٹی افسر سے نتیجہ واضح کروائیں۔ جائزہ شدہ کوشش بند صرف روک ہٹاتا ہے، کامیابی یا واپسی کا اعلان نہیں۔ ونڈو کھلی رکھیں؛ بحالی صرف میموری میں ہے۔",
+    ],
+  ),
+  "settings.recovery": g(
+    ["settings"],
+    [
+      "Check policy and requests / Retry original request / Close reviewed attempt",
+      "پالیسی اور درخواستیں / اصل درخواست دوبارہ / جائزہ شدہ کوشش بند",
+    ],
+    [
+      "An uncertain policy reply holds the original value and request identity in this window. Read current policy and recent requests, then open the request's live detail. A failed follow-up read must never create another request. Retry original request keeps the exact payload/key within 24 hours; after expiry or clock reversal reconcile with the administrator. Close reviewed attempt clears only the reviewed hold, not the server record. Policy changes follow approval.resolved; they are not personal display preferences.",
+      "پالیسی کا غیر یقینی جواب اصل قدر اور شناخت اسی ونڈو میں روکتا ہے۔ موجودہ پالیسی اور حالیہ درخواستیں پڑھ کر اصل تفصیل کھولیں۔ بعد کی پڑھائی ناکام ہو تو نئی درخواست نہ بنائیں۔ اصل درخواست دوبارہ چوبیس گھنٹے میں وہی مواد اور شناخت بھیجتی ہے؛ مدت یا گھڑی الٹنے پر ایڈمن سے مطابقت کرائیں۔ جائزہ شدہ کوشش بند صرف روک ہٹاتا ہے، سرور کا ریکارڈ نہیں۔ پالیسی کی تبدیلی منظوری کے مطابق ہوتی ہے، ذاتی ترتیب نہیں۔",
+    ],
+  ),
+  "shell.session": g(
+    deliveredHelpScreens,
+    ["Confirm your session / Password", "سیشن کی تصدیق / پاس ورڈ"],
+    [
+      "When session renewal cannot be confirmed, this window keeps your draft and pauses authenticated work. Enter the same account's current password and choose Confirm your session once. This starts a new authenticated session; it never retries the lost refresh token, a password change or any business submission. For a confirmed password change use the NEW password. A different account cannot inherit this draft. Server revocation still signs out every window. An incorrect password is cleared; follow any server lockout message and contact IT if needed.",
+      "سیشن کی تجدید غیر یقینی ہو تو ونڈو مسودہ برقرار رکھتی اور مجاز کام روکتی ہے۔ اسی اکاؤنٹ کا موجودہ پاس ورڈ درج کرکے ایک بار سیشن کی تصدیق کریں۔ یہ نیا سیشن بناتا ہے، گم شدہ ٹوکن، پاس ورڈ کی تبدیلی یا کاروباری ارسال نہیں دہراتا۔ پاس ورڈ بدل چکا ہو تو نیا پاس ورڈ دیں۔ دوسرے اکاؤنٹ کو مسودہ نہیں ملتا۔ سرور کی منسوخی پر تمام ونڈوز بند ہوتی ہیں۔ غلط پاس ورڈ صاف ہوتا ہے؛ سرور کی پابندی یا آئی ٹی کی ہدایت پر عمل کریں۔",
+    ],
+  ),
   "cash.refresh": g(
     ["my_cash_shift"],
     ["Refresh / Show my current shift", "تازہ کریں / میری موجودہ شفٹ"],
@@ -214,16 +295,16 @@ export const controlGuides: Record<string, ControlGuide> = {
     ["settings"],
     ["Settings sections", "ترتیبات کے حصے"],
     [
-      "Choose a section in the Settings sidebar. This terminal shows connection and printer/location facts; My settings changes your account; Facility is offered only with permission. Sections assigned to a later workspace explicitly say they are outside this build. Changing section warns before discarding a policy or password draft. It does not itself save anything.",
-      "ترتیبات کی فہرست سے حصہ منتخب کریں۔ یہ ٹرمینل رابطے، پرنٹر اور مقام کی معلومات دکھاتا ہے؛ میری ترتیبات اکاؤنٹ بدلتی ہیں؛ ہسپتال کا حصہ اجازت سے ملتا ہے۔ بعد کے کام کی جگہ والے حصے اس تعمیر سے باہر بتائے جاتے ہیں۔ حصہ بدلنے پر پالیسی یا پاس ورڈ کا مسودہ چھوڑنے سے پہلے تنبیہ آتی ہے۔ اس سے کچھ محفوظ نہیں ہوتا۔",
+      "Choose a section in the Settings sidebar. This terminal shows connection and printer/location facts; My settings changes your account; Facility is offered only with permission. System (IT) opens its actual users/access, hardware, health, maintenance or emergency panel. Changing section warns before discarding a draft and blocks navigation while a write, uncertain outcome or once-only credential is open. Selecting a section does not itself save anything.",
+      "ترتیبات کی فہرست سے حصہ منتخب کریں۔ یہ ٹرمینل رابطے، پرنٹر اور مقام کی معلومات؛ میری ترتیبات اکاؤنٹ؛ ہسپتال اجازت سے دکھتا ہے۔ نظام (آئی ٹی) اصل صارف، رسائی، آلات، صحت، دیکھ بھال یا ہنگامی حصہ کھولتا ہے۔ حصہ بدلنے سے پہلے مسودے کی تنبیہ ہے؛ جاری ارسال، غیر یقینی نتیجہ یا ایک بار کے کوائف پر نقل و حرکت رکی ہے۔ صرف حصہ چننے سے کچھ محفوظ نہیں ہوتا۔",
     ],
   ),
   "settings.display": g(
     ["settings"],
     ["Language and Theme", "زبان اور تھیم"],
     [
-      "Choose English or Urdu, or Light or Dark · high contrast. Each selection saves immediately; wait for it to finish. Before login this changes only the terminal display. After login it saves to your account and all this session's windows update. A failed save shows an error and must not be assumed applied. Urdu wording remains a draft awaiting language review.",
-      "انگریزی یا اردو، یا روشن یا گہرا زیادہ تضاد والا تھیم منتخب کریں۔ ہر انتخاب فوراً محفوظ ہوتا ہے؛ مکمل ہونے دیں۔ لاگ اِن سے پہلے صرف ٹرمینل بدلتا ہے۔ بعد میں اکاؤنٹ میں محفوظ اور سیشن کی تمام ونڈوز میں ظاہر ہوتا ہے۔ ناکام محفوظ کرنے پر خطا آتی ہے؛ کامیابی فرض نہ کریں۔ اردو متن لسانی جائزے تک مسودہ ہے۔",
+      "Choose English or Urdu, or Light or Dark · high contrast. Each selection saves immediately; wait for it to finish. Before login this changes only the terminal display. After login it saves to your account and all this session's windows update. Reload preferences reads the account through the same ordered queue; it never repeats a save, sign-in or password change. Login and restored sessions also read account preferences. A failed save/read shows an error and must not be assumed applied. Urdu wording remains a draft awaiting language review.",
+      "انگریزی یا اردو، یا روشن یا گہرا زیادہ تضاد والا تھیم منتخب کریں۔ ہر انتخاب فوراً محفوظ ہوتا ہے؛ مکمل ہونے دیں۔ لاگ اِن سے پہلے صرف ٹرمینل بدلتا ہے۔ بعد میں اکاؤنٹ میں محفوظ اور تمام ونڈوز میں ظاہر ہوتا ہے۔ ترجیحات دوبارہ لوڈ اسی قطار سے اکاؤنٹ پڑھتا ہے، محفوظ کرنا، سائن اِن یا پاس ورڈ نہیں دہراتا۔ سائن اِن اور بحالی پر بھی اکاؤنٹ کی ترجیحات پڑھی جاتی ہیں۔ ناکامی کو کامیابی نہ سمجھیں۔ اردو متن لسانی جائزے تک مسودہ ہے۔",
     ],
   ),
   "settings.zoom": g(
@@ -614,8 +695,8 @@ export const workspaceFocus: Record<string, Bilingual> = {
     "مینٹیننس ایڈمن: دیکھ بھال کا پیغام ہسپتال کی عملی روک ہے، مرمت کا حکم نہیں۔ دوبارہ چیک صرف حالت دیکھتا ہے۔ مجاز آئی ٹی سے رابطہ کریں؛ بنیاد مینٹیننس سوئچ یا آلات کی مرمت نہیں دیتی۔",
   ],
   super_admin: [
-    "IT Super Admins: inspect connection, pinned certificate, terminal location and printers; route licence or session problems to the authorized owner/vendor. System setup sections clearly marked outside this build have no implemented editor here. Never accept a changed certificate without independent verification.",
-    "آئی ٹی سپر ایڈمن: رابطہ، مقررہ سرٹیفکیٹ، ٹرمینل مقام اور پرنٹر دیکھیں؛ لائسنس یا سیشن مسئلہ مجاز مالک/وینڈر کو دیں۔ تعمیر سے باہر سسٹم حصوں کا یہاں مدیر نہیں۔ بدلا سرٹیفکیٹ آزاد تصدیق کے بغیر قبول نہ کریں۔",
+    "IT Super Admins: use Settings > System for the submitted HR provisioning queue, actual users and access requests, role matrix, devices and server health. Give ordinary authorized roles first and send privileged changes to the Owner; Pending is not completed access. Deliver once-only credentials privately and change temporary passwords on first sign-in. Confirm the actual target before deactivate/reset/revoke/rotate; reconcile a lost reply without repeating these effects. Coordinate maintenance/emergency logout with staff. Ward/ICD and other IT workspace journeys still need separate implementation/review. Never accept a changed certificate without independent verification.",
+    "آئی ٹی سپر ایڈمن: ترتیبات > نظام میں ایچ آر کی جمع شدہ قطار، اصل صارف، رسائی کی درخواست، کردار، آلات اور سرور صحت کھولیں۔ پہلے مجاز عام کردار اور خصوصی تبدیلی مالک کو بھیجیں؛ منتظر کا مطلب مکمل رسائی نہیں۔ ایک بار کے کوائف نجی دیں اور پہلے سائن اِن پر پاس ورڈ بدلوائیں۔ غیر فعال، ری سیٹ، سیشن یا کلید سے پہلے ہدف دیکھیں؛ گم جواب پر یہی اثر دوبارہ نہ دہرائیں۔ دیکھ بھال یا ہنگامی سائن آؤٹ سے پہلے عملے سے رابطہ کریں۔ وارڈ، آئی سی ڈی اور دیگر آئی ٹی کام الگ تعمیر و جائزہ چاہتے ہیں۔ بدلا سرٹیفکیٹ آزاد تصدیق کے بغیر قبول نہ کریں۔",
   ],
   zakat: [
     "Zakat officers: open Charity approvals for pharmacy charity overrides. Check the frozen request, eligibility and note before Confirm; My requests is for requests you raised. A decision applies the server-returned effect, not a separate cash payout. Notify the requester of the confirmed outcome.",

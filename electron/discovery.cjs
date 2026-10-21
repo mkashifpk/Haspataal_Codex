@@ -1,7 +1,7 @@
 const dgram = require("node:dgram");
 const os = require("node:os");
 const { randomBytes } = require("node:crypto");
-exports.discover = () =>
+exports.discover = (port = 47632) =>
   new Promise((resolve) => {
     const sock = dgram.createSocket("udp4"),
       nonce = randomBytes(12).toString("hex"),
@@ -41,7 +41,7 @@ exports.discover = () =>
               nonce,
             }),
           ),
-          47632,
+          port,
           a,
           () => {},
         );

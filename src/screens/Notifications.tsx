@@ -1,5 +1,5 @@
 import { tr } from "../i18n";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import * as notifications from "../generated/notifications";
 import { Empty, ErrorBox, LoadState, useLoad } from "../components";
 import { formatHospitalTime, hospitalTimeZoneError } from "../hospital-time";
@@ -17,13 +17,23 @@ export function Notifications({
   const [unread, setUnread] = useState(false),
     [error, setError] = useState<unknown>(),
     [busy, setBusy] = useState(false);
+  const [hasOlder, setHasOlder] = useState(true);
+  const flight = useRef(false),
+    generation = useRef(0);
+  useEffect(() => {
+    generation.current++;
+    setHasOlder(true);
+  }, [unread, revision]);
   const zoneProblem = hospitalTimeZoneError(timeZone);
   const r = useLoad(
     () => notifications.inbox({ unread_only: unread, limit: 50 }),
     [unread, revision],
   );
   async function run(fn: () => Promise<unknown>) {
+    if (flight.current) return;
+    flight.current = true;
     setBusy(true);
+    setError(undefined);
     try {
       await fn();
       await r.reload();
@@ -31,6 +41,7 @@ export function Notifications({
     } catch (e) {
       setError(e);
     } finally {
+      flight.current = false;
       setBusy(false);
     }
   }
@@ -56,6 +67,7 @@ export function Notifications({
           data-help="notifications.filter"
           type="checkbox"
           checked={unread}
+          disabled={busy}
           onChange={(e) => setUnread(e.target.checked)}
         />
         {tr("Unread only")}
@@ -102,11 +114,15 @@ export function Notifications({
           </article>
         ))}
       </div>
-      {r.data && r.data.length >= 50 && (
+      {hasOlder && r.data && r.data.length >= 50 && (
         <button
           data-help="notifications.filter"
           disabled={busy}
           onClick={async () => {
+            if (flight.current) return;
+            flight.current = true;
+            const currentGeneration = generation.current,
+              baseRows = r.data!;
             setBusy(true);
             setError(undefined);
             try {
@@ -115,10 +131,16 @@ export function Notifications({
                 before_id: r.data!.at(-1)!.notification_id,
                 limit: 50,
               });
-              r.setData([...r.data!, ...next]);
+              if (generation.current === currentGeneration) {
+                r.setData((previous) =>
+                  previous === baseRows ? [...baseRows, ...next] : previous,
+                );
+                setHasOlder(next.length >= 50);
+              }
             } catch (e) {
               setError(e);
             } finally {
+              flight.current = false;
               setBusy(false);
             }
           }}

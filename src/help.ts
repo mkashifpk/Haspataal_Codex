@@ -22,13 +22,15 @@ export const help: Record<string, HelpPage> = {
       "Select Find servers on this network. Select the hospital supplied by IT, or type its HTTPS address.",
       "Select Check server identity. Compare the complete fingerprint with the one IT supplies from the Control Center. Enter that fingerprint and select They match — connect.",
       "If no server is found, ask IT for the address or terminal.json provisioning file. A changed certificate must be checked by IT; never accept it just to reconnect.",
-      "During an outage your form remains in memory. Wait for connection recovery before saving. Closing the app loses unsaved input.",
+      "IT policy takes priority over a provisioning file, then this Windows user's saved choice. An IT-managed server cannot be replaced here; ask IT to correct its settings.",
+      "During an outage the terminal tries its saved addresses with the same pinned certificate, then retries after 1, 2, 5, 10 and 30 seconds (continuing every 30 seconds). Keep the window open: input stays in memory and writes are blocked while offline. Reconnecting never repeats a payment or other submission; check its outcome before deliberately retrying. Closing the app loses unsaved input.",
     ],
     stepsUr: [
       "نیٹ ورک پر سرور تلاش کریں اور آئی ٹی کا بتایا ہوا ہسپتال منتخب کریں، یا اس کا HTTPS پتہ درج کریں۔",
       "سرور کی شناخت چیک کریں۔ مکمل فنگرپرنٹ کو کنٹرول سینٹر سے آئی ٹی کے فراہم کردہ فنگرپرنٹ سے ملائیں۔ مطابقت کے بعد رابطہ قائم کریں۔",
       "سرور نہ ملے تو آئی ٹی سے پتہ یا terminal.json فائل لیں۔ سرٹیفکیٹ بدلنے پر آئی ٹی سے تصدیق کرائیں۔",
-      "رابطہ منقطع ہونے پر فارم میموری میں رہتا ہے۔ محفوظ کرنے سے پہلے رابطہ بحال ہونے کا انتظار کریں۔ ایپ بند کرنے سے غیر محفوظ اندراج ضائع ہوتا ہے۔",
+      "آئی ٹی پالیسی کو ترتیب کی فائل، پھر اس ونڈوز صارف کے محفوظ انتخاب پر ترجیح ہے۔ آئی ٹی کا مقرر کردہ سرور یہاں تبدیل نہیں ہوتا؛ درست ترتیب کے لیے آئی ٹی سے رابطہ کریں۔",
+      "رابطہ ٹوٹنے پر ٹرمینل اسی محفوظ سرٹیفکیٹ کے ساتھ متبادل پتے آزماتا ہے، پھر 1، 2، 5، 10 اور 30 سیکنڈ بعد اور اس کے بعد ہر 30 سیکنڈ کوشش کرتا ہے۔ ونڈو کھلی رکھیں؛ اندراج میموری میں رہتا اور محفوظ کرنا رکتا ہے۔ رابطہ بحال ہونے سے ادائیگی یا ارسال خود نہیں دہرایا جاتا؛ نتیجہ چیک کرکے دوبارہ کوشش کریں۔ ایپ بند کرنے سے غیر محفوظ اندراج ضائع ہوتا ہے۔",
     ],
     faq: [
       [
@@ -39,6 +41,14 @@ export const help: Record<string, HelpPage> = {
         "What if the server address changes?",
         "The terminal tries the saved alternate addresses with the same pinned hospital certificate.",
       ],
+      [
+        "The connection failed while I was saving. Should I save again?",
+        "Wait for reconnection and check the record or the screen's recovery instructions. The server may have saved it before the reply was lost. Never start a replacement payment or registration just to fix a connection error.",
+      ],
+      [
+        "Why can I not replace an IT-managed server?",
+        "Policy and provisioning keep shared terminals at the correct hospital. Ask IT to update the policy or terminal.json. Discovery only suggests addresses and never changes the pinned identity.",
+      ],
     ],
     faqUr: [
       [
@@ -48,6 +58,14 @@ export const help: Record<string, HelpPage> = {
       [
         "سرور کا پتہ بدل جائے تو؟",
         "ٹرمینل اسی ہسپتال کے سرٹیفکیٹ کے ساتھ محفوظ متبادل پتے آزماتا ہے۔",
+      ],
+      [
+        "محفوظ کرتے وقت رابطہ ٹوٹا، کیا دوبارہ محفوظ کروں؟",
+        "رابطہ بحال ہونے دیں، پھر ریکارڈ یا صفحے کی بحالی کی ہدایات دیکھیں۔ جواب کھونے سے پہلے سرور محفوظ کر چکا ہو سکتا ہے۔ رابطے کی خطا کے لیے نئی ادائیگی یا رجسٹریشن نہ شروع کریں۔",
+      ],
+      [
+        "آئی ٹی کا مقرر کردہ سرور کیوں نہیں بدل سکتا؟",
+        "پالیسی اور ترتیب مشترکہ ٹرمینل کو درست ہسپتال سے جوڑتے ہیں۔ آئی ٹی سے پالیسی یا terminal.json درست کروائیں۔ تلاش صرف پتے بتاتی ہے، محفوظ شناخت نہیں بدلتی۔",
       ],
     ],
   },
@@ -177,7 +195,7 @@ export const help: Record<string, HelpPage> = {
       "Change password requires your current password and matching new entries. Passwords are cleared after the attempt.",
       "Server connection runs health, address and licence checks. This terminal shows the server’s location and printer mapping.",
       "Hospital policy: select a setting, preserve its value type, enter a reason for control settings, and Save policy. Read the result: Applied is saved; Pending waits for an Owner. Review recent requests below.",
-      "Facility profile and services opens a separate administrator screen. System configuration sections belong to the later IT workspace.",
+      "Facility profile and services opens a separate administrator screen. System (IT) opens the server-permitted user/access, hardware, health, maintenance and emergency panels. Review target and values before any change. See the detailed system instructions below for Owner requests, once-only credentials and uncertain replies.",
     ],
     stepsUr: [
       "ترتیبات کھولیں یا Ctrl/Cmd comma دبائیں۔ حصے آپ کی سرور اجازت کے مطابق ہیں۔",
@@ -185,7 +203,7 @@ export const help: Record<string, HelpPage> = {
       "پاس ورڈ بدلنے کے لیے موجودہ اور یکساں نئے اندراج درکار ہیں۔ کوشش کے بعد پاس ورڈ صاف ہو جاتے ہیں۔",
       "سرور رابطہ میں صحت، پتے اور لائسنس چیک ہوتے ہیں۔ ٹرمینل میں مقام اور پرنٹر کی معلومات ہیں۔",
       "پالیسی منتخب کریں، قدر کی قسم برقرار رکھیں، وجہ لکھیں اور محفوظ کریں۔ Applied محفوظ ہے؛ Pending مالک کی منظوری کا منتظر ہے۔",
-      "پروفائل اور خدمات منتظم کا الگ صفحہ ہے۔ سسٹم کی ترتیب بعد کے آئی ٹی حصے میں ہے۔",
+      "پروفائل اور خدمات منتظم کا الگ صفحہ ہے۔ نظام (آئی ٹی) میں سرور کی مجاز صارف، رسائی، آلات، صحت، دیکھ بھال اور ہنگامی ترتیب کھلتی ہے۔ تبدیلی سے پہلے ہدف اور کوائف دیکھیں۔ نیچے مالک کی درخواست، ایک بار کے کوائف اور غیر یقینی جواب کی مفصل ہدایات ہیں۔",
     ],
     faq: [
       [

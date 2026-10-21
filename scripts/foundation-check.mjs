@@ -1,3 +1,4 @@
+import { terminalPage } from "./terminal-page.mjs";
 import { _electron as electron } from "playwright";
 import { expect } from "playwright/test";
 import fs from "node:fs";
@@ -34,7 +35,17 @@ async function shot(id) {
   for (const language of ["en", "ur"]) {
     await prefs({ language, ui_scale_pct: 100 });
     await expect(page.locator("html")).toHaveAttribute("lang", language);
-    await page.screenshot({ path: `public/handbook/${id}-${language}.png` });
+    // Replace a complete PNG rather than truncating a file a Windows viewer or
+    // scanner may briefly hold open. Never leave a partially written example.
+    const target=`public/handbook/${id}-${language}.png`;
+    const temporary=`public/handbook/.capture-${id}-${language}-${process.pid}.png`;
+    fs.writeFileSync(temporary,await page.screenshot());
+    try {
+      for(let attempt=0;;attempt++) {
+        try {fs.renameSync(temporary,target);break;}
+        catch(error) {if(attempt>=4)throw error;await new Promise(resolve=>setTimeout(resolve,200));}
+      }
+    } finally {if(fs.existsSync(temporary))fs.unlinkSync(temporary);}
   }
   await prefs({ language: "en" });
 }
@@ -68,7 +79,7 @@ async function zoomKey(key) {
 }
 async function launch(env) {
   app = await electron.launch({ args: ["."], env });
-  page = await app.firstWindow();
+  page = await terminalPage(app);
   page.setDefaultTimeout(25000);
   await page.setViewportSize({ width: 1400, height: 1000 });
   page.on("pageerror", (e) => errors.push(e.message));

@@ -3,7 +3,7 @@ import { api, call, resetRequests } from "./bridge";
 import type { MeOut, LicenseStatusOut, HealthOut } from "./generated/login";
 import type { EstablishmentOut } from "./generated/facility_profile";
 import type { HandbookOut } from "./generated/help_center";
-import { Details, ErrorBox, Modal } from "./components";
+import { Details, ErrorBox, Field, Modal } from "./components";
 import { Connection } from "./screens/Connection";
 import { Login, ChangePassword } from "./screens/Login";
 import { Settings, TerminalIdentity } from "./screens/Settings";
@@ -15,7 +15,7 @@ import { CashShift } from "./screens/CashShift";
 import { PatientSearch } from "./screens/PatientSearch";
 import { Registration } from "./screens/Registration";
 import { Help } from "./screens/Help";
-import { setLanguage } from "./i18n";
+import { setLanguage, tr } from "./i18n";
 import { hasUnsavedChanges } from "./unsaved";
 const labels: Record<string, [string, string, string]> = {
   app_shell: ["Workspace home", "کام کی جگہ", "⌂"],
@@ -62,9 +62,15 @@ export function App() {
     [logoutOpen, setLogoutOpen] = useState(false),
     [maintenance, setMaintenance] = useState<any>(),
     [critical, setCritical] = useState<any>(),
+    [criticalNotices, setCriticalNotices] = useState<any[]>([]),
     [notice, setNotice] = useState(""),
     [booting, setBooting] = useState(true),
     [clock, setClock] = useState(Date.now());
+  const [sessionRecovery, setSessionRecovery] = useState<string | null>(null),
+    [sessionPassword, setSessionPassword] = useState(""),
+    [sessionBusy, setSessionBusy] = useState(false),
+    [sessionError, setSessionError] = useState<unknown>();
+  const reauthFlight = useRef(false);
   const first = useRef(true),
     loaded = useRef(false),
     liveState = useRef({ user, workspace, screen });
@@ -80,6 +86,7 @@ export function App() {
       setUser(s.user);
       setWorkspace(s.workspace);
       setPrefs(s.prefs);
+      setSessionRecovery(s.sessionRecovery || null);
       if (first.current) {
         first.current = false;
         setScreen(
@@ -102,7 +109,14 @@ export function App() {
     const current = liveState.current;
     if (!current.user || current.user.must_change_password) return;
     try {
-      const [establishment, handbook, settings, count, me] = await Promise.all([
+      const [
+        establishment,
+        handbook,
+        settings,
+        count,
+        me,
+        permittedWorkspaces,
+      ] = await Promise.all([
         api<EstablishmentOut>("GET", "/establishment"),
         api<HandbookOut>(
           "GET",
@@ -114,6 +128,7 @@ export function App() {
         api("GET", "/meta/settings"),
         api<{ unread: number }>("GET", "/notifications/unread-count"),
         api<MeOut>("GET", "/auth/me"),
+        api<MeOut["workspaces"]>("GET", "/auth/workspaces"),
       ]);
       if (
         liveState.current.user?.user_id !== current.user.user_id ||
@@ -124,7 +139,7 @@ export function App() {
       setOutline(handbook);
       setMeta(settings);
       setUnread(count.unread);
-      setUser(me);
+      setUser({ ...me, workspaces: permittedWorkspaces });
       setPrefs(me.preferences);
       setMaintenance(
         settings.maintenance_mode
@@ -139,7 +154,7 @@ export function App() {
           api("GET", "/meta/error-codes"),
           api("GET", "/meta/events"),
         ]);
-        const available = me.workspaces.filter(
+        const available = permittedWorkspaces.filter(
           (w) =>
             establishment.views.workspaces.find((v) => v.workspace === w.code)
               ?.view !== "hidden",
@@ -183,11 +198,27 @@ export function App() {
     if (!window.terminal) return;
     return window.terminal.subscribe((e) => {
       if (e.type === "login") {
+        if (e.license) setLicense(e.license);
         loaded.current = false;
         setUser(e.user);
         setScreen(e.user.must_change_password ? "login" : "app_shell");
+        setSessionRecovery(null);
+      }
+      if (e.type === "session-recovery") {
+        setSessionPassword("");
+        setSessionRecovery(e.message);
+      }
+      if (e.type === "session-restored") {
+        setSessionRecovery(null);
+        setSessionPassword("");
+        setSessionError(undefined);
+        setUser(e.user);
+        if (e.user.must_change_password) setScreen("login");
+        void refreshData();
       }
       if (e.type === "logout") {
+        setSessionRecovery(null);
+        setSessionPassword("");
         resetRequests();
         loaded.current = false;
         setUser(null);
@@ -197,6 +228,7 @@ export function App() {
         setUnread(undefined);
         setWorkspace(null);
         setCritical(undefined);
+        setCriticalNotices([]);
         setMaintenance(undefined);
         setHelpOpen(false);
         setHelpPage(undefined);
@@ -229,6 +261,10 @@ export function App() {
           void api<LicenseStatusOut>("GET", "/meta/license")
             .then(setLicense)
             .catch(setError);
+        if (["system.license", "system.maintenance"].includes(e.event_type)) {
+          loaded.current = false;
+          void refreshData();
+        }
         if (e.event_type === "system.maintenance")
           setMaintenance(
             e.payload.enabled || e.payload.maintenance_mode
@@ -241,7 +277,10 @@ export function App() {
           e.event_type === "notification.created" &&
           e.payload.severity === "critical"
         )
-          setCritical({ kind: "notification", ...e.payload });
+          setCriticalNotices((current) => [
+            ...current.filter((n) => n.id !== e.event_id),
+            { ...e.payload, id: e.event_id },
+          ]);
         if (
           [
             "establishment.changed",
@@ -279,7 +318,7 @@ export function App() {
       cancelled = true;
       clearInterval(id);
     };
-  }, [server?.current, license?.reason]);
+  }, [server?.current, license?.reason, user?.user_id]);
   useEffect(() => {
     if (user || !server) return;
     let cancelled = false;
@@ -372,6 +411,19 @@ export function App() {
     void call("logout", { all }).catch(setError);
   }
   function navigate(next: string) {
+    if (sessionRecovery) return false;
+    const required: Record<string, string[]> = {
+      facility_profile: ["establishment.manage"],
+      report_incident: ["incident.report"],
+      patient_search: ["patient.search", "patient.view"],
+      registration: ["opd.ticket.create"],
+      my_cash_shift: ["finance.shift.operate"],
+    };
+    if (est?.views.screens.some(v => v.screen_id === next && v.view === "hidden") ||
+      (required[next] && !required[next].some(p => user?.permissions.includes(p)))) {
+      setNotice(tr("This screen is not available with your current permissions and hospital services."));
+      return false;
+    }
     if (
       next !== screen &&
       document.querySelector('[data-write-pending="true"]')
@@ -470,7 +522,10 @@ export function App() {
       ? ["facility_profile"]
       : []),
     "settings",
-  ];
+  ].filter(
+    (id) =>
+      est?.views.screens.find((v) => v.screen_id === id)?.view !== "hidden",
+  );
   const view = est?.views.workspaces.find(
     (v) => v.workspace === workspace,
   )?.view;
@@ -532,6 +587,14 @@ export function App() {
           >
             {t("Help · F1", "مدد · F1")}
           </button>
+          {user?.permissions.includes("incident.report") && (
+            <button
+              data-help="shell.navigation"
+              onClick={() => navigate("report_incident")}
+            >
+              {t("Report an incident", "واقعے کی رپورٹ")}
+            </button>
+          )}
           {!user && server && (
             <button
               data-help="shell.settings"
@@ -648,6 +711,7 @@ export function App() {
                 onPrefs={refreshState}
                 onFacility={() => {}}
                 connected={connected}
+                revision={revision}
               />
             ) : (
               <Login
@@ -782,6 +846,7 @@ export function App() {
                   onPrefs={refreshState}
                   onFacility={() => navigate("facility_profile")}
                   connected={connected}
+                  revision={revision}
                 />
               )}
               {screen === "notifications" && (
@@ -880,6 +945,16 @@ export function App() {
           </p>
           <div className="actions">
             <button
+              data-help="shell.help"
+              onClick={() => {
+                setLogoutOpen(false);
+                setHelpPage("home");
+                setHelpOpen(true);
+              }}
+            >
+              {t("Help & handbook", "مدد اور رہنما")}
+            </button>
+            <button
               data-help="shell.settings"
               onClick={() => {
                 if (navigate("settings")) setLogoutOpen(false);
@@ -929,7 +1004,22 @@ export function App() {
           </button>
         </div>
       )}
-      {critical && (
+      {criticalNotices.length > 0 && (
+        <aside className="notice critical-toast" role="alert">
+          <strong>
+            {criticalNotices[0].title ||
+              t("Critical notification", "اہم اطلاع")}
+          </strong>
+          <p>{criticalNotices[0].body || criticalNotices[0].message}</p>
+          <button
+            data-help="shell.critical"
+            onClick={() => setCriticalNotices((current) => current.slice(1))}
+          >
+            {t("Dismiss", "بند کریں")}
+          </button>
+        </aside>
+      )}
+      {critical?.kind === "code_red" && (
         <Modal
           title={
             critical.kind === "code_red" ? "Code Red" : "Critical notification"
@@ -944,6 +1034,54 @@ export function App() {
           >
             Acknowledge on this terminal
           </button>
+        </Modal>
+      )}
+      {sessionRecovery && user && (
+        <Modal
+          title={t("Confirm your session", "اپنے سیشن کی تصدیق کریں")}
+          onClose={() => {}}
+        >
+          <p>{tr(sessionRecovery)}</p>
+          <p>{user.username}</p>
+          <ErrorBox error={sessionError} />
+          <form
+            onSubmit={async (event) => {
+              event.preventDefault();
+              if (reauthFlight.current) return;
+              reauthFlight.current = true;
+              setSessionBusy(true);
+              setSessionError(undefined);
+              try {
+                await call("reauthenticate", { password: sessionPassword });
+              } catch (cause) {
+                setSessionError(cause);
+              } finally {
+                setSessionPassword("");
+                setSessionBusy(false);
+                reauthFlight.current = false;
+              }
+            }}
+          >
+            <Field label={t("Password", "پاس ورڈ")}>
+              <input
+                data-help="shell.session"
+                type="password"
+                autoComplete="current-password"
+                required
+                maxLength={256}
+                disabled={sessionBusy}
+                value={sessionPassword}
+                onChange={(e) => setSessionPassword(e.target.value)}
+              />
+            </Field>
+            <button
+              data-help="shell.session"
+              className="primary"
+              disabled={sessionBusy || !connected}
+            >
+              {t("Confirm your session", "اپنے سیشن کی تصدیق کریں")}
+            </button>
+          </form>
         </Modal>
       )}
     </div>

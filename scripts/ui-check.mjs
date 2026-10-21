@@ -1,3 +1,4 @@
+import { terminalPage } from "./terminal-page.mjs";
 import { _electron as electron } from "playwright";
 import fs from "node:fs";
 import path from "node:path";
@@ -11,7 +12,7 @@ const environment = {
 };
 delete environment.ELECTRON_RUN_AS_NODE;
 const app = await electron.launch({ args: ["."], env: environment });
-const page = await app.firstWindow();
+const page = await terminalPage(app);
 await page.setViewportSize({ width: 1400, height: 900 });
 const errors = [];
 page.on("pageerror", (e) => errors.push(e.message));

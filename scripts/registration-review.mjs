@@ -1,3 +1,4 @@
+import { terminalPage } from "./terminal-page.mjs";
 import { _electron as electron } from "playwright";
 import fs from "node:fs";
 import path from "node:path";
@@ -10,7 +11,7 @@ const env = {
 };
 delete env.ELECTRON_RUN_AS_NODE;
 const app = await electron.launch({ args: ["."], env });
-const page = await app.firstWindow();
+const page = await terminalPage(app);
 page.setDefaultTimeout(15000);
 const errors = [];
 page.on("pageerror", (e) => errors.push(e.message));

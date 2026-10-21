@@ -1,0 +1,1647 @@
+{
+  "contract_fingerprint": "0b5ab90e400dfbb822d3",
+  "knowledge_revision": "a95cfca74fcbe8af",
+  "endpoints": [
+    {
+      "endpoint": "GET /admin/users/{user_id}",
+      "access": {
+        "authentication": "user",
+        "permissions": ["admin.user.manage", "admin.user.provision"],
+        "permissions_mode": "any",
+        "who": "holders of admin.user.manage or admin.user.provision",
+        "roles_allowed": ["super_admin"]
+      },
+      "idempotency_key": false,
+      "request_body": null
+    },
+    {
+      "endpoint": "POST /admin/users/{user_id}/revoke-sessions",
+      "access": {
+        "authentication": "user",
+        "permissions": ["admin.user.manage"],
+        "permissions_mode": "all",
+        "who": "holders of admin.user.manage",
+        "roles_allowed": ["super_admin"]
+      },
+      "idempotency_key": false,
+      "request_body": null,
+      "write": {
+        "protection": "repeat_effect",
+        "on_lost_answer": "Repeating this call has another effect: also ends any sessions opened since the first call. Never retry automatically; reconcile the result and require a deliberate new action if still needed.",
+        "reconcile_with": "GET /admin/users/{user_id}",
+        "emits_events": ["session.revoked"],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "GET /admin/login-events",
+      "access": {
+        "authentication": "user",
+        "permissions": ["admin.audit.view", "admin.user.manage"],
+        "permissions_mode": "any",
+        "who": "holders of admin.audit.view or admin.user.manage",
+        "roles_allowed": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "super_admin"
+        ]
+      },
+      "idempotency_key": false,
+      "request_body": null
+    },
+    {
+      "endpoint": "GET /admin/departments",
+      "access": {
+        "authentication": "user",
+        "permissions": [],
+        "permissions_mode": "all",
+        "who": "any logged-in user"
+      },
+      "idempotency_key": false,
+      "request_body": null
+    },
+    {
+      "endpoint": "PUT /admin/departments/{department_id}",
+      "access": {
+        "authentication": "user",
+        "permissions": ["admin.department.manage"],
+        "permissions_mode": "all",
+        "who": "holders of admin.department.manage",
+        "roles_allowed": ["super_admin"]
+      },
+      "idempotency_key": false,
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/DepartmentIn"
+            }
+          }
+        }
+      },
+      "write": {
+        "protection": "replace",
+        "on_lost_answer": "Unversioned PUT: re-read before resubmitting. A retry may overwrite intervening edits and repeat history, timestamps or events; the HTTP method alone is not replay protection. Never retry automatically.",
+        "reconcile_with": "GET /admin/departments",
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "PUT /admin/wards/{ward_id}",
+      "access": {
+        "authentication": "user",
+        "permissions": ["admin.ward.manage"],
+        "permissions_mode": "all",
+        "who": "holders of admin.ward.manage",
+        "roles_allowed": ["super_admin"]
+      },
+      "idempotency_key": false,
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/WardIn"
+            }
+          }
+        }
+      },
+      "write": {
+        "protection": "replace",
+        "on_lost_answer": "Unversioned PUT: re-read before resubmitting. A retry may overwrite intervening edits and repeat history, timestamps or events; the HTTP method alone is not replay protection. Never retry automatically.",
+        "reconcile_with": null,
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "PUT /admin/printers/{printer_id}",
+      "access": {
+        "authentication": "user",
+        "permissions": ["admin.printer.manage"],
+        "permissions_mode": "all",
+        "who": "holders of admin.printer.manage",
+        "roles_allowed": ["super_admin"]
+      },
+      "idempotency_key": false,
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/PrinterIn"
+            }
+          }
+        }
+      },
+      "write": {
+        "protection": "replace",
+        "on_lost_answer": "Unversioned PUT: re-read before resubmitting. A retry may overwrite intervening edits and repeat history, timestamps or events; the HTTP method alone is not replay protection. Never retry automatically.",
+        "reconcile_with": "GET /admin/printers",
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "PUT /admin/terminals/{terminal_id}",
+      "access": {
+        "authentication": "user",
+        "permissions": ["admin.terminal.manage"],
+        "permissions_mode": "all",
+        "who": "holders of admin.terminal.manage",
+        "roles_allowed": ["super_admin"]
+      },
+      "idempotency_key": false,
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/TerminalIn"
+            }
+          }
+        }
+      },
+      "write": {
+        "protection": "replace",
+        "on_lost_answer": "Unversioned PUT: re-read before resubmitting. A retry may overwrite intervening edits and repeat history, timestamps or events; the HTTP method alone is not replay protection. Never retry automatically.",
+        "reconcile_with": "GET /admin/terminals",
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "GET /meta/roles",
+      "access": {
+        "authentication": "user",
+        "permissions": [],
+        "permissions_mode": "all",
+        "who": "any logged-in user"
+      },
+      "idempotency_key": false,
+      "request_body": null
+    },
+    {
+      "endpoint": "GET /meta/permissions",
+      "access": {
+        "authentication": "user",
+        "permissions": [],
+        "permissions_mode": "all",
+        "who": "any logged-in user"
+      },
+      "idempotency_key": false,
+      "request_body": null
+    },
+    {
+      "endpoint": "GET /admin/provisioning-queue",
+      "access": {
+        "authentication": "user",
+        "permissions": ["admin.user.provision"],
+        "permissions_mode": "all",
+        "who": "holders of admin.user.provision",
+        "roles_allowed": ["super_admin"]
+      },
+      "idempotency_key": false,
+      "request_body": null
+    },
+    {
+      "endpoint": "POST /admin/users",
+      "access": {
+        "authentication": "user",
+        "permissions": ["admin.user.provision"],
+        "permissions_mode": "all",
+        "who": "holders of admin.user.provision",
+        "roles_allowed": ["super_admin"]
+      },
+      "idempotency_key": false,
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ProvisionIn"
+            }
+          }
+        }
+      },
+      "write": {
+        "protection": "state_guard",
+        "on_lost_answer": "A repeat is refused with EMPLOYEE_ALREADY_HAS_ACCOUNT: an employee has one login. The first call may have succeeded; this error does not replay its result. Never retry automatically; re-read the record, then offer the action again only if it is still needed.",
+        "reconcile_with": "GET /admin/users",
+        "refused_with": "EMPLOYEE_ALREADY_HAS_ACCOUNT",
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "GET /admin/users",
+      "access": {
+        "authentication": "user",
+        "permissions": ["admin.user.manage", "admin.user.provision"],
+        "permissions_mode": "any",
+        "who": "holders of admin.user.manage or admin.user.provision",
+        "roles_allowed": ["super_admin"]
+      },
+      "idempotency_key": false,
+      "request_body": null
+    },
+    {
+      "endpoint": "PUT /admin/users/{user_id}/roles",
+      "access": {
+        "authentication": "user",
+        "permissions": ["admin.user.manage"],
+        "permissions_mode": "all",
+        "who": "holders of admin.user.manage",
+        "roles_allowed": ["super_admin"]
+      },
+      "idempotency_key": false,
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/RolesIn"
+            }
+          }
+        }
+      },
+      "write": {
+        "protection": "replace",
+        "on_lost_answer": "Unversioned PUT: re-read before resubmitting. A retry may overwrite intervening edits and repeat history, timestamps or events; the HTTP method alone is not replay protection. Never retry automatically.",
+        "reconcile_with": "GET /admin/users/{user_id}",
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "POST /admin/users/{user_id}/reset-password",
+      "access": {
+        "authentication": "user",
+        "permissions": ["admin.user.manage"],
+        "permissions_mode": "all",
+        "who": "holders of admin.user.manage",
+        "roles_allowed": ["super_admin"]
+      },
+      "idempotency_key": false,
+      "request_body": null,
+      "write": {
+        "protection": "repeat_effect",
+        "on_lost_answer": "Repeating this call has another effect: issues another temporary password: only the last one works. Never retry automatically; reconcile the result and require a deliberate new action if still needed.",
+        "reconcile_with": "GET /admin/users/{user_id}",
+        "emits_events": ["session.revoked"],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "POST /admin/users/{user_id}/active",
+      "access": {
+        "authentication": "user",
+        "permissions": ["admin.user.manage"],
+        "permissions_mode": "all",
+        "who": "holders of admin.user.manage",
+        "roles_allowed": ["super_admin"]
+      },
+      "idempotency_key": false,
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ActiveIn"
+            }
+          }
+        }
+      },
+      "write": {
+        "protection": "repeat_safe",
+        "on_lost_answer": "A repeat is harmless for the same state: sets the same flag again. No response is stored; re-read before resubmitting because newer data may have arrived.",
+        "reconcile_with": "GET /admin/users/{user_id}",
+        "emits_events": ["session.revoked"],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "GET /admin/role-matrix",
+      "access": {
+        "authentication": "user",
+        "permissions": ["admin.roles.view", "admin.role_matrix.update"],
+        "permissions_mode": "any",
+        "who": "holders of admin.roles.view or admin.role_matrix.update",
+        "roles_allowed": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "super_admin"
+        ]
+      },
+      "idempotency_key": false,
+      "request_body": null
+    },
+    {
+      "endpoint": "PUT /admin/roles/{role_code}/permissions",
+      "access": {
+        "authentication": "user",
+        "permissions": ["admin.role_matrix.update"],
+        "permissions_mode": "all",
+        "who": "holders of admin.role_matrix.update",
+        "roles_allowed": ["super_admin"]
+      },
+      "idempotency_key": false,
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/PermissionsIn"
+            }
+          }
+        }
+      },
+      "write": {
+        "protection": "replace",
+        "on_lost_answer": "Unversioned PUT: re-read before resubmitting. A retry may overwrite intervening edits and repeat history, timestamps or events; the HTTP method alone is not replay protection. Never retry automatically.",
+        "reconcile_with": null,
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "GET /admin/terminals",
+      "access": {
+        "authentication": "user",
+        "permissions": ["admin.terminal.manage"],
+        "permissions_mode": "all",
+        "who": "holders of admin.terminal.manage",
+        "roles_allowed": ["super_admin"]
+      },
+      "idempotency_key": false,
+      "request_body": null
+    },
+    {
+      "endpoint": "POST /admin/terminals",
+      "access": {
+        "authentication": "user",
+        "permissions": ["admin.terminal.manage"],
+        "permissions_mode": "all",
+        "who": "holders of admin.terminal.manage",
+        "roles_allowed": ["super_admin"]
+      },
+      "idempotency_key": true,
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/TerminalIn"
+            }
+          }
+        }
+      },
+      "write": {
+        "protection": "idempotency_key",
+        "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+        "reconcile_with": "GET /admin/terminals",
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "GET /admin/printers",
+      "access": {
+        "authentication": "user",
+        "permissions": ["admin.printer.manage", "admin.terminal.manage"],
+        "permissions_mode": "any",
+        "who": "holders of admin.printer.manage or admin.terminal.manage",
+        "roles_allowed": ["super_admin"]
+      },
+      "idempotency_key": false,
+      "request_body": null
+    },
+    {
+      "endpoint": "POST /admin/printers",
+      "access": {
+        "authentication": "user",
+        "permissions": ["admin.printer.manage"],
+        "permissions_mode": "all",
+        "who": "holders of admin.printer.manage",
+        "roles_allowed": ["super_admin"]
+      },
+      "idempotency_key": true,
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/PrinterIn"
+            }
+          }
+        }
+      },
+      "write": {
+        "protection": "idempotency_key",
+        "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+        "reconcile_with": "GET /admin/printers",
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "GET /admin/badge-stations",
+      "access": {
+        "authentication": "user",
+        "permissions": ["admin.badge_station.manage"],
+        "permissions_mode": "all",
+        "who": "holders of admin.badge_station.manage",
+        "roles_allowed": ["super_admin"]
+      },
+      "idempotency_key": false,
+      "request_body": null
+    },
+    {
+      "endpoint": "PUT /admin/badge-stations/{station_id}",
+      "access": {
+        "authentication": "user",
+        "permissions": ["admin.badge_station.manage"],
+        "permissions_mode": "all",
+        "who": "holders of admin.badge_station.manage",
+        "roles_allowed": ["super_admin"]
+      },
+      "idempotency_key": false,
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/StationIn"
+            }
+          }
+        }
+      },
+      "write": {
+        "protection": "replace",
+        "on_lost_answer": "Unversioned PUT: re-read before resubmitting. A retry may overwrite intervening edits and repeat history, timestamps or events; the HTTP method alone is not replay protection. Never retry automatically.",
+        "reconcile_with": "GET /admin/badge-stations",
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "POST /admin/badge-stations/{station_id}/rotate-key",
+      "access": {
+        "authentication": "user",
+        "permissions": ["admin.badge_station.manage"],
+        "permissions_mode": "all",
+        "who": "holders of admin.badge_station.manage",
+        "roles_allowed": ["super_admin"]
+      },
+      "idempotency_key": false,
+      "request_body": null,
+      "write": {
+        "protection": "repeat_effect",
+        "on_lost_answer": "Repeating this call has another effect: issues another key: only the newest works, use the last answer. Never retry automatically; reconcile the result and require a deliberate new action if still needed.",
+        "reconcile_with": "GET /admin/badge-stations",
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "GET /admin/wards/{ward_id}/bed-labels",
+      "access": {
+        "authentication": "user",
+        "permissions": ["admin.badge_station.manage", "admin.ward.manage"],
+        "permissions_mode": "any",
+        "who": "holders of admin.badge_station.manage or admin.ward.manage",
+        "roles_allowed": ["super_admin"]
+      },
+      "idempotency_key": false,
+      "request_body": null
+    },
+    {
+      "endpoint": "GET /admin/server-health",
+      "access": {
+        "authentication": "user",
+        "permissions": ["admin.server_health.view"],
+        "permissions_mode": "all",
+        "who": "holders of admin.server_health.view",
+        "roles_allowed": ["super_admin"]
+      },
+      "idempotency_key": false,
+      "request_body": null
+    },
+    {
+      "endpoint": "GET /admin/settings",
+      "access": {
+        "authentication": "user",
+        "permissions": ["admin.settings.manage"],
+        "permissions_mode": "all",
+        "who": "holders of admin.settings.manage",
+        "roles_allowed": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "super_admin"
+        ]
+      },
+      "idempotency_key": false,
+      "request_body": null
+    },
+    {
+      "endpoint": "PUT /admin/settings/{key}",
+      "access": {
+        "authentication": "user",
+        "permissions": ["admin.settings.manage"],
+        "permissions_mode": "all",
+        "who": "holders of admin.settings.manage",
+        "roles_allowed": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "super_admin"
+        ]
+      },
+      "idempotency_key": false,
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/SettingIn"
+            }
+          }
+        }
+      },
+      "write": {
+        "protection": "replace",
+        "on_lost_answer": "Unversioned PUT: re-read before resubmitting. A retry may overwrite intervening edits and repeat history, timestamps or events; the HTTP method alone is not replay protection. Never retry automatically.",
+        "reconcile_with": "GET /admin/settings",
+        "emits_events": ["risk.critical_event"],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "PUT /admin/maintenance",
+      "access": {
+        "authentication": "user",
+        "permissions": ["admin.maintenance.manage"],
+        "permissions_mode": "all",
+        "who": "holders of admin.maintenance.manage",
+        "roles_allowed": ["super_admin"]
+      },
+      "idempotency_key": false,
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/MaintenanceIn"
+            }
+          }
+        },
+        "required": true
+      },
+      "write": {
+        "protection": "replace",
+        "on_lost_answer": "Unversioned PUT: re-read before resubmitting. A retry may overwrite intervening edits and repeat history, timestamps or events; the HTTP method alone is not replay protection. Never retry automatically.",
+        "reconcile_with": null,
+        "emits_events": ["system.maintenance"],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "POST /admin/kill-switch",
+      "access": {
+        "authentication": "user",
+        "permissions": ["admin.kill_switch"],
+        "permissions_mode": "all",
+        "who": "holders of admin.kill_switch",
+        "roles_allowed": ["super_admin"]
+      },
+      "idempotency_key": false,
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/KillSwitchIn"
+            }
+          }
+        },
+        "required": true
+      },
+      "write": {
+        "protection": "repeat_effect",
+        "on_lost_answer": "Repeating this call has another effect: also ends any sessions opened since the first call. Never retry automatically; reconcile the result and require a deliberate new action if still needed.",
+        "reconcile_with": null,
+        "emits_events": ["session.revoked"],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "POST /admin/departments",
+      "access": {
+        "authentication": "user",
+        "permissions": ["admin.department.manage"],
+        "permissions_mode": "all",
+        "who": "holders of admin.department.manage",
+        "roles_allowed": ["super_admin"]
+      },
+      "idempotency_key": true,
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/DepartmentIn"
+            }
+          }
+        }
+      },
+      "write": {
+        "protection": "idempotency_key",
+        "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+        "reconcile_with": "GET /admin/departments",
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "POST /admin/wards",
+      "access": {
+        "authentication": "user",
+        "permissions": ["admin.ward.manage"],
+        "permissions_mode": "all",
+        "who": "holders of admin.ward.manage",
+        "roles_allowed": ["super_admin"]
+      },
+      "idempotency_key": true,
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/WardIn"
+            }
+          }
+        }
+      },
+      "write": {
+        "protection": "idempotency_key",
+        "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+        "reconcile_with": null,
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "POST /admin/wards/{ward_id}/beds",
+      "access": {
+        "authentication": "user",
+        "permissions": ["admin.ward.manage"],
+        "permissions_mode": "all",
+        "who": "holders of admin.ward.manage",
+        "roles_allowed": ["super_admin"]
+      },
+      "idempotency_key": true,
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/BedsIn"
+            }
+          }
+        }
+      },
+      "write": {
+        "protection": "idempotency_key",
+        "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+        "reconcile_with": null,
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "POST /ot/theaters",
+      "access": {
+        "authentication": "user",
+        "permissions": ["ot.theater.provision"],
+        "permissions_mode": "all",
+        "who": "holders of ot.theater.provision",
+        "roles_allowed": ["super_admin"]
+      },
+      "idempotency_key": true,
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/TheaterIn"
+            }
+          }
+        }
+      },
+      "write": {
+        "protection": "idempotency_key",
+        "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+        "reconcile_with": "GET /ot/theaters",
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "GET /icd/releases",
+      "access": {
+        "authentication": "user",
+        "permissions": [],
+        "permissions_mode": "all",
+        "who": "any logged-in user"
+      },
+      "idempotency_key": false,
+      "request_body": null
+    },
+    {
+      "endpoint": "POST /icd/releases",
+      "access": {
+        "authentication": "user",
+        "permissions": ["icd.release.manage"],
+        "permissions_mode": "all",
+        "who": "holders of icd.release.manage",
+        "roles_allowed": ["quality_officer", "super_admin"]
+      },
+      "idempotency_key": false,
+      "request_body": {
+        "content": {
+          "multipart/form-data": {
+            "schema": {
+              "$ref": "#/components/schemas/Body_load_release_api_v1_icd_releases_post"
+            }
+          }
+        },
+        "required": true
+      },
+      "write": {
+        "protection": "state_guard",
+        "on_lost_answer": "A repeat is refused with ICD_RELEASE_EXISTS: the release is loaded already. The first call may have succeeded; this error does not replay its result. Never retry automatically; re-read the record, then offer the action again only if it is still needed.",
+        "reconcile_with": "GET /icd/releases",
+        "refused_with": "ICD_RELEASE_EXISTS",
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "POST /icd/releases/{release_id}/activate",
+      "access": {
+        "authentication": "user",
+        "permissions": ["icd.release.manage"],
+        "permissions_mode": "all",
+        "who": "holders of icd.release.manage",
+        "roles_allowed": ["quality_officer", "super_admin"]
+      },
+      "idempotency_key": false,
+      "request_body": null,
+      "write": {
+        "protection": "repeat_safe",
+        "on_lost_answer": "A repeat is harmless for the same state: the release is active already. No response is stored; re-read before resubmitting because newer data may have arrived.",
+        "reconcile_with": "GET /icd/releases",
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "GET /admin/first-owner",
+      "access": {
+        "authentication": "user",
+        "permissions": ["admin.user.provision"],
+        "permissions_mode": "all",
+        "who": "holders of admin.user.provision",
+        "roles_allowed": ["super_admin"]
+      },
+      "idempotency_key": false,
+      "request_body": null
+    },
+    {
+      "endpoint": "POST /admin/first-owner",
+      "access": {
+        "authentication": "user",
+        "permissions": ["admin.user.provision"],
+        "permissions_mode": "all",
+        "who": "holders of admin.user.provision",
+        "roles_allowed": ["super_admin"]
+      },
+      "idempotency_key": false,
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/FirstOwnerIn"
+            }
+          }
+        },
+        "required": true
+      },
+      "write": {
+        "protection": "state_guard",
+        "on_lost_answer": "A repeat is refused with FIRST_OWNER_EXISTS: the first Owner exists already: a repeat creates nobody. The first call may have succeeded; this error does not replay its result. Never retry automatically; re-read the record, then offer the action again only if it is still needed.",
+        "reconcile_with": "GET /admin/first-owner",
+        "refused_with": "FIRST_OWNER_EXISTS",
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "POST /admin/change-requests",
+      "access": {
+        "authentication": "user",
+        "permissions": [],
+        "permissions_mode": "all",
+        "who": "admin.settings.manage for a setting, admin.user.manage for a user's roles, admin.role_matrix.update for a role's permissions (the service checks)"
+      },
+      "idempotency_key": true,
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ChangeRequestIn"
+            }
+          }
+        }
+      },
+      "write": {
+        "protection": "idempotency_key",
+        "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+        "reconcile_with": "GET /admin/change-requests",
+        "emits_events": ["approval.requested", "notification.created"],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "GET /admin/change-requests",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "admin.settings.manage",
+          "admin.user.manage",
+          "admin.role_matrix.update",
+          "approval.policy_change.approve",
+          "approval.privileged_access.approve"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of admin.settings.manage or admin.user.manage or admin.role_matrix.update or approval.policy_change.approve or approval.privileged_access.approve",
+        "roles_allowed": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "super_admin"
+        ]
+      },
+      "idempotency_key": false,
+      "request_body": null
+    },
+    {
+      "endpoint": "GET /admin/change-requests/{change_request_id}",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "admin.settings.manage",
+          "admin.user.manage",
+          "admin.role_matrix.update",
+          "approval.policy_change.approve",
+          "approval.privileged_access.approve"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of admin.settings.manage or admin.user.manage or admin.role_matrix.update or approval.policy_change.approve or approval.privileged_access.approve",
+        "roles_allowed": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "super_admin"
+        ]
+      },
+      "idempotency_key": false,
+      "request_body": null
+    }
+  ],
+  "schemas": {
+    "DepartmentIn": {
+      "properties": {
+        "code": {
+          "type": "string",
+          "maxLength": 20,
+          "minLength": 2,
+          "title": "Code"
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 100,
+          "minLength": 2,
+          "title": "Name"
+        },
+        "is_clinical": {
+          "type": "boolean",
+          "title": "Is Clinical",
+          "default": false
+        },
+        "is_active": {
+          "type": "boolean",
+          "title": "Is Active",
+          "default": true
+        }
+      },
+      "type": "object",
+      "required": ["code", "name"],
+      "title": "DepartmentIn"
+    },
+    "WardIn": {
+      "properties": {
+        "code": {
+          "type": "string",
+          "maxLength": 20,
+          "minLength": 2,
+          "title": "Code"
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 100,
+          "minLength": 2,
+          "title": "Name"
+        },
+        "ward_type": {
+          "type": "string",
+          "enum": [
+            "General",
+            "Private",
+            "SemiPrivate",
+            "ICU",
+            "CCU",
+            "NICU",
+            "Surgical",
+            "Pediatric",
+            "Maternity",
+            "Emergency",
+            "Isolation",
+            "Other"
+          ],
+          "title": "Ward Type"
+        },
+        "gender_restriction": {
+          "type": "string",
+          "enum": ["male", "female", "any"],
+          "title": "Gender Restriction",
+          "default": "any"
+        },
+        "department_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Department Id"
+        },
+        "room_charge_service_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Room Charge Service Id",
+          "description": "Per bed-day charge (service catalog, category RoomCharge)"
+        },
+        "is_active": {
+          "type": "boolean",
+          "title": "Is Active",
+          "default": true
+        }
+      },
+      "type": "object",
+      "required": ["code", "name", "ward_type"],
+      "title": "WardIn"
+    },
+    "PrinterIn": {
+      "properties": {
+        "name": {
+          "type": "string",
+          "maxLength": 100,
+          "minLength": 2,
+          "title": "Name",
+          "examples": ["Lab Requisition Printer B"]
+        },
+        "printer_type": {
+          "type": "string",
+          "enum": [
+            "ThermalReceipt",
+            "BarcodeLabel",
+            "PVCCard",
+            "Laser",
+            "Other"
+          ],
+          "title": "Printer Type"
+        },
+        "connection": {
+          "type": "string",
+          "enum": ["USB", "Network", "Shared", "Bluetooth", "Other"],
+          "title": "Connection"
+        },
+        "address": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Address",
+          "description": "OS printer name, \\\\PC\\Printer or 192.168.1.40:9100"
+        },
+        "paper_width_mm": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "maximum": 400,
+              "minimum": 30
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Paper Width Mm"
+        },
+        "driver": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Driver"
+        },
+        "is_active": {
+          "type": "boolean",
+          "title": "Is Active",
+          "default": true
+        }
+      },
+      "type": "object",
+      "required": ["name", "printer_type", "connection"],
+      "title": "PrinterIn"
+    },
+    "TerminalIn": {
+      "properties": {
+        "mac": {
+          "type": "string",
+          "pattern": "^([0-9A-Fa-f]{2}[:-]){5}[0-9A-Fa-f]{2}$",
+          "title": "Mac",
+          "examples": ["3C:52:82:1A:2B:3C"]
+        },
+        "ip": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ip",
+          "examples": ["192.168.1.15"]
+        },
+        "hostname": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Hostname"
+        },
+        "location_label": {
+          "type": "string",
+          "maxLength": 100,
+          "minLength": 2,
+          "title": "Location Label",
+          "examples": ["Lab Reception PC 2"]
+        },
+        "department_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Department Id"
+        },
+        "receipt_printer_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Receipt Printer Id"
+        },
+        "label_printer_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Label Printer Id"
+        },
+        "document_printer_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Document Printer Id"
+        },
+        "card_printer_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Card Printer Id"
+        },
+        "cash_node": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "MainReception",
+                "PharmacyCounter",
+                "LabReception",
+                "IPDBilling",
+                "EmergencyCounter",
+                "CashierDesk"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cash Node"
+        },
+        "is_active": {
+          "type": "boolean",
+          "title": "Is Active",
+          "default": true
+        }
+      },
+      "type": "object",
+      "required": ["mac", "location_label"],
+      "title": "TerminalIn"
+    },
+    "ProvisionIn": {
+      "properties": {
+        "employee_id": {
+          "type": "integer",
+          "title": "Employee Id"
+        },
+        "username": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-z0-9._-]{3,64}$"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Username",
+          "description": "Suggested from the name if omitted"
+        },
+        "role_codes": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "minItems": 1,
+          "title": "Role Codes",
+          "description": "Multi-select checklist, e.g. ['clinical_specialist','hospital_admin']"
+        }
+      },
+      "type": "object",
+      "required": ["employee_id", "role_codes"],
+      "title": "ProvisionIn"
+    },
+    "RolesIn": {
+      "properties": {
+        "role_codes": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "minItems": 1,
+          "title": "Role Codes"
+        }
+      },
+      "type": "object",
+      "required": ["role_codes"],
+      "title": "RolesIn"
+    },
+    "ActiveIn": {
+      "properties": {
+        "active": {
+          "type": "boolean",
+          "title": "Active"
+        },
+        "reason": {
+          "type": "string",
+          "maxLength": 300,
+          "minLength": 3,
+          "title": "Reason"
+        }
+      },
+      "type": "object",
+      "required": ["active", "reason"],
+      "title": "ActiveIn"
+    },
+    "PermissionsIn": {
+      "properties": {
+        "permission_codes": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Permission Codes"
+        }
+      },
+      "type": "object",
+      "required": ["permission_codes"],
+      "title": "PermissionsIn"
+    },
+    "StationIn": {
+      "properties": {
+        "station_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{2,64}$",
+          "title": "Station Id",
+          "examples": ["WARD3-KIOSK", "GATE-STAFF"]
+        },
+        "label": {
+          "type": "string",
+          "maxLength": 100,
+          "minLength": 2,
+          "title": "Label"
+        },
+        "device_type": {
+          "type": "string",
+          "enum": ["RFIDReader", "BarcodeScanner", "BiometricTerminal"],
+          "title": "Device Type",
+          "description": "The hardware; the API is the same for all (BarcodeScanner = kiosk PC/tablet reading printed QR badges)",
+          "default": "RFIDReader"
+        },
+        "location_type": {
+          "type": "string",
+          "enum": [
+            "Bed",
+            "Ward",
+            "Gate",
+            "OT",
+            "Pharmacy",
+            "Lab",
+            "StaffEntrance"
+          ],
+          "title": "Location Type"
+        },
+        "action_type": {
+          "type": "string",
+          "enum": ["AttendancePunch", "BedCleaned", "SecurityPass", "Generic"],
+          "title": "Action Type"
+        },
+        "ward_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ward Id",
+          "description": "BedCleaned without bed_id: the ward whose bed QR stickers this kiosk scans"
+        },
+        "bed_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Bed Id",
+          "description": "BedCleaned: the bed this station hangs at (or leave empty for a ward kiosk)"
+        },
+        "is_active": {
+          "type": "boolean",
+          "title": "Is Active",
+          "default": true
+        }
+      },
+      "type": "object",
+      "required": ["station_id", "label", "location_type", "action_type"],
+      "title": "StationIn"
+    },
+    "SettingIn": {
+      "properties": {
+        "value": {
+          "title": "Value",
+          "description": "JSON value of the same type as the current one"
+        }
+      },
+      "type": "object",
+      "required": ["value"],
+      "title": "SettingIn"
+    },
+    "MaintenanceIn": {
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "title": "Enabled"
+        },
+        "message": {
+          "type": "string",
+          "maxLength": 300,
+          "title": "Message",
+          "default": ""
+        }
+      },
+      "type": "object",
+      "required": ["enabled"],
+      "title": "MaintenanceIn"
+    },
+    "KillSwitchIn": {
+      "properties": {
+        "reason": {
+          "type": "string",
+          "maxLength": 500,
+          "minLength": 5,
+          "title": "Reason"
+        },
+        "confirm": {
+          "type": "string",
+          "const": "FORCE GLOBAL LOGOUT",
+          "title": "Confirm",
+          "description": "Type exactly \"FORCE GLOBAL LOGOUT\" (dangerous, emergency only)"
+        }
+      },
+      "type": "object",
+      "required": ["reason", "confirm"],
+      "title": "KillSwitchIn"
+    },
+    "BedsIn": {
+      "properties": {
+        "labels": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "maxItems": 200,
+          "minItems": 1,
+          "title": "Labels",
+          "examples": [["B-1", "B-2", "B-3"]]
+        },
+        "is_overflow_allowed": {
+          "type": "boolean",
+          "title": "Is Overflow Allowed",
+          "default": false
+        }
+      },
+      "type": "object",
+      "required": ["labels"],
+      "title": "BedsIn"
+    },
+    "TheaterIn": {
+      "properties": {
+        "code": {
+          "type": "string",
+          "maxLength": 20,
+          "minLength": 2,
+          "title": "Code",
+          "examples": ["OT1"]
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 100,
+          "minLength": 2,
+          "title": "Name",
+          "examples": ["Main OT 1"]
+        },
+        "theater_type": {
+          "type": "string",
+          "title": "Theater Type",
+          "default": "General",
+          "examples": ["General", "Cardiac", "Orthopedic"]
+        }
+      },
+      "type": "object",
+      "required": ["code", "name"],
+      "title": "TheaterIn"
+    },
+    "FirstOwnerIn": {
+      "properties": {
+        "full_name": {
+          "type": "string",
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Full Name",
+          "examples": ["Dr. Ayesha Malik"]
+        },
+        "cnic": {
+          "type": "string",
+          "pattern": "^[0-9]{5}-?[0-9]{7}-?[0-9]$",
+          "title": "Cnic",
+          "description": "Required of every member of staff (§6.1)",
+          "examples": ["35202-1234567-1"]
+        },
+        "mobile": {
+          "type": "string",
+          "pattern": "^\\+?[0-9][0-9 -]{6,19}$",
+          "title": "Mobile",
+          "examples": ["0300-1234567"]
+        },
+        "gender": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": ["male", "female", "other"]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Gender"
+        },
+        "dob": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Dob"
+        },
+        "email": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 200
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Email"
+        },
+        "designation": {
+          "type": "string",
+          "maxLength": 100,
+          "minLength": 1,
+          "title": "Designation",
+          "default": "Owner"
+        },
+        "username": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-z0-9._-]{3,64}$"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Username",
+          "description": "Suggested from the name if omitted"
+        },
+        "roles": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "maxItems": 10,
+          "title": "Roles",
+          "description": "Roles besides owner (always given), e.g. ['hr_admin'] or, in a small clinic, ['hr_admin', 'doctor']; never super_admin or phc_inspector"
+        }
+      },
+      "type": "object",
+      "required": ["full_name", "cnic", "mobile"],
+      "title": "FirstOwnerIn"
+    },
+    "ChangeRequestIn": {
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": ["Setting", "UserRoles", "RolePermissions"],
+          "title": "Kind"
+        },
+        "setting_key": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Setting Key"
+        },
+        "target_user_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Target User Id"
+        },
+        "target_role_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Target Role Code"
+        },
+        "requested_value": {
+          "title": "Requested Value",
+          "description": "Setting: the new value; UserRoles: role codes; RolePermissions: permission codes"
+        },
+        "reason": {
+          "type": "string",
+          "maxLength": 500,
+          "minLength": 3,
+          "title": "Reason"
+        }
+      },
+      "type": "object",
+      "required": ["kind", "requested_value", "reason"],
+      "title": "ChangeRequestIn"
+    }
+  }
+}

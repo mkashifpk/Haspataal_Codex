@@ -1,5 +1,5 @@
 import { tr } from "../i18n";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { api, call } from "../bridge";
 import { Details, ErrorBox, Field, LoadState, useLoad } from "../components";
 import type {
@@ -8,23 +8,32 @@ import type {
   AdminChangeRequestOut,
 } from "../generated/settings";
 import { ChangePassword } from "./Login";
+import { ITConsole } from "./ITConsole";
 import { hasUnsavedChanges } from "../unsaved";
+import {
+  writeAttempt,
+  canRetryWrite,
+  definiteWriteRefusal,
+  type WriteAttempt,
+} from "../write-attempt";
 export function Settings({
   user,
   prefs,
   onPrefs,
   onFacility,
   connected,
+  revision = 0,
 }: {
   user: any;
   prefs: any;
   onPrefs: () => void;
   onFacility: () => void;
   connected: boolean;
+  revision?: number;
 }) {
   const result = useLoad(
     () => api<SettingsSectionsOut>("GET", "/settings/sections"),
-    [user?.user_id],
+    [user?.user_id, user?.permissions?.join(","), revision],
   );
   const [section, setSection] = useState("preferences"),
     [error, setError] = useState<unknown>(),
@@ -53,7 +62,7 @@ export function Settings({
         <aside className="settings-nav">
           {result.data?.tiers.map((t) => (
             <div key={t.tier}>
-              <h3>{t.label}</h3>
+              <h3>{tr(t.label)}</h3>
               {t.sections.map((s) => (
                 <button
                   data-help="settings.sections"
@@ -79,7 +88,7 @@ export function Settings({
                       : setSection(s.key);
                   }}
                 >
-                  {s.label}
+                  {tr(s.label)}
                   {s.danger ? " ⚠" : ""}
                 </button>
               ))}
@@ -90,12 +99,18 @@ export function Settings({
           <ErrorBox error={error} />
           {["preferences", "login_display"].includes(chosen) && (
             <>
-              <h2>{user ? "Your display preferences" : "Login display"}</h2>
+              <h2>{tr(user ? "Your display preferences" : "Login display")}</h2>
               <p className="muted">
-                {user
-                  ? "Saved with your account on the hospital server."
-                  : "Saved only on this terminal. Signing in loads your own preferences."}
+                {tr(
+                  user
+                    ? "Saved with your account on the hospital server."
+                    : "Saved only on this terminal. Signing in loads your own preferences.",
+                )}
               </p>
+              {user && <button data-help="settings.display" disabled={busy || !connected} onClick={async()=>{
+                setBusy(true);setError(undefined);
+                try {await call("prefs-refresh");onPrefs();} catch(cause){setError(cause);} finally {setBusy(false);}
+              }}>{tr("Reload preferences")}</button>}
               <Field label={tr("Language")}>
                 <select
                   data-help="settings.display"
@@ -121,7 +136,7 @@ export function Settings({
                 </select>
               </Field>
               <Field
-                label={`Display size · ${prefs.ui_scale_pct}%`}
+                label={`${tr("Display size")} · ${prefs.ui_scale_pct}%`}
                 hint={tr("Ctrl/Cmd +, − and 0 use this same setting.")}
               >
                 <input
@@ -162,24 +177,28 @@ export function Settings({
               )}
             </>
           )}
-          {chosen === "password" && <ChangePassword onDone={onPrefs} />}{" "}
+          {chosen === "password" && (
+            <ChangePassword settings onDone={onPrefs} />
+          )}{" "}
           {chosen === "connection" && <Diagnostics />}
           {chosen === "terminal_identity" && <TerminalIdentity />}
-          {chosen === "policy" && <Policy />}
-          {![
-            "preferences",
-            "login_display",
-            "password",
-            "connection",
-            "terminal_identity",
-            "policy",
-          ].includes(chosen) && (
-            <p>
-              {tr(
-                "This system section belongs to the IT workspace, outside this foundation build.",
-              )}
-            </p>
-          )}
+          {chosen === "policy" && <Policy revision={revision} />}
+          {user &&
+            result.data?.tiers.some(
+              (t) =>
+                t.tier === "system" &&
+                t.sections.some(
+                  (s) => s.key === chosen && s.screen === "it_console",
+                ),
+            ) && (
+              <ITConsole
+                key={chosen}
+                section={chosen}
+                permissions={user.permissions}
+                userId={user.user_id}
+                revision={revision}
+              />
+            )}
         </section>
       </div>
     </>
@@ -224,26 +243,75 @@ export function TerminalIdentity() {
     </>
   );
 }
-function Policy() {
-  const r = useLoad(async () => ({
-    settings: await api<SettingOut[]>("GET", "/admin/settings"),
-    requests: await api<AdminChangeRequestOut[]>(
-      "GET",
-      "/admin/change-requests",
-    ),
-  }));
+function Policy({ revision }: { revision: number }) {
+  const r = useLoad(
+    async () => ({
+      settings: await api<SettingOut[]>("GET", "/admin/settings"),
+      requests: await api<AdminChangeRequestOut[]>(
+        "GET",
+        "/admin/change-requests",
+      ),
+    }),
+    [revision],
+  );
   const [selected, setSelected] = useState<SettingOut>(),
     [value, setValue] = useState(""),
     [reason, setReason] = useState(""),
     [error, setError] = useState<unknown>(),
     [busy, setBusy] = useState(false),
     [message, setMessage] = useState("");
+  type PolicyWrite = { method: "POST" | "PUT"; path: string; payload: unknown };
+  const [pending, setPending] = useState<WriteAttempt<PolicyWrite>>(),
+    [requestDetail, setRequestDetail] = useState<AdminChangeRequestOut>();
+  const flight = useRef(false),
+    detailGeneration = useRef(0);
+  async function submitPolicy(attempt: WriteAttempt<PolicyWrite>) {
+    if (flight.current || !canRetryWrite(attempt)) return;
+    flight.current = true;
+    setBusy(true);
+    setError(undefined);
+    setPending(attempt);
+    try {
+      const result = await api<any>(
+        attempt.body.method,
+        attempt.body.path,
+        attempt.body.payload,
+        { key: attempt.key },
+      );
+      setPending(undefined);
+      setSelected(undefined);
+      setMessage(
+        result.change_request_id
+          ? `${result.status === "Pending" ? tr("Waiting for an Owner") : result.status} · ${result.change_request_id}`
+          : tr("Policy saved."),
+      );
+      if (result.change_request_id) {
+        try {
+          setRequestDetail(
+            await api(
+              "GET",
+              `/admin/change-requests/${result.change_request_id}`,
+            ),
+          );
+        } catch (cause) {
+          setError(cause);
+        }
+      }
+      await r.reload();
+    } catch (cause) {
+      setError(cause);
+      if (definiteWriteRefusal(cause)) setPending(undefined);
+    } finally {
+      flight.current = false;
+      setBusy(false);
+    }
+  }
   return (
     <div
       data-unsaved={
         !!selected && (value !== JSON.stringify(selected.value) || !!reason)
       }
-      data-write-pending={busy}
+      data-write-pending={busy || !!pending}
     >
       <h2>{tr("Hospital policy")}</h2>
       <p className="muted">
@@ -263,7 +331,7 @@ function Policy() {
           <button
             data-help="settings.policy"
             className="list-row"
-            disabled={busy}
+            disabled={busy || !!pending}
             key={s.key}
             onClick={() => {
               if (
@@ -287,7 +355,7 @@ function Policy() {
         <form
           onSubmit={async (e) => {
             e.preventDefault();
-            setBusy(true);
+            if (flight.current || pending) return;
             setError(undefined);
             try {
               const parsed = JSON.parse(value);
@@ -299,35 +367,29 @@ function Policy() {
                   "Keep the same value type as the current setting.",
                 );
               if (selected.is_control) {
-                const d = await api<AdminChangeRequestOut>(
-                  "POST",
-                  "/admin/change-requests",
-                  {
-                    kind: "Setting",
-                    setting_key: selected.key,
-                    requested_value: parsed,
-                    reason,
-                  },
-                );
-                setMessage(
-                  d.status === "Pending"
-                    ? "Waiting for an Owner"
-                    : `Change ${d.status}`,
+                await submitPolicy(
+                  writeAttempt({
+                    method: "POST",
+                    path: "/admin/change-requests",
+                    payload: {
+                      kind: "Setting",
+                      setting_key: selected.key,
+                      requested_value: parsed,
+                      reason,
+                    },
+                  }),
                 );
               } else {
-                await api(
-                  "PUT",
-                  "/admin/settings/" + encodeURIComponent(selected.key),
-                  { value: parsed },
+                await submitPolicy(
+                  writeAttempt({
+                    method: "PUT",
+                    path: "/admin/settings/" + encodeURIComponent(selected.key),
+                    payload: { value: parsed },
+                  }),
                 );
-                setMessage("Policy saved.");
               }
-              setSelected(undefined);
-              await r.reload();
             } catch (err) {
               setError(err);
-            } finally {
-              setBusy(false);
             }
           }}
         >
@@ -342,6 +404,7 @@ function Policy() {
             <textarea
               data-help="settings.policy"
               required
+              disabled={busy || !!pending}
               value={value}
               onChange={(e) => setValue(e.target.value)}
             />
@@ -351,6 +414,7 @@ function Policy() {
               <textarea
                 data-help="settings.policy"
                 required
+                disabled={busy || !!pending}
                 minLength={3}
                 maxLength={500}
                 value={reason}
@@ -362,7 +426,7 @@ function Policy() {
             <button
               data-help="settings.policy"
               type="button"
-              disabled={busy}
+              disabled={busy || !!pending}
               onClick={() => setSelected(undefined)}
             >
               {tr("Cancel")}
@@ -370,12 +434,47 @@ function Policy() {
             <button
               data-help="settings.policy"
               className="primary"
-              disabled={busy}
+              disabled={busy || !!pending}
             >
               {tr("Save policy")}
             </button>
           </div>
         </form>
+      )}
+      {pending && !busy && (
+        <section className="notice" role="status">
+          <h3>{tr("Policy outcome needs checking")}</h3>
+          <p>
+            {tr(
+              "The original value and request identity are held in this window. Check recent requests and current policy before retrying. A confirmed request must not be replaced just because its follow-up read failed.",
+            )}
+          </p>
+          <button data-help="settings.recovery" onClick={() => void r.reload()}>
+            {tr("Check policy and requests")}
+          </button>
+          <button
+            data-help="settings.recovery"
+            disabled={!canRetryWrite(pending)}
+            onClick={() => void submitPolicy(pending)}
+          >
+            {tr("Retry original request")}
+          </button>
+          <button
+            data-help="settings.recovery"
+            onClick={() => {
+              if (
+                window.confirm(
+                  tr(
+                    "Only clear this hold after the responsible supervisor has reconciled the original request. This does not report success or undo anything. Continue?",
+                  ),
+                )
+              )
+                setPending(undefined);
+            }}
+          >
+            {tr("Close reviewed attempt")}
+          </button>
+        </section>
       )}
       <h3>{tr("Recent change requests")}</h3>
       {r.data?.requests.map((q) => (
@@ -384,8 +483,27 @@ function Policy() {
             {q.setting_key || q.kind} · {q.status}
           </summary>
           <Details value={q} />
+          <button
+            data-help="settings.requests"
+            onClick={async () => {
+              const generation = ++detailGeneration.current;
+              try {
+                const detail = await api<AdminChangeRequestOut>(
+                  "GET",
+                  `/admin/change-requests/${q.change_request_id}`,
+                );
+                if (generation === detailGeneration.current)
+                  setRequestDetail(detail);
+              } catch (cause) {
+                if (generation === detailGeneration.current) setError(cause);
+              }
+            }}
+          >
+            {tr("Open request")} {q.change_request_id}
+          </button>
         </details>
       ))}
+      {requestDetail && <Details value={requestDetail} />}
     </div>
   );
 }

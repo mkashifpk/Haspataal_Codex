@@ -75,7 +75,13 @@ export function Modal({
     return () => old?.focus();
   }, []);
   return (
-    <dialog ref={ref} onCancel={onClose}>
+    <dialog
+      ref={ref}
+      onCancel={(event) => {
+        event.preventDefault();
+        onClose();
+      }}
+    >
       <div className="dialog-head">
         <h2>{title}</h2>
         <button

@@ -27,6 +27,7 @@ function request(
     body,
     bootstrap = false,
     binary = false,
+    timeoutMs = 10000,
   } = {},
 ) {
   return new Promise((resolve, reject) => {
@@ -69,7 +70,7 @@ function request(
         method,
         ca,
         rejectUnauthorized: !bootstrap,
-        timeout: 10000,
+        timeout: timeoutMs,
         headers: {
           ...headers,
           ...(data
@@ -81,6 +82,10 @@ function request(
         },
       },
       (res) => {
+        res.on("error", reject);
+        res.on("aborted", () =>
+          reject(new Error("Server reply was interrupted")),
+        );
         const parts = [];
         let size = 0;
         res.on("data", (chunk) => {

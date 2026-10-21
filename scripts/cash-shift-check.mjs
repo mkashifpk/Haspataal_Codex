@@ -1,3 +1,4 @@
+import { terminalPage } from "./terminal-page.mjs";
 // Real DEV reads and restored preferences only. Never opens/closes a drawer.
 import { _electron as electron } from "playwright";
 import { expect } from "playwright/test";
@@ -28,7 +29,7 @@ async function invoke(action, args) {
 }
 try {
   app = await electron.launch({ args: ["."], env });
-  page = await app.firstWindow();
+  page = await terminalPage(app);
   page.setDefaultTimeout(30000);
   page.on("pageerror", (error) => errors.push(error.message));
   await page.setViewportSize({ width: 1400, height: 1000 });

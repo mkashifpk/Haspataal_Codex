@@ -1,29 +1,58 @@
 const {
   app,
   BrowserWindow,
+  WebContentsView,
   ipcMain,
   safeStorage,
   dialog,
   session,
+  protocol,
+  net,
 } = require("electron");
 const fs = require("node:fs");
 const path = require("node:path");
 const os = require("node:os");
-const { execFile } = require("node:child_process");
 const { X509Certificate } = require("node:crypto");
 const { pathToFileURL } = require("node:url");
+const { assetUrl } = require("./local-assets.cjs");
+const { migrateRecovery } = require("./recovery-migration.cjs");
+let recoveryMigrationError;
+let hasAppWindow = false;
+const terminalUrl = "app://terminal/index.html";
+protocol.registerSchemesAsPrivileged([
+  {
+    scheme: "app",
+    privileges: {
+      standard: true,
+      secure: true,
+      supportFetchAPI: true,
+      corsEnabled: true,
+    },
+  },
+]);
 const WebSocket = require("ws");
 const { request, checkedRoot } = require("./transport.cjs");
 const { discover } = require("./discovery.cjs");
 const { validate, permissionAllows } = require("./contract.cjs");
 const { createPreferenceQueue } = require("./preference-queue.cjs");
 const { isDegradedHealthResponse } = require("./health-response.cjs");
+const {
+  selectConfiguration,
+  serverAddresses,
+  discoveryPort,
+} = require("./provisioning.cjs");
 let server = null,
   auth = null,
   refreshFlight = null,
   refreshTimer,
   recoveryTimer,
-  recoveryStep = 0;
+  recoveryStep = 0,
+  addressFlight = null,
+  configuredDiscoveryPort = 47632,
+  provisioningPending = false,
+  managedConnection = false,
+  recoveryRunning = false;
+let credentialFlight = false;
 let connected = false,
   pendingCa = null,
   prefs = { theme: "Light", language: "en", ui_scale_pct: 100 };
@@ -77,17 +106,32 @@ function publicServer() {
     : null;
 }
 function state() {
-  return { server: publicServer(), connected, user: auth?.user || null, prefs };
+  return {
+    server: publicServer(),
+    connected,
+    user: auth?.user || null,
+    prefs,
+    sessionRecovery: auth?.recovery || null,
+  };
+}
+function stopStreams() {
+  for (const stream of streams.values()) {
+    stream.stopped = true;
+    clearTimeout(stream.timer);
+    stream.socket?.close();
+  }
+  streams.clear();
 }
 function clearSession(reason = "Signed out") {
   preferenceContext++;
   clearTimeout(refreshTimer);
   auth = null;
   refreshFlight = null;
+  let storageFailure = false;
   try {
     fs.unlinkSync(tokenFile());
   } catch (e) {
-    if (e.code !== "ENOENT") throw e;
+    if (e.code !== "ENOENT") storageFailure = true;
   }
   for (const stream of streams.values()) {
     stream.stopped = true;
@@ -103,6 +147,14 @@ function clearSession(reason = "Signed out") {
   };
   applyZoom(prefs.ui_scale_pct);
   broadcast({ type: "logout", reason });
+  if (storageFailure)
+    broadcast({
+      type: "error",
+      error: {
+        message:
+          "The secure session cache could not be removed. The session is closed; ask IT to check terminal storage.",
+      },
+    });
 }
 function acceptTokens(data) {
   if (
@@ -113,14 +165,16 @@ function acceptTokens(data) {
     throw new Error("CONTRACT_MISMATCH: token response is incomplete");
   if (!safeStorage.isEncryptionAvailable())
     throw new Error("Windows secure token storage is unavailable");
+  const encrypted = safeStorage.encryptString(data.refresh_token);
+  fs.writeFileSync(tokenFile(), encrypted);
   auth = {
     ...auth,
     access: data.access_token,
     refresh: data.refresh_token,
     expires: Date.now() + data.expires_in * 1000,
     user: data.user || auth?.user,
+    recovery: null,
   };
-  fs.writeFileSync(tokenFile(), safeStorage.encryptString(data.refresh_token));
   clearTimeout(refreshTimer);
   refreshTimer = setTimeout(
     () => refresh().catch(() => {}),
@@ -158,8 +212,10 @@ function apiPath(p) {
 }
 async function raw(method, p, body, workspace, key, binary = false) {
   if (!server?.current) throw new Error("Connect to the hospital server first");
-  try {
-    const result = await request(server.current + apiPath(p), {
+  const originalServer = server;
+  const originalUrl = server.current;
+  const send = () =>
+    request(server.current + apiPath(p), {
       ca: server.ca_pem,
       method,
       body,
@@ -169,15 +225,36 @@ async function raw(method, p, body, workspace, key, binary = false) {
       },
       binary,
     });
+  try {
+    const result = await send();
     if (!connected) {
       connected = true;
       broadcast({ type: "connection", connected: true });
     }
     return result;
   } catch (e) {
-    connected = false;
-    broadcast({ type: "connection", connected: false });
-    scheduleRecovery();
+    if (server !== originalServer) throw e;
+    try {
+      // Probe the other pinned addresses before announcing an outage. A write
+      // may have committed: only reads can be repeated automatically.
+      await pickAddress(originalUrl);
+      broadcast({ type: "connection", connected: true });
+    } catch {
+      connected = false;
+      broadcast({ type: "connection", connected: false });
+      scheduleRecovery();
+      throw e;
+    }
+    if (method === "GET") {
+      try {
+        return await send();
+      } catch (readError) {
+        connected = false;
+        broadcast({ type: "connection", connected: false });
+        scheduleRecovery();
+        throw readError;
+      }
+    }
     throw e;
   }
 }
@@ -196,6 +273,19 @@ function errorResult(result) {
 async function refresh() {
   if (refreshFlight) return refreshFlight;
   if (!auth?.refresh) throw new Error("Sign in again");
+  if (credentialFlight) {
+    clearTimeout(refreshTimer);
+    refreshTimer = setTimeout(() => refresh().catch(() => {}), 5000);
+    throw new Error("An account action is already pending.");
+  }
+  if (auth.recovery) throw new Error(auth.recovery);
+  if (!connected) {
+    clearTimeout(refreshTimer);
+    refreshTimer = setTimeout(() => refresh().catch(() => {}), 30000);
+    throw new Error(
+      "Server unreachable. Your input is preserved; waiting to renew your session.",
+    );
+  }
   refreshFlight = (async () => {
     try {
       const r = await raw("POST", "/auth/refresh", {
@@ -203,13 +293,27 @@ async function refresh() {
       });
       if (r.status !== 200) {
         const message = r.body?.error?.message || "Session refresh failed";
-        clearSession(message);
+        if (r.status >= 400 && r.status < 500 && ![408, 429].includes(r.status))
+          clearSession(message);
         throw new Error(message);
       }
       acceptTokens(r.body.data);
     } catch (e) {
-      if (auth)
-        clearSession("Session refresh could not be confirmed. Sign in again.");
+      if (auth) {
+        // A lost rotation must never reuse the old refresh token. Keep drafts
+        // mounted, block authenticated operations and ask the SAME user to sign
+        // in explicitly. Revocation/refusal above still clears every window.
+        auth.recovery =
+          "Session renewal could not be confirmed. Sign in again to keep working; your unsaved input is preserved.";
+        clearTimeout(refreshTimer);
+        for (const stream of streams.values()) {
+          stream.stopped = true;
+          clearTimeout(stream.timer);
+          stream.socket?.close();
+        }
+        streams.clear();
+        broadcast({ type: "session-recovery", message: auth.recovery });
+      }
       throw e;
     } finally {
       refreshFlight = null;
@@ -229,10 +333,15 @@ function matchOperation(method, p) {
   });
 }
 async function api(method, p, body, workspace, key, retried = false) {
+  if (method === "POST" && p === "/establishment/changes" && recoveryMigrationError)
+    throw new Error(recoveryMigrationError);
   const op = matchOperation(method, p);
   if (!op && !["/health", "/health/live"].includes(p))
     throw new Error("Endpoint is outside the foundation contract");
-  if (auth && Date.now() > auth.expires - 60000) await refresh();
+  if (auth?.recovery && op?.access.authentication !== "public")
+    throw new Error(auth.recovery);
+  if (auth && !auth.recovery && Date.now() > auth.expires - 60000)
+    await refresh();
   if (op?.access.authentication === "user" && !auth)
     return {
       ok: false,
@@ -256,7 +365,10 @@ async function api(method, p, body, workspace, key, retried = false) {
           "Server unreachable. Your input has been kept; reconnect before saving.",
       },
     };
+  const requestSession = auth;
   const r = await raw(method, p, body, workspace, key);
+  if (requestSession && requestSession !== auth)
+    return { ok: false, error: { code: "SESSION_CHANGED", message: "The account session changed while reading this result. Reload the current view." } };
   if (!retried && r.status === 401 && r.body?.error?.code === "TOKEN_EXPIRED") {
     await refresh();
     return api(method, p, body, workspace, key, true);
@@ -311,20 +423,37 @@ async function refreshAddresses() {
     throw new Error("Hospital certificate identity has changed. Ask IT.");
   if (!Array.isArray(info.urls))
     throw new Error("CONTRACT_MISMATCH: server addresses missing");
-  server.urls = [...new Set([...info.urls, ...server.urls])];
+  server.urls = [...new Set([...serverAddresses(info.urls), ...server.urls])];
   server.hospital_name = info.hospital_name;
   fs.writeFileSync(locationFile(), JSON.stringify(server));
   return info;
 }
-async function pickAddress() {
+async function pickAddress(failedUrl) {
+  if (addressFlight) return addressFlight;
+  const target = server;
+  addressFlight = pickPinnedAddress(target, failedUrl);
+  try {
+    return await addressFlight;
+  } finally {
+    addressFlight = null;
+  }
+}
+async function pickPinnedAddress(target, failedUrl) {
   let lastError;
-  for (const url of [
-    ...new Set([server.current, ...server.urls].filter(Boolean)),
-  ]) {
+  const urls = [...new Set([target.current, ...target.urls].filter(Boolean))];
+  if (failedUrl)
+    urls.sort((a, b) => Number(a === failedUrl) - Number(b === failedUrl));
+  for (const url of urls) {
     try {
-      const r = await request(url + "/health/live", { ca: server.ca_pem });
+      const r = await request(url + "/health/live", {
+        ca: target.ca_pem,
+        timeoutMs: 4000,
+      });
       if (r.status === 200) {
-        server.current = url;
+        if (server !== target)
+          throw new Error("Hospital server selection changed");
+        target.current = url;
+        fs.writeFileSync(locationFile(), JSON.stringify(target));
         connected = true;
         return;
       }
@@ -336,17 +465,24 @@ async function pickAddress() {
   throw lastError || new Error("Hospital server is unreachable");
 }
 function scheduleRecovery() {
-  if (recoveryTimer || !server) return;
+  if (recoveryTimer || recoveryRunning || (!server && !provisioningPending))
+    return;
   recoveryTimer = setTimeout(async () => {
     recoveryTimer = null;
+    recoveryRunning = true;
+    let failed = false;
     try {
-      await pickAddress();
+      if (server) await pickAddress();
+      else await loadProvisioning();
       recoveryStep = 0;
       broadcast({ type: "connection", connected: true });
       for (const id of streams.keys()) connectStream(id);
     } catch {
       recoveryStep++;
-      scheduleRecovery();
+      failed = true;
+    } finally {
+      recoveryRunning = false;
+      if (failed) scheduleRecovery();
     }
   }, [1000, 2000, 5000, 10000, 30000][Math.min(recoveryStep, 4)]);
 }
@@ -359,6 +495,17 @@ function applyZoom(value) {
   return zoom;
 }
 async function savePrefs(value, owner) {
+  if (value.__readPreferences) {
+    if (!auth) throw new Error("Sign in before reloading account preferences");
+    const r = await api("GET", "/settings/me");
+    if (!r.ok) return r;
+    if (owner !== preferenceContext || !auth)
+      throw new Error("The session changed while reading preferences.");
+    prefs = r.data;
+    auth.user.preferences = prefs;
+    applyZoom(prefs.ui_scale_pct);
+    return {ok:true,data:prefs};
+  }
   if (value.ui_scale_pct !== undefined)
     value.ui_scale_pct = Math.max(
       100,
@@ -379,9 +526,18 @@ async function savePrefs(value, owner) {
   broadcast({ type: "prefs", prefs });
   return { ok: true, data: prefs };
 }
+async function readAccountDisplay() {
+  if (auth?.user.must_change_password) return;
+  try {
+    const r = await queuePrefs({__readPreferences:true});
+    if (!r.ok) throw new Error(r.error?.message || "Preference read failed");
+  } catch {
+    return "Your session is confirmed, but display preferences could not be reloaded. The server's session preferences are shown. Use Settings > Reload preferences after reconnecting; do not repeat sign-in or password changes.";
+  }
+}
 function connectStream(id) {
   const win = BrowserWindow.fromId(id);
-  if (!win || !auth || !connected) return;
+  if (!win || !auth || auth.recovery || !connected) return;
   let stream = streams.get(id);
   if (!stream) {
     stream = { last: null, seen: new Set(), backoff: 1000, stopped: false };
@@ -412,6 +568,12 @@ function connectStream(id) {
       );
   });
   socket.on("message", (raw) => {
+    if (
+      stream.stopped ||
+      streams.get(id) !== stream ||
+      stream.socket !== socket
+    )
+      return;
     try {
       const m = JSON.parse(raw);
       if (m.type === "ping") {
@@ -446,7 +608,11 @@ function connectStream(id) {
       });
     }
   });
-  socket.on("error", () => send({ type: "stream", status: "Reconnecting" }));
+  let failed = false;
+  socket.on("error", () => {
+    failed = true;
+    send({ type: "stream", status: "Reconnecting" });
+  });
   socket.on("close", async (code) => {
     if (stream.stopped || !auth || win.isDestroyed()) return;
     send({ type: "stream", status: "Reconnecting" });
@@ -461,6 +627,19 @@ function connectStream(id) {
         return;
       }
     }
+    // A TCP/TLS failure must also try alternate addresses, even on an idle
+    // screen with no API request to trigger recovery. Keep the replay cursor.
+    if (failed || code === 1006 || code === 1012) {
+      try {
+        await pickAddress(server.current);
+      } catch {
+        connected = false;
+        broadcast({ type: "connection", connected: false });
+        scheduleRecovery();
+        return;
+      }
+    }
+    if (stream.stopped || !auth || win.isDestroyed()) return;
     stream.timer = setTimeout(
       () => connectStream(id),
       Math.min(stream.backoff, 30000),
@@ -469,6 +648,7 @@ function connectStream(id) {
   });
 }
 function createWindow(workspace = null) {
+  hasAppWindow = true;
   const win = new BrowserWindow({
     width: 1366,
     height: 900,
@@ -488,8 +668,7 @@ function createWindow(workspace = null) {
   win.setMenu(null);
   win.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
   win.webContents.on("will-navigate", (event, url) => {
-    if (url !== pathToFileURL(path.join(root, "dist/index.html")).href)
-      event.preventDefault();
+    if (url.split("#")[0] !== terminalUrl) event.preventDefault();
   });
   win.webContents.on("before-input-event", (event, input) => {
     if (
@@ -526,81 +705,55 @@ function createWindow(workspace = null) {
     streams.delete(win.id);
     windows.delete(win.id);
   });
-  win.loadFile(path.join(root, "dist/index.html"));
+  win.loadURL(terminalUrl);
   return win;
 }
 async function loadProvisioning() {
-  let provision;
-  if (process.platform === "win32") {
-    provision = await new Promise((resolve) =>
-      execFile(
-        "reg",
-        ["query", "HKLM\\SOFTWARE\\Policies\\Haspataal\\Terminal", "/reg:64"],
-        { windowsHide: true },
-        (err, out) => {
-          if (err) return resolve(null);
-          const v = {};
-          for (const line of out.split(/\r?\n/)) {
-            const m = line.match(/^\s+(\S+)\s+REG_(?:SZ|DWORD)\s+(.*)$/);
-            if (m) v[m[1]] = m[2].trim();
-          }
-          resolve(
-            v.ServerUrls
-              ? {
-                  server_urls: v.ServerUrls.split(";").filter(Boolean),
-                  ca_fingerprint_sha256: v.CaFingerprintSha256,
-                  hospital_name: v.HospitalName,
-                  source: "policy",
-                }
-              : null,
-          );
-        },
-      ),
-    );
-  }
-  if (!provision && !app.isPackaged && process.env.HASPATAAL_DEV_CONFIG)
-    provision = readJson(process.env.HASPATAAL_DEV_CONFIG);
-  if (!provision) {
-    provision = readJson(
-      path.join(
-        process.env.ProgramData || "C:\\ProgramData",
-        "Haspataal Terminal",
-        "terminal.json",
-      ),
-    );
-    if (provision) {
-      if (provision.schema !== "haspataal.terminal/1")
-        throw new Error("Unsupported terminal provisioning schema");
-      provision.source = "file";
+  const selected = await selectConfiguration({
+    savedPath: locationFile(),
+    developmentFile: !app.isPackaged
+      ? process.env.HASPATAAL_DEV_CONFIG
+      : undefined,
+  });
+  if (!selected) return;
+  provisioningPending = true;
+  managedConnection = ["policy", "file"].includes(selected.source);
+  const urls = serverAddresses(selected.server_urls || selected.urls);
+  configuredDiscoveryPort = discoveryPort(selected.discovery_port);
+  let pem = selected.ca_pem;
+  if (!pem) {
+    let failure;
+    for (const url of urls) {
+      try {
+        const response = await request(url + "/ca.crt", {
+          bootstrap: true,
+          timeoutMs: 4000,
+        });
+        if (response.status !== 200)
+          throw new Error("Cannot download hospital root");
+        pem = checkedRoot(response.body, selected.ca_fingerprint_sha256);
+        break;
+      } catch (error) {
+        failure = error;
+      }
     }
+    if (!pem) throw failure || new Error("Cannot download hospital root");
   }
-  if (provision) {
-    const urls = provision.server_urls;
-    if (!Array.isArray(urls) || !urls.length)
-      throw new Error("Provisioning has no server addresses");
-    let pem = provision.ca_pem;
-    if (!pem) {
-      const r = await request(new URL("/ca.crt", urls[0]).href, {
-        bootstrap: true,
-      });
-      if (r.status !== 200) throw new Error("Cannot download hospital root");
-      pem = r.body;
-    }
-    server = {
-      urls,
-      current: urls[0],
-      ca_pem: checkedRoot(pem, provision.ca_fingerprint_sha256),
-      ca_fingerprint_sha256: new X509Certificate(pem).fingerprint256,
-      hospital_name: provision.hospital_name,
-      source: provision.source || "file",
-    };
-  } else server = readJson(locationFile());
-  if (server) {
-    checkedRoot(server.ca_pem, server.ca_fingerprint_sha256);
-    await pickAddress();
-    await refreshAddresses();
-  }
+  checkedRoot(pem, selected.ca_fingerprint_sha256);
+  server = {
+    urls,
+    current: urls.includes(selected.current) ? selected.current : urls[0],
+    ca_pem: pem,
+    ca_fingerprint_sha256: new X509Certificate(pem).fingerprint256,
+    hospital_name: selected.hospital_name,
+    source: selected.source || "user",
+    discovery_port: configuredDiscoveryPort,
+  };
+  await pickAddress();
+  await refreshAddresses();
+  provisioningPending = false;
 }
+
 ipcMain.handle("terminal", async (event, action, args = {}) => {
   const win = BrowserWindow.fromWebContents(event.sender);
   if (
@@ -609,18 +762,40 @@ ipcMain.handle("terminal", async (event, action, args = {}) => {
     event.senderFrame !== event.sender.mainFrame
   )
     throw new Error("Untrusted IPC sender");
+  const credentialAction = [
+    "login",
+    "reauthenticate",
+    "change-password",
+  ].includes(action);
+  if (credentialAction && credentialFlight)
+    return {
+      ok: false,
+      error: {
+        code: "ACTION_IN_PROGRESS",
+        message: "An account action is already pending.",
+      },
+    };
+  if (credentialAction) credentialFlight = true;
   try {
+    if (credentialAction && refreshFlight) await refreshFlight;
     if (action === "state")
       return { ok: true, data: { ...state(), workspace: windows.get(win.id) } };
-    if (action === "discover") return { ok: true, data: await discover() };
+    if (action === "discover")
+      return { ok: true, data: await discover(configuredDiscoveryPort) };
     if (action === "inspect-server") {
       if (auth) throw new Error("Sign out before changing servers");
+      if (managedConnection)
+        throw new Error(
+          "IT manages this terminal's server. Ask IT to update its provisioning.",
+        );
       const u = new URL(args.url);
       if (
         u.protocol !== "https:" ||
         u.username ||
         u.password ||
-        u.pathname !== "/"
+        u.pathname !== "/" ||
+        u.search ||
+        u.hash
       )
         throw new Error("Enter an HTTPS server address, without a path");
       const r = await request(u.origin + "/ca.crt", { bootstrap: true });
@@ -636,6 +811,10 @@ ipcMain.handle("terminal", async (event, action, args = {}) => {
     }
     if (action === "trust-server") {
       if (auth || !pendingCa) throw new Error("Inspect the server first");
+      if (managedConnection)
+        throw new Error(
+          "IT manages this terminal's server. Ask IT to update its provisioning.",
+        );
       checkedRoot(pendingCa.pem, args.fingerprint);
       server = {
         urls: [pendingCa.url],
@@ -755,28 +934,103 @@ ipcMain.handle("terminal", async (event, action, args = {}) => {
     }
     if (action === "login") {
       if (auth) throw new Error("Already signed in");
+      await refreshAddresses();
       const r = await raw("POST", "/auth/login", args);
       if (r.status !== 200) return errorResult(r);
       acceptTokens(r.body.data);
       preferenceContext++;
       prefs = auth.user.preferences;
       applyZoom(prefs.ui_scale_pct);
-      await refreshAddresses();
-      broadcast({ type: "login", user: auth.user });
+      const preferenceWarning = await readAccountDisplay();
+      if (!auth) throw new Error("The session ended during sign-in. Sign in again.");
+      broadcast({
+        type: "login",
+        user: auth.user,
+        license: r.body.data.license,
+      });
+      if (preferenceWarning) broadcast({type:"error",error:{message:preferenceWarning}});
       return {
         ok: true,
         data: { user: auth.user, license: r.body.data.license },
       };
     }
     if (action === "change-password") {
-      const r = await raw("POST", "/auth/change-password", args);
-      if (r.status !== 200) return errorResult(r);
+      if (!auth || auth.recovery)
+        throw new Error("Confirm your session before changing the password");
+      // Old-session revocation can reach its socket before the HTTP token pair.
+      // Retire that socket first; only the new session may update this window.
+      stopStreams();
+      let r;
+      try {
+        r = await raw(
+          "POST",
+          args.settings
+            ? "/settings/me/change-password"
+            : "/auth/change-password",
+          {
+            current_password: args.current_password,
+            new_password: args.new_password,
+          },
+        );
+      } catch (cause) {
+        if (auth) {
+          auth.recovery =
+            "Password change could not be confirmed. Sign in with the new password first; do not repeat the password change.";
+          broadcast({ type: "session-recovery", message: auth.recovery });
+        }
+        throw cause;
+      }
+      if (r.status !== 200) {
+        if (
+          ["TOKEN_REVOKED", "REFRESH_TOKEN_REUSED"].includes(
+            r.body?.error?.code,
+          )
+        )
+          clearSession(r.body.error.message);
+        else for (const id of windows.keys()) connectStream(id);
+        return errorResult(r);
+      }
       acceptTokens(r.body.data);
-      const me = await raw("GET", "/auth/me");
-      if (me.status !== 200) return errorResult(me);
-      auth.user = me.body.data;
+      try {
+        const me = await raw("GET", "/auth/me");
+        if (me.status !== 200)
+          throw new Error("Cannot reload account after password change");
+        auth.user = me.body.data;
+      } catch {
+        auth.recovery =
+          "Your password changed. Sign in with the new password; the password change will not be repeated.";
+        broadcast({ type: "session-recovery", message: auth.recovery });
+        return { ok: true, data: { account_refresh_needed: true } };
+      }
+      const preferenceWarning = await readAccountDisplay();
+      if (!auth) throw new Error("Your password changed, but the session ended. Sign in with the new password; do not repeat the change.");
       broadcast({ type: "login", user: auth.user });
+      if (preferenceWarning) broadcast({type:"error",error:{message:preferenceWarning}});
+      for (const id of windows.keys()) connectStream(id);
       return { ok: true, data: auth.user };
+    }
+    if (action === "reauthenticate") {
+      if (!auth?.recovery) throw new Error("No session recovery is pending");
+      const priorUser = auth.user;
+      const r = await raw("POST", "/auth/login", {
+        username: priorUser.username,
+        password: args.password,
+      });
+      if (r.status !== 200) return errorResult(r);
+      if (r.body?.data?.user?.user_id !== priorUser.user_id)
+        throw new Error(
+          "The account identity changed. Sign out and contact IT.",
+        );
+      acceptTokens(r.body.data);
+      preferenceContext++;
+      prefs = auth.user.preferences;
+      applyZoom(prefs.ui_scale_pct);
+      const preferenceWarning = await readAccountDisplay();
+      if (!auth) throw new Error("The restored session ended. Sign in again.");
+      broadcast({ type: "session-restored", user: auth.user });
+      if (preferenceWarning) broadcast({type:"error",error:{message:preferenceWarning}});
+      for (const id of windows.keys()) connectStream(id);
+      return { ok: true };
     }
     if (action === "logout") {
       const r = await api("POST", "/auth/logout", { all_sessions: !!args.all });
@@ -785,7 +1039,12 @@ ipcMain.handle("terminal", async (event, action, args = {}) => {
       return { ok: true };
     }
     if (action === "prefs") {
+      if (credentialFlight) throw new Error("Wait for the account action to finish before changing display preferences.");
       return await queuePrefs(args);
+    }
+    if (action === "prefs-refresh") {
+      if (credentialFlight) throw new Error("Wait for the account action to finish before reloading display preferences.");
+      return await queuePrefs({__readPreferences:true});
     }
     if (action === "workspace") {
       if (
@@ -849,20 +1108,52 @@ ipcMain.handle("terminal", async (event, action, args = {}) => {
         });
       });
     }
+    if (action === "print-admin-slip") {
+      if (!auth || !["admin.user.provision", "admin.user.manage", "admin.badge_station.manage"].some(p => auth.user.permissions.includes(p)))
+        throw new Error("Credential printing is not permitted");
+      if (![args.target,args.credential,args.kind].every(v => typeof v === "string" && v.length > 0 && v.length < 1000))
+        throw new Error("Invalid credential slip");
+      const escape = value => value.replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+      const slip = new BrowserWindow({show:false,webPreferences:{sandbox:true,contextIsolation:true,nodeIntegration:false}});
+      slip.webContents.setWindowOpenHandler(() => ({action:"deny"}));
+      slip.webContents.on("will-navigate", e => e.preventDefault());
+      try {
+        await slip.loadURL("data:text/html;charset=utf-8,"+encodeURIComponent(`<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'"><title>Private credential slip</title><style>body{font:18px sans-serif;margin:40px}strong{font:24px monospace;white-space:pre-wrap}</style><h1>Haspataal — private credential</h1><p>${escape(args.target)}</p><h2>${escape(args.kind)}</h2><strong>${escape(args.credential)}</strong><p>Deliver privately. Change a temporary password at first sign-in. The personnel file still needs its required CNIC copy.</p>`));
+        return await new Promise(resolve => slip.webContents.print({silent:false},(success,reason)=>resolve(success?{ok:true}:{ok:false,error:{code:"PRINT_FAILED",message:reason || "Credential slip was not printed. Reprint; do not repeat the account action."}})));
+      } finally {slip.destroy();}
+    }
     throw new Error("Unsupported terminal action");
   } catch (e) {
     return { ok: false, error: { code: "TERMINAL_ERROR", message: e.message } };
+  } finally {
+    if (credentialAction) credentialFlight = false;
   }
 });
 app.whenReady().then(async () => {
   if (process.env.HASPATAAL_TEST_DATA)
     app.setPath("userData", process.env.HASPATAAL_TEST_DATA);
+  fs.mkdirSync(app.getPath("userData"), { recursive: true });
+  protocol.handle("app", (request) => {
+    try {
+      return net.fetch(assetUrl(request.url, path.join(root, "dist")));
+    } catch {
+      return new Response("Terminal asset not found", { status: 404 });
+    }
+  });
+  try {
+    await migrateRecovery({
+      WebContentsView,
+      legacyUrl: pathToFileURL(path.join(root, "dist", "index.html")).href,
+      targetUrl: "app://terminal/storage-migration.html",
+    });
+  } catch {
+    recoveryMigrationError = "Facility recovery records could not be migrated. Apply is blocked. Ask IT to reconcile the old and new terminal recovery holds before changing the facility.";
+  }
   session.defaultSession.setPermissionRequestHandler(
     (contents, permission, callback, details) =>
       callback(
         permission === "media" &&
-          contents.getURL() ===
-            pathToFileURL(path.join(root, "dist/index.html")).href &&
+          contents.getURL().split("#")[0] === terminalUrl &&
           details.mediaTypes?.length === 1 &&
           details.mediaTypes[0] === "video",
       ),
@@ -885,6 +1176,7 @@ app.whenReady().then(async () => {
     );
 });
 app.on("window-all-closed", () => {
+  if (!hasAppWindow) return;
   clearTimeout(refreshTimer);
   clearTimeout(recoveryTimer);
   app.quit();

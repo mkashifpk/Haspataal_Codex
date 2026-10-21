@@ -1,5 +1,5 @@
 import { tr } from "../i18n";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import * as facility from "../generated/facility_profile";
 import contract from "../../contracts/facility_profile.json";
 import { Details, ErrorBox, Field, LoadState, useLoad } from "../components";
@@ -64,6 +64,9 @@ export function Facility({
     [error, setError] = useState<unknown>(),
     [busy, setBusy] = useState(false),
     [saved, setSaved] = useState("");
+  const [changeDetail, setChangeDetail] =
+    useState<facility.EstablishmentChangeOut>();
+  const detailGeneration = useRef(0);
   const states = contract.schemas.CapabilityMoveIn.properties.state.enum;
   const change = () => {
     if (pending) return;
@@ -313,7 +316,8 @@ export function Facility({
             r.data.staff.map((s) => (
               <article
                 className={
-                  "card " + (s.status === "NotApplicable" ? "muted" : "")
+                  "card " + (s.status === "NotApplicable" ? "muted" :
+                    ["NobodyHolds", "NeedsSecondPerson"].includes(s.status) ? "duty-warning" : "")
                 }
                 key={s.duty}
               >
@@ -333,8 +337,25 @@ export function Facility({
                     {h.changed_at} · {h.changed_by_name} · {h.reason}
                   </summary>
                   <Details value={h} />
+                  <button
+                    data-help="facility.tabs"
+                    onClick={async () => {
+                      const generation = ++detailGeneration.current;
+                      try {
+                        const detail = await facility.getChange(h.change_id);
+                        if (generation === detailGeneration.current)
+                          setChangeDetail(detail);
+                      } catch (cause) {
+                        if (generation === detailGeneration.current)
+                          setError(cause);
+                      }
+                    }}
+                  >
+                    {tr("Open change")} {h.change_id}
+                  </button>
                 </details>
               ))}
+              {changeDetail && <Details value={changeDetail} />}
               <h2>{tr("Recorded PHC categories")}</h2>
               <Details value={r.data.confirmations} />
             </>

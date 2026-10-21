@@ -101,6 +101,20 @@ export function checkHelp({
         );
       }
   }
+  if (media)
+    for (const lang of ["en", "ur"]) {
+      const filename = `public/handbook/settings-it-${lang}.png`;
+      const png = fs.readFileSync(filename);
+      assert.equal(
+        png.subarray(0, 8).toString("hex"),
+        "89504e470d0a1a0a",
+        `Invalid image ${filename}`,
+      );
+      assert(
+        png.readUInt32BE(16) >= 1000 && png.readUInt32BE(20) >= 650,
+        `Unreadable example ${filename}`,
+      );
+    }
   const bilingual = (pair, label) => {
     assert.equal(pair.length, 2, label);
     assert(
@@ -138,6 +152,7 @@ export function checkHelp({
       "Connection",
       "Login",
       "Settings",
+      "ITConsole",
       "Notifications",
       "Approvals",
       "Incidents",
