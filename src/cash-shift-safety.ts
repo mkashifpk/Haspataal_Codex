@@ -7,6 +7,30 @@ export type ShiftAttempt =
     }
   | { kind: "close"; shiftId: number; body: { declared_cash: number } };
 
+export type ShiftCloseReview = Readonly<{
+  shiftId: number;
+  node: string;
+  expectedCash: number;
+  declaredCash: number;
+}>;
+
+// A refresh must never silently replace the drawer or totals the cashier reviewed.
+export function matchesShiftCloseReview(
+  review: ShiftCloseReview,
+  shift:
+    | { shift_id: number; node: string; expected_cash: number; status: string }
+    | null
+    | undefined,
+): boolean {
+  return (
+    !!shift &&
+    shift.status === "Open" &&
+    shift.shift_id === review.shiftId &&
+    shift.node === review.node &&
+    shift.expected_cash === review.expectedCash
+  );
+}
+
 // Reject partial numbers, whitespace-only values, Infinity and negative amounts.
 export function cashAmount(value: string): number | undefined {
   if (!/^\d+(?:\.\d+)?$/.test(value.trim())) return undefined;

@@ -3,9 +3,13 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import { checkHelp } from "../scripts/check-help.mjs";
 const read = (file) => fs.readFileSync(file, "utf8");
+
+test("separately authored registration help must retain its Urdu title", () => {
+  assert.throws(()=>checkHelp({media:false,read:file=>file === "src/registration-help.ts" ? read(file).replace(/titleUr:\s*"[^"]*",/, "") : read(file)}), /registration: missing titleUr/);
+});
 test("all delivered controls, tasks, role guides and FAQ seeds have bilingual help", () => {
   const result = checkHelp({ media: false });
-  assert.equal(result.screens, 12);
+  assert.equal(result.screens, 19);
   assert(result.controls > 90);
   assert.equal(result.workspaceGuides, 30);
 });
@@ -17,6 +21,19 @@ test("the first Phase 2 screen cannot add an uncovered cash control", () => {
         read: (file) =>
           file === "src/screens/CashShift.tsx"
             ? read(file).replace('data-help="cash.open"', "")
+            : read(file),
+      }),
+    /missing\/broken control help mapping/,
+  );
+});
+test("cash-back handover cannot ship without mapped bilingual control help", () => {
+  assert.throws(
+    () =>
+      checkHelp({
+        media: false,
+        read: (file) =>
+          file === "src/screens/TicketDesk.tsx"
+            ? read(file).replace('data-help="cashback.confirm"', "")
             : read(file),
       }),
     /missing\/broken control help mapping/,

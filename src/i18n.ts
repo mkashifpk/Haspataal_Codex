@@ -1,12 +1,92 @@
 import { registrationUr } from "./registration-i18n";
+import { frontdeskUr } from "./frontdesk-i18n";
 let language = "en";
 export function setLanguage(value: string) {
   language = value;
 }
 const ur: Record<string, string> = {
+  "Tariff": "نرخ نامہ",
+  "Check the hospital's published prices before explaining a charge. This screen does not change prices or collect payment.": "رقم بتانے سے پہلے ہسپتال کے شائع شدہ نرخ چیک کریں۔ یہاں قیمت نہیں بدلتی اور رقم وصول نہیں ہوتی۔",
+  "Refresh tariff": "نرخ تازہ کریں",
+  "Print / save tariff PDF": "نرخ نامہ چھاپیں یا پی ڈی ایف محفوظ کریں",
+  "Downloading PDF…": "پی ڈی ایف آ رہی ہے…",
+  "Tariff PDF saved. Open the saved PDF in your PDF reader to print.": "نرخ نامہ محفوظ ہوگیا۔ چھاپنے کے لیے محفوظ پی ڈی ایف ریڈر میں کھولیں۔",
+  "PDF save cancelled. No file was saved.": "پی ڈی ایف محفوظ کرنا منسوخ ہوگیا۔ فائل محفوظ نہیں ہوئی۔",
+  "The official PDF contains the full tariff; screen filters do not change it. Save it, then open it in your PDF reader to print.": "اصل پی ڈی ایف میں مکمل نرخ نامہ ہے؛ اسکرین کے فلٹر اسے نہیں بدلتے۔ محفوظ کرکے پی ڈی ایف ریڈر میں کھول کر چھاپیں۔",
+  "Prices as of": "نرخ کی تاریخ",
+  "Price category": "نرخ کی قسم",
+  "All prices": "تمام نرخ",
+  "Ward daily charges": "وارڈ کا یومیہ خرچ",
+  "Lab test prices": "لیب ٹیسٹ کے نرخ",
+  "Find a service, ward or test": "خدمت، وارڈ یا ٹیسٹ تلاش کریں",
+  "Show all prices": "تمام نرخ دکھائیں",
+  "Price not listed": "نرخ درج نہیں",
+  "No published prices match this view. Show all prices or refresh; a missing price does not mean a free service.": "اس تلاش میں شائع شدہ نرخ نہیں ملے۔ تمام نرخ دکھائیں یا تازہ کریں؛ غائب نرخ مفت خدمت نہیں ہے۔",
+  "No ward prices match this view.": "اس تلاش میں وارڈ کے نرخ نہیں ملے۔",
+  "No lab test prices match this view.": "اس تلاش میں لیب ٹیسٹ کے نرخ نہیں ملے۔",
+  "Price per day": "روزانہ نرخ",
+  "Consultations (OPD)": "او پی ڈی مشاورت",
+  "Ward bed charges (per day)": "وارڈ بستر کا یومیہ خرچ",
+  "Procedures": "طبی عمل",
+  "Patient document vault": "مریض کی دستاویزات",
+  "Verify the patient's name and MRN before attaching or opening a document. Files open only when you choose them.": "فائل منسلک یا کھولنے سے پہلے مریض کا نام اور ایم آر این چیک کریں۔ فائل صرف انتخاب پر کھلتی ہے۔",
+  "Your account cannot search and open patient records.": "آپ کو مریض تلاش اور ریکارڈ کھولنے کی اجازت نہیں ہے۔",
+  "Patient name, mobile, CNIC or MRN": "مریض کا نام، موبائل، شناختی کارڈ یا ایم آر این",
+  "No matching patients. Check the identifier; this screen does not register a patient.": "مریض نہیں ملا؛ شناخت چیک کریں۔ یہاں نیا مریض درج نہیں ہوتا۔",
+  "Clear patient selection": "مریض کا انتخاب صاف کریں",
+  "Patient identity changed. Reconcile pending uploads before selecting the master record.": "مریض کی شناخت بدل گئی ہے۔ مرکزی ریکارڈ چننے سے پہلے غیر یقینی اپ لوڈ چیک کرائیں۔",
+  "Outside document": "بیرونی دستاویز",
+  "Refresh documents": "دستاویزات تازہ کریں",
+  "bytes": "بائٹس",
+  "Outside reports stay separate from this hospital's results. For an ID copy or hospital attachment, clear Outside document and select its type.": "بیرونی رپورٹ ہسپتال کے اپنے نتائج سے الگ ہے۔ شناختی نقل یا ہسپتال کی دستاویز کے لیے بیرونی کا نشان ہٹا کر قسم چنیں۔",
+  "Verified open shift": "تصدیق شدہ کھلی شفٹ",
+  "Before handing over cash, open your own shift at this terminal's assigned counter, then refresh the slip. Do not hand over cash while the drawer check is unavailable.": "نقد دینے سے پہلے اس ٹرمینل کے مقررہ کاؤنٹر پر اپنی شفٹ کھولیں، پھر پرچی تازہ کریں۔ دراز کی جانچ دستیاب نہ ہو تو نقد نہ دیں۔",
+  "The slip changed during request review. Go back and review the current balance and status before submitting.": "درخواست کے جائزے کے دوران پرچی بدل گئی ہے۔ واپس جاکر بھیجنے سے پہلے موجودہ بقایا اور حالت چیک کریں۔",
+  "The slip changed while this dialog was open. Close it and review the current status before another action.": "اس مکالمے کے دوران پرچی بدل گئی ہے۔ بند کرکے نیا عمل کرنے سے پہلے موجودہ حالت کا جائزہ لیں۔",
+  "The original request is outside the safe retry window. Ask IT to reconcile it; do not register or pay again.": "اصل درخواست کی محفوظ دوبارہ کوشش کا وقت ختم ہے۔ آئی ٹی سے نتیجہ چیک کرائیں؛ رجسٹریشن یا ادائیگی دوبارہ نہ کریں۔",
+  "Discard patient demographic changes?": "مریض کی معلومات کا مسودہ چھوڑ دیں؟",
+  "Review current record": "موجودہ ریکارڈ کا جائزہ لیں",
+  "Read current record": "موجودہ ریکارڈ پڑھیں",
+  "The save result needs review. Your draft is preserved. Read the current record before another save; a lost reply may already have saved the change.": "محفوظ نتیجہ چیک کرنا ضروری ہے۔ مسودہ محفوظ ہے۔ دوبارہ بھیجنے سے پہلے موجودہ ریکارڈ پڑھیں؛ گم جواب کے باوجود تبدیلی ہو سکتی ہے۔",
+  "days left": "دن باقی ہیں",
+  "The shift or expected cash changed. Go back, refresh and review the counted cash again.": "شفٹ یا متوقع نقدی بدل گئی ہے۔ واپس جائیں، تازہ کریں اور گنی ہوئی نقدی کا دوبارہ جائزہ لیں۔",
+  "Closing records your counted cash for the accountant to verify. You will not be able to record further counter cash on this shift.": "بندش سے آپ کی گنی ہوئی نقدی اکاؤنٹنٹ کی تصدیق کے لیے درج ہوتی ہے۔ اس شفٹ میں مزید کاؤنٹر نقدی درج نہیں ہو سکے گی۔",
+  "Refresh inbox": "اطلاعات تازہ کریں",
+  "Unread notifications": "غیر پڑھی اطلاعات",
+  "Checking…": "جانچ جاری ہے…",
+  Read: "پڑھی ہوئی",
+  Unread: "غیر پڑھی",
+  info: "معلومات",
+  warning: "تنبیہ",
+  critical: "اہم",
+  "Read status saved. A refresh error does not undo the saved change.":
+    "پڑھے جانے کی حالت محفوظ ہو گئی۔ تازہ کرنے کی خرابی محفوظ تبدیلی واپس نہیں کرتی۔",
+  "The read-status result could not be confirmed. Refresh inbox before another action. No write is retried automatically; marking all again could include newer notifications.":
+    "پڑھے جانے کی حالت کی تصدیق نہیں ہو سکی۔ اگلے عمل سے پہلے اطلاعات تازہ کریں۔ کوئی تبدیلی خودکار نہیں دہرائی جاتی؛ دوبارہ سب کو پڑھا ہوا کرنے میں نئی اطلاعات بھی شامل ہو سکتی ہیں۔",
+  "No unread notifications.": "کوئی غیر پڑھی اطلاع نہیں۔",
+  "No notifications yet. New hospital updates will appear here.":
+    "ابھی کوئی اطلاع نہیں۔ ہسپتال کی نئی خبریں یہاں آئیں گی۔",
+  "Mark all notifications as read?": "سب اطلاعات کو پڑھا ہوا کریں؟",
+  "This marks every current notification in your account as read, including older and filtered-out items. It does not approve requests, resolve alerts or record treatment.":
+    "یہ آپ کے اکاؤنٹ کی تمام موجودہ اطلاعات کو پڑھا ہوا کرتا ہے، جن میں پرانی اور فلٹر سے باہر اطلاعات بھی ہیں۔ اس سے درخواست منظور، انتباہ حل یا علاج درج نہیں ہوتا۔",
+  "Confirm mark all as read": "سب کو پڑھا ہوا کرنے کی تصدیق",
+  "Open notifications": "اطلاعات کھولیں",
+  "Critical notification": "اہم اطلاع",
+  "Open the inbox to find this notification. It may be outside the current view.":
+    "یہ اطلاع تلاش کرنے کے لیے فہرست کھولیں۔ ممکن ہے موجودہ منظر میں شامل نہ ہو۔",
+  "Sign-out is already pending. Wait for the result.":
+    "سائن آؤٹ پہلے ہی جاری ہے۔ نتیجے کا انتظار کریں۔",
+  "Wait for the account action to finish before signing out.":
+    "سائن آؤٹ سے پہلے اکاؤنٹ کا جاری عمل مکمل ہونے دیں۔",
+  "Sign-in could not be confirmed. It may have opened a session. No automatic retry was made. Check the connection, then sign in again deliberately if needed.":
+    "سائن اِن کی تصدیق نہیں ہو سکی۔ ممکن ہے سیشن کھل گیا ہو۔ خودکار دوبارہ کوشش نہیں کی گئی۔ رابطہ چیک کریں، پھر ضرورت ہو تو خود دوبارہ سائن اِن کریں۔",
+  "Discard this system-change draft and open another action?":
+    "نظام کی تبدیلی کا یہ مسودہ چھوڑ کر دوسرا عمل کھولیں؟",
   "Reload preferences": "ترجیحات دوبارہ لوڈ کریں",
-  "Wait for the account action to finish before changing display preferences.": "ڈسپلے بدلنے سے پہلے اکاؤنٹ کا جاری عمل مکمل ہونے دیں۔",
-  "Wait for the account action to finish before reloading display preferences.": "ترجیحات دوبارہ پڑھنے سے پہلے اکاؤنٹ کا جاری عمل مکمل ہونے دیں۔",
+  "Wait for the account action to finish before changing display preferences.":
+    "ڈسپلے بدلنے سے پہلے اکاؤنٹ کا جاری عمل مکمل ہونے دیں۔",
+  "Wait for the account action to finish before reloading display preferences.":
+    "ترجیحات دوبارہ پڑھنے سے پہلے اکاؤنٹ کا جاری عمل مکمل ہونے دیں۔",
   "Changes affect hospital access and devices. Review the selected person or device before confirming.":
     "تبدیلی ہسپتال کی رسائی اور آلات پر اثر ڈالتی ہے۔ تصدیق سے پہلے منتخب شخص یا آلہ دیکھیں۔",
   "Create the first Owner": "پہلا مالک بنائیں",
@@ -612,6 +692,7 @@ const ur: Record<string, string> = {
   unknown: "نامعلوم",
 };
 export function tr(text: string) {
+  if (language === "ur" && frontdeskUr[text]) return frontdeskUr[text];
   if (language === "ur" && registrationUr[text]) return registrationUr[text];
   const fixes: Record<string, string> = {
     "Discard draft and reload latest record":

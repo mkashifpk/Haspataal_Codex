@@ -1,11 +1,12 @@
 // Settings system sections: real DEV reads and isolated synthetic fixtures only.
 // No maintenance/kill-switch, shared password, role/permission or service change.
 import { _electron as electron } from "playwright";
-import { expect } from "playwright/test";
+import { expect as baseExpect } from "playwright/test";
 import { terminalPage } from "./terminal-page.mjs";
 import fs from "node:fs";
 import path from "node:path";
 import assert from "node:assert/strict";
+const expect = baseExpect.configure({ timeout: 40000 });
 const file = "artifacts/settings-it-check.json",
   transportFile = path.resolve("artifacts/settings-it-transport.json");
 const j = fs.existsSync(file)
@@ -30,6 +31,7 @@ if (process.argv.includes("--resume")) {
 const save = () => fs.writeFileSync(file, JSON.stringify(j, null, 2));
 const passed = (check) => {
   j.checks = [...new Set([...j.checks, check])];
+  j.last_run.checks.push(check);
   save();
   console.log("PASS " + check);
 };
@@ -42,12 +44,20 @@ const api = async (method, path, body) => {
     path,
     body,
   });
-  assert(r.ok, r.error?.code || "API failure");
+  assert(
+    r.ok,
+    [r.error?.code, r.error?.message].filter(Boolean).join(": ") ||
+      "API failure",
+  );
   return r.data;
 };
 const preference = async (value) => {
   const r = await page.evaluate((v) => window.terminal.call("prefs", v), value);
-  assert(r.ok);
+  assert(
+    r.ok,
+    [r.error?.code, r.error?.message].filter(Boolean).join(": ") ||
+      "Preference failure",
+  );
 };
 const section = async (name) => {
   await page.locator(".settings-nav button").filter({ hasText: name }).click();
@@ -83,6 +93,13 @@ async function shot(name) {
   );
   fs.writeFileSync(name, Buffer.from(png, "base64"));
 }
+j.last_run = {
+  started_at: new Date().toISOString(),
+  mode: process.argv.includes("--resume")
+    ? "read-only continuation"
+    : "lifecycle",
+  checks: [],
+};
 j.passed = false;
 save();
 try {
@@ -134,16 +151,34 @@ try {
   passed(
     "public Settings exposes only terminal tier, actual diagnostics/identity and permitted public help",
   );
-  await app.evaluate(()=>{
-    const https=process.getBuiltinModule("https"),original=https.request;
-    globalThis.preferenceReads=0;globalThis.normalLoginPosts=0;globalThis.dropFirstPreferenceRead=true;
-    https.request=function(url,options,callback){const u=typeof url==="object"&&!(url instanceof URL)?new URL(`https://${url.hostname||url.host}:${url.port||443}${url.path||"/"}`):new URL(url);
-      if(u.pathname==="/api/v1/auth/login")globalThis.normalLoginPosts++;
-      if(u.pathname==="/api/v1/settings/me"&&options.method==="GET"){
+  await app.evaluate(() => {
+    const https = process.getBuiltinModule("https"),
+      original = https.request;
+    globalThis.itAdminWritePaths = [];
+    globalThis.preferenceReads = 0;
+    globalThis.normalLoginPosts = 0;
+    globalThis.dropFirstPreferenceRead = true;
+    https.request = function (url, options, callback) {
+      const u =
+        typeof url === "object" && !(url instanceof URL)
+          ? new URL(
+              `https://${url.hostname || url.host}:${url.port || 443}${url.path || "/"}`,
+            )
+          : new URL(url);
+      if (u.pathname === "/api/v1/auth/login") globalThis.normalLoginPosts++;
+      if (u.pathname.startsWith("/api/v1/admin/") && options.method !== "GET")
+        globalThis.itAdminWritePaths.push(u.pathname);
+      if (u.pathname === "/api/v1/settings/me" && options.method === "GET") {
         globalThis.preferenceReads++;
-        if(globalThis.dropFirstPreferenceRead){globalThis.dropFirstPreferenceRead=false;return original.call(this,url,options,response=>{callback(response);response.destroy(new Error("TEST lost real preference read"));});}
+        if (globalThis.dropFirstPreferenceRead) {
+          globalThis.dropFirstPreferenceRead = false;
+          return original.call(this, url, options, (response) => {
+            callback(response);
+            response.destroy(new Error("TEST lost real preference read"));
+          });
+        }
       }
-      return original.call(this,url,options,callback);
+      return original.call(this, url, options, callback);
     };
   });
   await page.getByLabel("Username", { exact: true }).fill("demo.it");
@@ -154,17 +189,27 @@ try {
     .toBe("demo.it");
   await page.getByRole("navigation").waitFor();
   prefs = (await state()).prefs;
-  const loginCounters=await app.evaluate(()=>({reads:globalThis.preferenceReads,logins:globalThis.normalLoginPosts}));
-  assert(loginCounters.reads>=2);assert.equal(loginCounters.logins,1);
+  const loginCounters = await app.evaluate(() => ({
+    reads: globalThis.preferenceReads,
+    logins: globalThis.normalLoginPosts,
+  }));
+  assert(loginCounters.reads >= 2);
+  assert.equal(loginCounters.logins, 1);
   await preference({ language: "en", theme: "Light", ui_scale_pct: 100 });
   await page
     .getByRole("navigation")
     .getByRole("button", { name: "Settings", exact: false })
     .click();
-  await page.getByRole("button",{name:"Reload preferences",exact:true}).click();
-  await expect.poll(()=>app.evaluate(()=>globalThis.preferenceReads)).toBeGreaterThan(loginCounters.reads);
-  assert.equal(await app.evaluate(()=>globalThis.normalLoginPosts),1);
-  passed("native login reads settings/me through ordered queue; lost GET retries safely, Reload preferences never repeats login");
+  await page
+    .getByRole("button", { name: "Reload preferences", exact: true })
+    .click();
+  await expect
+    .poll(() => app.evaluate(() => globalThis.preferenceReads))
+    .toBeGreaterThan(loginCounters.reads);
+  assert.equal(await app.evaluate(() => globalThis.normalLoginPosts), 1);
+  passed(
+    "native login reads settings/me through ordered queue; lost GET retries safely, Reload preferences never repeats login",
+  );
   await section("Users, roles and access");
   await page
     .getByRole("heading", { name: "Staff awaiting login", exact: true })
@@ -383,7 +428,9 @@ try {
     save();
   }
   passed(
-    "actual lost printer creation reply reconciled; original same key replays exactly one inactive synthetic printer",
+    process.argv.includes("--resume")
+      ? "existing synthetic printer read-only reconciliation; confirmed lifecycle not repeated"
+      : "actual lost printer creation reply reconciled; original same key replays exactly one inactive synthetic printer",
   );
   // Identify by the unique synthetic label, never by a guessed ordinal.
   const current = (await api("GET", "/admin/printers")).find(
@@ -391,6 +438,51 @@ try {
   );
   assert(current.name.startsWith(j.run));
   assert.equal(current.is_active, false);
+  if (process.argv.includes("--resume")) {
+    const selected = page.locator("article.card").filter({
+      has: page.getByRole("heading", {
+        name: current.name + " · " + j.printer_id,
+        exact: true,
+      }),
+    });
+    await selected
+      .getByRole("button", { name: "Edit device", exact: true })
+      .click();
+    const draft = j.run + " unsaved draft only";
+    await page.getByLabel("Name", { exact: true }).fill(draft);
+    page.once("dialog", (d) => d.dismiss());
+    await page
+      .getByRole("button", { name: "Add printers", exact: true })
+      .click();
+    await expect(page.getByLabel("Name", { exact: true })).toHaveValue(draft);
+    await page
+      .getByRole("button", { name: "Reload system records", exact: true })
+      .click();
+    await expect(
+      page.getByText("Loading from the hospital server…", { exact: true }),
+    ).toHaveCount(0);
+    await expect(page.getByLabel("Name", { exact: true })).toHaveValue(draft);
+    assert.equal(
+      (await api("GET", "/admin/printers")).find(
+        (p) => p.printer_id === j.printer_id,
+      ).name,
+      current.name,
+    );
+    page.once("dialog", (d) => d.accept());
+    await page
+      .getByRole("button", { name: "Add printers", exact: true })
+      .click();
+    await expect(page.getByLabel("Name", { exact: true })).toHaveValue("");
+    const active = page.getByLabel("Is Active", { exact: true });
+    await expect(active).toHaveValue("true");
+    await expect(active.locator('option[value=""]')).toHaveCount(0);
+    await active.selectOption("false");
+    await expect(active).toHaveValue("false");
+    await page.getByRole("button", { name: "Cancel", exact: true }).click();
+    passed(
+      "unsaved device action replacement requires confirmation; read-only reload retains draft; boolean defaults explicit; no device mutation",
+    );
+  }
   if (!process.argv.includes("--resume")) {
     const selected = page.locator("article.card").filter({
       has: page.getByRole("heading", {
@@ -440,19 +532,47 @@ try {
     ).toHaveCount(0);
     await expect(page.getByRole("alert")).toHaveCount(0);
   }
-  await page
-    .getByRole("button", { name: "Force global logout", exact: true })
-    .click();
+  const emergency = page.getByRole("button", {
+    name: "Force global logout",
+    exact: true,
+  });
+  assert(
+    await emergency.evaluate((e) => e.getBoundingClientRect().height >= 64),
+  );
+  assert.equal(
+    await emergency.evaluate((e) => getComputedStyle(e).backgroundColor),
+    "rgb(165, 40, 40)",
+  );
+  await emergency.click();
   const confirmation = page.getByLabel("Confirm", { exact: true });
   await confirmation.fill("WRONG");
   await page
     .getByLabel("Reason", { exact: true })
     .fill(j.run + " validation only, no submit");
   assert.equal(await confirmation.evaluate((e) => e.checkValidity()), false);
+  await confirmation.fill("FORCE GLOBAL LOGOUT");
+  await page
+    .getByRole("button", { name: "Review system change", exact: true })
+    .click();
+  await expect(page.getByRole("dialog")).toContainText("FORCE GLOBAL LOGOUT");
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: "Go back", exact: true })
+    .click();
+  await expect(confirmation).toHaveValue("FORCE GLOBAL LOGOUT");
   await page.getByRole("button", { name: "Cancel", exact: true }).click();
   passed(
     "actual health/maintenance/emergency panels read; emergency exact phrase enforced, no global write",
   );
+  if (process.argv.includes("--resume")) {
+    assert.deepEqual(
+      await app.evaluate(() => globalThis.itAdminWritePaths),
+      [],
+    );
+    passed(
+      "large red emergency trigger, exact phrase and review/back/cancel verified with zero admin writes",
+    );
+  }
   await section("Users, roles and access");
   for (const panel of [
     "Users, roles and access",
@@ -526,17 +646,24 @@ try {
           });
         j.user_cleanup_pending = false;
         j.account_deactivated = true;
+        delete j.cleanup_error;
         save();
       } catch (e) {
+        j.passed = false;
         j.cleanup_error = e.message;
         save();
       }
     }
-    if (prefs)
-      await preference(prefs).catch((e) => {
+    if (prefs) {
+      try {
+        await preference(prefs);
+        delete j.preferences_restore_error;
+      } catch (e) {
         j.preferences_restore_error = e.message;
-        save();
-      });
+        j.passed = false;
+      }
+      save();
+    }
     await app.close();
   }
 }

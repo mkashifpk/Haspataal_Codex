@@ -1,7 +1,7 @@
 {
   "screen_id": "charity_approvals",
-  "contract_fingerprint": "0b5ab90e400dfbb822d3",
-  "knowledge_revision": "318d65bdd91cd873",
+  "contract_fingerprint": "61186bb3306515cae1c9",
+  "knowledge_revision": "eb7204298b390985",
   "delivery_gate": {
     "required": true,
     "status": "required",
@@ -53,9 +53,7 @@
     "context": {
       "workspace": "zakat",
       "purpose": "The Zakat Officer's queue: charity and social-welfare requests from the pharmacy counter, decided with a reason.",
-      "roles": [
-        "zakat_officer"
-      ],
+      "roles": ["zakat_officer"],
       "screens": [
         {
           "id": "charity_approvals",
@@ -206,9 +204,7 @@
         "cites": []
       }
     ],
-    "related_workflows": [
-      "refunds-waivers-credit"
-    ]
+    "related_workflows": ["refunds-waivers-credit"]
   },
   "rules_in_force": null,
   "build_order": {
@@ -218,11 +214,7 @@
     "phase": "P1",
     "position": 8,
     "points": 51,
-    "capabilities": [
-      "realtime",
-      "f1_help",
-      "zoom"
-    ],
+    "capabilities": ["realtime", "f1_help", "zoom"],
     "depends_on": [
       {
         "from": "charity_approvals",
@@ -488,12 +480,7 @@
           "required": false,
           "description": "",
           "schema": {
-            "enum": [
-              "Pending",
-              "Approved",
-              "Rejected",
-              "Cancelled"
-            ],
+            "enum": ["Pending", "Approved", "Rejected", "Cancelled"],
             "type": "string",
             "default": "Pending",
             "title": "Status"
@@ -565,12 +552,7 @@
             "name": "status",
             "required": false,
             "type": "string",
-            "enum": [
-              "Pending",
-              "Approved",
-              "Rejected",
-              "Cancelled"
-            ],
+            "enum": ["Pending", "Approved", "Rejected", "Cancelled"],
             "default": "Pending"
           },
           {
@@ -601,14 +583,8 @@
           "message": "You do not have permission to do this.",
           "retryable": false,
           "ui_action": "Explain and hide the action (check x-permissions).",
-          "source": [
-            "documented",
-            "seen_in_tests"
-          ],
-          "details_fields": [
-            "any_of",
-            "required"
-          ],
+          "source": ["documented", "seen_in_tests"],
+          "details_fields": ["any_of", "required"],
           "details_from": "POST /api/v1/admin/departments"
         },
         {
@@ -617,13 +593,8 @@
           "message": "The requested resource was not found.",
           "retryable": false,
           "ui_action": "Say 'not found'; refresh the list.",
-          "source": [
-            "documented",
-            "seen_in_tests"
-          ],
-          "details_fields": [
-            "resource"
-          ],
+          "source": ["documented", "seen_in_tests"],
+          "details_fields": ["resource"],
           "details_from": "PUT /api/v1/admin/printers/{printer_id}"
         }
       ],
@@ -677,7 +648,7 @@
         "authentication": "user",
         "permissions": [],
         "permissions_mode": "all",
-        "who": "the holder of the request's required_permission, never its requester (SELF_APPROVAL_FORBIDDEN)"
+        "who": "a holder of the request's required_permission while the request's can_decide is true (decide_blocked says why not); never its requester (SELF_APPROVAL_FORBIDDEN, self_decision forbidden), except the Owner of a solo practice who alone can decide their own refund, waiver or credit, with a note (self_decision allowed_with_note); a large cash drop is never approved by the cashier of its shift (DUAL_CONTROL_SAME_PERSON)"
       },
       "service_gates": [],
       "idempotency_key": false,
@@ -688,9 +659,7 @@
           "message": "This approval request was already decided.",
           "retryable": false,
           "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
-          "source": [
-            "documented"
-          ],
+          "source": ["documented"],
           "details_fields": [],
           "details_from": null
         },
@@ -700,10 +669,7 @@
           "message": "The second approver must be a different person.",
           "retryable": false,
           "ui_action": "Explain and hide the action (check x-permissions).",
-          "source": [
-            "documented",
-            "seen_in_tests"
-          ],
+          "source": ["documented", "seen_in_tests"],
           "details_fields": [],
           "details_from": "POST /api/v1/prescriptions/{prescription_id}/dispense"
         },
@@ -713,13 +679,8 @@
           "message": "You do not have permission to do this.",
           "retryable": false,
           "ui_action": "Explain and hide the action (check x-permissions).",
-          "source": [
-            "seen_in_tests"
-          ],
-          "details_fields": [
-            "any_of",
-            "required"
-          ],
+          "source": ["seen_in_tests"],
+          "details_fields": ["any_of", "required"],
           "details_from": "POST /api/v1/admin/departments"
         },
         {
@@ -728,9 +689,7 @@
           "message": "The last active Owner keeps the Owner role.",
           "retryable": false,
           "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
-          "source": [
-            "documented"
-          ],
+          "source": ["documented"],
           "details_fields": [],
           "details_from": "PUT /api/v1/admin/users/{user_id}/roles"
         },
@@ -740,10 +699,7 @@
           "message": "You cannot approve your own request.",
           "retryable": false,
           "ui_action": "Explain and hide the action (check x-permissions).",
-          "source": [
-            "documented",
-            "seen_in_tests"
-          ],
+          "source": ["documented", "seen_in_tests"],
           "details_fields": [],
           "details_from": "POST /api/v1/risk/findings/{risk_event_id}/review"
         },
@@ -753,10 +709,7 @@
           "message": "Nobody changes their own roles.",
           "retryable": false,
           "ui_action": "Explain and hide the action (check x-permissions).",
-          "source": [
-            "documented",
-            "seen_in_tests"
-          ],
+          "source": ["documented", "seen_in_tests"],
           "details_fields": [],
           "details_from": "PUT /api/v1/admin/users/{user_id}/roles"
         },
@@ -766,10 +719,7 @@
           "message": "The request is invalid.",
           "retryable": false,
           "ui_action": "Show field errors from details.fields / the message.",
-          "source": [
-            "documented",
-            "seen_in_tests"
-          ],
+          "source": ["documented", "seen_in_tests"],
           "details_fields": [],
           "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
         }
@@ -869,7 +819,7 @@
         "authentication": "user",
         "permissions": [],
         "permissions_mode": "all",
-        "who": "the holder of the request's required_permission, never its requester (SELF_APPROVAL_FORBIDDEN)"
+        "who": "a holder of the request's required_permission while the request's can_decide is true (decide_blocked says why not); never its requester (SELF_APPROVAL_FORBIDDEN, self_decision forbidden), except the Owner of a solo practice who alone can decide their own refund, waiver or credit, with a note (self_decision allowed_with_note); a large cash drop is never approved by the cashier of its shift (DUAL_CONTROL_SAME_PERSON)"
       },
       "service_gates": [],
       "idempotency_key": false,
@@ -880,9 +830,7 @@
           "message": "This approval request was already decided.",
           "retryable": false,
           "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
-          "source": [
-            "documented"
-          ],
+          "source": ["documented"],
           "details_fields": [],
           "details_from": null
         },
@@ -892,9 +840,7 @@
           "message": "The request is invalid.",
           "retryable": false,
           "ui_action": "Show field errors from details.fields / the message.",
-          "source": [
-            "seen_in_tests"
-          ],
+          "source": ["seen_in_tests"],
           "details_fields": [],
           "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
         }
@@ -1005,10 +951,7 @@
           "POST /pharmacy/charity-override-request",
           "POST /wards/{ward_id}/indents"
         ],
-        "refresh": [
-          "GET /approvals",
-          "GET /approvals/{request_id}"
-        ]
+        "refresh": ["GET /approvals", "GET /approvals/{request_id}"]
       },
       {
         "event": "approval.resolved",
@@ -1020,10 +963,7 @@
           "POST /approvals/{request_id}/reject",
           "POST /pharmacy/charity-override-request"
         ],
-        "refresh": [
-          "GET /approvals",
-          "GET /approvals/{request_id}"
-        ]
+        "refresh": ["GET /approvals", "GET /approvals/{request_id}"]
       }
     ],
     "rule": "Refresh the listed reads when the event arrives (a list without a path id: every time; a detail read: when the payload names the same id). Never poll."
@@ -1077,19 +1017,13 @@
       "call": "POST /approvals/{request_id}/approve",
       "emits": "opd.queue.updated",
       "audience": "permission opd.queue.view + the assigned doctor",
-      "reaches_screens": [
-        "registration",
-        "queue_management",
-        "doctor_queue"
-      ]
+      "reaches_screens": ["registration", "queue_management", "doctor_queue"]
     },
     {
       "call": "POST /approvals/{request_id}/approve",
       "emits": "opd.ticket.status_changed",
       "audience": "permissions opd.queue.view / opd.ticket.view + assigned doctor",
-      "reaches_screens": [
-        "queue_management"
-      ]
+      "reaches_screens": ["queue_management"]
     },
     {
       "call": "POST /approvals/{request_id}/approve",
@@ -1106,35 +1040,25 @@
       "call": "POST /approvals/{request_id}/approve",
       "emits": "refund.ready",
       "audience": "permission opd.cash_back.dispense",
-      "reaches_screens": [
-        "refund_waiver_credit",
-        "cash_back_prompts"
-      ]
+      "reaches_screens": ["refund_waiver_credit", "cash_back_prompts"]
     },
     {
       "call": "POST /approvals/{request_id}/approve",
       "emits": "risk.critical_event",
       "audience": "permission risk.view",
-      "reaches_screens": [
-        "risk_dashboard"
-      ]
+      "reaches_screens": ["risk_dashboard"]
     },
     {
       "call": "POST /approvals/{request_id}/approve",
       "emits": "ticket.clinical_lockout",
       "audience": "permission opd.ticket.view",
-      "reaches_screens": [
-        "consultation"
-      ]
+      "reaches_screens": ["consultation"]
     },
     {
       "call": "POST /approvals/{request_id}/approve",
       "emits": "waiver.refund_order.ready",
       "audience": "permission opd.cash_back.dispense",
-      "reaches_screens": [
-        "refund_waiver_credit",
-        "cash_back_prompts"
-      ]
+      "reaches_screens": ["refund_waiver_credit", "cash_back_prompts"]
     },
     {
       "call": "POST /approvals/{request_id}/reject",
@@ -1184,9 +1108,7 @@
       "call": "POST /approvals/{request_id}/reject",
       "emits": "opd.ticket.status_changed",
       "audience": "permissions opd.queue.view / opd.ticket.view + assigned doctor",
-      "reaches_screens": [
-        "queue_management"
-      ]
+      "reaches_screens": ["queue_management"]
     }
   ],
   "patient_context": null,
@@ -1220,12 +1142,7 @@
       }
     },
     {
-      "values": [
-        "Pending",
-        "Approved",
-        "Rejected",
-        "Cancelled"
-      ],
+      "values": ["Pending", "Approved", "Rejected", "Cancelled"],
       "column": "vip_waiver_requests.status",
       "used_at": "GET /approvals[].status",
       "labels": {
@@ -1236,11 +1153,7 @@
       }
     },
     {
-      "values": [
-        "PendingDispensation",
-        "Dispensed",
-        "Cancelled"
-      ],
+      "values": ["PendingDispensation", "Dispensed", "Cancelled"],
       "column": "waiver_refund_orders.status",
       "used_at": "POST /approvals/{request_id}/approve.effect.cash_back_order.status",
       "labels": {
@@ -1250,11 +1163,7 @@
       }
     },
     {
-      "values": [
-        "Applied",
-        "Rejected",
-        "Cancelled"
-      ],
+      "values": ["Applied", "Rejected", "Cancelled"],
       "column": null,
       "used_at": "POST /approvals/{request_id}/approve.effect.change_request",
       "labels": {
@@ -1264,10 +1173,7 @@
       }
     },
     {
-      "values": [
-        "approved",
-        "cancelled"
-      ],
+      "values": ["approved", "cancelled"],
       "column": null,
       "used_at": "POST /approvals/{request_id}/approve.effect.payable",
       "labels": {
@@ -1276,10 +1182,7 @@
       }
     },
     {
-      "values": [
-        "approved",
-        "rejected"
-      ],
+      "values": ["approved", "rejected"],
       "column": null,
       "used_at": "POST /approvals/{request_id}/approve.effect.cash_drop",
       "labels": {
@@ -1288,11 +1191,7 @@
       }
     },
     {
-      "values": [
-        "approved",
-        "rejected",
-        "cancelled"
-      ],
+      "values": ["approved", "rejected", "cancelled"],
       "column": null,
       "used_at": "POST /approvals/{request_id}/approve.effect.charity_override",
       "labels": {
@@ -1302,11 +1201,7 @@
       }
     },
     {
-      "values": [
-        "decided",
-        "missing_permission",
-        "own_request"
-      ],
+      "values": ["decided", "missing_permission", "own_request"],
       "column": null,
       "used_at": "GET /approvals[].decide_blocked",
       "labels": {
@@ -1316,10 +1211,7 @@
       }
     },
     {
-      "values": [
-        "forbidden",
-        "allowed_with_note"
-      ],
+      "values": ["forbidden", "allowed_with_note"],
       "column": null,
       "used_at": "GET /approvals[].self_decision",
       "labels": {
@@ -1388,9 +1280,7 @@
           "expect": "403 FORBIDDEN"
         },
         "errors_to_handle": [],
-        "as_one_of": [
-          "any logged-in user"
-        ]
+        "as_one_of": ["any logged-in user"]
       },
       {
         "id": "case:GET /approvals/{request_id}",
@@ -1400,13 +1290,8 @@
           "as_one_of": [],
           "expect": "403 FORBIDDEN"
         },
-        "errors_to_handle": [
-          "FORBIDDEN",
-          "NOT_FOUND"
-        ],
-        "as_one_of": [
-          "any logged-in user"
-        ]
+        "errors_to_handle": ["FORBIDDEN", "NOT_FOUND"],
+        "as_one_of": ["any logged-in user"]
       },
       {
         "id": "case:POST /approvals/{request_id}/approve",
@@ -1425,9 +1310,7 @@
           "SELF_ROLE_CHANGE_FORBIDDEN",
           "VALIDATION_ERROR"
         ],
-        "as_one_of": [
-          "any logged-in user"
-        ]
+        "as_one_of": ["any logged-in user"]
       },
       {
         "id": "case:POST /approvals/{request_id}/reject",
@@ -1437,12 +1320,8 @@
           "as_one_of": [],
           "expect": "403 FORBIDDEN"
         },
-        "errors_to_handle": [
-          "VALIDATION_ERROR"
-        ],
-        "as_one_of": [
-          "any logged-in user"
-        ]
+        "errors_to_handle": ["VALIDATION_ERROR"],
+        "as_one_of": ["any logged-in user"]
       }
     ],
     "service_cases": [],
@@ -1558,10 +1437,7 @@
       "Reject requires a note.",
       "You can never approve your own request (SELF_APPROVAL_FORBIDDEN)."
     ],
-    "updates_by_itself_on": [
-      "approval.requested",
-      "approval.resolved"
-    ],
+    "updates_by_itself_on": ["approval.requested", "approval.resolved"],
     "errors_the_user_can_meet": [
       {
         "code": "APPROVAL_ALREADY_DECIDED",
@@ -1613,15 +1489,7 @@
       "Language and visual examples",
       "Related help and delivery"
     ],
-    "requirement_ids": [
-      "S1",
-      "S2",
-      "S3",
-      "S4",
-      "S5",
-      "S6",
-      "S7"
-    ],
+    "requirement_ids": ["S1", "S2", "S3", "S4", "S5", "S6", "S7"],
     "delivery": "F1 and contextual screen Help",
     "requirements": [
       {
@@ -1674,146 +1542,85 @@
     {
       "id": "H02",
       "question": "Digits in the Urdu UI and printouts: Latin 0-9 or Extended Arabic-Indic ۰-۹.",
-      "owner": [
-        "vendor"
-      ],
-      "affects": [
-        "every screen in Urdu"
-      ],
+      "owner": ["vendor"],
+      "affects": ["every screen in Urdu"],
       "meanwhile": "Latin digits; identifiers, doses and money stay left to right."
     },
     {
       "id": "H03",
       "question": "How dates and times are shown on screen, and a 12- or 24-hour clock.",
-      "owner": [
-        "vendor",
-        "clinical_lead"
-      ],
-      "affects": [
-        "every screen"
-      ],
+      "owner": ["vendor", "clinical_lead"],
+      "affects": ["every screen"],
       "meanwhile": "The server's print format (e.g. 27-Sep-2026) and the hospital time zone."
     },
     {
       "id": "H04",
       "question": "Money on screen: decimals shown, and digit grouping (1,234,567 or 12,34,567).",
-      "owner": [
-        "vendor"
-      ],
-      "affects": [
-        "every screen with money"
-      ],
+      "owner": ["vendor"],
+      "affects": ["every screen with money"],
       "meanwhile": "The amounts as the API sends them, with the currency setting."
     },
     {
       "id": "H08",
       "question": "Who writes and signs off the Urdu text of the UI, above all clinical and consent wording.",
-      "owner": [
-        "vendor",
-        "translator",
-        "clinical_lead"
-      ],
-      "affects": [
-        "every screen in Urdu"
-      ],
+      "owner": ["vendor", "translator", "clinical_lead"],
+      "affects": ["every screen in Urdu"],
       "meanwhile": "Urdu you add is a draft: mark it so (the interview bank's pattern: a draft until a native speaker reviews it)."
     },
     {
       "id": "H09",
       "question": "One design system shared by every frontend team (who authors and approves it), or each team's own.",
-      "owner": [
-        "vendor",
-        "frontend_lead"
-      ],
-      "affects": [
-        "every screen"
-      ],
+      "owner": ["vendor", "frontend_lead"],
+      "affects": ["every screen"],
       "meanwhile": "Each team designs within the backend's constraints: themes Light and DarkHighContrast, zoom 100-250 %, Noto Nastaliq Urdu, status shown as text and icon, never colour alone. Follow the vendor's design principles (frontend guide 18, get_design_principles)."
     },
     {
       "id": "H10",
       "question": "How each realtime event is shown (interrupt, attention, inform, silent), alert sounds and which terminals play them. Only Code Red (interrupt), the licence and maintenance banners and the logout on session.revoked are prescribed (the event catalogue's `presentation`).",
-      "owner": [
-        "clinical_lead",
-        "vendor"
-      ],
-      "affects": [
-        "every screen with realtime events"
-      ],
+      "owner": ["clinical_lead", "vendor"],
+      "affects": ["every screen with realtime events"],
       "meanwhile": "Code Red interrupts; every other event updates the screen and, at most, a dismissible notice. `priority` is the delivery urgency, not a presentation rule."
     },
     {
       "id": "H12",
       "question": "Which workspaces run on web, Android and iOS, which cannot read a MAC address, discover the server by UDP or print silently; or are cash and printing Windows-only.",
-      "owner": [
-        "vendor",
-        "backend"
-      ],
-      "affects": [
-        "my_cash_shift",
-        "registration",
-        "every screen that prints"
-      ],
+      "owner": ["vendor", "backend"],
+      "affects": ["my_cash_shift", "registration", "every screen that prints"],
       "meanwhile": "The guides describe the Windows (Electron) terminal; tell your developer when a screen needs a capability your platform lacks."
     },
     {
       "id": "H18",
       "question": "Noto Nastaliq Urdu everywhere, or the more compact Naskh in dense tables.",
-      "owner": [
-        "vendor",
-        "frontend_lead"
-      ],
-      "affects": [
-        "every table in Urdu"
-      ],
+      "owner": ["vendor", "frontend_lead"],
+      "affects": ["every table in Urdu"],
       "meanwhile": "Noto Nastaliq Urdu, as the guides require."
     },
     {
       "id": "H19",
       "question": "Allergies: the patient record keeps free text, so it cannot tell \"no known allergies\" (asserted by a clinician) from \"not recorded\". Should it?",
-      "owner": [
-        "clinical_lead",
-        "backend"
-      ],
-      "affects": [
-        "every screen with a patient banner"
-      ],
+      "owner": ["clinical_lead", "backend"],
+      "affects": ["every screen with a patient banner"],
       "meanwhile": "Show the recorded text as recorded; an empty value is \"not recorded\", never \"none\"."
     },
     {
       "id": "H20",
       "question": "May unsaved form input be kept on the terminal (which fields, encrypted, for how long)?",
-      "owner": [
-        "vendor",
-        "hospital"
-      ],
-      "affects": [
-        "every form"
-      ],
+      "owner": ["vendor", "hospital"],
+      "affects": ["every form"],
       "meanwhile": "In memory only; never a second checker's password."
     },
     {
       "id": "H22",
       "question": "Which documents may print on an unregistered terminal's default printer (sensitive A4 documents).",
-      "owner": [
-        "hospital",
-        "vendor"
-      ],
-      "affects": [
-        "every screen that prints"
-      ],
+      "owner": ["hospital", "vendor"],
+      "affects": ["every screen that prints"],
       "meanwhile": "As the printing guide says: the hint, then the default printer."
     },
     {
       "id": "H24",
       "question": "Who approves frontend performance targets, alert thresholds and escalation timers.",
-      "owner": [
-        "vendor",
-        "clinical_lead"
-      ],
-      "affects": [
-        "every screen"
-      ],
+      "owner": ["vendor", "clinical_lead"],
+      "affects": ["every screen"],
       "meanwhile": "The server's own settings (e.g. critical_result_communicate_minutes)."
     }
   ],
@@ -2073,12 +1880,7 @@
         },
         "status": {
           "type": "string",
-          "enum": [
-            "Pending",
-            "Approved",
-            "Rejected",
-            "Cancelled"
-          ],
+          "enum": ["Pending", "Approved", "Rejected", "Cancelled"],
           "title": "Status"
         },
         "decided_by": {
@@ -2145,11 +1947,7 @@
           "anyOf": [
             {
               "type": "string",
-              "enum": [
-                "decided",
-                "missing_permission",
-                "own_request"
-              ]
+              "enum": ["decided", "missing_permission", "own_request"]
             },
             {
               "type": "null"
@@ -2162,10 +1960,7 @@
           "anyOf": [
             {
               "type": "string",
-              "enum": [
-                "forbidden",
-                "allowed_with_note"
-              ]
+              "enum": ["forbidden", "allowed_with_note"]
             },
             {
               "type": "null"
@@ -2311,11 +2106,7 @@
           "anyOf": [
             {
               "type": "string",
-              "enum": [
-                "approved",
-                "rejected",
-                "cancelled"
-              ]
+              "enum": ["approved", "rejected", "cancelled"]
             },
             {
               "type": "null"
@@ -2328,10 +2119,7 @@
           "anyOf": [
             {
               "type": "string",
-              "enum": [
-                "approved",
-                "rejected"
-              ]
+              "enum": ["approved", "rejected"]
             },
             {
               "type": "null"
@@ -2344,10 +2132,7 @@
           "anyOf": [
             {
               "type": "string",
-              "enum": [
-                "approved",
-                "cancelled"
-              ]
+              "enum": ["approved", "cancelled"]
             },
             {
               "type": "null"
@@ -2360,11 +2145,7 @@
           "anyOf": [
             {
               "type": "string",
-              "enum": [
-                "approved",
-                "rejected",
-                "cancelled"
-              ]
+              "enum": ["approved", "rejected", "cancelled"]
             },
             {
               "type": "null"
@@ -2389,11 +2170,7 @@
           "anyOf": [
             {
               "type": "string",
-              "enum": [
-                "Applied",
-                "Rejected",
-                "Cancelled"
-              ]
+              "enum": ["Applied", "Rejected", "Cancelled"]
             },
             {
               "type": "null"
@@ -2489,12 +2266,7 @@
         },
         "status": {
           "type": "string",
-          "enum": [
-            "Pending",
-            "Approved",
-            "Rejected",
-            "Cancelled"
-          ],
+          "enum": ["Pending", "Approved", "Rejected", "Cancelled"],
           "title": "Status"
         },
         "decided_by": {
@@ -2561,11 +2333,7 @@
           "anyOf": [
             {
               "type": "string",
-              "enum": [
-                "decided",
-                "missing_permission",
-                "own_request"
-              ]
+              "enum": ["decided", "missing_permission", "own_request"]
             },
             {
               "type": "null"
@@ -2578,10 +2346,7 @@
           "anyOf": [
             {
               "type": "string",
-              "enum": [
-                "forbidden",
-                "allowed_with_note"
-              ]
+              "enum": ["forbidden", "allowed_with_note"]
             },
             {
               "type": "null"
@@ -2668,11 +2433,7 @@
         }
       },
       "type": "object",
-      "required": [
-        "data",
-        "meta",
-        "request_id"
-      ],
+      "required": ["data", "meta", "request_id"],
       "title": "Envelope[ApprovalDecisionOut]"
     },
     "Envelope_ApprovalOut_": {
@@ -2689,11 +2450,7 @@
         }
       },
       "type": "object",
-      "required": [
-        "data",
-        "meta",
-        "request_id"
-      ],
+      "required": ["data", "meta", "request_id"],
       "title": "Envelope[ApprovalOut]"
     },
     "Envelope_list_ApprovalOut__": {
@@ -2714,11 +2471,7 @@
         }
       },
       "type": "object",
-      "required": [
-        "data",
-        "meta",
-        "request_id"
-      ],
+      "required": ["data", "meta", "request_id"],
       "title": "Envelope[list[ApprovalOut]]"
     },
     "HTTPValidationError": {
@@ -2779,9 +2532,7 @@
         }
       },
       "type": "object",
-      "required": [
-        "server_time"
-      ],
+      "required": ["server_time"],
       "title": "Meta"
     },
     "ValidationError": {
@@ -2817,11 +2568,7 @@
         }
       },
       "type": "object",
-      "required": [
-        "loc",
-        "msg",
-        "type"
-      ],
+      "required": ["loc", "msg", "type"],
       "title": "ValidationError"
     },
     "WaiverRefundOrderOut": {
@@ -2844,11 +2591,7 @@
         },
         "status": {
           "type": "string",
-          "enum": [
-            "PendingDispensation",
-            "Dispensed",
-            "Cancelled"
-          ],
+          "enum": ["PendingDispensation", "Dispensed", "Cancelled"],
           "title": "Status"
         },
         "shift_id": {
@@ -2909,147 +2652,86 @@
   "unknowns": [
     {
       "what": "decision H02",
-      "owner": [
-        "vendor"
-      ],
+      "owner": ["vendor"],
       "question": "Digits in the Urdu UI and printouts: Latin 0-9 or Extended Arabic-Indic ۰-۹.",
-      "affects": [
-        "every screen in Urdu"
-      ],
+      "affects": ["every screen in Urdu"],
       "meanwhile": "Latin digits; identifiers, doses and money stay left to right."
     },
     {
       "what": "decision H03",
-      "owner": [
-        "vendor",
-        "clinical_lead"
-      ],
+      "owner": ["vendor", "clinical_lead"],
       "question": "How dates and times are shown on screen, and a 12- or 24-hour clock.",
-      "affects": [
-        "every screen"
-      ],
+      "affects": ["every screen"],
       "meanwhile": "The server's print format (e.g. 27-Sep-2026) and the hospital time zone."
     },
     {
       "what": "decision H04",
-      "owner": [
-        "vendor"
-      ],
+      "owner": ["vendor"],
       "question": "Money on screen: decimals shown, and digit grouping (1,234,567 or 12,34,567).",
-      "affects": [
-        "every screen with money"
-      ],
+      "affects": ["every screen with money"],
       "meanwhile": "The amounts as the API sends them, with the currency setting."
     },
     {
       "what": "decision H08",
-      "owner": [
-        "vendor",
-        "translator",
-        "clinical_lead"
-      ],
+      "owner": ["vendor", "translator", "clinical_lead"],
       "question": "Who writes and signs off the Urdu text of the UI, above all clinical and consent wording.",
-      "affects": [
-        "every screen in Urdu"
-      ],
+      "affects": ["every screen in Urdu"],
       "meanwhile": "Urdu you add is a draft: mark it so (the interview bank's pattern: a draft until a native speaker reviews it)."
     },
     {
       "what": "decision H09",
-      "owner": [
-        "vendor",
-        "frontend_lead"
-      ],
+      "owner": ["vendor", "frontend_lead"],
       "question": "One design system shared by every frontend team (who authors and approves it), or each team's own.",
-      "affects": [
-        "every screen"
-      ],
+      "affects": ["every screen"],
       "meanwhile": "Each team designs within the backend's constraints: themes Light and DarkHighContrast, zoom 100-250 %, Noto Nastaliq Urdu, status shown as text and icon, never colour alone. Follow the vendor's design principles (frontend guide 18, get_design_principles)."
     },
     {
       "what": "decision H10",
-      "owner": [
-        "clinical_lead",
-        "vendor"
-      ],
+      "owner": ["clinical_lead", "vendor"],
       "question": "How each realtime event is shown (interrupt, attention, inform, silent), alert sounds and which terminals play them. Only Code Red (interrupt), the licence and maintenance banners and the logout on session.revoked are prescribed (the event catalogue's `presentation`).",
-      "affects": [
-        "every screen with realtime events"
-      ],
+      "affects": ["every screen with realtime events"],
       "meanwhile": "Code Red interrupts; every other event updates the screen and, at most, a dismissible notice. `priority` is the delivery urgency, not a presentation rule."
     },
     {
       "what": "decision H12",
-      "owner": [
-        "vendor",
-        "backend"
-      ],
+      "owner": ["vendor", "backend"],
       "question": "Which workspaces run on web, Android and iOS, which cannot read a MAC address, discover the server by UDP or print silently; or are cash and printing Windows-only.",
-      "affects": [
-        "my_cash_shift",
-        "registration",
-        "every screen that prints"
-      ],
+      "affects": ["my_cash_shift", "registration", "every screen that prints"],
       "meanwhile": "The guides describe the Windows (Electron) terminal; tell your developer when a screen needs a capability your platform lacks."
     },
     {
       "what": "decision H18",
-      "owner": [
-        "vendor",
-        "frontend_lead"
-      ],
+      "owner": ["vendor", "frontend_lead"],
       "question": "Noto Nastaliq Urdu everywhere, or the more compact Naskh in dense tables.",
-      "affects": [
-        "every table in Urdu"
-      ],
+      "affects": ["every table in Urdu"],
       "meanwhile": "Noto Nastaliq Urdu, as the guides require."
     },
     {
       "what": "decision H19",
-      "owner": [
-        "clinical_lead",
-        "backend"
-      ],
+      "owner": ["clinical_lead", "backend"],
       "question": "Allergies: the patient record keeps free text, so it cannot tell \"no known allergies\" (asserted by a clinician) from \"not recorded\". Should it?",
-      "affects": [
-        "every screen with a patient banner"
-      ],
+      "affects": ["every screen with a patient banner"],
       "meanwhile": "Show the recorded text as recorded; an empty value is \"not recorded\", never \"none\"."
     },
     {
       "what": "decision H20",
-      "owner": [
-        "vendor",
-        "hospital"
-      ],
+      "owner": ["vendor", "hospital"],
       "question": "May unsaved form input be kept on the terminal (which fields, encrypted, for how long)?",
-      "affects": [
-        "every form"
-      ],
+      "affects": ["every form"],
       "meanwhile": "In memory only; never a second checker's password."
     },
     {
       "what": "decision H22",
-      "owner": [
-        "hospital",
-        "vendor"
-      ],
+      "owner": ["hospital", "vendor"],
       "question": "Which documents may print on an unregistered terminal's default printer (sensitive A4 documents).",
-      "affects": [
-        "every screen that prints"
-      ],
+      "affects": ["every screen that prints"],
       "meanwhile": "As the printing guide says: the hint, then the default printer."
     },
     {
       "what": "decision H24",
-      "owner": [
-        "vendor",
-        "clinical_lead"
-      ],
+      "owner": ["vendor", "clinical_lead"],
       "question": "Who approves frontend performance targets, alert thresholds and escalation timers.",
-      "affects": [
-        "every screen"
-      ],
+      "affects": ["every screen"],
       "meanwhile": "The server's own settings (e.g. critical_result_communicate_minutes)."
     }
   ]

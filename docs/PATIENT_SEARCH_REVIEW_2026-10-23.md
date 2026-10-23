@@ -1,0 +1,32 @@
+# Patient search: manual review checkpoint
+
+2026-10-23, implementation1 Codex/mkashif. User requested one Phase2 screen at a time, according to MCP requirements. Patient search position13 is ready for the next manual review; full MCP screen acceptance remains pending.
+
+## Implemented scope
+
+The existing search/profile/financial summary reads remain. Separate search/view/update permissions are enforced. Search bounds are 2–100 characters, typing waits250ms and scanner Enter submits immediately; stale matches disappear as the query changes. No-match, loading, denied and error states are visible. Existing server outstanding-banner text, MLC numbers, deceased flag and merged-profile presentation remain; merge/death and reconnect refresh reads while preserving the original editor snapshot. This screen starts no new visit and deletes no patient.
+
+Demographic editing sends only changed fields with the original row_version and a synchronous single-save guard. Cancel/close protects changed drafts, F1 preserves draft/focus, and shell navigation/sign-out waits for the pending action. ANY failed or uncertain save blocks further saving and preserves the draft. Read current record displays the server's current values; explicitly discard/reload before re-entering still-needed edits. The real server panel catalogue replaces a typed ID. Hospital timezone and currency now come from shared metadata. Bilingual screen/control help and actual screenshots are bundled, with16screens/212controls/74groups in mandatory help coverage. Urdu remains draft pending native review.
+
+Changed files: src/screens/PatientSearch.tsx, src/App.tsx, src/help.ts, src/foundation-help.ts, src/i18n.ts, foundation catalogue/task mappings, scripts/check-help.mjs, tests/help-coverage.test.mjs. Current bundle/contracts in contracts/patient_search.json and patient-search-refresh-2026-10-23.json; real test script scripts/patient-search-check.mjs. MCP overview, roadmap, full bundle, quality/design, reception handbook/workspace brief, endpoint/generated types and request validation were reviewed. DEV server build2026-10-23T01:28:16.037092+00:00, contract57d137222f1ca637655d, rubricd81d43f195f8.
+
+## Verification
+
+- Final renderer index-Bn5p1AqN.js SHA2562316e2e284db876d6e524462f324d7af9e3f42e8391802c50a4169b7894a10b4. Manifest docs/patient-search-build-2026-10-23.json identifies exact source/native reports and media. main467f416 with preserved earlier uncommitted work; no commit/reset.
+- npm run build PASS, including required help/media, TypeScript and Vite. Existing bundle size warning remains. npm test48 PASS; the delivered-screen assertion was updated15→16, with coverage checks retained.
+- Real DEV Electron PASS3, final runDEMO-PATIENT-SEARCH-1792727048279. Existing owned synthetic patient12, no new registration/payment. Initial doubleclick exactlyone PATCH200 with original expected_version; cancelled discard/F1 retained draft/focus. Second session advanced version; UI PATCH409 preserved draft, blocked replay and read real latest values before explicit reload. Third UI PATCH200 committed but reply deliberately lost; real GET confirmed saved address, UI did not repeat and reconciled original12. No mocked responses/records. Actual EN/UR both themes250% reflow and no-match/MRN/profile/financial reads exercised. Images public/handbook/patient_search-{en,ur}.png and ignored artifacts/patient_search-*-250.png.
+- demo.doctor actual PATCH12 refused403 FORBIDDEN (patient.update), requestb8a4ebe153464978976c69da7421a90a; docs/patient-search-access-2026-10-23.json. This is one denied role, not a full permission matrix.
+- Original patient12 address restored with a fresh expected_version; audit row_version increased legitimately. Owned user34/employee36 exact codex.foundation.1792584106665 inactive; original preferences restored. Every administrative/native journal attempt finished; no uncertain writes/running commands. Ignored immutable artifacts/patient-search-passed-20261023.json and patient-search-native-passed-20261023.json hold original writes. Earlier bootstrap/final runs also cleaned up. Do not rerun without verifying journals/owned fixture; never repeat an uncertain write blindly.
+
+## Manual test steps
+
+1. Sign in with an authorized reception DEV account and open Reception → Patient search. Use a fresh synthetic patient registered through the app for your named human worksheet; note its MRN and build. The automation used an earlier synthetic patient, so it does not replace this fresh-data human review.
+2. Find it by MRN, name, mobile and CNIC where recorded; try no match, Clear, scanner Enter and rapid query changes. Verify selected identity, all flags and financial summary before editing.
+3. Edit contact/address/name as appropriate. Try invalid/empty required values, cancel a changed draft and reject discard; press F1 from a field. Save a valid change once and reopen/re-read it.
+4. Open the same fresh patient in a second session. Save there, then try the old editor. Verify conflict, preserved draft, Read current record and deliberate discard/reload; re-enter only necessary changes. Test permitted billing/Panel and LabOnly upgrade on suitable synthetic records.
+5. Check outstanding dues, master/old merged MRNs, MLC and deceased banners only with approved real synthetic fixtures. Confirm no separate duplicate identities/new deceased visit. Physical barcode scanner, complete field/role matrices and merge/death live paths are not established by this automated run.
+6. Check English/Urdu, both themes, keyboard/Settings shared zoom100–250/reset, help from screen/fields/dialogs, offline help and role FAQ. Record reviewer/date/IDs/expected-versus-actual in the reception review worksheet. Only the human fills results/signs it.
+
+Proposal **#61** saved/read back pending for the newly tested PATCH endpoint only: **awaiting human review on /docs -> My progress**. Exact input docs/codex-patient-search-edit-20261023-v1.json. Existing accepted reads were not resubmitted. No q:tested/full-quality/human gate claimed. Prior proposals58–60 are accepted, session baseline495points/0complete screens. Named human fresh-data, full role FAQ/native Urdu/editor, flagged/merge/refusal and peripheral journeys remain pending.
+
+No new backend defect reproduced. Existing #13 remains New/no response on2026-10-23 session closeout: backend-owned demo.reception restoration is pending. Shared password/reset/reseed was not attempted. No later Phase2 screen started.

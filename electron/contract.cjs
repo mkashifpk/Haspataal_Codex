@@ -63,10 +63,34 @@ function permissionAllows(op, user) {
     ? p.some((x) => user.permissions.includes(x))
     : p.every((x) => user.permissions.includes(x));
 }
+function matchOperation(operations, method, path) {
+  const pathname = path.split("?")[0];
+  // Static names such as /cash-shifts/mine must beat /cash-shifts/{shift_id}.
+  const exact = operations.find((e) => e.endpoint === `${method} ${pathname}`);
+  if (exact) return exact;
+  return operations.find((e) => {
+    const [m, route] = e.endpoint.split(" ");
+    const pattern = route
+      .split(/(\{[^}]+\})/g)
+      .map((part) =>
+        part.startsWith("{")
+          ? "[^/]+"
+          : part.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
+      )
+      .join("");
+    return m === method && new RegExp("^" + pattern + "$").test(pathname);
+  });
+}
 function workspaceView(est, code) {
   return est.views.workspaces.find((v) => v.workspace === code)?.view || "full";
 }
 function screenView(est, id) {
   return est.views.screens.find((v) => v.screen_id === id)?.view || "full";
 }
-module.exports = { validate, permissionAllows, workspaceView, screenView };
+module.exports = {
+  validate,
+  permissionAllows,
+  workspaceView,
+  screenView,
+  matchOperation,
+};

@@ -31,7 +31,7 @@ Screen examples are synthetic DEV illustrations, not evidence of the reader's ow
 
 ## Backend gap
 
-Issue **#7**, Documentation / Low / **New**: `get_handbook_outline('*')` still describes an unconditional requester ban for approval/rejection after issue #2 introduced server-computed solo eligibility. The UI uses the actual `can_decide` / `self_decision` response. The outdated prose is reported, not implemented as a client authorization rule.
+Status refreshed 2026-10-22: issue **#7**, Documentation / Low, is **Fixed**. Backend build2026-10-22T03:00:52.677157+00:00 corrects the unconditional requester ban to match server-computed `can_decide`, `decide_blocked` and `self_decision`, including permitted solo decisions with a note and independent cash-drop decisions. Local handbook/contract snapshots were refreshed and retested; see `docs/backend-fix-retests-2026-10-22.json`. The UI uses actual server eligibility. Current cross-issue status and verification limits are in `docs/BACKEND_STATUS_2026-10-22.md`.
 
 ## Acceptance still pending
 
@@ -46,7 +46,7 @@ A subsequent code/contract comparison identified four follow-ups. All four are n
 
 These are frontend fixes, not new backend bug reports. Bilingual guidance/translations and screen examples were refreshed; structural coverage is now 102 controls and 42 groups. Build and 24 unit tests passed, including health-503/schema handling, hospital-time conversion/DST refusal, recovery identity/expiry, and separate durable records per account/hospital/action. The live Electron run passed the avatar route, real healthy health, a Los Angeles workstation with real hospital timezone metadata and read-only recovery from an unsent client draft, including closing/reopening the app and signing in again. A captured recovery screen was visually inspected; its fetched history is now expandable so actions are not buried below a long register. No Facility apply is submitted by automation; controlled degraded/uncertain-commit scenarios remain manual tests. See `PHASE1_MANUAL_TEST.md`.
 
-Backend issue #7 remains the separately reported documentation gap; MCP listed one open backend report when this task started.
+The issue #7 gap described at the start of this historical checkpoint is now resolved and locally integrated. The test counts above describe their original runs, not a new rerun. Later Notifications/foundation verification is recorded separately in `docs/NOTIFICATIONS_REVIEW_2026-10-22.md`.
 
 Phase 1 is not declared complete by this change. A named human must perform fresh-record role journeys and review the Urdu wording. The full exit scenarios still need their recorded outcomes: every demo account's landing, forced password change, licence/maintenance banners, session revocation across windows, actual approval decision/withdrawal and requester handover, and profile/service changes refreshing every window. Broader F1/zoom/layout and physical device checks remain part of acceptance. Agent tests and seeded browsing do not replace this review.
 

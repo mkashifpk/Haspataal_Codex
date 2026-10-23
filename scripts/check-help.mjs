@@ -28,6 +28,12 @@ export function checkHelp({
   for (const id of deliveredHelpScreens) {
     const page = pages.find((p) => p.key.name === id);
     assert(page, `Missing page ${id}`);
+    if (id === "registration" && page.value.type === "Identifier" && page.value.name === "registrationHelp") {
+      page.value = parse(read("src/registration-help.ts"), {sourceType:"module",plugins:["typescript"]})
+        .program.body.find(n=>n.type === "ExportNamedDeclaration" && n.declaration?.declarations?.some(d=>d.id.name === "registrationHelp"))
+        ?.declaration.declarations.find(d=>d.id.name === "registrationHelp")?.init;
+      assert(page.value?.type === "ObjectExpression", "Missing authored registration help");
+    }
     for (const key of [
       "title",
       "titleUr",
@@ -159,6 +165,16 @@ export function checkHelp({
       "Facility",
       "Help",
       "CashShift",
+      "QueueManagement",
+      "RefundRequests",
+      "CashBack",
+      "TicketDesk",
+      "PatientSearch",
+      "Registration",
+      "RegistrationActions",
+      "RegistrationDocuments",
+      "PatientDocuments",
+      "Tariff",
     ].map((n) => `src/screens/${n}.tsx`),
   ];
   const used = new Set(),

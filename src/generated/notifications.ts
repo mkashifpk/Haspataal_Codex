@@ -39,7 +39,7 @@ export interface ReadAllOut {
   marked: number;
 }
 
-/** My notifications (newest first) — GET /api/v1/notifications (permissions: any logged-in user). */
+/** My notifications (newest first) — GET /api/v1/notifications (who may call: any logged-in user, for their own account (also before a forced password change where allowed)). */
 export function inbox(query?: {
   unread_only?: boolean;
   before_id?: number | null;
@@ -52,12 +52,12 @@ export function inbox(query?: {
   );
 }
 
-/** Badge count — GET /api/v1/notifications/unread-count (permissions: any logged-in user). */
+/** Badge count — GET /api/v1/notifications/unread-count (who may call: any logged-in user, for their own account (also before a forced password change where allowed)). */
 export function unreadCount(): Promise<UnreadCountOut> {
   return api<UnreadCountOut>("GET", `/notifications/unread-count`, undefined);
 }
 
-/** Mark one as read — POST /api/v1/notifications/{notification_id}/read (permissions: any logged-in user). */
+/** Mark one as read — POST /api/v1/notifications/{notification_id}/read (who may call: any logged-in user, for their own account (also before a forced password change where allowed)). */
 export function markRead(
   notification_id: number,
 ): Promise<NotificationReadOut> {
@@ -68,7 +68,7 @@ export function markRead(
   );
 }
 
-/** Mark everything as read — POST /api/v1/notifications/read-all (permissions: any logged-in user). */
+/** Mark everything as read — POST /api/v1/notifications/read-all (who may call: any logged-in user, for their own account (also before a forced password change where allowed)). */
 export function readAll(): Promise<ReadAllOut> {
   return api<ReadAllOut>("POST", `/notifications/read-all`, undefined);
 }

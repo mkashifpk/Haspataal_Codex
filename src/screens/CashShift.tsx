@@ -17,6 +17,8 @@ import {
   createShiftOpen,
   definiteShiftRefusal,
   mayRetryShiftOpen,
+  matchesShiftCloseReview,
+  type ShiftCloseReview,
   type ShiftAttempt,
 } from "../cash-shift-safety";
 import { formatHospitalTime, hospitalTimeZoneError } from "../hospital-time";
@@ -79,7 +81,7 @@ export function CashShift({
   const flight = useRef(false);
   const [error, setError] = useState<unknown>();
   const [notice, setNotice] = useState("");
-  const [confirmClose, setConfirmClose] = useState(false);
+  const [confirmClose, setConfirmClose] = useState<ShiftCloseReview>();
   const [attempt, setAttempt] = useState<ShiftAttempt>();
   const [checked, setChecked] =
     useState<cashShift.CashShiftSummaryOut | null>();
@@ -194,7 +196,7 @@ export function CashShift({
         setReview(closed);
         setAttempt(undefined);
         setDeclaredCash("");
-        setConfirmClose(false);
+        setConfirmClose(undefined);
         setNotice(
           tr("Shift closed successfully. Pending collection by accountant."),
         );
@@ -245,6 +247,7 @@ export function CashShift({
       if (
         current &&
         (current.user_id !== user.user_id ||
+          (attempt.kind === "open" && current.node !== attempt.body.node) ||
           (attempt.kind === "close" && current.shift_id !== attempt.shiftId))
       )
         throw new Error(
@@ -274,7 +277,7 @@ export function CashShift({
       return;
     setAttempt(undefined);
     setChecked(undefined);
-    setConfirmClose(false);
+    setConfirmClose(undefined);
     setNotice(
       tr(
         "Recovery hold cleared after review. Check the current shift before starting another action.",
@@ -617,7 +620,18 @@ export function CashShift({
                   !!shiftReq.error ||
                   cashAmount(declaredCash) === undefined
                 }
-                onClick={() => setConfirmClose(true)}
+                onClick={() => {
+                  const amount = cashAmount(declaredCash);
+                  if (amount !== undefined && readyToClose)
+                    setConfirmClose(
+                      Object.freeze({
+                        shiftId: shift.shift_id,
+                        node: shift.node,
+                        expectedCash: shift.expected_cash,
+                        declaredCash: amount,
+                      }),
+                    );
+                }}
               >
                 {tr("Close shift")}
               </button>
@@ -627,35 +641,45 @@ export function CashShift({
             <Modal
               title={tr("Confirm Shift Closure")}
               onClose={() => {
-                if (!busy) setConfirmClose(false);
+                if (!busy) setConfirmClose(undefined);
               }}
             >
               <p>
                 {tr(
-                  "Closing hands over the counted cash to the accountant. You will not be able to record further counter cash on this shift.",
+                  "Closing records your counted cash for the accountant to verify. You will not be able to record further counter cash on this shift.",
                 )}
               </p>
               <dl className="details">
                 <div>
                   <dt>{tr("Shift #")}</dt>
                   <dd>
-                    {shift.shift_id} · {shift.node}
+                    {confirmClose.shiftId} ·{" "}
+                    {tr(
+                      NODE_LABELS[confirmClose.node]?.[0] || confirmClose.node,
+                    )}
                   </dd>
                 </div>
                 <div>
                   <dt>{tr("Expected cash")}</dt>
-                  <dd dir="ltr">{money(shift.expected_cash)}</dd>
+                  <dd dir="ltr">{money(confirmClose.expectedCash)}</dd>
                 </div>
                 <div>
                   <dt>{tr("Counted cash")}</dt>
-                  <dd dir="ltr">{money(cashAmount(declaredCash))}</dd>
+                  <dd dir="ltr">{money(confirmClose.declaredCash)}</dd>
                 </div>
               </dl>
+              {!matchesShiftCloseReview(confirmClose, shift) && (
+                <p role="alert">
+                  {tr(
+                    "The shift or expected cash changed. Go back, refresh and review the counted cash again.",
+                  )}
+                </p>
+              )}
               <div className="actions">
                 <button
                   data-help="cash.close"
                   disabled={busy}
-                  onClick={() => setConfirmClose(false)}
+                  onClick={() => setConfirmClose(undefined)}
                 >
                   {tr("Go back")}
                 </button>
@@ -665,20 +689,19 @@ export function CashShift({
                   disabled={
                     busy ||
                     !readyToClose ||
-                    cashAmount(declaredCash) === undefined
+                    !matchesShiftCloseReview(confirmClose, shift)
                   }
                   onClick={() => {
-                    const amount = cashAmount(declaredCash);
                     if (
-                      amount !== undefined &&
+                      matchesShiftCloseReview(confirmClose, shift) &&
                       !blocked &&
                       readyToClose &&
                       canOperate
                     )
                       void send({
                         kind: "close",
-                        shiftId: shift.shift_id,
-                        body: { declared_cash: amount },
+                        shiftId: confirmClose.shiftId,
+                        body: { declared_cash: confirmClose.declaredCash },
                       });
                   }}
                 >

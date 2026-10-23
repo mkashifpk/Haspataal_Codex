@@ -1,3 +1,7 @@
+# Status note — 22 October 2026
+
+This dated checkpoint retains its original test/reporting history. Backend issues7/8 are now Fixed, reporting has been retested successfully and the supported connection claims were subsequently accepted. Current issue states and local integration evidence: `BACKEND_STATUS_2026-10-22.md`; current continuation: `../handoff.md`. Do not retry historical proposal payloads already superseded by accepted work.
+
 # Connect to server — foundation closure checkpoint
 
 Implementation 1 / Codex; 2026-10-21. Baseline `8e3d42f` plus the uncommitted files in `foundation-connect-build-2026-10-21-v2.json`. Renderer `index-DgT4A-8I.js`, SHA256 `05fb5995a452459b6b233be915e53a63be5a55421905b802ae556b534a2dd247`; the manifest also identifies the Electron code actually tested. The earlier v1 manifest/payload are retained as immutable reporting-error evidence. Final timer review prevents overlapping recovery cycles; final build/32 tests/6 focused checks passed again. The 14 shared regression checks passed before this last timer-only guard.

@@ -662,7 +662,9 @@ export function getUser(user_id: number): Promise<UserDetailOut> {
 }
 
 /** Log a user out everywhere — POST /api/v1/admin/users/{user_id}/revoke-sessions (who may call: holders of admin.user.manage). */
-export function revoke(user_id: number): Promise<SessionsRevokedOut> {
+export function revokeAdminUsersSessions(
+  user_id: number,
+): Promise<SessionsRevokedOut> {
   return api<SessionsRevokedOut>(
     "POST",
     `/admin/users/${user_id}/revoke-sessions`,
@@ -717,7 +719,7 @@ export function updateTerminal(
 }
 
 /** Roles with their default workspace and permissions — GET /api/v1/meta/roles (who may call: any logged-in user). */
-export function roles(): Promise<RoleOut[]> {
+export function rolesMeta(): Promise<RoleOut[]> {
   return api<RoleOut[]>("GET", `/meta/roles`, undefined);
 }
 
@@ -736,7 +738,9 @@ export function provisioningQueue(): Promise<ProvisioningQueueItemOut[]> {
 }
 
 /** Provision a login (temporary password shown ONCE) — POST /api/v1/admin/users (who may call: holders of admin.user.provision). */
-export function provision(body: ProvisionIn): Promise<ProvisionedUserOut> {
+export function provisionAdminUsers(
+  body: ProvisionIn,
+): Promise<ProvisionedUserOut> {
   return api<ProvisionedUserOut>("POST", `/admin/users`, body);
 }
 
@@ -900,9 +904,7 @@ export function addBeds(ward_id: number, body: BedsIn): Promise<BedOut[]> {
 }
 
 /** Provision an operating theater (Super Admin) — POST /api/v1/ot/theaters (who may call: holders of ot.theater.provision). */
-// Local compile-only disambiguation: MCP generator duplicates provision().
-// Backend report codex-it-generator-duplicate-provision-20261021; no contract change.
-export function provisionTheater(body: TheaterIn): Promise<TheaterOut> {
+export function provisionOtTheaters(body: TheaterIn): Promise<TheaterOut> {
   return api<TheaterOut>("POST", `/ot/theaters`, body, { idempotent: true });
 }
 

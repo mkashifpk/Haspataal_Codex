@@ -1,10 +1,16 @@
 {
   "screen_id": "patient_search",
-  "contract_fingerprint": "bde3c5f94776075b2abd",
-  "knowledge_revision": "933cb79d7aa9f9b7",
+  "contract_fingerprint": "57d137222f1ca637655d",
+  "knowledge_revision": "cdafb44b06354a92",
   "delivery_gate": {
     "required": true,
     "status": "required",
+    "progress_reporting": {
+      "required": true,
+      "submit": "propose_progress",
+      "verify": "progress_proposals",
+      "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+    },
     "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
     "compulsory": [
       {
@@ -33,8 +39,8 @@
       }
     ],
     "zoom": {
-      "min_pct": 100.0,
-      "max_pct": 250.0,
+      "min_pct": 100,
+      "max_pct": 250,
       "reset_pct": 100,
       "keys": [
         "Ctrl + or Ctrl = (zoom in)",
@@ -49,7 +55,7 @@
   },
   "ui_quality": {
     "source": "frontend-docs/guides/16-ui-quality.md",
-    "standard_revision": "955624dcfc85ddb2",
+    "standard_revision": "3f27760c7bc06e2d",
     "context": {
       "workspace": "reception",
       "purpose": "Find returning patients by MRN, mobile, CNIC or name; show outstanding dues banner.",
@@ -147,7 +153,7 @@
         {
           "id": "R9",
           "title": "Keep reproducible evidence",
-          "instruction": "- [ ] For each task record new record IDs, ordered UI steps, expected/actual outcome, pass/fail/not-applicable,\n  reason for non-applicability, test output, synthetic screenshots, handbook/FAQ paths and remaining limitations.\n- [ ] Start from the workspace's **review worksheet**: *Download the review worksheet* on the portal's page of the\n  workspace (*Human review with new records*), in the accept box of a proposal or on *Save this screen*\n  (`/docs/api/review-worksheet/<workspace>`, `shared` for the screens every workspace has). It is one Markdown file,\n  made from the backend's catalogue: R1's fields, the four compulsory checks, R1-R10, the workspace's own checklist,\n  every write operation to exercise and the results table below, one row per screen to start from. Agents may prepare\n  its lists; only the named reviewer fills in the results.\n- [ ] Keep the filled worksheet in the frontend repository or its review system. The portal note is a summary, not\n  storage for the whole test report.\n- [ ] Accepting or reporting **F1 help, the role FAQs, zoom or the fresh-data review** (on a proposal, on *Save this\n  screen* or in the transfer of legacy work) needs the worksheet's reference (its path or link, and the build) in\n  **Review worksheet**. The portal refuses those four without it (`VALIDATION_ERROR`, `details.field` = `worksheet`)\n  and shows the reference to the backend team's inspectors.\n\n| Role / task / screen | New record IDs | Create | Read | Update / correction | Delete / permitted alternative | Help / FAQ / zoom | Evidence / result |\n|---|---|---|---|---|---|---|---|\n| Fill one row per supported task | IDs from this review run | Pass/fail/N-A + reason | Pass/fail | Pass/fail/N-A + reason | Exact action and outcome | Pass/fail | Steps, expected/actual, evidence reference |"
+          "instruction": "- [ ] For each task record new record IDs, ordered UI steps, expected/actual outcome, pass/fail/not-applicable,\n  reason for non-applicability, test output, synthetic screenshots, handbook/FAQ paths and remaining limitations.\n- [ ] Start from the workspace's **review worksheet**: *Download the review worksheet* on the portal's page of the\n  workspace (*Human review with new records*), in the accept box of a proposal or on *Save this screen*\n  (`/docs/api/review-worksheet/<workspace>`, `shared` for the screens every workspace has). It is one Markdown file,\n  made from the backend's catalogue: R1's fields, the four compulsory checks, R1-R10, the workspace's own checklist,\n  every write operation to exercise and the results table below, one row per screen to start from. Agents may prepare\n  its lists; only the named reviewer fills in the results.\n- [ ] Keep the filled worksheet in the frontend repository or its review system. The portal note is a summary, not\n  storage for the whole test report.\n- [ ] Accepting or reporting **F1 help, the role FAQs, zoom or the fresh-data review** (on a proposal, on *Save this\n  screen* or in the transfer of legacy work) needs the worksheet's reference (its path or link, and the build) in\n  **Review worksheet**. The portal refuses those four without it (`VALIDATION_ERROR`, `details.field` = `worksheet`)\n  and shows the reference to the backend team's inspectors.\n- [ ] In the proposal inbox, the worksheet reference can be entered once for all selected proposals. Use a proposal's\n  override when its worksheet differs. **Approve all reported progress** is one human declaration for that displayed\n  selection; untick any untested items first. Each proposal retains its build and your decision.\n\n| Role / task / screen | New record IDs | Create | Read | Update / correction | Delete / permitted alternative | Help / FAQ / zoom | Evidence / result |\n|---|---|---|---|---|---|---|---|\n| Fill one row per supported task | IDs from this review run | Pass/fail/N-A + reason | Pass/fail | Pass/fail/N-A + reason | Exact action and outcome | Pass/fail | Steps, expected/actual, evidence reference |"
         },
         {
           "id": "R10",
@@ -264,19 +270,19 @@
         "id": "ep:GET /patients/search",
         "label": "GET /patients/search",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:GET /patients/{patient_id}",
         "label": "GET /patients/{patient_id}",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:GET /patients/{patient_id}/financial-summary",
         "label": "GET /patients/{patient_id}/financial-summary",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ev:patient.merged",
@@ -375,7 +381,7 @@
         "claimed": false
       }
     ],
-    "rule": "Agents may propose evidence with propose_progress. Only the developer accepts items on My progress for what this implementation does on the DEV server. No tool records progress."
+    "rule": "Agents MUST submit propose_progress after implementing this screen and verify it with progress_proposals. Only the developer accepts items on My progress for what this implementation does on the DEV server. No tool awards progress."
   },
   "endpoints": [
     {
@@ -408,7 +414,8 @@
           "details_fields": [
             "current_version",
             "expected_version"
-          ]
+          ],
+          "details_from": "PATCH /api/v1/finance/service-catalog/{service_id}"
         }
       ],
       "parameters": [
@@ -497,8 +504,8 @@
             "type": "integer",
             "required": false,
             "nullable": true,
-            "minimum": 0.0,
-            "maximum": 150.0
+            "minimum": 0,
+            "maximum": 150
           },
           {
             "pointer": "/mobile",
@@ -657,7 +664,8 @@
           "details_fields": [
             "any_of",
             "required"
-          ]
+          ],
+          "details_from": "POST /api/v1/admin/departments"
         }
       ],
       "parameters": [
@@ -1360,6 +1368,12 @@
     "delivery_gate": {
       "required": true,
       "status": "required",
+      "progress_reporting": {
+        "required": true,
+        "submit": "propose_progress",
+        "verify": "progress_proposals",
+        "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+      },
       "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
       "compulsory": [
         {
@@ -1388,8 +1402,8 @@
         }
       ],
       "zoom": {
-        "min_pct": 100.0,
-        "max_pct": 250.0,
+        "min_pct": 100,
+        "max_pct": 250,
         "reset_pct": 100,
         "keys": [
           "Ctrl + or Ctrl = (zoom in)",
@@ -1842,7 +1856,7 @@
               "mlc_numbers": [],
               "outstanding": {
                 "has_outstanding_ar": true,
-                "outstanding_ar_balance": 600.0,
+                "outstanding_ar_balance": 600,
                 "ar_block_applies": true,
                 "banner_text": "OUTSTANDING BALANCE: RS. 600.00"
               }
@@ -1934,9 +1948,9 @@
                 "invoice_no": "INV-2026-0000001",
                 "invoice_type": "OPD",
                 "status": "Paid",
-                "net_payable": 1000.0,
-                "amount_paid": 1000.0,
-                "balance_due": 0.0,
+                "net_payable": 1000,
+                "amount_paid": 1000,
+                "balance_due": 0,
                 "created_at": "2026-09-27T17:42:06.555355+00:00"
               }
             ]
@@ -3154,8 +3168,8 @@
           "anyOf": [
             {
               "type": "integer",
-              "maximum": 150.0,
-              "minimum": 0.0
+              "maximum": 150,
+              "minimum": 0
             },
             {
               "type": "null"

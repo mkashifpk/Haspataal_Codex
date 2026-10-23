@@ -3,6 +3,7 @@ import { api, call, ApiError } from "../bridge";
 import { ErrorBox, Field, LoadState, Modal, useLoad } from "../components";
 import * as reg from "../generated/registration";
 import { tr } from "../i18n";
+import { definiteWriteRefusal, canRetryWrite, writeAttempt } from "../write-attempt";
 
 export function RegistrationActions({
   ticketId,
@@ -51,17 +52,25 @@ export function RegistrationActions({
   const pending = useRef<{
     fn: () => Promise<unknown>;
     message: string;
+    createdAt: number;
   } | null>(null);
+  const flight = useRef(false);
   async function act(
     fn: () => Promise<unknown>,
     message: string,
     write = false,
   ) {
+    if (flight.current) return;
+    if (write && pending.current && !canRetryWrite({ ...pending.current, body:null, key:"retained" })) {
+      setError(new Error("The original request is outside the safe retry window. Ask IT to reconcile it; do not register or pay again."));
+      return;
+    }
+    flight.current = true;
     setBusy(true);
     setError(undefined);
     setNotice("");
     try {
-      if (write) pending.current = { fn, message };
+      if (write && !pending.current) pending.current = { fn, message, createdAt:Date.now() };
       await fn();
       if (write) {
         pending.current = null;
@@ -71,11 +80,13 @@ export function RegistrationActions({
       await ticket.reload();
     } catch (e) {
       setError(e);
-      if (write) {
-        const status = e instanceof ApiError ? e.response.status : undefined;
-        setUnknownOutcome(!status || status < 400 || status >= 500);
+      if (write && pending.current) {
+        const refused = definiteWriteRefusal(e);
+        if (refused) pending.current = null;
+        setUnknownOutcome(!refused);
       }
     } finally {
+      flight.current = false;
       setBusy(false);
     }
   }
@@ -92,7 +103,7 @@ export function RegistrationActions({
               "The action outcome is unknown. Retry the original payment or waiver request before starting another action.",
             )}
           </p>
-          <button
+          <button data-help="registration.actions"
             disabled={busy}
             onClick={() =>
               pending.current &&
@@ -122,13 +133,10 @@ export function RegistrationActions({
           <form
             onSubmit={(e) => {
               e.preventDefault();
+              const attempt = writeAttempt({method, ...(amount ? { amount } : {}), ...(reference ? { reference_no: reference } : {})});
               void act(
                 () =>
-                  reg.pay(ticketId, {
-                    method,
-                    ...(amount ? { amount } : {}),
-                    ...(reference ? { reference_no: reference } : {}),
-                  }),
+                  api("POST", `/opd-tickets/${ticketId}/pay`, attempt.body, {key:attempt.key}),
                 tr("Payment recorded. The queue reflects the server result."),
                 true,
               );
@@ -137,7 +145,7 @@ export function RegistrationActions({
             <fieldset disabled={busy || unknownOutcome}>
               <div className="form-grid">
                 <Field label={tr("Payment method")}>
-                  <select
+                  <select data-help="registration.actions"
                     aria-label={tr("Payment method")}
                     value={method}
                     onChange={(e) => setMethod(e.target.value as typeof method)}
@@ -151,7 +159,7 @@ export function RegistrationActions({
                   label={tr("Payment amount")}
                   hint={tr("Leave blank to collect the full amount due.")}
                 >
-                  <input
+                  <input data-help="registration.actions"
                     aria-label={tr("Payment amount")}
                     type="number"
                     min="0.01"
@@ -161,7 +169,7 @@ export function RegistrationActions({
                   />
                 </Field>
                 <Field label={tr("Card / bank reference")}>
-                  <input
+                  <input data-help="registration.actions"
                     aria-label={tr("Card / bank reference")}
                     maxLength={60}
                     value={reference}
@@ -170,7 +178,7 @@ export function RegistrationActions({
                   />
                 </Field>
               </div>
-              <button className="primary">{tr("Collect payment")}</button>
+              <button data-help="registration.actions" className="primary">{tr("Collect payment")}</button>
               <p className="fine muted">
                 {tr(
                   "Cash requires your own open cash shift. A failed or lost answer must be retried with the same amount and method.",
@@ -186,12 +194,10 @@ export function RegistrationActions({
           <form
             onSubmit={(e) => {
               e.preventDefault();
+              const attempt = writeAttempt({reason, waiver_pct:pct});
               void act(
                 () =>
-                  api("POST", `/opd-tickets/${ticketId}/vip-waiver-request`, {
-                    reason,
-                    waiver_pct: pct,
-                  }),
+                  api("POST", `/opd-tickets/${ticketId}/vip-waiver-request`, attempt.body, {key:attempt.key}),
                 tr("Waiver request sent for approval."),
                 true,
               );
@@ -201,7 +207,7 @@ export function RegistrationActions({
               <h3>{tr("Request VIP waiver")}</h3>
               <div className="form-grid">
                 <Field label={tr("Waiver percent")}>
-                  <input
+                  <input data-help="registration.actions"
                     type="number"
                     min="0.01"
                     max="100"
@@ -212,7 +218,7 @@ export function RegistrationActions({
                   />
                 </Field>
                 <Field label={tr("Reason")}>
-                  <input
+                  <input data-help="registration.actions"
                     minLength={3}
                     maxLength={1000}
                     required
@@ -221,7 +227,7 @@ export function RegistrationActions({
                   />
                 </Field>
               </div>
-              <button>{tr("Request VIP waiver")}</button>
+              <button data-help="registration.actions">{tr("Request VIP waiver")}</button>
             </fieldset>
           </form>
         )}
@@ -238,7 +244,7 @@ export function RegistrationActions({
         </p>
       )}
       <div className="actions">
-        <button
+        <button data-help="registration.actions"
           type="button"
           disabled={busy}
           onClick={() =>
@@ -250,7 +256,7 @@ export function RegistrationActions({
         >
           {tr("Preview slip")}
         </button>
-        <button
+        <button data-help="registration.actions"
           type="button"
           disabled={busy || terminal.loading || !!terminal.error}
           onClick={() =>
@@ -262,7 +268,7 @@ export function RegistrationActions({
         >
           {tr("Print / reprint slip")}
         </button>
-        <button
+        <button data-help="registration.actions"
           type="button"
           disabled={busy}
           onClick={() =>

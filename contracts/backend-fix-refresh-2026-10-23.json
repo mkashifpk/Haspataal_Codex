@@ -1,0 +1,4464 @@
+{
+  "contract_fingerprint": "57d137222f1ca637655d",
+  "knowledge_revision": "cdafb44b06354a92",
+  "endpoints": [
+    {
+      "endpoint": "POST /auth/login",
+      "summary": "Log in (returns tokens, profile, roles, workspaces)",
+      "access": {
+        "authentication": "public",
+        "permissions": [],
+        "permissions_mode": "all",
+        "who": "public: no login (works before login)"
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "ACCOUNT_DISABLED",
+          "http_status": 403,
+          "message": "This account is disabled.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "POST /api/v1/auth/login"
+        },
+        {
+          "code": "ACCOUNT_EXPIRED",
+          "http_status": 403,
+          "message": "This guest account has expired (the PHC inspector's access ended).",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "GET /api/v1/msds/profile"
+        },
+        {
+          "code": "ACCOUNT_LOCKED",
+          "http_status": 423,
+          "message": "Too many failed attempts; the account is temporarily locked.",
+          "retryable": true,
+          "ui_action": "Show a countdown from retry_after_seconds.",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "retry_after_seconds"
+          ],
+          "details_from": "POST /api/v1/auth/login"
+        },
+        {
+          "code": "INVALID_CREDENTIALS",
+          "http_status": 401,
+          "message": "Username or password is incorrect.",
+          "retryable": false,
+          "ui_action": "Refresh the token once; if that fails return to login.",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "POST /api/v1/auth/login"
+        },
+        {
+          "code": "LICENSE_INVALID",
+          "http_status": 403,
+          "message": "This server's license grace period has ended; only the Super Admin can log in until the vendor's new license is installed.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "grace_until",
+            "reason",
+            "state",
+            "vendor"
+          ],
+          "details_from": "POST /api/v1/auth/login"
+        },
+        {
+          "code": "PASSWORD_CHANGE_REQUIRED",
+          "http_status": 403,
+          "message": "You must change your temporary password first.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "GET /api/v1/auth/workspaces"
+        },
+        {
+          "code": "RATE_LIMITED",
+          "http_status": 429,
+          "message": "Too many requests; slow down.",
+          "retryable": true,
+          "ui_action": "Back off per Retry-After.",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "retry_after_seconds"
+          ],
+          "details_from": "POST /api/v1/auth/login"
+        }
+      ],
+      "parameters": [],
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/LoginIn"
+            }
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_LoginOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "application/json",
+        "model": "LoginIn",
+        "fields": [
+          {
+            "pointer": "/username",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "min_length": 3,
+            "max_length": 64
+          },
+          {
+            "pointer": "/password",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "min_length": 1,
+            "max_length": 256,
+            "sensitive": "never log, store or keep it after the call"
+          },
+          {
+            "pointer": "/terminal_label",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "max_length": 100,
+            "description": "Optional terminal name shown in session lists"
+          }
+        ],
+        "cross_field_rules": {},
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "repeat_effect",
+        "on_lost_answer": "Repeating this call has another effect: opens another session; the unused one expires. Never retry automatically; reconcile the result and require a deliberate new action if still needed.",
+        "reconcile_with": null,
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "GET /terminals/whoami",
+      "summary": "Identify this terminal (location + mapped printers) — works before login",
+      "access": {
+        "authentication": "public",
+        "permissions": [],
+        "permissions_mode": "all",
+        "who": "public: no login (works before login)"
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_TerminalIdentityOut_"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "object",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "POST /auth/change-password",
+      "summary": "Change own password",
+      "access": {
+        "authentication": "user",
+        "permissions": [],
+        "permissions_mode": "all",
+        "who": "any logged-in user, for their own account (also before a forced password change where allowed)"
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "DEMO_ACCOUNT_PROTECTED",
+          "http_status": 403,
+          "message": "DEV servers only: a demo account is shared by every developer, so its password, roles and active state stay as seeded. Use a user of your own.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": null
+        },
+        {
+          "code": "INVALID_CREDENTIALS",
+          "http_status": 401,
+          "message": "Username or password is incorrect.",
+          "retryable": false,
+          "ui_action": "Refresh the token once; if that fails return to login.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "POST /api/v1/auth/login"
+        },
+        {
+          "code": "PASSWORD_POLICY",
+          "http_status": 422,
+          "message": "The new password does not meet the password policy.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": null
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [],
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ChangePasswordIn"
+            }
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_TokenPair_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "application/json",
+        "model": "ChangePasswordIn",
+        "fields": [
+          {
+            "pointer": "/current_password",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "min_length": 1,
+            "max_length": 256,
+            "sensitive": "never log, store or keep it after the call"
+          },
+          {
+            "pointer": "/new_password",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "min_length": 8,
+            "max_length": 256,
+            "sensitive": "never log, store or keep it after the call"
+          }
+        ],
+        "cross_field_rules": {},
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "state_guard",
+        "on_lost_answer": "A repeat is refused with INVALID_CREDENTIALS: the password has changed already: log in with the new one. The first call may have succeeded; this error does not replay its result. Never retry automatically; re-read the record, then offer the action again only if it is still needed.",
+        "reconcile_with": null,
+        "refused_with": "INVALID_CREDENTIALS",
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "GET /meta/license",
+      "summary": "The server's license state: show a banner when it needs attention — works before login",
+      "access": {
+        "authentication": "public",
+        "permissions": [],
+        "permissions_mode": "all",
+        "who": "public: no login (works before login)"
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "LICENSE_INVALID",
+          "http_status": 403,
+          "message": "This server's license grace period has ended; only the Super Admin can log in until the vendor's new license is installed.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "grace_until",
+            "reason",
+            "state",
+            "vendor"
+          ],
+          "details_from": "POST /api/v1/auth/login"
+        }
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_LicenseStatusOut_"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "object",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "GET /health/live",
+      "summary": "Is the server there? (unauthenticated, no database)",
+      "access": {
+        "authentication": "public",
+        "permissions": [],
+        "permissions_mode": "all",
+        "who": "public: no login (works before login)"
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_LiveOut_"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "object",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "GET /health",
+      "summary": "Server health (unauthenticated; used by the login screen)",
+      "access": {
+        "authentication": "public",
+        "permissions": [],
+        "permissions_mode": "all",
+        "who": "public: no login (works before login)"
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_HealthOut_"
+              }
+            }
+          }
+        },
+        "503": {
+          "description": "degraded: the database is down",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_HealthOut_"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "object",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "POST /auth/refresh",
+      "summary": "Rotate the refresh token and get a new access token",
+      "access": {
+        "authentication": "public",
+        "permissions": [],
+        "permissions_mode": "all",
+        "who": "public: no login (works before login)"
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "LICENSE_INVALID",
+          "http_status": 403,
+          "message": "This server's license grace period has ended; only the Super Admin can log in until the vendor's new license is installed.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "grace_until",
+            "reason",
+            "state",
+            "vendor"
+          ],
+          "details_from": "POST /api/v1/auth/login"
+        },
+        {
+          "code": "REFRESH_TOKEN_REUSED",
+          "http_status": 401,
+          "message": "Refresh token reuse detected; all sessions of this login were revoked.",
+          "retryable": false,
+          "ui_action": "Refresh the token once; if that fails return to login.",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "POST /api/v1/auth/refresh"
+        },
+        {
+          "code": "TOKEN_REVOKED",
+          "http_status": 401,
+          "message": "The session was revoked; log in again.",
+          "retryable": false,
+          "ui_action": "Refresh the token once; if that fails return to login.",
+          "source": [
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "GET /api/v1/auth/workspaces"
+        }
+      ],
+      "parameters": [],
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/RefreshIn"
+            }
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_TokenPair_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "application/json",
+        "model": "RefreshIn",
+        "fields": [
+          {
+            "pointer": "/refresh_token",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "min_length": 20,
+            "max_length": 200
+          }
+        ],
+        "cross_field_rules": {},
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "state_guard",
+        "on_lost_answer": "A repeat is refused with REFRESH_TOKEN_REUSED: a refresh token works once; presenting it again ends that login: log in again. The first call may have succeeded; this error does not replay its result. Never retry automatically; re-read the record, then offer the action again only if it is still needed.",
+        "reconcile_with": null,
+        "refused_with": "REFRESH_TOKEN_REUSED",
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "POST /auth/logout",
+      "summary": "End this session (or all sessions)",
+      "access": {
+        "authentication": "user",
+        "permissions": [],
+        "permissions_mode": "all",
+        "who": "any logged-in user, for their own account (also before a forced password change where allowed)"
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [],
+      "parameters": [],
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/LogoutIn"
+            }
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_LogoutOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "application/json",
+        "model": "LogoutIn",
+        "fields": [
+          {
+            "pointer": "/all_sessions",
+            "type": "boolean",
+            "required": false,
+            "nullable": false,
+            "default": false,
+            "description": "Also revoke every other session of this user"
+          }
+        ],
+        "cross_field_rules": {},
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "repeat_safe",
+        "on_lost_answer": "A repeat is harmless for the same state: the session is ended already. No response is stored; re-read before resubmitting because newer data may have arrived.",
+        "reconcile_with": null,
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "GET /meta/enums",
+      "summary": "All enumerated values, introspected from database CHECK constraints",
+      "access": {
+        "authentication": "user",
+        "permissions": [],
+        "permissions_mode": "all",
+        "who": "any logged-in user"
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_dict_str__list_str___"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "object",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "GET /meta/settings",
+      "summary": "Non-sensitive hospital settings for UI display",
+      "access": {
+        "authentication": "user",
+        "permissions": [],
+        "permissions_mode": "all",
+        "who": "any logged-in user"
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_HospitalSettingsOut_"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "object",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "GET /meta/workspaces",
+      "summary": "UI workspaces and the screens each should contain",
+      "access": {
+        "authentication": "user",
+        "permissions": [],
+        "permissions_mode": "all",
+        "who": "any logged-in user"
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_WorkspaceInfoOut__"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "GET /meta/error-codes",
+      "summary": "Every error code the API can return",
+      "access": {
+        "authentication": "public",
+        "permissions": [],
+        "permissions_mode": "all",
+        "who": "public: no login (works before login)"
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_ErrorCodeOut__"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "GET /meta/events",
+      "summary": "Realtime WebSocket event catalogue",
+      "access": {
+        "authentication": "public",
+        "permissions": [],
+        "permissions_mode": "all",
+        "who": "public: no login (works before login)"
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_EventInfoOut__"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "GET /notifications",
+      "summary": "My notifications (newest first)",
+      "access": {
+        "authentication": "user",
+        "permissions": [],
+        "permissions_mode": "all",
+        "who": "any logged-in user, for their own account (also before a forced password change where allowed)"
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "LICENSE_INVALID",
+          "http_status": 403,
+          "message": "This server's license grace period has ended; only the Super Admin can log in until the vendor's new license is installed.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "grace_until",
+            "reason",
+            "state",
+            "vendor"
+          ],
+          "details_from": "POST /api/v1/auth/login"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "unread_only",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "type": "boolean",
+            "default": false,
+            "title": "Unread Only"
+          }
+        },
+        {
+          "name": "before_id",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Before Id"
+          }
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "maximum": 200,
+            "minimum": 1,
+            "default": 50,
+            "title": "Limit"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_NotificationOut__"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [
+          {
+            "name": "limit",
+            "required": false,
+            "type": "integer",
+            "default": 50,
+            "minimum": 1,
+            "maximum": 200
+          }
+        ],
+        "search": [],
+        "filters": [
+          {
+            "name": "unread_only",
+            "required": false,
+            "type": "boolean",
+            "default": false
+          },
+          {
+            "name": "before_id",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "note": "Lists are bounded by `limit` (no cursor paging): ask for what the screen shows, filter on the server."
+      }
+    },
+    {
+      "endpoint": "GET /notifications/unread-count",
+      "summary": "Badge count",
+      "access": {
+        "authentication": "user",
+        "permissions": [],
+        "permissions_mode": "all",
+        "who": "any logged-in user, for their own account (also before a forced password change where allowed)"
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_UnreadCountOut_"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "object",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "POST /notifications/{notification_id}/read",
+      "summary": "Mark one as read",
+      "access": {
+        "authentication": "user",
+        "permissions": [],
+        "permissions_mode": "all",
+        "who": "any logged-in user, for their own account (also before a forced password change where allowed)"
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [],
+      "parameters": [
+        {
+          "name": "notification_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Notification Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_NotificationReadOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": null,
+      "write": {
+        "protection": "repeat_safe",
+        "on_lost_answer": "A repeat is harmless for the same state: read once. No response is stored; re-read before resubmitting because newer data may have arrived.",
+        "reconcile_with": "GET /notifications",
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "POST /notifications/read-all",
+      "summary": "Mark everything as read",
+      "access": {
+        "authentication": "user",
+        "permissions": [],
+        "permissions_mode": "all",
+        "who": "any logged-in user, for their own account (also before a forced password change where allowed)"
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_ReadAllOut_"
+              }
+            }
+          }
+        }
+      },
+      "request": null,
+      "write": {
+        "protection": "repeat_safe",
+        "on_lost_answer": "A repeat is harmless for the same state: read once. No response is stored; re-read before resubmitting because newer data may have arrived.",
+        "reconcile_with": "GET /notifications",
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "GET /settings/sections",
+      "summary": "The Settings window: the tiers and sections this caller may open (also before login)",
+      "access": {
+        "authentication": "public",
+        "permissions": [],
+        "permissions_mode": "all",
+        "who": "public: no login (works before login); a logged-in caller also gets what their permissions open"
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "TOKEN_EXPIRED",
+          "http_status": 401,
+          "message": "The session has expired; refresh or log in again.",
+          "retryable": false,
+          "ui_action": "Refresh the token once; if that fails return to login.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": null
+        },
+        {
+          "code": "TOKEN_REVOKED",
+          "http_status": 401,
+          "message": "The session was revoked; log in again.",
+          "retryable": false,
+          "ui_action": "Refresh the token once; if that fails return to login.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "GET /api/v1/auth/workspaces"
+        },
+        {
+          "code": "UNAUTHENTICATED",
+          "http_status": 401,
+          "message": "Authentication is required.",
+          "retryable": false,
+          "ui_action": "Refresh the token once; if that fails return to login.",
+          "source": [
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "GET /api/v1/settings/sections"
+        }
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_SettingsSectionsOut_"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "object",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "GET /settings/me",
+      "summary": "My preferences (theme, language, UI scale, PDF download)",
+      "access": {
+        "authentication": "user",
+        "permissions": [],
+        "permissions_mode": "all",
+        "who": "any logged-in user, for their own account (also before a forced password change where allowed)"
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_MyPreferencesOut_"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "object",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "PUT /settings/me",
+      "summary": "Update my preferences (only the fields you send)",
+      "access": {
+        "authentication": "user",
+        "permissions": [],
+        "permissions_mode": "all",
+        "who": "any logged-in user, for their own account (also before a forced password change where allowed)"
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "PAYLOAD_TOO_LARGE",
+          "http_status": 413,
+          "message": "The uploaded file is too large.",
+          "retryable": false,
+          "ui_action": "Tell the user the file is too large.",
+          "source": [
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/settings/me"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [],
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/PreferencesIn"
+            }
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_MyPreferencesOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "application/json",
+        "model": "PreferencesIn",
+        "fields": [
+          {
+            "pointer": "/theme",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "enum": [
+              "Light",
+              "DarkHighContrast"
+            ]
+          },
+          {
+            "pointer": "/language",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "enum": [
+              "en",
+              "ur"
+            ]
+          },
+          {
+            "pointer": "/ui_scale_pct",
+            "type": "integer",
+            "required": false,
+            "nullable": true,
+            "minimum": 100,
+            "maximum": 250,
+            "description": "Shared keyboard/Settings zoom state, bounded to 100–250%; Ctrl/Cmd +, -, 0"
+          },
+          {
+            "pointer": "/pdf_download",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "enum": [
+              "Separate",
+              "Combined"
+            ],
+            "description": "A set of documents (the MSDS inspection pack): Separate = a download button per document, one PDF each (default); Combined = one button, one PDF with all of them"
+          },
+          {
+            "pointer": "/extra",
+            "type": "object",
+            "required": false,
+            "nullable": true,
+            "description": "Free-form UI state (e.g. last workspace, column widths); max 16 KB"
+          }
+        ],
+        "cross_field_rules": {},
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "replace",
+        "on_lost_answer": "Unversioned PUT: re-read before resubmitting. A retry may overwrite intervening edits and repeat history, timestamps or events; the HTTP method alone is not replay protection. Never retry automatically.",
+        "reconcile_with": "GET /settings/me",
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "POST /settings/me/change-password",
+      "summary": "Change my password (same as /auth/change-password)",
+      "access": {
+        "authentication": "user",
+        "permissions": [],
+        "permissions_mode": "all",
+        "who": "any logged-in user, for their own account (also before a forced password change where allowed)"
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "DEMO_ACCOUNT_PROTECTED",
+          "http_status": 403,
+          "message": "DEV servers only: a demo account is shared by every developer, so its password, roles and active state stay as seeded. Use a user of your own.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": null
+        },
+        {
+          "code": "INVALID_CREDENTIALS",
+          "http_status": 401,
+          "message": "Username or password is incorrect.",
+          "retryable": false,
+          "ui_action": "Refresh the token once; if that fails return to login.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "POST /api/v1/auth/login"
+        },
+        {
+          "code": "PASSWORD_POLICY",
+          "http_status": 422,
+          "message": "The new password does not meet the password policy.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": null
+        }
+      ],
+      "parameters": [],
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ChangePasswordIn"
+            }
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_TokenPair_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "application/json",
+        "model": "ChangePasswordIn",
+        "fields": [
+          {
+            "pointer": "/current_password",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "min_length": 1,
+            "max_length": 256,
+            "sensitive": "never log, store or keep it after the call"
+          },
+          {
+            "pointer": "/new_password",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "min_length": 8,
+            "max_length": 256,
+            "sensitive": "never log, store or keep it after the call"
+          }
+        ],
+        "cross_field_rules": {},
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "state_guard",
+        "on_lost_answer": "A repeat is refused with INVALID_CREDENTIALS: the password has changed already: log in with the new one. The first call may have succeeded; this error does not replay its result. Never retry automatically; re-read the record, then offer the action again only if it is still needed.",
+        "reconcile_with": "GET /settings/me",
+        "refused_with": "INVALID_CREDENTIALS",
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "GET /admin/settings",
+      "summary": "Hospital policy settings",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "admin.settings.manage"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of admin.settings.manage",
+        "roles_allowed": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "super_admin"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_SettingOut__"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "PUT /admin/settings/{key}",
+      "summary": "Change a policy setting (type-checked, audited)",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "admin.settings.manage"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of admin.settings.manage",
+        "roles_allowed": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "super_admin"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "FORBIDDEN",
+          "http_status": 403,
+          "message": "You do not have permission to do this.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "any_of",
+            "required"
+          ],
+          "details_from": "POST /api/v1/admin/departments"
+        },
+        {
+          "code": "ICD_SYSTEM_NOT_LOADED",
+          "http_status": 409,
+          "message": "No code list of this classification is loaded (ICD-10: load the hospital's licensed WHO file first).",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "code_system"
+          ],
+          "details_from": "GET /api/v1/icd/codes"
+        },
+        {
+          "code": "NOT_FOUND",
+          "http_status": 404,
+          "message": "The requested resource was not found.",
+          "retryable": false,
+          "ui_action": "Say 'not found'; refresh the list.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "resource"
+          ],
+          "details_from": "PUT /api/v1/admin/printers/{printer_id}"
+        },
+        {
+          "code": "POLICY_CHANGE_APPROVAL_REQUIRED",
+          "http_status": 409,
+          "message": "This is a control setting: an Owner changes it or approves the change (POST /admin/change-requests).",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "kind",
+            "next_step",
+            "setting_key"
+          ],
+          "details_from": "PUT /api/v1/admin/settings/{key}",
+          "next_step": "POST /admin/change-requests"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "key",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "string",
+            "title": "Key"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/SettingIn"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_SettingRowOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "application/json",
+        "model": "SettingIn",
+        "fields": [
+          {
+            "pointer": "/value",
+            "type": null,
+            "required": true,
+            "nullable": false,
+            "description": "JSON value of the same type as the current one"
+          }
+        ],
+        "cross_field_rules": {},
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "replace",
+        "on_lost_answer": "Unversioned PUT: re-read before resubmitting. A retry may overwrite intervening edits and repeat history, timestamps or events; the HTTP method alone is not replay protection. Never retry automatically.",
+        "reconcile_with": "GET /admin/settings",
+        "emits_events": [
+          "risk.critical_event"
+        ],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "POST /admin/change-requests",
+      "summary": "Request a control-setting or privileged-access change (applied at once for an Owner)",
+      "access": {
+        "authentication": "user",
+        "permissions": [],
+        "permissions_mode": "all",
+        "who": "admin.settings.manage for a setting, admin.user.manage for a user's roles, admin.role_matrix.update for a role's permissions (the service checks)"
+      },
+      "service_gates": [],
+      "idempotency_key": true,
+      "errors": [
+        {
+          "code": "DEMO_ACCOUNT_PROTECTED",
+          "http_status": 403,
+          "message": "DEV servers only: a demo account is shared by every developer, so its password, roles and active state stay as seeded. Use a user of your own.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": null
+        },
+        {
+          "code": "FORBIDDEN",
+          "http_status": 403,
+          "message": "You do not have permission to do this.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "any_of",
+            "required"
+          ],
+          "details_from": "POST /api/v1/admin/departments"
+        },
+        {
+          "code": "LAST_OWNER",
+          "http_status": 409,
+          "message": "The last active Owner keeps the Owner role.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/users/{user_id}/roles"
+        },
+        {
+          "code": "REFERENCE_NOT_FOUND",
+          "http_status": 422,
+          "message": "A referenced record does not exist.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "ward_id"
+          ],
+          "details_from": "POST /api/v1/pharmacy/storage-checks"
+        },
+        {
+          "code": "SELF_ROLE_CHANGE_FORBIDDEN",
+          "http_status": 403,
+          "message": "Nobody changes their own roles.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/users/{user_id}/roles"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "Idempotency-Key",
+          "in": "header",
+          "required": false,
+          "description": "Unique per logical action; retries return the first result",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Unique per logical action; retries return the first result",
+            "title": "Idempotency-Key"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ChangeRequestIn"
+            }
+          }
+        }
+      },
+      "responses": {
+        "201": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_AdminChangeRequestOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "application/json",
+        "model": "ChangeRequestIn",
+        "fields": [
+          {
+            "pointer": "/kind",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "enum": [
+              "Setting",
+              "UserRoles",
+              "RolePermissions"
+            ]
+          },
+          {
+            "pointer": "/setting_key",
+            "type": "string",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "pointer": "/target_user_id",
+            "type": "integer",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "pointer": "/target_role_code",
+            "type": "string",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "pointer": "/requested_value",
+            "type": null,
+            "required": true,
+            "nullable": false,
+            "description": "Setting: the new value; UserRoles: role codes; RolePermissions: permission codes"
+          },
+          {
+            "pointer": "/reason",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "min_length": 3,
+            "max_length": 500
+          }
+        ],
+        "cross_field_rules": {
+          "ChangeRequestIn": [
+            "… names …, and only it",
+            "requested_value is the complete list of codes"
+          ]
+        },
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "idempotency_key",
+        "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+        "reconcile_with": "GET /admin/change-requests",
+        "emits_events": [
+          "approval.requested",
+          "notification.created"
+        ],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "GET /admin/change-requests",
+      "summary": "Control-setting and privileged-access change requests",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "admin.settings.manage",
+          "admin.user.manage",
+          "admin.role_matrix.update",
+          "approval.policy_change.approve",
+          "approval.privileged_access.approve"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of admin.settings.manage or admin.user.manage or admin.role_matrix.update or approval.policy_change.approve or approval.privileged_access.approve",
+        "roles_allowed": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "super_admin"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [],
+      "parameters": [
+        {
+          "name": "status",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          }
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "maximum": 500,
+            "minimum": 1,
+            "default": 100,
+            "title": "Limit"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_AdminChangeRequestOut__"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [
+          {
+            "name": "limit",
+            "required": false,
+            "type": "integer",
+            "default": 100,
+            "minimum": 1,
+            "maximum": 500
+          }
+        ],
+        "search": [],
+        "filters": [
+          {
+            "name": "status",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "note": "Lists are bounded by `limit` (no cursor paging): ask for what the screen shows, filter on the server."
+      }
+    },
+    {
+      "endpoint": "GET /admin/change-requests/{change_request_id}",
+      "summary": "One control-setting or privileged-access change request",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "admin.settings.manage",
+          "admin.user.manage",
+          "admin.role_matrix.update",
+          "approval.policy_change.approve",
+          "approval.privileged_access.approve"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of admin.settings.manage or admin.user.manage or admin.role_matrix.update or approval.policy_change.approve or approval.privileged_access.approve",
+        "roles_allowed": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "super_admin"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "NOT_FOUND",
+          "http_status": 404,
+          "message": "The requested resource was not found.",
+          "retryable": false,
+          "ui_action": "Say 'not found'; refresh the list.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "resource"
+          ],
+          "details_from": "PUT /api/v1/admin/printers/{printer_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "change_request_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Change Request Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_AdminChangeRequestOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "object",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      }
+    }
+  ],
+  "schemas": {
+    "ChangePasswordIn": {
+      "properties": {
+        "current_password": {
+          "type": "string",
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Current Password"
+        },
+        "new_password": {
+          "type": "string",
+          "maxLength": 256,
+          "minLength": 8,
+          "title": "New Password"
+        }
+      },
+      "type": "object",
+      "required": [
+        "current_password",
+        "new_password"
+      ],
+      "title": "ChangePasswordIn"
+    },
+    "Envelope_HealthOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/HealthOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[HealthOut]"
+    },
+    "Envelope_LicenseStatusOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/LicenseStatusOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[LicenseStatusOut]"
+    },
+    "Envelope_LiveOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/LiveOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[LiveOut]"
+    },
+    "Envelope_LoginOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/LoginOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[LoginOut]"
+    },
+    "Envelope_TerminalIdentityOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/TerminalIdentityOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[TerminalIdentityOut]"
+    },
+    "Envelope_TokenPair_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/TokenPair"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[TokenPair]"
+    },
+    "HTTPValidationError": {
+      "properties": {
+        "detail": {
+          "items": {
+            "$ref": "#/components/schemas/ValidationError"
+          },
+          "type": "array",
+          "title": "Detail"
+        }
+      },
+      "type": "object",
+      "title": "HTTPValidationError"
+    },
+    "HealthComponentsOut": {
+      "properties": {
+        "database": {
+          "type": "string",
+          "enum": [
+            "up",
+            "down"
+          ],
+          "title": "Database"
+        },
+        "realtime": {
+          "type": "string",
+          "enum": [
+            "up",
+            "down"
+          ],
+          "title": "Realtime",
+          "description": "The database listener behind the WebSocket events"
+        }
+      },
+      "type": "object",
+      "required": [
+        "database",
+        "realtime"
+      ],
+      "title": "HealthComponentsOut"
+    },
+    "HealthLicenseOut": {
+      "properties": {
+        "state": {
+          "type": "string",
+          "enum": [
+            "ok",
+            "grace",
+            "locked",
+            "dev"
+          ],
+          "title": "State"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "type": "string",
+              "const": ""
+            },
+            {
+              "type": "string",
+              "enum": [
+                "hardware_changed",
+                "license_missing",
+                "license_invalid",
+                "license_outdated",
+                "license_expired",
+                "hardware_unreadable",
+                "check_failed",
+                "standby_main_active",
+                "standby_check_failed",
+                "standby_invalid"
+              ]
+            }
+          ],
+          "title": "Reason",
+          "description": "Empty when there is nothing to report"
+        },
+        "detail": {
+          "type": "string",
+          "title": "Detail",
+          "description": "One sentence for people"
+        },
+        "grace_until": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Grace Until"
+        },
+        "days_left": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Days Left"
+        }
+      },
+      "type": "object",
+      "required": [
+        "state",
+        "reason",
+        "detail",
+        "grace_until",
+        "days_left"
+      ],
+      "title": "HealthLicenseOut",
+      "description": "The license summary of GET /health (GET /meta/license has the whole state, the vendor's contact included)."
+    },
+    "HealthOut": {
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "ok",
+            "degraded"
+          ],
+          "title": "Status",
+          "description": "degraded, answered with HTTP 503: the database is down"
+        },
+        "version": {
+          "type": "string",
+          "title": "Version"
+        },
+        "server_time": {
+          "type": "string",
+          "title": "Server Time"
+        },
+        "components": {
+          "$ref": "#/components/schemas/HealthComponentsOut"
+        },
+        "maintenance_mode": {
+          "type": "boolean",
+          "title": "Maintenance Mode"
+        },
+        "license": {
+          "$ref": "#/components/schemas/HealthLicenseOut"
+        },
+        "uptime_seconds": {
+          "type": "integer",
+          "title": "Uptime Seconds"
+        }
+      },
+      "type": "object",
+      "required": [
+        "status",
+        "version",
+        "server_time",
+        "components",
+        "maintenance_mode",
+        "license",
+        "uptime_seconds"
+      ],
+      "title": "HealthOut",
+      "description": "GET /health: the login screen's connection check and the Settings window's This terminal section."
+    },
+    "LicenseStatusOut": {
+      "properties": {
+        "state": {
+          "type": "string",
+          "enum": [
+            "ok",
+            "grace",
+            "locked",
+            "dev"
+          ],
+          "title": "State"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "hardware_changed",
+                "license_missing",
+                "license_invalid",
+                "license_outdated",
+                "license_expired",
+                "hardware_unreadable",
+                "check_failed",
+                "standby_main_active",
+                "standby_check_failed",
+                "standby_invalid"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Reason"
+        },
+        "message": {
+          "type": "string",
+          "title": "Message",
+          "description": "One sentence for people: show it as the banner"
+        },
+        "hospital": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Hospital"
+        },
+        "license_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "License Id"
+        },
+        "grace_until": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Grace Until"
+        },
+        "days_left": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Days Left"
+        },
+        "expires_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Expires At"
+        },
+        "notice": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Notice",
+          "description": "A milder warning (e.g. the license ends within 30 days), even when ok"
+        },
+        "vendor": {
+          "$ref": "#/components/schemas/VendorContactOut"
+        },
+        "logins": {
+          "type": "string",
+          "enum": [
+            "all",
+            "super_admin_only"
+          ],
+          "title": "Logins"
+        }
+      },
+      "type": "object",
+      "required": [
+        "state",
+        "reason",
+        "message",
+        "hospital",
+        "license_id",
+        "grace_until",
+        "days_left",
+        "expires_at",
+        "notice",
+        "vendor",
+        "logins"
+      ],
+      "title": "LicenseStatusOut",
+      "description": "The server's license state (licensing.public_view): no hardware details."
+    },
+    "LiveOut": {
+      "properties": {
+        "status": {
+          "type": "string",
+          "const": "alive",
+          "title": "Status"
+        }
+      },
+      "type": "object",
+      "required": [
+        "status"
+      ],
+      "title": "LiveOut",
+      "description": "GET /health/live: the server answers (no database is touched)."
+    },
+    "LoginIn": {
+      "properties": {
+        "username": {
+          "type": "string",
+          "maxLength": 64,
+          "minLength": 3,
+          "title": "Username",
+          "examples": [
+            "dr.ahmed"
+          ]
+        },
+        "password": {
+          "type": "string",
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Password",
+          "examples": [
+            "S3cure-Pass!"
+          ]
+        },
+        "terminal_label": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 100
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Terminal Label",
+          "description": "Optional terminal name shown in session lists"
+        }
+      },
+      "type": "object",
+      "required": [
+        "username",
+        "password"
+      ],
+      "title": "LoginIn"
+    },
+    "LoginOut": {
+      "properties": {
+        "access_token": {
+          "type": "string",
+          "title": "Access Token"
+        },
+        "token_type": {
+          "type": "string",
+          "title": "Token Type",
+          "description": "Always bearer"
+        },
+        "expires_in": {
+          "type": "integer",
+          "title": "Expires In",
+          "description": "Access token lifetime in seconds"
+        },
+        "refresh_token": {
+          "type": "string",
+          "title": "Refresh Token"
+        },
+        "refresh_expires_in": {
+          "type": "integer",
+          "title": "Refresh Expires In"
+        },
+        "user": {
+          "$ref": "#/components/schemas/MeOut"
+        },
+        "license": {
+          "$ref": "#/components/schemas/LicenseStatusOut",
+          "description": "Show `message` as a banner while `state` is grace or locked"
+        }
+      },
+      "type": "object",
+      "required": [
+        "access_token",
+        "token_type",
+        "expires_in",
+        "refresh_token",
+        "refresh_expires_in",
+        "user",
+        "license"
+      ],
+      "title": "LoginOut"
+    },
+    "MeOut": {
+      "properties": {
+        "user_id": {
+          "type": "integer",
+          "title": "User Id"
+        },
+        "username": {
+          "type": "string",
+          "title": "Username"
+        },
+        "display_name": {
+          "type": "string",
+          "title": "Display Name"
+        },
+        "employee_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Employee Id",
+          "description": "Null for accounts without an employee (e.g. the bootstrap Super Admin)"
+        },
+        "emp_number": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Emp Number"
+        },
+        "designation": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Designation"
+        },
+        "department": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Department"
+        },
+        "roles": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Roles"
+        },
+        "permissions": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Permissions"
+        },
+        "workspaces": {
+          "items": {
+            "$ref": "#/components/schemas/WorkspaceOut"
+          },
+          "type": "array",
+          "title": "Workspaces"
+        },
+        "must_change_password": {
+          "type": "boolean",
+          "title": "Must Change Password"
+        },
+        "preferences": {
+          "$ref": "#/components/schemas/PreferencesOut"
+        }
+      },
+      "type": "object",
+      "required": [
+        "user_id",
+        "username",
+        "display_name",
+        "employee_id",
+        "emp_number",
+        "designation",
+        "department",
+        "roles",
+        "permissions",
+        "workspaces",
+        "must_change_password",
+        "preferences"
+      ],
+      "title": "MeOut"
+    },
+    "Meta": {
+      "properties": {
+        "server_time": {
+          "type": "string",
+          "title": "Server Time",
+          "description": "Server clock (UTC). Use it to detect terminal clock skew."
+        },
+        "page": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Page"
+        },
+        "page_size": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Page Size"
+        },
+        "total_count": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Total Count"
+        },
+        "next_cursor": {
+          "title": "Next Cursor"
+        }
+      },
+      "type": "object",
+      "required": [
+        "server_time"
+      ],
+      "title": "Meta"
+    },
+    "PreferencesOut": {
+      "properties": {
+        "theme": {
+          "type": "string",
+          "enum": [
+            "Light",
+            "DarkHighContrast"
+          ],
+          "title": "Theme"
+        },
+        "language": {
+          "type": "string",
+          "enum": [
+            "en",
+            "ur"
+          ],
+          "title": "Language"
+        },
+        "ui_scale_pct": {
+          "type": "integer",
+          "title": "Ui Scale Pct"
+        },
+        "pdf_download": {
+          "type": "string",
+          "enum": [
+            "Separate",
+            "Combined"
+          ],
+          "title": "Pdf Download",
+          "description": "Separate (a download button per document) or Combined (one PDF) for a set of documents"
+        },
+        "extra": {
+          "additionalProperties": true,
+          "type": "object",
+          "title": "Extra",
+          "description": "The user's own UI state (PUT /settings/me extra), as saved"
+        }
+      },
+      "type": "object",
+      "required": [
+        "theme",
+        "language",
+        "ui_scale_pct",
+        "pdf_download",
+        "extra"
+      ],
+      "title": "PreferencesOut",
+      "description": "Display preferences and the user's own UI state (`preferences.extra`)."
+    },
+    "TerminalIdentityOut": {
+      "properties": {
+        "registered": {
+          "type": "boolean",
+          "title": "Registered"
+        },
+        "client_ip": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Client Ip"
+        },
+        "mac": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Mac"
+        },
+        "hint": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Hint"
+        },
+        "location_label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Location Label"
+        },
+        "cash_node": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "MainReception",
+                "PharmacyCounter",
+                "LabReception",
+                "IPDBilling",
+                "EmergencyCounter",
+                "CashierDesk"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cash Node"
+        },
+        "ip": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ip"
+        },
+        "receipt_printer": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Receipt Printer"
+        },
+        "receipt_printer_address": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Receipt Printer Address"
+        },
+        "receipt_paper_mm": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Receipt Paper Mm"
+        },
+        "label_printer": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Label Printer"
+        },
+        "label_printer_address": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Label Printer Address"
+        },
+        "document_printer": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Document Printer"
+        },
+        "document_printer_address": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Document Printer Address"
+        },
+        "card_printer": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Card Printer"
+        },
+        "card_printer_address": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Card Printer Address"
+        }
+      },
+      "type": "object",
+      "required": [
+        "registered",
+        "client_ip",
+        "mac"
+      ],
+      "title": "TerminalIdentityOut",
+      "description": "This terminal's location, printers and cash node. The location and printer fields are present only when\n`registered` is true; `hint` only when it is false."
+    },
+    "TokenPair": {
+      "properties": {
+        "access_token": {
+          "type": "string",
+          "title": "Access Token"
+        },
+        "token_type": {
+          "type": "string",
+          "title": "Token Type",
+          "description": "Always bearer"
+        },
+        "expires_in": {
+          "type": "integer",
+          "title": "Expires In",
+          "description": "Access token lifetime in seconds"
+        },
+        "refresh_token": {
+          "type": "string",
+          "title": "Refresh Token"
+        },
+        "refresh_expires_in": {
+          "type": "integer",
+          "title": "Refresh Expires In"
+        }
+      },
+      "type": "object",
+      "required": [
+        "access_token",
+        "token_type",
+        "expires_in",
+        "refresh_token",
+        "refresh_expires_in"
+      ],
+      "title": "TokenPair"
+    },
+    "ValidationError": {
+      "properties": {
+        "loc": {
+          "items": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ]
+          },
+          "type": "array",
+          "title": "Location"
+        },
+        "msg": {
+          "type": "string",
+          "title": "Message"
+        },
+        "type": {
+          "type": "string",
+          "title": "Error Type"
+        },
+        "input": {
+          "title": "Input"
+        },
+        "ctx": {
+          "type": "object",
+          "title": "Context"
+        }
+      },
+      "type": "object",
+      "required": [
+        "loc",
+        "msg",
+        "type"
+      ],
+      "title": "ValidationError"
+    },
+    "VendorContactOut": {
+      "properties": {
+        "company": {
+          "type": "string",
+          "title": "Company"
+        },
+        "phone": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Phone"
+        },
+        "whatsapp": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Whatsapp"
+        },
+        "email": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Email"
+        },
+        "website": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Website"
+        }
+      },
+      "type": "object",
+      "required": [
+        "company"
+      ],
+      "title": "VendorContactOut",
+      "description": "The vendor to contact about the license (only the channels the vendor gave are present)."
+    },
+    "WorkspaceOut": {
+      "properties": {
+        "code": {
+          "type": "string",
+          "title": "Code"
+        },
+        "label": {
+          "type": "string",
+          "title": "Label"
+        },
+        "label_ur": {
+          "type": "string",
+          "title": "Label Ur"
+        },
+        "description": {
+          "type": "string",
+          "title": "Description"
+        },
+        "roles": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Roles",
+          "description": "The user's roles that open this workspace"
+        }
+      },
+      "type": "object",
+      "required": [
+        "code",
+        "label",
+        "label_ur",
+        "description",
+        "roles"
+      ],
+      "title": "WorkspaceOut"
+    },
+    "Envelope_HospitalSettingsOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/HospitalSettingsOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[HospitalSettingsOut]"
+    },
+    "Envelope_LogoutOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/LogoutOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[LogoutOut]"
+    },
+    "Envelope_dict_str__list_str___": {
+      "properties": {
+        "data": {
+          "additionalProperties": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "type": "object",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[dict[str, list[str]]]"
+    },
+    "Envelope_list_ErrorCodeOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/ErrorCodeOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[ErrorCodeOut]]"
+    },
+    "Envelope_list_EventInfoOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/EventInfoOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[EventInfoOut]]"
+    },
+    "Envelope_list_WorkspaceInfoOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/WorkspaceInfoOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[WorkspaceInfoOut]]"
+    },
+    "ErrorCodeOut": {
+      "properties": {
+        "code": {
+          "type": "string",
+          "title": "Code",
+          "description": "Switch on this, never on the message"
+        },
+        "http_status": {
+          "type": "integer",
+          "title": "Http Status"
+        },
+        "message": {
+          "type": "string",
+          "title": "Message",
+          "description": "The default text (an error may carry a more specific one)"
+        },
+        "retryable": {
+          "type": "boolean",
+          "title": "Retryable"
+        },
+        "category": {
+          "type": "string",
+          "title": "Category"
+        }
+      },
+      "type": "object",
+      "required": [
+        "code",
+        "http_status",
+        "message",
+        "retryable",
+        "category"
+      ],
+      "title": "ErrorCodeOut"
+    },
+    "EventInfoOut": {
+      "properties": {
+        "event_type": {
+          "type": "string",
+          "title": "Event Type"
+        },
+        "description": {
+          "type": "string",
+          "title": "Description"
+        },
+        "audience": {
+          "type": "string",
+          "title": "Audience",
+          "description": "Who receives it (permissions, the user or employee concerned)"
+        },
+        "payload_fields": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "type": "object",
+          "title": "Payload Fields",
+          "description": "Payload field -> its type (e.g. \"int|null\")"
+        },
+        "priority": {
+          "type": "string",
+          "enum": [
+            "normal",
+            "high",
+            "critical"
+          ],
+          "title": "Priority"
+        },
+        "workflow": {
+          "type": "string",
+          "title": "Workflow",
+          "description": "The EXPECTED_HOSPITAL_WORKFLOWS.md sections it belongs to"
+        },
+        "presentation": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "interrupt",
+                "banner",
+                "logout"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Presentation",
+          "description": "How the backend prescribes showing it: interrupt (a full-screen alert until acknowledged), banner (on every window while it lasts), logout. null = not prescribed: `priority` is the delivery urgency, not a presentation rule"
+        }
+      },
+      "type": "object",
+      "required": [
+        "event_type",
+        "description",
+        "audience",
+        "payload_fields",
+        "priority",
+        "workflow",
+        "presentation"
+      ],
+      "title": "EventInfoOut"
+    },
+    "HospitalSettingsOut": {
+      "properties": {
+        "hospital_name": {
+          "type": "string",
+          "title": "Hospital Name"
+        },
+        "hospital_address": {
+          "type": "string",
+          "title": "Hospital Address"
+        },
+        "hospital_phone": {
+          "type": "string",
+          "title": "Hospital Phone"
+        },
+        "hospital_timezone": {
+          "type": "string",
+          "title": "Hospital Timezone"
+        },
+        "currency_code": {
+          "type": "string",
+          "title": "Currency Code"
+        },
+        "ticket_validity_hours": {
+          "type": "integer",
+          "title": "Ticket Validity Hours"
+        },
+        "reception_max_discount_pct": {
+          "type": "number",
+          "title": "Reception Max Discount Pct"
+        },
+        "opd_require_payment_before_queue": {
+          "type": "boolean",
+          "title": "Opd Require Payment Before Queue"
+        },
+        "lab_require_payment_before_sample": {
+          "type": "boolean",
+          "title": "Lab Require Payment Before Sample"
+        },
+        "password_min_length": {
+          "type": "integer",
+          "title": "Password Min Length"
+        },
+        "maintenance_mode": {
+          "type": "boolean",
+          "title": "Maintenance Mode"
+        },
+        "large_cash_settlement_threshold": {
+          "type": "number",
+          "title": "Large Cash Settlement Threshold",
+          "description": "A cash drop or a payable settlement at or above this needs a second, different person's credentials on the finance screens"
+        },
+        "solo_practice_mode": {
+          "type": "boolean",
+          "title": "Solo Practice Mode",
+          "description": "A one-person practice: the Owner who is the only possible approver may decide their own refund, waiver or credit (the approval's self_decision says when)"
+        }
+      },
+      "type": "object",
+      "required": [
+        "hospital_name",
+        "hospital_address",
+        "hospital_phone",
+        "hospital_timezone",
+        "currency_code",
+        "ticket_validity_hours",
+        "reception_max_discount_pct",
+        "opd_require_payment_before_queue",
+        "lab_require_payment_before_sample",
+        "password_min_length",
+        "maintenance_mode",
+        "large_cash_settlement_threshold",
+        "solo_practice_mode"
+      ],
+      "title": "HospitalSettingsOut",
+      "description": "The non-sensitive hospital settings every screen may show (the policy values are in admin settings)."
+    },
+    "LogoutIn": {
+      "properties": {
+        "all_sessions": {
+          "type": "boolean",
+          "title": "All Sessions",
+          "description": "Also revoke every other session of this user",
+          "default": false
+        }
+      },
+      "type": "object",
+      "title": "LogoutIn"
+    },
+    "LogoutOut": {
+      "properties": {
+        "revoked_refresh_tokens": {
+          "type": "integer",
+          "title": "Revoked Refresh Tokens"
+        }
+      },
+      "type": "object",
+      "required": [
+        "revoked_refresh_tokens"
+      ],
+      "title": "LogoutOut"
+    },
+    "RefreshIn": {
+      "properties": {
+        "refresh_token": {
+          "type": "string",
+          "maxLength": 200,
+          "minLength": 20,
+          "title": "Refresh Token"
+        }
+      },
+      "type": "object",
+      "required": [
+        "refresh_token"
+      ],
+      "title": "RefreshIn"
+    },
+    "WorkspaceInfoOut": {
+      "properties": {
+        "code": {
+          "type": "string",
+          "title": "Code"
+        },
+        "label": {
+          "type": "string",
+          "title": "Label"
+        },
+        "label_ur": {
+          "type": "string",
+          "title": "Label Ur"
+        },
+        "description": {
+          "type": "string",
+          "title": "Description"
+        },
+        "screens": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Screens",
+          "description": "The titles of the workspace's screens, from the screen catalogue (GET /meta/handbook and the MCP server give each screen in full)"
+        },
+        "also_uses": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Also Uses",
+          "description": "Screen ids of other workspaces its roles work in (the cashier: my_cash_shift, cash_back_prompts)"
+        }
+      },
+      "type": "object",
+      "required": [
+        "code",
+        "label",
+        "label_ur",
+        "description",
+        "screens",
+        "also_uses"
+      ],
+      "title": "WorkspaceInfoOut"
+    },
+    "Envelope_NotificationReadOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/NotificationReadOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[NotificationReadOut]"
+    },
+    "Envelope_ReadAllOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/ReadAllOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[ReadAllOut]"
+    },
+    "Envelope_UnreadCountOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/UnreadCountOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[UnreadCountOut]"
+    },
+    "Envelope_list_NotificationOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/NotificationOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[NotificationOut]]"
+    },
+    "NotificationOut": {
+      "properties": {
+        "notification_id": {
+          "type": "integer",
+          "title": "Notification Id"
+        },
+        "category": {
+          "type": "string",
+          "title": "Category"
+        },
+        "severity": {
+          "type": "string",
+          "enum": [
+            "info",
+            "warning",
+            "critical"
+          ],
+          "title": "Severity"
+        },
+        "title": {
+          "type": "string",
+          "title": "Title"
+        },
+        "body": {
+          "type": "string",
+          "title": "Body"
+        },
+        "entity_type": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Entity Type"
+        },
+        "entity_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Entity Id"
+        },
+        "action_url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Action Url",
+          "description": "Where the frontend should take the user (a route of the app)"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Created At"
+        },
+        "is_read": {
+          "type": "boolean",
+          "title": "Is Read"
+        }
+      },
+      "type": "object",
+      "required": [
+        "notification_id",
+        "category",
+        "severity",
+        "title",
+        "body",
+        "entity_type",
+        "entity_id",
+        "action_url",
+        "created_at",
+        "is_read"
+      ],
+      "title": "NotificationOut"
+    },
+    "NotificationReadOut": {
+      "properties": {
+        "notification_id": {
+          "type": "integer",
+          "title": "Notification Id"
+        },
+        "is_read": {
+          "type": "boolean",
+          "title": "Is Read"
+        }
+      },
+      "type": "object",
+      "required": [
+        "notification_id",
+        "is_read"
+      ],
+      "title": "NotificationReadOut"
+    },
+    "ReadAllOut": {
+      "properties": {
+        "marked": {
+          "type": "integer",
+          "title": "Marked",
+          "description": "How many were newly marked as read"
+        }
+      },
+      "type": "object",
+      "required": [
+        "marked"
+      ],
+      "title": "ReadAllOut"
+    },
+    "UnreadCountOut": {
+      "properties": {
+        "unread": {
+          "type": "integer",
+          "title": "Unread"
+        }
+      },
+      "type": "object",
+      "required": [
+        "unread"
+      ],
+      "title": "UnreadCountOut"
+    },
+    "AdminChangeRequestOut": {
+      "properties": {
+        "change_request_id": {
+          "type": "integer",
+          "title": "Change Request Id"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "Setting",
+            "UserRoles",
+            "RolePermissions"
+          ],
+          "title": "Kind"
+        },
+        "setting_key": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Setting Key"
+        },
+        "target_user_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Target User Id"
+        },
+        "target_role_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Target Role Code"
+        },
+        "requested_value": {
+          "title": "Requested Value"
+        },
+        "current_value": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Current Value"
+        },
+        "reason": {
+          "type": "string",
+          "title": "Reason"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "Pending",
+            "Applied",
+            "Rejected",
+            "Cancelled"
+          ],
+          "title": "Status"
+        },
+        "approval_request_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Approval Request Id"
+        },
+        "requested_by": {
+          "type": "integer",
+          "title": "Requested By"
+        },
+        "requested_by_name": {
+          "type": "string",
+          "title": "Requested By Name"
+        },
+        "requested_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Requested At"
+        },
+        "decided_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Decided At"
+        }
+      },
+      "type": "object",
+      "required": [
+        "change_request_id",
+        "kind",
+        "setting_key",
+        "target_user_id",
+        "target_role_code",
+        "requested_value",
+        "current_value",
+        "reason",
+        "status",
+        "approval_request_id",
+        "requested_by",
+        "requested_by_name",
+        "requested_at",
+        "decided_at"
+      ],
+      "title": "AdminChangeRequestOut"
+    },
+    "ChangeRequestIn": {
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "Setting",
+            "UserRoles",
+            "RolePermissions"
+          ],
+          "title": "Kind"
+        },
+        "setting_key": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Setting Key"
+        },
+        "target_user_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Target User Id"
+        },
+        "target_role_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Target Role Code"
+        },
+        "requested_value": {
+          "title": "Requested Value",
+          "description": "Setting: the new value; UserRoles: role codes; RolePermissions: permission codes"
+        },
+        "reason": {
+          "type": "string",
+          "maxLength": 500,
+          "minLength": 3,
+          "title": "Reason"
+        }
+      },
+      "type": "object",
+      "required": [
+        "kind",
+        "requested_value",
+        "reason"
+      ],
+      "title": "ChangeRequestIn"
+    },
+    "Envelope_AdminChangeRequestOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/AdminChangeRequestOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[AdminChangeRequestOut]"
+    },
+    "Envelope_MyPreferencesOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/MyPreferencesOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[MyPreferencesOut]"
+    },
+    "Envelope_SettingRowOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/SettingRowOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[SettingRowOut]"
+    },
+    "Envelope_SettingsSectionsOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/SettingsSectionsOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[SettingsSectionsOut]"
+    },
+    "Envelope_list_AdminChangeRequestOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/AdminChangeRequestOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[AdminChangeRequestOut]]"
+    },
+    "Envelope_list_SettingOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/SettingOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[SettingOut]]"
+    },
+    "MyPreferencesOut": {
+      "properties": {
+        "theme": {
+          "type": "string",
+          "enum": [
+            "Light",
+            "DarkHighContrast"
+          ],
+          "title": "Theme"
+        },
+        "language": {
+          "type": "string",
+          "enum": [
+            "en",
+            "ur"
+          ],
+          "title": "Language"
+        },
+        "ui_scale_pct": {
+          "type": "integer",
+          "title": "Ui Scale Pct"
+        },
+        "pdf_download": {
+          "type": "string",
+          "enum": [
+            "Separate",
+            "Combined"
+          ],
+          "title": "Pdf Download",
+          "description": "How a set of documents (the MSDS inspection pack) downloads: Separate = a button per document, one PDF each; Combined = one button, one PDF with all of them"
+        },
+        "extra": {
+          "additionalProperties": true,
+          "type": "object",
+          "title": "Extra",
+          "description": "Anything else the frontend stores for this user"
+        },
+        "updated_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Updated At",
+          "description": "Null until the user saves preferences for the first time"
+        }
+      },
+      "type": "object",
+      "required": [
+        "theme",
+        "language",
+        "ui_scale_pct",
+        "pdf_download",
+        "extra",
+        "updated_at"
+      ],
+      "title": "MyPreferencesOut"
+    },
+    "PreferencesIn": {
+      "properties": {
+        "theme": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "Light",
+                "DarkHighContrast"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Theme"
+        },
+        "language": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "en",
+                "ur"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Language"
+        },
+        "ui_scale_pct": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "maximum": 250,
+              "minimum": 100
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ui Scale Pct",
+          "description": "Shared keyboard/Settings zoom state, bounded to 100–250%; Ctrl/Cmd +, -, 0"
+        },
+        "pdf_download": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "Separate",
+                "Combined"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Pdf Download",
+          "description": "A set of documents (the MSDS inspection pack): Separate = a download button per document, one PDF each (default); Combined = one button, one PDF with all of them"
+        },
+        "extra": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Extra",
+          "description": "Free-form UI state (e.g. last workspace, column widths); max 16 KB"
+        }
+      },
+      "type": "object",
+      "title": "PreferencesIn"
+    },
+    "SettingIn": {
+      "properties": {
+        "value": {
+          "title": "Value",
+          "description": "JSON value of the same type as the current one"
+        }
+      },
+      "type": "object",
+      "required": [
+        "value"
+      ],
+      "title": "SettingIn"
+    },
+    "SettingOut": {
+      "properties": {
+        "key": {
+          "type": "string",
+          "title": "Key"
+        },
+        "value": {
+          "title": "Value",
+          "description": "The setting's JSON value (number, boolean, text, list ...)"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Description"
+        },
+        "is_control": {
+          "type": "boolean",
+          "title": "Is Control",
+          "description": "A control setting: an Owner changes it or approves the change"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Updated At"
+        }
+      },
+      "type": "object",
+      "required": [
+        "key",
+        "value",
+        "description",
+        "is_control",
+        "updated_at"
+      ],
+      "title": "SettingOut"
+    },
+    "SettingRowOut": {
+      "properties": {
+        "key": {
+          "type": "string",
+          "title": "Key"
+        },
+        "value_jsonb": {
+          "title": "Value Jsonb",
+          "description": "The new JSON value"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Description"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Updated At"
+        },
+        "row_version": {
+          "type": "integer",
+          "title": "Row Version"
+        }
+      },
+      "type": "object",
+      "required": [
+        "key",
+        "value_jsonb",
+        "description",
+        "updated_at",
+        "row_version"
+      ],
+      "title": "SettingRowOut"
+    },
+    "SettingsSectionOut": {
+      "properties": {
+        "key": {
+          "type": "string",
+          "title": "Key"
+        },
+        "label": {
+          "type": "string",
+          "title": "Label"
+        },
+        "screen": {
+          "type": "string",
+          "title": "Screen"
+        },
+        "danger": {
+          "type": "boolean",
+          "title": "Danger"
+        },
+        "before_login": {
+          "type": "boolean",
+          "title": "Before Login",
+          "description": "Also before login: the login screen's Settings button opens it (it writes nothing on the server)"
+        },
+        "endpoints": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Endpoints"
+        }
+      },
+      "type": "object",
+      "required": [
+        "key",
+        "label",
+        "screen",
+        "danger",
+        "before_login",
+        "endpoints"
+      ],
+      "title": "SettingsSectionOut"
+    },
+    "SettingsSectionsOut": {
+      "properties": {
+        "shortcut": {
+          "type": "string",
+          "title": "Shortcut"
+        },
+        "signed_in": {
+          "type": "boolean",
+          "title": "Signed In",
+          "description": "False: the caller sent no token (the login screen), so only the This terminal tier"
+        },
+        "tiers": {
+          "items": {
+            "$ref": "#/components/schemas/SettingsTierOut"
+          },
+          "type": "array",
+          "title": "Tiers"
+        }
+      },
+      "type": "object",
+      "required": [
+        "shortcut",
+        "signed_in",
+        "tiers"
+      ],
+      "title": "SettingsSectionsOut"
+    },
+    "SettingsTierOut": {
+      "properties": {
+        "tier": {
+          "type": "string",
+          "enum": [
+            "personal",
+            "facility",
+            "system",
+            "terminal"
+          ],
+          "title": "Tier"
+        },
+        "label": {
+          "type": "string",
+          "title": "Label"
+        },
+        "sections": {
+          "items": {
+            "$ref": "#/components/schemas/SettingsSectionOut"
+          },
+          "type": "array",
+          "title": "Sections"
+        }
+      },
+      "type": "object",
+      "required": [
+        "tier",
+        "label",
+        "sections"
+      ],
+      "title": "SettingsTierOut"
+    }
+  }
+}

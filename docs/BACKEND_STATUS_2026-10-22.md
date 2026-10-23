@@ -1,0 +1,24 @@
+# Backend issue audit — 22 October 2026
+
+Codex implementation1 / mkashif. Fresh MCP `my_backend_issues` answers read; current server2026-10-22T03:00:52.677157+00:00, contract61186bb3306515cae1c9. `what_changed` from that fingerprint reports no operation/schema/event/rubric/handbook changes. No new backend deployment to integrate in this audit.
+
+| Issue | Backend status | Local integration and evidence |
+|---|---|---|
+| #1 Public endpoint generator comments | Fixed | `src/generated/login.ts` labels login/terminal/licence/health public. Already regenerated; source verified again. |
+| #2 Approval eligibility / co-signing | Fixed | `src/approval-policy.ts` and Approvals obey `can_decide`, `self_decision` and note requirements; no approval co-signer input. Fresh GET /approvals as demo.owner200 includes all eligibility fields, request758f07b6315746e9ad7e39055394532f. No approval write. |
+| #3 Incident staff lookup | Fixed | Incidents uses shared `StaffPicker`, which calls `/staff/lookup`, not privileged HR directory. |
+| #4 Patient/CashShift frontend defects | Rejected as backend issue | Correctly frontend-owned. Current source already has patient detail/financial generation guards, visible financial errors, explicit stale-version reconciliation, `event_type` subscription and no fabricated MainReception fallback. Static reinspection this audit; no new full patient runtime test asserted. |
+| #5 Registration staff lookup | Fixed | Registration uses the same picker. Fresh staff lookup as signed-in demo.zakat200, request47fcd1f0dea44ad49dcf48657fd117cb. Reception-specific fresh retry is blocked by new #12; prior successful Electron verification is recorded in REGISTRATION_REVIEW.md. |
+| #6 Missing-reference field metadata | Fixed | Registration consumes actual `error.details.field` and preserves complete errors. Prior real invalid-employee rollback test documented in REGISTRATION_REVIEW.md; not repeated here. Current recorded `ward_id` error example is explicitly from pharmacy/storage-checks (`details_from`), not a registration field. |
+| #7 Approval handbook wording | Fixed | Refreshed handbook/access snapshots and earlier retest in docs/backend-fix-retests-2026-10-22.json. Fresh approve contract now describes eligibility/solo noted decisions/independent cash-drop decider. Corrected stale New wording in PHASE1_IMPLEMENTATION_REVIEW.md. |
+| #8 Generic MCP proposal errors | Fixed | Prior negative validation retest returned actionable details and saved no proposal; see earlier retest JSON. Real proposals52/53 subsequently saved, verified and now accepted. No duplicate validation/progress write this audit. |
+| #9 Duplicate TypeScript operations | Fixed | Current generated IT client uses provisionAdminUsers/provisionOtTheaters and callers match. Prior regeneration/build retested successfully; final previous checkpoint build and38 unit tests passed. No generator workaround needed. |
+| #10 Safe real licence-state test workflow | New; no answer | Reported through MCP, exact input docs/codex-login-license-dev-workflow-20261022.json. Await isolated grace/locked/system.license setup and restoration. No shared licence override. |
+| #11 Safe targeted critical-notification test workflow | New; no answer | Reported through MCP, exact input docs/codex-notifications-critical-dev-workflow-20261022.json. Real critical-severity acceptance remains pending. |
+| #12 Advertised reception demo login refused | New; reported this audit | One sandbox request as demo.reception refused INVALID_CREDENTIALS before GET. demo_accounts advertises it; admin user5 is active/unlocked, failed_login_count1, details200 requestd8523d920d7b45069431692afbc9fcee. No retry/reset/reseed/shared password change. Exact report docs/codex-demo-reception-sandbox-login-20261022.json. |
+
+All fixed backend changes requiring local integration are already represented in the app; no runtime edit was necessary in this audit. Corrected status documentation and recorded verification limits. Older dated review documents retain original test history; current status is this audit and handoff.md.
+
+Notifications proposals52/53 are now **ACCEPTED**,447 accepted points,0/268 complete, no pending proposal. No new screen implementation or newly tested rubric item here, so no empty/duplicate progress proposal was sent. Named human/full-screen gates remain pending.
+
+Only read-only business endpoints and normal demo sign-ins were used; no registration/payment/approval/clinical mutation or account reset. Build,38 unit tests, focused Notifications and14 foundation checks passed in the preceding implementation checkpoint, not rerun during this documentation audit. No runtime files changed, no new build required, no running commands or uncertain writes. Recheck issue answers on next session and retest new fixes once the deployed server reaches fixed_in.

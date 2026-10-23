@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { tr } from "../i18n";
 import * as pts from "../generated/patient_search";
+import { api } from "../bridge";
+import { formatHospitalTime } from "../hospital-time";
 import {
   Details,
   Empty,
@@ -8,6 +10,7 @@ import {
   Field,
   LoadState,
   Modal,
+  useLoad,
 } from "../components";
 
 const BLOOD_GROUPS = [
@@ -31,14 +34,18 @@ const GENDERS = [
 export function PatientSearch({
   user,
   revision,
+  timeZone,
+  currency,
 }: {
   user: any;
   revision: number;
+  timeZone?: string;
+  currency?: string;
 }) {
-  const canSearch =
-    user?.permissions?.includes("patient.search") ||
-    user?.permissions?.includes("patient.view");
+  const canSearch = user?.permissions?.includes("patient.search");
+  const canView = user?.permissions?.includes("patient.view");
   const canUpdate = user?.permissions?.includes("patient.update");
+  const panels = useLoad(() => canUpdate ? api<{panel_id:number;name:string;is_active:boolean}[]>("GET", "/finance/panels") : Promise.resolve([]), [canUpdate]);
 
   const [query, setQuery] = useState("");
   const [searching, setSearching] = useState(false);
@@ -71,6 +78,15 @@ export function PatientSearch({
   const [editBusy, setEditBusy] = useState(false);
   const [editError, setEditError] = useState<unknown>();
   const [versionConflict, setVersionConflict] = useState(false);
+  const [latestEdit, setLatestEdit] = useState<pts.PatientDetailOut | null>(null);
+  const editFlight = useRef(false);
+  const [editDirty, setEditDirty] = useState(false);
+  function closeEdit() {
+    if (editFlight.current) return;
+    if (editDirty && !window.confirm(tr("Discard patient demographic changes?"))) return;
+    setEditOpen(false);
+    setEditDirty(false);
+  }
 
   // Edit form state
   const [formName, setFormName] = useState("");
@@ -98,6 +114,7 @@ export function PatientSearch({
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const performSearch = useCallback(async (q: string) => {
+    if (!canSearch) return;
     const generation = ++searchGeneration.current;
     const trimmed = q.trim();
     if (trimmed.length < 2) {
@@ -107,6 +124,7 @@ export function PatientSearch({
       return;
     }
     setSearching(true);
+    setResults([]);
     setSearchError(undefined);
     try {
       const hits = await pts.search({ q: trimmed, limit: 20 });
@@ -118,11 +136,13 @@ export function PatientSearch({
     } finally {
       if (generation === searchGeneration.current) setSearching(false);
     }
-  }, []);
+  }, [canSearch]);
 
   useEffect(() => {
     ++searchGeneration.current;
     setSearching(false);
+    setResults([]);
+    setSearchError(undefined);
     if (debounceTimer.current) clearTimeout(debounceTimer.current);
     if (!query || query.trim().length < 2) {
       setResults([]);
@@ -187,6 +207,7 @@ export function PatientSearch({
   }, []);
 
   function handleSelectPatient(p: pts.PatientSearchHitOut) {
+    if (!canView) return;
     selection.current = p.patient_id;
     setSelectedId(p.patient_id);
     setShowFinancials(false);
@@ -198,7 +219,7 @@ export function PatientSearch({
   useEffect(() => {
     if (!window.terminal) return;
     return window.terminal.subscribe((e) => {
-      if (e.type === "event" && e.event_type === "patient.merged") {
+      if ((e.type === "event" && ["patient.merged", "death.recorded"].includes(e.event_type)) || (e.type === "stream" && e.resync)) {
         if (query.trim().length >= 2) {
           void performSearch(query);
         }
@@ -234,12 +255,15 @@ export function PatientSearch({
     setFormUpgradeRegular(false);
     setEditError(undefined);
     setVersionConflict(false);
+    setLatestEdit(null);
+    setEditDirty(false);
     setEditOpen(true);
   }
 
   async function handleSaveEdit(e: React.FormEvent) {
     e.preventDefault();
-    if (!editBase || versionConflict || editBusy) return;
+    if (!editBase || versionConflict || editFlight.current || !canUpdate) return;
+    editFlight.current = true;
     const patient = editBase;
     setEditBusy(true);
     setEditError(undefined);
@@ -247,7 +271,7 @@ export function PatientSearch({
 
     const body: pts.PatientUpdate = {
       expected_version: patient.row_version,
-      full_name: formName || null,
+      full_name: formName.trim(),
       gender: formGender,
       dob: formDob || null,
       age_years: formAgeYears ? parseInt(formAgeYears, 10) : null,
@@ -265,10 +289,17 @@ export function PatientSearch({
       upgrade_to_regular: formUpgradeRegular,
     };
 
+    // PATCH only changed fields; do not erase unedited server data.
+    for (const key of Object.keys(body) as (keyof pts.PatientUpdate)[]) {
+      if (key !== "expected_version" && key !== "upgrade_to_regular" &&
+          body[key] === (patient as any)[key]) delete body[key];
+    }
+
     try {
       const updated = await pts.updatePatient(patient.patient_id, body);
       setPatient(updated);
       setEditOpen(false);
+      setEditDirty(false);
       // Also update search results entry if present
       setResults((prev) =>
         prev.map((r) =>
@@ -277,33 +308,26 @@ export function PatientSearch({
       );
     } catch (err: any) {
       setEditError(err);
-      if (err?.response?.error?.code === "VERSION_CONFLICT") {
+      {
+        // A lost response might already have advanced the version. Never replay.
         setVersionConflict(true);
         // Keep the original version and draft until the user explicitly reloads.
       }
     } finally {
+      editFlight.current = false;
       setEditBusy(false);
     }
   }
 
   const formatMoney = (val?: number | null) => {
-    if (val === undefined || val === null) return "₨ 0.00";
-    return `₨ ${Number(val).toLocaleString(undefined, {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    })}`;
+    if (val === undefined || val === null) return "—";
+    return (currency ? currency + " " : "") + String(val);
   };
 
   const formatDateTime = (iso?: string | null) => {
     if (!iso) return "—";
     try {
-      return new Date(iso).toLocaleString("en-GB", {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      });
+      return timeZone ? formatHospitalTime(iso, timeZone) : tr("Hospital timezone unavailable");
     } catch {
       return iso;
     }
@@ -323,7 +347,7 @@ export function PatientSearch({
   }
 
   return (
-    <>
+    <div data-help="patients.profile" data-write-pending={editBusy}>
       <div className="section-heading">
         <div>
           <span className="eyebrow">{tr("RECEPTION & FRONT DESK")}</span>
@@ -337,11 +361,12 @@ export function PatientSearch({
       </div>
 
       {/* Search Input Bar */}
-      <section className="card" style={{ marginTop: 0 }}>
+      <section className="card" data-help="patients.lookup" style={{ marginTop: 0 }}>
         <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
           <div style={{ flex: 1, position: "relative" }}>
-            <input
+            <input data-help="patients.lookup"
               type="search"
+              maxLength={100}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={handleKeyDown}
@@ -352,7 +377,7 @@ export function PatientSearch({
               autoFocus
             />
           </div>
-          <button
+          <button data-help="patients.lookup"
             type="button"
             className="primary"
             onClick={() => void performSearch(query)}
@@ -361,7 +386,7 @@ export function PatientSearch({
             {searching ? tr("Searching…") : tr("Search")}
           </button>
           {query && (
-            <button
+            <button data-help="patients.lookup"
               type="button"
               onClick={() => {
                 setQuery("");
@@ -393,11 +418,12 @@ export function PatientSearch({
       </section>
 
       <ErrorBox error={searchError} />
+      {!canView && <p>{tr("Profile access requires patient.view permission. Ask your supervisor.")}</p>}
 
       {/* Main Split Layout: Search Results (Left) & Selected Patient Details (Right) */}
       <div className="split patient-search-layout">
         {/* Left Column: Search Results */}
-        <section className="card patient-results">
+        <section className="card patient-results" data-help="patients.profile">
           <div className="patient-results-heading">
             <h3>{tr("Search results")}</h3>
             {searched && (
@@ -445,9 +471,10 @@ export function PatientSearch({
                   aria-pressed={isSelected}
                   onClick={() => handleSelectPatient(hit)}
                   role="button"
-                  tabIndex={0}
+                  aria-disabled={!canView}
+                  tabIndex={canView ? 0 : -1}
                   onKeyDown={(e) =>
-                    e.key === "Enter" && handleSelectPatient(hit)
+                    ["Enter", " "].includes(e.key) && (e.preventDefault(), handleSelectPatient(hit))
                   }
                 >
                   {/* Outstanding AR banner */}
@@ -690,7 +717,7 @@ export function PatientSearch({
                 <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
                   <span className="badge">{tr(patient.registration_type)}</span>
                   {canUpdate && (
-                    <button
+                    <button data-help="patients.profile"
                       type="button"
                       className="primary"
                       onClick={() => openEditModal()}
@@ -790,7 +817,7 @@ export function PatientSearch({
                   }}
                 >
                   <h3>{tr("Financials & Dues")}</h3>
-                  <button
+                  <button data-help="patients.profile"
                     type="button"
                     onClick={() => {
                       setShowFinancials(!showFinancials);
@@ -808,7 +835,7 @@ export function PatientSearch({
                   <div style={{ marginTop: 16 }}>
                     <ErrorBox error={financialError} />
                     {!!financialError && (
-                      <button
+                      <button data-help="patients.profile"
                         onClick={() =>
                           selectedId && void loadFinancials(selectedId)
                         }
@@ -1072,21 +1099,22 @@ export function PatientSearch({
       {editOpen && (
         <Modal
           title={tr("Edit patient demographics")}
-          onClose={() => setEditOpen(false)}
+          onClose={closeEdit}
+          closable={!editBusy}
         >
           {versionConflict && (
             <div className="error" role="alert" style={{ marginBottom: 12 }}>
-              <strong>{tr("VERSION CONFLICT")}</strong>
+              <strong>{tr("Review current record")}</strong>
               <p className="fine">
                 {tr(
-                  "This patient record was updated by another terminal. Your draft has been preserved. Discard it and reload the latest record before editing again.",
+                  "The save result needs review. Your draft is preserved. Read the current record before another save; a lost reply may already have saved the change.",
                 )}
               </p>
             </div>
           )}
 
           {versionConflict && (
-            <button
+            <button data-help="patients.edit"
               type="button"
               disabled={editBusy}
               onClick={async () => {
@@ -1094,8 +1122,7 @@ export function PatientSearch({
                 setEditBusy(true);
                 try {
                   const fresh = await pts.getPatient(editBase.patient_id);
-                  setPatient(fresh);
-                  openEditModal(fresh);
+                  setLatestEdit(fresh);
                 } catch (error) {
                   setEditError(error);
                 } finally {
@@ -1103,20 +1130,27 @@ export function PatientSearch({
                 }
               }}
             >
-              {tr("Discard draft and reload latest record")}
+              {tr("Read current record")}
             </button>
           )}
+          {latestEdit && <div data-help="patients.edit">
+            <Details value={latestEdit} />
+            <button data-help="patients.edit" type="button" onClick={() => { setPatient(latestEdit); openEditModal(latestEdit); }}>
+              {tr("Discard draft and reload latest record")}
+            </button>
+          </div>}
           <ErrorBox error={editError} />
 
-          <form onSubmit={handleSaveEdit}>
+          <form data-help="patients.edit" onSubmit={handleSaveEdit} data-unsaved={editDirty || editBusy} onChange={() => setEditDirty(true)}>
             <div className="form-grid">
               <Field
                 label={tr("Full name")}
                 hint={tr("Patient's official name")}
               >
-                <input
+                <input data-help="patients.edit"
                   type="text"
                   required
+                  maxLength={200}
                   value={formName}
                   onChange={(e) => setFormName(e.target.value)}
                   disabled={editBusy}
@@ -1125,7 +1159,7 @@ export function PatientSearch({
               </Field>
 
               <Field label={tr("Father / Husband name")}>
-                <input
+                <input data-help="patients.edit"
                   type="text"
                   value={formFatherHusband}
                   onChange={(e) => setFormFatherHusband(e.target.value)}
@@ -1134,7 +1168,7 @@ export function PatientSearch({
               </Field>
 
               <Field label={tr("Gender")}>
-                <select
+                <select data-help="patients.edit"
                   value={formGender}
                   onChange={(e) => setFormGender(e.target.value as any)}
                   disabled={editBusy}
@@ -1149,7 +1183,7 @@ export function PatientSearch({
               </Field>
 
               <Field label={tr("Age (Years)")}>
-                <input
+                <input data-help="patients.edit"
                   type="number"
                   min="0"
                   max="150"
@@ -1161,7 +1195,7 @@ export function PatientSearch({
               </Field>
 
               <Field label={tr("Date of birth")}>
-                <input
+                <input data-help="patients.edit"
                   type="date"
                   value={formDob}
                   onChange={(e) => setFormDob(e.target.value)}
@@ -1170,7 +1204,7 @@ export function PatientSearch({
               </Field>
 
               <Field label={tr("Mobile phone")} hint={tr("e.g. 03001234567")}>
-                <input
+                <input data-help="patients.edit"
                   type="tel"
                   value={formMobile}
                   onChange={(e) => setFormMobile(e.target.value)}
@@ -1180,9 +1214,10 @@ export function PatientSearch({
               </Field>
 
               <Field label={tr("CNIC")} hint={tr("e.g. 35202-1234567-1")}>
-                <input
+                <input data-help="patients.edit"
                   type="text"
                   value={formCnic}
+                  pattern="[0-9]{5}-?[0-9]{7}-?[0-9]"
                   onChange={(e) => setFormCnic(e.target.value)}
                   disabled={editBusy}
                   placeholder="35202-1234567-1"
@@ -1190,7 +1225,7 @@ export function PatientSearch({
               </Field>
 
               <Field label={tr("Blood group")}>
-                <select
+                <select data-help="patients.edit"
                   value={formBloodGroup}
                   onChange={(e) => setFormBloodGroup(e.target.value)}
                   disabled={editBusy}
@@ -1208,7 +1243,7 @@ export function PatientSearch({
                 label={tr("Allergies")}
                 hint={tr("Known drug/food allergies")}
               >
-                <input
+                <input data-help="patients.edit"
                   type="text"
                   value={formAllergies}
                   onChange={(e) => setFormAllergies(e.target.value)}
@@ -1218,7 +1253,7 @@ export function PatientSearch({
               </Field>
 
               <Field label={tr("Billing category")}>
-                <select
+                <select data-help="patients.edit"
                   value={formBillingCat}
                   onChange={(e) => setFormBillingCat(e.target.value as any)}
                   disabled={editBusy}
@@ -1231,15 +1266,20 @@ export function PatientSearch({
               {formBillingCat === "Panel" && (
                 <>
                   <Field label={tr("Panel ID")}>
-                    <input
-                      type="number"
+                    <select data-help="patients.edit"
+                      required
                       value={formPanelId}
                       onChange={(e) => setFormPanelId(e.target.value)}
-                      disabled={editBusy}
-                    />
+                      disabled={editBusy || panels.loading || !!panels.error}
+                    >
+                      <option value="">{tr("Select panel")}</option>
+                      {formPanelId && !panels.data?.some(p => String(p.panel_id) === formPanelId) && <option value={formPanelId}>{editBase?.panel_name || formPanelId}</option>}
+                      {panels.data?.filter(p=>p.is_active || String(p.panel_id)===formPanelId).map(p=><option key={p.panel_id} value={p.panel_id}>{p.name}</option>)}
+                    </select>
+                    <LoadState {...panels} retry={panels.reload}/>
                   </Field>
                   <Field label={tr("Panel Member #")}>
-                    <input
+                    <input data-help="patients.edit"
                       type="text"
                       value={formPanelMemberNo}
                       onChange={(e) => setFormPanelMemberNo(e.target.value)}
@@ -1250,7 +1290,7 @@ export function PatientSearch({
               )}
 
               <Field label={tr("Address")}>
-                <input
+                <input data-help="patients.edit"
                   type="text"
                   value={formAddress}
                   onChange={(e) => setFormAddress(e.target.value)}
@@ -1259,7 +1299,7 @@ export function PatientSearch({
               </Field>
 
               <Field label={tr("Emergency contact name")}>
-                <input
+                <input data-help="patients.edit"
                   type="text"
                   value={formEmergencyName}
                   onChange={(e) => setFormEmergencyName(e.target.value)}
@@ -1268,7 +1308,7 @@ export function PatientSearch({
               </Field>
 
               <Field label={tr("Emergency contact phone")}>
-                <input
+                <input data-help="patients.edit"
                   type="tel"
                   value={formEmergencyPhone}
                   onChange={(e) => setFormEmergencyPhone(e.target.value)}
@@ -1279,7 +1319,7 @@ export function PatientSearch({
 
             {patient?.registration_type === "LabOnly" && (
               <label className="check" style={{ marginTop: 12 }}>
-                <input
+                <input data-help="patients.edit"
                   type="checkbox"
                   checked={formUpgradeRegular}
                   onChange={(e) => setFormUpgradeRegular(e.target.checked)}
@@ -1290,14 +1330,14 @@ export function PatientSearch({
             )}
 
             <div className="actions" style={{ marginTop: 20 }}>
-              <button
+              <button data-help="patients.edit"
                 type="button"
                 disabled={editBusy}
-                onClick={() => setEditOpen(false)}
+                onClick={closeEdit}
               >
                 {tr("Cancel")}
               </button>
-              <button
+              <button data-help="patients.edit"
                 type="submit"
                 className="primary"
                 disabled={editBusy || versionConflict}
@@ -1308,6 +1348,6 @@ export function PatientSearch({
           </form>
         </Modal>
       )}
-    </>
+    </div>
   );
 }

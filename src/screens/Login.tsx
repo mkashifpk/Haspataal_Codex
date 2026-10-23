@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { ApiError, call } from "../bridge";
 import { ErrorBox, Field } from "../components";
 import type { HealthOut } from "../generated/login";
+import { definiteWriteRefusal } from "../write-attempt";
 export function Login({
   onLogin,
   connected,
@@ -17,6 +18,7 @@ export function Login({
   healthError?: unknown;
 }) {
   const [error, setError] = useState<unknown>(),
+    [unknownLogin, setUnknownLogin] = useState(false),
     [busy, setBusy] = useState(false),
     [until, setUntil] = useState(0),
     [now, setNow] = useState(Date.now());
@@ -46,6 +48,13 @@ export function Login({
           {tr("Use the account provided by your hospital.")}
         </p>
         <ErrorBox error={error} />
+        {unknownLogin && (
+          <p className="notice" role="status">
+            {tr(
+              "Sign-in could not be confirmed. It may have opened a session. No automatic retry was made. Check the connection, then sign in again deliberately if needed.",
+            )}
+          </p>
+        )}
         <ErrorBox error={healthError} />
         <p
           role="status"
@@ -68,6 +77,7 @@ export function Login({
                   : tr("Hospital server ready.")}
         </p>
         <form
+          data-write-pending={busy}
           onSubmit={async (e) => {
             e.preventDefault();
             if (
@@ -85,6 +95,7 @@ export function Login({
               data = new FormData(f);
             setBusy(true);
             setError(undefined);
+            setUnknownLogin(false);
             try {
               await call("login", {
                 username: data.get("username"),
@@ -94,11 +105,19 @@ export function Login({
               onLogin();
             } catch (err) {
               setError(err);
+              setUnknownLogin(
+                !definiteWriteRefusal(err) &&
+                  !(
+                    err instanceof ApiError &&
+                    err.response.error?.code === "RATE_LIMITED"
+                  ),
+              );
               if (err instanceof ApiError) {
                 const s =
                   err.response.error?.retry_after_seconds ??
                   err.response.error?.details?.retry_after_seconds;
-                if (typeof s === "number") setUntil(Date.now() + s * 1000);
+                if (typeof s === "number" && Number.isFinite(s) && s > 0)
+                  setUntil(Date.now() + s * 1000);
               }
               (f.elements.namedItem("password") as HTMLInputElement).value = "";
             } finally {

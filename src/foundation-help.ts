@@ -19,7 +19,17 @@ export const phase1Screens = [
 ];
 const approvalScreens = ["approval_queue", "charity_approvals"];
 // Coverage grows screen by screen; Phase 1 acceptance remains separate.
-export const deliveredHelpScreens = [...phase1Screens, "my_cash_shift"];
+export const deliveredHelpScreens = [
+  ...phase1Screens,
+  "my_cash_shift",
+  "queue_management",
+  "refund_waiver_credit",
+  "cash_back_prompts",
+  "patient_search",
+  "registration",
+  "patient_documents",
+  "tariff_display",
+];
 const g = (
   screens: string[],
   title: Bilingual,
@@ -28,20 +38,160 @@ const g = (
 // IDs are also attached to the actual controls. The build rejects missing
 // mappings and empty translations instead of treating a page as coverage.
 export const controlGuides: Record<string, ControlGuide> = {
+  "tariff.read": g(["tariff_display"], ["Read and filter the published tariff", "شائع شدہ نرخ پڑھیں اور تلاش کریں"], ["Reception → Tariff shows the server's hospital name, as-of date and currency. Read services grouped by category, each ward's daily charge and the lab tests. Price category and Find a service, ward or test only filter this display; Show all prices clears both. Refresh tariff reloads the server; there is no polling. Loading/error hides old prices; Try again repeats only the read. A blank/missing price is not zero or a free service. No patient, bill, price edit or payment is created. Any signed-in user may call the tariff; the server's permitted screen list decides where it appears.", "استقبالیہ سے نرخ نامہ کھولیں۔ ہسپتال، تاریخ اور کرنسی دیکھیں۔ خدمات کی اقسام، وارڈ کا یومیہ خرچ اور ٹیسٹ الگ ہیں۔ قسم یا تلاش صرف دکھائی فہرست بدلتی ہے؛ تمام نرخ دکھائیں دونوں صاف کرتا ہے۔ تازہ کریں اصل سرور دوبارہ پڑھتا ہے۔ خرابی پر پرانے نرخ چھپتے ہیں؛ دوبارہ کوشش صرف پڑھتی ہے۔ خالی نرخ مفت خدمت نہیں۔ یہاں مریض، بل یا ادائیگی نہیں بنتی۔"]),
+  "tariff.pdf": g(["tariff_display"], ["Save the official tariff for printing", "چھاپنے کے لیے اصل نرخ نامہ محفوظ کریں"], ["Print / save tariff PDF downloads the official complete PDF from the hospital server and opens the native Save dialog. Screen search/category filters never change that PDF. Choose a file location to save, or Cancel to save nothing. Wait for the saved/cancelled outcome; repeated clicks while pending create no parallel download. Open the saved PDF in your PDF reader to print. A failed download or printer never changes tariff data or takes payment; retry the download/read only. Physical print quality and native-language review remain human checks.", "نرخ نامہ چھاپیں یا پی ڈی ایف محفوظ کریں سے اصل مکمل فائل سرور سے آتی اور محفوظ کرنے کا مکالمہ کھلتا ہے۔ تلاش یا قسم پی ڈی ایف نہیں بدلتی۔ جگہ چنیں یا منسوخ کریں؛ نتیجے کا انتظار کریں۔ محفوظ پی ڈی ایف ریڈر میں کھول کر چھاپیں۔ ناکامی پر صرف ڈاؤن لوڈ دہرائیں، رقم یا نرخ نہیں بدلتے۔ اصل پرنٹر اور اردو انسانی جائزہ باقی ہے۔"]),
+  "documents.select": g(["patient_documents"], ["Select the correct patient", "درست مریض منتخب کریں"], ["In Reception open Patient document vault. Enter 2–100 characters of name, mobile, CNIC or MRN and Search or scanner Enter. Pick the matching identity; verify name, MRN, age/date of birth and flags. Search does not create a patient. Clear patient selection or another result asks before discarding unsent files, and is blocked during an uncertain upload. A failed patient refresh prevents new uploads; retry the read. Files remain attached to their original patient. No automatic document download occurs.", "استقبالیہ سے مریض کی دستاویزات کھولیں۔ نام، موبائل، شناختی کارڈ یا ایم آر این کے ۲ تا ۱۰۰ حروف لکھ کر تلاش یا انٹر دبائیں۔ نام، ایم آر این، عمر اور نشانیاں چیک کریں۔ تلاش مریض نہیں بناتی۔ انتخاب بدلنے پر غیر ارسال فائل چھوڑنے کی تصدیق ہوتی ہے؛ غیر یقینی اپ لوڈ میں تبدیلی رکتی ہے۔ مریض پڑھنے میں خرابی ہو تو تازہ کریں۔ فائل خود نہیں کھلتی۔"]),
+  "registration.intake": g(["registration"], ["Register once and recover the original request", "ایک بار رجسٹریشن اور اصل درخواست کی بحالی"], ["Reception: choose New patient or Returning patient; search by name/mobile/CNIC/MRN, then verify the selected master identity, deceased/MLC flags and dues before proceeding. Regular intake requires name, gender, mobile and age or DOB; CNIC and photo are optional. Optional contact, address, allergies, staff payroll lookup and server panel selection belong to the same draft. Patient record only creates no visit. Otherwise select an active OPD service, source and permitted discount; emergency source is available only while the server emergency service is Active. Dues and discount refusals come from the server; correct only a definite refusal. Register and collect payment is a real charge: verify method/reference first. Each action retains an original UUID/body for explicit retry after an unknown result, never automatic replay or a changed payload. REQUEST_IN_PROGRESS, timeout/throttling and server failures keep it frozen; Retry same registration reuses that original identity inside24hours. After that ask IT to reconcile; never create a replacement registration/payment. Confirmed patient and ticket numbers are the recovery reference. Open ticket reads an existing slip; Start another registration begins a separate action only after current work is resolved. F1 and zoom keep the draft.", "استقبالیہ: نیا یا واپس آنے والا مریض چنیں؛ شناخت، ایم آر این، وفات، میڈیکو لیگل اور واجبات چیک کریں۔ نام، جنس، موبائل اور عمر یا تاریخ پیدائش لازم؛ شناختی کارڈ اور تصویر اختیاری ہیں۔ رابطہ، الرجی، ملازم اور اصل پینل کی فہرست منتخب کریں۔ صرف مریض ریکارڈ سے وزٹ نہیں بنتا۔ اصل فعال خدمت، ذریعہ اور مجاز رعایت چنیں۔ ہنگامی ذریعہ صرف فعال خدمت میں ملتا ہے۔ وصولی حقیقی ادائیگی ہے، طریقہ اور حوالہ چیک کریں۔ غیر یقینی جواب پر اصل کلید اور معلومات محفوظ رہتی ہیں؛ اسی رجسٹریشن کی دوبارہ کوشش ۲۴ گھنٹے کے اندر وہی درخواست بھیجتی ہے۔ وقت ختم ہونے پر آئی ٹی سے نتیجہ چیک کرائیں، دوبارہ رجسٹریشن یا ادائیگی نہ بنائیں۔ پرانی پرچی کھولنا صرف پڑھتا ہے۔ ایف۱ مسودہ محفوظ رکھتا ہے۔"]),
+  "registration.documents": g(["registration", "patient_documents"], ["Optional photo and outside reports", "اختیاری تصویر اور بیرونی رپورٹس"], ["Ask for photo consent first. Choose JPEG/PNG or Take photo with the camera, preview/retake, or Skip photo without a reason. Refusal, an injured face or emergency never blocks registration. PDF is not a patient photo. For each optional outside report choose PDF/JPEG/PNG, report type/title, issuing facility and document date; remove an unsent report if unnecessary. Register first, then upload each file separately under its own key. Upload retries retain the original file/metadata/patient; an uncertain result never repeats registration or payment. Wait for Photo uploaded/Report uploaded before treating upload as confirmed. Outside: facility,date identifies external provenance, not this hospital's own test result. Stored files and current photo open through the authenticated document viewer; failed download/reprint only retries the read. Camera permission denial must leave Skip/Choose file available. Physical camera still needs human review.", "تصویر سے پہلے اجازت لیں۔ جے پیگ یا پی این جی فائل یا کیمرہ، پیش منظر، دوبارہ تصویر یا بلا وجہ چھوڑنے کا انتخاب ہے۔ انکار یا ہنگامی حالت رجسٹریشن نہیں روکتی۔ پی ڈی ایف تصویر نہیں ہے۔ بیرونی رپورٹ کی فائل، قسم، عنوان، ادارہ اور تاریخ درج کریں؛ غیر ارسال رپورٹ ہٹا سکتے ہیں۔ پہلے مریض درج پھر ہر فائل الگ کلید سے اپ لوڈ کریں۔ غیر یقینی اپ لوڈ پر وہی مریض، فائل اور معلومات دوبارہ جاتے ہیں، رجسٹریشن یا رقم نہیں۔ اپ لوڈ کی اصل تصدیق دیکھیں۔ بیرونی ادارہ اور تاریخ ہسپتال کے اپنے نتائج سے الگ ہیں۔ کیمرہ اجازت نہ ملے تو فائل یا چھوڑنے کا راستہ رہتا ہے۔"]),
+  "registration.actions": g(["registration"], ["Payment, waiver and reprinting", "ادائیگی، رعایت اور دوبارہ پرنٹ"], ["Verify the confirmed ticket/patient and server balance. Only permitted unpaid/partially paid unlocked tickets offer payment; blank amount collects the full balance, otherwise enter the actual amount. Card/bank needs a reference; cash needs your own open shift. Collect payment sends one separate immutable original request; unknown outcome freezes new actions and Retry original action keeps its original key/body, within24hours. Never change amount/method while resolving it. An unpaid eligible ticket may request a reasoned VIP waiver for approval by another eligible person; a request is not an approval. Review server approval lock/cash-back messages. Preview slip reads the original print text/barcodes; Print / reprint slip uses the mapped receipt printer and Save slip PDF produces the80mm PDF. Printer/PDF/download failure is separate from registration and payment; repeat printing only. Physical printer output remains a human acceptance item.", "اصل پرچی، مریض اور سرور کا بقایا چیک کریں۔ مجاز غیر ادا یا جزوی ادا غیر مقفل پرچی پر وصولی ہوتی ہے؛ خالی رقم پورا بقایا وصول کرتی ہے۔ کارڈ یا بینک کا حوالہ، نقد کے لیے اپنی کھلی شفٹ لازم ہے۔ وصولی الگ اصل کلید سے ایک بار؛ غیر یقینی نتیجے پر رقم یا طریقہ نہ بدلیں، اسی عمل کی دوبارہ کوشش کریں۔ درخواست منظوری نہیں؛ مجاز دوسرے فرد کا فیصلہ اور اصل لاک دیکھیں۔ پیش منظر اصل متن اور بارکوڈ پڑھتا ہے؛ دوبارہ پرنٹ نقش شدہ رسید پرنٹر پر، پی ڈی ایف الگ ہے۔ پرنٹ ناکامی پر رجسٹریشن یا ادائیگی نہ دہرائیں۔ اصل پرنٹر کا انسانی جائزہ باقی ہے۔"]),
+  "patients.lookup": g(["patient_search"], ["Find a returning patient", "واپس آنے والا مریض تلاش کریں"], ["Reception: enter 2–100 characters of name, mobile, CNIC or MRN. Search waits 250 ms; scanner Enter searches immediately. Search repeats the current query; Clear removes the query and selection. No match is not a new registration. Check identifiers before selecting; search and profile access require their respective permissions. Results are limited to 20; narrow the query when there are many matches.", "استقبالیہ میں نام، موبائل، شناختی کارڈ یا ایم آر این کے ۲ تا ۱۰۰ حروف درج کریں۔ تلاش ۲۵۰ ملی سیکنڈ بعد، سکینر پر انٹر سے فوراً ہوتی ہے۔ صاف کریں سے انتخاب اور تلاش ختم ہوتے ہیں۔ شناخت چیک کریں؛ نتائج زیادہ ہوں تو تلاش محدود کریں۔ اجازت کے بغیر پروفائل نہیں کھلتا۔"]),
+  "patients.profile": g(["patient_search"], ["Patient identity, flags and dues", "مریض کی شناخت، نشانیاں اور واجبات"], ["Select a matching identity, verify MRN, name and mobile, then inspect outstanding.banner_text above the card. MEDICO-LEGAL lists case numbers; DECEASED shows the recorded death time in hospital timezone and prohibits new visits. Search itself creates no visit. Merged identifiers resolve through the server to the master record; never create a duplicate for an old MRN. View dues & invoices expands the real merge-chain financial summary; refresh a failed read deliberately. Another screen handles collections. Merge/death and reconnect events refresh reads without polling or overwriting an open edit draft.", "شناخت، ایم آر این، نام اور موبائل چیک کریں۔ سرخ واجبات اصل سرور کا پیغام ہیں۔ میڈیکو لیگل میں کیس نمبر، وفات میں ہسپتال کے وقت سے تاریخ آتی ہے؛ نیا وزٹ ممنوع ہے۔ پرانے ضم ایم آر این پر نیا مریض نہ بنائیں۔ واجبات اور انوائس اصل حساب کھولتے ہیں، وصولی الگ صفحے پر ہے۔ رابطہ بحال یا ضم ہونے پر معلومات تازہ ہوتی ہیں، کھلا مسودہ نہیں بدلتا۔"]),
+  "patients.edit": g(["patient_search"], ["Correct demographics and reconcile a save", "معلومات درست اور محفوظ نتیجہ چیک کریں"], ["Only patient.update holders see Edit demographics. Verify the selected MRN and change the appropriate identity/contact/billing fields; a LabOnly record can request upgrade to Regular. Choose a panel from the real server list; failed loading has an explicit retry. Save changes sends changed fields once with the original row_version; it is never automatically retried. Cancel or close asks before discarding a changed draft. F1 keeps the draft and restores focus. After ANY failed/uncertain save, Read current record shows the real server record beside the preserved draft. Compare values and version; only then choose Discard draft and reload latest record, re-enter still-needed changes and save deliberately. A lost reply may have committed. Never repeat registration, merge or payment to repair a demographic edit. Records are not deleted here. Urdu wording needs native review.", "صرف ترمیم کی اجازت والا فرد معلومات بدلتا ہے۔ ایم آر این چیک کرکے رابطہ، شناخت اور بلنگ درست کریں۔ اصل سرور کی فہرست سے پینل چنیں۔ محفوظ کریں صرف بدلے خانے اصل ورژن کے ساتھ ایک بار بھیجتا ہے۔ بند یا منسوخ کرنے پر بدلا مسودہ چھوڑنے کی تصدیق ہوتی ہے۔ ایف۱ مسودہ رکھتا ہے۔ ناکام یا غیر یقینی نتیجے پر موجودہ ریکارڈ پڑھیں، اصل معلومات اور ورژن کا موازنہ کریں؛ پھر مسودہ چھوڑ کر تازہ ریکارڈ لیں اور صرف باقی تبدیلی کریں۔ گم جواب کے باوجود تبدیلی محفوظ ہو سکتی ہے۔ رجسٹریشن یا ادائیگی دوبارہ نہ کریں۔ یہاں ریکارڈ حذف نہیں ہوتا۔ اردو انسانی جائزے کی منتظر ہے۔"]),
+  "desk.lookup": g(
+    ["queue_management", "refund_waiver_credit", "cash_back_prompts"],
+    ["Open a slip by barcode or number", "بارکوڈ یا نمبر سے پرچی کھولیں"],
+    [
+      "Verify the physical slip and patient. Enter its full OPD number or let the USB scanner type it, then Enter/Open slip. This reads only: it never registers, pays or creates a token. A failed lookup stays visible; correct the number and try again. Unsaved reasons require confirmation before replacing the selected slip; an unresolved write blocks replacement.",
+      "اصل پرچی اور مریض چیک کریں۔ مکمل او پی ڈی نمبر لکھیں یا اسکینر سے درج کرکے انٹر یا پرچی کھولیں دبائیں۔ یہ صرف پڑھتا ہے، رجسٹریشن، ادائیگی یا ٹوکن نہیں بناتا۔ خطا پر نمبر درست کریں۔ غیر محفوظ وجہ بدلنے کی تصدیق اور غیر یقینی تبدیلی کا جائزہ پہلے ضروری ہے۔",
+    ],
+  ),
+  "desk.refresh": g(
+    ["queue_management", "refund_waiver_credit", "cash_back_prompts"],
+    ["Read the latest slip", "تازہ پرچی پڑھیں"],
+    [
+      "Refresh slip reads current status, invoice, pending approval and cash-back prompts. It never repeats a write. Loading or failed reads keep a visible message; do not assume the old state is current. Server time governs expiry; the hospital timezone governs display.",
+      "پرچی تازہ کریں اصل حالت، بل، زیر التوا منظوری اور واپس دینے کی رقم پڑھتا ہے۔ یہ تبدیلی نہیں دہراتا۔ انتظار یا خطا واضح ہے؛ پرانی حالت کو تازہ فرض نہ کریں۔ میعاد سرور کے وقت اور نمایش ہسپتال کے وقت کے مطابق ہے۔",
+    ],
+  ),
+  "desk.recovery": g(
+    ["queue_management", "refund_waiver_credit", "cash_back_prompts"],
+    ["Resolve a lost answer", "گم شدہ جواب کا جائزہ"],
+    [
+      "New actions and navigation remain blocked while a write is pending or uncertain. Check latest slip and history/requests. Retry original action reuses its frozen payload/key for an idempotent action within24 hours; no automatic retry. Deferral cannot replay. After personally reviewing the actual record, tick the review statement and Close reviewed action; this does not assert success, undo cash or resend. A confirmed Saved message remains true even if a following read fails; refresh, never repeat a confirmed handover.",
+      "جاری یا غیر یقینی تبدیلی میں نئے کام اور راستہ بند ہیں۔ تازہ پرچی، تاریخ اور درخواستیں دیکھیں۔ اصل عمل دوبارہ صرف محفوظ اصل معلومات اور کلید سے چوبیس گھنٹے کے اندر، خودکار نہیں۔ مؤخر کرنا دوبارہ نہیں بھیجا جاتا۔ اصل ریکارڈ دیکھ کر جائزے کا نشان اور بند کریں چنیں؛ یہ کامیابی، رقم کی واپسی یا دوبارہ ارسال نہیں۔ محفوظ ہونے کے بعد پڑھنے کی خطا ہو تو صرف تازہ کریں، تصدیق شدہ رقم دوبارہ نہ دیں۔",
+    ],
+  ),
+  "queue.refresh": g(
+    ["queue_management"],
+    ["Refresh queues", "قطاریں تازہ کریں"],
+    [
+      "Reads the dashboard, chosen doctor's queue, selected slip and history. Live events and reconnect refresh them without polling. A failed read shows an error, never a fabricated empty queue. No queue edit or cash movement occurs.",
+      "ڈیش بورڈ، منتخب ڈاکٹر، پرچی اور تاریخ دوبارہ پڑھتا ہے۔ حقیقی واقعات اور دوبارہ رابطہ انہیں تازہ کرتے ہیں۔ خرابی خالی کامیابی نہیں۔ قطار یا رقم نہیں بدلتی۔",
+    ],
+  ),
+  "queue.filter": g(
+    ["queue_management"],
+    ["Doctor queue / All queues", "ڈاکٹر کی قطار یا تمام قطاریں"],
+    [
+      "Choose a real doctor supplied by the dashboard or the selected slip to read their calling order, status and waiting minutes. The selected doctor stays visible even when that queue becomes empty. All queues includes department-level queues where no doctor is assigned. This changes the view only; it never calls or reroutes a patient.",
+      "ڈیش بورڈ یا منتخب پرچی کے اصل ڈاکٹر کو چن کر ترتیب، حالت اور انتظار پڑھیں۔ قطار خالی ہونے پر بھی منتخب ڈاکٹر برقرار رہتا ہے۔ تمام قطاروں میں بغیر ڈاکٹر شعبہ بھی شامل ہے۔ صرف منظر بدلتا ہے، مریض کو بلاتا یا منتقل نہیں کرتا۔",
+    ],
+  ),
+  "queue.open": g(
+    ["queue_management"],
+    ["Open a queued, deferred or locked slip", "قطار، مؤخر یا بند پرچی کھولیں"],
+    [
+      "Open slip loads that exact ticket's patient, MRN, original token, payment, validity and history. Deferred and Awaiting approval groups are distinct; locked visits are off the doctor's queue. Expired — new visit needs a new slip means do not reuse or charge this old token. Opening a cash-back slip shows its mandatory handover.",
+      "پرچی کھولیں اسی مریض، ایم آر این، اصل ٹوکن، ادائیگی، میعاد اور تاریخ پڑھتا ہے۔ مؤخر اور منظوری کی قطاریں الگ ہیں۔ بند وزٹ ڈاکٹر کی قطار سے باہر ہے۔ میعاد ختم پر نیا وزٹ نئی پرچی چاہتا ہے، پرانے ٹوکن پر نئی وصولی نہ کریں۔ واپسی والی پرچی رقم کا لازمی مکالمہ کھولتی ہے۔",
+    ],
+  ),
+  "queue.change": g(
+    ["queue_management"],
+    ["Defer, reactivate or cancel unpaid", "مؤخر، بحال یا غیر ادا پرچی منسوخ"],
+    [
+      "Only eligible statuses and your permissions expose actions. Verify patient/number in the review. A changed slip version/token blocks confirmation; close and review the current status. Closing a changed reason asks before discarding it. Defer slip requires a3–500 character reason, keeps the ticket and does not refund. Reactivate slip keeps its token without another payment while valid. Cancel unpaid slip requires a reason and is unavailable when paid/locked. Confirm ticket action sends once; Close keeps the reason unsaved. Server refusals remain visible; re-read before any new decision after a concurrent change.",
+      "اجازت اور درست حالت پر عمل نظر آتا ہے۔ جائزے میں مریض اور نمبر چیک کریں۔ جائزے کے دوران ورژن یا ٹوکن بدلے تو تصدیق رکتی ہے؛ بند کرکے تازہ حالت دیکھیں۔ لکھی وجہ چھوڑنے پر تصدیق ہوتی ہے۔ مؤخر کرنے کو تین تا پانچ سو حروف وجہ، پرچی برقرار اور رقم واپس نہیں۔ جائز میعاد میں بحالی اصل ٹوکن اور بغیر نئی ادائیگی ہے۔ غیر ادا منسوخی وجہ مانگتی، ادا یا بند پر دستیاب نہیں۔ تصدیق ایک بار بھیجتی ہے؛ بند کرنے پر وجہ غیر محفوظ رہتی ہے۔ خطا پر تازہ پڑھ کر اگلا فیصلہ کریں۔",
+    ],
+  ),
+  "requests.refresh": g(
+    ["refund_waiver_credit"],
+    ["Refresh requests and slip", "درخواستیں اور پرچی تازہ کریں"],
+    [
+      "Reads the selected ticket and up to100 of your own approval requests. Live approval/cash-back/ticket events refresh the view. Pending is not approved; inspect actual status and decision note. Refresh preserves the unsaved reason and never resends a request.",
+      "منتخب پرچی اور اپنی سو تک منظوری کی درخواستیں پڑھتا ہے۔ حقیقی منظوری، واپسی اور پرچی کے واقعات منظر تازہ کرتے ہیں۔ زیر التوا، منظور نہیں؛ اصل حالت اور نوٹ دیکھیں۔ تازہ کرنا وجہ رکھتا اور درخواست نہیں دہراتا۔",
+    ],
+  ),
+  "requests.form": g(
+    ["refund_waiver_credit"],
+    ["Choose and prepare a request", "درخواست چنیں اور تیار کریں"],
+    [
+      "Open the actual slip. Request type offers only permitted lifecycle actions. Enter the factual reason. Refund: choose reason and optional positive amount (blank=remaining refundable). Pre-consult waiver: percentage greater than0 up to100. Post-consult waiver: authorized doctor needs a finalized note; the server selects the latest one, outcome Waivered rather than Refunded. Credit: enter amount paid now, actual method and optional due date; that amount is collected immediately, cash needs your own open shift. Void is only for an unpaid unlocked slip and is risk-monitored. Review request does not save.",
+      "اصل پرچی کھولیں۔ اجازت اور حالت کے مطابق درخواست چنیں، حقیقی وجہ دیں۔ ریفنڈ میں وجہ اور مثبت رقم اختیاری، خالی پر قابل واپسی باقی رقم۔ پہلے معائنے کی رعایت صفر سے زیادہ سو تک۔ بعد کی رعایت مجاز ڈاکٹر اور حتمی نوٹ مانگتی ہے؛ نتیجہ رعایت ہے، ریفنڈ نہیں۔ ادھار میں ابھی ادا رقم، اصل طریقہ اور اختیاری تاریخ دیں؛ رقم فوراً وصول ہوتی، نقد کے لیے اپنی کھلی شفٹ لازم۔ غیر ادا غیر بند پرچی کی منسوخی نگرانی میں ہے۔ جائزہ ابھی محفوظ نہیں کرتا۔",
+    ],
+  ),
+  "requests.confirm": g(
+    ["refund_waiver_credit"],
+    ["Confirm a request", "درخواست کی تصدیق"],
+    [
+      "Verify patient/MRN/ticket, action, reason and amount in Review request. Review keeps the original ticket version, fields and amounts fixed. A second-session change blocks confirmation: go back, compare the latest balance/status and review again. Confirm request sends once with its own retained key. Pending approval locks the visit and removes it from the doctor's queue. A clinical-activity refund needs elevated approval and is risk-flagged; ask the doctor about a post-consult waiver. Nobody hands back money merely because the request was submitted. The approver decides; approved refunds/waivers later create the mandatory cash-back prompt.",
+      "جائزے میں اصل ورژن، معلومات اور رقم محفوظ رہتے ہیں۔ دوسری نشست سے تبدیلی پر تصدیق رکتی ہے؛ واپس جاکر تازہ بقایا اور حالت دیکھیں۔ جائزے میں مریض، ایم آر این، پرچی، عمل، وجہ اور رقم چیک کریں۔ تصدیق اصل کلید سے ایک بار بھیجتی ہے۔ زیر التوا منظوری وزٹ بند کرکے ڈاکٹر کی قطار سے ہٹاتی ہے۔ طبی کام کے بعد ریفنڈ بڑی منظوری اور خطرے کا نشان رکھتا ہے؛ ڈاکٹر سے بعد معائنہ رعایت پوچھیں۔ درخواست بھیجتے ہی رقم نہ دیں؛ منظوری کے بعد لازمی واپسی آتی ہے۔",
+    ],
+  ),
+  "cashback.shift": g(
+    ["queue_management", "refund_waiver_credit", "cash_back_prompts"],
+    ["Own drawer and pending handover", "اپنی دراز اور باقی واپسی"],
+    [
+      "Cash leaves the signed-in cashier's own open shift at this counter, not an approver's drawer. The app first reads your identity, this terminal cash node and your own open shift. Missing/mismatched/closed drawer or a failed read disables the handover acknowledgement; do not give cash yet. Open another window for My cash shift opens your workspace separately; use its My cash shift screen, then return and Refresh slip. SHIFT_NOT_OPEN remains an error; no success is invented. Sign out; leave cash-back pending ends this session without dispensing or erasing the prompt; an authorized cashier can resume. Sign-out is disabled after a dispensation attempt becomes uncertain: first reconcile its original key/status; never lose the retained attempt or hand cash over again.",
+      "نقد اسی کاؤنٹر پر اپنے کھلے کیش دراز سے نکلتا، منظور کنندہ سے نہیں۔ پہلے اصل شناخت، ٹرمینل کاؤنٹر اور اپنی کھلی شفٹ پڑھی جاتی ہے؛ بند، مختلف یا غیر دستیاب دراز پر نقد نہ دیں، بیان کا نشان بند رہتا ہے۔ دوسری ونڈو کھول کر میری کیش شفٹ استعمال کریں، پھر واپس پرچی تازہ کریں۔ شفٹ نہ کھلے تو خطا ہے، فرضی کامیابی نہیں۔ سائن آؤٹ رقم دیے یا اطلاع مٹائے بغیر نشست ختم کرتا؛ مجاز کیشیئر بعد میں مکمل کرتا ہے۔ ادائیگی کی کوشش کا نتیجہ غیر یقینی ہو تو سائن آؤٹ بند رہتا ہے؛ پہلے اصل درخواست اور حالت چیک کریں، نقد دوبارہ نہ دیں۔",
+    ],
+  ),
+  "cashback.confirm": g(
+    ["queue_management", "refund_waiver_credit", "cash_back_prompts"],
+    ["Mandatory exact cash-back", "عین رقم کی لازمی واپسی"],
+    [
+      "The blocking modal shows the server's exact message/amount and patient identity until the approved cash-back is confirmed. The acknowledgement belongs to this exact ticket/patient/prompt/amount/shift; a changed context invalidates it. Verify and physically hand that cash over before ticking the statement and Confirm cash handed back. Only opd.cash_back.dispense may confirm; records-only mode cannot. Each refund/waiver handover has a separate original key. A lost reply requires checking and only an explicit original-key retry; never pay twice. A successful write cannot be repeated just because its following read fails.",
+      "لازمی مکالمہ سرور کا عین پیغام، رقم اور مریض دکھاتا ہے۔ بیان صرف اسی مریض، پرچی، اطلاع، رقم اور شفٹ سے متعلق ہے؛ بدلنے پر درست نہیں رہتا۔ اصل نقد دینے کے بعد بیان کا نشان اور تصدیق کریں۔ صرف مجاز کیشیئر؛ صرف ریکارڈ حالت میں عمل نہیں۔ ہر ریفنڈ اور رعایت کی الگ اصل کلید۔ گم جواب پر پہلے جائزہ اور صرف اصل دوبارہ عمل؛ رقم دو بار نہیں۔ محفوظ تبدیلی کے بعد پڑھنے کی خطا نقد دوبارہ دینے کی وجہ نہیں۔",
+    ],
+  ),
+  "cashback.refresh": g(
+    ["cash_back_prompts"],
+    ["Refresh cash-back", "رقم کی واپسی تازہ کریں"],
+    [
+      "Rereads the selected slip and, with queue permission, the dashboard's outstanding prompts. If none remains for the actual slip, no cash-back is pending. Cashier accounts without queue permission scan their physical slip; no guessed ID or fabricated list.",
+      "منتخب پرچی اور قطار کی اجازت ہو تو باقی واپسی دوبارہ پڑھتا ہے۔ اصل پرچی پر اطلاع نہ ہو تو واپسی باقی نہیں۔ بغیر قطار اجازت کیشیئر اصل پرچی اسکین کرتا ہے؛ فرضی شناخت یا فہرست نہیں۔",
+    ],
+  ),
+  "cashback.open": g(
+    ["cash_back_prompts"],
+    ["Open an outstanding handover", "باقی رقم کا اندراج کھولیں"],
+    [
+      "Open slip reads the server's exact outstanding ticket before showing the mandatory cash-back modal. The list's amount is not a completed payment. Confirm patient and read the current prompt before giving cash.",
+      "پرچی کھولیں اصل باقی اندراج پڑھ کر لازمی مکالمہ دکھاتا ہے۔ فہرست کی رقم مکمل ادائیگی نہیں۔ نقد دینے سے پہلے مریض اور تازہ پیغام چیک کریں۔",
+    ],
+  ),
+  "notifications.refresh": g(
+    ["notifications"],
+    ["Refresh inbox and unread count", "اطلاعات اور غیر پڑھے عدد کو تازہ کریں"],
+    [
+      "Refresh inbox reads your latest first page and the server's total unread count, including older and filtered-out items. It never repeats a read-status change. A failed refresh keeps the last view with a visible error; do not assume an empty or current inbox. After an uncertain mark-read result, refresh successfully before deciding on another action. Read status saved confirms a write even if its following refresh failed.",
+      "اطلاعات تازہ کریں پہلا صفحہ اور سرور کا کل غیر پڑھا عدد پڑھتا ہے، جس میں پرانی اور فلٹر سے باہر اطلاعات شامل ہیں۔ یہ حالت کی تبدیلی نہیں دہراتا۔ خرابی پر آخری منظر اور واضح خطا رہتی ہے؛ فہرست خالی یا تازہ فرض نہ کریں۔ غیر یقینی تبدیلی کے بعد اگلا عمل چننے سے پہلے کامیابی سے تازہ کریں۔ حالت محفوظ ہونے کا پیغام تازہ کرنے کی خرابی کے باوجود اصل تبدیلی کی تصدیق ہے۔",
+    ],
+  ),
+  "notifications.critical": g(
+    ["notifications", "app_shell"],
+    [
+      "Critical notice: Open notifications / Dismiss",
+      "اہم اطلاع: کھولیں / بند کریں",
+    ],
+    [
+      "A notification whose severity is critical stays in the corner until Dismiss; it does not interrupt as Code Red. The title comes from the server event and the body is read from your permitted inbox. A loading/error or missing item is shown honestly; Try again only rereads. Open notifications keeps the notice open while you inspect the inbox. Dismiss closes this local notice only, never marks it read, resolves an alert, approves a request or records care. Other queued critical notices appear next. Signing out clears this account's notices.",
+      "سرور کی اہم شدت والی اطلاع بند کریں تک کونے میں رہتی ہے؛ کوڈ ریڈ جیسی رکاوٹ نہیں بنتی۔ عنوان سرور کے واقعے اور تفصیل آپ کی مجاز فہرست سے آتی ہے۔ انتظار، خرابی یا گم شدہ اندراج واضح بتایا جاتا ہے؛ دوبارہ کوشش صرف پڑھتی ہے۔ اطلاعات کھولنے سے اطلاع بند نہیں ہوتی۔ بند کریں صرف مقامی اطلاع ہٹاتا ہے، پڑھا ہوا نشان، انتباہ کا حل، منظوری یا علاج نہیں کرتا۔ اگلی اہم اطلاع باری سے دکھتی ہے۔ سائن آؤٹ پر اکاؤنٹ کی اطلاعات صاف ہوتی ہیں۔",
+    ],
+  ),
   "settings.it.read": g(
     ["settings"],
     ["System sections, user search and audit", "نظام، صارف تلاش اور لاگ"],
     [
-      "Open Settings > System (IT). Your server permissions decide the available sections. Users, roles and access reads HR's submitted provisioning queue, users, role matrix and sign-in audit. Find user searches the server by name/username; Account state limits to active/inactive; up to 100 matches are shown, so refine a full list. Sign-in failures only filters the latest 200 audit events. Empty HR queue means no submitted employee needs a login; it never authorizes inventing an employee ID. Open user rereads the selected real account. Hardware reads terminal, printer and badge-station mappings; Server health reads actual database/worker/disk/realtime diagnostics. Refresh checks the server again, never repeats a change. Errors stay visible and do not turn into empty-success data.",
-      "ترتیبات > نظام (آئی ٹی) کھولیں۔ سرور کی اجازتیں دستیاب حصے طے کرتی ہیں۔ صارف، کردار اور رسائی میں ایچ آر کی جمع شدہ قطار، صارف، اجازتیں اور سائن اِن لاگ آتے ہیں۔ صارف تلاش نام یا یوزرنیم سے سرور پر ہوتی ہے؛ حالت سے فعال یا غیر فعال چنیں۔ زیادہ سے زیادہ سو نتائج ہیں، بھری فہرست پر تلاش محدود کریں۔ صرف ناکامیوں میں تازہ دو سو لاگ ہیں۔ خالی قطار نئی فرضی ملازم شناخت بنانے کی اجازت نہیں۔ صارف کھولیں منتخب اصل اکاؤنٹ دوبارہ پڑھتا ہے۔ ہارڈویئر اصل ٹرمینل، پرنٹر اور بیج ترتیب؛ صحت اصل ڈیٹابیس، ورکر، ڈسک اور رابطہ پڑھتی ہے۔ تازہ کرنا تبدیلی دوبارہ نہیں کرتا۔ خرابی کو خالی کامیابی نہیں دکھایا جاتا۔",
+      "Open Settings > System (IT). Your server permissions decide the available sections. Users, roles and access reads HR's submitted provisioning queue, users, role matrix and sign-in audit. Find user searches the server by name/username; Account state limits to active/inactive; up to 100 matches are shown, so refine a full list. Sign-in failures only filters the latest 200 audit events. Empty HR queue means no submitted employee needs a login; it never authorizes inventing an employee ID. Open user rereads the selected real account. Hardware reads terminal, printer and badge-station mappings; Server health reads actual database/worker/disk/realtime diagnostics. Reload system records checks the server again without discarding the open draft or repeating a change. After a stale edit, Cancel the draft, reload the records and reopen the device before editing again. Errors stay visible and do not turn into empty-success data.",
+      "ترتیبات > نظام (آئی ٹی) کھولیں۔ سرور کی اجازتیں دستیاب حصے طے کرتی ہیں۔ صارف، کردار اور رسائی میں ایچ آر کی جمع شدہ قطار، صارف، اجازتیں اور سائن اِن لاگ آتے ہیں۔ صارف تلاش نام یا یوزرنیم سے سرور پر ہوتی ہے؛ حالت سے فعال یا غیر فعال چنیں۔ زیادہ سے زیادہ سو نتائج ہیں، بھری فہرست پر تلاش محدود کریں۔ صرف ناکامیوں میں تازہ دو سو لاگ ہیں۔ خالی قطار نئی فرضی ملازم شناخت بنانے کی اجازت نہیں۔ صارف کھولیں منتخب اصل اکاؤنٹ دوبارہ پڑھتا ہے۔ ہارڈویئر اصل ٹرمینل، پرنٹر اور بیج ترتیب؛ صحت اصل ڈیٹابیس، ورکر، ڈسک اور رابطہ پڑھتی ہے۔ نظام کے ریکارڈ تازہ کریں کھلا مسودہ برقرار رکھتے ہوئے سرور پڑھتا ہے، تبدیلی دوبارہ نہیں کرتا۔ پرانی ترمیم کی خرابی پر مسودہ منسوخ کریں، ریکارڈ تازہ کریں اور آلہ دوبارہ کھول کر ترمیم کریں۔ خرابی کو خالی کامیابی نہیں دکھایا جاتا۔",
     ],
   ),
   "settings.it.fields": g(
     ["settings"],
     ["System change fields", "نظام کی تبدیلی کے خانے"],
     [
-      "Select the actual HR employee before Provision login; use the server's role checklist and a unique username. New installation: Create the first Owner is offered only while the server says it is needed; enter their real authorized personnel details and extra roles. Nobody may provision SupportZeroInterface staff: they use badge stations. For devices enter the actual terminal MAC, location and printer names; choose only real department/printer mappings. Badge stations without RFID may use BarcodeScanner; station identity, location/action type and any ward/bed references must describe the actual installation. Review inactive/deactivation choices carefully. The form preserves value types and server enumerations; a refused reference is an error, never a guessed replacement. Required fields and the exact emergency phrase must be complete before review.",
-      "لاگ اِن دینے سے پہلے ایچ آر کا اصل ملازم چنیں؛ سرور کی کردار فہرست اور منفرد یوزرنیم استعمال کریں۔ نئی تنصیب پر سرور کے درکار بتانے تک پہلا مالک بنائیں دستیاب ہے؛ مجاز اصل کوائف اور اضافی کردار دیں۔ بغیر انٹرفیس مددگار عملہ بیج استعمال کرتا ہے، لاگ اِن نہیں۔ آلات کے لیے اصل میک، مقام، پرنٹر اور حقیقی شعبہ چنیں۔ آر ایف آئی ڈی نہ ہو تو بارکوڈ اسکینر چن سکتے ہیں؛ اسٹیشن، مقام، کام اور وارڈ یا بیڈ اصل تنصیب کے ہوں۔ غیر فعال کرنے کا انتخاب غور سے دیکھیں۔ قسمیں اور سرور کی فہرست برقرار ہیں؛ غلط حوالہ پر فرضی متبادل نہیں۔ لازمی خانے اور ہنگامی عین عبارت مکمل کرکے جائزہ لیں۔",
+      "Select the actual HR employee before Provision login; use the server's role checklist and a unique username. New installation: Create the first Owner is offered only while the server says it is needed; enter their real authorized personnel details and extra roles. Nobody may provision SupportZeroInterface staff: they use badge stations. For devices enter the actual terminal MAC, location and printer names; choose only real department/printer mappings. Badge stations without RFID may use BarcodeScanner; station identity, location/action type and any ward/bed references must describe the actual installation. Review inactive/deactivation choices carefully. Yes/No fields with a server default always show an explicit choice; there is no blank choice that silently restores a default. The form preserves value types and server enumerations; a refused reference is an error, never a guessed replacement. Required fields and the exact emergency phrase must be complete before review.",
+      "لاگ اِن دینے سے پہلے ایچ آر کا اصل ملازم چنیں؛ سرور کی کردار فہرست اور منفرد یوزرنیم استعمال کریں۔ نئی تنصیب پر سرور کے درکار بتانے تک پہلا مالک بنائیں دستیاب ہے؛ مجاز اصل کوائف اور اضافی کردار دیں۔ بغیر انٹرفیس مددگار عملہ بیج استعمال کرتا ہے، لاگ اِن نہیں۔ آلات کے لیے اصل میک، مقام، پرنٹر اور حقیقی شعبہ چنیں۔ آر ایف آئی ڈی نہ ہو تو بارکوڈ اسکینر چن سکتے ہیں؛ اسٹیشن، مقام، کام اور وارڈ یا بیڈ اصل تنصیب کے ہوں۔ غیر فعال کرنے کا انتخاب غور سے دیکھیں۔ ہاں یا نہیں کے سرور طے شدہ خانوں میں واضح انتخاب ہوتا ہے؛ خالی انتخاب سے پوشیدہ طے شدہ قدر بحال نہیں ہوتی۔ قسمیں اور سرور کی فہرست برقرار ہیں؛ غلط حوالہ پر فرضی متبادل نہیں۔ لازمی خانے اور ہنگامی عین عبارت مکمل کرکے جائزہ لیں۔",
     ],
   ),
   "settings.it.access": g(
@@ -59,8 +209,8 @@ export const controlGuides: Record<string, ControlGuide> = {
     ["settings"],
     ["Review and confirm system changes", "نظام کی تبدیلی کا جائزہ اور تصدیق"],
     [
-      "Review system change opens a confirmation showing the exact selected target and submitted values. Go back returns to the draft; Confirm system change sends once and stays disabled while pending. Device edits reread their current mapping before replacement; a detected change requires reloading, and no atomic server-version guarantee is invented. Deactivate/reactivate requires a reason. Issue temporary password ends that user's sessions; End user's sessions also affects sessions opened since any prior attempt, so neither action is auto-repeated. Maintenance blocks non-admin work: coordinate with hospital staff first. Emergency-only Force global logout ends every hospital session and requires the exact typed FORCE GLOBAL LOGOUT phrase plus a reason and confirmation. No global action is performed by merely opening or reading these panels.",
-      "نظام کی تبدیلی کا جائزہ منتخب ہدف اور بھیجے جانے والے کوائف کی تصدیق کھولتا ہے۔ واپس پر مسودہ رہتا ہے؛ تصدیق ایک بار بھیجتی اور انتظار میں بند رہتی ہے۔ آلے کی ترمیم سے پہلے اصل ترتیب پڑھی جاتی ہے؛ فرق پر دوبارہ لوڈ کریں، سرور کی ایٹمی ورژن ضمانت کا دعویٰ نہیں۔ غیر فعال یا بحال پر وجہ دیں۔ عارضی پاس ورڈ صارف کے سیشن ختم کرتا ہے؛ سیشن ختم کرنا بھی بعد کے سیشن متاثر کر سکتا ہے، اس لیے خود نہیں دہرایا جاتا۔ دیکھ بھال عام عملہ روکتی ہے؛ پہلے اطلاع و رابطہ کریں۔ ہنگامی عالمی سائن آؤٹ سب کے سیشن ختم کرتا ہے اور عین FORCE GLOBAL LOGOUT، وجہ اور تصدیق چاہتا ہے۔ صرف حصہ کھولنے یا پڑھنے سے کوئی عالمی تبدیلی نہیں ہوتی۔",
+      "Opening another system action asks before discarding the current draft; Cancel keeps it, and accepting opens the other action without saving. Review system change opens a confirmation showing the exact selected target and submitted values. Go back returns to the draft; Confirm system change sends once and stays disabled while pending. Device edits reread their current mapping before replacement; a detected change requires reloading, and no atomic server-version guarantee is invented. Deactivate/reactivate requires a reason. Issue temporary password ends that user's sessions; End user's sessions also affects sessions opened since any prior attempt, so neither action is auto-repeated. Maintenance blocks non-admin work: coordinate with hospital staff first. The large red emergency-only Force global logout button opens the form; confirming the completed form ends every hospital session and requires the exact typed FORCE GLOBAL LOGOUT phrase plus a reason and confirmation. No global action is performed by merely opening or reading these panels.",
+      "دوسرا نظام عمل کھولنے سے پہلے مسودہ چھوڑنے کی تصدیق ہوتی ہے؛ منسوخ پر مسودہ رہتا ہے اور قبول پر بغیر محفوظ کیے دوسرا عمل کھلتا ہے۔ نظام کی تبدیلی کا جائزہ منتخب ہدف اور بھیجے جانے والے کوائف کی تصدیق کھولتا ہے۔ واپس پر مسودہ رہتا ہے؛ تصدیق ایک بار بھیجتی اور انتظار میں بند رہتی ہے۔ آلے کی ترمیم سے پہلے اصل ترتیب پڑھی جاتی ہے؛ فرق پر دوبارہ لوڈ کریں، سرور کی ایٹمی ورژن ضمانت کا دعویٰ نہیں۔ غیر فعال یا بحال پر وجہ دیں۔ عارضی پاس ورڈ صارف کے سیشن ختم کرتا ہے؛ سیشن ختم کرنا بھی بعد کے سیشن متاثر کر سکتا ہے، اس لیے خود نہیں دہرایا جاتا۔ دیکھ بھال عام عملہ روکتی ہے؛ پہلے اطلاع و رابطہ کریں۔ بڑا سرخ ہنگامی عالمی سائن آؤٹ بٹن فارم کھولتا ہے؛ مکمل فارم کی تصدیق سب کے سیشن ختم کرتی ہے اور عین FORCE GLOBAL LOGOUT، وجہ اور تصدیق چاہتا ہے۔ صرف حصہ کھولنے یا پڑھنے سے کوئی عالمی تبدیلی نہیں ہوتی۔",
     ],
   ),
   "settings.it.recovery": g(
@@ -132,8 +282,8 @@ export const controlGuides: Record<string, ControlGuide> = {
       "گنی ہوئی نقدی / شفٹ بند کریں / واپس",
     ],
     [
-      "On your open shift at the mapped counter, count physical cash excluding the opening float. Enter Counted cash in drawer (zero is allowed), choose Close shift, compare shift/counter and amounts, then Confirm & Close Shift. Go back or Close dismisses confirmation without saving and keeps the amount. PendingCollection is server-confirmed closure, not accountant verification. A refused or lost close answer must be checked against the original shift; it is never blindly repeated. Another counter or missing identity blocks closing here.",
-      "مقررہ کاؤنٹر کی اپنی کھلی شفٹ میں ابتدائی فلوٹ نکال کر نقد گنیں۔ دراز میں گنی ہوئی نقدی درج کریں، صفر بھی درست ہے۔ شفٹ بند کریں، نمبر، کاؤنٹر اور رقم دیکھیں پھر تصدیق کریں۔ واپس یا بند سے کچھ محفوظ نہیں ہوتا اور رقم رہتی ہے۔ وصولی کا انتظار اکاؤنٹنٹ کی تصدیق نہیں۔ انکار یا گم جواب پر اصل شفٹ چیک کریں، اندھا دوبارہ ارسال نہ کریں۔ دوسرے کاؤنٹر یا نامعلوم شناخت پر بندش رکے گی۔",
+      "On your open shift at the mapped counter, count physical cash excluding the opening float. Enter Counted cash in drawer (zero is allowed), choose Close shift, compare shift/counter and amounts, then Confirm & Close Shift. The confirmation retains the reviewed shift, counter and amounts. If the shift or expected cash changes, confirmation is blocked: Go back, Refresh and review again. Go back or Close dismisses confirmation without saving and keeps the amount. PendingCollection is server-confirmed closure, not accountant verification. A refused or lost close answer must be checked against the original shift; it is never blindly repeated. Another counter or missing identity blocks closing here.",
+      "مقررہ کاؤنٹر کی اپنی کھلی شفٹ میں ابتدائی فلوٹ نکال کر نقد گنیں۔ دراز میں گنی ہوئی نقدی درج کریں، صفر بھی درست ہے۔ شفٹ بند کریں، نمبر، کاؤنٹر اور رقم دیکھیں پھر تصدیق کریں۔ تصدیق میں جائزہ شدہ شفٹ، کاؤنٹر اور رقم برقرار رہتے ہیں۔ شفٹ یا متوقع نقد بدل جائے تو تصدیق رک جاتی ہے؛ واپس جائیں، تازہ کریں اور دوبارہ جائزہ لیں۔ واپس یا بند سے کچھ محفوظ نہیں ہوتا اور رقم رہتی ہے۔ وصولی کا انتظار اکاؤنٹنٹ کی تصدیق نہیں۔ انکار یا گم جواب پر اصل شفٹ چیک کریں، اندھا دوبارہ ارسال نہ کریں۔ دوسرے کاؤنٹر یا نامعلوم شناخت پر بندش رکے گی۔",
     ],
   ),
   "cash.recovery": g(
@@ -216,8 +366,8 @@ export const controlGuides: Record<string, ControlGuide> = {
       "نام کا بٹن، سائن آؤٹ، کام جاری رکھیں، ہر جگہ سائن آؤٹ",
     ],
     [
-      "Finish or deliberately discard drafts before signing out. Pending actions block sign-out; resolve uncertain cash-shift requests while their window stays open. Unsaved drafts require confirmation before being discarded. The avatar or Sign out opens a confirmation: Keep working closes it, Sign out ends this shared terminal session, and Sign out everywhere revokes your other sessions too. All windows sharing this session return to login. Signing out never saves unfinished forms.",
-      "سائن آؤٹ سے پہلے مسودہ مکمل کریں یا جان بوجھ کر چھوڑیں۔ جاری عمل پر سائن آؤٹ رکتا ہے؛ غیر یقینی کیش شفٹ اسی کھلی ونڈو میں واضح کریں۔ مسودہ ختم کرنے سے پہلے تصدیق لازم ہے۔ نام کا بٹن یا سائن آؤٹ تصدیق کھولتا ہے: کام جاری رکھیں سے بند ہوتا ہے، سائن آؤٹ سے یہ ٹرمینل سیشن ختم ہوتا ہے، ہر جگہ سائن آؤٹ سے دوسرے سیشن بھی ختم ہوتے ہیں۔ اس سیشن کی تمام ونڈوز لاگ اِن پر لوٹتی ہیں۔ نامکمل فارم محفوظ نہیں ہوتے۔",
+      "Finish or deliberately discard drafts before signing out. Pending actions block sign-out; resolve uncertain cash-shift requests while their window stays open. Unsaved drafts require confirmation before being discarded. The avatar or Sign out opens a confirmation: Keep working closes it, Sign out ends this shared terminal session, and Sign out everywhere revokes your other sessions too. All windows sharing this session return to login. While Signing out is shown, confirmation actions are disabled; repeated clicks or another window cannot start another sign-out. Wait for the result; an error leaves the session open for deliberate recovery, while confirmed server revocation closes it. Signing out never saves unfinished forms.",
+      "سائن آؤٹ سے پہلے مسودہ مکمل کریں یا جان بوجھ کر چھوڑیں۔ جاری عمل پر سائن آؤٹ رکتا ہے؛ غیر یقینی کیش شفٹ اسی کھلی ونڈو میں واضح کریں۔ مسودہ ختم کرنے سے پہلے تصدیق لازم ہے۔ نام کا بٹن یا سائن آؤٹ تصدیق کھولتا ہے: کام جاری رکھیں سے بند ہوتا ہے، سائن آؤٹ سے یہ ٹرمینل سیشن ختم ہوتا ہے، ہر جگہ سائن آؤٹ سے دوسرے سیشن بھی ختم ہوتے ہیں۔ اس سیشن کی تمام ونڈوز لاگ اِن پر لوٹتی ہیں۔ سائن آؤٹ جاری ہو تو تصدیق کے بٹن بند رہتے ہیں؛ بار بار کلک یا دوسری ونڈو نیا سائن آؤٹ نہیں بھیج سکتی۔ نتیجے کا انتظار کریں؛ خرابی پر خود بحالی کریں اور سرور کی تصدیق شدہ منسوخی پر سیشن بند ہوتا ہے۔ نامکمل فارم محفوظ نہیں ہوتے۔",
     ],
   ),
   "shell.maintenance": g(
@@ -276,8 +426,8 @@ export const controlGuides: Record<string, ControlGuide> = {
     ["login"],
     ["Username, Password and Sign in →", "صارف نام، پاس ورڈ اور سائن اِن"],
     [
-      "Use your own hospital account: enter Username and Password, then Sign in once. The button waits during submission, a lockout countdown or loss of connection. On refusal the password is cleared; check the message before deliberately trying again. Success opens your workspace or the workspace picker. Never retry an unanswered login automatically.",
-      "اپنا ہسپتال اکاؤنٹ استعمال کریں: صارف نام اور پاس ورڈ درج کرکے ایک بار سائن اِن کریں۔ ارسال، عارضی پابندی یا رابطہ نہ ہونے پر بٹن رکتا ہے۔ انکار پر پاس ورڈ صاف ہوتا ہے؛ دوبارہ کوشش سے پہلے پیغام دیکھیں۔ کامیابی پر کام کی جگہ یا انتخاب کھلتا ہے۔ جواب نہ ملنے پر خودکار بار بار لاگ اِن نہ کریں۔",
+      "Use your own hospital account: enter Username and Password, then Sign in once. The button waits during submission, a lockout countdown or loss of connection. On refusal the password is cleared; check the message before deliberately trying again. Success opens your workspace or the workspace picker. If the reply is lost, Sign-in could not be confirmed explains that a session may exist. No automatic retry is made. Check connection before a deliberate new sign-in; an unused session expires on the server. Navigation waits while sign-in is pending. ACCOUNT_LOCKED or RATE_LIMITED keeps the server message and countdown visible; waiting never submits another login.",
+      "اپنا ہسپتال اکاؤنٹ استعمال کریں: صارف نام اور پاس ورڈ درج کرکے ایک بار سائن اِن کریں۔ ارسال، عارضی پابندی یا رابطہ نہ ہونے پر بٹن رکتا ہے۔ انکار پر پاس ورڈ صاف ہوتا ہے؛ دوبارہ کوشش سے پہلے پیغام دیکھیں۔ کامیابی پر کام کی جگہ یا انتخاب کھلتا ہے۔ جواب گم ہو تو سائن اِن کی تصدیق نہیں ہو سکی بتاتا ہے کہ سیشن کھل سکتا ہے۔ خودکار کوشش نہیں ہوتی۔ رابطہ دیکھ کر ضرورت پر خود سائن اِن کریں؛ غیر استعمال شدہ سیشن سرور پر ختم ہوتا ہے۔ جاری سائن اِن کے دوران نقل و حرکت رکی رہتی ہے۔ اکاؤنٹ کی پابندی یا درخواستوں کی حد پر سرور کا پیغام اور گنتی دیکھیں؛ انتظار سے نیا لاگ اِن نہیں بھیجا جاتا۔",
     ],
   ),
   "login.password": g(
@@ -287,8 +437,8 @@ export const controlGuides: Record<string, ControlGuide> = {
       "موجودہ پاس ورڈ، نیا پاس ورڈ، تصدیق اور پاس ورڈ بدلیں",
     ],
     [
-      "For a temporary password, complete this screen before other work; otherwise open Settings → Password. Enter the current password, a new password of 8–256 characters and the same new password again. Change password submits once. A mismatch is refused locally; the server also enforces hospital policy. Fields clear after a submitted attempt; use the shown error before retrying. Do not share the new password.",
-      "عارضی پاس ورڈ ہو تو دوسرے کام سے پہلے یہ صفحہ مکمل کریں؛ ورنہ ترتیبات ← پاس ورڈ کھولیں۔ موجودہ پاس ورڈ، ۸ تا ۲۵۶ حروف کا نیا پاس ورڈ اور اسی کی تصدیق درج کریں۔ پاس ورڈ بدلیں ایک بار بھیجتا ہے۔ عدم مطابقت مقامی طور پر رکتی ہے؛ سرور ہسپتال کی پالیسی بھی لاگو کرتا ہے۔ ارسال کی کوشش کے بعد خانے صاف ہوتے ہیں؛ خطا دیکھ کر دوبارہ کوشش کریں۔ نیا پاس ورڈ کسی کو نہ دیں۔",
+      "For a temporary password, complete this screen before other work; otherwise open Settings → Password. Enter the current password, a new password of 8–256 characters and the same new password again. Change password submits once. A mismatch is refused locally; the server also enforces hospital policy. Fields clear after a submitted attempt; use the shown error before retrying. Do not share the new password. On a DEV server shared demo accounts are protected (DEMO_ACCOUNT_PROTECTED); use your own provisioned test account for password, role or deactivation testing.",
+      "عارضی پاس ورڈ ہو تو دوسرے کام سے پہلے یہ صفحہ مکمل کریں؛ ورنہ ترتیبات ← پاس ورڈ کھولیں۔ موجودہ پاس ورڈ، ۸ تا ۲۵۶ حروف کا نیا پاس ورڈ اور اسی کی تصدیق درج کریں۔ پاس ورڈ بدلیں ایک بار بھیجتا ہے۔ عدم مطابقت مقامی طور پر رکتی ہے؛ سرور ہسپتال کی پالیسی بھی لاگو کرتا ہے۔ ارسال کی کوشش کے بعد خانے صاف ہوتے ہیں؛ خطا دیکھ کر دوبارہ کوشش کریں۔ نیا پاس ورڈ کسی کو نہ دیں۔ ڈیو سرور پر مشترکہ ڈیمو اکاؤنٹ محفوظ ہے؛ پاس ورڈ، کردار یا غیر فعالیت کی جانچ اپنے الگ بنائے گئے اکاؤنٹ پر کریں۔",
     ],
   ),
   "settings.sections": g(
@@ -368,8 +518,8 @@ export const controlGuides: Record<string, ControlGuide> = {
       "پڑھی ہوئی نشان لگائیں / سب کو پڑھا ہوا کریں",
     ],
     [
-      "Read the item first, then mark that item or the whole inbox as read. The unread badge decreases after server confirmation. This acknowledges reading only: it does not decide an approval, deliver treatment or resolve an alert. Already read items have no single-item action.",
-      "پہلے اطلاع پڑھیں، پھر ایک یا پوری فہرست کو پڑھا ہوا کریں۔ سرور کی تصدیق کے بعد غیر پڑھے کا عدد کم ہوتا ہے۔ یہ صرف پڑھنے کی تصدیق ہے؛ منظوری، علاج یا ہنگامی حل نہیں۔ پہلے پڑھی اطلاع میں انفرادی بٹن نہیں ہوتا۔",
+      "Read the item first, then mark that item or the whole inbox as read. Mark all as read opens a confirmation explaining that it includes every current notification, even older and filtered-out items. Go back changes nothing; Confirm mark all as read submits once. Buttons wait while saving; navigation waits for the write. The unread badge is reread from the server after confirmation. This acknowledges reading only: it does not decide an approval, deliver treatment or resolve an alert. Already read items have no single-item action.",
+      "پہلے اطلاع پڑھیں، پھر ایک یا پوری فہرست کو پڑھا ہوا کریں۔ سب کو پڑھا ہوا کرنے پر تصدیق بتاتی ہے کہ پرانی اور فلٹر سے باہر تمام موجودہ اطلاعات بھی شامل ہیں۔ واپس پر کچھ نہیں بدلتا؛ تصدیق ایک بار بھیجتی ہے۔ محفوظ کرنے تک بٹن اور نقل و حرکت رکتے ہیں۔ پھر سرور سے اصل غیر پڑھا عدد پڑھا جاتا ہے۔ یہ صرف پڑھنے کی تصدیق ہے؛ منظوری، علاج یا ہنگامی حل نہیں۔ پہلے پڑھی اطلاع میں انفرادی بٹن نہیں ہوتا۔",
     ],
   ),
   "notifications.open": g(
@@ -603,8 +753,8 @@ export const foundationJourney: {
 
 export const workspaceFocus: Record<string, Bilingual> = {
   reception: [
-    "Receptionists: check the counter and printer before front-desk work. In this foundation, read notifications, report incidents and follow My requests; another eligible person decides your requests. Cash shifts and registration have separate guides.",
-    "استقبالیہ: کام سے پہلے کاؤنٹر اور پرنٹر چیک کریں۔ بنیاد میں اطلاعات، واقعات اور اپنی درخواستیں دیکھیں؛ دوسرا مجاز فرد فیصلہ کرتا ہے۔ کیش شفٹ اور رجسٹریشن الگ رہنمائی ہیں۔",
+    "Receptionists: check counter/printer and your own cash shift, find/register the patient, then follow the actual doctor/department queue. Verify slip/MRN before deferral, reactivation or an unpaid cancellation. Refund/waiver/credit requests lock the visit until an eligible approver decides; credit can collect its stated amount immediately. Cash-back is a separate exact physical handover from your own drawer, confirmed only after cash is given. Follow each screen's guide, original-key recovery and Status history/My requests. Human fresh-data, detailed role journey and Urdu approval remain pending.",
+    "استقبالیہ: کاؤنٹر، پرنٹر اور اپنی کیش شفٹ چیک، مریض تلاش یا درج، پھر اصل ڈاکٹر یا شعبے کی قطار دیکھیں۔ مؤخر، بحال یا غیر ادا منسوخی سے پہلے پرچی اور ایم آر این چیک کریں۔ واپسی، رعایت اور ادھار منظوری تک وزٹ بند کرتے؛ ادھار میں لکھی رقم فوراً وصول ہو سکتی ہے۔ نقد واپسی اپنی دراز سے عین الگ عمل ہے، اصل رقم دینے کے بعد تصدیق۔ ہر صفحے کی مدد، اصل کلید اور تاریخ یا اپنی درخواستیں دیکھیں۔ تازہ انسانی، کردار اور اردو جائزہ باقی ہیں۔",
   ],
   doctor: [
     "Doctors, clinical specialists and surgeons: verify the hospital/workspace before your duty. Use foundation help for alerts, incident reporting, preferences and permitted approvals. Clinical documentation and prescribing are separate journeys; acknowledging a notice does not record treatment.",

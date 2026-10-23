@@ -63,10 +63,12 @@ export function Modal({
   title,
   children,
   onClose,
+  closable = true,
 }: {
   title: string;
   children: ReactNode;
   onClose: () => void;
+  closable?: boolean;
 }) {
   const ref = useRef<HTMLDialogElement>(null);
   useEffect(() => {
@@ -84,13 +86,15 @@ export function Modal({
     >
       <div className="dialog-head">
         <h2>{title}</h2>
-        <button
-          data-help="common.close"
-          onClick={onClose}
-          aria-label={tr("Close")}
-        >
-          ×
-        </button>
+        {closable && (
+          <button
+            data-help="common.close"
+            onClick={onClose}
+            aria-label={tr("Close")}
+          >
+            ×
+          </button>
+        )}
       </div>
       {children}
     </dialog>

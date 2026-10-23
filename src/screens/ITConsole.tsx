@@ -153,6 +153,13 @@ export function ITConsole({
   const roles = data("/meta/roles") || [],
     permissionsList = data("/meta/permissions") || [];
   const open = (a: Action) => {
+    if (
+      action &&
+      !window.confirm(
+        tr("Discard this system-change draft and open another action?"),
+      )
+    )
+      return;
     setError(undefined);
     setResult(undefined);
     setAction(a);
@@ -240,10 +247,12 @@ export function ITConsole({
     label: string,
     fn: () => void,
     disabled = false,
+    className?: string,
   ) =>
     allowed(endpoint) && (
       <button
         data-help="settings.it.actions"
+        className={className}
         disabled={busy || !!pending || !!secret || disabled}
         onClick={fn}
       >
@@ -260,6 +269,13 @@ export function ITConsole({
         )}
       </p>
       <LoadState {...r} retry={r.reload} />
+      <button
+        data-help="settings.it.recovery"
+        disabled={busy || r.loading || !!secret}
+        onClick={() => void r.reload()}
+      >
+        {tr("Reload system records")}
+      </button>
       <ErrorBox error={error} />
       {r.data
         ?.filter((x) => x.error)
@@ -587,12 +603,17 @@ export function ITConsole({
               "This ends every hospital session. Coordinate the emergency response before continuing.",
             )}
           </p>
-          {button("POST /admin/kill-switch", "Force global logout", () =>
-            open({
-              endpoint: "POST /admin/kill-switch",
-              path: "/admin/kill-switch",
-              label: "Force global logout",
-            }),
+          {button(
+            "POST /admin/kill-switch",
+            "Force global logout",
+            () =>
+              open({
+                endpoint: "POST /admin/kill-switch",
+                path: "/admin/kill-switch",
+                label: "Force global logout",
+              }),
+            false,
+            "danger emergency-action",
           )}
         </section>
       )}
@@ -664,12 +685,6 @@ export function ITConsole({
                 "Check the record before any new action.",
             )}
           </p>
-          <button
-            data-help="settings.it.recovery"
-            onClick={() => void r.reload()}
-          >
-            {tr("Reload system records")}
-          </button>
           {operation(pending.body.endpoint).idempotency_key && (
             <button
               data-help="settings.it.recovery"
@@ -898,7 +913,9 @@ function AdminForm({
                   )
                 }
               >
-                <option value="">{tr("Choose")}</option>
+                {raw.default === undefined && (
+                  <option value="">{tr("Choose")}</option>
+                )}
                 <option value="true">{tr("Yes")}</option>
                 <option value="false">{tr("No")}</option>
               </select>

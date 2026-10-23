@@ -1,3 +1,7 @@
+# Status note — 22 October 2026
+
+This dated checkpoint retains its original results. Issues7/8/9 are now Fixed and locally retested; IT generated operations use the server's unique names. The four frontend follow-ups listed below were implemented in the later Settings IT continuation. See `SETTINGS_IT_CONTINUATION_2026-10-22.md`, `BACKEND_STATUS_2026-10-22.md` and `../handoff.md` for current state; full IT/human acceptance remains pending.
+
 # Settings system sections checkpoint — 21 October 2026
 
 Latest renderer `index-BPLOEbxs.js`; source/build hashes in `foundation-closure-build-2026-10-21-v3.json`. Earlier foundation checkpoints remain immutable in v1/v2 and their proposals.

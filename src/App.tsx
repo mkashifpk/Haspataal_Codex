@@ -7,13 +7,21 @@ import { Details, ErrorBox, Field, Modal } from "./components";
 import { Connection } from "./screens/Connection";
 import { Login, ChangePassword } from "./screens/Login";
 import { Settings, TerminalIdentity } from "./screens/Settings";
-import { Notifications } from "./screens/Notifications";
+import {
+  CriticalNotificationToast,
+  Notifications,
+} from "./screens/Notifications";
 import { Approvals } from "./screens/Approvals";
 import { Facility } from "./screens/Facility";
 import { Incidents } from "./screens/Incidents";
 import { CashShift } from "./screens/CashShift";
 import { PatientSearch } from "./screens/PatientSearch";
 import { Registration } from "./screens/Registration";
+import { QueueManagement } from "./screens/QueueManagement";
+import { RefundRequests } from "./screens/RefundRequests";
+import { CashBack } from "./screens/CashBack";
+import { PatientDocuments } from "./screens/PatientDocuments";
+import { Tariff } from "./screens/Tariff";
 import { Help } from "./screens/Help";
 import { setLanguage, tr } from "./i18n";
 import { hasUnsavedChanges } from "./unsaved";
@@ -24,7 +32,16 @@ const labels: Record<string, [string, string, string]> = {
   approval_queue: ["Approvals", "منظوریاں", "✓"],
   charity_approvals: ["Charity approvals", "فلاحی منظوری", "♡"],
   my_cash_shift: ["My cash shift", "میری کیش شفٹ", "₨"],
+  queue_management: ["Queue management", "قطاروں کا انتظام", "≡"],
+  refund_waiver_credit: [
+    "Refund / waiver / credit",
+    "واپسی، رعایت اور ادھار",
+    "↩",
+  ],
+  cash_back_prompts: ["Cash-back", "رقم کی واپسی", "₨"],
   patient_search: ["Patient search", "مریض کی تلاش", "⌕"],
+  patient_documents: ["Patient document vault", "مریض کی دستاویزات", "▤"],
+  tariff_display: ["Tariff", "نرخ نامہ", "₨"],
   registration: [
     "New registration + OPD slip",
     "نئی رجسٹریشن اور او پی ڈی پرچی",
@@ -34,6 +51,13 @@ const labels: Record<string, [string, string, string]> = {
   facility_profile: ["Facility & services", "ہسپتال اور خدمات", "▤"],
   settings: ["Settings", "ترتیبات", "⚙"],
 };
+const frontDeskScreens = new Set([
+  "queue_management",
+  "refund_waiver_credit",
+  "cash_back_prompts",
+  "patient_documents",
+  "tariff_display",
+]);
 export function App() {
   const [user, setUser] = useState<MeOut | null>(null),
     [server, setServer] = useState<any>(),
@@ -60,6 +84,7 @@ export function App() {
     [helpPage, setHelpPage] = useState<string>(),
     [infoOpen, setInfoOpen] = useState(false),
     [logoutOpen, setLogoutOpen] = useState(false),
+    [logoutBusy, setLogoutBusy] = useState(false),
     [maintenance, setMaintenance] = useState<any>(),
     [critical, setCritical] = useState<any>(),
     [criticalNotices, setCriticalNotices] = useState<any[]>([]),
@@ -71,6 +96,7 @@ export function App() {
     [sessionBusy, setSessionBusy] = useState(false),
     [sessionError, setSessionError] = useState<unknown>();
   const reauthFlight = useRef(false);
+  const logoutFlight = useRef(false);
   const first = useRef(true),
     loaded = useRef(false),
     liveState = useRef({ user, workspace, screen });
@@ -168,7 +194,7 @@ export function App() {
           if (available.length === 1) {
             await call("workspace", { code: available[0].code });
             setWorkspace(available[0].code);
-            setScreen("app_shell");
+            setScreen(currentScreen => ["login", "workspace_picker", "app_shell"].includes(currentScreen) ? "app_shell" : currentScreen);
           } else {
             setScreen("workspace_picker");
           }
@@ -257,10 +283,15 @@ export function App() {
       }
       if (e.type === "event") {
         setRevision((n) => n + 1);
-        if (e.event_type === "system.license")
-          void api<LicenseStatusOut>("GET", "/meta/license")
-            .then(setLicense)
-            .catch(setError);
+        if (e.event_type === "system.license") {
+          // The documented DEV fixture belongs to this authenticated socket;
+          // an ordinary REST read would erase it with the global DEV state.
+          if (e.simulated === true && e.event_id < 0) setLicense(e.payload);
+          else
+            void api<LicenseStatusOut>("GET", "/meta/license")
+              .then(setLicense)
+              .catch(setError);
+        }
         if (["system.license", "system.maintenance"].includes(e.event_type)) {
           loaded.current = false;
           void refreshData();
@@ -278,7 +309,9 @@ export function App() {
           e.payload.severity === "critical"
         )
           setCriticalNotices((current) => [
-            ...current.filter((n) => n.id !== e.event_id),
+            ...current.filter(
+              (n) => n.notification_id !== e.payload.notification_id,
+            ),
             { ...e.payload, id: e.event_id },
           ]);
         if (
@@ -318,7 +351,7 @@ export function App() {
       cancelled = true;
       clearInterval(id);
     };
-  }, [server?.current, license?.reason, user?.user_id]);
+  }, [server?.current, !!license?.reason?.startsWith("standby_"), user?.user_id]);
   useEffect(() => {
     if (user || !server) return;
     let cancelled = false;
@@ -388,7 +421,8 @@ export function App() {
     return () => document.removeEventListener("keydown", key);
   });
   const dirty = hasUnsavedChanges;
-  function signOut(all: boolean) {
+  async function signOut(all: boolean) {
+    if (logoutFlight.current) return;
     if (document.querySelector('[data-write-pending="true"]')) {
       setNotice(
         t(
@@ -408,7 +442,18 @@ export function App() {
       )
     )
       return;
-    void call("logout", { all }).catch(setError);
+    logoutFlight.current = true;
+    setLogoutBusy(true);
+    try {
+      await call("logout", { all });
+    } catch (cause) {
+      // Revocation can arrive before the HTTP reply. A server-ended session
+      // is already closed; do not attach an old logout error to a new login.
+      if (liveState.current.user) setError(cause);
+    } finally {
+      logoutFlight.current = false;
+      setLogoutBusy(false);
+    }
   }
   function navigate(next: string) {
     if (sessionRecovery) return false;
@@ -416,12 +461,29 @@ export function App() {
       facility_profile: ["establishment.manage"],
       report_incident: ["incident.report"],
       patient_search: ["patient.search", "patient.view"],
+      patient_documents: ["patient.document.view", "patient.document.upload"],
       registration: ["opd.ticket.create"],
       my_cash_shift: ["finance.shift.operate"],
+      queue_management: ["opd.queue.view", "opd.ticket.view"],
+      refund_waiver_credit: ["opd.ticket.view", "opd.queue.doctor"],
+      cash_back_prompts: ["opd.ticket.view", "opd.queue.doctor"],
     };
-    if (est?.views.screens.some(v => v.screen_id === next && v.view === "hidden") ||
-      (required[next] && !required[next].some(p => user?.permissions.includes(p)))) {
-      setNotice(tr("This screen is not available with your current permissions and hospital services."));
+    if (
+      (frontDeskScreens.has(next) &&
+        !outline?.workspaces.some((w) =>
+          w.screens.some((s) => s.id === next),
+        )) ||
+      est?.views.screens.some(
+        (v) => v.screen_id === next && v.view === "hidden",
+      ) ||
+      (required[next] &&
+        !required[next].some((p) => user?.permissions.includes(p)))
+    ) {
+      setNotice(
+        tr(
+          "This screen is not available with your current permissions and hospital services.",
+        ),
+      );
       return false;
     }
     if (
@@ -487,6 +549,10 @@ export function App() {
       patient_search: "patient_search",
       registration: "registration",
       registrations: "registration",
+      opd_queues: "queue_management",
+      queue_management: "queue_management",
+      refund_waiver_credit: "refund_waiver_credit",
+      cash_back_prompts: "cash_back_prompts",
     };
     if (known[normalized]) navigate(known[normalized]);
     else setNotice("The related destination is outside this foundation build.");
@@ -511,9 +577,21 @@ export function App() {
     user?.permissions.includes("patient.view")
       ? ["patient_search"]
       : []),
+    ...(user?.permissions.includes("patient.document.view") || user?.permissions.includes("patient.document.upload")
+      ? ["patient_documents"]
+      : []),
+    "tariff_display",
     ...(workspace === "reception" &&
     user?.permissions.includes("opd.ticket.create")
       ? ["registration"]
+      : []),
+    ...(user?.permissions.includes("opd.queue.view") ||
+    user?.permissions.includes("opd.ticket.view")
+      ? ["queue_management"]
+      : []),
+    ...(user?.permissions.includes("opd.ticket.view") ||
+    user?.permissions.includes("opd.queue.doctor")
+      ? ["refund_waiver_credit", "cash_back_prompts"]
       : []),
     ...(user?.permissions.includes("incident.report")
       ? ["report_incident"]
@@ -524,6 +602,10 @@ export function App() {
     "settings",
   ].filter(
     (id) =>
+      (!frontDeskScreens.has(id) ||
+        !!outline?.workspaces.some((w) =>
+          w.screens.some((s) => s.id === id),
+        )) &&
       est?.views.screens.find((v) => v.screen_id === id)?.view !== "hidden",
   );
   const view = est?.views.workspaces.find(
@@ -621,7 +703,7 @@ export function App() {
         <div className="licence-banner" role="alert">
           <strong>{license.message}</strong>
           {license.days_left !== null && (
-            <span>{license.days_left} days left</span>
+            <span><bdi>{license.days_left}</bdi> {tr("days left")}</span>
           )}
           <span>
             {license.vendor.company} · {license.vendor.phone} ·{" "}
@@ -872,10 +954,60 @@ export function App() {
                 />
               )}
               {screen === "patient_search" && (
-                <PatientSearch user={user} revision={revision} />
+                <PatientSearch user={user} revision={revision} timeZone={meta?.hospital_timezone} currency={meta?.currency_code} />
               )}
               {screen === "registration" && (
                 <Registration user={user} revision={revision} />
+              )}
+              {screen === "patient_documents" && <PatientDocuments user={user} revision={revision} />}
+              {screen === "tariff_display" && <Tariff revision={revision} />}
+              {screen === "queue_management" && (
+                <QueueManagement
+                  currency={meta?.currency_code}
+                  permissions={user.permissions}
+                  revision={revision}
+                  timeZone={meta?.hospital_timezone}
+                  readOnly={
+                    view === "records" ||
+                    est?.views.screens.find((s) => s.screen_id === screen)
+                      ?.view === "records"
+                  }
+                  onShift={() =>
+                    void selectWorkspace(workspace || "reception", true)
+                  }
+                />
+              )}
+              {screen === "refund_waiver_credit" && (
+                <RefundRequests
+                  currency={meta?.currency_code}
+                  permissions={user.permissions}
+                  revision={revision}
+                  timeZone={meta?.hospital_timezone}
+                  readOnly={
+                    view === "records" ||
+                    est?.views.screens.find((s) => s.screen_id === screen)
+                      ?.view === "records"
+                  }
+                  onShift={() =>
+                    void selectWorkspace(workspace || "reception", true)
+                  }
+                />
+              )}
+              {screen === "cash_back_prompts" && (
+                <CashBack
+                  currency={meta?.currency_code}
+                  permissions={user.permissions}
+                  revision={revision}
+                  timeZone={meta?.hospital_timezone}
+                  readOnly={
+                    view === "records" ||
+                    est?.views.screens.find((s) => s.screen_id === screen)
+                      ?.view === "records"
+                  }
+                  onShift={() =>
+                    void selectWorkspace(workspace || "reception", true)
+                  }
+                />
               )}
               {screen === "report_incident" && (
                 <Incidents
@@ -935,7 +1067,7 @@ export function App() {
       {logoutOpen && (
         <Modal
           title={t("Your account", "آپ کا اکاؤنٹ")}
-          onClose={() => setLogoutOpen(false)}
+          onClose={() => !logoutBusy && setLogoutOpen(false)}
         >
           <p>
             {t(
@@ -943,9 +1075,13 @@ export function App() {
               "سائن آؤٹ سے پہلے جاری عمل مکمل کریں۔ غیر یقینی کیش شفٹ کا نتیجہ اسی کھلی ونڈو میں واضح کریں۔ غیر محفوظ اندراج ختم کرنے سے پہلے تصدیق ہوگی۔ ہسپتال کی محفوظ درخواستیں اسی اکاؤنٹ اور ہسپتال کے ساتھ رہتی ہیں۔",
             )}
           </p>
-          <div className="actions">
+          <div className="actions" data-write-pending={logoutBusy}>
+            {logoutBusy && (
+              <p role="status">{t("Signing out…", "سائن آؤٹ جاری ہے…")}</p>
+            )}
             <button
               data-help="shell.help"
+              disabled={logoutBusy}
               onClick={() => {
                 setLogoutOpen(false);
                 setHelpPage("home");
@@ -956,6 +1092,7 @@ export function App() {
             </button>
             <button
               data-help="shell.settings"
+              disabled={logoutBusy}
               onClick={() => {
                 if (navigate("settings")) setLogoutOpen(false);
               }}
@@ -964,19 +1101,25 @@ export function App() {
             </button>
             <button
               data-help="shell.logout"
+              disabled={logoutBusy}
               onClick={() => setLogoutOpen(false)}
             >
-              Keep working
+              {t("Keep working", "کام جاری رکھیں")}
             </button>
-            <button data-help="shell.logout" onClick={() => signOut(true)}>
-              Sign out everywhere
+            <button
+              data-help="shell.logout"
+              disabled={logoutBusy}
+              onClick={() => void signOut(true)}
+            >
+              {t("Sign out everywhere", "ہر جگہ سائن آؤٹ کریں")}
             </button>
             <button
               data-help="shell.logout"
               className="primary"
-              onClick={() => signOut(false)}
+              disabled={logoutBusy}
+              onClick={() => void signOut(false)}
             >
-              Sign out
+              {t("Sign out", "سائن آؤٹ کریں")}
             </button>
           </div>
         </Modal>
@@ -1005,19 +1148,12 @@ export function App() {
         </div>
       )}
       {criticalNotices.length > 0 && (
-        <aside className="notice critical-toast" role="alert">
-          <strong>
-            {criticalNotices[0].title ||
-              t("Critical notification", "اہم اطلاع")}
-          </strong>
-          <p>{criticalNotices[0].body || criticalNotices[0].message}</p>
-          <button
-            data-help="shell.critical"
-            onClick={() => setCriticalNotices((current) => current.slice(1))}
-          >
-            {t("Dismiss", "بند کریں")}
-          </button>
-        </aside>
+        <CriticalNotificationToast
+          key={criticalNotices[0].notification_id}
+          notice={criticalNotices[0]}
+          onDismiss={() => setCriticalNotices((current) => current.slice(1))}
+          onOpen={() => navigate("notifications")}
+        />
       )}
       {critical?.kind === "code_red" && (
         <Modal

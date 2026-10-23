@@ -193,7 +193,7 @@ export function whoami(): Promise<TerminalIdentityOut> {
 }
 
 /** Change own password — POST /api/v1/auth/change-password (who may call: any logged-in user, for their own account (also before a forced password change where allowed)). */
-export function changePassword(body: ChangePasswordIn): Promise<TokenPair> {
+export function changePasswordAuth(body: ChangePasswordIn): Promise<TokenPair> {
   return api<TokenPair>("POST", `/auth/change-password`, body);
 }
 

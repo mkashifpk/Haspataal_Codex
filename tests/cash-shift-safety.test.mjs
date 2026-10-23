@@ -5,7 +5,34 @@ import {
   createShiftOpen,
   definiteShiftRefusal,
   mayRetryShiftOpen,
+  matchesShiftCloseReview,
 } from "../src/cash-shift-safety.ts";
+
+test("closing retains the reviewed drawer and totals across refreshes", () => {
+  const review = Object.freeze({
+    shiftId: 12,
+    node: "MainReception",
+    expectedCash: 50,
+    declaredCash: 45,
+  });
+  const shift = {
+    shift_id: 12,
+    node: "MainReception",
+    expected_cash: 50,
+    status: "Open",
+  };
+  assert(matchesShiftCloseReview(review, shift));
+  for (const change of [
+    { shift_id: 13 },
+    { node: "CashierDesk" },
+    { expected_cash: 51 },
+    { status: "PendingCollection" },
+  ])
+    assert(!matchesShiftCloseReview(review, { ...shift, ...change }));
+  assert(!matchesShiftCloseReview(review, null));
+  assert(!matchesShiftCloseReview(review, undefined));
+  assert.equal(review.declaredCash, 45);
+});
 
 test("cash amounts refuse empty/partial/nonfinite/negative values without turning them into zero", () => {
   for (const input of [

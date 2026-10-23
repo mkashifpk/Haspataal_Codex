@@ -1,0 +1,16 @@
+{
+  "implementation_id": 1,
+  "request_id": "codex-refund-ready-money-type-20261023-v1",
+  "kind": "ContractMismatch",
+  "severity": "Low",
+  "title": "refund.ready amount arrives as a string although its event contract declares number",
+  "actual": "On current DEV a real refund.ready WebSocket event carried amount:\"10.00\" (JSON string). get_event('refund.ready') declares payload_fields.amount:'number', and the shared MCP convention says money is JSON numbers. This is not a client-created event: the native test observer copied fields from JSON.parse(raw) of the authenticated socket and preserved typeof string in its journal.",
+  "expected": "Align refund.ready serialization with the documented numeric money field, or publish a deliberate revised event contract/generation and workflow guidance if strings are intended. Keep the REST ticket prompt amount and documented convention consistent. Frontend uses the event as a hint and re-reads the ticket; it does not invent/parse a replacement monetary state.",
+  "steps": "Use a separately owned synthetic paid DEV ticket and request a partial refund; a different eligible actor approves it through POST /approvals/{request_id}/approve. Observe actual authenticated refund.ready. This reproduced once for synthetic ticket13/approval11/disbursement1. No new approval/dispensation is needed to inspect saved original event529. get_event('refund.ready') documents amount number.",
+  "evidence": "DEV server_build2026-10-23T01:28:16.037092+00:00, contract57d137222f1ca637655d. Actual event_type refund.ready,event_id529,ticket_id13,disbursement_id1,amount:\"10.00\". Source artifacts/cashback-fixture-prepared-20261023.json -> transport.events; Python JSON type check returned str. Real GET /opd-tickets/13 cash_back_prompts[0].amount is numeric10 and UI shows that real value. Existing open issues checked: only13, no duplicate. No physical handover or confirm-dispensation call performed; pending synthetic prompt retained for human review.",
+  "endpoint": "POST /approvals/{request_id}/approve",
+  "screen_id": "cash_back_prompts",
+  "workflow": "refunds-waivers-credit §1.6; realtime event refund.ready",
+  "build": "main467f416+cashback edits; index-CkiNXUMn.js",
+  "agent": "Codex"
+}

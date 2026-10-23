@@ -7,6 +7,7 @@ import * as patients from "../generated/patient_search";
 import { RegistrationDocuments } from "./RegistrationDocuments";
 import { RegistrationActions } from "./RegistrationActions";
 import { tr } from "../i18n";
+import { writeAttempt, canRetryWrite, definiteWriteRefusal, type WriteAttempt } from "../write-attempt";
 
 type Mode = "new" | "returning";
 
@@ -19,7 +20,7 @@ export function Registration({
 }) {
   const permitted = user.permissions.includes("opd.ticket.create");
   const canSearch =
-    user.permissions.includes("patient.search") ||
+    user.permissions.includes("patient.search") &&
     user.permissions.includes("patient.view");
   const catalog = useLoad(
     () => registration.serviceCatalog({ category: "OPD" }),
@@ -98,8 +99,9 @@ export function Registration({
     [contextId, revision],
   );
   const [uncertain, setUncertain] = useState(false);
-  const pendingPatient = useRef<registration.PatientCreate | null>(null);
-  const pendingBody = useRef<registration.RegistrationIn | null>(null);
+  const pendingPatient = useRef<WriteAttempt<registration.PatientCreate> | null>(null);
+  const pendingBody = useRef<WriteAttempt<registration.RegistrationIn> | null>(null);
+  const registrationFlight = useRef(false);
 
   useEffect(() => {
     const generation = ++searchGeneration.current;
@@ -136,37 +138,56 @@ export function Registration({
   }
 
   async function issue(body: registration.RegistrationIn) {
+    if (registrationFlight.current) return;
+    const attempt = pendingBody.current || writeAttempt(body);
+    pendingBody.current = attempt;
+    if (!canRetryWrite(attempt)) {
+      setError(new Error("The original request is outside the safe retry window. Ask IT to reconcile it; do not register or pay again."));
+      setUncertain(true);
+      return;
+    }
+    registrationFlight.current = true;
     setBusy(true);
     setError(undefined);
     try {
-      const created = await registration.register(body);
+      const created = await api<registration.RegistrationOut>("POST", "/reception/registrations", attempt.body, {key:attempt.key});
       pendingBody.current = null;
       setUncertain(false);
       setResult(created);
     } catch (cause) {
       setError(cause);
-      const status =
-        cause instanceof ApiError ? cause.response.status : undefined;
-      setUncertain(!status || status < 400 || status >= 500);
+      const refused = definiteWriteRefusal(cause);
+      if (refused) pendingBody.current = null;
+      setUncertain(!refused);
     } finally {
+      registrationFlight.current = false;
       setBusy(false);
     }
   }
 
   async function savePatient(body: registration.PatientCreate) {
-    pendingPatient.current = body;
+    if (registrationFlight.current) return;
+    const attempt = pendingPatient.current || writeAttempt(body);
+    pendingPatient.current = attempt;
+    if (!canRetryWrite(attempt)) {
+      setError(new Error("The original request is outside the safe retry window. Ask IT to reconcile it; do not register or pay again."));
+      setUncertain(true);
+      return;
+    }
+    registrationFlight.current = true;
     setBusy(true);
     setError(undefined);
     try {
-      setPatientRecord(await registration.createPatient(body));
+      setPatientRecord(await api<registration.PatientDetailOut>("POST", "/patients", attempt.body, {key:attempt.key}));
       pendingPatient.current = null;
       setUncertain(false);
     } catch (cause) {
       setError(cause);
-      const status =
-        cause instanceof ApiError ? cause.response.status : undefined;
-      setUncertain(!status || status < 400 || status >= 500);
+      const refused = definiteWriteRefusal(cause);
+      if (refused) pendingPatient.current = null;
+      setUncertain(!refused);
     } finally {
+      registrationFlight.current = false;
       setBusy(false);
     }
   }
@@ -176,7 +197,7 @@ export function Registration({
   }, [revision]);
   async function submit(event: React.FormEvent) {
     event.preventDefault();
-    if (busy || result || uncertain || !permitted) return;
+    if (registrationFlight.current || busy || result || patientRecord || uncertain || !permitted) return;
     if (
       source === "Emergency" &&
       !establishment.data?.active.includes("emergency_department")
@@ -273,7 +294,7 @@ export function Registration({
       ...(source === "Emergency" ? { emergency_bypass: bypass } : {}),
       ...(override.trim() ? { ar_override_reason: override.trim() } : {}),
     };
-    pendingBody.current = body;
+    pendingBody.current = writeAttempt(body);
     await issue(body);
   }
 
@@ -363,14 +384,14 @@ export function Registration({
           }}
         >
           <Field label={tr("Open an existing OPD slip")}>
-            <input
+            <input data-help="registration.intake"
               value={resume}
               onChange={(e) => setResume(e.target.value)}
               placeholder="OPD-2026-000003"
               required
             />
           </Field>
-          <button>{tr("Open ticket")}</button>
+          <button data-help="registration.intake">{tr("Open ticket")}</button>
         </form>
       )}
       {patientRecord && (
@@ -380,7 +401,7 @@ export function Registration({
             {patientRecord.full_name} · {patientRecord.mrn}
           </strong>
           <p>{tr("No OPD visit was issued.")}</p>
-          <button disabled={documentsPending} onClick={resetDraft}>
+          <button data-help="registration.intake" disabled={documentsPending} onClick={resetDraft}>
             {tr("Start another registration")}
           </button>
         </section>
@@ -427,7 +448,7 @@ export function Registration({
               "Use this ticket for payment, approvals and reprinting. Do not register the same visit again.",
             )}
           </p>
-          <button
+          <button data-help="registration.intake"
             type="button"
             disabled={actionPending || documentsPending}
             onClick={resetDraft}
@@ -443,7 +464,7 @@ export function Registration({
               style={{ border: 0, padding: 0, minWidth: 0 }}
             >
               <div className="actions">
-                <button
+                <button data-help="registration.intake"
                   type="button"
                   className={mode === "new" ? "primary" : ""}
                   onClick={() => {
@@ -453,7 +474,7 @@ export function Registration({
                 >
                   {tr("New patient")}
                 </button>
-                <button
+                <button data-help="registration.intake"
                   type="button"
                   className={mode === "returning" ? "primary" : ""}
                   disabled={!canSearch}
@@ -468,7 +489,7 @@ export function Registration({
               {mode === "new" ? (
                 <div className="form-grid">
                   <Field label={tr("Full name")}>
-                    <input
+                    <input data-help="registration.intake"
                       aria-label={tr("Full name")}
                       value={name}
                       onChange={(e) => setName(e.target.value)}
@@ -477,7 +498,7 @@ export function Registration({
                     />
                   </Field>
                   <Field label={tr("Gender")}>
-                    <select
+                    <select data-help="registration.intake"
                       aria-label={tr("Gender")}
                       value={gender}
                       onChange={(e) =>
@@ -498,7 +519,7 @@ export function Registration({
                     label={tr("Age in years")}
                     hint={tr("Enter age or date of birth.")}
                   >
-                    <input
+                    <input data-help="registration.intake"
                       aria-label={tr("Age in years")}
                       type="number"
                       min="0"
@@ -511,7 +532,7 @@ export function Registration({
                     />
                   </Field>
                   <Field label={tr("Date of birth")}>
-                    <input
+                    <input data-help="registration.intake"
                       aria-label={tr("Date of birth")}
                       type="date"
                       max={new Date().toISOString().slice(0, 10)}
@@ -523,7 +544,7 @@ export function Registration({
                     />
                   </Field>
                   <Field label={tr("Mobile")}>
-                    <input
+                    <input data-help="registration.intake"
                       aria-label={tr("Mobile")}
                       type="tel"
                       value={mobile}
@@ -533,7 +554,7 @@ export function Registration({
                     />
                   </Field>
                   <Field label={tr("CNIC (optional)")}>
-                    <input
+                    <input data-help="registration.intake"
                       aria-label={tr("CNIC (optional)")}
                       value={cnic}
                       onChange={(e) => setCnic(e.target.value)}
@@ -549,7 +570,7 @@ export function Registration({
                       "Search by name, MRN, mobile, or CNIC. Check identity before selecting.",
                     )}
                   >
-                    <input
+                    <input data-help="registration.intake"
                       type="search"
                       aria-label={tr("Search patient")}
                       value={query}
@@ -578,7 +599,7 @@ export function Registration({
                   {hits.length > 0 && (
                     <div className="results-list registration-results">
                       {hits.map((hit) => (
-                        <button
+                        <button data-help="registration.intake"
                           type="button"
                           key={hit.patient_id}
                           aria-pressed={selected?.patient_id === hit.patient_id}
@@ -660,7 +681,7 @@ export function Registration({
                       ] as const
                     ).map(([field, label, max]) => (
                       <Field key={field} label={tr(label)}>
-                        <input
+                        <input data-help="registration.intake"
                           value={String(extras[field] || "")}
                           maxLength={max}
                           onChange={(e) =>
@@ -673,7 +694,7 @@ export function Registration({
                       </Field>
                     ))}
                     <Field label={tr("Blood group")}>
-                      <select
+                      <select data-help="registration.intake"
                         aria-label={tr("Blood group")}
                         value={extras.blood_group || ""}
                         onChange={(e) =>
@@ -701,7 +722,7 @@ export function Registration({
                       </select>
                     </Field>
                     <Field label={tr("Billing category")}>
-                      <select
+                      <select data-help="registration.intake"
                         aria-label={tr("Billing category")}
                         value={billing}
                         onChange={(e) =>
@@ -725,7 +746,7 @@ export function Registration({
                             </p>
                           )}
                         <Field label={tr("Panel")}>
-                          <select
+                          <select data-help="registration.intake"
                             aria-label={tr("Panel")}
                             required
                             value={panelId}
@@ -742,7 +763,7 @@ export function Registration({
                           </select>
                         </Field>
                         <Field label={tr("Panel member number")}>
-                          <input
+                          <input data-help="registration.intake"
                             value={member}
                             maxLength={50}
                             onChange={(e) => setMember(e.target.value)}
@@ -762,7 +783,7 @@ export function Registration({
                     }}
                   />
                   <label>
-                    <input
+                    <input data-help="registration.intake"
                       type="checkbox"
                       checked={onlyPatient}
                       disabled={!user.permissions.includes("patient.create")}
@@ -777,7 +798,7 @@ export function Registration({
                   <LoadState {...catalog} retry={catalog.reload} />
                   <div className="form-grid">
                     <Field label={tr("OPD service")}>
-                      <select
+                      <select data-help="registration.intake"
                         aria-label={tr("OPD service")}
                         aria-invalid={[
                           "service_id",
@@ -797,7 +818,7 @@ export function Registration({
                       </select>
                     </Field>
                     <Field label={tr("Visit source")}>
-                      <select
+                      <select data-help="registration.intake"
                         aria-label={tr("Visit source")}
                         value={source}
                         onChange={(e) =>
@@ -831,7 +852,7 @@ export function Registration({
                     )}
                   <div className="form-grid">
                     <Field label={tr("Discount amount")}>
-                      <input
+                      <input data-help="registration.intake"
                         type="number"
                         min="0"
                         step="0.01"
@@ -840,7 +861,7 @@ export function Registration({
                       />
                     </Field>
                     <Field label={tr("Discount reason")}>
-                      <input
+                      <input data-help="registration.intake"
                         value={discountReason}
                         maxLength={300}
                         required={Number(discount) > 0}
@@ -850,7 +871,7 @@ export function Registration({
                   </div>
                   {source === "Emergency" && (
                     <label>
-                      <input
+                      <input data-help="registration.intake"
                         type="checkbox"
                         checked={bypass}
                         onChange={(e) => setBypass(e.target.checked)}
@@ -862,7 +883,7 @@ export function Registration({
                   )}
                   {user.permissions.includes("opd.ticket.ar_override") && (
                     <Field label={tr("Outstanding dues override reason")}>
-                      <input
+                      <input data-help="registration.intake"
                         maxLength={300}
                         value={override}
                         onChange={(e) => setOverride(e.target.value)}
@@ -870,7 +891,7 @@ export function Registration({
                     </Field>
                   )}
                   <label>
-                    <input
+                    <input data-help="registration.intake"
                       type="checkbox"
                       checked={payNow}
                       disabled={
@@ -883,7 +904,7 @@ export function Registration({
                   {payNow && (
                     <div className="form-grid">
                       <Field label={tr("Payment method")}>
-                        <select
+                        <select data-help="registration.intake"
                           value={payMethod}
                           onChange={(e) =>
                             setPayMethod(e.target.value as typeof payMethod)
@@ -895,7 +916,7 @@ export function Registration({
                         </select>
                       </Field>
                       <Field label={tr("Card / bank reference")}>
-                        <input
+                        <input data-help="registration.intake"
                           required={payMethod !== "Cash"}
                           maxLength={60}
                           value={payReference}
@@ -917,7 +938,7 @@ export function Registration({
               </p>
             )}
             <div className="actions">
-              <button
+              <button data-help="registration.intake"
                 type="submit"
                 className="primary"
                 disabled={
@@ -938,13 +959,13 @@ export function Registration({
                       : tr("Issue unpaid OPD slip")}
               </button>
               {uncertain && (pendingBody.current || pendingPatient.current) && (
-                <button
+                <button data-help="registration.intake"
                   type="button"
                   disabled={busy}
                   onClick={() =>
                     pendingPatient.current
-                      ? void savePatient(pendingPatient.current)
-                      : void issue(pendingBody.current!)
+                      ? void savePatient(pendingPatient.current.body)
+                      : void issue(pendingBody.current!.body)
                   }
                 >
                   {tr("Retry same registration")}

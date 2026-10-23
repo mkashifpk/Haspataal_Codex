@@ -1,0 +1,1079 @@
+{
+  "contract_fingerprint": "61186bb3306515cae1c9",
+  "knowledge_revision": "eb7204298b390985",
+  "approved": {
+    "method": "POST",
+    "path": "/api/v1/approvals/{request_id}/approve",
+    "summary": "Approve (applies the effect atomically)",
+    "tags": [
+      "Approvals"
+    ],
+    "permissions": [],
+    "permissions_mode": "all",
+    "idempotency_key": false,
+    "access": {
+      "authentication": "user",
+      "permissions": [],
+      "permissions_mode": "all",
+      "who": "a holder of the request's required_permission while the request's can_decide is true (decide_blocked says why not); never its requester (SELF_APPROVAL_FORBIDDEN, self_decision forbidden), except the Owner of a solo practice who alone can decide their own refund, waiver or credit, with a note (self_decision allowed_with_note); a large cash drop is never approved by the cashier of its shift (DUAL_CONTROL_SAME_PERSON)"
+    },
+    "description": "Requires the request's `required_permission`. You never approve your own request (`SELF_APPROVAL_FORBIDDEN`,\n`details` says why: `solo_practice_mode`, `owner`, `other_approvers`), except the Owner of a solo practice who is\nthe only person able to decide a refund, waiver or credit: with the Owner's `solo_practice_mode` on, that Owner\napproves their own request with a `note` (without one: `VALIDATION_ERROR`); the answer says\n`solo_self_approved: true` and a risk item records it. The request's `can_decide` and `self_decision` say all this\nin advance. `APPROVAL_ALREADY_DECIDED`: decided already. `DUAL_CONTROL_SAME_PERSON`: a large cash drop is never\napproved by the cashier of its shift (no co-signer is typed here); `SELF_ROLE_CHANGE_FORBIDDEN`: nobody\nchanges their own roles; `LAST_OWNER`: an approved role change would leave the hospital without an active Owner.",
+    "roles_allowed": [],
+    "parameters": [
+      {
+        "name": "request_id",
+        "in": "path",
+        "required": true,
+        "description": "",
+        "schema": {
+          "type": "integer",
+          "title": "Request Id"
+        }
+      }
+    ],
+    "request_body": {
+      "title": "DecisionIn",
+      "properties": {
+        "note": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 1000
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Note",
+          "description": "Required when rejecting"
+        },
+        "items": {
+          "anyOf": [
+            {
+              "items": {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Items",
+          "description": "Ward indent partial approval: [{\"ward_indent_item_id\": 1, \"qty_approved\": 5}]"
+        }
+      },
+      "type": "object"
+    },
+    "request_content_type": "application/json",
+    "response_schema": {
+      "title": "Envelope[ApprovalDecisionOut]",
+      "properties": {
+        "data": {
+          "title": "ApprovalDecisionOut",
+          "properties": {
+            "request_id": {
+              "type": "integer",
+              "title": "Request Id"
+            },
+            "approval_type": {
+              "type": "string",
+              "enum": [
+                "Refund",
+                "VIPWaiverPreConsult",
+                "VIPWaiverPostConsult",
+                "PatientCredit",
+                "PharmacyCharityOverride",
+                "LargeCashDrop",
+                "WardIndent",
+                "APPayment",
+                "PolicyChange",
+                "PrivilegedAccess"
+              ],
+              "title": "Approval Type"
+            },
+            "required_permission": {
+              "type": "string",
+              "title": "Required Permission",
+              "description": "Who may decide: every holder of this permission sees the request"
+            },
+            "requester_id": {
+              "type": "integer",
+              "title": "Requester Id"
+            },
+            "requester_name": {
+              "type": "string",
+              "title": "Requester Name"
+            },
+            "subject_type": {
+              "type": "string",
+              "title": "Subject Type"
+            },
+            "subject_id": {
+              "type": "integer",
+              "title": "Subject Id"
+            },
+            "patient_id": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Patient Id"
+            },
+            "amount": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Amount"
+            },
+            "summary": {
+              "type": "string",
+              "title": "Summary"
+            },
+            "payload_jsonb": {
+              "additionalProperties": true,
+              "type": "object",
+              "title": "Payload Jsonb",
+              "description": "Type-specific details the approver needs to decide"
+            },
+            "is_elevated": {
+              "type": "boolean",
+              "title": "Is Elevated",
+              "description": "Needs the elevated approver (e.g. a large refund)"
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "Pending",
+                "Approved",
+                "Rejected",
+                "Cancelled"
+              ],
+              "title": "Status"
+            },
+            "decided_by": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Decided By"
+            },
+            "decided_by_name": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Decided By Name"
+            },
+            "decided_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Decided At"
+            },
+            "decision_note": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Decision Note"
+            },
+            "solo_self_approved": {
+              "type": "boolean",
+              "title": "Solo Self Approved",
+              "description": "Decided by its own requester, the Owner of a solo practice (audit H-5); a risk item records it"
+            },
+            "requested_at": {
+              "type": "string",
+              "format": "date-time",
+              "title": "Requested At"
+            },
+            "can_decide": {
+              "type": "boolean",
+              "title": "Can Decide",
+              "description": "Whether you may approve or reject it now, by the rule the decision applies: show the buttons only when true (a type's own rule may still refuse, e.g. a large cash drop's decider is never the shift's cashier: DUAL_CONTROL_SAME_PERSON)"
+            },
+            "decide_blocked": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "enum": [
+                    "decided",
+                    "missing_permission",
+                    "own_request"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Decide Blocked",
+              "description": "Why you may not decide it, when can_decide is false; null when you may"
+            },
+            "self_decision": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "enum": [
+                    "forbidden",
+                    "allowed_with_note"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Self Decision",
+              "description": "On your own pending request: forbidden, or allowed_with_note for the Owner of a solo practice (solo_practice_mode on, nobody else holds the permission; a note is required and a risk item records it); null on anyone else's request or a decided one"
+            },
+            "effect": {
+              "$ref": "#/components/schemas/ApprovalEffectOut"
+            }
+          },
+          "type": "object",
+          "required": [
+            "request_id",
+            "approval_type",
+            "required_permission",
+            "requester_id",
+            "requester_name",
+            "subject_type",
+            "subject_id",
+            "patient_id",
+            "amount",
+            "summary",
+            "payload_jsonb",
+            "is_elevated",
+            "status",
+            "decided_by",
+            "decided_by_name",
+            "decided_at",
+            "decision_note",
+            "solo_self_approved",
+            "requested_at",
+            "can_decide",
+            "decide_blocked",
+            "self_decision",
+            "effect"
+          ],
+          "description": "The request after an approve / reject / cancel, with the effect applied in the same transaction."
+        },
+        "meta": {
+          "title": "Meta",
+          "properties": {
+            "server_time": {
+              "type": "string",
+              "title": "Server Time",
+              "description": "Server clock (UTC). Use it to detect terminal clock skew."
+            },
+            "page": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Page"
+            },
+            "page_size": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Page Size"
+            },
+            "total_count": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Total Count"
+            },
+            "next_cursor": {
+              "title": "Next Cursor"
+            }
+          },
+          "type": "object",
+          "required": [
+            "server_time"
+          ]
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ]
+    },
+    "recorded_example": {
+      "request": {
+        "path": "/api/v1/approvals/1/approve",
+        "body": {}
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": {
+            "request_id": 1,
+            "approval_type": "WardIndent",
+            "required_permission": "approval.ward_indent.approve",
+            "requester_id": 12,
+            "requester_name": "uc6a8f1ef7a",
+            "subject_type": "ward_indent",
+            "subject_id": 1,
+            "patient_id": null,
+            "amount": null,
+            "summary": "Ward indent from General Ward: 1 item(s)",
+            "payload_jsonb": {},
+            "is_elevated": false,
+            "status": "Approved",
+            "decided_by": 11,
+            "decided_by_name": "u7bfdac5fe0",
+            "decided_at": "2026-10-18T12:06:35.914622+00:00",
+            "decision_note": null,
+            "solo_self_approved": false,
+            "requested_at": "2026-10-18T12:06:35.837712+00:00",
+            "can_decide": false,
+            "decide_blocked": "decided",
+            "self_decision": null,
+            "effect": {
+              "indent": "approved",
+              "partial": false
+            }
+          },
+          "meta": {
+            "server_time": "2026-10-18T12:06:35.989565+00:00"
+          },
+          "request_id": "36d21ea5fdbd44f09891295343f31486"
+        }
+      },
+      "errors_seen": [
+        "DUAL_CONTROL_SAME_PERSON",
+        "FORBIDDEN",
+        "SELF_APPROVAL_FORBIDDEN",
+        "SELF_ROLE_CHANGE_FORBIDDEN",
+        "VALIDATION_ERROR"
+      ],
+      "events_emitted": [
+        "approval.resolved",
+        "notification.created",
+        "opd.queue.updated",
+        "opd.ticket.status_changed",
+        "pharmacy.stock.updated",
+        "refund.ready",
+        "risk.critical_event",
+        "ticket.clinical_lockout",
+        "waiver.refund_order.ready"
+      ]
+    },
+    "errors": [
+      {
+        "code": "APPROVAL_ALREADY_DECIDED",
+        "http_status": 409,
+        "message": "This approval request was already decided.",
+        "retryable": false,
+        "category": "business",
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      },
+      {
+        "code": "DUAL_CONTROL_SAME_PERSON",
+        "http_status": 403,
+        "message": "The second approver must be a different person.",
+        "retryable": false,
+        "category": "business",
+        "ui_action": "Explain and hide the action (check x-permissions)."
+      },
+      {
+        "code": "FORBIDDEN",
+        "http_status": 403,
+        "message": "You do not have permission to do this.",
+        "retryable": false,
+        "category": "auth",
+        "ui_action": "Explain and hide the action (check x-permissions)."
+      },
+      {
+        "code": "LAST_OWNER",
+        "http_status": 409,
+        "message": "The last active Owner keeps the Owner role.",
+        "retryable": false,
+        "category": "business",
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      },
+      {
+        "code": "SELF_APPROVAL_FORBIDDEN",
+        "http_status": 403,
+        "message": "You cannot approve your own request.",
+        "retryable": false,
+        "category": "auth",
+        "ui_action": "Explain and hide the action (check x-permissions)."
+      },
+      {
+        "code": "SELF_ROLE_CHANGE_FORBIDDEN",
+        "http_status": 403,
+        "message": "Nobody changes their own roles.",
+        "retryable": false,
+        "category": "auth",
+        "ui_action": "Explain and hide the action (check x-permissions)."
+      },
+      {
+        "code": "VALIDATION_ERROR",
+        "http_status": 422,
+        "message": "The request is invalid.",
+        "retryable": false,
+        "category": "request",
+        "ui_action": "Show field errors from details.fields / the message."
+      }
+    ],
+    "errors_seen_in_tests": [
+      "DUAL_CONTROL_SAME_PERSON",
+      "FORBIDDEN",
+      "SELF_APPROVAL_FORBIDDEN",
+      "SELF_ROLE_CHANGE_FORBIDDEN",
+      "VALIDATION_ERROR"
+    ],
+    "used_by_screens": [
+      "approval_queue",
+      "charity_approvals"
+    ],
+    "used_by_workflows": [
+      "refunds-waivers-credit"
+    ],
+    "typescript_example": "// Approve (applies the effect atomically)  (permissions: any logged-in user)\nexport const approve = (request_id, body) =>\n  api(\"POST\", `/approvals/${request_id}/approve`, body);   // api(): see get_guide('envelope-and-errors')",
+    "write_semantics": {
+      "protection": "state_guard",
+      "on_lost_answer": "A repeat is refused with APPROVAL_ALREADY_DECIDED: the request is decided already. The first call may have succeeded; this error does not replay its result. Never retry automatically; re-read the record, then offer the action again only if it is still needed.",
+      "reconcile_with": "GET /approvals/{request_id}",
+      "refused_with": "APPROVAL_ALREADY_DECIDED",
+      "emits_events": [
+        "approval.resolved",
+        "notification.created",
+        "opd.queue.updated",
+        "opd.ticket.status_changed",
+        "pharmacy.stock.updated",
+        "refund.ready",
+        "risk.critical_event",
+        "ticket.clinical_lockout",
+        "waiver.refund_order.ready"
+      ],
+      "prints": false,
+      "related_state_machine": null
+    },
+    "emits_events": [
+      "approval.resolved",
+      "notification.created",
+      "opd.queue.updated",
+      "opd.ticket.status_changed",
+      "pharmacy.stock.updated",
+      "refund.ready",
+      "risk.critical_event",
+      "ticket.clinical_lockout",
+      "waiver.refund_order.ready"
+    ],
+    "list": null,
+    "cross_field_rules": {},
+    "errors_detail": [
+      {
+        "code": "APPROVAL_ALREADY_DECIDED",
+        "http_status": 409,
+        "message": "This approval request was already decided.",
+        "retryable": false,
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+        "source": [
+          "documented"
+        ],
+        "details_fields": [],
+        "details_from": null
+      },
+      {
+        "code": "DUAL_CONTROL_SAME_PERSON",
+        "http_status": 403,
+        "message": "The second approver must be a different person.",
+        "retryable": false,
+        "ui_action": "Explain and hide the action (check x-permissions).",
+        "source": [
+          "documented",
+          "seen_in_tests"
+        ],
+        "details_fields": [],
+        "details_from": "POST /api/v1/prescriptions/{prescription_id}/dispense"
+      },
+      {
+        "code": "FORBIDDEN",
+        "http_status": 403,
+        "message": "You do not have permission to do this.",
+        "retryable": false,
+        "ui_action": "Explain and hide the action (check x-permissions).",
+        "source": [
+          "seen_in_tests"
+        ],
+        "details_fields": [
+          "any_of",
+          "required"
+        ],
+        "details_from": "POST /api/v1/admin/departments"
+      },
+      {
+        "code": "LAST_OWNER",
+        "http_status": 409,
+        "message": "The last active Owner keeps the Owner role.",
+        "retryable": false,
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+        "source": [
+          "documented"
+        ],
+        "details_fields": [],
+        "details_from": "PUT /api/v1/admin/users/{user_id}/roles"
+      },
+      {
+        "code": "SELF_APPROVAL_FORBIDDEN",
+        "http_status": 403,
+        "message": "You cannot approve your own request.",
+        "retryable": false,
+        "ui_action": "Explain and hide the action (check x-permissions).",
+        "source": [
+          "documented",
+          "seen_in_tests"
+        ],
+        "details_fields": [],
+        "details_from": "POST /api/v1/risk/findings/{risk_event_id}/review"
+      },
+      {
+        "code": "SELF_ROLE_CHANGE_FORBIDDEN",
+        "http_status": 403,
+        "message": "Nobody changes their own roles.",
+        "retryable": false,
+        "ui_action": "Explain and hide the action (check x-permissions).",
+        "source": [
+          "documented",
+          "seen_in_tests"
+        ],
+        "details_fields": [],
+        "details_from": "PUT /api/v1/admin/users/{user_id}/roles"
+      },
+      {
+        "code": "VALIDATION_ERROR",
+        "http_status": 422,
+        "message": "The request is invalid.",
+        "retryable": false,
+        "ui_action": "Show field errors from details.fields / the message.",
+        "source": [
+          "documented",
+          "seen_in_tests"
+        ],
+        "details_fields": [],
+        "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+      }
+    ]
+  },
+  "rejected": {
+    "method": "POST",
+    "path": "/api/v1/approvals/{request_id}/reject",
+    "summary": "Reject (unfreezes the subject)",
+    "tags": [
+      "Approvals"
+    ],
+    "permissions": [],
+    "permissions_mode": "all",
+    "idempotency_key": false,
+    "access": {
+      "authentication": "user",
+      "permissions": [],
+      "permissions_mode": "all",
+      "who": "a holder of the request's required_permission while the request's can_decide is true (decide_blocked says why not); never its requester (SELF_APPROVAL_FORBIDDEN, self_decision forbidden), except the Owner of a solo practice who alone can decide their own refund, waiver or credit, with a note (self_decision allowed_with_note); a large cash drop is never approved by the cashier of its shift (DUAL_CONTROL_SAME_PERSON)"
+    },
+    "description": "",
+    "roles_allowed": [],
+    "parameters": [
+      {
+        "name": "request_id",
+        "in": "path",
+        "required": true,
+        "description": "",
+        "schema": {
+          "type": "integer",
+          "title": "Request Id"
+        }
+      }
+    ],
+    "request_body": {
+      "title": "DecisionIn",
+      "properties": {
+        "note": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 1000
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Note",
+          "description": "Required when rejecting"
+        },
+        "items": {
+          "anyOf": [
+            {
+              "items": {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Items",
+          "description": "Ward indent partial approval: [{\"ward_indent_item_id\": 1, \"qty_approved\": 5}]"
+        }
+      },
+      "type": "object"
+    },
+    "request_content_type": "application/json",
+    "response_schema": {
+      "title": "Envelope[ApprovalDecisionOut]",
+      "properties": {
+        "data": {
+          "title": "ApprovalDecisionOut",
+          "properties": {
+            "request_id": {
+              "type": "integer",
+              "title": "Request Id"
+            },
+            "approval_type": {
+              "type": "string",
+              "enum": [
+                "Refund",
+                "VIPWaiverPreConsult",
+                "VIPWaiverPostConsult",
+                "PatientCredit",
+                "PharmacyCharityOverride",
+                "LargeCashDrop",
+                "WardIndent",
+                "APPayment",
+                "PolicyChange",
+                "PrivilegedAccess"
+              ],
+              "title": "Approval Type"
+            },
+            "required_permission": {
+              "type": "string",
+              "title": "Required Permission",
+              "description": "Who may decide: every holder of this permission sees the request"
+            },
+            "requester_id": {
+              "type": "integer",
+              "title": "Requester Id"
+            },
+            "requester_name": {
+              "type": "string",
+              "title": "Requester Name"
+            },
+            "subject_type": {
+              "type": "string",
+              "title": "Subject Type"
+            },
+            "subject_id": {
+              "type": "integer",
+              "title": "Subject Id"
+            },
+            "patient_id": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Patient Id"
+            },
+            "amount": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Amount"
+            },
+            "summary": {
+              "type": "string",
+              "title": "Summary"
+            },
+            "payload_jsonb": {
+              "additionalProperties": true,
+              "type": "object",
+              "title": "Payload Jsonb",
+              "description": "Type-specific details the approver needs to decide"
+            },
+            "is_elevated": {
+              "type": "boolean",
+              "title": "Is Elevated",
+              "description": "Needs the elevated approver (e.g. a large refund)"
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "Pending",
+                "Approved",
+                "Rejected",
+                "Cancelled"
+              ],
+              "title": "Status"
+            },
+            "decided_by": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Decided By"
+            },
+            "decided_by_name": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Decided By Name"
+            },
+            "decided_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Decided At"
+            },
+            "decision_note": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Decision Note"
+            },
+            "solo_self_approved": {
+              "type": "boolean",
+              "title": "Solo Self Approved",
+              "description": "Decided by its own requester, the Owner of a solo practice (audit H-5); a risk item records it"
+            },
+            "requested_at": {
+              "type": "string",
+              "format": "date-time",
+              "title": "Requested At"
+            },
+            "can_decide": {
+              "type": "boolean",
+              "title": "Can Decide",
+              "description": "Whether you may approve or reject it now, by the rule the decision applies: show the buttons only when true (a type's own rule may still refuse, e.g. a large cash drop's decider is never the shift's cashier: DUAL_CONTROL_SAME_PERSON)"
+            },
+            "decide_blocked": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "enum": [
+                    "decided",
+                    "missing_permission",
+                    "own_request"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Decide Blocked",
+              "description": "Why you may not decide it, when can_decide is false; null when you may"
+            },
+            "self_decision": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "enum": [
+                    "forbidden",
+                    "allowed_with_note"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Self Decision",
+              "description": "On your own pending request: forbidden, or allowed_with_note for the Owner of a solo practice (solo_practice_mode on, nobody else holds the permission; a note is required and a risk item records it); null on anyone else's request or a decided one"
+            },
+            "effect": {
+              "$ref": "#/components/schemas/ApprovalEffectOut"
+            }
+          },
+          "type": "object",
+          "required": [
+            "request_id",
+            "approval_type",
+            "required_permission",
+            "requester_id",
+            "requester_name",
+            "subject_type",
+            "subject_id",
+            "patient_id",
+            "amount",
+            "summary",
+            "payload_jsonb",
+            "is_elevated",
+            "status",
+            "decided_by",
+            "decided_by_name",
+            "decided_at",
+            "decision_note",
+            "solo_self_approved",
+            "requested_at",
+            "can_decide",
+            "decide_blocked",
+            "self_decision",
+            "effect"
+          ],
+          "description": "The request after an approve / reject / cancel, with the effect applied in the same transaction."
+        },
+        "meta": {
+          "title": "Meta",
+          "properties": {
+            "server_time": {
+              "type": "string",
+              "title": "Server Time",
+              "description": "Server clock (UTC). Use it to detect terminal clock skew."
+            },
+            "page": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Page"
+            },
+            "page_size": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Page Size"
+            },
+            "total_count": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Total Count"
+            },
+            "next_cursor": {
+              "title": "Next Cursor"
+            }
+          },
+          "type": "object",
+          "required": [
+            "server_time"
+          ]
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ]
+    },
+    "recorded_example": {
+      "request": {
+        "path": "/api/v1/approvals/1/reject",
+        "body": {
+          "note": "not eligible"
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": {
+            "request_id": 1,
+            "approval_type": "VIPWaiverPreConsult",
+            "required_permission": "approval.waiver.approve",
+            "requester_id": 3,
+            "requester_name": "Receptionist",
+            "subject_type": "vip_waiver_request",
+            "subject_id": 1,
+            "patient_id": 1,
+            "amount": 1000,
+            "summary": "Pre-consult VIP waiver 100% (Rs. 1000.00) for ticket OPD-2026-000001: Owner guest",
+            "payload_jsonb": {
+              "ticket_id": 1,
+              "waiver_pct": "100"
+            },
+            "is_elevated": false,
+            "status": "Rejected",
+            "decided_by": 5,
+            "decided_by_name": "u577c8951e0",
+            "decided_at": "2026-10-18T11:22:13.944869+00:00",
+            "decision_note": "not eligible",
+            "solo_self_approved": false,
+            "requested_at": "2026-10-18T11:22:13.844212+00:00",
+            "can_decide": false,
+            "decide_blocked": "decided",
+            "self_decision": null,
+            "effect": {
+              "waiver": "not approved"
+            }
+          },
+          "meta": {
+            "server_time": "2026-10-18T11:22:13.979062+00:00"
+          },
+          "request_id": "b61634f88dbd4a90a7d083cbc5ea23fc"
+        }
+      },
+      "errors_seen": [
+        "VALIDATION_ERROR"
+      ],
+      "events_emitted": [
+        "approval.resolved",
+        "notification.created",
+        "opd.ticket.status_changed"
+      ]
+    },
+    "errors": [
+      {
+        "code": "VALIDATION_ERROR",
+        "http_status": 422,
+        "message": "The request is invalid.",
+        "retryable": false,
+        "category": "request",
+        "ui_action": "Show field errors from details.fields / the message."
+      }
+    ],
+    "errors_seen_in_tests": [
+      "VALIDATION_ERROR"
+    ],
+    "used_by_screens": [
+      "approval_queue",
+      "charity_approvals"
+    ],
+    "used_by_workflows": [],
+    "typescript_example": "// Reject (unfreezes the subject)  (permissions: any logged-in user)\nexport const reject = (request_id, body) =>\n  api(\"POST\", `/approvals/${request_id}/reject`, body);   // api(): see get_guide('envelope-and-errors')",
+    "write_semantics": {
+      "protection": "state_guard",
+      "on_lost_answer": "A repeat is refused with APPROVAL_ALREADY_DECIDED: the request is decided already. The first call may have succeeded; this error does not replay its result. Never retry automatically; re-read the record, then offer the action again only if it is still needed.",
+      "reconcile_with": "GET /approvals/{request_id}",
+      "refused_with": "APPROVAL_ALREADY_DECIDED",
+      "emits_events": [
+        "approval.resolved",
+        "notification.created",
+        "opd.ticket.status_changed"
+      ],
+      "prints": false,
+      "related_state_machine": null
+    },
+    "emits_events": [
+      "approval.resolved",
+      "notification.created",
+      "opd.ticket.status_changed"
+    ],
+    "list": null,
+    "cross_field_rules": {},
+    "errors_detail": [
+      {
+        "code": "APPROVAL_ALREADY_DECIDED",
+        "http_status": 409,
+        "message": "This approval request was already decided.",
+        "retryable": false,
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+        "source": [
+          "documented"
+        ],
+        "details_fields": [],
+        "details_from": null
+      },
+      {
+        "code": "VALIDATION_ERROR",
+        "http_status": 422,
+        "message": "The request is invalid.",
+        "retryable": false,
+        "ui_action": "Show field errors from details.fields / the message.",
+        "source": [
+          "seen_in_tests"
+        ],
+        "details_fields": [],
+        "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+      }
+    ]
+  }
+}

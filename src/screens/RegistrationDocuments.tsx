@@ -3,6 +3,7 @@ import { api, call, ApiError } from "../bridge";
 import { ErrorBox, Field, LoadState, Modal, useLoad } from "../components";
 import type { PatientDocumentOut } from "../generated/registration";
 import { tr } from "../i18n";
+import { definiteWriteRefusal } from "../write-attempt";
 
 type Draft = {
   id: string;
@@ -16,6 +17,7 @@ type Draft = {
   error?: unknown;
   busy?: boolean;
   locked?: boolean;
+  outside?: boolean;
 };
 export function RegistrationDocuments({
   patientId,
@@ -23,12 +25,14 @@ export function RegistrationDocuments({
   permissions,
   onPending,
   onChanged,
+  vault = false,
 }: {
   patientId?: number;
   photoId?: number | null;
   permissions: string[];
   onPending: (pending: boolean) => void;
   onChanged: () => void;
+  vault?: boolean;
 }) {
   const allowed = permissions.includes("patient.document.upload");
   const canView = permissions.includes("patient.document.view");
@@ -41,6 +45,8 @@ export function RegistrationDocuments({
   const [view, setView] = useState<string>();
   const video = useRef<HTMLVideoElement>(null);
   const stream = useRef<MediaStream | null>(null);
+  const flights = useRef(new Set<string>());
+  const started = useRef(new Map<string,number>());
   useEffect(() => {
     onPending(
       !!photo?.busy ||
@@ -53,7 +59,7 @@ export function RegistrationDocuments({
       patientId && canView
         ? api<PatientDocumentOut[]>("GET", `/patients/${patientId}/documents`)
         : [],
-    [patientId],
+    [patientId, canView],
   );
   function stop() {
     stream.current?.getTracks().forEach((t) => t.stop());
@@ -130,7 +136,7 @@ export function RegistrationDocuments({
     );
   }
   async function upload(item: Draft, isPhoto = false) {
-    if (!patientId || item.busy || item.saved) return;
+    if (!patientId || item.busy || item.saved || flights.current.has(item.id)) return;
     const update = (values: Partial<Draft>) =>
       isPhoto
         ? setPhoto((p) => (p ? { ...p, ...values } : p))
@@ -139,7 +145,7 @@ export function RegistrationDocuments({
           );
     if (
       !isPhoto &&
-      (!item.title.trim() || !item.facility.trim() || !item.date)
+      (!item.title.trim() || (item.outside !== false && (!item.facility.trim() || !item.date)))
     ) {
       update({
         error: new Error(
@@ -148,6 +154,13 @@ export function RegistrationDocuments({
       });
       return;
     }
+    const first = started.current.get(item.id) ?? Date.now();
+    started.current.set(item.id, first);
+    if (Date.now() < first || Date.now() - first >= 86400000) {
+      update({locked:true,error:new Error("The original request is outside the safe retry window. Ask IT to reconcile it; do not register or pay again.")});
+      return;
+    }
+    flights.current.add(item.id);
     update({ busy: true, error: undefined, locked: true });
     try {
       const form = new FormData();
@@ -155,9 +168,9 @@ export function RegistrationDocuments({
       form.append("doc_type", item.type);
       form.append("title", item.title);
       if (!isPhoto) {
-        form.append("is_outside", "true");
-        form.append("source_facility", item.facility);
-        form.append("document_date", item.date);
+        form.append("is_outside", String(item.outside !== false));
+        if (item.outside !== false) form.append("source_facility", item.facility);
+        if (item.date) form.append("document_date", item.date);
       }
       const result = await api<{ document_id: number }>(
         "POST",
@@ -166,20 +179,22 @@ export function RegistrationDocuments({
         { key: item.key },
       );
       update({ saved: result.document_id });
-      await list.reload();
-      onChanged();
     } catch (cause) {
-      const status =
-        cause instanceof ApiError ? cause.response.status : undefined;
+      const refused = definiteWriteRefusal(cause);
+      if (refused) started.current.delete(item.id);
       update({
         error: cause,
-        ...(status && status >= 400 && status < 500
+        ...(refused
           ? { locked: false, key: crypto.randomUUID() }
           : {}),
       });
     } finally {
+      flights.current.delete(item.id);
       update({ busy: false });
     }
+    // A failed follow-up read cannot turn a confirmed upload into a new write.
+    await list.reload();
+    onChanged();
   }
   async function open(id: number) {
     try {
@@ -210,7 +225,7 @@ export function RegistrationDocuments({
       </p>
       <ErrorBox error={error} />
       {photoId && canView && (
-        <button type="button" onClick={() => void open(photoId)}>
+        <button data-help="registration.documents" type="button" onClick={() => void open(photoId)}>
           {tr("View current patient photo")}
         </button>
       )}
@@ -219,7 +234,7 @@ export function RegistrationDocuments({
           <div className="patient-photo-layout">
             <div className="patient-photo-controls">
               <label className="photo-consent">
-                <input
+                <input data-help="registration.documents"
                   type="checkbox"
                   checked={consent}
                   disabled={photo?.busy || photo?.locked}
@@ -236,7 +251,7 @@ export function RegistrationDocuments({
               </label>
               <div className="photo-toolbar">
                 <Field label={tr("Choose photo")}>
-                  <input
+                  <input data-help="registration.documents"
                     type="file"
                     accept="image/jpeg,image/png"
                     disabled={
@@ -245,7 +260,7 @@ export function RegistrationDocuments({
                     onChange={(e) => void choosePhoto(e.target.files?.[0])}
                   />
                 </Field>
-                <button
+                <button data-help="registration.documents"
                   type="button"
                   disabled={
                     !consent ||
@@ -258,7 +273,7 @@ export function RegistrationDocuments({
                 >
                   {tr("Take photo")}
                 </button>
-                <button
+                <button data-help="registration.documents"
                   type="button"
                   disabled={photo?.busy || !!photo?.saved || photo?.locked}
                   onClick={() => {
@@ -288,10 +303,10 @@ export function RegistrationDocuments({
                     className="photo-frame"
                   />
                   <div className="actions">
-                    <button type="button" onClick={() => void capture()}>
+                    <button data-help="registration.documents" type="button" onClick={() => void capture()}>
                       {tr("Capture photo")}
                     </button>
-                    <button type="button" onClick={stop}>
+                    <button data-help="registration.documents" type="button" onClick={stop}>
                       {tr("Close camera")}
                     </button>
                   </div>
@@ -307,7 +322,7 @@ export function RegistrationDocuments({
               {photo && (
                 <>
                   <ErrorBox error={photo.error} />
-                  <button
+                  <button data-help="registration.documents"
                     type="button"
                     disabled={!patientId || photo.busy || !!photo.saved}
                     onClick={() => void upload(photo, true)}
@@ -330,8 +345,9 @@ export function RegistrationDocuments({
             </p>
           )}
           <h2>{tr("Reports brought by the patient (optional)")}</h2>
+          {vault && <p>{tr("Outside reports stay separate from this hospital's results. For an ID copy or hospital attachment, clear Outside document and select its type.")}</p>}
           <Field label={tr("Choose outside reports")}>
-            <input
+            <input data-help="registration.documents"
               type="file"
               multiple
               accept="application/pdf,image/jpeg,image/png"
@@ -357,9 +373,10 @@ export function RegistrationDocuments({
             <div className="card" key={d.id}>
               <strong>{d.file.name}</strong>
               <fieldset disabled={d.busy || !!d.saved || d.locked}>
+                {vault && <label><input data-help="registration.documents" type="checkbox" checked={d.outside !== false} onChange={event => setDrafts(ds => ds.map(x => x.id === d.id ? { ...x, outside: event.target.checked, type: "Other" } : x))} />{tr("Outside document")}</label>}
                 <div className="form-grid">
                   <Field label={tr("Report type")}>
-                    <select
+                    <select data-help="registration.documents"
                       value={d.type}
                       onChange={(e) =>
                         setDrafts((ds) =>
@@ -369,15 +386,15 @@ export function RegistrationDocuments({
                         )
                       }
                     >
-                      {[
+                      {(vault && d.outside === false ? ["CNIC", "PanelCard", "Consent", "ReferralLetter", "DeathCertificate", "AutopsyReport", "PostMortemReport", "MedicoLegalReport", "LabReport", "Imaging", "DischargeSummary", "Prescription", "Other"] : [
                         "LabReport",
                         "Imaging",
                         "DischargeSummary",
                         "Prescription",
                         "ReferralLetter",
                         "Other",
-                      ].map((t) => (
-                        <option key={t}>{t}</option>
+                      ]).map((t) => (
+                        <option key={t} value={t}>{tr(t)}</option>
                       ))}
                     </select>
                   </Field>
@@ -389,7 +406,7 @@ export function RegistrationDocuments({
                     ] as const
                   ).map(([field, label]) => (
                     <Field key={field} label={tr(label)}>
-                      <input
+                      <input data-help="registration.documents"
                         aria-label={tr(label)}
                         type={field === "date" ? "date" : "text"}
                         maxLength={200}
@@ -410,7 +427,7 @@ export function RegistrationDocuments({
               </fieldset>
               <ErrorBox error={d.error} />
               <div className="actions">
-                <button
+                <button data-help="registration.documents"
                   type="button"
                   disabled={!patientId || d.busy || !!d.saved}
                   onClick={() => void upload(d)}
@@ -418,7 +435,7 @@ export function RegistrationDocuments({
                   {d.saved ? tr("Report uploaded") : tr("Upload report")}
                 </button>
                 {!d.saved && (
-                  <button
+                  <button data-help="registration.documents"
                     type="button"
                     disabled={d.busy || d.locked}
                     onClick={() =>
@@ -438,19 +455,20 @@ export function RegistrationDocuments({
       {patientId && canView && (
         <>
           <h3>{tr("Stored patient documents")}</h3>
+          <button data-help="registration.documents" type="button" onClick={() => void list.reload()} disabled={list.loading}>{tr("Refresh documents")}</button>
           <LoadState {...list} retry={list.reload} />
           {list.data?.length === 0 && (
             <p>{tr("No patient documents have been uploaded.")}</p>
           )}
-          {list.data?.map((d) => (
+          {!list.error && list.data?.map((d) => (
             <p key={d.document_id}>
-              <button type="button" onClick={() => void open(d.document_id)}>
-                {d.title || d.doc_type}
+              <button data-help="registration.documents" type="button" onClick={() => void open(d.document_id)}>
+              {d.title || tr(d.doc_type)} · #{d.document_id}
               </button>{" "}
               ·{" "}
               {d.is_outside
                 ? `${tr("Outside")}: ${d.source_facility}, ${d.document_date}`
-                : tr("Hospital document")}
+                : tr("Hospital document")} · {tr(d.doc_type)} · {d.content_type} · {d.size_bytes} {tr("bytes")}
             </p>
           ))}
         </>

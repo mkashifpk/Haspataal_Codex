@@ -33,9 +33,10 @@ protocol.registerSchemesAsPrivileged([
 const WebSocket = require("ws");
 const { request, checkedRoot } = require("./transport.cjs");
 const { discover } = require("./discovery.cjs");
-const { validate, permissionAllows } = require("./contract.cjs");
+const { validate, permissionAllows, matchOperation: findOperation } = require("./contract.cjs");
 const { createPreferenceQueue } = require("./preference-queue.cjs");
 const { isDegradedHealthResponse } = require("./health-response.cjs");
+const { unseenEvent, simulatedLicenseEvent } = require("./event-cursor.cjs");
 const {
   selectConfiguration,
   serverAddresses,
@@ -53,6 +54,7 @@ let server = null,
   managedConnection = false,
   recoveryRunning = false;
 let credentialFlight = false;
+let logoutPending = false;
 let connected = false,
   pendingCa = null,
   prefs = { theme: "Light", language: "en", ui_scale_pct: 100 };
@@ -322,18 +324,14 @@ async function refresh() {
   return refreshFlight;
 }
 function matchOperation(method, p) {
-  return operations.find((e) => {
-    const [m, route] = e.endpoint.split(" ");
-    return (
-      m === method &&
-      new RegExp("^" + route.replace(/\{[^}]+\}/g, "[^/]+") + "$").test(
-        p.split("?")[0],
-      )
-    );
-  });
+  return findOperation(operations, method, p);
 }
 async function api(method, p, body, workspace, key, retried = false) {
-  if (method === "POST" && p === "/establishment/changes" && recoveryMigrationError)
+  if (
+    method === "POST" &&
+    p === "/establishment/changes" &&
+    recoveryMigrationError
+  )
     throw new Error(recoveryMigrationError);
   const op = matchOperation(method, p);
   if (!op && !["/health", "/health/live"].includes(p))
@@ -368,7 +366,14 @@ async function api(method, p, body, workspace, key, retried = false) {
   const requestSession = auth;
   const r = await raw(method, p, body, workspace, key);
   if (requestSession && requestSession !== auth)
-    return { ok: false, error: { code: "SESSION_CHANGED", message: "The account session changed while reading this result. Reload the current view." } };
+    return {
+      ok: false,
+      error: {
+        code: "SESSION_CHANGED",
+        message:
+          "The account session changed while reading this result. Reload the current view.",
+      },
+    };
   if (!retried && r.status === 401 && r.body?.error?.code === "TOKEN_EXPIRED") {
     await refresh();
     return api(method, p, body, workspace, key, true);
@@ -504,7 +509,7 @@ async function savePrefs(value, owner) {
     prefs = r.data;
     auth.user.preferences = prefs;
     applyZoom(prefs.ui_scale_pct);
-    return {ok:true,data:prefs};
+    return { ok: true, data: prefs };
   }
   if (value.ui_scale_pct !== undefined)
     value.ui_scale_pct = Math.max(
@@ -529,7 +534,7 @@ async function savePrefs(value, owner) {
 async function readAccountDisplay() {
   if (auth?.user.must_change_password) return;
   try {
-    const r = await queuePrefs({__readPreferences:true});
+    const r = await queuePrefs({ __readPreferences: true });
     if (!r.ok) throw new Error(r.error?.message || "Preference read failed");
   } catch {
     return "Your session is confirmed, but display preferences could not be reloaded. The server's session preferences are shown. Use Settings > Reload preferences after reconnecting; do not repeat sign-in or password changes.";
@@ -540,7 +545,13 @@ function connectStream(id) {
   if (!win || !auth || auth.recovery || !connected) return;
   let stream = streams.get(id);
   if (!stream) {
-    stream = { last: null, seen: new Set(), backoff: 1000, stopped: false };
+    stream = {
+      last: null,
+      initialCursor: null,
+      seen: new Set(),
+      backoff: 1000,
+      stopped: false,
+    };
     streams.set(id, stream);
   }
   if (
@@ -584,12 +595,14 @@ function connectStream(id) {
         stream.backoff = 1000;
         if (stream.last === null) {
           stream.last = m.last_event_id;
+          stream.initialCursor = m.last_event_id;
           send({ type: "stream", status: "Live", resync: true });
         } else send({ type: "stream", status: "Catching up" });
       }
       if (m.type === "replay_complete")
         send({ type: "stream", status: "Live", resync: true });
-      if (m.type === "event" && !stream.seen.has(m.event_id)) {
+      if (simulatedLicenseEvent(m)) send(m);
+      if (unseenEvent(stream, m)) {
         stream.seen.add(m.event_id);
         if (stream.seen.size > 5000)
           stream.seen = new Set([...stream.seen].slice(-2000));
@@ -942,13 +955,15 @@ ipcMain.handle("terminal", async (event, action, args = {}) => {
       prefs = auth.user.preferences;
       applyZoom(prefs.ui_scale_pct);
       const preferenceWarning = await readAccountDisplay();
-      if (!auth) throw new Error("The session ended during sign-in. Sign in again.");
+      if (!auth)
+        throw new Error("The session ended during sign-in. Sign in again.");
       broadcast({
         type: "login",
         user: auth.user,
         license: r.body.data.license,
       });
-      if (preferenceWarning) broadcast({type:"error",error:{message:preferenceWarning}});
+      if (preferenceWarning)
+        broadcast({ type: "error", error: { message: preferenceWarning } });
       return {
         ok: true,
         data: { user: auth.user, license: r.body.data.license },
@@ -1003,9 +1018,13 @@ ipcMain.handle("terminal", async (event, action, args = {}) => {
         return { ok: true, data: { account_refresh_needed: true } };
       }
       const preferenceWarning = await readAccountDisplay();
-      if (!auth) throw new Error("Your password changed, but the session ended. Sign in with the new password; do not repeat the change.");
+      if (!auth)
+        throw new Error(
+          "Your password changed, but the session ended. Sign in with the new password; do not repeat the change.",
+        );
       broadcast({ type: "login", user: auth.user });
-      if (preferenceWarning) broadcast({type:"error",error:{message:preferenceWarning}});
+      if (preferenceWarning)
+        broadcast({ type: "error", error: { message: preferenceWarning } });
       for (const id of windows.keys()) connectStream(id);
       return { ok: true, data: auth.user };
     }
@@ -1028,23 +1047,43 @@ ipcMain.handle("terminal", async (event, action, args = {}) => {
       const preferenceWarning = await readAccountDisplay();
       if (!auth) throw new Error("The restored session ended. Sign in again.");
       broadcast({ type: "session-restored", user: auth.user });
-      if (preferenceWarning) broadcast({type:"error",error:{message:preferenceWarning}});
+      if (preferenceWarning)
+        broadcast({ type: "error", error: { message: preferenceWarning } });
       for (const id of windows.keys()) connectStream(id);
       return { ok: true };
     }
     if (action === "logout") {
-      const r = await api("POST", "/auth/logout", { all_sessions: !!args.all });
-      if (!r.ok) return r;
-      clearSession();
-      return { ok: true };
+      if (logoutPending)
+        throw new Error("Sign-out is already pending. Wait for the result.");
+      if (credentialFlight)
+        throw new Error(
+          "Wait for the account action to finish before signing out.",
+        );
+      logoutPending = true;
+      try {
+        const r = await api("POST", "/auth/logout", {
+          all_sessions: !!args.all,
+        });
+        if (!r.ok) return r;
+        clearSession();
+        return { ok: true };
+      } finally {
+        logoutPending = false;
+      }
     }
     if (action === "prefs") {
-      if (credentialFlight) throw new Error("Wait for the account action to finish before changing display preferences.");
+      if (credentialFlight)
+        throw new Error(
+          "Wait for the account action to finish before changing display preferences.",
+        );
       return await queuePrefs(args);
     }
     if (action === "prefs-refresh") {
-      if (credentialFlight) throw new Error("Wait for the account action to finish before reloading display preferences.");
-      return await queuePrefs({__readPreferences:true});
+      if (credentialFlight)
+        throw new Error(
+          "Wait for the account action to finish before reloading display preferences.",
+        );
+      return await queuePrefs({ __readPreferences: true });
     }
     if (action === "workspace") {
       if (
@@ -1069,9 +1108,17 @@ ipcMain.handle("terminal", async (event, action, args = {}) => {
       return { ok: true };
     }
     if (action === "download") {
-      if (args.path !== "/incidents/sentinel-list/pdf")
+      const filenames = {
+        "/incidents/sentinel-list/pdf": "Haspataal-what-to-report.pdf",
+        "/tariff/pdf": "Haspataal-tariff.pdf",
+      };
+      if (!Object.hasOwn(filenames, args.path))
         throw new Error("Download not permitted");
-      const r = await raw(
+      const op = matchOperation("GET", args.path);
+      if (!op || !permissionAllows(op, auth?.user))
+        throw new Error("You do not have permission to download this document");
+      if (auth && Date.now() > auth.expires - 60000) await refresh();
+      let r = await raw(
         "GET",
         args.path,
         undefined,
@@ -1079,13 +1126,28 @@ ipcMain.handle("terminal", async (event, action, args = {}) => {
         undefined,
         true,
       );
+      const parseError = () => {
+        try { r.body = JSON.parse(r.bytes.toString("utf8")); } catch {}
+      };
+      if (r.status !== 200) {
+        parseError();
+        if (auth && r.status === 401 && r.body?.error?.code === "TOKEN_EXPIRED") {
+          await refresh();
+          r = await raw("GET", args.path, undefined, windows.get(win.id), undefined, true);
+          if (r.status !== 200) parseError();
+        }
+        if (r.status !== 200) {
+          if (r.body?.error?.code === "TOKEN_REVOKED") clearSession(r.body.error.message);
+          return errorResult(r);
+        }
+      }
       if (
-        r.status !== 200 ||
+        String(r.headers["content-type"]).split(";")[0] !== "application/pdf" ||
         !r.bytes.subarray(0, 5).equals(Buffer.from("%PDF-"))
       )
         throw new Error("The server did not return a PDF");
       const result = await dialog.showSaveDialog(win, {
-        defaultPath: "Haspataal-what-to-report.pdf",
+        defaultPath: filenames[args.path],
         filters: [{ name: "PDF", extensions: ["pdf"] }],
       });
       if (!result.canceled) fs.writeFileSync(result.filePath, r.bytes);
@@ -1109,18 +1171,70 @@ ipcMain.handle("terminal", async (event, action, args = {}) => {
       });
     }
     if (action === "print-admin-slip") {
-      if (!auth || !["admin.user.provision", "admin.user.manage", "admin.badge_station.manage"].some(p => auth.user.permissions.includes(p)))
+      if (
+        !auth ||
+        ![
+          "admin.user.provision",
+          "admin.user.manage",
+          "admin.badge_station.manage",
+        ].some((p) => auth.user.permissions.includes(p))
+      )
         throw new Error("Credential printing is not permitted");
-      if (![args.target,args.credential,args.kind].every(v => typeof v === "string" && v.length > 0 && v.length < 1000))
+      if (
+        ![args.target, args.credential, args.kind].every(
+          (v) => typeof v === "string" && v.length > 0 && v.length < 1000,
+        )
+      )
         throw new Error("Invalid credential slip");
-      const escape = value => value.replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-      const slip = new BrowserWindow({show:false,webPreferences:{sandbox:true,contextIsolation:true,nodeIntegration:false}});
-      slip.webContents.setWindowOpenHandler(() => ({action:"deny"}));
-      slip.webContents.on("will-navigate", e => e.preventDefault());
+      const escape = (value) =>
+        value.replace(
+          /[&<>"']/g,
+          (c) =>
+            ({
+              "&": "&amp;",
+              "<": "&lt;",
+              ">": "&gt;",
+              '"': "&quot;",
+              "'": "&#39;",
+            })[c],
+        );
+      const slip = new BrowserWindow({
+        show: false,
+        webPreferences: {
+          sandbox: true,
+          contextIsolation: true,
+          nodeIntegration: false,
+        },
+      });
+      slip.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
+      slip.webContents.on("will-navigate", (e) => e.preventDefault());
       try {
-        await slip.loadURL("data:text/html;charset=utf-8,"+encodeURIComponent(`<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'"><title>Private credential slip</title><style>body{font:18px sans-serif;margin:40px}strong{font:24px monospace;white-space:pre-wrap}</style><h1>Haspataal — private credential</h1><p>${escape(args.target)}</p><h2>${escape(args.kind)}</h2><strong>${escape(args.credential)}</strong><p>Deliver privately. Change a temporary password at first sign-in. The personnel file still needs its required CNIC copy.</p>`));
-        return await new Promise(resolve => slip.webContents.print({silent:false},(success,reason)=>resolve(success?{ok:true}:{ok:false,error:{code:"PRINT_FAILED",message:reason || "Credential slip was not printed. Reprint; do not repeat the account action."}})));
-      } finally {slip.destroy();}
+        await slip.loadURL(
+          "data:text/html;charset=utf-8," +
+            encodeURIComponent(
+              `<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'"><title>Private credential slip</title><style>body{font:18px sans-serif;margin:40px}strong{font:24px monospace;white-space:pre-wrap}</style><h1>Haspataal — private credential</h1><p>${escape(args.target)}</p><h2>${escape(args.kind)}</h2><strong>${escape(args.credential)}</strong><p>Deliver privately. Change a temporary password at first sign-in. The personnel file still needs its required CNIC copy.</p>`,
+            ),
+        );
+        return await new Promise((resolve) =>
+          slip.webContents.print({ silent: false }, (success, reason) =>
+            resolve(
+              success
+                ? { ok: true }
+                : {
+                    ok: false,
+                    error: {
+                      code: "PRINT_FAILED",
+                      message:
+                        reason ||
+                        "Credential slip was not printed. Reprint; do not repeat the account action.",
+                    },
+                  },
+            ),
+          ),
+        );
+      } finally {
+        slip.destroy();
+      }
     }
     throw new Error("Unsupported terminal action");
   } catch (e) {
@@ -1147,7 +1261,8 @@ app.whenReady().then(async () => {
       targetUrl: "app://terminal/storage-migration.html",
     });
   } catch {
-    recoveryMigrationError = "Facility recovery records could not be migrated. Apply is blocked. Ask IT to reconcile the old and new terminal recovery holds before changing the facility.";
+    recoveryMigrationError =
+      "Facility recovery records could not be migrated. Apply is blocked. Ask IT to reconcile the old and new terminal recovery holds before changing the facility.";
   }
   session.defaultSession.setPermissionRequestHandler(
     (contents, permission, callback, details) =>

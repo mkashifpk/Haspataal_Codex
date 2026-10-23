@@ -1,6 +1,10 @@
 import type { Bilingual } from "./foundation-help";
 // Recovery guidance, not a substitute for server validation or authorization.
 export const foundationErrors: Record<string, Bilingual> = {
+  DEMO_ACCOUNT_PROTECTED: [
+    "This shared DEV demo account keeps its seeded password, roles and active state for everyone. Use an individually provisioned test account for password, role and deactivation checks. Ask the backend team to restore a broken demo login; do not reset shared demo accounts or reseed the server yourself.",
+    "مشترکہ ڈیو ڈیمو اکاؤنٹ کا ابتدائی پاس ورڈ، کردار اور فعال حالت سب کے لیے محفوظ ہیں۔ پاس ورڈ، کردار یا غیر فعالیت کی جانچ اپنے الگ بنائے گئے اکاؤنٹ پر کریں۔ خراب ڈیمو لاگ اِن کی بحالی بیک اینڈ ٹیم سے کرائیں؛ خود مشترکہ اکاؤنٹ ری سیٹ یا سرور دوبارہ سیڈ نہ کریں۔",
+  ],
   PASSWORD_CHANGE_REQUIRED: [
     "Your temporary password must change first. Complete Current password, New password and Confirm new password, then Change password. Other work opens only after server confirmation; contact IT if the supplied current password fails.",
     "عارضی پاس ورڈ پہلے بدلنا لازم ہے۔ موجودہ، نیا اور نئے کی تصدیق درج کرکے پاس ورڈ بدلیں۔ سرور کی تصدیق کے بعد دوسرا کام کھلتا ہے؛ دیا گیا موجودہ پاس ورڈ ناکام ہو تو آئی ٹی سے رابطہ کریں۔",
