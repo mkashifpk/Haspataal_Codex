@@ -10,7 +10,7 @@ Git checkpoints:
 
 - Previous session implementation `a18726c`, Home evidence `f132463`, atomic registration/payment evidence `edfc9a9`, shutdown checkpoint `0042d57`.
 - **`a4079bba21e8d3244c05ff305b1cbd711c569c0e`**: authoritative merged-patient resolution and safe edit recovery.
-- Following workspace-fix commit contains `src/App.tsx` same-workspace navigation repair, bilingual launcher help, strengthened smoke/startup checks and final evidence. See `git log -2` for its exact hash until this handoff's final documentation checkpoint names it.
+- **`69453f2b5bef1f38f30308252f61d66be27ca108`**: `src/App.tsx` same-workspace navigation repair, bilingual launcher help, strengthened smoke/startup checks and final evidence.
 
 **All pre-24October-reinstall record IDs/keys are historical and must not be replayed.** Original pause/history is preserved in Git9c3fb8b and `docs/HANDOFF_HISTORY_2026-10-24.md`. Even the NEW IDs below must have their recorded synthetic name verified before a future write. Never repeat a confirmed registration, payment, home visit or merge.
 
@@ -22,7 +22,7 @@ Confirmed progress proposals **awaiting human review on /docs -> My progress**:
 
 -99 Registration POST/patients,100 Patient Search search/detail/PATCH,101 Home Visit search,102 Registration atomic UPMRN — prior session, still pending at resume.
 -**103 Patient Search event `patient.merged` and `q:writes`**, commit a4079bb, confirmed/verified pending this session. Exact payload `docs/patient-search-merge-proposal-a4079bb.json`. No unchanged99–102 items repeated. Whole merge rule/q:tested deliberately omitted because issue18 failed.
--Workspace-fix proposal will be recorded after committing its tested source; do not claim posted until confirmed.
+-**104 Workspace Launcher**, material same-workspace reopen/metadata consumer fix (`ep:GET /auth/workspaces`), commit69453f2. Server-confirmed and verified pending, **awaiting human review on /docs -> My progress**. Exact payload `docs/workspace-reopen-proposal-69453f2.json`. Earlier accepted endpoint is materially updated; no unchanged rule/help/window claim repeated.
 
 Backend issues last read **09:52:43UTC / 14:52:43PKT on24October**:
 
