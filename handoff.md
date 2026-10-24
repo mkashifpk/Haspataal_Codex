@@ -1,6 +1,12 @@
 # Haspataal checkpoint
 
-Updated **24 October 2026 — Codex/functions, Asia/Karachi**. Current request: complete pending **My cash shift** screen, one screen at a time. Baseline clean1454d36. Implementation and automated verification COMPLETE in **099cf310e3a91ec21a46f6c0b3621a207fb17f7e**; proposal109 server-confirmed pending. Full screen acceptance remains pending named human/Urdu/role-FAQ/editor review. No agent app/command or uncertain write remains.
+Updated **24 October 2026 — Codex/functions, Asia/Karachi**. Current request: Phase2 remaining-work status. Read-only audit complete on clean4589756; no source change, new business write, test app or running command. My cash shift source099cf31 remains implemented/tested; proposal109 pending human review.
+
+**New backend update:**17/18 both Fixed/deployed on2026-10-24T11:22:17.357549+00:00 (server equals fixed_in). Contracta9063847cb6fd629bfa0, knowledge85970bc300a07875. Read-only original-record retests PASS: alphanumeric full/partial names find current master7 once; source10 retained/Merged ->master11; oldMRN000006 finds11 once with matched_merged_profile source10; currentMRN000007 finds11 with null match context. No merge/scenario replayed. Exact request refs/limits docs/backend-search-fixes-retest-2026-10-24.json. This supersedes old17/18 New/Open notes below, which are historical.
+
+**Next screen: Patient Search.** Backend adds rule4b48fd699f and PatientSearchHitOut.matched_merged_profile. Refresh full bundle/quality/design/endpoint/types; implement bilingual Found by oldMRN, merged into this record explanation; refresh existing Home Visit/shared search consumers as affected; rerun UI/remaining variants and submit only new tested items. No frontend update has been made yet in this status-only turn. what_changed lists search schema/rule only, no new endpoint/event.
+
+Phase2 remains19screens/0full acceptance;867accepted points/160endpoint claims across app, not zero work. Existing screens need remaining API/event/rule evidence and documented fresh-data/F1/FAQ/Urdu/zoom/printing/editor review. My cash shift109 is awaiting human review on /docs -> My progress;107/108 accepted. Next3actions: finish Patient Search update; verify remaining Reception/clinical variants screen-by-screen; human reviews cash/other role worksheets. No new progress proposal for this document/API-read-only status audit; no newly implemented screen item. Last app verification remains build+74tests/current cash9checks onCM-4TamT, not rerun here.
 
 ## My cash shift checkpoint
 

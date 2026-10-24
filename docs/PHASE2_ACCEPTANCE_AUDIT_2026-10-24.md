@@ -8,7 +8,11 @@ Proposals107(app_shell)/108(workspace_picker) pending, awaiting human review on 
 
 A screen requires all endpoint/event/rule and UI-quality claims, including contextual F1, bilingual handbook and supported-role FAQs, bounded shared zoom, tested safe operations and named human fresh-data/editor review. Human worksheet reference is required for the compulsory review claims; an informal chat statement or automated navigation pass does not satisfy the portal gate. We must also finish agent-owned testing/evidence; this is not solely waiting for the user.
 
-## Recommended next screen: My cash shift
+## Audit update after cash-shift implementation
+
+My cash shift implementation/test gaps were addressed in099cf31; proposal109 is pending human review. Backend17/18 are now Fixed and original-record API retests passed on build2026-10-24T11:22:17.357549+00:00. Next implementation screen: **Patient Search**, including NEW rule4b48fd699f / matched_merged_profile explanation and regenerated types; total now53points. See docs/backend-search-fixes-retest-2026-10-24.json. Earlier New/Open/backend and recommendation notes below describe the earlier audit, not current status. All19screens still pending full human acceptance.
+
+## Earlier first-screen recommendation: My cash shift
 
 First Phase2 screen in the server dependency roadmap. Already accepted21/45points: all four listed endpoint consumers, counted-cash closing rule, handbook/F1/zoom. Remaining: enforce/test this terminal counter/open-shift rule; loading/empty/error states; permission controls; safe writes; complete API test plan; supported-role EN/UR FAQs; human fresh-data review; design and editor pass. Audit existing src/screens/CashShift.tsx and src/cash-shift-safety.ts before changing code. Next implementation session must read full bundle/quality/design/endpoints, inspect existing evidence, then verify missing scenarios and submit only new tested claims. Never close an existing shared demo shift merely to manufacture evidence.
 
