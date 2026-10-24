@@ -1,8 +1,8 @@
-# Phase 2 review checkpoint — 24 October 2026
+# Phase 2 review checkpoint — updated 25 October 2026
 
 Phase 2 is **Outpatient front desk and consultation**, 19 screens. All have UI implementations; this does not mean every API/event/rule or human acceptance gate is complete. The portal still reports zero fully accepted screens because partial claims and proposals do not close the full screen checklist. Only the human portal review awards progress.
 
-Current source: e5dd135, renderer index-Cd4gDgdp.js. Build/help coverage and **76 unit tests passed**. Prior six-role navigation on fe68bd3 passed76visits/28authenticated IDs, zero errors/5xx/businesswrites; all6preferences restored/signedout. New targeted consent/upload checks passed on Cd4gDgdp. Real DEV tests use synthetic records only. The earlier pre-reset evidence is historical; do not reuse its record IDs.
+Current source includes ab48870 ICD Refresh and the pending Receivables update, renderer index-D21_PzNk.js. Current build/help coverage passed; **76 unit tests passed** on the Receivables receipt core (DvSn1Yo3), before the final invoice empty-message addition. Prior six-role navigation on fe68bd3 passed76visits/28authenticated IDs, zero errors/5xx/businesswrites; all6preferences restored/signedout. New targeted consent/upload checks passed on Cd4gDgdp. Real DEV tests use synthetic records only. The earlier pre-reset evidence is historical; do not reuse its record IDs.
 
 ## Backend fixes applied and verified
 
@@ -20,13 +20,13 @@ Current source: e5dd135, renderer index-Cd4gDgdp.js. Build/help coverage and **7
 | Patient Search | Digit names, merged identifiers/master, edit/recovery | Remaining refusal variants and named review |
 | Registration + OPD slip | Optional UPMRN, duplicate guidance, same-key recovery; fresh AR block and explicit emergency bypass | Inactive-service and remaining refusal variants, physical slip printing |
 | Queue management | Fresh Defer/Reactivate/refund; two-doctor reasoned reroute and live handover | Full expiry/forfeiture and remaining refusal plan |
-| Refund / waiver / credit | Fresh refund/credit plus post-consult waiver/lost-reply recovery/Owner decision | Elevated post-clinical REFUND risk/approver variants |
+| Refund / waiver / credit | Fresh refund/credit plus post-consult waiver/lost-reply recovery/Owner decision | Elevated post-clinical risk/approver variants passed (129 Accepted); original prompt2 cash-back pending correct drawer/accounting workflow, backend #19 |
 | Mandatory cash-back | Both refund and waiver-refund blocking prompts/confirmations; isolated drawers net zero | Physical review and remaining denied-drawer variants |
-| Outstanding dues | Cashier permission fix, separate Card AR collection, invoice/F1 read | Positive Owner write-off with active debt, full refusal matrix |
+| Outstanding dues | Cashier permission fix, separate Card AR collection, invoice/F1 read | Positive Owner partial/full write-off and lost-reply original-key recovery passed25Oct on AR3; invoice state checks passed; remaining full refusal/human matrix |
 | Patient document vault | Consent/Skip/reselect fix, separate uploads/download, lost201 original-key replay/one attachment | Camera hardware and remaining type/size/date/denied-upload matrix |
 | Tariff | Role navigation/read smoke; fresh categories/empty state (q:states), PDF save (q:tested), contextual F1 (q:f1_help), and bounded 100-250% zoom (q:zoom) PASS | Fresh role-specific review of displayed services/prices and named human journey |
 | Doctor queue | Actual arrival/call; reason required, live top/highlighted handover and restore | Remaining reconnect/refusal variants and human workflow |
-| ICD picker | Real catalogue/code-only storage, diagnosis title readback | Full current catalogue/version/refusal plan and human terminology review |
+| ICD picker | Real catalogue/code-only storage, diagnosis title readback | Refresh/list invalidation, real API refusals, access, native zoom, F1/draft checks passed25Oct; 131 pending. Configured-unloaded-system UI and human terminology review remain |
 | Consultation | Server-selected Clinic guidance; consent switches, Final VCO/Declined, lost201 retry, VCO PDF | Actual Clinic422 on controlled Clinic setup, procedure gates and remaining events |
 | E-prescription | Linked encounter, complete OPD directions, empty handover blocked; fresh High-Alert/LASA warnings, lost201 same-key replay, standard print payload, and actual handover (POST /prescriptions/{id}/handover) PASS | Inpatient MAR generation, physical slip printing, remaining safety/service/refusal branches and human review |
 | Lab & imaging | Own unsampled200; other-doctor403; sampled409; prohibited actions hidden | Imaging and remaining event/service branches |
@@ -51,7 +51,7 @@ Original keys/receipts and failed-test limitations are in the dated evidence fil
 
 ## Progress review
 
-110–119 accepted at this continuation start. New 120 Registration, 121 Post-consult waiver, 122 Waiver cash-back, 123 Lab cancellation, 124 Doctor re-route, 125 Consultation, 126 Upload recovery, 127 E-Prescription handover, and 128 Tariff quality are **awaiting human review on /docs -> My progress**, together with 109 Cash shift. Only tested new items were proposed; full-plan and human gates were not claimed. Check live feedback before any further proposal.
+Latest portal read25Oct: 110–130 Accepted (including129 elevated-refund risk rule and130 clinical-lockout event). **109 Cash shift and131 ICD are awaiting human review on /docs -> My progress**. Score974,163endpoints,0fully accepted screens. Receivables states/zoom evidence passed and is about to be proposed with its tested commit. Full-plan and human gates remain pending; check live feedback before new proposals.
 
 ## New synthetic records from this continuation
 
@@ -60,3 +60,5 @@ Original keys/receipts and failed-test limitations are in the dated evidence fil
 - Patient13: lab requisition2 Cancelled, requisition3 sampled-refusal test; invoice10 paid800Card. Synthetic sample3 subsequently RejectedOther, requisition remains InProgress/re-run workflow; NO actual specimen/result. New outside attachment3 original-key upload recovery passed.
 
 DEV currently has profileIIB and active services: it cannot prove Clinic-only422 or retired-service paths in that state. No shared profile/service changed and no backend response fabricated. PACS study/viewer cases need an actual linked DEV study; camera/thermal printer/cash handovers and named role/Urdu/editor reviews need the relevant human/hardware. Remaining negative API variants stay explicit. These limits are not new backend bug reports or full-plan passes.
+
+25Oct fresh Owner write-off fixture: patient18 DEMO-AR-WRITEOFF-1792873698881/MRN000014, ticket8/invoice11, approval6/creditrequest3/AR3. Partial10 original200 lost/replayed SAME key/body once, then remaining1490 written off; cumulative1500/statusWrittenOff, queue removed/patient debt flag cleared. No cash/payment/drawer writes. Do not recreate or repeat. Original keys/results and retained harness failures in docs/receivables-owner-active-evidence-2026-10-25.json. Backend19 opening-float accounting remains New/unanswered; original patient13/ticket2 is Refunded/locked with prompt2 cash-back1500 pending, not dispensed.

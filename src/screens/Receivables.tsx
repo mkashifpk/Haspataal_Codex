@@ -564,7 +564,10 @@ export function Receivables({
           </div>
 
           <LoadState {...invoicesReq} retry={invoicesReq.reload} />
-          {!invoicesReq.loading && !invoicesReq.error && invoicesReq.data && (
+          {!invoicesReq.loading && !invoicesReq.error && invoicesReq.data?.length === 0 && (
+            <Empty>{tr("No invoices match these filters. Choose All statuses and All types, or refresh to check again.")}</Empty>
+          )}
+          {!invoicesReq.loading && !invoicesReq.error && !!invoicesReq.data?.length && (
             <div className="table-wrap">
               <table aria-label={tr("Invoices")}>
                 <thead>
@@ -759,6 +762,7 @@ export function Receivables({
               <div className="card">
                 <p>{tr("Receivable ID")}: #{writeOffResult.ar_id}</p>
                 <p>{tr("Amount Written Off")}: <bdi>{formatMoney(writeOffResult.amount_written_off)}</bdi></p>
+                <p>{tr("Remaining Balance")}: <bdi>{formatMoney(writeOffResult.amount_due - writeOffResult.amount_paid - writeOffResult.amount_written_off)}</bdi></p>
                 <p>{tr("Status")}: {tr(writeOffResult.status)}</p>
               </div>
               <div className="actions">

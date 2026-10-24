@@ -18,3 +18,7 @@ Full human role journeys, native Urdu wording, editor review and physical printi
 
 ## My cash shift continuation — 24 October
 Frontend fixes: reviewed-shift read failure now invalidates closure eligibility until a successful retry; new open/close checks fresh permission/counter/drawer rather than stale loaded context. A success notice captured in English is now translated on rendering after a language change. Evidence: docs/my-cash-shift-completion-evidence-2026-10-24.json (index-CM-4TamT.js,74unit/buildPASS, real zero-cash workflow and denied UI PASS). Backend17/18 unchanged; these defects do not require backend reports. Human role/Urdu/editor review remains pending.
+
+## Outstanding dues continuation —25 October
+
+Frontend findings fixed: partial write-off result lacked remaining balance; empty invoice filters showed a blank table without recovery guidance; Actions/View labels remained English in Urdu. Receipt balance, EN/UR empty-state guidance and missing labels added. Real Owner partial/full write-off and same-key lost-reply recovery passed on isolated AR3, followed by invoice read-failure/empty/detail/F1/layout checks and final translation check. See docs/RECEIVABLES_REVIEW_2026-10-25.md. Test harness lookup/translated locator/alert ambiguity failures and explicit test-profile restoration are retained separately; no new backend defect. Backend19 opening-float contract remains New/unanswered.

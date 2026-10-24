@@ -165,7 +165,7 @@ export const help: Record<string, HelpPage> = {
       "Open Cashier → Outstanding dues (Udhaar). Review the aging summary cards at the top (0–30, 31–60, 61–90, 90+ days) and the outstanding receivables table.",
       "Use Search to find debtors by patient name, MRN, mobile, panel or invoice number. Use the Receivable type and Status selectors to narrow the view, or click Show all to reset.",
       "To settle an outstanding debt, click Settle. Enter the amount to pay (defaults to the full balance) and select Cash, Card or Bank transfer. Cash collection requires an open cash shift. Confirming records the settlement and issues an official receipt.",
-      "Write off (with its mandatory reason of 5–500 characters) is restricted to finance.ar.write_off (Owner and Hospital Admin). Cashiers collect and settle but never write off.",
+      "Write off (with its mandatory reason of 5–500 characters) is restricted to finance.ar.write_off (Owner and Hospital Admin). Cashiers collect and settle but never write off. Read the confirmed cumulative write-off, remaining balance and status: a partial write-off leaves debt outstanding; a full write-off removes it from this queue.",
       "In the Invoices & direct payments tab, filter invoices by status or type. Click an invoice number to inspect its itemized lines, or click Collect payment to receive money against an open bill.",
       "F1 or Help opens this page, retains all input and returns focus when closed. Shared zoom stays 100–250% across all themes and languages."
     ],
@@ -173,7 +173,7 @@ export const help: Record<string, HelpPage> = {
       "کیشیئر سے بقایا جات (ادھار) کھولیں۔ اوپر دیے گئے عمر کے خانے (۰ تا ۳۰، ۳۱ تا ۶۰، ۶۱ تا ۹۰ اور ۹۰ سے زائد دن) اور بقایا جات کی جدول دیکھیں۔",
       "مریض کے نام، ایم آر این، موبائل، پینل یا انوائس سے تلاش کریں۔ قسم اور حالت سے فلٹر کریں، یا تمام دکھائیں دبائیں۔",
       "قرض ادا کرنے کے لیے ادا کریں دبائیں۔ رقم درج کریں اور نقد، کارڈ یا بینک ٹرانسفر چنیں۔ نقد کے لیے کھلی کیش شفٹ لازم ہے۔ تصدیق پر رسید جاری ہوتی ہے۔",
-      "قرض معاف کرنا (۵ تا ۵۰۰ حروف کی لازمی وجہ کے ساتھ) صرف مالک اور ہسپتال ایڈمن کا اختیار ہے۔ کیشیئر وصول کرتا ہے مگر معاف نہیں کر سکتا۔",
+      "قرض معاف کرنا (۵ تا ۵۰۰ حروف کی لازمی وجہ کے ساتھ) صرف مالک اور ہسپتال ایڈمن کا اختیار ہے۔ کیشیئر وصول کرتا ہے مگر معاف نہیں کر سکتا۔ تصدیق شدہ نتیجے میں کل معاف رقم، باقی بقایا اور حالت دیکھیں۔ جزوی معافی کے بعد باقی قرض واجب الادا ہے؛ مکمل معافی سے یہ قطار سے نکل جاتا ہے۔",
       "انوائسز ٹیب میں انوائسز دیکھیں، تفصیلات پڑھیں اور براہ راست رقم وصول کریں۔",
       "ایف۱ یا مدد کا بٹن معلومات کو محفوظ رکھتا ہے۔ زوم ۱۰۰ تا ۲۵۰ فیصد برقرار رہتا ہے۔"
     ],
