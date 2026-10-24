@@ -1,6 +1,10 @@
 # Haspataal checkpoint
 
-Updated **24 October 2026 — Codex/functions, Asia/Karachi**. Current request: shorten the Preparing your workspace delay after login. Baseline clean1290e29. Implementation and verification complete in **0648ac02213465ac1ff01593551118ab40deeae8**; proposals confirmed. No agent command/app currently running, no business writes.
+Updated **24 October 2026 — Codex/functions, Asia/Karachi**. Current request: identify next pending Phase2 screen and explain 0 completed screens. Audit complete; clean baseline f70732c confirmed. No app implementation/test currently running.
+
+Live MCP audit: **867 accepted points /160 endpoint claims,0/268 complete; Phase2 has19screens, all pending full acceptance**. Partial accepted endpoint claims do not close an entire screen; agent testing/evidence plus named human fresh-data/FAQ/editor review remain. Recommended next screen **My cash shift** (first P2 dependency order),21/45points already accepted; complete counter/open-shift rule, states/permissions/write-safety/API-plan evidence and role FAQ/human review gaps. Exact19screen pending checklist **docs/PHASE2_ACCEPTANCE_AUDIT_2026-10-24.md**. No new screen/proposal created in this read-only audit; no tests rerun for docs.107/108 still awaiting human review on /docs -> My progress;105/106 accepted. Backend17/18 stillNew at24October11:06UTC read, no answer.
+
+Next three actions: (1) full MCP/source/evidence audit for My cash shift; (2) fix/test missing items safely without disturbing an existing shared cash drawer, propose only new tested evidence; (3) named human reviews fresh UI journey/Urdu/editor worksheet then accepts applicable items in portal. No whole-phase completion claim.
 
 ## Current startup optimization
 
@@ -64,7 +68,7 @@ Backend issues last read **09:52:43UTC / 14:52:43PKT on24October**:
 
 ## Verification and next three steps
 
-Latest source build **PASS**:30screens554controls180groups33FAQseeds30workspaceguides, TypeScript/Vite. **70unit tests PASS**. Final renderer **index-CtYF9m4r.js**. Vite bundle-size warning remains. No app source change after this build; subsequent changes are docs/tests/screenshots. `git diff --check` before commits. No full `screen_test_plan` pass claimed with17/18 outstanding.
+Historical pre-startup source build **PASS**:30screens554controls180groups33FAQseeds30workspaceguides, TypeScript/Vite; **70unit tests PASS**, renderer **index-CtYF9m4r.js**. Superseded by74tests/BKH9BhkL startup build above. Vite bundle-size warning remains. `git diff --check` before commits. No full `screen_test_plan` pass claimed with17/18 outstanding.
 
 1. At next resume re-read instructions/Git/MCP feedback; check17/18. Retest Fixed only when server_build>=fixed_in and refresh affected contracts/help via what_changed. Use recorded synthetic names/MRNs to verify identity; do not recreate old actions. Old sourceMRN000006 is the known failed18 test, masterMRN000007 is the working current lookup.
 2. Finish remaining Registration/Patient Search/Home Visit API-plan variants not yet exercised on the reset database (conditional AR/deceased/MLC/service/refusal/document branches as appropriate); keep17/18 explicitly pending and report new reproduced backend gaps once. Read old test prerequisites: many old scripts hardcode invalid pre-reset IDs and must not be run unchanged. No new payment/approval/clinical record just to inspect existing evidence.
@@ -75,7 +79,3 @@ Latest source build **PASS**:30screens554controls180groups33FAQseeds30workspaceg
 NEW epoch existing evidence: UI-created patients1/2 from identifier tests; patient5/ticket1/queue1/demo payment/shift1 from atomic test; Home1original+2corrective for patient1; prior confirmed merge6->7; this session confirmed merge10->11. Exact records/keys in `docs/*reset*evidence*.json`, `docs/reset-merge-upstream-2026-10-24.json`, and resume-merge write receipt. **No pending/uncertain writes.** patient2 temporary address restored. Community services remain developer-authorized DEV simulation setup (home_visits/preventive_programmes Active revision3, programme1), receipts `docs/dev-reset-community*.json`; do not repeat setup/payment/visit writes.
 
 DEV **https://hms-dev.netbird.cloud**. Ignored `.dev-terminal.json`/CA and local MCP config supply connection; never copy credentials to Git/handoff. Historical IP fallbacks remain in ignored local config; tests used the cloud server. node_modules/dist/artifacts/profiles ignored. No subagents. No agent app/command remains running; user-owned profiles untouched.
-
-Evidence audit correction: background-recovery assertions passed, but its logout returned Server unreachable; prior all-sessions-signedout claim was incorrect. Isolated test app closed; no business writes. Do not replay any business action. Rerunning node scripts/reception-startup-check.mjs background-recovery-final --coherent --lose-catalogue to verify full cleanup before commit; retain original limitation. Source commit has NOT happened (evidence export correctly refused incomplete cleanup).
-
-Background recovery rerun exit0. Strengthened script to explicitly wait for the retry error/button to disappear after successful restoration (older assertion only checked cards/session); rerunning final recovery once. This changes test script only, renderer remains BKH9BhkL. Original failed logout remains a historical cleanup limitation.
