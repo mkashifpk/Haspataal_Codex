@@ -15,3 +15,6 @@ Backend issues17(name queries with digits) and18(old merged MRN search) are sepa
 The old smoke harness also had independent faults: cached navigation indexes drifted as authorized menus loaded, Settings uses h2, and initial single-workspace auto-opening could detach the picker card. The corrected smoke waits startup, selects a real workspace, locates fresh accessible labels, verifies active buttons and required screen inventory, and makes no business writes. These harness failures were not reported as backend bugs or counted as successful screen coverage.
 
 Full human role journeys, native Urdu wording, editor review and physical printing remain pending. Automated navigation is not equivalent to acceptance of every endpoint/event/rule.
+
+## My cash shift continuation — 24 October
+Frontend fixes: reviewed-shift read failure now invalidates closure eligibility until a successful retry; new open/close checks fresh permission/counter/drawer rather than stale loaded context. A success notice captured in English is now translated on rendering after a language change. Evidence: docs/my-cash-shift-completion-evidence-2026-10-24.json (index-CM-4TamT.js,74unit/buildPASS, real zero-cash workflow and denied UI PASS). Backend17/18 unchanged; these defects do not require backend reports. Human role/Urdu/editor review remains pending.

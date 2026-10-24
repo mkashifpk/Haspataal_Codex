@@ -410,8 +410,8 @@ export const controlGuides: Record<string, ControlGuide> = {
     ["my_cash_shift"],
     ["Refresh / Show my current shift", "تازہ کریں / میری موجودہ شفٹ"],
     [
-      "Refresh reads the shift, its ledger and terminal counter again; it never opens or closes a drawer. Show my current shift returns from a reviewed closed shift to the current server result. Review the shift number, cashier, counter, business date, hospital time and transaction amounts. Empty collections mean no entries were returned, not a zero balance inferred after an error. There is no cash-shift event guarantee: use Refresh before decisions.",
-      "تازہ کریں شفٹ، کھاتہ اور ٹرمینل کاؤنٹر دوبارہ پڑھتا ہے؛ دراز کھولتا یا بند نہیں کرتا۔ میری موجودہ شفٹ سے جائزہ شدہ بند شفٹ کے بجائے موجودہ نتیجہ دکھتا ہے۔ نمبر، کیشیئر، کاؤنٹر، کاروباری تاریخ، ہسپتال کا وقت اور رقوم چیک کریں۔ خالی کھاتہ خطا کے بعد فرضی صفر نہیں ہے۔ فیصلے سے پہلے تازہ کریں۔",
+      "Refresh reads the shift, its ledger and terminal counter again; it never opens or closes a drawer. Show my current shift returns from a reviewed closed shift to the current server result. Review the shift number, cashier, counter, business date, hospital time and transaction amounts. Empty collections mean no entries were returned, not a zero balance inferred after an error. A failed reviewed-shift refresh blocks closure until Refresh succeeds, with counted input kept. New actions recheck access, counter and drawer before submission. There is no cash-shift event guarantee: use Refresh before decisions.",
+      "تازہ کریں شفٹ، کھاتہ اور ٹرمینل کاؤنٹر دوبارہ پڑھتا ہے؛ دراز کھولتا یا بند نہیں کرتا۔ میری موجودہ شفٹ سے جائزہ شدہ بند شفٹ کے بجائے موجودہ نتیجہ دکھتا ہے۔ نمبر، کیشیئر، کاؤنٹر، کاروباری تاریخ، ہسپتال کا وقت اور رقوم چیک کریں۔ خالی کھاتہ خطا کے بعد فرضی صفر نہیں ہے۔ جائزہ شدہ شفٹ کی تازگی ناکام ہو تو بندش کامیاب تازگی تک رکے گی اور گنی ہوئی رقم رہے گی۔ نیا عمل اجازت، کاؤنٹر اور دراز دوبارہ چیک کرتا ہے۔ فیصلے سے پہلے تازہ کریں۔",
     ],
   ),
   "cash.open": g(

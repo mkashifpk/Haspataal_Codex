@@ -87,22 +87,22 @@ export interface CloseShiftIn {
   declared_cash: number | string;
 }
 
-/** Open my cash shift at a counter — POST /api/v1/finance/cash-shifts/open (permissions: finance.shift.operate). */
+/** Open my cash shift at a counter — POST /api/v1/finance/cash-shifts/open (who may call: holders of finance.shift.operate). */
 export function openShift(body: OpenShiftIn): Promise<CashShiftOut> {
   return api<CashShiftOut>("POST", `/finance/cash-shifts/open`, body, { idempotent: true });
 }
 
-/** My open shift (if any) — GET /api/v1/finance/cash-shifts/mine (permissions: finance.shift.operate). */
+/** My open shift (if any) — GET /api/v1/finance/cash-shifts/mine (who may call: holders of finance.shift.operate). */
 export function myShift(): Promise<CashShiftSummaryOut | null> {
   return api<CashShiftSummaryOut | null>("GET", `/finance/cash-shifts/mine`, undefined);
 }
 
-/** Drawer ledger of a shift — GET /api/v1/finance/cash-shifts/{shift_id}/transactions (permissions: finance.shift.operate, finance.shift.view_all). */
+/** Drawer ledger of a shift — GET /api/v1/finance/cash-shifts/{shift_id}/transactions (who may call: holders of finance.shift.operate or finance.shift.view_all). */
 export function shiftTxns(shift_id: number): Promise<ShiftTransactionOut[]> {
   return api<ShiftTransactionOut[]>("GET", `/finance/cash-shifts/${shift_id}/transactions`, undefined);
 }
 
-/** Close shift → PendingCollection — POST /api/v1/finance/cash-shifts/{shift_id}/close (permissions: finance.shift.operate). */
+/** Close shift → PendingCollection — POST /api/v1/finance/cash-shifts/{shift_id}/close (who may call: holders of finance.shift.operate). */
 export function closeShift(shift_id: number, body: CloseShiftIn): Promise<CashShiftSummaryOut> {
   return api<CashShiftSummaryOut>("POST", `/finance/cash-shifts/${shift_id}/close`, body);
 }

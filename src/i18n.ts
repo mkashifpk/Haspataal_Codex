@@ -9,6 +9,10 @@ export function setLanguage(value: string) {
   language = value;
 }
 const ur: Record<string, string> = {
+  "Cash-shift permission changed. Refresh your session before continuing.": "کیش شفٹ کی اجازت بدل گئی ہے۔ آگے بڑھنے سے پہلے سیشن تازہ کریں۔",
+  "The terminal counter changed or is unavailable. Refresh and ask IT before handling cash.": "ٹرمینل کاؤنٹر بدل گیا یا دستیاب نہیں۔ نقدی کے کام سے پہلے تازہ کریں اور آئی ٹی سے رابطہ کریں۔",
+  "An open shift already exists. Review it before starting another action.": "ایک کھلی شفٹ پہلے سے موجود ہے۔ نیا عمل شروع کرنے سے پہلے اسے دیکھیں۔",
+  "The reviewed shift is not current. Refresh successfully before closing; your counted cash is kept.": "جائزہ شدہ شفٹ تازہ نہیں ہے۔ بندش سے پہلے کامیابی سے تازہ کریں؛ گنی ہوئی رقم محفوظ ہے۔",
   "Discard this financial draft?": "یہ مالی مسودہ چھوڑ دیں؟",
   "This financial action is unavailable with your current permissions or record-only access.": "موجودہ اجازت یا صرف ریکارڈ دیکھنے کی حالت میں یہ مالی عمل دستیاب نہیں ہے۔",
   "The original financial request needs IT reconciliation. Do not collect again or start a replacement.": "اصل مالی درخواست کا آئی ٹی سے نتیجہ چیک کرائیں۔ دوبارہ رقم یا متبادل درخواست نہ بنائیں۔",

@@ -81,11 +81,13 @@ export function CashShift({
   const flight = useRef(false);
   const [error, setError] = useState<unknown>();
   const [notice, setNotice] = useState("");
+  const [noticeShiftId, setNoticeShiftId] = useState<number>();
   const [confirmClose, setConfirmClose] = useState<ShiftCloseReview>();
   const [attempt, setAttempt] = useState<ShiftAttempt>();
   const [checked, setChecked] =
     useState<cashShift.CashShiftSummaryOut | null>();
   const [review, setReview] = useState<cashShift.CashShiftSummaryOut>();
+  const [reviewReadBlocked, setReviewReadBlocked] = useState(false);
   const [, tick] = useState(0);
   useEffect(() => {
     const timer = setInterval(() => tick((n) => n + 1), 30000);
@@ -108,6 +110,7 @@ export function CashShift({
   const readyToClose =
     canOperate &&
     sameCounter &&
+    !reviewReadBlocked &&
     shift?.user_id === user.user_id &&
     shift.status === "Open" &&
     !shiftReq.loading &&
@@ -149,8 +152,10 @@ export function CashShift({
     if (flight.current) return;
     setError(undefined);
     if (review) {
+      setReviewReadBlocked(true);
       try {
         setReview(await readShift(review.shift_id));
+        setReviewReadBlocked(false);
       } catch (cause) {
         setError(cause);
       }
@@ -174,9 +179,65 @@ export function CashShift({
     setBusy(true);
     setError(undefined);
     setNotice("");
+    setNoticeShiftId(undefined);
     setChecked(undefined);
-    setAttempt(action);
+    let submitted = false;
     try {
+      // Retained idempotent retries keep their exact original identity/body.
+      // New actions re-read permission, hardware mapping and drawer state.
+      if (!attempt) {
+        const [me, terminal, latest] = await Promise.all([
+          api<{ user_id: number; permissions: string[] }>("GET", "/auth/me"),
+          api<TerminalIdentityOut>("GET", "/terminals/whoami"),
+          action.kind === "open"
+            ? cashShift.myShift()
+            : readShift(action.shiftId),
+        ]);
+        terminalReq.setData(terminal);
+        if (action.kind === "open") shiftReq.setData(latest);
+        else {
+          setReview(latest!);
+          setReviewReadBlocked(false);
+        }
+        if (
+          me.user_id !== user.user_id ||
+          !me.permissions.includes("finance.shift.operate")
+        )
+          throw new Error(
+            tr(
+              "Cash-shift permission changed. Refresh your session before continuing.",
+            ),
+          );
+        if (
+          !terminal.cash_node ||
+          terminal.cash_node !==
+            (action.kind === "open" ? action.body.node : latest?.node)
+        )
+          throw new Error(
+            tr(
+              "The terminal counter changed or is unavailable. Refresh and ask IT before handling cash.",
+            ),
+          );
+        if (action.kind === "open" && latest?.status === "Open")
+          throw new Error(
+            tr(
+              "An open shift already exists. Review it before starting another action.",
+            ),
+          );
+        if (
+          action.kind === "close" &&
+          (!confirmClose ||
+            !matchesShiftCloseReview(confirmClose, latest) ||
+            latest?.user_id !== user.user_id)
+        )
+          throw new Error(
+            tr(
+              "The shift or expected cash changed. Go back, refresh and review the counted cash again.",
+            ),
+          );
+      }
+      setAttempt(action);
+      submitted = true;
       if (action.kind === "open") {
         const opened = await api<cashShift.CashShiftOut>(
           "POST",
@@ -187,9 +248,8 @@ export function CashShift({
         // The write is confirmed even if the following read fails; never repeat it for a read failure.
         setAttempt(undefined);
         setOpeningFloat("0");
-        setNotice(
-          tr("Cash shift opened successfully.") + " #" + opened.shift_id,
-        );
+        setNotice("Cash shift opened successfully.");
+        setNoticeShiftId(opened.shift_id);
         await shiftReq.reload();
       } else {
         const closed = await cashShift.closeShift(action.shiftId, action.body);
@@ -197,14 +257,15 @@ export function CashShift({
         setAttempt(undefined);
         setDeclaredCash("");
         setConfirmClose(undefined);
-        setNotice(
-          tr("Shift closed successfully. Pending collection by accountant."),
-        );
+        setNotice("Shift closed successfully. Pending collection by accountant.");
         await shiftReq.reload();
       }
     } catch (cause) {
       setError(cause);
-      if (definiteShiftRefusal(cause)) {
+      if (!submitted) {
+        // Failed prerequisites cannot imply an uncertain money write.
+        if (action.kind === "close") setReviewReadBlocked(true);
+      } else if (definiteShiftRefusal(cause)) {
         // SHIFT_NOT_OPEN still needs the original record, rather than a blind new close.
         if (action.kind === "close") setAttempt(action);
         else setAttempt(undefined);
@@ -256,7 +317,10 @@ export function CashShift({
           ),
         );
       setChecked(current);
-      if (current) setReview(current);
+      if (current) {
+        setReview(current);
+        setReviewReadBlocked(false);
+      }
       await shiftReq.reload();
     } catch (cause) {
       setError(cause);
@@ -278,11 +342,7 @@ export function CashShift({
     setAttempt(undefined);
     setChecked(undefined);
     setConfirmClose(undefined);
-    setNotice(
-      tr(
-        "Recovery hold cleared after review. Check the current shift before starting another action.",
-      ),
-    );
+    setNotice("Recovery hold cleared after review. Check the current shift before starting another action.");
   }
 
   if (!canOperate)
@@ -323,9 +383,16 @@ export function CashShift({
       <LoadState {...terminalReq} retry={terminalReq.reload} />
       <ErrorBox error={error} />
       <ErrorBox error={zoneProblem} />
+      {reviewReadBlocked && (
+        <p className="notice" role="alert">
+          {tr(
+            "The reviewed shift is not current. Refresh successfully before closing; your counted cash is kept.",
+          )}
+        </p>
+      )}
       {notice && (
         <p className="notice" role="status">
-          {notice}
+          {tr(notice)}{noticeShiftId !== undefined && <> #<bdi>{noticeShiftId}</bdi></>}
         </p>
       )}
       {review && (
@@ -334,6 +401,7 @@ export function CashShift({
           disabled={blocked}
           onClick={() => {
             setReview(undefined);
+            setReviewReadBlocked(false);
             void shiftReq.reload();
           }}
         >

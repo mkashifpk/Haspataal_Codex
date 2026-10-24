@@ -892,24 +892,26 @@ export const help: Record<string, HelpPage> = {
     purposeUr:
       "کاؤنٹر عملہ: مقررہ کاؤنٹر چیک کریں، دراز کھولیں، کھاتہ دیکھیں اور گنی ہوئی نقدی کے ساتھ اکاؤنٹنٹ کے لیے بند کریں۔",
     steps: [
-      "Open Reception > My cash shift. Check Terminal cash counter, shift number and cashier. If the counter is missing or wrong, ask IT; it cannot be changed here.",
+      "Open My cash shift from Reception, Cashier or Pharmacy when your permissions and workspace provide it. Check Terminal cash counter, shift number and cashier. If the counter is missing or wrong, ask IT; it cannot be changed here.",
       "With no open shift, enter Opening float (a nonnegative amount) and choose Open cash shift once. Wait for the confirmed shift number. An error is not a successful opening.",
-      "Use Refresh to read the current shift and drawer ledger. Check cash totals separately from non-cash collections. Times use the hospital timezone; business dates already belong to the hospital. The screen does not promise a cash-shift event.",
+      "Use Refresh to read the current shift and drawer ledger. Check cash totals separately from non-cash collections. Times use the hospital timezone; business dates already belong to the hospital. The screen does not promise a cash-shift event. A failed reviewed-shift refresh blocks closure until Refresh succeeds; your counted draft remains. New opening/closing actions recheck permission, the terminal counter and the original drawer before submission.",
       "To close your shift at this counter, count cash excluding the opening float. Enter Counted cash in drawer, choose Close shift and review shift/counter/amounts. The confirmation keeps the reviewed shift, counter and amounts fixed. If a refresh changes the shift or expected cash, Go back, Refresh and review again. Go back keeps the amount without closing; Confirm & Close Shift submits once.",
       "Server-confirmed PendingCollection means the accountant must still verify the handover. Show my current shift returns from a reviewed closed shift to current server state.",
       "If an answer is uncertain, keep the window open and use Check original shift. Only an opening has Retry original opening, with its original identity/body within 24 hours. Never blindly retry closure. With your supervisor review the original shift, then Close reviewed attempt only after reconciliation.",
       "F1 from a field or confirmation opens this page without losing the draft. Closing Help restores focus. Ctrl +/−/0 and Settings share 100–250% zoom. Urdu wording and fresh-record human review remain pending.",
     ],
     stepsUr: [
-      "استقبالیہ سے میری کیش شفٹ کھولیں۔ ٹرمینل کاؤنٹر، شفٹ نمبر اور کیشیئر دیکھیں۔ غلط یا غائب ترتیب آئی ٹی درست کرے، یہاں نہیں بدل سکتی۔",
+      "استقبالیہ، کیشیئر یا فارمیسی میں اجازت کے مطابق میری کیش شفٹ کھولیں۔ ٹرمینل کاؤنٹر، شفٹ نمبر اور کیشیئر دیکھیں۔ غلط یا غائب ترتیب آئی ٹی درست کرے، یہاں نہیں بدل سکتی۔",
       "کھلی شفٹ نہ ہو تو غیر منفی ابتدائی فلوٹ درج کرکے ایک بار کیش شفٹ کھولیں۔ سرور کے تصدیق شدہ نمبر کا انتظار کریں۔ خطا کامیابی نہیں۔",
-      "تازہ کریں سے موجودہ شفٹ اور کھاتہ پڑھیں۔ نقد اور غیر نقد وصولیاں الگ دیکھیں۔ وقت ہسپتال کے ٹائم زون میں ہے اور کاروباری تاریخ پہلے سے ہسپتال کی ہے۔ خودکار نقد واقعے کی ضمانت نہیں۔",
+      "تازہ کریں سے موجودہ شفٹ اور کھاتہ پڑھیں۔ نقد اور غیر نقد وصولیاں الگ دیکھیں۔ وقت ہسپتال کے ٹائم زون میں ہے اور کاروباری تاریخ پہلے سے ہسپتال کی ہے۔ خودکار نقد واقعے کی ضمانت نہیں۔ جائزہ شدہ شفٹ تازہ نہ ہو تو کامیاب تازگی تک بندش رکے گی، گنی ہوئی رقم رہے گی۔ نئے افتتاح یا بندش سے پہلے اجازت، ٹرمینل کاؤنٹر اور اصل دراز دوبارہ چیک ہوتے ہیں۔",
       "اسی کاؤنٹر پر بندش کے لیے فلوٹ نکال کر نقد گنیں۔ دراز میں گنی ہوئی نقدی درج کرکے شفٹ بند کریں۔ نمبر، کاؤنٹر اور رقم دیکھیں۔ تصدیق میں شفٹ، کاؤنٹر اور رقم کا جائزہ برقرار رہتا ہے۔ شفٹ یا متوقع نقد بدل جائے تو واپس جائیں، تازہ کریں اور دوبارہ جائزہ لیں۔ واپس سے رقم رہتی ہے اور شفٹ بند نہیں ہوتی؛ تصدیق سے ایک بار ارسال ہوتا ہے۔",
       "سرور کی وصولی کے انتظار کی حالت کے بعد بھی اکاؤنٹنٹ کو حوالگی چیک کرنا ہے۔ میری موجودہ شفٹ جائزہ شدہ بند شفٹ سے موجودہ حالت پر لاتی ہے۔",
       "جواب غیر یقینی ہو تو ونڈو کھلی رکھ کر اصل شفٹ چیک کریں۔ صرف افتتاح چوبیس گھنٹے میں وہی شناخت اور مواد کے ساتھ دوبارہ ہو سکتا ہے۔ بندش اندھا دوبارہ نہ کریں۔ نگران کے ساتھ اصل شفٹ کا نتیجہ واضح کرکے جائزہ شدہ کوشش بند کریں۔",
       "خانے یا تصدیق میں F1 یہ مدد کھولتا اور مسودہ رکھتا ہے۔ مدد بند ہونے پر فوکس لوٹتا ہے۔ Ctrl +/−/0 اور ترتیب کا زوم ایک ہی سو سے ڈھائی سو فیصد ہے۔ اردو اور تازہ ریکارڈ کا انسانی جائزہ باقی ہے۔",
     ],
     faq: [
+      ["Who opens the drawer and who verifies it?", "Receptionists, cashiers and pharmacists with finance.shift.operate use their own mapped counter drawer. The accountant reads the closed shift and verifies the cash drop separately. No one borrows a login or changes a terminal mapping on this screen."],
+      ["Why did confirmation stop before sending?", "Permissions, the terminal mapping, shift identity/status or expected cash may have changed. No closure was submitted by this precheck. Keep your counted amount, Go back and Refresh successfully, then compare the current drawer and amounts before opening a new confirmation."],
       [
         "What if my terminal has no cash counter?",
         "Opening is blocked. Ask IT to map the correct terminal counter, then Refresh. Do not choose another counter or borrow a colleague's account.",
@@ -932,6 +934,8 @@ export const help: Record<string, HelpPage> = {
       ],
     ],
     faqUr: [
+      ["دراز کون کھولتا اور تصدیق کون کرتا ہے؟", "اجازت رکھنے والا استقبالیہ، کیشیئر یا فارماسسٹ اپنی مقررہ دراز استعمال کرے۔ اکاؤنٹنٹ بند شفٹ اور کیش ڈراپ الگ تصدیق کرتا ہے۔ کسی کا لاگ ان نہ لیں؛ یہاں ٹرمینل کی ترتیب نہیں بدلتی۔"],
+      ["ارسال سے پہلے تصدیق کیوں رک گئی؟", "اجازت، کاؤنٹر، شفٹ کی شناخت یا حالت یا متوقع نقد بدل سکتا ہے۔ اس جانچ سے بندش نہیں بھیجی گئی۔ گنی ہوئی رقم رکھیں، واپس جائیں، کامیابی سے تازہ کریں اور نئی تصدیق سے پہلے دراز اور رقوم ملائیں۔"],
       [
         "ٹرمینل کا کاؤنٹر نہ ہو تو؟",
         "افتتاح رکتا ہے۔ آئی ٹی سے درست ترتیب کروا کر تازہ کریں۔ دوسرا کاؤنٹر یا ساتھی کا اکاؤنٹ نہ لیں۔",
