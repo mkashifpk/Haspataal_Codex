@@ -178,6 +178,7 @@ export const help: Record<string, HelpPage> = {
       "ایف۱ یا مدد کا بٹن معلومات کو محفوظ رکھتا ہے۔ زوم ۱۰۰ تا ۲۵۰ فیصد برقرار رہتا ہے۔"
     ],
     faq: [
+      ["Why is the original invoice still credit authorised after repayment?", "Credit authorisation and repayment of the debtor balance are separate records. Use the settlement receipt and remaining outstanding balance to confirm repayment. Fully settled debts leave the outstanding queue; do not collect the original invoice again."],
       [
         "Why is Settle or Collect payment disabled or failing with SHIFT_NOT_OPEN?",
         "Collecting cash requires an open cash shift on your cashier account. Open My cash shift, enter your opening float, and open your shift before collecting cash."
@@ -192,6 +193,7 @@ export const help: Record<string, HelpPage> = {
       ]
     ],
     faqUr: [
+      ["ادائیگی کے بعد اصل بل پر ادھار کی اجازت کیوں ہے؟", "ادھار کی منظوری اور بقایا قرض کی ادائیگی الگ ریکارڈ ہیں۔ ادائیگی کی رسید اور باقی واجب الادا رقم سے تصدیق کریں۔ مکمل ادا قرض بقایا قطار سے نکلتا ہے؛ اصل بل کی رقم دوبارہ وصول نہ کریں۔"],
       [
         "ادائیگی یا وصولی کا بٹن غیر فعال کیوں ہے یا SHIFT_NOT_OPEN کا پیغام کیوں آتا ہے؟",
         "نقد وصولی کے لیے کیشیئر کی کھلی شفٹ لازم ہے۔ میری کیش شفٹ کھول کر اپنی شفٹ شروع کریں۔"

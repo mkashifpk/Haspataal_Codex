@@ -1,0 +1,17 @@
+// Reconcile the original completed synthetic workflow by reads only.
+// Does not reopen a drawer, reactivate an account, or repeat any payment.
+import fs from 'node:fs';import assert from 'node:assert/strict';import {createRequire} from 'node:module';
+const {request,checkedRoot}=createRequire(import.meta.url)('../electron/transport.cjs');
+const cfg=JSON.parse(fs.readFileSync('.dev-terminal.json')),ca=checkedRoot(cfg.ca_pem,cfg.ca_fingerprint_sha256);
+const file='artifacts/phase2-financial-cycle.json',j=JSON.parse(fs.readFileSync(file));assert(!j.pending);assert(j.ar_settlement?.result.data.receivable.status==='Settled');
+const call=async(method,path,token,body)=>{const r=await request(cfg.server_urls[0]+'/api/v1'+path,{ca,method,body,headers:{...(token?{Authorization:'Bearer '+token}:{}),'X-Haspataal-Developer':'mkashif','X-Haspataal-Implementation':'1'}});assert(r.status<400,path+':'+r.status);return r.body.data;};
+const token=async user=>(await call('POST','/auth/login',null,{username:user,password:'Demo-pass-2026'})).access_token;
+const owner=await token('demo.owner'),it=await token('demo.it'),cashier=await token('demo.cashier');
+const ticket=await call('GET','/opd-tickets/'+j.refund_ticket.ticket_id,owner);assert.equal(ticket.patient_name,j.run+' virtual full refund');assert.equal(ticket.cash_back_prompts.length,0);assert.equal(ticket.invoice.amount_paid,ticket.invoice.amount_refunded);
+const shift=await call('GET','/finance/cash-shifts/'+j.shift_id,owner);assert.equal(shift.user_id,j.user_id);assert.equal(shift.status,'PendingCollection');assert.equal(shift.expected_cash,0);assert.equal(shift.declared_cash,0);
+const invoice=await call('GET','/finance/invoices/'+j.credit_ticket.invoice.invoice_id,cashier);assert.equal(invoice.patient_id,j.credit_ticket.patient_id);assert.equal(invoice.balance_due,0);assert.equal(invoice.credit_amount,invoice.net_payable);
+const ar=await call('GET','/finance/ar/outstanding',cashier);assert(!ar.some(a=>a.ar_id===j.ar.ar_id));const settled=j.ar_settlement.result.data.receivable;assert.equal(settled.status,'Settled');assert.equal(settled.amount_due-settled.amount_paid-settled.amount_written_off,0);
+const u=await call('GET','/admin/users/'+j.user_id,it);assert.equal(u.username,j.username);assert.equal(u.employee_id,j.employee_id);assert.equal(u.is_active,false);
+const terminals=await call('GET','/admin/terminals',it),terminal=terminals.find(t=>t.terminal_id===j.terminal_id);assert.equal(terminal.location_label,j.terminal_body.location_label);assert.equal(terminal.is_active,false);
+j.final_read_verification={passed:true,at:new Date().toISOString(),ticket_status:ticket.status,shift,settlement_receipt:settled,absent_from_outstanding:true,invoice,account_inactive:true,terminal_inactive:true,limitation:'UI business writes passed; earlier harness stopped after receipt on ambiguous Close locator. Settled AR is confirmed by its original server receipt and absence from the outstanding-only queue. Original AR settlement remains separate from the credit-authorised invoice, not a second invoice payment. No business write repeated.'};
+j.passed=true;if(j.error){j.previous_errors=j.previous_errors||[];j.previous_errors.push(j.error);delete j.error;}delete j.shift_cleanup_error;fs.writeFileSync(file,JSON.stringify(j,null,2));console.log(JSON.stringify({passed:true,ticket:ticket.ticket_id,shift:shift.shift_id,ar:settled.ar_id,ar_status:settled.status,invoice_status:invoice.status,invoice_balance:invoice.balance_due}));

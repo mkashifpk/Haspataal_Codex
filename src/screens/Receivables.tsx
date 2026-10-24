@@ -396,8 +396,6 @@ export function Receivables({
                   <option value="all">{tr("All statuses")}</option>
                   <option value="Active">{tr("Active")}</option>
                   <option value="PartiallySettled">{tr("Partially settled")}</option>
-                  <option value="Settled">{tr("Settled")}</option>
-                  <option value="WrittenOff">{tr("Written off")}</option>
                   <option value="Cancelled">{tr("Cancelled")}</option>
                 </select>
               </Field>
@@ -509,15 +507,11 @@ export function Receivables({
                                   {tr("Write off")}
                                 </button>
                               ) : (!canWriteOff || readOnly) && item.balance > 0 ? (
-                                <button
-                                  data-help="receivables.write_off"
-                                  disabled
-                                  title={readOnly ? tr("This financial action is unavailable with your current permissions or record-only access.") : tr(
-                                    "Write off requires Hospital Admin or Owner permission (finance.ar.write_off). A cashier collects and settles but never writes off.",
-                                  )}
-                                >
-                                  {tr("Write off")}
-                                </button>
+                                <span className="fine muted">
+                                  {tr(readOnly
+                                    ? "Records only — new actions are unavailable for this service."
+                                    : "Ask an authorised administrator about debt write-offs.")}
+                                </span>
                               ) : null}
                             </div>
                           </td>
