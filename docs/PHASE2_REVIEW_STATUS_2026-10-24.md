@@ -2,7 +2,7 @@
 
 Phase 2 is **Outpatient front desk and consultation**, 19 screens. All have UI implementations; this does not mean every API/event/rule or human acceptance gate is complete. The portal still reports zero fully accepted screens because partial claims and proposals do not close the full screen checklist. Only the human portal review awards progress.
 
-Current source: `fe68bd3`, renderer `index-C6mdBa9P.js`. Build/help coverage and 74 unit tests passed. Final six-role readonly navigation:76visits/28authenticated screen IDs, zero errors/5xx/businesswrites; preferences restored and signedout for all6. Real DEV tests use synthetic records only. The earlier pre-reset evidence is historical; do not reuse its record IDs.
+Current source: e5dd135, renderer index-Cd4gDgdp.js. Build/help coverage and **76 unit tests passed**. Prior six-role navigation on fe68bd3 passed76visits/28authenticated IDs, zero errors/5xx/businesswrites; all6preferences restored/signedout. New targeted consent/upload checks passed on Cd4gDgdp. Real DEV tests use synthetic records only. The earlier pre-reset evidence is historical; do not reuse its record IDs.
 
 ## Backend fixes applied and verified
 
@@ -10,7 +10,7 @@ Current source: `fe68bd3`, renderer `index-C6mdBa9P.js`. Build/help coverage and
 - #18: searching old merged MRN `MRN-2026-000006` finds master11/current `MRN-2026-000007` once. UI explains the old identifier match in English/Urdu. Never repeat merge10→11.
 - #14: fresh refund/approval/cash-back software workflow passed.
 - #15: Owner can open dues; Cashier can settle but sees no write-off action. UI permission guidance corrected.
-- #16: own unsampled laboratory cancellation passed. Fresh other-doctor and sampled-order refusal cases remain to be exercised.
+- #16: fresh own-unsampled UI200, other-doctor403FORBIDDEN and sampled409LAB_ITEM_STATE_INVALID all passed; unsupported cancellation actions hidden.
 
 ## Screen checks and remaining review
 
@@ -18,18 +18,18 @@ Current source: `fe68bd3`, renderer `index-C6mdBa9P.js`. Build/help coverage and
 |---|---|---|
 | My cash shift | Zero opening, uncertain-write recovery, count and close; use separate cash-shift worksheet | Named drawer/physical handover review |
 | Patient Search | Digit names, merged identifiers/master, edit/recovery | Remaining refusal variants and named review |
-| Registration + OPD slip | Optional UPMRN, duplicate guidance, same-key atomic registration/payment recovery | AR/emergency/service refusal matrix, physical slip printing |
-| Queue management | Fresh Defer/Reactivate and refund workflow | Re-route reason/flag variants and full event/refusal plan |
-| Refund / waiver / credit | Fresh refund approval and credit authorisation | Post-consult VIP waiver/elevated approver variants |
-| Mandatory cash-back | Exact amount, blocking confirmation, original drawer net zero | Waiver-refund variant and physical review |
+| Registration + OPD slip | Optional UPMRN, duplicate guidance, same-key recovery; fresh AR block and explicit emergency bypass | Inactive-service and remaining refusal variants, physical slip printing |
+| Queue management | Fresh Defer/Reactivate/refund; two-doctor reasoned reroute and live handover | Full expiry/forfeiture and remaining refusal plan |
+| Refund / waiver / credit | Fresh refund/credit plus post-consult waiver/lost-reply recovery/Owner decision | Elevated post-clinical REFUND risk/approver variants |
+| Mandatory cash-back | Both refund and waiver-refund blocking prompts/confirmations; isolated drawers net zero | Physical review and remaining denied-drawer variants |
 | Outstanding dues | Cashier permission fix, separate Card AR collection, invoice/F1 read | Positive Owner write-off with active debt, full refusal matrix |
-| Patient document vault | Consent/Skip/reselect fix, separate photo and outside report, original photo download | Camera hardware; remaining upload/error/retry matrix |
+| Patient document vault | Consent/Skip/reselect fix, separate uploads/download, lost201 original-key replay/one attachment | Camera hardware and remaining type/size/date/denied-upload matrix |
 | Tariff | Role navigation/read smoke | Fresh role-specific review of displayed services/prices |
-| Doctor queue | Actual arrival/call into consultation | Reasoned re-route and remaining event variants |
+| Doctor queue | Actual arrival/call; reason required, live top/highlighted handover and restore | Remaining reconnect/refusal variants and human workflow |
 | ICD picker | Real catalogue/code-only storage, diagnosis title readback | Full current catalogue/version/refusal plan and human terminology review |
-| Consultation | Final coded NotExamined note, consent deliberately chosen | Clinic-required refusal/VCO/Declined variants, procedure gates and outstanding event checks |
+| Consultation | Server-selected Clinic guidance; consent switches, Final VCO/Declined, lost201 retry, VCO PDF | Actual Clinic422 on controlled Clinic setup, procedure gates and remaining events |
 | E-prescription | Linked encounter, complete OPD directions, empty handover blocked | Actual handover, remaining safety/service/refusal branches and physical print |
-| Lab & imaging | Own unsampled CBC order/cancellation | Sampled/other-doctor refusals, imaging and remaining event/service branches |
+| Lab & imaging | Own unsampled200; other-doctor403; sampled409; prohibited actions hidden | Imaging and remaining event/service branches |
 | External referral | Lost-create replay; lost-cancel original read; fixed stale detail refresh; real PDF | Actual receiving acknowledgement; contact-list branch and remaining negative cases |
 | Referral register | Read-only role navigation/filter/detail implementation | Fresh cancellation/filter review in Quality and remaining plan |
 | Patient education | Linked encounter, lost201 same-key recovery, immutable corrective entry | Positive material branches, remaining denied/error cases, human staff workflow |
@@ -51,4 +51,12 @@ Original keys/receipts and failed-test limitations are in the dated evidence fil
 
 ## Progress review
 
-110–114 accepted. New115 Receivables,116 Cash-back,117 Documents,118 Education and119 Referral are **awaiting human review on /docs -> My progress**, together with109 Cash shift. Only tested new items were proposed; full-plan and human gates were not claimed. Check live feedback before any further proposal.
+110–119 accepted at this continuation start. New120 Registration,121 Post-consult waiver,122 Waiver cash-back,123 Lab cancellation,124 Doctor re-route,125 Consultation and126 Upload recovery are **awaiting human review on /docs -> My progress**, together with109 Cash shift. Only tested new items were proposed; full-plan and human gates were not claimed. Check live feedback before any further proposal.
+
+## New synthetic records from this continuation
+
+- Patient16 DEMO-AR-EMERGENCY-1792861877963, ticket5/OPD000005: original credit approved, AR2 Card-settled; two reasoned re-routes returned it to Doctor10. Simulated VCO note3/Declined note4; no actual examination/care. Emergency-bypass ticket6 was voided, debt is clear. Never repeat these writes.
+- Patient17/ticket7: final note2, waiver approval4/cash-back1500 confirmed, ends Waivered. Isolated employee43/user41/terminal9/shift9 closed PendingCollection expected0/declared0; account/terminal inactive. First harness Plan-label failure corrected by resuming original sale, no replacement payment.
+- Patient13: lab requisition2 Cancelled, requisition3 sampled-refusal test; invoice10 paid800Card. Synthetic sample3 subsequently RejectedOther, requisition remains InProgress/re-run workflow; NO actual specimen/result. New outside attachment3 original-key upload recovery passed.
+
+DEV currently has profileIIB and active services: it cannot prove Clinic-only422 or retired-service paths in that state. No shared profile/service changed and no backend response fabricated. PACS study/viewer cases need an actual linked DEV study; camera/thermal printer/cash handovers and named role/Urdu/editor reviews need the relevant human/hardware. Remaining negative API variants stay explicit. These limits are not new backend bug reports or full-plan passes.
