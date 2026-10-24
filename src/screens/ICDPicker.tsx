@@ -60,17 +60,17 @@ export function ICDPicker({
   }, [q, mode, system, releases.loading, releases.error]);
   const browse = useLoad(
     () =>
-      system && mode === "browse"
+      system && !releases.loading && !releases.error && mode === "browse"
         ? icd.browse({ system, parent })
         : Promise.resolve(undefined),
-    [system, mode, parent],
+    [system, mode, parent, releases.loading, releases.error],
   );
   const detail = useLoad(
     () =>
-      code && system
+      code && system && !releases.loading && !releases.error
         ? icd.detail(encodeURIComponent(code), { system })
         : Promise.resolve(undefined),
-    [code, system],
+    [code, system, releases.loading, releases.error],
   );
   const selected =
     !detail.loading && !detail.error && detail.data?.code === code
@@ -89,6 +89,15 @@ export function ICDPicker({
     setCode(c);
     setPicked(undefined);
   };
+  const refresh = () => {
+    generation.current++;
+    setItems(undefined);
+    setSearchError(undefined);
+    setSearching(false);
+    setCode(undefined);
+    setPicked(undefined);
+    void releases.reload();
+  };
   return (
     <section data-help-screen="icd_picker">
       <div className="section-heading">
@@ -101,7 +110,7 @@ export function ICDPicker({
             )}
           </p>
         </div>
-        <button data-help="icd.refresh" onClick={() => void releases.reload()}>
+        <button data-help="icd.refresh" disabled={releases.loading} onClick={refresh}>
           {t("Refresh classification", "درجہ بندی تازہ کریں")}
         </button>
       </div>
