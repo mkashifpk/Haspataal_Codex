@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { tr, bilingual as t } from "../i18n";
 import { isDuplicatePatient, patientErrorCode, patientEditNeedsReconcile } from "../patient-errors";
+import { resolvePatientMaster } from "../patient-profile";
 import * as pts from "../generated/patient_search";
 import { api } from "../bridge";
 import { formatHospitalTime } from "../hospital-time";
@@ -65,6 +66,7 @@ export function PatientSearch({
   const financialGeneration = useRef(0);
   const searchGeneration = useRef(0);
   const [editBase, setEditBase] = useState<pts.PatientDetailOut | null>(null);
+  const editIdentity = useRef<number | null>(null);
   const [financialError, setFinancialError] = useState<unknown>();
 
   // Financial summary
@@ -86,6 +88,7 @@ export function PatientSearch({
     if (editFlight.current) return;
     if (editDirty && !window.confirm(tr("Discard patient demographic changes?"))) return;
     setEditOpen(false);
+    editIdentity.current = null;
     setEditDirty(false);
   }
 
@@ -168,24 +171,6 @@ export function PatientSearch({
     }
   }
 
-  // Load single patient detail
-  const loadPatientDetail = useCallback(async (id: number) => {
-    const generation = ++detailGeneration.current;
-    setLoadingDetail(true);
-    setPatient(null);
-    setDetailError(undefined);
-    try {
-      const p = await pts.getPatient(id);
-      if (generation !== detailGeneration.current || selection.current !== id)
-        return;
-      setPatient(p);
-    } catch (e) {
-      if (generation === detailGeneration.current) setDetailError(e);
-    } finally {
-      if (generation === detailGeneration.current) setLoadingDetail(false);
-    }
-  }, []);
-
   // Load financial summary
   const loadFinancials = useCallback(async (id: number) => {
     const generation = ++financialGeneration.current;
@@ -207,6 +192,40 @@ export function PatientSearch({
         setLoadingFinancials(false);
     }
   }, []);
+
+  const loadPatientDetail = useCallback(async (id: number) => {
+    const generation = ++detailGeneration.current;
+    const current = () => generation === detailGeneration.current && selection.current === id;
+    setLoadingDetail(true);
+    setPatient(null);
+    setDetailError(undefined);
+    try {
+      const record = await resolvePatientMaster(id, pts.getPatient, current);
+      if (!record || !current()) return;
+      if (record.patient_id !== id) {
+        selection.current = record.patient_id;
+        setSelectedId(record.patient_id);
+        void loadFinancials(record.patient_id);
+      }
+      if (editIdentity.current !== null && editIdentity.current !== record.patient_id) {
+        setVersionConflict(true);
+        setLatestEdit(null);
+        setEditError(new Error("This profile was merged. Read the current master record before making further changes. Your draft is preserved."));
+      }
+      setPatient(record);
+    } catch (error) {
+      if (current()) {
+        setDetailError(error);
+        if (editIdentity.current !== null) {
+          setVersionConflict(true);
+          setLatestEdit(null);
+          setEditError(error);
+        }
+      }
+    } finally {
+      if (generation === detailGeneration.current) setLoadingDetail(false);
+    }
+  }, [loadFinancials]);
 
   function handleSelectPatient(p: pts.PatientSearchHitOut) {
     if (!canView) return;
@@ -239,6 +258,7 @@ export function PatientSearch({
     if (!source) return;
     const record = source;
     setEditBase(record);
+    editIdentity.current = record.patient_id;
     setFormName(record.full_name || "");
     setFormGender(record.gender || "unknown");
     setFormDob(record.dob || "");
@@ -265,7 +285,7 @@ export function PatientSearch({
 
   async function handleSaveEdit(e: React.FormEvent) {
     e.preventDefault();
-    if (!editBase || versionConflict || editFlight.current || !canUpdate) return;
+    if (!editBase || versionConflict || editFlight.current || !canUpdate || !canSaveEdit) return;
     editFlight.current = true;
     const patient = editBase;
     setEditBusy(true);
@@ -303,6 +323,7 @@ export function PatientSearch({
       const updated = await pts.updatePatient(patient.patient_id, body);
       setPatient(updated);
       setEditOpen(false);
+      editIdentity.current = null;
       setEditDirty(false);
       // Also update search results entry if present
       setResults((prev) =>
@@ -320,6 +341,8 @@ export function PatientSearch({
       setEditBusy(false);
     }
   }
+
+  const canSaveEdit = !!patient && !loadingDetail && patient.patient_id === editBase?.patient_id && patient.registration_type !== "Merged" && !patient.merged_into_id;
 
   const formatMoney = (val?: number | null) => {
     if (val === undefined || val === null) return "—";
@@ -1127,8 +1150,8 @@ export function PatientSearch({
                 if (!editBase) return;
                 setEditBusy(true);
                 try {
-                  const fresh = await pts.getPatient(editBase.patient_id);
-                  setLatestEdit(fresh);
+                  const fresh = await resolvePatientMaster(editBase.patient_id, pts.getPatient);
+                  if (fresh) setLatestEdit(fresh);
                 } catch (error) {
                   setEditError(error);
                 } finally {
@@ -1141,7 +1164,7 @@ export function PatientSearch({
           )}
           {latestEdit && <div data-help="patients.edit">
             <Details value={latestEdit} />
-            <button data-help="patients.edit" type="button" onClick={() => { setPatient(latestEdit); openEditModal(latestEdit); }}>
+            <button data-help="patients.edit" type="button" onClick={() => { ++detailGeneration.current; selection.current = latestEdit.patient_id; setSelectedId(latestEdit.patient_id); setPatient(latestEdit); void loadFinancials(latestEdit.patient_id); openEditModal(latestEdit); }}>
               {tr("Discard draft and reload latest record")}
             </button>
           </div>}
@@ -1350,7 +1373,7 @@ export function PatientSearch({
               <button data-help="patients.edit"
                 type="submit"
                 className="primary"
-                disabled={editBusy || versionConflict}
+                disabled={editBusy || versionConflict || !canSaveEdit}
               >
                 {editBusy ? tr("Saving…") : tr("Save changes")}
               </button>

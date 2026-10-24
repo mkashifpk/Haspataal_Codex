@@ -958,6 +958,7 @@ export const help: Record<string, HelpPage> = {
     purposeUr:
       "ایم آر این، موبائل، شناختی کارڈ یا نام سے مریض تلاش کریں؛ بقایا جات کا بینر دیکھیں۔",
     steps: [
+      "A merged identity opens the actual master profile. If your open edit belongs to the old identity, keep the draft for comparison, read the current master, then explicitly discard/reload before another save.",
       "Type at least two characters into the search field (name, phone, CNIC, or MRN), or scan the patient's MRN barcode with a handheld scanner.",
       "The system searches with a 250ms debounce. Select the patient from the results to view their complete profile.",
       "Check the patient banners: an outstanding dues banner indicates unpaid balances (reception may block new OPD slips until cleared); a Medico-Legal banner marks an active MLC (MSDS 154); a Deceased banner prohibits new visits.",
@@ -966,6 +967,7 @@ export const help: Record<string, HelpPage> = {
       "Click 'View dues & invoices' to inspect outstanding receivables and past invoices across the patient's whole merge chain.",
     ],
     stepsUr: [
+      "ضم شدہ شناخت سے اصل پروفائل کھلتی ہے۔ کھلا مسودہ پرانی شناخت کا ہو تو موازنے کے لیے محفوظ رکھیں، موجودہ اصل ریکارڈ پڑھیں، پھر دوبارہ محفوظ کرنے سے پہلے خود مسودہ چھوڑ کر تازہ کریں۔",
       "تلاش کے خانے میں کم از کم دو حروف (نام، فون، شناختی کارڈ یا ایم آر این) درج کریں، یا بارکوڈ سکینر سے ایم آر این سکین کریں۔",
       "نظام 250 ملی سیکنڈ کے وقفے سے خودکار تلاش کرتا ہے۔ مکمل پروفائل دیکھنے کے لیے نتائج میں سے مریض منتخب کریں۔",
       "مریض کے بینرز دیکھیں: سرخ بینر بقایا رقم ظاہر کرتا ہے (جس سے نئی او پی ڈی پرچی رک سکتی ہے)؛ میڈیکو لیگل بینر ایم ایل سی کیس ظاہر کرتا ہے؛ اور وفات یافتہ کا بینر نئی وزٹ سے روکتا ہے۔",
@@ -980,7 +982,7 @@ export const help: Record<string, HelpPage> = {
       ],
       [
         "What should I do if a patient has multiple merged profiles?",
-        "Merged records automatically resolve to the master profile. The system displays all merged MRNs under the master record so historical visits and billing are retained.",
+        "Merged records automatically resolve to the current master profile and its financial context. Retained source records remain in history, not as separate editable patients. If merging occurs during an edit, your draft is kept but Save is blocked. Read current record and compare the master; explicitly discard/reload before editing the master. Never repeat registration or a merge.",
       ],
       [
         "Why is a Deceased banner displayed?",

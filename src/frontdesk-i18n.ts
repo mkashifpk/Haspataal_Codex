@@ -1,5 +1,7 @@
 // Draft Urdu pending the named language/clinical review.
 export const frontdeskUr: Record<string, string> = {
+  "The merged patient record could not be resolved. Refresh or ask reception to check the master record.": "ضم شدہ مریض کا اصل ریکارڈ نہیں ملا۔ تازہ کریں یا استقبالیہ سے اصل ریکارڈ چیک کرائیں۔",
+  "This profile was merged. Read the current master record before making further changes. Your draft is preserved.": "یہ پروفائل ضم ہو چکی ہے۔ مزید تبدیلی سے پہلے موجودہ اصل ریکارڈ پڑھیں۔ آپ کا مسودہ محفوظ ہے۔",
   "Queue management": "قطاروں کا انتظام",
   "Refund / waiver / credit requests": "واپسی، رعایت اور ادھار کی درخواستیں",
   "Mandatory cash-back": "رقم کی لازمی واپسی",
