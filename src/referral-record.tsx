@@ -67,6 +67,15 @@ export function ReferralRecord({
     connected &&
     !blocked &&
     value?.status === "Issued";
+  const reviewed = () => {
+    const observed = write.observed as ref.ReferralOut | undefined;
+    if (observed?.referral_id === id && observed.status !== "Issued") {
+      setAction(undefined);
+      setDirty(false);
+    }
+    setLocal((n) => n + 1);
+    onChanged?.();
+  };
   const time = (v: string | null) =>
     v
       ? timeZone
@@ -188,7 +197,7 @@ export function ReferralRecord({
       <LoadState {...profile} retry={profile.reload} />
       <ErrorBox error={action ? undefined : error} verbatim />
       <p role="status">{notice}</p>
-      {!action && <ClinicalWriteFeedback write={write} />}
+      {!action && <ClinicalWriteFeedback write={write} onReviewed={reviewed} />}
       {value && (
         <>
           <h2>
@@ -437,7 +446,7 @@ export function ReferralRecord({
                   </button>
                 </fieldset>
                 <ErrorBox error={error} verbatim />
-                <ClinicalWriteFeedback write={write} />
+                <ClinicalWriteFeedback write={write} onReviewed={reviewed} />
               </section>
             </Modal>
           )}

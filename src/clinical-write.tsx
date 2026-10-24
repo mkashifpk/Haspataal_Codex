@@ -151,8 +151,10 @@ export function useClinicalWrite(
 }
 export function ClinicalWriteFeedback({
   write,
+  onReviewed,
 }: {
   write: ReturnType<typeof useClinicalWrite>;
+  onReviewed?: () => void;
 }) {
   return (
     <>
@@ -193,7 +195,10 @@ export function ClinicalWriteFeedback({
           {write.checked && (
             <>
               <Details value={write.observed} />
-              <button data-help="clinical.recovery" onClick={write.release}>
+              <button data-help="clinical.recovery" onClick={() => {
+                write.release();
+                onReviewed?.();
+              }}>
                 {t(
                   "Result reviewed; return to draft",
                   "نتیجہ چیک ہو گیا؛ مسودے پر واپس",
