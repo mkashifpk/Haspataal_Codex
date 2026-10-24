@@ -1,6 +1,6 @@
 # Haspataal pause checkpoint
 
-Last update: **2026-10-24 12:00 Asia/Karachi — Codex / functions**.
+Last update: **2026-10-24 12:06 Asia/Karachi — Codex / functions**.
 
 ## Stop condition
 
@@ -8,7 +8,7 @@ Last update: **2026-10-24 12:00 Asia/Karachi — Codex / functions**.
 
 All agent test apps have finished, restored their original preferences and logged out before this pause; no agent command, pending business write or uncertain response remains. A normal interactive terminal using the standard user profile may still be open (user-owned, not an agent test); do not kill it or discard its draft. No new server call was made after the pause instruction. No merge was submitted. The planned Registration queue-event follow-on was not started; ticket15 was NOT completed by that plan.
 
-Git baseline: main `13b2fefe1f655b80c93ba4267b64cea7a9acdc47`. User authorized committing everything now, including the preserved earlier user/Antigravity work. Implementation commit and final local verification will be recorded below after the freeze commit. Ignored credentials, test profiles, node_modules and dist stay out of Git. Historical details/original recovery keys are preserved in `docs/HANDOFF_HISTORY_2026-10-24.md` and the exact evidence/proposal JSON files; that archive is historical, not an executable task list.
+Git baseline: main `13b2fefe1f655b80c93ba4267b64cea7a9acdc47`. User authorized committing everything now, including the preserved earlier user/Antigravity work. Implementation commit **`fb7aca039c1d7edcc15a0b825cfeb7e190ab1bd4`** (`fb7aca0`: feat: checkpoint Phase 2 screens and verified recovery workflows) includes all259 changed files, including preserved prior work. Rebuilt and reran64unit tests OFFLINE on that exact commit; both PASS. A following documentation-only commit records this hash and the clean pause. See `docs/phase2-pause-progress-2026-10-24.json` for the proposal/build/commit mapping and source hashes. Ignored credentials, test profiles, node_modules and dist stay out of Git. Historical details/original recovery keys are preserved in `docs/HANDOFF_HISTORY_2026-10-24.md` and the exact evidence/proposal JSON files; that archive is historical, not an executable task list.
 
 ## What is complete
 
