@@ -37,6 +37,8 @@ import { Help } from "./screens/Help";
 import { setLanguage, tr } from "./i18n";
 import { hasUnsavedChanges } from "./unsaved";
 import { createMetadataFlight } from "./metadata-flight";
+import { createBootstrapSeed } from "./bootstrap-seed";
+type WorkspaceSnapshot = {establishment:EstablishmentOut;settings:any;me:MeOut;permittedWorkspaces:MeOut["workspaces"]};
 const labels: Record<string, [string, string, string]> = {
   home_visit_record: ["Record a home visit", "گھر کے دورے کا اندراج", "⌂"],
   patient_programmes: ["Preventive programmes of a patient", "مریض کے حفاظتی پروگرام", "◷"],
@@ -137,6 +139,9 @@ export function App() {
   const reauthFlight = useRef(false);
   const [metadataFlight] = useState(createMetadataFlight);
   const metadataEpoch = useRef(0);
+  const [bootstrapSeed] = useState(() => createBootstrapSeed<WorkspaceSnapshot>());
+  const catalogueEpoch = useRef<number | undefined>(undefined);
+  const [referenceError, setReferenceError] = useState<unknown>();
   const [readyContext, setReadyContext] = useState<{userId:number;workspace:string|null;epoch:number}>();
   const logoutFlight = useRef(false);
   const first = useRef(true),
@@ -173,6 +178,26 @@ export function App() {
       setBooting(false);
     }
   }, []);
+  const refreshReferences = useCallback((userId: number, epoch: number) => {
+    const current = () => metadataEpoch.current === epoch && liveState.current.user?.user_id === userId;
+    return metadataFlight(`references:${epoch}:${userId}`, async () => {
+      try {
+        const [count] = await Promise.all([
+          api<{unread:number}>("GET", "/notifications/unread-count"),
+          ...(catalogueEpoch.current !== epoch ? [Promise.all([
+            api("GET", "/meta/enums"), api("GET", "/meta/workspaces"),
+            api("GET", "/meta/error-codes"), api("GET", "/meta/events"),
+          ])] : []),
+        ]);
+        if (!current()) return;
+        catalogueEpoch.current = epoch;
+        setUnread(count.unread);
+        setReferenceError(undefined);
+      } catch (error) {
+        if (current()) setReferenceError(error);
+      }
+    });
+  }, [metadataFlight]);
   const refreshData = useCallback(async () => {
     const current = liveState.current;
     if (!current.user || current.user.must_change_password) return;
@@ -181,40 +206,22 @@ export function App() {
     const isCurrent = () => metadataEpoch.current === epoch && liveState.current.user?.user_id === userId && liveState.current.workspace === current.workspace;
     return metadataFlight(`${epoch}:${userId}:${current.workspace || ""}`, async () => {
     try {
-      const [
-        establishment,
-        handbook,
-        settings,
-        count,
-        me,
-        permittedWorkspaces,
-      ] = await Promise.all([
-        api<EstablishmentOut>("GET", "/establishment"),
-        api<HandbookOut>(
-          "GET",
-          "/meta/handbook" +
-            (current.workspace
-              ? "?workspace=" + encodeURIComponent(current.workspace)
-              : ""),
-        ),
-        api("GET", "/meta/settings"),
-        api<{ unread: number }>("GET", "/notifications/unread-count"),
-        api<MeOut>("GET", "/auth/me"),
-        api<MeOut["workspaces"]>("GET", "/auth/workspaces"),
-        // Catalogue reads are independent of the workspace metadata. Start them
-        // in the same batch instead of delaying workspace selection afterwards.
-        ...(!loaded.current ? [Promise.all([
-          api("GET", "/meta/enums"),
-          api("GET", "/meta/workspaces"),
-          api("GET", "/meta/error-codes"),
-          api("GET", "/meta/events"),
-        ])] : []),
+      const key = `${epoch}:${userId}:${current.workspace || ""}`;
+      const seed = bootstrapSeed.take(key);
+      // On first login defer the handbook until the authoritative workspace is
+      // known. A selected workspace reads only its own handbook, once.
+      const handbookRead = current.workspace ? api<HandbookOut>("GET", "/meta/handbook?workspace=" + encodeURIComponent(current.workspace)) : undefined;
+      const [snapshot, scopedHandbook] = await Promise.all([
+        seed ? Promise.resolve(seed) : Promise.all([
+          api<EstablishmentOut>("GET", "/establishment"), api("GET", "/meta/settings"),
+          api<MeOut>("GET", "/auth/me"), api<MeOut["workspaces"]>("GET", "/auth/workspaces"),
+        ]).then(([establishment,settings,me,permittedWorkspaces]) => ({establishment,settings,me,permittedWorkspaces})),
+        handbookRead,
       ]);
+      const {establishment,settings,me,permittedWorkspaces} = snapshot;
       if (!isCurrent()) return;
       setEst(establishment);
-      setOutline(handbook);
       setMeta(settings);
-      setUnread(count.unread);
       setUser({ ...me, workspaces: permittedWorkspaces });
       setPrefs(me.preferences);
       setMaintenance(
@@ -223,7 +230,6 @@ export function App() {
           : undefined,
       );
       if (!loaded.current) {
-        loaded.current = true;
         const available = permittedWorkspaces.filter(
           (w) =>
             establishment.views.workspaces.find((v) => v.workspace === w.code)
@@ -238,6 +244,8 @@ export function App() {
           if (available.length === 1) {
             await call("workspace", { code: available[0].code });
             if (!isCurrent()) return;
+            loaded.current = true;
+            bootstrapSeed.offer(`${epoch}:${userId}:${available[0].code}`, snapshot);
             setOutline(undefined);
             setHelpOpen(false);
             setHelpPage(undefined);
@@ -248,6 +256,7 @@ export function App() {
             setScreen("workspace_picker");
           }
         }
+        loaded.current = true;
       }
       if (
         current.workspace &&
@@ -262,12 +271,17 @@ export function App() {
         setScreen("workspace_picker");
         return;
       }
+      const handbook = scopedHandbook || await api<HandbookOut>("GET", "/meta/handbook");
+      if (!isCurrent()) return;
+      setOutline(handbook);
       setReadyContext({userId,workspace:current.workspace,epoch});
+      // Reference lists and badge counts cannot delay an authorized workspace.
+      void refreshReferences(userId, epoch);
     } catch (e) {
       if (isCurrent()) setError(e);
     }
     });
-  }, [metadataFlight]);
+  }, [metadataFlight, bootstrapSeed, refreshReferences]);
   useEffect(() => {
     void refreshState();
     const timer = setInterval(() => setClock(Date.now()), 1000);
@@ -278,6 +292,8 @@ export function App() {
     return window.terminal.subscribe((e) => {
       if (e.type === "login") {
         metadataEpoch.current++;
+        bootstrapSeed.clear();
+        setReferenceError(undefined);
         setReadyContext(undefined);
         if (e.license) setLicense(e.license);
         loaded.current = false;
@@ -291,6 +307,8 @@ export function App() {
       }
       if (e.type === "session-restored") {
         metadataEpoch.current++;
+        bootstrapSeed.clear();
+        setReferenceError(undefined);
         setReadyContext(undefined);
         setSessionRecovery(null);
         setSessionPassword("");
@@ -301,6 +319,8 @@ export function App() {
       }
       if (e.type === "logout") {
         metadataEpoch.current++;
+        bootstrapSeed.clear();
+        setReferenceError(undefined);
         setReadyContext(undefined);
         setSessionRecovery(null);
         setSessionPassword("");
@@ -326,6 +346,8 @@ export function App() {
       if (e.type === "connection") setConnected(e.connected);
       if (e.type === "permissions") {
         metadataEpoch.current++;
+        bootstrapSeed.clear();
+        setReferenceError(undefined);
         setReadyContext(undefined);
         setOutline(undefined);
         setHelpOpen(false);
@@ -385,7 +407,7 @@ export function App() {
           void refreshData();
       }
     });
-  }, [refreshData, refreshState]);
+  }, [refreshData, refreshState, bootstrapSeed]);
   useEffect(() => {
     if (user && !user.must_change_password) {
       void call("stream").catch(setError);
@@ -835,6 +857,11 @@ export function App() {
         )}
         <main id="content">
           <ErrorBox error={error} />
+          {!!referenceError && user && <section className="notice" data-help="shell.navigation">
+            <p>{t("Some reference lists could not be loaded. Retry to refresh them.", "بعض حوالہ جاتی فہرستیں حاصل نہیں ہو سکیں۔ تازہ کرنے کے لیے دوبارہ کوشش کریں۔")}</p>
+            <ErrorBox error={referenceError} />
+            <button data-help="shell.navigation" onClick={() => void refreshReferences(user.user_id, metadataEpoch.current)}>{t("Retry loading reference lists", "حوالہ جاتی فہرستیں دوبارہ حاصل کریں")}</button>
+          </section>}
           {notice && (
             <p className="notice" role="status">
               {notice}
