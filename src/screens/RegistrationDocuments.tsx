@@ -244,6 +244,7 @@ export function RegistrationDocuments({
                       stop();
                       setPhoto(undefined);
                       setPreview(undefined);
+                      setError(undefined);
                     }
                   }}
                 />
@@ -257,7 +258,11 @@ export function RegistrationDocuments({
                     disabled={
                       !consent || !!photo?.saved || photo?.busy || photo?.locked
                     }
-                    onChange={(e) => void choosePhoto(e.target.files?.[0])}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      e.target.value = "";
+                      void choosePhoto(file);
+                    }}
                   />
                 </Field>
                 <button data-help="registration.documents"
@@ -281,6 +286,7 @@ export function RegistrationDocuments({
                     setPhoto(undefined);
                     setPreview(undefined);
                     setConsent(false);
+                    setError(undefined);
                   }}
                 >
                   {tr("Skip photo")}
