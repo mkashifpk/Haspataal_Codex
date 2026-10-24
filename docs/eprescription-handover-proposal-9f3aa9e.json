@@ -1,0 +1,18 @@
+{
+  "implementation_id": 1,
+  "request_id": "codex-eprescription-handover-9f3aa9e-20261024",
+  "screen_id": "eprescription",
+  "items": [
+    "ep:POST /prescriptions/{prescription_id}/handover",
+    "rule:7874298bee",
+    "rule:116b498e61",
+    "rule:5a13c8d3a4",
+    "rule:a0b954034e",
+    "rule:72ad58bc73",
+    "q:writes",
+    "q:f1_help"
+  ],
+  "build": "9f3aa9e / index-Cd4gDgdp.js",
+  "rubric_fingerprint": "d23b880e906d",
+  "evidence": "## Implemented & Verified\nReal DEV Electron verification of Outpatient E-Prescription with full directions, linked consultation, safety warnings, safe write recovery, and actual handover (`node scripts/eprescription-handover-check.mjs --resume` PASS).\n- **Outpatient line validation (`rule:116b498e61`):** Requires dose, route, frequency, and whole-day duration for outpatient non-STAT lines; STAT dose requires dose and route. Missing duration or invalid quantity blocked in UI before POST. Consultation encounter 4 linked.\n- **Safety warnings (`rule:5a13c8d3a4`):** Search for Insulin regular 100IU/ml displays High-Alert banner (Insulin) and LASA warning ('Looks or sounds like: Insulin NPH 100IU/ml'). UI blocks submission until explicit safety confirmation checkbox is checked.\n- **Capability gating (`rule:a0b954034e`, `rule:72ad58bc73`):** Both HospitalPharmacy and ExternalMarket destinations available because dispensing is Active in `GET /establishment`.\n- **Standard prescription print-payload (`rule:7874298bee`):** `GET /prescriptions/{id}/print-payload` contains linked consultation encounter 4, particulars, directions in words ('10 IU SC OD for 5 days'), Dr. Ahmed Khan author stamp with PMDC registration, and signature line. Native PDF save verified with valid `%PDF-` header.\n- **Safe writes (`q:writes`):** Lost 201 response on `POST /prescriptions` replayed with original Idempotency-Key and identical body returns SAME prescription 2 (RX-2026-000002) with `replay: true`. Double-click single-flight protection verified.\n- **Actual handover (`ep:POST /prescriptions/{prescription_id}/handover`):** Unconfirmed handover blocks write before POST. Handover submitted with `handed_to: \"Patient\"`, `copy_kept: \"Electronic\"`, confirmed checkbox, and Idempotency-Key. Returned 201 Created; prescription detail lists handover 1 by Dr. Ahmed Khan.\n- **Contextual F1 help & zoom (`q:f1_help`):** F1 opens handbook page, preserves draft values and focus. English/Urdu layouts verified at 250% zoom without overflow. Preferences restored and session signed out cleanly.\n- Durable evidence in `docs/eprescription-handover-evidence-2026-10-24.json`.\n\n## Limitations\n- Software simulation using synthetic patient 16 (MRN-2026-000012) and ticket 5; no actual patient care or physical medications dispensed.\n- Hospital pharmacy queue dispensing (`POST /pharmacy/dispensations`), physical thermal printing, and independent human/Urdu-editor review remain pending and are not claimed."
+}

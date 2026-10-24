@@ -28,7 +28,7 @@ Current source: e5dd135, renderer index-Cd4gDgdp.js. Build/help coverage and **7
 | Doctor queue | Actual arrival/call; reason required, live top/highlighted handover and restore | Remaining reconnect/refusal variants and human workflow |
 | ICD picker | Real catalogue/code-only storage, diagnosis title readback | Full current catalogue/version/refusal plan and human terminology review |
 | Consultation | Server-selected Clinic guidance; consent switches, Final VCO/Declined, lost201 retry, VCO PDF | Actual Clinic422 on controlled Clinic setup, procedure gates and remaining events |
-| E-prescription | Linked encounter, complete OPD directions, empty handover blocked | Actual handover, remaining safety/service/refusal branches and physical print |
+| E-prescription | Linked encounter, complete OPD directions, empty handover blocked; fresh High-Alert/LASA warnings, lost201 same-key replay, standard print payload, and actual handover (POST /prescriptions/{id}/handover) PASS | Inpatient MAR generation, physical slip printing, remaining safety/service/refusal branches and human review |
 | Lab & imaging | Own unsampled200; other-doctor403; sampled409; prohibited actions hidden | Imaging and remaining event/service branches |
 | External referral | Lost-create replay; lost-cancel original read; fixed stale detail refresh; real PDF | Actual receiving acknowledgement; contact-list branch and remaining negative cases |
 | Referral register | Read-only role navigation/filter/detail implementation | Fresh cancellation/filter review in Quality and remaining plan |
@@ -51,7 +51,7 @@ Original keys/receipts and failed-test limitations are in the dated evidence fil
 
 ## Progress review
 
-110–119 accepted at this continuation start. New120 Registration,121 Post-consult waiver,122 Waiver cash-back,123 Lab cancellation,124 Doctor re-route,125 Consultation and126 Upload recovery are **awaiting human review on /docs -> My progress**, together with109 Cash shift. Only tested new items were proposed; full-plan and human gates were not claimed. Check live feedback before any further proposal.
+110–119 accepted at this continuation start. New 120 Registration, 121 Post-consult waiver, 122 Waiver cash-back, 123 Lab cancellation, 124 Doctor re-route, 125 Consultation, 126 Upload recovery, and 127 E-Prescription handover are **awaiting human review on /docs -> My progress**, together with 109 Cash shift. Only tested new items were proposed; full-plan and human gates were not claimed. Check live feedback before any further proposal.
 
 ## New synthetic records from this continuation
 
