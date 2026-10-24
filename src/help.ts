@@ -528,12 +528,14 @@ export const help: Record<string, HelpPage> = {
     purposeUr:
       "متعدد ذمہ داریوں والے عملے کے لیے: کام شروع کرنے سے پہلے درست جگہ کھولیں۔",
     steps: [
+      "Reopening your current workspace keeps its permitted menu while the server refreshes its guidance. Wait for the workspace to open before choosing a task.",
       "Choose a workspace card. With one workspace the terminal opens it directly.",
       "Select Open in new window to keep another duty open alongside this window. Both windows use your session, but each keeps its own workspace context.",
       "A Records badge means history access. Open work means a retiring service can finish existing work but cannot start new work.",
       "The facility controls available workspaces. Changes appear when the server notifies the terminal.",
     ],
     stepsUr: [
+      "موجودہ کام کی جگہ دوبارہ کھولنے پر مجاز فہرست برقرار رہتی ہے اور سرور سے رہنمائی تازہ ہوتی ہے۔ کام چننے سے پہلے جگہ کھلنے کا انتظار کریں۔",
       "کام کی جگہ کا کارڈ منتخب کریں۔ صرف ایک جگہ ہو تو وہ خود کھلتی ہے۔",
       "دوسری ذمہ داری کے لیے نئی ونڈو کھولیں۔ دونوں میں ایک سیشن مگر الگ کام کا سیاق ہوتا ہے۔",
       "ریکارڈز کا مطلب سابقہ معلومات تک رسائی ہے۔ جاری کام کا مطلب موجودہ کام مکمل کرنا ہے، نیا کام شروع کرنا نہیں۔",

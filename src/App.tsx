@@ -564,7 +564,10 @@ export function App() {
         return;
       await call("workspace", { code, newWindow });
       if (!newWindow) {
-        setOutline(undefined);
+        // Reopening the same workspace does not retrigger the workspace effect.
+        // Keep its authorized menu while explicitly refreshing the server data.
+        if (code === liveState.current.workspace) void refreshData();
+        else setOutline(undefined);
         setWorkspace(code);
         if (liveState.current.screen === "workspace_picker") {
           setScreen("app_shell");
