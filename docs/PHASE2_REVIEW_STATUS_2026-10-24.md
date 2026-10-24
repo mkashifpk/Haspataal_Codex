@@ -51,7 +51,7 @@ Original keys/receipts and failed-test limitations are in the dated evidence fil
 
 ## Progress review
 
-Latest portal read25Oct: 110–130 Accepted (including129 elevated-refund risk rule and130 clinical-lockout event). **109 Cash shift and131 ICD are awaiting human review on /docs -> My progress**. Score974,163endpoints,0fully accepted screens. Receivables states/zoom evidence passed and is about to be proposed with its tested commit. Full-plan and human gates remain pending; check live feedback before new proposals.
+Latest portal read25Oct: 110–130 Accepted (including129 elevated-refund risk rule and130 clinical-lockout event). **109 Cash shift and131 ICD are awaiting human review on /docs -> My progress**. Score974,163endpoints,0fully accepted screens. Receivables states/zoom proposal132 saved and verified Pending for source2144510; awaiting human review on /docs -> My progress. Full-plan and human gates remain pending; check live feedback before new proposals.
 
 ## New synthetic records from this continuation
 

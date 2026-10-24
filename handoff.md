@@ -4,11 +4,11 @@ Updated **25 October 2026 — Codex/functions, Asia/Karachi**. User requested re
 
 ## Git and completed current step
 
-Verified baseline **ab48870**, preceding aca0271/ebf77af/0a57f62/9f3aa9e preserved. Receivables source/help/scripts/evidence and current checkpoint are about to commit; inspect Git for final commit. No commands/Electron sessions running, no unknown writes. All current test profiles restored/signedout, including the injected-outage profile explicitly reconciled. Existing unrelated Node processes812/7404/8528 predate takeover; never kill them.
+Verified baseline **ab48870**, preceding aca0271/ebf77af/0a57f62/9f3aa9e preserved. Receivables source/help/scripts/evidence committed **2144510**; final documentation/proposal record checkpoint follows that commit. No commands/Electron sessions running, no unknown writes. All current test profiles restored/signedout, including the injected-outage profile explicitly reconciled. Existing unrelated Node processes812/7404/8528 predate takeover; never kill them.
 
 ## Receivables checkpoint —25Oct
 
-Read full current bundle including omitted sections, quality/design/test plan, generated contracts (matches local after formatting), finance workflow and cashier handbook. Existing endpoint/write-off-rule/safe-writes/permissions/help claims accepted; no duplicate proposal. New q:states/q:zoom ready to propose with tested commit; full q:tested/human gates remain pending.
+Read full current bundle including omitted sections, quality/design/test plan, generated contracts (matches local after formatting), finance workflow and cashier handbook. Existing endpoint/write-off-rule/safe-writes/permissions/help claims accepted; no duplicate proposal. Proposal **132** saved and verified Pending for q:states/q:zoom on tested source2144510; full q:tested/human gates remain pending. Exact payload docs/receivables-states-zoom-proposal-2144510.json, request_id codex-receivables-states-zoom-2144510-20261025.
 
 Files: src/screens/Receivables.tsx shows confirmed Remaining Balance and explanatory empty invoice state; src/receivables-i18n.ts adds empty message and Actions/View Urdu; src/foundation-help.ts/src/help.ts explain partial/full write-off and recovery EN/UR. Screenshots refreshed and visually checked. docs/RECEIVABLES_REVIEW_2026-10-25.md has reproduction/manual guidance; frontend findings recorded in docs/frontend-resume-review-2026-10-24.md.
 
@@ -23,7 +23,7 @@ Files: src/screens/Receivables.tsx shows confirmed Remaining Balance and explana
 Startup my_progress/progress_proposals/overview/issues/roadmap/connection guide read; verified implementation1/mkashif. DEV https://hms-dev.netbird.cloud; build2026-10-24T11:22:17.357549+00:00, contracta9063847cb6fd629bfa0, knowledge85970bc300a07875, rubricd23b880e906d unchanged.
 
 -110–130 Accepted at latest read, including new129 elevated refund risk rule and130 ticket.clinical_lockout event. Score974/endpoints163/0fully accepted screens. Accepted partial items do not close full screens.
--**109 My cash shift and131 ICD Pending: awaiting human review on /docs -> My progress.** ICD payload docs/icd-refresh-proposal-ab48870.json, request_id codex-icd-refresh-quality-ab48870-20261025. Saved/verified131 q:permissions/handbook/F1/zoom; no full-plan/human/unloaded-classification-UI claim. Partial129/130 exact payloads docs/clinical-refund-partial-*-proposal-aca0271.json. Do not duplicate accepted/pending work.
+-**109 My cash shift,131 ICD and132 Receivables Pending: awaiting human review on /docs -> My progress.** ICD payload docs/icd-refresh-proposal-ab48870.json, request_id codex-icd-refresh-quality-ab48870-20261025. Saved/verified131 q:permissions/handbook/F1/zoom; no full-plan/human/unloaded-classification-UI claim. Partial129/130 exact payloads docs/clinical-refund-partial-*-proposal-aca0271.json. Do not duplicate accepted/pending work.
 -**#19 New/unanswered/no fixed_in25Oct:** nonzero openingfloat1500 returns expected_cash0 before movements; owned shift10 closed declared0/by_type[]. Backend must fix/document physical float/expected-balance semantics. No frontend formula/workaround. Evidence docs/nonzero-opening-float-evidence-2026-10-24.json and report counterpart. Original open201 request5be534bbae31490b8f1d0d1102211867/keybb065d87-081f-4216-9129-057d812b21c1. Never reopen/reclose shift10.
 -#17/#18 Fixed/retested digit-name and merged-oldMRN lookup. OldMRN000006 ->master11/currentMRN000007 once with EN/UR explanation; never replay merge10->11.
 -#14 Fixed refund event amount; #15 Fixed Owner AR/Cashier guidance; #16 Fixed/retested own-unsampled200/otherDoctor403/sampled409/UIhidden. No new backend report in this continuation.
@@ -52,7 +52,7 @@ Actual tests PASS: existing icd-picker-check.mjs baseline; new icd-refresh-quali
 
 ## Next3 actions / limits
 
-1.Commit/report current Receivables q:states/q:zoom with exact tested builds, then verify saved proposal; no duplicated accepted claims. Current upstream/write-off fixture is complete; no business step in progress.
+1.No implementation/business step is in progress;132 is saved/verified Pending. Read review feedback on next session; do not resubmit109/131/132 or unchanged accepted claims. All current test profiles restored/signedout; no running commands. Source2144510 and final proposal/checkpoint documentation are committed; working tree must be checked on takeover.
 2.Continue Phase2 verification: read Referral Register current bundle/quality/design/test plan, verify original cancelled synthetic referrals1/2 in Quality filters/detail, without replaying cancellations. docs/PHASE2_REVIEW_STATUS_2026-10-24.md refreshed25Oct; controlledClinic/inactive-service/PACS branches still require suitable controlled setup, never fabricated responses/shared profile changes.
 3.Read backend19 answer/retest when deployed, safely reconcile original pendingcashback. Named human freshdata/roleFAQ/Urdu/editor/physicalprinter/camera/actualhandovers remain required. Agents never fill human worksheet results or approve themselves. No phase completion claimed.
 
