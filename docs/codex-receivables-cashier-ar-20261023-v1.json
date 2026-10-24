@@ -1,0 +1,19 @@
+{
+  "implementation_id": 1,
+  "request_id": "codex-receivables-cashier-ar-20261023-v1",
+  "screen_id": "receivables",
+  "rubric_fingerprint": "d81d43f195f8",
+  "agent": "Codex",
+  "build": "main13b2fef + receivables edits; index-EldWD2ZU.js; docs/receivables-build-2026-10-23.json",
+  "items": [
+    "ep:GET /finance/ar/outstanding",
+    "ep:GET /finance/ar/aging",
+    "ep:POST /finance/ar/{ar_id}/settle",
+    "ep:POST /finance/ar/{ar_id}/write-off",
+    "ep:POST /finance/invoices/{invoice_id}/payments",
+    "ep:GET /finance/invoices",
+    "ep:GET /finance/invoices/{invoice_id}",
+    "rule:61ddcf1727"
+  ],
+  "evidence": "## Receivables implementation checkpoint\nImplemented Phase 2 Position #18 screen `receivables` (Outstanding dues / Udhaar, 52 pts) under workspace `finance_cashier`.\n- New `src/screens/Receivables.tsx` and App route display live debt aging cards (0–30, 31–60, 61–90, 90+ days), outstanding accounts receivable list, search/filtering, debt settlement modal, restricted write-off modal, and invoices & direct payments tab.\n- Debt settlement (`POST /finance/ar/{ar_id}/settle`) and invoice collection (`POST /finance/invoices/{invoice_id}/payments`) use Idempotency-Key headers, single-flight locks, amount bounds validation, and handle `SHIFT_NOT_OPEN` (409) with staff guidance.\n- Enforced `rule:61ddcf1727`: Write-off (`POST /finance/ar/{ar_id}/write-off`) is strictly restricted to `finance.ar.write_off` (Owner and Hospital Admin). Cashiers see this action disabled with explanatory title; cashier write-off attempts are refused by server with 403 FORBIDDEN. Mandatory write-off reason is validated (5–500 chars, rejects shorter input with 422).\n- Bilingual control help and F1 contextual help on all interactive controls (`data-help`), handbook pages, and actual EN/UR 1400x1000 screenshots (`public/handbook/receivables-{en,ur}.png`).\n\n## Automated verification\n- `npm run check:help`: PASS (20 screens, 313 controls, 85 groups, 33 FAQ seeds, 30 workspace guides).\n- `npm test`: 52 PASS.\n- `npm run build`: PASS (TypeScript `tsc --noEmit` clean + Vite production bundle `index-EldWD2ZU.js`).\n- Real DEV access test (`scripts/receivables-access-check.mjs`): 401 unauth refusal, 403 clinical doctor refusal on all endpoints, 200 cashier reads for AR queue, aging summary, and invoices, 403 rule:61ddcf1727 cashier write-off refusal, 409 SHIFT_NOT_OPEN prerequisite on invoice payment without open shift, and 422 short reason validation.\n- Real DEV Electron UI test (`scripts/receivables-ui-check.mjs`): verified live aging summary cards, invoices tab and lines inspection, contextual F1 help with focus restoration, bounded native zoom (100–250%, Ctrl+0 reset, Ctrl+- clamp), and verified 250% layout with no horizontal overflow in both Light and DarkHighContrast themes.\n\n## Evidence & limitations\nHashes and manifests in `docs/receivables-build-2026-10-23.json` and `docs/receivables-access-checks-2026-10-23.json`. Manual review guide in `docs/RECEIVABLES_REVIEW_2026-10-23.md`. Owned test account 34 restored to inactive and original preferences restored. Server `2026-10-23T05:05:34.846311+00:00`, contract `57d137222f1ca637655d`, rubric `d81d43f195f8`. Only tested endpoints and rule:61ddcf1727 proposed; no human review items (q:fresh_data, q:role_faq, q:editor, q:character) claimed. Awaiting human review on /docs -> My progress."
+}

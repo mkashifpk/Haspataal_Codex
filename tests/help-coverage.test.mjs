@@ -9,7 +9,7 @@ test("separately authored registration help must retain its Urdu title", () => {
 });
 test("all delivered controls, tasks, role guides and FAQ seeds have bilingual help", () => {
   const result = checkHelp({ media: false });
-  assert.equal(result.screens, 19);
+  assert.equal(result.screens, 30);
   assert(result.controls > 90);
   assert.equal(result.workspaceGuides, 30);
 });
@@ -74,7 +74,7 @@ test("missing translated screen steps fail coverage", () => {
         media: false,
         read: (file) =>
           file === "src/help.ts"
-            ? read(file).replace(/stepsUr: \[[\s\S]*?\n    \],/, "stepsUr: [],")
+            ? read(file).replace(/stepsUr: \[[\s\S]*?\n\s*\],/, "stepsUr: [],")
             : read(file),
       }),
     /empty stepsUr/,

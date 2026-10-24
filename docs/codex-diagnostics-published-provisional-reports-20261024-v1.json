@@ -1,0 +1,24 @@
+{
+  "implementation_id": 1,
+  "screen_id": "lab_orders_results",
+  "rubric_fingerprint": "d81d43f195f8",
+  "request_id": "codex-diagnostics-published-provisional-reports-20261024-v1",
+  "agent": "Codex",
+  "build": "main13b2fef + index-CFLr9BSe (lab), index-Dgcr4IDc (imaging); real DEV2026-10-24",
+  "items": [
+    "ep:GET /lab/requisitions/{requisition_id}/report/print-payload",
+    "ep:GET /lab/requisitions/{requisition_id}/report/pdf",
+    "ep:GET /imaging/orders/{order_id}/report/print-payload",
+    "ep:GET /imaging/orders/{order_id}/report/pdf",
+    "ev:lab.result.published",
+    "ev:lab.result.critical_pending",
+    "ev:lab.result.provisional",
+    "ev:lab.result.provisional_withdrawn",
+    "ev:imaging.report.ready",
+    "rule:accdde6d25",
+    "rule:432f4e51a3",
+    "rule:cef1a004c6",
+    "rule:015914afe4"
+  ],
+  "evidence": "## Real result and report paths exercised\nCurrent full lab_orders_results bundle/quality/design, Doctor workspace handbook, laboratory workflow/recipe, actual collection/result/verification/imaging contracts and request validation read. Existing LabOrdersResults.tsx/App events and secure native diagnostic printing exercised against actual DEV without fake results/events/URLs. No new source change needed in this screen; this closes missing positive verification.\n\n## Laboratory\nscripts/phase2-diagnostic-results-check.mjs plus --resume: original new UI requisition2 for synthetic patient21/ticket15, CBCitem2/sample2 and RBSitem3/sample3; invoice18 Card1050 paidONCE/payment12, originalkey retained. Real demo.labtech collect/receive/enter: CBCresult1 critical hb6/wbc7/plt200 and RBSresult2 normal glucose110 PendingVerification. Actual critical_pending event reaches Doctor; current item/sample status reread, sampled cancellation unavailable, no unverified routine values or Print report. Independent demo.labverifier publishes RBS2: active Doctor UI shows RBS/verified stamp without manual Refresh; real publication-triggered GET timing and resulting DOM stored. First harness stopped after successful partial PDF on wrong button label; corrected to actual Download official lab PDF and resumed SAME requisition without replacement order/payment/result. Raw publication event from first browser wasn't retained before that stop; visible live refresh and HTTP trace are retained, so this is not a fabricated resumed event.\n\nActual worker (unchanged15minute setting) released CBC1 at06:27:14.436489UTC, actual provisional event captured. UI shows red unverified critical/Pending verification in detail and timeline; native/server partial reports contain only Published RBS with complete=false. No clinical value was invented client-side or printed provisionally. Independent verifier rejection200/request80cd746922fd4366b92216679cc8ad2b produced actual provisional_withdrawn; value disappeared immediately, explicit do-not-act warning stayed, PublishedRBS remained. No state-guard result/verification replay. RBS per-test performed and verified stamps visible; both report/print-payload and report/pdf returned200 through actual buttons, native PDF saved.\n\n## Imaging\nscripts/phase2-imaging-report-check.mjs --resume PASS1: one new UI imaging2 IMG-2026-00002/accessionA161C26C07427, real offered XR-CHESTservice10, deliberate NotApplicable laterality, explicitly synthetic/no actual exam text. First harmless harness read catalogue before async load; fixed wait, no POST occurred in failed run. Separate actual radiographer InProgress/Completed with synthetic identity/site checks and registered radiologist final report; real imaging.report.ready updates Doctor report/stamp without Refresh. No print controls before Reported. Actual report/print-payload200, native PDF saved and official report/pdf200; patient21/report/stamp verified. PACS viewer_url remains null, no invented Orthanc study/viewer; study event/viewer acceptance NOT claimed.\n\nOriginal requests/keys/IDs/results/events/traces in docs/phase2-diagnostic-{results-check,upstream}-2026-10-24.json and docs/phase2-imaging-{report-check,upstream}-2026-10-24.json. All records explicitly DEV software simulations; no real specimen, examination, radiation, care or physical printing. All sessions closed/prefs restored/logout. Final build Dgcr4IDc PASS30screens550controls+TS/Vite; npm test64PASS. Native PDFs only, no ZIP. Actual critical-result acknowledgement/communication, rejected-sample recovery, PACS, full human/role/translation/editor/device gates remain pending; no whole screen/phase completion."
+}

@@ -1,0 +1,16 @@
+{
+  "implementation_id": 1,
+  "agent": "Codex",
+  "request_id": "codex-doctor-handbook-lab-own-cancel-20261023-v1",
+  "screen_id": "lab_orders_results",
+  "kind": "Documentation",
+  "severity": "Low",
+  "title": "Doctor review checklist still says only Lab Admin can cancel tests, contrary to own unsampled cancellation",
+  "endpoint": "POST /lab/requisitions/{requisition_id}/cancel",
+  "build": "13b2fef dirty; index-BLqOTtUs.js",
+  "workflow": "get_ui_quality_brief(lab_orders_results).human_review.workspace_checklist; doctor handbook",
+  "expected": "The doctor worksheet/handbook should explain lab.requisition.cancel_own: ordering doctor can cancel their own unsampled order, with reason; another doctor's or already-sampled order is refused. This agrees with current screen rule:9fee661557 and get_endpoint description.",
+  "actual": "The returned workspace checklist says: 'Cancelling lab tests not yet sampled is refused (FORBIDDEN: only the Lab Admin holds that permission).' Current endpoint and actual DEV behavior allow the requesting doctor with lab.requisition.cancel_own.",
+  "steps": "Read get_ui_quality_brief(screen_id=lab_orders_results).human_review.workspace_checklist and get_endpoint POST /lab/requisitions/{requisition_id}/cancel. In actual Electron app as demo.doctor2, select synthetic patient18/ticket14, create lab requisition1 using active LFT test3; before any sample, confirm own cancellation with reason. It returns200 and all items Cancelled.",
+  "evidence": "DEVbuild2026-10-23T11:39:48.766011+00:00, contract77fa54d69ee6f7aa6a6d. Actual create201 request293eaff4e39c4b1c93bcc94e28ddde3a, original-key replay SAME1; owncancel200 request0487098d0daf4807b0fc790816b4df15; final GET200 confirmsCancelled. No payments/samples/examinations. contracts/lab_orders_results-quality.json contains stale checklist; native journal artifacts/diagnostics-check-transport.json. Frontend instructions follow current endpoint; not a runtime backend blocker."
+}

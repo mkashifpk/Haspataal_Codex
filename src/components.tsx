@@ -9,13 +9,13 @@ import {
   type ReactElement,
 } from "react";
 import { ApiError } from "./bridge";
-export function ErrorBox({ error }: { error: unknown }) {
+export function ErrorBox({ error, verbatim = false }: { error: unknown; verbatim?: boolean }) {
   if (!error) return null;
   const r = error instanceof ApiError ? error.response : undefined;
   return (
     <div className="error" role="alert">
       <strong>
-        {tr(error instanceof Error ? error.message : String(error))}
+        {verbatim ? (error instanceof Error ? error.message : String(error)) : tr(error instanceof Error ? error.message : String(error))}
       </strong>
       {r && (
         <small>

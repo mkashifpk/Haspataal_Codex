@@ -1,0 +1,27 @@
+// Read-only real DEV checks against original synthetic Cancelled referral1; no clinical writes.
+import {session,expect,help,capture} from './clinical-test-kit.mjs';
+import assert from 'node:assert/strict';import fs from 'node:fs';
+for(const [account,name] of [['demo.doctor2','referral-register-clinician-check'],['demo.quality','referral-register-quality-check']]){
+ const s=await session(name,account),p=s.p;
+ const reads=async()=>(await s.trace()).requests.filter(r=>r.method==='GET'&&r.path.startsWith('/api/v1/referrals'));
+ try{
+  const original=await s.native('api',{method:'GET',path:'/referrals/1'});assert.equal(original.patient_id,18);assert.equal(original.status,'Cancelled');
+  if(account==='demo.doctor2'){
+   await expect.poll(async()=>(await s.native('state')).workspace).toBe('doctor');
+   const scoped=await s.native('api',{method:'GET',path:'/meta/handbook?workspace=doctor'});assert(![...scoped.shared_screens,...scoped.workspaces.flatMap(w=>w.screens)].some(v=>v.id==='referral_register'));
+   await expect(p.getByRole('navigation').getByRole('button',{name:'Referral register',exact:false})).toHaveCount(0);
+   s.pass('Doctor API may read original referral, but its scoped workspace catalogue excludes the quality register. No transient cross-workspace menu exposed; register UI journey is N/A for doctor workspace.');s.j.passed=true;s.save();continue;
+  }
+  await s.nav('Referral register');await expect(p.locator('main h1')).toHaveText('Referral register');await expect(p.locator('table')).toContainText(original.referral_number);await expect(p.locator('main')).toContainText('Access to the register and individual records is logged.');
+  const old=(await reads()).length;await p.getByLabel('Referral start date',{exact:true}).fill('2026-10-24');await p.getByLabel('Referral end date',{exact:true}).fill('2026-10-23');await p.getByRole('button',{name:'Apply referral filters',exact:true}).click();await expect(p.getByRole('alert').filter({hasText:'Start date must not be after end date'})).toBeVisible();assert.equal((await reads()).length,old);
+  await p.getByLabel('Referral start date',{exact:true}).fill('2026-10-23');await p.getByLabel('Referral status',{exact:true}).selectOption('Cancelled');await p.getByRole('button',{name:'Apply referral filters',exact:true}).click();await expect(p.locator('table')).toContainText(original.referral_number);await expect.poll(async()=>(await reads()).some(r=>r.path.includes('date_from=2026-10-23')&&r.path.includes('status=Cancelled')&&r.status===200)).toBe(true);
+  const query=p.getByLabel('Find in this loaded page',{exact:true});await query.fill(original.mrn);await help(s,query,'Referral register');await expect(query).toHaveValue(original.mrn);await query.fill('DEMO-NOT-A-MATCH');await expect(p.getByText('No row matches this page search. Clear it or load another page.',{exact:true})).toBeVisible();await query.fill('');
+  await p.getByLabel('Acknowledgement pending',{exact:true}).check();await p.getByRole('button',{name:'Apply referral filters',exact:true}).click();await expect(p.locator('table')).not.toContainText(original.referral_number);await expect.poll(async()=>(await reads()).some(r=>r.path.includes('acknowledgement_pending=true')&&r.status===200)).toBe(true);
+  await p.getByRole('button',{name:'Reset to last 12 months',exact:true}).click();await expect(p.locator('table')).toContainText(original.referral_number);await p.getByRole('button',{name:'Older referral page',exact:true}).click();await expect.poll(async()=>(await reads()).some(r=>r.path.includes('before_id=1')&&r.status===200)).toBe(true);await expect(p.getByText('No referrals returned for this period/filter/page. Change filters or return to a newer page.',{exact:true})).toBeVisible();await p.getByRole('button',{name:'Newer referral page',exact:true}).click();await expect(p.locator('table')).toContainText(original.referral_number);
+  await p.getByRole('button').filter({hasText:'Open referral '+original.referral_number}).click();const pdf=p.getByRole('button',{name:'Save referral letter PDF',exact:true});await expect(pdf).toBeVisible();await help(s,pdf,'Referral register');assert.equal(await p.getByRole('button',{name:'Cancel referral',exact:true}).count(),0);assert.equal(await p.getByRole('button',{name:'Record receiving acknowledgement',exact:true}).count(),0);
+  await s.app.evaluate(({dialog},name)=>{dialog.showSaveDialog=async()=>({canceled:false,filePath:process.cwd()+'/artifacts/'+name+'.pdf'})},name);await pdf.click();await expect(p.getByText('Referral PDF saved.',{exact:true})).toBeVisible();assert.equal(fs.readFileSync('artifacts/'+name+'.pdf').subarray(0,5).toString(),'%PDF-');assert.equal((await s.trace()).requests.filter(r=>r.method==='POST').length,0);
+  s.pass('Actual original referral read-only for '+account+'; reversed dates ZEROGET; applied dates/status/pending; current-page find and actual before_id Older/Newer; F1 parent/embedded detail; real PDF; ZEROclinicalPOST and no acknowledgement/cancel buttons');
+  if(account==='demo.quality'){await p.evaluate(()=>scrollTo(0,0));await capture(s,'referral_register');s.pass('Quality English/Urdu/both themes250 no document overflow, real synthetic register/screenshots')}
+  s.j.passed=true;s.save();
+ }catch(e){s.j.error=e.stack;s.save();console.error(e.stack);try{await p.screenshot({path:'artifacts/'+name+'-failure.png'});s.j.failure_ui=await p.locator('body').innerText();s.save()}catch{}process.exitCode=1}finally{await s.close()}
+}

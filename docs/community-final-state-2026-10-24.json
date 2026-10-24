@@ -1,0 +1,1880 @@
+{
+  "checked_at": "2026-10-23T19:50:43.417200+00:00",
+  "establishment": {
+    "revision": 4,
+    "profile": {
+      "code": "IIB",
+      "label": "Hospital, Category II B",
+      "establishment": "Hospital",
+      "beds": "16 to 30 beds",
+      "framework": "IIB",
+      "framework_edition": "MSDS and Reference Manual for Category II B HCEs, 2017 (amended 2018)",
+      "indicators": 122,
+      "registration_number": "PHC-R-55210",
+      "effective_from": "2025-06-05",
+      "licensed_beds": null,
+      "confirmed_at": "2026-10-18T07:09:05.237283+00:00",
+      "confirmed_by_name": "Hospital Owner"
+    },
+    "active": [
+      "dispensing",
+      "outsourced_diagnostics",
+      "laboratory",
+      "imaging",
+      "outpatient_procedures",
+      "inpatient",
+      "emergency_department",
+      "surgery",
+      "cssd",
+      "blood_transfusion",
+      "blood_center",
+      "maternity",
+      "home_visits",
+      "preventive_programmes"
+    ],
+    "rules_in_force": [
+      {
+        "code": "consultation_requires_vco",
+        "description": "A clinic's outpatient or follow-up note records whether the patient gave verbal consent to the examination (VCO), declined it, or was not examined, before it is finalized (clinic manual, indicator 41).",
+        "applies": false,
+        "profiles": [
+          "Clinic"
+        ],
+        "error_code": "EXAMINATION_CONSENT_REQUIRED",
+        "operations": [
+          "POST /clinical-encounters/{encounter_id}/finalize"
+        ],
+        "screens": [
+          "consultation"
+        ],
+        "source": "clinical/service.py finalize; 0013, the clinical encounter guard"
+      },
+      {
+        "code": "consultation_complete_record",
+        "description": "A clinic's outpatient or follow-up note has the complaint or history, the examination (when the patient consented), the diagnosis and the plan before it is finalized (clinic manual, indicator 28).",
+        "applies": false,
+        "profiles": [
+          "Clinic"
+        ],
+        "error_code": "CONSULTATION_INCOMPLETE",
+        "operations": [
+          "POST /clinical-encounters/{encounter_id}/finalize"
+        ],
+        "screens": [
+          "consultation"
+        ],
+        "source": "clinical/service.py finalize; 0013, the clinical encounter guard"
+      },
+      {
+        "code": "high_risk_pregnancy_nutrition",
+        "description": "In a Category I hospital, a high-risk obstetric assessment includes the nutritional assessment.",
+        "applies": false,
+        "profiles": [
+          "I"
+        ],
+        "error_code": "MATERNAL_NUTRITION_REQUIRED",
+        "operations": [
+          "POST /maternity/assessments"
+        ],
+        "screens": [
+          "obstetric_assessment"
+        ],
+        "source": "maternity/service.py assess; 0013, the obstetric assessment guard"
+      },
+      {
+        "code": "no_indoor_services_in_a_clinic",
+        "description": "A clinic runs no indoor service: the services marked hospital_only in GET /establishment → capabilities cannot be Active under the Clinic profile.",
+        "applies": false,
+        "profiles": [
+          "Clinic"
+        ],
+        "error_code": "CAPABILITY_NOT_PERMITTED",
+        "operations": [
+          "POST /establishment/changes/preview",
+          "POST /establishment/changes"
+        ],
+        "screens": [
+          "facility_profile"
+        ],
+        "source": "establishment/service.py plan; 0013, the establishment capability guard"
+      }
+    ],
+    "capabilities": [
+      {
+        "phc_declared": [],
+        "declaration_note": "Running here but not in the services declared to the PHC: add it to the declaration (PUT /phc/services)",
+        "capability": "dispensing",
+        "label": "Pharmacy dispensing",
+        "purpose": "Medicines dispensed from the facility's own stock (otherwise prescriptions are printed for the patient to buy outside).",
+        "state": "Active",
+        "state_since": "2026-10-18T07:09:05.237283+00:00",
+        "changed_by_name": null,
+        "requires": [],
+        "hospital_only": false,
+        "implemented": true,
+        "new_work": "dispensings",
+        "operations": [
+          {
+            "operation": "POST /prescriptions",
+            "when": "for the hospital pharmacy (destination HospitalPharmacy)",
+            "continues_while_retiring": false
+          },
+          {
+            "operation": "POST /prescriptions/verbal",
+            "when": "for the hospital pharmacy (destination HospitalPharmacy)",
+            "continues_while_retiring": false
+          },
+          {
+            "operation": "POST /prescriptions/{prescription_id}/dispense",
+            "when": null,
+            "continues_while_retiring": true
+          },
+          {
+            "operation": "POST /otc-sales",
+            "when": null,
+            "continues_while_retiring": false
+          }
+        ],
+        "outstanding": [
+          {
+            "kind": "stock_on_hand",
+            "count": 11,
+            "label": "Medicine batches with stock",
+            "how": "Use the stock while the service retires; bring ward stock back to the pharmacy; write off what is left with its reason (expiry, damage, or an adjustment saying where it went), or return it to its supplier for a credit note the accountant confirms (decisions 47, R1)",
+            "operations": [
+              "POST /wards/{ward_id}/inventory/remove",
+              "POST /pharmacy-admin/batches/{batch_id}/adjust",
+              "POST /pharmacy-admin/batches/{batch_id}/supplier-returns"
+            ]
+          }
+        ]
+      },
+      {
+        "phc_declared": [
+          "Biochemistry",
+          "Hematology"
+        ],
+        "declaration_note": null,
+        "capability": "outsourced_diagnostics",
+        "label": "Tests sent to partner laboratories",
+        "purpose": "Samples taken here and sent to a laboratory under an MOU (lab tests marked SendOut).",
+        "state": "Active",
+        "state_since": "2026-10-18T07:09:05.237283+00:00",
+        "changed_by_name": null,
+        "requires": [],
+        "hospital_only": false,
+        "implemented": true,
+        "new_work": "orders for send-out tests",
+        "operations": [
+          {
+            "operation": "POST /lab/requisitions",
+            "when": "for a send-out test (availability SendOut)",
+            "continues_while_retiring": false
+          },
+          {
+            "operation": "POST /patients/lab-only-walk-in",
+            "when": "for a send-out test (availability SendOut)",
+            "continues_while_retiring": false
+          }
+        ],
+        "outstanding": []
+      },
+      {
+        "phc_declared": [
+          "Biochemistry",
+          "Hematology"
+        ],
+        "declaration_note": null,
+        "capability": "laboratory",
+        "label": "In-house laboratory",
+        "purpose": "Tests done in the facility's own laboratory.",
+        "state": "Active",
+        "state_since": "2026-10-18T07:09:05.237283+00:00",
+        "changed_by_name": null,
+        "requires": [],
+        "hospital_only": false,
+        "implemented": true,
+        "new_work": "orders for in-house tests",
+        "operations": [
+          {
+            "operation": "POST /lab/requisitions",
+            "when": "for an in-house test (availability InHouse)",
+            "continues_while_retiring": false
+          },
+          {
+            "operation": "POST /patients/lab-only-walk-in",
+            "when": "for an in-house test (availability InHouse)",
+            "continues_while_retiring": false
+          }
+        ],
+        "outstanding": []
+      },
+      {
+        "phc_declared": [
+          "Color Doppler Ultrasound",
+          "Digital X-Ray"
+        ],
+        "declaration_note": null,
+        "capability": "imaging",
+        "label": "Imaging (X-ray, ultrasound, CT, MRI)",
+        "purpose": "Examinations done and reported in the facility.",
+        "state": "Active",
+        "state_since": "2026-10-18T07:09:05.237283+00:00",
+        "changed_by_name": null,
+        "requires": [],
+        "hospital_only": false,
+        "implemented": true,
+        "new_work": "imaging orders",
+        "operations": [
+          {
+            "operation": "POST /imaging/orders",
+            "when": null,
+            "continues_while_retiring": false
+          }
+        ],
+        "outstanding": []
+      },
+      {
+        "phc_declared": [],
+        "declaration_note": "Running here but not in the services declared to the PHC: add it to the declaration (PUT /phc/services)",
+        "capability": "outpatient_procedures",
+        "label": "Outpatient procedures",
+        "purpose": "Procedures done without admission (dressings, minor procedures), with their procedure notes.",
+        "state": "Active",
+        "state_since": "2026-10-18T07:09:05.237283+00:00",
+        "changed_by_name": null,
+        "requires": [],
+        "hospital_only": false,
+        "implemented": true,
+        "new_work": "procedure notes for outpatients",
+        "operations": [
+          {
+            "operation": "POST /clinical-encounters",
+            "when": "for a Procedure note with its procedure, not an admission's",
+            "continues_while_retiring": false
+          },
+          {
+            "operation": "PATCH /clinical-encounters/{encounter_id}",
+            "when": "for the procedure of an outpatient's Procedure note",
+            "continues_while_retiring": false
+          }
+        ],
+        "outstanding": []
+      },
+      {
+        "phc_declared": [],
+        "declaration_note": null,
+        "capability": "inpatient",
+        "label": "Inpatient care",
+        "purpose": "Admissions, beds, nursing, the medication chart and discharge (medicines come from the pharmacy when dispensing runs, otherwise from outside on printed prescriptions).",
+        "state": "Active",
+        "state_since": "2026-10-18T07:09:05.237283+00:00",
+        "changed_by_name": null,
+        "requires": [],
+        "hospital_only": true,
+        "implemented": true,
+        "new_work": "admissions",
+        "operations": [
+          {
+            "operation": "POST /admissions",
+            "when": null,
+            "continues_while_retiring": false
+          },
+          {
+            "operation": "POST /admissions/code-red",
+            "when": null,
+            "continues_while_retiring": false
+          }
+        ],
+        "outstanding": []
+      },
+      {
+        "phc_declared": [],
+        "declaration_note": "Running here but not in the services declared to the PHC: add it to the declaration (PUT /phc/services)",
+        "capability": "emergency_department",
+        "label": "Emergency department",
+        "purpose": "The emergency register, triage by the hospital's algorithm, observation and departure. (Every profile gives first aid and refers: that is part of consultation.)",
+        "state": "Active",
+        "state_since": "2026-10-18T07:09:05.237283+00:00",
+        "changed_by_name": null,
+        "requires": [],
+        "hospital_only": true,
+        "implemented": true,
+        "new_work": "emergency visits",
+        "operations": [
+          {
+            "operation": "POST /er/visits",
+            "when": null,
+            "continues_while_retiring": false
+          },
+          {
+            "operation": "POST /reception/registrations",
+            "when": "for an emergency patient (source Emergency) without an open emergency visit",
+            "continues_while_retiring": false
+          },
+          {
+            "operation": "POST /admissions/code-red",
+            "when": "unless the patient has an open emergency visit",
+            "continues_while_retiring": false
+          }
+        ],
+        "outstanding": []
+      },
+      {
+        "phc_declared": [
+          "General Surgery"
+        ],
+        "declaration_note": null,
+        "capability": "surgery",
+        "label": "Operating theatre and anaesthesia",
+        "purpose": "Operations with the surgical record: pre-operative note, anaesthesia, safety checklist, recovery.",
+        "state": "Active",
+        "state_since": "2026-10-18T07:09:05.237283+00:00",
+        "changed_by_name": null,
+        "requires": [
+          "inpatient"
+        ],
+        "hospital_only": true,
+        "implemented": true,
+        "new_work": "theatre bookings",
+        "operations": [
+          {
+            "operation": "POST /ot/bookings",
+            "when": null,
+            "continues_while_retiring": false
+          },
+          {
+            "operation": "POST /admissions/code-red",
+            "when": "with needs_ot (the emergency theatre hold)",
+            "continues_while_retiring": false
+          }
+        ],
+        "outstanding": []
+      },
+      {
+        "phc_declared": [],
+        "declaration_note": null,
+        "capability": "cssd",
+        "label": "Sterile supply (CSSD)",
+        "purpose": "Sterilizer loads, packs, issue and recall.",
+        "state": "Active",
+        "state_since": "2026-10-18T07:09:05.237283+00:00",
+        "changed_by_name": null,
+        "requires": [],
+        "hospital_only": false,
+        "implemented": true,
+        "new_work": "sterilizer cycles",
+        "operations": [
+          {
+            "operation": "POST /cssd/cycles",
+            "when": null,
+            "continues_while_retiring": false
+          }
+        ],
+        "outstanding": []
+      },
+      {
+        "phc_declared": [],
+        "declaration_note": "Running here but not in the services declared to the PHC: add it to the declaration (PUT /phc/services)",
+        "capability": "blood_transfusion",
+        "label": "Blood transfusion",
+        "purpose": "The hospital blood bank and the bedside: units received from a licensed blood center or bank (or, for a II B or II C hospital without its own bank, under a contract), the storage log, compatibility tests, issue, the two-person bedside check, reactions, wastage and return. Donors and their blood are the blood_center service's.",
+        "state": "Active",
+        "state_since": "2026-10-18T07:09:05.237283+00:00",
+        "changed_by_name": null,
+        "requires": [
+          "inpatient"
+        ],
+        "hospital_only": true,
+        "implemented": true,
+        "new_work": "blood requests and units received",
+        "operations": [
+          {
+            "operation": "POST /blood/units",
+            "when": null,
+            "continues_while_retiring": false
+          },
+          {
+            "operation": "POST /blood/requests",
+            "when": null,
+            "continues_while_retiring": false
+          },
+          {
+            "operation": "POST /blood/requests/{request_id}/crossmatches",
+            "when": null,
+            "continues_while_retiring": true
+          },
+          {
+            "operation": "POST /blood/requests/{request_id}/issue",
+            "when": null,
+            "continues_while_retiring": true
+          }
+        ],
+        "outstanding": []
+      },
+      {
+        "phc_declared": [],
+        "declaration_note": null,
+        "capability": "blood_center",
+        "label": "Blood center (donors and their blood)",
+        "purpose": "The hospital's own blood center under its PBTA licence (owner decision B1, decisions 48): donors registered once for life, the doctor's assessment and deferral, written consent, the collection, every donation's five screens and its group, components in quarantine, and their release into the blood bank's stock by two people. Distribution to other hospitals is not in this release.",
+        "state": "Active",
+        "state_since": "2026-10-18T07:09:05.237283+00:00",
+        "changed_by_name": null,
+        "requires": [
+          "blood_transfusion"
+        ],
+        "hospital_only": true,
+        "implemented": true,
+        "new_work": "donors registered and donations",
+        "operations": [
+          {
+            "operation": "POST /blood-center/donors",
+            "when": null,
+            "continues_while_retiring": false
+          },
+          {
+            "operation": "POST /blood-center/donations",
+            "when": null,
+            "continues_while_retiring": false
+          },
+          {
+            "operation": "POST /blood-center/donations/{donation_id}/tests",
+            "when": null,
+            "continues_while_retiring": true
+          },
+          {
+            "operation": "POST /blood-center/donations/{donation_id}/components",
+            "when": null,
+            "continues_while_retiring": true
+          },
+          {
+            "operation": "POST /blood-center/components/{component_id}/release",
+            "when": null,
+            "continues_while_retiring": true
+          }
+        ],
+        "outstanding": []
+      },
+      {
+        "phc_declared": [],
+        "declaration_note": "Running here but not in the services declared to the PHC: add it to the declaration (PUT /phc/services)",
+        "capability": "maternity",
+        "label": "Maternity and newborn care",
+        "purpose": "Obstetric risk assessments with the counselling (and the nutritional assessment in Category I) and newborns registered as patients of their own, 'Baby of' the mother, with their own band; the hospital's labour register and the birth notification for the union council, never a certificate (owner decision M1). The list of high-risk cases and its notice are kept whether or not it runs.",
+        "state": "Active",
+        "state_since": "2026-10-18T07:09:05.237283+00:00",
+        "changed_by_name": null,
+        "requires": [
+          "inpatient"
+        ],
+        "hospital_only": true,
+        "implemented": true,
+        "new_work": "obstetric assessments and newborns registered",
+        "operations": [
+          {
+            "operation": "POST /maternity/assessments",
+            "when": null,
+            "continues_while_retiring": false
+          },
+          {
+            "operation": "POST /maternity/newborns",
+            "when": null,
+            "continues_while_retiring": false
+          },
+          {
+            "operation": "POST /maternity/labour-register",
+            "when": null,
+            "continues_while_retiring": false
+          }
+        ],
+        "outstanding": []
+      },
+      {
+        "phc_declared": [],
+        "declaration_note": null,
+        "capability": "home_visits",
+        "label": "Home visits",
+        "purpose": "Care at the patient's home by the establishment's doctors or nurses (the clinic manual, indicator 32). Not Active is a valid policy too: the notice for display then says home visits are not provided.",
+        "state": "Active",
+        "state_since": "2026-10-23T19:44:39.413889+00:00",
+        "changed_by_name": "Hospital Owner",
+        "requires": [],
+        "hospital_only": false,
+        "implemented": true,
+        "new_work": "home visits",
+        "operations": [
+          {
+            "operation": "POST /home-visits",
+            "when": null,
+            "continues_while_retiring": false
+          }
+        ],
+        "outstanding": []
+      },
+      {
+        "phc_declared": [],
+        "declaration_note": null,
+        "capability": "preventive_programmes",
+        "label": "Preventive programmes",
+        "purpose": "Immunization, family planning, TB-DOTS, malaria and dengue control and the like, as their national programmes run them: the list displayed, each patient's enrolment and the services given (the clinic manual, indicator 26). Retired only once every enrolment is completed or transferred.",
+        "state": "Active",
+        "state_since": "2026-10-23T19:44:39.413889+00:00",
+        "changed_by_name": "Hospital Owner",
+        "requires": [],
+        "hospital_only": false,
+        "implemented": true,
+        "new_work": "programme enrolments and their services",
+        "operations": [
+          {
+            "operation": "POST /patients/{patient_id}/programmes",
+            "when": null,
+            "continues_while_retiring": false
+          },
+          {
+            "operation": "POST /programme-enrolments/{enrolment_id}/entries",
+            "when": null,
+            "continues_while_retiring": true
+          }
+        ],
+        "outstanding": []
+      }
+    ],
+    "views": {
+      "workspaces": [
+        {
+          "workspace": "admissions",
+          "services": [
+            "inpatient"
+          ],
+          "view": "full"
+        },
+        {
+          "workspace": "ward_nurse",
+          "services": [
+            "inpatient"
+          ],
+          "view": "full"
+        },
+        {
+          "workspace": "triage",
+          "services": [
+            "emergency_department"
+          ],
+          "view": "full"
+        },
+        {
+          "workspace": "ot_admin",
+          "services": [
+            "surgery"
+          ],
+          "view": "full"
+        },
+        {
+          "workspace": "anaesthesia",
+          "services": [
+            "surgery"
+          ],
+          "view": "full"
+        },
+        {
+          "workspace": "ot_nurse",
+          "services": [
+            "surgery"
+          ],
+          "view": "full"
+        },
+        {
+          "workspace": "cssd",
+          "services": [
+            "cssd"
+          ],
+          "view": "full"
+        },
+        {
+          "workspace": "pharmacy",
+          "services": [
+            "dispensing"
+          ],
+          "view": "full"
+        },
+        {
+          "workspace": "lab_tech",
+          "services": [
+            "laboratory",
+            "outsourced_diagnostics",
+            "blood_transfusion",
+            "blood_center"
+          ],
+          "view": "full"
+        },
+        {
+          "workspace": "lab_verifier",
+          "services": [
+            "laboratory",
+            "blood_center"
+          ],
+          "view": "full"
+        },
+        {
+          "workspace": "lab_admin",
+          "services": [
+            "laboratory",
+            "outsourced_diagnostics",
+            "blood_transfusion",
+            "blood_center"
+          ],
+          "view": "full"
+        },
+        {
+          "workspace": "radiology",
+          "services": [
+            "imaging",
+            "outsourced_diagnostics"
+          ],
+          "view": "full"
+        }
+      ],
+      "screens": [
+        {
+          "screen_id": "lab_only_walkin",
+          "workspace": "reception",
+          "services": [
+            "laboratory",
+            "outsourced_diagnostics"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "lab_orders_results",
+          "workspace": "doctor",
+          "services": [
+            "laboratory",
+            "outsourced_diagnostics",
+            "imaging"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "critical_results_doctor",
+          "workspace": "doctor",
+          "services": [
+            "laboratory",
+            "outsourced_diagnostics",
+            "imaging"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "doctor_inpatients",
+          "workspace": "doctor",
+          "services": [
+            "inpatient"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "discharge_summary",
+          "workspace": "doctor",
+          "services": [
+            "inpatient"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "er_board_doctor",
+          "workspace": "doctor",
+          "services": [
+            "emergency_department"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "er_visit_doctor",
+          "workspace": "doctor",
+          "services": [
+            "emergency_department"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "bed_matrix",
+          "workspace": "admissions",
+          "services": [
+            "inpatient"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "pending_admissions",
+          "workspace": "admissions",
+          "services": [
+            "inpatient"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "code_red",
+          "workspace": "triage",
+          "services": [
+            "inpatient"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "mlc_cases",
+          "workspace": "triage",
+          "services": [
+            "emergency_department"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "er_board",
+          "workspace": "triage",
+          "services": [
+            "emergency_department"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "er_visit",
+          "workspace": "triage",
+          "services": [
+            "emergency_department"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "body_release_er",
+          "workspace": "triage",
+          "services": [
+            "emergency_department"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "critical_results_ward",
+          "workspace": "ward_nurse",
+          "services": [
+            "inpatient"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "critical_results_er",
+          "workspace": "triage",
+          "services": [
+            "emergency_department"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "my_beds",
+          "workspace": "ward_nurse",
+          "services": [
+            "inpatient"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "body_release_ward",
+          "workspace": "ward_nurse",
+          "services": [
+            "inpatient"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "vitals_tracker",
+          "workspace": "ward_nurse",
+          "services": [
+            "inpatient"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "mar",
+          "workspace": "ward_nurse",
+          "services": [
+            "inpatient"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "ward_indent",
+          "workspace": "head_nurse",
+          "services": [
+            "inpatient"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "rx_queue",
+          "workspace": "pharmacy",
+          "services": [
+            "dispensing"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "dispense",
+          "workspace": "pharmacy",
+          "services": [
+            "dispensing"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "otc",
+          "workspace": "pharmacy",
+          "services": [
+            "dispensing"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "charity_override",
+          "workspace": "pharmacy",
+          "services": [
+            "dispensing"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "verbal_orders_ward",
+          "workspace": "ward_nurse",
+          "services": [
+            "inpatient"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "verbal_orders_er",
+          "workspace": "triage",
+          "services": [
+            "emergency_department"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "wristbands_admissions",
+          "workspace": "admissions",
+          "services": [
+            "inpatient"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "wristbands_ward",
+          "workspace": "ward_nurse",
+          "services": [
+            "inpatient"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "wristbands_er",
+          "workspace": "triage",
+          "services": [
+            "emergency_department"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "own_medicines_ward",
+          "workspace": "ward_nurse",
+          "services": [
+            "inpatient"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "own_medicines_pharmacy",
+          "workspace": "pharmacy",
+          "services": [
+            "inpatient"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "order_queries",
+          "workspace": "pharmacy",
+          "services": [
+            "dispensing"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "medication_safety_ward",
+          "workspace": "ward_nurse",
+          "services": [
+            "inpatient"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "drug_recalls",
+          "workspace": "pharmacy_admin",
+          "services": [
+            "dispensing"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "diagnostics_quality",
+          "workspace": "quality",
+          "services": [
+            "laboratory",
+            "outsourced_diagnostics",
+            "imaging"
+          ],
+          "role": "records",
+          "view": "full"
+        },
+        {
+          "screen_id": "diagnostic_correlation",
+          "workspace": "quality",
+          "services": [
+            "laboratory",
+            "outsourced_diagnostics",
+            "imaging"
+          ],
+          "role": "records",
+          "view": "full"
+        },
+        {
+          "screen_id": "lab_bench",
+          "workspace": "lab_tech",
+          "services": [
+            "laboratory"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "lab_verification",
+          "workspace": "lab_verifier",
+          "services": [
+            "laboratory",
+            "blood_center"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "lab_admin",
+          "workspace": "lab_admin",
+          "services": [
+            "laboratory",
+            "outsourced_diagnostics"
+          ],
+          "role": "setup",
+          "view": "full"
+        },
+        {
+          "screen_id": "radiology_worklist",
+          "workspace": "radiology",
+          "services": [
+            "imaging"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "critical_results_radiology",
+          "workspace": "radiology",
+          "services": [
+            "imaging"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "imaging_outsourced",
+          "workspace": "radiology",
+          "services": [
+            "imaging",
+            "outsourced_diagnostics"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "imaging_repeats",
+          "workspace": "radiology",
+          "services": [
+            "imaging"
+          ],
+          "role": "records",
+          "view": "full"
+        },
+        {
+          "screen_id": "imaging_quality_setup",
+          "workspace": "radiology",
+          "services": [
+            "imaging"
+          ],
+          "role": "setup",
+          "view": "full"
+        },
+        {
+          "screen_id": "radiology_quality",
+          "workspace": "radiology",
+          "services": [
+            "imaging"
+          ],
+          "role": "records",
+          "view": "full"
+        },
+        {
+          "screen_id": "critical_results_bench",
+          "workspace": "lab_tech",
+          "services": [
+            "laboratory"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "critical_results_verifier",
+          "workspace": "lab_verifier",
+          "services": [
+            "laboratory",
+            "blood_center"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "lab_send_outs",
+          "workspace": "lab_tech",
+          "services": [
+            "outsourced_diagnostics"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "diagnostic_partners",
+          "workspace": "lab_admin",
+          "services": [
+            "outsourced_diagnostics"
+          ],
+          "role": "setup",
+          "view": "full"
+        },
+        {
+          "screen_id": "lab_quality",
+          "workspace": "lab_admin",
+          "services": [
+            "laboratory",
+            "outsourced_diagnostics"
+          ],
+          "role": "records",
+          "view": "full"
+        },
+        {
+          "screen_id": "ot_board",
+          "workspace": "*",
+          "services": [
+            "surgery"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "ot_scheduling",
+          "workspace": "ot_admin",
+          "services": [
+            "surgery"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "ot_intraop",
+          "workspace": "ot_admin",
+          "services": [
+            "surgery"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "ot_settlement",
+          "workspace": "ot_admin",
+          "services": [
+            "surgery"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "consents_admissions",
+          "workspace": "admissions",
+          "services": [
+            "inpatient"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "consents_ward",
+          "workspace": "ward_nurse",
+          "services": [
+            "inpatient"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "consents_triage",
+          "workspace": "triage",
+          "services": [
+            "emergency_department"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "consents_anaesthesia",
+          "workspace": "anaesthesia",
+          "services": [
+            "surgery"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "ot_consumables_nurse",
+          "workspace": "ot_nurse",
+          "services": [
+            "surgery"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "safety_checklist",
+          "workspace": "ot_nurse",
+          "services": [
+            "surgery"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "safety_checklist_admin",
+          "workspace": "ot_admin",
+          "services": [
+            "surgery"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "safety_checklist_anaesthesia",
+          "workspace": "anaesthesia",
+          "services": [
+            "surgery"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "recovery_board",
+          "workspace": "ot_nurse",
+          "services": [
+            "surgery"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "recovery_board_admin",
+          "workspace": "ot_admin",
+          "services": [
+            "surgery"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "recovery_board_anaesthesia",
+          "workspace": "anaesthesia",
+          "services": [
+            "surgery"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "pre_anaesthesia_clinic",
+          "workspace": "anaesthesia",
+          "services": [
+            "surgery"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "anaesthesia_record",
+          "workspace": "anaesthesia",
+          "services": [
+            "surgery"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "surgical_record_surgeon",
+          "workspace": "doctor",
+          "services": [
+            "surgery"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "er_statistics_owner",
+          "workspace": "owner_dashboard",
+          "services": [
+            "emergency_department"
+          ],
+          "role": "records",
+          "view": "full"
+        },
+        {
+          "screen_id": "er_statistics",
+          "workspace": "quality",
+          "services": [
+            "emergency_department"
+          ],
+          "role": "records",
+          "view": "full"
+        },
+        {
+          "screen_id": "er_register",
+          "workspace": "quality",
+          "services": [
+            "emergency_department"
+          ],
+          "role": "records",
+          "view": "full"
+        },
+        {
+          "screen_id": "triage_scale",
+          "workspace": "quality",
+          "services": [
+            "emergency_department"
+          ],
+          "role": "setup",
+          "view": "full"
+        },
+        {
+          "screen_id": "record_complaint_admissions",
+          "workspace": "admissions",
+          "services": [
+            "inpatient"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "record_complaint_ward",
+          "workspace": "ward_nurse",
+          "services": [
+            "inpatient"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "record_complaint_er",
+          "workspace": "triage",
+          "services": [
+            "emergency_department"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "cssd_board",
+          "workspace": "cssd",
+          "services": [
+            "cssd"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "cssd_stock",
+          "workspace": "cssd",
+          "services": [
+            "cssd"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "cssd_setup",
+          "workspace": "infection_control",
+          "services": [
+            "cssd"
+          ],
+          "role": "setup",
+          "view": "full"
+        },
+        {
+          "screen_id": "ssi_surveillance",
+          "workspace": "infection_control",
+          "services": [
+            "surgery"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "sterile_packs_ot",
+          "workspace": "ot_nurse",
+          "services": [
+            "cssd"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "sterile_packs_ward",
+          "workspace": "ward_nurse",
+          "services": [
+            "cssd"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "sterile_packs_ot_admin",
+          "workspace": "ot_admin",
+          "services": [
+            "cssd"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "report_infection_ward",
+          "workspace": "ward_nurse",
+          "services": [
+            "inpatient"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "nursing_assessment",
+          "workspace": "ward_nurse",
+          "services": [
+            "inpatient"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "cost_estimates_admissions",
+          "workspace": "admissions",
+          "services": [
+            "inpatient"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "home_visit_record",
+          "workspace": "doctor",
+          "services": [
+            "home_visits"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "home_visit_register",
+          "workspace": "quality",
+          "services": [
+            "home_visits"
+          ],
+          "role": "records",
+          "view": "full"
+        },
+        {
+          "screen_id": "preventive_programmes_setup",
+          "workspace": "quality",
+          "services": [
+            "preventive_programmes"
+          ],
+          "role": "setup",
+          "view": "full"
+        },
+        {
+          "screen_id": "patient_programmes",
+          "workspace": "doctor",
+          "services": [
+            "preventive_programmes"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "patient_programmes_triage",
+          "workspace": "triage",
+          "services": [
+            "preventive_programmes"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "blood_sources",
+          "workspace": "lab_admin",
+          "services": [
+            "blood_transfusion"
+          ],
+          "role": "setup",
+          "view": "full"
+        },
+        {
+          "screen_id": "blood_request",
+          "workspace": "doctor",
+          "services": [
+            "blood_transfusion"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "blood_bank",
+          "workspace": "lab_tech",
+          "services": [
+            "blood_transfusion"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "transfusion_bedside",
+          "workspace": "ward_nurse",
+          "services": [
+            "blood_transfusion"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "transfusion_bedside_er",
+          "workspace": "triage",
+          "services": [
+            "blood_transfusion"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "transfusion_bedside_ot",
+          "workspace": "ot_nurse",
+          "services": [
+            "blood_transfusion"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "obstetric_assessment",
+          "workspace": "doctor",
+          "services": [
+            "maternity"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "newborn_registration",
+          "workspace": "ward_nurse",
+          "services": [
+            "maternity"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "labour_register",
+          "workspace": "ward_nurse",
+          "services": [
+            "maternity"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "labour_register_columns",
+          "workspace": "quality",
+          "services": [
+            "maternity"
+          ],
+          "role": "setup",
+          "view": "full"
+        },
+        {
+          "screen_id": "obstetric_register",
+          "workspace": "quality",
+          "services": [
+            "maternity"
+          ],
+          "role": "records",
+          "view": "full"
+        },
+        {
+          "screen_id": "blood_registers",
+          "workspace": "quality",
+          "services": [
+            "blood_transfusion"
+          ],
+          "role": "records",
+          "view": "full"
+        },
+        {
+          "screen_id": "blood_donors",
+          "workspace": "lab_tech",
+          "services": [
+            "blood_center"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "donor_assessment",
+          "workspace": "doctor",
+          "services": [
+            "blood_center"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "blood_collection",
+          "workspace": "lab_tech",
+          "services": [
+            "blood_center"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "blood_center_lab",
+          "workspace": "lab_tech",
+          "services": [
+            "blood_center"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "blood_center_release",
+          "workspace": "lab_verifier",
+          "services": [
+            "blood_center"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "blood_center_registers",
+          "workspace": "quality",
+          "services": [
+            "blood_center"
+          ],
+          "role": "records",
+          "view": "full"
+        },
+        {
+          "screen_id": "patient_education_ward",
+          "workspace": "ward_nurse",
+          "services": [
+            "inpatient"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "ward_transfer",
+          "workspace": "admissions",
+          "services": [
+            "inpatient"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "ward_transfer_head_nurse",
+          "workspace": "head_nurse",
+          "services": [
+            "inpatient"
+          ],
+          "role": "work",
+          "view": "full"
+        },
+        {
+          "screen_id": "surgical_statistics",
+          "workspace": "quality",
+          "services": [
+            "surgery"
+          ],
+          "role": "records",
+          "view": "full"
+        },
+        {
+          "screen_id": "surgical_statistics_owner",
+          "workspace": "owner_dashboard",
+          "services": [
+            "surgery"
+          ],
+          "role": "records",
+          "view": "full"
+        },
+        {
+          "screen_id": "owner_diagnostics",
+          "workspace": "owner_dashboard",
+          "services": [
+            "laboratory",
+            "outsourced_diagnostics",
+            "imaging"
+          ],
+          "role": "records",
+          "view": "full"
+        },
+        {
+          "screen_id": "clinical_privileges",
+          "workspace": "owner_dashboard",
+          "services": [
+            "surgery"
+          ],
+          "role": "setup",
+          "view": "full"
+        },
+        {
+          "screen_id": "theatre_checklist_setup",
+          "workspace": "quality",
+          "services": [
+            "surgery"
+          ],
+          "role": "setup",
+          "view": "full"
+        }
+      ]
+    }
+  },
+  "programmes": [
+    {
+      "enrolment_id": 3,
+      "enrolment_number": "PE-2026-000003",
+      "programme_id": 1,
+      "programme_name": "DEMO Phase2 immunization records 20261024",
+      "patient_id": 18,
+      "mrn": "MRN-2026-000016",
+      "patient_name": "DEMO-DOCTOR-QUEUE-1792746891807",
+      "card_number": "DEMO-CARD-DISCONTINUED-20261024",
+      "status": "Discontinued",
+      "enrolled_at": "2026-10-23T19:44:44.239151+00:00",
+      "enrolled_by": 12,
+      "closed_at": "2026-10-23T19:44:52.700549+00:00",
+      "close_note": "DEMO synthetic course ended after software verification; no actual vaccine or care.",
+      "row_version": 2,
+      "entries": []
+    },
+    {
+      "enrolment_id": 2,
+      "enrolment_number": "PE-2026-000002",
+      "programme_id": 1,
+      "programme_name": "DEMO Phase2 immunization records 20261024",
+      "patient_id": 18,
+      "mrn": "MRN-2026-000016",
+      "patient_name": "DEMO-DOCTOR-QUEUE-1792746891807",
+      "card_number": "DEMO-CARD-RETIRING-20261024",
+      "status": "Completed",
+      "enrolled_at": "2026-10-23T19:42:36.224699+00:00",
+      "enrolled_by": 12,
+      "closed_at": "2026-10-23T19:44:12.067111+00:00",
+      "close_note": null,
+      "row_version": 2,
+      "entries": [
+        {
+          "entry_id": 2,
+          "enrolment_id": 2,
+          "service": "OPV-0 (DEV simulation only)",
+          "given_at": "2026-10-23T19:43:00+00:00",
+          "batch_number": null,
+          "next_due_on": null,
+          "note": "DEMO-RETIRING-CONTINUATION-20261024 no vaccine or actual care",
+          "given_by": 12,
+          "given_by_stamp": {
+            "at": "2026-10-23T19:44:06.480794+00:00",
+            "name": "Dr. Sara Malik",
+            "text": "Dr. Sara Malik, Clinical Specialist, PMDC LIC-00011, 24-Oct-2026 00:44",
+            "user_id": 12,
+            "designation": "Clinical Specialist",
+            "employee_id": 11,
+            "registration": "PMDC LIC-00011"
+          },
+          "created_at": "2026-10-23T19:44:06.480794+00:00"
+        }
+      ]
+    },
+    {
+      "enrolment_id": 1,
+      "enrolment_number": "PE-2026-000001",
+      "programme_id": 1,
+      "programme_name": "DEMO Phase2 immunization records 20261024",
+      "patient_id": 18,
+      "mrn": "MRN-2026-000016",
+      "patient_name": "DEMO-DOCTOR-QUEUE-1792746891807",
+      "card_number": "DEMO-CARD-PHASE2-20261024",
+      "status": "TransferredOut",
+      "enrolled_at": "2026-10-23T19:22:32.311626+00:00",
+      "enrolled_by": 12,
+      "closed_at": "2026-10-23T19:26:00.035107+00:00",
+      "close_note": "DEMO simulated receiving test site. Software verification only; no actual transfer or care.",
+      "row_version": 2,
+      "entries": [
+        {
+          "entry_id": 1,
+          "enrolment_id": 1,
+          "service": "BCG (DEV simulation only)",
+          "given_at": "2026-10-23T19:20:00+00:00",
+          "batch_number": "DEMO-NOT-A-VACCINE-20261024",
+          "next_due_on": "2026-10-24",
+          "note": "DEMO-PROGRAMME-20261024 software simulation only; no vaccine administered. The synthetic card explicitly says this test date; no schedule calculated.",
+          "given_by": 12,
+          "given_by_stamp": {
+            "at": "2026-10-23T19:25:32.074937+00:00",
+            "name": "Dr. Sara Malik",
+            "text": "Dr. Sara Malik, Clinical Specialist, PMDC LIC-00011, 24-Oct-2026 00:25",
+            "user_id": 12,
+            "designation": "Clinical Specialist",
+            "employee_id": 11,
+            "registration": "PMDC LIC-00011"
+          },
+          "created_at": "2026-10-23T19:25:32.074937+00:00"
+        }
+      ]
+    }
+  ],
+  "home_visits": [
+    {
+      "home_visit_id": 2,
+      "visit_number": "HV-2026-00002",
+      "patient_id": 18,
+      "mrn": "MRN-2026-000016",
+      "patient_name": "DEMO-DOCTOR-QUEUE-1792746891807",
+      "requested_by": "DEMO synthetic attendant / software test",
+      "requested_at": "2026-10-23T19:04:00+00:00",
+      "reason": "DEMO-HOME-VISIT-20261024 software simulation, no actual home visit",
+      "address": "DEMO corrected synthetic test-site address; no real home",
+      "visited_at": "2026-10-23T19:24:00+00:00",
+      "visited_by": 11,
+      "accompanied_by": "DEMO test observer",
+      "examination_consent": "VerbalObtained",
+      "history": "DEMO software simulation only; no real clinical history asserted.",
+      "examination": "DEMO examination field check only; no examination performed.",
+      "assessment": "DEMO software verification, not a clinical diagnosis",
+      "care_given": "DEMO workflow test only; no care, medicines or home visit provided.",
+      "outcome": "Referred",
+      "referred_to": "DEMO receiving test site; no actual transfer",
+      "follow_up": "Correction to home visit #1: updated synthetic address wording, original retained. Software testing only; no real care.",
+      "author_stamp": {
+        "at": "2026-10-23T19:35:29.688216+00:00",
+        "name": "Dr. Sara Malik",
+        "text": "Dr. Sara Malik, Clinical Specialist, PMDC LIC-00011, 24-Oct-2026 00:35",
+        "user_id": 12,
+        "designation": "Clinical Specialist",
+        "employee_id": 11,
+        "registration": "PMDC LIC-00011"
+      },
+      "created_at": "2026-10-23T19:35:29.688216+00:00"
+    },
+    {
+      "home_visit_id": 1,
+      "visit_number": "HV-2026-00001",
+      "patient_id": 18,
+      "mrn": "MRN-2026-000016",
+      "patient_name": "DEMO-DOCTOR-QUEUE-1792746891807",
+      "requested_by": "DEMO synthetic attendant / software test",
+      "requested_at": "2026-10-23T19:04:00+00:00",
+      "reason": "DEMO-HOME-VISIT-20261024 software simulation, no actual home visit",
+      "address": "DEMO synthetic test address, no real home",
+      "visited_at": "2026-10-23T19:24:00+00:00",
+      "visited_by": 11,
+      "accompanied_by": "DEMO test observer",
+      "examination_consent": "VerbalObtained",
+      "history": "DEMO software simulation only; no real clinical history asserted.",
+      "examination": "DEMO examination field check only; no examination performed.",
+      "assessment": "DEMO software verification, not a clinical diagnosis",
+      "care_given": "DEMO workflow test only; no care, medicines or home visit provided.",
+      "outcome": "Referred",
+      "referred_to": "DEMO receiving test site; no actual transfer",
+      "follow_up": "DEMO synthetic workflow verification only.",
+      "author_stamp": {
+        "at": "2026-10-23T19:35:10.682678+00:00",
+        "name": "Dr. Sara Malik",
+        "text": "Dr. Sara Malik, Clinical Specialist, PMDC LIC-00011, 24-Oct-2026 00:35",
+        "user_id": 12,
+        "designation": "Clinical Specialist",
+        "employee_id": 11,
+        "registration": "PMDC LIC-00011"
+      },
+      "created_at": "2026-10-23T19:35:10.682678+00:00"
+    }
+  ],
+  "policy": {
+    "provided": true,
+    "state": "Active",
+    "arrangements": "DEV SOFTWARE TEST ONLY. Hours: authorized synthetic test sessions. Area: synthetic DEV addresses only. Requests: test operator verifies synthetic identity and records a completed simulation. Team and kit: permitted demo clinician/nurse; no real visit, medicine or equipment use. Escalation: DEV administrator. Not a live patient-facing service.",
+    "notice": "Home visits are provided. DEV SOFTWARE TEST ONLY. Hours: authorized synthetic test sessions. Area: synthetic DEV addresses only. Requests: test operator verifies synthetic identity and records a completed simulation. Team and kit: permitted demo clinician/nurse; no real visit, medicine or equipment use. Escalation: DEV administrator. Not a live patient-facing service."
+  },
+  "comparison": "IIB profile and every other service state exactly match original snapshot. Both requested services Active. Negative cases created no extra enrolment/entry/home record.",
+  "scope": "DEV synthetic software testing, no actual care, vaccine or transfer."
+}

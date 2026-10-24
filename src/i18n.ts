@@ -1,10 +1,25 @@
+import { receivablesUr } from "./receivables-i18n";
+import { doctorQueueUr } from "./doctor-queue-i18n";
+import { clinicalUr } from "./clinical-i18n";
 import { registrationUr } from "./registration-i18n";
 import { frontdeskUr } from "./frontdesk-i18n";
 let language = "en";
+export function bilingual(en: string, urText: string) { return language === "ur" ? urText : en; }
 export function setLanguage(value: string) {
   language = value;
 }
 const ur: Record<string, string> = {
+  "Discard this financial draft?": "یہ مالی مسودہ چھوڑ دیں؟",
+  "This financial action is unavailable with your current permissions or record-only access.": "موجودہ اجازت یا صرف ریکارڈ دیکھنے کی حالت میں یہ مالی عمل دستیاب نہیں ہے۔",
+  "The original financial request needs IT reconciliation. Do not collect again or start a replacement.": "اصل مالی درخواست کا آئی ٹی سے نتیجہ چیک کرائیں۔ دوبارہ رقم یا متبادل درخواست نہ بنائیں۔",
+  "The invoice changed or is locked. Close this draft, refresh and review it before collecting.": "بل بدل گیا یا مقفل ہے۔ مسودہ بند کرکے رقم سے پہلے تازہ بل چیک کریں۔",
+  "The receivable changed. Close this draft, refresh and review the current balance.": "واجبات بدل گئے ہیں۔ مسودہ بند کرکے موجودہ بقایا تازہ اور چیک کریں۔",
+  "Enter a complete positive amount within the balance and a reference for card or bank payments.": "بقایا کے اندر مکمل مثبت رقم اور کارڈ یا بینک ادائیگی کا حوالہ لکھیں۔",
+  "Enter a complete positive write-off amount within the balance and a reason of 5–500 characters.": "بقایا کے اندر مکمل مثبت معافی کی رقم اور ۵ تا ۵۰۰ حروف کی وجہ لکھیں۔",
+  "The financial result is unknown. Keep the original request; do not collect again, change the draft or close it. Retry only this original action within 24 hours; outside that window ask IT to reconcile it.": "مالی نتیجہ غیر یقینی ہے۔ اصل درخواست رکھیں؛ دوبارہ رقم، مسودے کی تبدیلی یا بند نہ کریں۔ صرف اسی عمل کی ۲۴ گھنٹے میں دوبارہ کوشش کریں؛ بعد میں آئی ٹی سے اصل نتیجہ چیک کرائیں۔",
+  "Retry original financial action": "اصل مالی عمل کی دوبارہ کوشش",
+  "Before collecting cash, open your own shift at this terminal's assigned counter. No payment has been submitted.": "نقد لینے سے پہلے ٹرمینل کے مقررہ کاؤنٹر پر اپنی شفٹ کھولیں۔ ابھی ادائیگی نہیں بھیجی گئی۔",
+  "You do not have permission to view invoice details.": "آپ کو بل کی تفصیل دیکھنے کی اجازت نہیں ہے۔",
   "Tariff": "نرخ نامہ",
   "Check the hospital's published prices before explaining a charge. This screen does not change prices or collect payment.": "رقم بتانے سے پہلے ہسپتال کے شائع شدہ نرخ چیک کریں۔ یہاں قیمت نہیں بدلتی اور رقم وصول نہیں ہوتی۔",
   "Refresh tariff": "نرخ تازہ کریں",
@@ -692,6 +707,9 @@ const ur: Record<string, string> = {
   unknown: "نامعلوم",
 };
 export function tr(text: string) {
+  if (language === "ur" && clinicalUr[text]) return clinicalUr[text];
+  if (language === "ur" && doctorQueueUr[text]) return doctorQueueUr[text];
+  if (language === "ur" && receivablesUr[text]) return receivablesUr[text];
   if (language === "ur" && frontdeskUr[text]) return frontdeskUr[text];
   if (language === "ur" && registrationUr[text]) return registrationUr[text];
   const fixes: Record<string, string> = {

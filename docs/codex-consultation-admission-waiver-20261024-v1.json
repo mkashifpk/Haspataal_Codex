@@ -1,0 +1,19 @@
+{
+  "implementation_id": 1,
+  "screen_id": "consultation",
+  "rubric_fingerprint": "d81d43f195f8",
+  "request_id": "codex-consultation-admission-waiver-20261024-v1",
+  "agent": "Codex",
+  "build": "main13b2fef + working tree; index-CFLr9BSe.js; positive handovers DXlZnRcZ + final read regression",
+  "items": [
+    "ep:POST /admissions",
+    "ep:POST /opd-tickets/{ticket_id}/vip-waiver-post-consult",
+    "ep:GET /icd/codes",
+    "ep:GET /icd/browse",
+    "ep:GET /icd/codes/{code}",
+    "ep:GET /icd/releases",
+    "rule:624ef5434a",
+    "rule:5dfbca77bd"
+  ],
+  "evidence": "## Change\nsrc/screens/Consultation.tsx now shows server-confirmed admission number/status/reason/diagnosis/doctor stamp and approval-request ID/summary/current ticket lock, with explicit receiving-role next steps. Confirmed admission does not allocate a bed or collect money; waiver request is not approval or cash handover. Clear validation on a new or valid action rather than leaving a prior failure beside a confirmed result. English/Urdu admission instructions updated in src/foundation-help.ts; existing action/F1 mappings retained. Full current bundle including omitted schemas/examples, screen/workspace quality, design, Doctor handbook, workflow recipes, actual endpoint contracts/generated admission types and request validation read.\n\n## Real DEV frontend evidence\nnode scripts/phase2-handover-check.mjs PASS4 on DXlZnRcZ. Two fresh synthetic visits created through Reception UI, each Card1500 once (payments10/11 invoices16/17). Patient21/ticket15 Finalnote4 -> admission1 ADM-2026-00001 AdmissionPending bed=null; patient22/ticket16 Finalnote5 -> waiver3/approval13 Pending, WaiverPending lock. Admission reason/diagnosis/initial-care-plan prefilled from actual note; missing reason/waiver reason rejected locally ZEROPOST; F1 preserves draft. Each real handover201 deliberately lost; rapid double submit sent one original; exact key/body replay returned the SAME record with Idempotent-Replay true. No replacement payment/registration/note/handover. Stored docs/phase2-handover-check-2026-10-24.json contains original requests/keys/IDs/results. Both consultations select actual ICD via embedded picker and persist code strings only, returning titled icd_terms on reread. Earlier accepted ICD evidence additionally verifies real browse/parent/root and classification reads; shared component used here unchanged.\n\nReceiving-role server reads: demo.admissions GET /admissions?status=AdmissionPending200/request2a65e29d1de74098aced1cdf712b2dcd sees admission1 samepatient21/doctor10/no bed. demo.owner GET /approvals/13 200/request1d2b0ee874fd426c81c350bf23f7935e sees samepatient22/encounter5/requester11, can_decide true. No simulated local receiving record. No approval or physical cash acknowledgement performed.\n\nFinal source build index-CFLr9BSe.js: npm run build PASS30screens550controls180groups33FAQseeds30workspaceguides + TS/Vite; npm test64PASS. node scripts/phase2-handover-read-check.mjs PASS2: original Finalnote4/titled code reread, invalid admission ZEROPOST, new dialog clears old error/F1 preserves input; originalticket16 remains locked/one note/no duplicates. Durable docs/phase2-handover-read-check-2026-10-24.json. Preferences restored/logout/apps closed. No named human fresh-data/translation/editor/device review or full test-plan/phase completion. Outpatient bedside procedure/consent and diagnostics event paths remain unclaimed. Partial tested claims only."
+}

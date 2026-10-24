@@ -1,0 +1,708 @@
+{
+  "endpoints": [
+    {
+      "method": "GET",
+      "path": "/api/v1/home-visits",
+      "summary": "The register of home visits",
+      "tags": [
+        "Home visits"
+      ],
+      "permissions": [
+        "homevisit.view",
+        "msds.view"
+      ],
+      "permissions_mode": "any",
+      "idempotency_key": false,
+      "description": "The visits of a period, newest first: the evidence that the portrayed policy is practised. Every row read is\nlogged as access to the patient's record. Continue with the last home_visit_id as `before_id`, keeping the dates,\nuntil an empty page. Reversed dates give `VALIDATION_ERROR`.\n\n**Required permission:** `homevisit.view OR msds.view`\n\n**Required permission:** `homevisit.view OR msds.view`",
+      "roles_allowed": [
+        "clinic_director",
+        "clinical_specialist",
+        "doctor",
+        "hospital_admin",
+        "hospital_director",
+        "owner",
+        "quality_officer"
+      ],
+      "parameters": [
+        {
+          "name": "date_from",
+          "in": "query",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "string",
+            "format": "date",
+            "title": "Date From"
+          }
+        },
+        {
+          "name": "date_to",
+          "in": "query",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "string",
+            "format": "date",
+            "title": "Date To"
+          }
+        },
+        {
+          "name": "patient_id",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Patient Id"
+          }
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "maximum": 1000,
+            "minimum": 1,
+            "default": 200,
+            "title": "Limit"
+          }
+        },
+        {
+          "name": "before_id",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Before Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "request_content_type": null,
+      "response_schema": {
+        "title": "Envelope[list[HomeVisitOut]]",
+        "properties": {
+          "data": {
+            "items": {
+              "title": "HomeVisitOut",
+              "properties": {
+                "home_visit_id": {
+                  "type": "integer",
+                  "title": "Home Visit Id"
+                },
+                "visit_number": {
+                  "type": "string",
+                  "title": "Visit Number"
+                },
+                "patient_id": {
+                  "type": "integer",
+                  "title": "Patient Id"
+                },
+                "mrn": {
+                  "type": "string",
+                  "title": "Mrn"
+                },
+                "patient_name": {
+                  "type": "string",
+                  "title": "Patient Name"
+                },
+                "requested_by": {
+                  "type": "string",
+                  "title": "Requested By"
+                },
+                "requested_at": {
+                  "type": "string",
+                  "format": "date-time",
+                  "title": "Requested At"
+                },
+                "reason": {
+                  "type": "string",
+                  "title": "Reason"
+                },
+                "address": {
+                  "type": "string",
+                  "title": "Address"
+                },
+                "visited_at": {
+                  "type": "string",
+                  "format": "date-time",
+                  "title": "Visited At"
+                },
+                "visited_by": {
+                  "type": "integer",
+                  "title": "Visited By"
+                },
+                "accompanied_by": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Accompanied By"
+                },
+                "examination_consent": {
+                  "type": "string",
+                  "enum": [
+                    "VerbalObtained",
+                    "Declined",
+                    "NotExamined"
+                  ],
+                  "title": "Examination Consent"
+                },
+                "history": {
+                  "type": "string",
+                  "title": "History"
+                },
+                "examination": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Examination"
+                },
+                "assessment": {
+                  "type": "string",
+                  "title": "Assessment"
+                },
+                "care_given": {
+                  "type": "string",
+                  "title": "Care Given"
+                },
+                "outcome": {
+                  "type": "string",
+                  "enum": [
+                    "ManagedAtHome",
+                    "AskedToAttend",
+                    "Referred"
+                  ],
+                  "title": "Outcome"
+                },
+                "referred_to": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Referred To"
+                },
+                "follow_up": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Follow Up"
+                },
+                "author_stamp": {
+                  "$ref": "#/components/schemas/AuthorStampOut"
+                },
+                "created_at": {
+                  "type": "string",
+                  "format": "date-time",
+                  "title": "Created At"
+                }
+              },
+              "type": "object",
+              "required": [
+                "home_visit_id",
+                "visit_number",
+                "patient_id",
+                "mrn",
+                "patient_name",
+                "requested_by",
+                "requested_at",
+                "reason",
+                "address",
+                "visited_at",
+                "visited_by",
+                "accompanied_by",
+                "examination_consent",
+                "history",
+                "examination",
+                "assessment",
+                "care_given",
+                "outcome",
+                "referred_to",
+                "follow_up",
+                "author_stamp",
+                "created_at"
+              ]
+            },
+            "type": "array",
+            "title": "Data"
+          },
+          "meta": {
+            "title": "Meta",
+            "properties": {
+              "server_time": {
+                "type": "string",
+                "title": "Server Time",
+                "description": "Server clock (UTC). Use it to detect terminal clock skew."
+              },
+              "page": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Page"
+              },
+              "page_size": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Page Size"
+              },
+              "total_count": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Total Count"
+              },
+              "next_cursor": {
+                "title": "Next Cursor"
+              }
+            },
+            "type": "object",
+            "required": [
+              "server_time"
+            ]
+          },
+          "request_id": {
+            "type": "string",
+            "title": "Request Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data",
+          "meta",
+          "request_id"
+        ]
+      },
+      "recorded_example": {
+        "request": {
+          "path": "/api/v1/home-visits",
+          "query": {
+            "date_from": "2026-10-13",
+            "date_to": "2026-10-14"
+          }
+        },
+        "response": {
+          "status": 200,
+          "body": {
+            "data": [
+              {
+                "home_visit_id": 2,
+                "visit_number": "HV-2026-00001",
+                "patient_id": 1,
+                "mrn": "MRN-2026-000001",
+                "patient_name": "Ali Khan",
+                "requested_by": "The patient's son, Bilal",
+                "requested_at": "2026-10-14T07:48:36.544459+00:00",
+                "reason": "Bedridden after a stroke; fever since yesterday",
+                "address": "House 4, Street 9, Lahore",
+                "visited_at": "2026-10-14T09:48:36.544459+00:00",
+                "visited_by": 1,
+                "accompanied_by": null,
+                "examination_consent": "VerbalObtained",
+                "history": "Fever 38.6 C since yesterday, eating less",
+                "examination": "Chest clear, sacral skin intact",
+                "assessment": "Viral fever",
+                "care_given": "Paracetamol advised; fluids; the family taught to turn him every two hours",
+                "outcome": "ManagedAtHome",
+                "referred_to": null,
+                "follow_up": null,
+                "author_stamp": {
+                  "at": "2026-10-14T10:48:36.548556+00:00",
+                  "name": "Dr Ahmed",
+                  "text": "Dr Ahmed, Doctor, PMDC PMDC-64257, 14-Oct-2026 15:48",
+                  "user_id": 1,
+                  "designation": "Doctor",
+                  "employee_id": 1,
+                  "registration": "PMDC PMDC-64257"
+                },
+                "created_at": "2026-10-14T10:48:36.548556+00:00"
+              }
+            ],
+            "meta": {
+              "server_time": "2026-10-14T10:48:36.583365+00:00"
+            },
+            "request_id": "ae051bef841e45f788606ad89d94fa5a"
+          }
+        }
+      },
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "category": "request",
+          "ui_action": "Show field errors from details.fields / the message."
+        }
+      ],
+      "errors_seen_in_tests": [],
+      "used_by_screens": [
+        "home_visit_register"
+      ],
+      "used_by_workflows": [
+        "home-visits-and-preventive-programmes"
+      ],
+      "typescript_example": "// The register of home visits  (permissions: homevisit.view, msds.view)\nexport const registerHomeVisits = () =>\n  api(\"GET\", `/home-visits`, undefined);   // api(): see get_guide('envelope-and-errors')",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "homevisit.view",
+          "msds.view"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of homevisit.view or msds.view",
+        "roles_allowed": [
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer"
+        ]
+      },
+      "write_semantics": null,
+      "emits_events": [],
+      "list": {
+        "returns": "list",
+        "paging": [
+          {
+            "name": "limit",
+            "required": false,
+            "type": "integer",
+            "default": 200,
+            "minimum": 1,
+            "maximum": 1000
+          }
+        ],
+        "search": [],
+        "filters": [
+          {
+            "name": "date_from",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "date_to",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "patient_id",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "before_id",
+            "required": false,
+            "type": "integer",
+            "minimum": 1
+          }
+        ],
+        "note": "Lists are bounded by `limit` (no cursor paging): ask for what the screen shows, filter on the server."
+      },
+      "cross_field_rules": {},
+      "errors_detail": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "endpoint": "GET /home-visits",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "title": "Envelope[list[HomeVisitOut]]",
+                "properties": {
+                  "data": {
+                    "items": {
+                      "title": "HomeVisitOut",
+                      "properties": {
+                        "home_visit_id": {
+                          "type": "integer",
+                          "title": "Home Visit Id"
+                        },
+                        "visit_number": {
+                          "type": "string",
+                          "title": "Visit Number"
+                        },
+                        "patient_id": {
+                          "type": "integer",
+                          "title": "Patient Id"
+                        },
+                        "mrn": {
+                          "type": "string",
+                          "title": "Mrn"
+                        },
+                        "patient_name": {
+                          "type": "string",
+                          "title": "Patient Name"
+                        },
+                        "requested_by": {
+                          "type": "string",
+                          "title": "Requested By"
+                        },
+                        "requested_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "title": "Requested At"
+                        },
+                        "reason": {
+                          "type": "string",
+                          "title": "Reason"
+                        },
+                        "address": {
+                          "type": "string",
+                          "title": "Address"
+                        },
+                        "visited_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "title": "Visited At"
+                        },
+                        "visited_by": {
+                          "type": "integer",
+                          "title": "Visited By"
+                        },
+                        "accompanied_by": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "title": "Accompanied By"
+                        },
+                        "examination_consent": {
+                          "type": "string",
+                          "enum": [
+                            "VerbalObtained",
+                            "Declined",
+                            "NotExamined"
+                          ],
+                          "title": "Examination Consent"
+                        },
+                        "history": {
+                          "type": "string",
+                          "title": "History"
+                        },
+                        "examination": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "title": "Examination"
+                        },
+                        "assessment": {
+                          "type": "string",
+                          "title": "Assessment"
+                        },
+                        "care_given": {
+                          "type": "string",
+                          "title": "Care Given"
+                        },
+                        "outcome": {
+                          "type": "string",
+                          "enum": [
+                            "ManagedAtHome",
+                            "AskedToAttend",
+                            "Referred"
+                          ],
+                          "title": "Outcome"
+                        },
+                        "referred_to": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "title": "Referred To"
+                        },
+                        "follow_up": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "title": "Follow Up"
+                        },
+                        "author_stamp": {
+                          "$ref": "#/components/schemas/AuthorStampOut"
+                        },
+                        "created_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "title": "Created At"
+                        }
+                      },
+                      "type": "object",
+                      "required": [
+                        "home_visit_id",
+                        "visit_number",
+                        "patient_id",
+                        "mrn",
+                        "patient_name",
+                        "requested_by",
+                        "requested_at",
+                        "reason",
+                        "address",
+                        "visited_at",
+                        "visited_by",
+                        "accompanied_by",
+                        "examination_consent",
+                        "history",
+                        "examination",
+                        "assessment",
+                        "care_given",
+                        "outcome",
+                        "referred_to",
+                        "follow_up",
+                        "author_stamp",
+                        "created_at"
+                      ]
+                    },
+                    "type": "array",
+                    "title": "Data"
+                  },
+                  "meta": {
+                    "title": "Meta",
+                    "properties": {
+                      "server_time": {
+                        "type": "string",
+                        "title": "Server Time",
+                        "description": "Server clock (UTC). Use it to detect terminal clock skew."
+                      },
+                      "page": {
+                        "anyOf": [
+                          {
+                            "type": "integer"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ],
+                        "title": "Page"
+                      },
+                      "page_size": {
+                        "anyOf": [
+                          {
+                            "type": "integer"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ],
+                        "title": "Page Size"
+                      },
+                      "total_count": {
+                        "anyOf": [
+                          {
+                            "type": "integer"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ],
+                        "title": "Total Count"
+                      },
+                      "next_cursor": {
+                        "title": "Next Cursor"
+                      }
+                    },
+                    "type": "object",
+                    "required": [
+                      "server_time"
+                    ]
+                  },
+                  "request_id": {
+                    "type": "string",
+                    "title": "Request Id"
+                  }
+                },
+                "type": "object",
+                "required": [
+                  "data",
+                  "meta",
+                  "request_id"
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

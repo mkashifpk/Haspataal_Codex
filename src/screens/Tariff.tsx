@@ -17,7 +17,7 @@ export function Tariff({ revision }: { revision: number }) {
     flight.current = true; setBusy(true); setError(undefined); setNotice("");
     try {
       const result = await call<{ saved: boolean }>("download", { path: "/tariff/pdf" });
-      setNotice(tr(result.saved ? "Tariff PDF saved. Open the saved PDF in your PDF reader to print." : "PDF save cancelled. No file was saved."));
+      setNotice(result.saved ? "Tariff PDF saved. Open the saved PDF in your PDF reader to print." : "PDF save cancelled. No file was saved.");
     } catch (cause) { setError(cause); }
     finally { flight.current = false; setBusy(false); }
   }
@@ -37,7 +37,7 @@ export function Tariff({ revision }: { revision: number }) {
     </div>
     <p className="muted">{tr("The official PDF contains the full tariff; screen filters do not change it. Save it, then open it in your PDF reader to print.")}</p>
     <ErrorBox error={error} />
-    {notice && <p role="status">{notice}</p>}
+    {notice && <p role="status">{tr(notice)}</p>}
     <LoadState {...tariff} retry={tariff.reload} />
     {data && <>
       <section className="card">

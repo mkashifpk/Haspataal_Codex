@@ -1,0 +1,1806 @@
+{
+  "endpoints": [
+    {
+      "method": "GET",
+      "path": "/api/v1/er/visits",
+      "summary": "The ER register (emergency log book)",
+      "tags": [
+        "Emergency department"
+      ],
+      "permissions": [
+        "er.visit.view"
+      ],
+      "permissions_mode": "all",
+      "idempotency_key": false,
+      "description": "Every ER visit, newest first, by the day of arrival: triage, stage, how the patient left (MSDS 20: admitted to\nwhich ward and when; discharged with the condition and follow-up; referred where and why; LAMA; on request with the\nsigned statement; left without being seen; died; brought dead).\n\n**Required permission:** `er.visit.view`\n\n**Required permission:** `er.visit.view`",
+      "roles_allowed": [
+        "admissions_officer",
+        "anaesthetist",
+        "clinic_director",
+        "clinical_specialist",
+        "doctor",
+        "hospital_admin",
+        "hospital_director",
+        "owner",
+        "quality_officer",
+        "receptionist",
+        "surgeon",
+        "triage_nurse"
+      ],
+      "parameters": [
+        {
+          "name": "date_from",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Date From"
+          }
+        },
+        {
+          "name": "date_to",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Date To"
+          }
+        },
+        {
+          "name": "disposition",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "enum": [
+                  "Admitted",
+                  "Discharged",
+                  "Referred",
+                  "LAMA",
+                  "DischargedOnRequest",
+                  "LeftWithoutBeingSeen",
+                  "Died",
+                  "BroughtDead"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Disposition"
+          }
+        },
+        {
+          "name": "triage_level",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 5,
+                "minimum": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Triage Level"
+          }
+        },
+        {
+          "name": "open_only",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "type": "boolean",
+            "default": false,
+            "title": "Open Only"
+          }
+        },
+        {
+          "name": "patient_id",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Patient Id"
+          }
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "maximum": 1000,
+            "minimum": 1,
+            "default": 200,
+            "title": "Limit"
+          }
+        }
+      ],
+      "request_body": null,
+      "request_content_type": null,
+      "response_schema": {
+        "title": "Envelope[list[ErVisitOut]]",
+        "properties": {
+          "data": {
+            "items": {
+              "title": "ErVisitOut",
+              "properties": {
+                "er_visit_id": {
+                  "type": "integer",
+                  "title": "Er Visit Id"
+                },
+                "er_number": {
+                  "type": "string",
+                  "title": "Er Number",
+                  "description": "The ER register number, e.g. ER-2026-000042"
+                },
+                "patient_id": {
+                  "type": "integer",
+                  "title": "Patient Id"
+                },
+                "mrn": {
+                  "type": "string",
+                  "title": "Mrn"
+                },
+                "patient_name": {
+                  "type": "string",
+                  "title": "Patient Name"
+                },
+                "gender": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "male",
+                        "female",
+                        "other",
+                        "unknown"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Gender"
+                },
+                "age_years": {
+                  "anyOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Age Years"
+                },
+                "ticket_id": {
+                  "anyOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Ticket Id",
+                  "description": "The emergency ticket (billing), once issued"
+                },
+                "ticket_number": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Ticket Number"
+                },
+                "ticket_status": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "Issued",
+                        "Waiting",
+                        "InConsultation",
+                        "Examined",
+                        "Completed",
+                        "Deferred",
+                        "Expired",
+                        "Forfeited",
+                        "Refunded",
+                        "Void",
+                        "Cancelled"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Ticket Status"
+                },
+                "admission_id": {
+                  "anyOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Admission Id",
+                  "description": "Code Red, or the admission requested from the ER"
+                },
+                "admission_number": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Admission Number"
+                },
+                "admission_status": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "AdmissionPending",
+                        "Waitlisted",
+                        "BedReserved",
+                        "CodeRedActive",
+                        "Admitted",
+                        "DischargeInProgress",
+                        "Discharged",
+                        "Cancelled"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Admission Status"
+                },
+                "ward_name": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Ward Name"
+                },
+                "arrived_at": {
+                  "type": "string",
+                  "format": "date-time",
+                  "title": "Arrived At"
+                },
+                "arrival_mode": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "WalkIn",
+                        "Ambulance",
+                        "Rescue1122",
+                        "Police",
+                        "Referred"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Arrival Mode"
+                },
+                "referred_from": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Referred From"
+                },
+                "presenting_complaint": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Presenting Complaint"
+                },
+                "stage": {
+                  "type": "string",
+                  "enum": [
+                    "Arrived",
+                    "Triaged",
+                    "InTreatment",
+                    "Observation",
+                    "AwaitingAdmission",
+                    "AwaitingBed",
+                    "AwaitingReferral",
+                    "Departed"
+                  ],
+                  "title": "Stage"
+                },
+                "stage_since": {
+                  "type": "string",
+                  "format": "date-time",
+                  "title": "Stage Since"
+                },
+                "triage_level": {
+                  "anyOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Triage Level",
+                  "description": "1 (resuscitation) … 5 (non-urgent); null: not triaged yet"
+                },
+                "triage_level_name": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Triage Level Name"
+                },
+                "triage_colour": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "Red",
+                        "Orange",
+                        "Yellow",
+                        "Green",
+                        "Blue",
+                        "White",
+                        "Black"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Triage Colour"
+                },
+                "triage_target_minutes": {
+                  "anyOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Triage Target Minutes",
+                  "description": "The level's target time from triage to the doctor"
+                },
+                "triaged_at": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Triaged At",
+                  "description": "The first triage"
+                },
+                "seen_at": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Seen At",
+                  "description": "First seen by a doctor (called in, or taken for treatment)"
+                },
+                "seen_by": {
+                  "anyOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Seen By"
+                },
+                "seen_by_name": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Seen By Name"
+                },
+                "is_medico_legal": {
+                  "anyOf": [
+                    {
+                      "type": "boolean"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Is Medico Legal",
+                  "description": "The medico-legal checklist; null: not decided yet"
+                },
+                "mlc_case_type_id": {
+                  "anyOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Mlc Case Type Id"
+                },
+                "mlc_case_type_name": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Mlc Case Type Name"
+                },
+                "mlc_id": {
+                  "anyOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Mlc Id",
+                  "description": "The medico-legal case opened for this visit"
+                },
+                "mlc_number": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Mlc Number"
+                },
+                "disposition": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "Admitted",
+                        "Discharged",
+                        "Referred",
+                        "LAMA",
+                        "DischargedOnRequest",
+                        "LeftWithoutBeingSeen",
+                        "Died",
+                        "BroughtDead"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Disposition"
+                },
+                "departed_at": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Departed At"
+                },
+                "condition_at_departure": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "Improved",
+                        "Stable",
+                        "Unchanged",
+                        "Deteriorated",
+                        "Critical"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Condition At Departure"
+                },
+                "follow_up_advice": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Follow Up Advice"
+                },
+                "referral_reason": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Referral Reason"
+                },
+                "referred_to": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Referred To"
+                },
+                "statement_signed_by": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Statement Signed By"
+                },
+                "absence_noticed_at": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Absence Noticed At"
+                },
+                "death_id": {
+                  "anyOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Death Id"
+                },
+                "death_number": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Death Number"
+                },
+                "departure_note": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Departure Note"
+                },
+                "departure_stamp": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/AuthorStampOut"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "description": "Who recorded the departure (MSDS 147)"
+                },
+                "created_at": {
+                  "type": "string",
+                  "format": "date-time",
+                  "title": "Created At"
+                },
+                "created_by_name": {
+                  "type": "string",
+                  "title": "Created By Name"
+                },
+                "admission_decided_at": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Admission Decided At",
+                  "description": "When the visit first waited for an admission"
+                },
+                "flags": {
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "TriageOverdue",
+                      "DoctorOverdue",
+                      "ObservationTooLong",
+                      "AdmissionWaitTooLong",
+                      "ReferralWaitTooLong",
+                      "MlcNotOpened",
+                      "MedicoLegalUndecided"
+                    ]
+                  },
+                  "type": "array",
+                  "title": "Flags",
+                  "description": "What is overdue by the hospital's targets (settings er_*), and a medico-legal checklist still to answer"
+                },
+                "minutes_in_er": {
+                  "type": "integer",
+                  "title": "Minutes In Er"
+                },
+                "minutes_in_stage": {
+                  "anyOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Minutes In Stage"
+                }
+              },
+              "type": "object",
+              "required": [
+                "er_visit_id",
+                "er_number",
+                "patient_id",
+                "mrn",
+                "patient_name",
+                "gender",
+                "age_years",
+                "ticket_id",
+                "ticket_number",
+                "ticket_status",
+                "admission_id",
+                "admission_number",
+                "admission_status",
+                "ward_name",
+                "arrived_at",
+                "arrival_mode",
+                "referred_from",
+                "presenting_complaint",
+                "stage",
+                "stage_since",
+                "triage_level",
+                "triage_level_name",
+                "triage_colour",
+                "triage_target_minutes",
+                "triaged_at",
+                "seen_at",
+                "seen_by",
+                "seen_by_name",
+                "is_medico_legal",
+                "mlc_case_type_id",
+                "mlc_case_type_name",
+                "mlc_id",
+                "mlc_number",
+                "disposition",
+                "departed_at",
+                "condition_at_departure",
+                "follow_up_advice",
+                "referral_reason",
+                "referred_to",
+                "statement_signed_by",
+                "absence_noticed_at",
+                "death_id",
+                "death_number",
+                "departure_note",
+                "departure_stamp",
+                "created_at",
+                "created_by_name",
+                "admission_decided_at",
+                "flags",
+                "minutes_in_er",
+                "minutes_in_stage"
+              ],
+              "description": "An ER visit: the patient, the arrival, the latest triage, the stage, the medico-legal checklist and case, and how\nthe patient left (MSDS 20)."
+            },
+            "type": "array",
+            "title": "Data"
+          },
+          "meta": {
+            "title": "Meta",
+            "properties": {
+              "server_time": {
+                "type": "string",
+                "title": "Server Time",
+                "description": "Server clock (UTC). Use it to detect terminal clock skew."
+              },
+              "page": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Page"
+              },
+              "page_size": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Page Size"
+              },
+              "total_count": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Total Count"
+              },
+              "next_cursor": {
+                "title": "Next Cursor"
+              }
+            },
+            "type": "object",
+            "required": [
+              "server_time"
+            ]
+          },
+          "request_id": {
+            "type": "string",
+            "title": "Request Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data",
+          "meta",
+          "request_id"
+        ]
+      },
+      "recorded_example": {
+        "request": {
+          "path": "/api/v1/er/visits",
+          "query": {
+            "open_only": "true"
+          }
+        },
+        "response": {
+          "status": 200,
+          "body": {
+            "data": [
+              {
+                "er_visit_id": 2,
+                "er_number": "ER-2026-000002",
+                "patient_id": 2,
+                "mrn": "MRN-2026-000002",
+                "patient_name": "Hina Breathless",
+                "gender": "male",
+                "age_years": 40,
+                "ticket_id": 2,
+                "ticket_number": "OPD-2026-000002",
+                "ticket_status": "Waiting",
+                "admission_id": null,
+                "admission_number": null,
+                "admission_status": null,
+                "ward_name": null,
+                "arrived_at": "2026-09-30T03:31:04.952307+00:00",
+                "arrival_mode": null,
+                "referred_from": null,
+                "presenting_complaint": null,
+                "stage": "Arrived",
+                "stage_since": "2026-09-30T03:31:04.952307+00:00",
+                "triage_level": null,
+                "triage_level_name": null,
+                "triage_colour": null,
+                "triage_target_minutes": null,
+                "triaged_at": null,
+                "seen_at": null,
+                "seen_by": null,
+                "seen_by_name": null,
+                "is_medico_legal": null,
+                "mlc_case_type_id": null,
+                "mlc_case_type_name": null,
+                "mlc_id": null,
+                "mlc_number": null,
+                "disposition": null,
+                "departed_at": null,
+                "condition_at_departure": null,
+                "follow_up_advice": null,
+                "referral_reason": null,
+                "referred_to": null,
+                "statement_signed_by": null,
+                "absence_noticed_at": null,
+                "death_id": null,
+                "death_number": null,
+                "departure_note": null,
+                "departure_stamp": null,
+                "created_at": "2026-09-30T03:31:04.952307+00:00",
+                "created_by_name": "Receptionist",
+                "admission_decided_at": null,
+                "flags": [],
+                "minutes_in_er": 0,
+                "minutes_in_stage": 0
+              },
+              {
+                "er_visit_id": 1,
+                "er_number": "ER-2026-000001",
+                "patient_id": 1,
+                "mrn": "MRN-2026-000001",
+                "patient_name": "Bilal Minor Cut",
+                "gender": "male",
+                "age_years": 40,
+                "ticket_id": 1,
+                "ticket_number": "OPD-2026-000001",
+                "ticket_status": "Waiting",
+                "admission_id": null,
+                "admission_number": null,
+                "admission_status": null,
+                "ward_name": null,
+                "arrived_at": "2026-09-30T03:31:04.821552+00:00",
+                "arrival_mode": null,
+                "referred_from": null,
+                "presenting_complaint": null,
+                "stage": "Arrived",
+                "stage_since": "2026-09-30T03:31:04.821552+00:00",
+                "triage_level": null,
+                "triage_level_name": null,
+                "triage_colour": null,
+                "triage_target_minutes": null,
+                "triaged_at": null,
+                "seen_at": null,
+                "seen_by": null,
+                "seen_by_name": null,
+                "is_medico_legal": null,
+                "mlc_case_type_id": null,
+                "mlc_case_type_name": null,
+                "mlc_id": null,
+                "mlc_number": null,
+                "disposition": null,
+                "departed_at": null,
+                "condition_at_departure": null,
+                "follow_up_advice": null,
+                "referral_reason": null,
+                "referred_to": null,
+                "statement_signed_by": null,
+                "absence_noticed_at": null,
+                "death_id": null,
+                "death_number": null,
+                "departure_note": null,
+                "departure_stamp": null,
+                "created_at": "2026-09-30T03:31:04.821552+00:00",
+                "created_by_name": "Receptionist",
+                "admission_decided_at": null,
+                "flags": [],
+                "minutes_in_er": 0,
+                "minutes_in_stage": 0
+              }
+            ],
+            "meta": {
+              "server_time": "2026-09-30T03:31:05.038871+00:00"
+            },
+            "request_id": "1031db5befad47ea8b167ba3cf0afe33"
+          }
+        }
+      },
+      "errors": [],
+      "errors_seen_in_tests": [],
+      "used_by_screens": [
+        "er_register"
+      ],
+      "used_by_workflows": [
+        "emergency-department"
+      ],
+      "typescript_example": "// The ER register (emergency log book)  (permissions: er.visit.view)\nexport const listVisitsEr = () =>\n  api(\"GET\", `/er/visits`, undefined);   // api(): see get_guide('envelope-and-errors')",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "er.visit.view"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of er.visit.view",
+        "roles_allowed": [
+          "admissions_officer",
+          "anaesthetist",
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer",
+          "receptionist",
+          "surgeon",
+          "triage_nurse"
+        ]
+      },
+      "write_semantics": null,
+      "emits_events": [],
+      "list": {
+        "returns": "list",
+        "paging": [
+          {
+            "name": "limit",
+            "required": false,
+            "type": "integer",
+            "default": 200,
+            "minimum": 1,
+            "maximum": 1000
+          }
+        ],
+        "search": [],
+        "filters": [
+          {
+            "name": "date_from",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "date_to",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "disposition",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "Admitted",
+              "Discharged",
+              "Referred",
+              "LAMA",
+              "DischargedOnRequest",
+              "LeftWithoutBeingSeen",
+              "Died",
+              "BroughtDead"
+            ]
+          },
+          {
+            "name": "triage_level",
+            "required": false,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5
+          },
+          {
+            "name": "open_only",
+            "required": false,
+            "type": "boolean",
+            "default": false
+          },
+          {
+            "name": "patient_id",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "note": "Lists are bounded by `limit` (no cursor paging): ask for what the screen shows, filter on the server."
+      },
+      "cross_field_rules": {},
+      "errors_detail": [],
+      "endpoint": "GET /er/visits",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "title": "Envelope[list[ErVisitOut]]",
+                "properties": {
+                  "data": {
+                    "items": {
+                      "title": "ErVisitOut",
+                      "properties": {
+                        "er_visit_id": {
+                          "type": "integer",
+                          "title": "Er Visit Id"
+                        },
+                        "er_number": {
+                          "type": "string",
+                          "title": "Er Number",
+                          "description": "The ER register number, e.g. ER-2026-000042"
+                        },
+                        "patient_id": {
+                          "type": "integer",
+                          "title": "Patient Id"
+                        },
+                        "mrn": {
+                          "type": "string",
+                          "title": "Mrn"
+                        },
+                        "patient_name": {
+                          "type": "string",
+                          "title": "Patient Name"
+                        },
+                        "gender": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "enum": [
+                                "male",
+                                "female",
+                                "other",
+                                "unknown"
+                              ]
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "title": "Gender"
+                        },
+                        "age_years": {
+                          "anyOf": [
+                            {
+                              "type": "integer"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "title": "Age Years"
+                        },
+                        "ticket_id": {
+                          "anyOf": [
+                            {
+                              "type": "integer"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "title": "Ticket Id",
+                          "description": "The emergency ticket (billing), once issued"
+                        },
+                        "ticket_number": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "title": "Ticket Number"
+                        },
+                        "ticket_status": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "enum": [
+                                "Issued",
+                                "Waiting",
+                                "InConsultation",
+                                "Examined",
+                                "Completed",
+                                "Deferred",
+                                "Expired",
+                                "Forfeited",
+                                "Refunded",
+                                "Void",
+                                "Cancelled"
+                              ]
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "title": "Ticket Status"
+                        },
+                        "admission_id": {
+                          "anyOf": [
+                            {
+                              "type": "integer"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "title": "Admission Id",
+                          "description": "Code Red, or the admission requested from the ER"
+                        },
+                        "admission_number": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "title": "Admission Number"
+                        },
+                        "admission_status": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "enum": [
+                                "AdmissionPending",
+                                "Waitlisted",
+                                "BedReserved",
+                                "CodeRedActive",
+                                "Admitted",
+                                "DischargeInProgress",
+                                "Discharged",
+                                "Cancelled"
+                              ]
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "title": "Admission Status"
+                        },
+                        "ward_name": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "title": "Ward Name"
+                        },
+                        "arrived_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "title": "Arrived At"
+                        },
+                        "arrival_mode": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "enum": [
+                                "WalkIn",
+                                "Ambulance",
+                                "Rescue1122",
+                                "Police",
+                                "Referred"
+                              ]
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "title": "Arrival Mode"
+                        },
+                        "referred_from": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "title": "Referred From"
+                        },
+                        "presenting_complaint": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "title": "Presenting Complaint"
+                        },
+                        "stage": {
+                          "type": "string",
+                          "enum": [
+                            "Arrived",
+                            "Triaged",
+                            "InTreatment",
+                            "Observation",
+                            "AwaitingAdmission",
+                            "AwaitingBed",
+                            "AwaitingReferral",
+                            "Departed"
+                          ],
+                          "title": "Stage"
+                        },
+                        "stage_since": {
+                          "type": "string",
+                          "format": "date-time",
+                          "title": "Stage Since"
+                        },
+                        "triage_level": {
+                          "anyOf": [
+                            {
+                              "type": "integer"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "title": "Triage Level",
+                          "description": "1 (resuscitation) … 5 (non-urgent); null: not triaged yet"
+                        },
+                        "triage_level_name": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "title": "Triage Level Name"
+                        },
+                        "triage_colour": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "enum": [
+                                "Red",
+                                "Orange",
+                                "Yellow",
+                                "Green",
+                                "Blue",
+                                "White",
+                                "Black"
+                              ]
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "title": "Triage Colour"
+                        },
+                        "triage_target_minutes": {
+                          "anyOf": [
+                            {
+                              "type": "integer"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "title": "Triage Target Minutes",
+                          "description": "The level's target time from triage to the doctor"
+                        },
+                        "triaged_at": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "format": "date-time"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "title": "Triaged At",
+                          "description": "The first triage"
+                        },
+                        "seen_at": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "format": "date-time"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "title": "Seen At",
+                          "description": "First seen by a doctor (called in, or taken for treatment)"
+                        },
+                        "seen_by": {
+                          "anyOf": [
+                            {
+                              "type": "integer"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "title": "Seen By"
+                        },
+                        "seen_by_name": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "title": "Seen By Name"
+                        },
+                        "is_medico_legal": {
+                          "anyOf": [
+                            {
+                              "type": "boolean"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "title": "Is Medico Legal",
+                          "description": "The medico-legal checklist; null: not decided yet"
+                        },
+                        "mlc_case_type_id": {
+                          "anyOf": [
+                            {
+                              "type": "integer"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "title": "Mlc Case Type Id"
+                        },
+                        "mlc_case_type_name": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "title": "Mlc Case Type Name"
+                        },
+                        "mlc_id": {
+                          "anyOf": [
+                            {
+                              "type": "integer"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "title": "Mlc Id",
+                          "description": "The medico-legal case opened for this visit"
+                        },
+                        "mlc_number": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "title": "Mlc Number"
+                        },
+                        "disposition": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "enum": [
+                                "Admitted",
+                                "Discharged",
+                                "Referred",
+                                "LAMA",
+                                "DischargedOnRequest",
+                                "LeftWithoutBeingSeen",
+                                "Died",
+                                "BroughtDead"
+                              ]
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "title": "Disposition"
+                        },
+                        "departed_at": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "format": "date-time"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "title": "Departed At"
+                        },
+                        "condition_at_departure": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "enum": [
+                                "Improved",
+                                "Stable",
+                                "Unchanged",
+                                "Deteriorated",
+                                "Critical"
+                              ]
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "title": "Condition At Departure"
+                        },
+                        "follow_up_advice": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "title": "Follow Up Advice"
+                        },
+                        "referral_reason": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "title": "Referral Reason"
+                        },
+                        "referred_to": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "title": "Referred To"
+                        },
+                        "statement_signed_by": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "title": "Statement Signed By"
+                        },
+                        "absence_noticed_at": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "format": "date-time"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "title": "Absence Noticed At"
+                        },
+                        "death_id": {
+                          "anyOf": [
+                            {
+                              "type": "integer"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "title": "Death Id"
+                        },
+                        "death_number": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "title": "Death Number"
+                        },
+                        "departure_note": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "title": "Departure Note"
+                        },
+                        "departure_stamp": {
+                          "anyOf": [
+                            {
+                              "$ref": "#/components/schemas/AuthorStampOut"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "description": "Who recorded the departure (MSDS 147)"
+                        },
+                        "created_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "title": "Created At"
+                        },
+                        "created_by_name": {
+                          "type": "string",
+                          "title": "Created By Name"
+                        },
+                        "admission_decided_at": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "format": "date-time"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "title": "Admission Decided At",
+                          "description": "When the visit first waited for an admission"
+                        },
+                        "flags": {
+                          "items": {
+                            "type": "string",
+                            "enum": [
+                              "TriageOverdue",
+                              "DoctorOverdue",
+                              "ObservationTooLong",
+                              "AdmissionWaitTooLong",
+                              "ReferralWaitTooLong",
+                              "MlcNotOpened",
+                              "MedicoLegalUndecided"
+                            ]
+                          },
+                          "type": "array",
+                          "title": "Flags",
+                          "description": "What is overdue by the hospital's targets (settings er_*), and a medico-legal checklist still to answer"
+                        },
+                        "minutes_in_er": {
+                          "type": "integer",
+                          "title": "Minutes In Er"
+                        },
+                        "minutes_in_stage": {
+                          "anyOf": [
+                            {
+                              "type": "integer"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "title": "Minutes In Stage"
+                        }
+                      },
+                      "type": "object",
+                      "required": [
+                        "er_visit_id",
+                        "er_number",
+                        "patient_id",
+                        "mrn",
+                        "patient_name",
+                        "gender",
+                        "age_years",
+                        "ticket_id",
+                        "ticket_number",
+                        "ticket_status",
+                        "admission_id",
+                        "admission_number",
+                        "admission_status",
+                        "ward_name",
+                        "arrived_at",
+                        "arrival_mode",
+                        "referred_from",
+                        "presenting_complaint",
+                        "stage",
+                        "stage_since",
+                        "triage_level",
+                        "triage_level_name",
+                        "triage_colour",
+                        "triage_target_minutes",
+                        "triaged_at",
+                        "seen_at",
+                        "seen_by",
+                        "seen_by_name",
+                        "is_medico_legal",
+                        "mlc_case_type_id",
+                        "mlc_case_type_name",
+                        "mlc_id",
+                        "mlc_number",
+                        "disposition",
+                        "departed_at",
+                        "condition_at_departure",
+                        "follow_up_advice",
+                        "referral_reason",
+                        "referred_to",
+                        "statement_signed_by",
+                        "absence_noticed_at",
+                        "death_id",
+                        "death_number",
+                        "departure_note",
+                        "departure_stamp",
+                        "created_at",
+                        "created_by_name",
+                        "admission_decided_at",
+                        "flags",
+                        "minutes_in_er",
+                        "minutes_in_stage"
+                      ],
+                      "description": "An ER visit: the patient, the arrival, the latest triage, the stage, the medico-legal checklist and case, and how\nthe patient left (MSDS 20)."
+                    },
+                    "type": "array",
+                    "title": "Data"
+                  },
+                  "meta": {
+                    "title": "Meta",
+                    "properties": {
+                      "server_time": {
+                        "type": "string",
+                        "title": "Server Time",
+                        "description": "Server clock (UTC). Use it to detect terminal clock skew."
+                      },
+                      "page": {
+                        "anyOf": [
+                          {
+                            "type": "integer"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ],
+                        "title": "Page"
+                      },
+                      "page_size": {
+                        "anyOf": [
+                          {
+                            "type": "integer"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ],
+                        "title": "Page Size"
+                      },
+                      "total_count": {
+                        "anyOf": [
+                          {
+                            "type": "integer"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ],
+                        "title": "Total Count"
+                      },
+                      "next_cursor": {
+                        "title": "Next Cursor"
+                      }
+                    },
+                    "type": "object",
+                    "required": [
+                      "server_time"
+                    ]
+                  },
+                  "request_id": {
+                    "type": "string",
+                    "title": "Request Id"
+                  }
+                },
+                "type": "object",
+                "required": [
+                  "data",
+                  "meta",
+                  "request_id"
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

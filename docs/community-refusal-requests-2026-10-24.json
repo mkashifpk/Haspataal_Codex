@@ -1,0 +1,54 @@
+{
+  "purpose": "Real server negative contract cases, expected no business effects; preserve originals on unexpected result.",
+  "cases": [
+    {
+      "name": "reception_cannot_enrol",
+      "as_user": "demo.reception",
+      "method": "POST",
+      "path": "/patients/18/programmes",
+      "idempotency_key": "3ad67240-ff21-4012-b8b7-94c6c11e8aba",
+      "body": {
+        "programme_id": 1,
+        "card_number": "DEMO-PERMISSION-DENIED-20261024"
+      },
+      "expected_status": 403,
+      "expected_code": "FORBIDDEN"
+    },
+    {
+      "name": "reception_cannot_record_home_visit",
+      "as_user": "demo.reception",
+      "method": "POST",
+      "path": "/home-visits",
+      "idempotency_key": "b6baee2a-faf4-43c3-860c-df64d8765cf1",
+      "body": {
+        "patient_id": 18,
+        "requested_by": "DEMO software permission test",
+        "requested_at": "2026-10-23T19:15:07.654Z",
+        "reason": "DEMO permission denial check, no actual home visit",
+        "address": "DEMO synthetic test address only",
+        "visited_at": "2026-10-23T19:35:07.654Z",
+        "examination_consent": "NotExamined",
+        "history": "DEMO permission test only, no clinical history asserted",
+        "assessment": "DEMO software test, not a clinical diagnosis",
+        "care_given": "DEMO permission test only; no care or medicines",
+        "outcome": "ManagedAtHome"
+      },
+      "expected_status": 403,
+      "expected_code": "FORBIDDEN"
+    },
+    {
+      "name": "closed_enrolment_cannot_receive_entry",
+      "as_user": "demo.doctor2",
+      "method": "POST",
+      "path": "/programme-enrolments/3/entries",
+      "idempotency_key": "780089ab-1968-44c7-825c-48ebc470c7f3",
+      "body": {
+        "service": "OPV-0 (DEV simulation only)",
+        "given_at": "2026-10-23T19:44:07.654Z",
+        "note": "DEMO closed-enrolment refusal verification; no vaccine administered"
+      },
+      "expected_status": 409,
+      "expected_code": "PROGRAMME_ENROLMENT_CLOSED"
+    }
+  ]
+}

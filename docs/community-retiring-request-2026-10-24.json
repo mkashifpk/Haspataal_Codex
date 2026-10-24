@@ -1,0 +1,105 @@
+{
+  "request": {
+    "method": "POST",
+    "path": "/establishment/changes",
+    "idempotency_key": "6e8690e5-c711-43cd-8ffa-c72a042cbd59",
+    "body": {
+      "capabilities": [
+        {
+          "capability": "home_visits",
+          "state": "Retiring"
+        },
+        {
+          "capability": "preventive_programmes",
+          "state": "Retiring"
+        }
+      ],
+      "reason": "DEMO-PHASE2-20261024 brief service-state acceptance test; only owned synthetic enrolment2 open; restore both Active immediately after checks",
+      "expected_revision": 2,
+      "acknowledged": [
+        "retire:home_visits",
+        "retire:preventive_programmes"
+      ]
+    }
+  },
+  "preview": {
+    "request": {
+      "method": "POST",
+      "path": "/api/v1/establishment/changes/preview",
+      "as_user": "demo.owner",
+      "query": null,
+      "body": {
+        "capabilities": [
+          {
+            "capability": "home_visits",
+            "state": "Retiring"
+          },
+          {
+            "capability": "preventive_programmes",
+            "state": "Retiring"
+          }
+        ],
+        "reason": "DEMO-PHASE2-20261024 brief service-state acceptance test; only owned synthetic enrolment2 open; restore both Active immediately after checks"
+      },
+      "idempotency_key": null
+    },
+    "status": 200,
+    "ms": 695,
+    "request_id": "3cf6d2b136ff4f4f8ce509996c8dbc82",
+    "body": {
+      "data": {
+        "revision": 2,
+        "profile": null,
+        "moves": [
+          {
+            "capability": "home_visits",
+            "from_state": "Active",
+            "to_state": "Retiring",
+            "label": "Home visits",
+            "prerequisites": [],
+            "outstanding": [],
+            "new_work": "home visits"
+          },
+          {
+            "capability": "preventive_programmes",
+            "from_state": "Active",
+            "to_state": "Retiring",
+            "label": "Preventive programmes",
+            "prerequisites": [],
+            "outstanding": [
+              {
+                "kind": "programme_enrolments",
+                "count": 1,
+                "label": "Patients enrolled in a preventive programme",
+                "how": "Close each enrolment: Completed, TransferredOut (to the facility that continues it) or Discontinued",
+                "operations": [
+                  "POST /programme-enrolments/{enrolment_id}/close"
+                ]
+              }
+            ],
+            "new_work": "programme enrolments and their services"
+          }
+        ],
+        "problems": [],
+        "acknowledgements": [
+          {
+            "code": "retire:home_visits",
+            "message": "No new home visits from now on; the open work listed continues to its end and its records stay readable."
+          },
+          {
+            "code": "retire:preventive_programmes",
+            "message": "No new programme enrolments and their services from now on; the open work listed continues to its end and its records stay readable."
+          }
+        ],
+        "warnings": [
+          "PACS (Orthanc) is not set up: imaging works (orders, the worklist, reports), but studies cannot be linked or viewed until IT sets it up."
+        ],
+        "allowed": true
+      },
+      "meta": {
+        "server_time": "2026-10-23T19:43:23.761213+00:00"
+      },
+      "request_id": "3cf6d2b136ff4f4f8ce509996c8dbc82"
+    }
+  }
+}

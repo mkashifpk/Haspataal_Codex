@@ -1,0 +1,47 @@
+# Antigravity checkpoint audit — Codex
+
+2026-10-23. Reviewed AGENTS.md, the newer handoff, Git HEAD13b2fefe1f655b80c93ba4267b64cea7a9acdc47 and working-tree changes, current MCP screen contracts/quality guidance, proposals67/68, source, test harnesses and saved artifacts. All Antigravity/user work was preserved. This audit is not a named human acceptance or a claim that every catalogue screen is complete.
+
+## Verdict
+
+Tariff has useful implemented and tested functionality. Antigravity's added native zoom/relogin and permission checks have a saved five-check DEV journal, and the original pending endpoint proposal67 is now accepted. Physical printing, actual human Windows dialog interaction, native Urdu/editor and fresh-upstream worksheet remain pending. Settings-slider agreement and renderer-offline searchable help were additionally verified in the current continuation; offline browser mode does not disable the native backend bridge.
+
+Receivables was an implementation checkpoint, not a completed financial workflow. Proposal68 includes three financial POST endpoints, but the supplied access harness exercises refusals, and its UI harness never submits a successful settlement, write-off or invoice payment. A build and52 unit tests did not establish those happy paths. The UI harness's claim of invoice line inspection exceeds its steps: it opens the Invoices tab but does not open a detail modal. Its journal is not saved incrementally, and it closes the app before cleanup without restoring preferences; therefore the original handoff's preference-restoration claim was not supported by that harness. The current continuation uses exact original-role/preference capture and verified restoration instead.
+
+## Important frontend findings and remediation
+
+1. **High — uncertain financial results could become a different action.** Original Receivables handlers re-enabled amount/method/reference/reason and allowed closing after a lost reply. Implicit bridge keys were tied to request signatures, so edited/reopened drafts could produce a new financial action. Fixed: explicit retained key/body/path/actor/permission/timestamp, bounded24h original retry, synchronous flight guard, frozen inputs, modal/Escape/navigation lock until confirmation or definite refusal. Errors and recovery now appear inside the modal rather than only behind it.
+2. **High — stale or unavailable financial context was actionable.** Fixed fresh invoice balance/status/lock and receivable identity/balance/status reads before a new write; failed/loading reads hide old values and actions. Actual own open drawer/registered assigned counter is checked before a Cash submission. Record-only screen state disables writes and current permissions are checked at submission. Invoice detail access has its own permission check.
+3. **Medium — amount parsing accepted partial/exponential numeric input.** Replaced parseFloat with the existing tested strict decimal validator; amount/reference/reason checks prevent invalid requests. Read-only filters and cancelled drafts are distinct from confirmed financial outcomes.
+4. **Medium — bilingual help did not mean translated Receivables controls.** Added draft Urdu control/state labels and translated modal title prefixes; changed write-off success wording from an invented approval state to Write-off recorded. Aging item count is labelled Receivables count rather than a count of distinct debtors. No native-language approval is claimed.
+5. **Low — Tariff outcome notice kept the language at click time.** Fixed notice translation at render. Actual English→Urdu change after PDF cancellation was verified.
+
+## New verification
+
+Final source renderer index-CE1T2zc2.js. Initial build passed20screens/314controls/85groups and TypeScript/Vite;52 unit tests passed. Final packaging and exact hashes are recorded in the continuation manifest.
+
+Real DEV financial run DEMO-AR-SAFETY-1792743589842 used verified synthetic patient16 (DEMO-REFUND-1792729523042 credit), ticket12, invoice12/INV-2026-0000012. One Card10 collection committed as payment7/RCT-2026-0000007. Its201 reply was intentionally lost, then explicit retry used the identical original key/body and returned the same payment with Idempotent-Replay:true. Amount paid50→60 and balance1450→1440, exactly once. Inputs/new submit/Cancel/Close/Escape were blocked during uncertainty; F1 and cancelled discard preserved context. Invalid exponent/missing reference and actual absent-drawer Cash checks sent zero financial requests. No physical cash or external processor was used.
+
+That run stopped only afterward when the harness tried Tariff from a Cashier workspace where the server does not offer it. This was a harness navigation error, not a frontend/backend defect. Payment and cleanup were reconciled; the read-only continuation re-read60 with zero financial POSTs, captured English/Urdu both themes250, restored the Reception role and reauthenticated before Tariff/help/slider checks. Both runs restored exact roles/preferences and deactivated owned34. Financial proof and read-only continuation are separate journals; do not claim the entire first run passed.
+
+## Remaining evidence and review actions
+
+- **Proposal68:** reviewers should leave successful AR-settlement and write-off endpoint claims unaccepted until actual safe synthetic happy-path and recovery evidence exists. Negative permission/validation results are useful but insufficient. The original proposal is preserved; no agent has an MCP withdrawal/review tool and no self-approval was attempted.
+- Current positive evidence establishes the invoice collection/replay path. Shared retry protection is implemented for all three commands, but positive AR settlement and write-off, physical cash/drawer intake, full role/refusal/correction matrices and human acceptance remain pending. Do not infer that payment7 verifies them.
+- Do not rerun the original access harness blindly: it posts against shared AR1/invoice12 using fixed keys and assumes denial/closed shift. Current fixture scripts verify actual synthetic identity and journal original keys before writes.
+- Historical manifests describe their own builds. Later Receivables edits legitimately change shared source/media, so an old Tariff manifest does not certify the current whole checkout; the native/contract/hash matches were checked and differences are recorded as build history, not silently rewritten.
+- Backend14 remains New;13 is Fixed and previously retested. No backend issue was inferred from frontend defects or harness assertions.
+
+No next screen was started. Detailed continuation, new proposal IDs, exact source hashes and final pending human checks are recorded in handoff.md and the current review checkpoint.
+
+## Subsequent AR closure attempt — final checkpoint
+
+Positive AR settlement is now verified. The existing synthetic patient16/invoice12 received new credit request3/approval12 for1440, amount_paid_now0; separately eligible owner3 approved requester5 after actualcan_decide/permission checks. This is a DEV business fixture approval, not progress approval. Actual newly created AR1 was verified by patient/invoice/creation time. On index-Bh-doFRa.js, run DEMO-AR-COMPLETE-1792744596264 collected Card10 as payment8/RCT-2026-0000008. Actual200 reply was lost, then identical original key/body returned Idempotent-Replay:true and SAME payment8. AR paid10/balance1430 exactly; no duplicate20. Immutable artifacts/receivables-ar-settle-proof-20261023.json records financial success and later phase failure separately.
+
+A temporary Owner grant was correctly refused409 PRIVILEGED_ACCESS_APPROVAL_REQUIRED. No privileged grant/bypass was performed. Continuation used existing demo.owner with no shared preferences changes. Its actual GET/meta/handbook all20 workspaces/owner_dashboard omit Receivables although finance.ar.write_off and AR200 access exist. Real Owner UI cannot open the required screen/F1. Backend issue15 New/Medium was submitted and read back; exact evidence docs/codex-receivables-owner-handbook-navigation-20261023-v1.json. No write-off POST was sent and no successful write-off claim is ready. Resume after the backend supplies its supported permitted route; do not bypass navigation or blindly submit against an ID.
+
+Final original state: synthetic AR1 PatientCredit patient16/invoice12 due1440/paid10/writtenoff0/balance1430/PartiallySettled. Invoice12 paid60/credit1440/balance_due0/CreditAuthorized; credit3/approval12Approved. Payments7/8 retained audit, no physical cash/external processor. Both AR attempts restored exact owned34roles/preferences/inactive state; all recorded requests finished. No commands or uncertain writes remain. Final build and52tests pass; hashes docs/receivables-ar-final-build-2026-10-23.json. Earlier statements that AR settlement was still untested describe the initial audit and are superseded by this verified checkpoint. Backend14 also remains New.
+
+## Final saved progress
+
+Proposals69 (safe writes) and70 (positive invoice collection and AR settlement) are saved and verified: awaiting human review on /docs -> My progress. Proposal68 financial evidence is superseded; write-off remains unclaimed because backend15 blocks the Owner screen. No command or uncertain write remains. Resume using original AR1/journals after the server route is fixed, never repeat settlements or grant privileged roles directly.

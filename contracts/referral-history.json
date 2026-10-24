@@ -1,0 +1,1136 @@
+{
+  "endpoints": [
+    {
+      "method": "GET",
+      "path": "/api/v1/referrals",
+      "summary": "The referral register (default: the last 12 months)",
+      "tags": [
+        "External referrals"
+      ],
+      "permissions": [
+        "referral.view",
+        "referral.create"
+      ],
+      "permissions_mode": "any",
+      "idempotency_key": false,
+      "description": "Newest first; each read is logged as access to the patient's record. Continue with `before_id` equal to the last\nrow's referral_id, keeping the same filters, until an empty page. Reversed dates give `VALIDATION_ERROR`.\n\n**Required permission:** `referral.view OR referral.create`\n\n**Required permission:** `referral.view OR referral.create`",
+      "roles_allowed": [
+        "anaesthetist",
+        "clinic_director",
+        "clinical_specialist",
+        "doctor",
+        "hospital_admin",
+        "hospital_director",
+        "owner",
+        "quality_officer",
+        "receptionist",
+        "surgeon",
+        "triage_nurse"
+      ],
+      "parameters": [
+        {
+          "name": "date_from",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Date From"
+          }
+        },
+        {
+          "name": "date_to",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Date To"
+          }
+        },
+        {
+          "name": "status",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "enum": [
+                  "Issued",
+                  "Acknowledged",
+                  "Cancelled"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          }
+        },
+        {
+          "name": "acknowledgement_pending",
+          "in": "query",
+          "required": false,
+          "description": "Only those our staff took and the receiving facility has not acknowledged yet",
+          "schema": {
+            "type": "boolean",
+            "description": "Only those our staff took and the receiving facility has not acknowledged yet",
+            "default": false,
+            "title": "Acknowledgement Pending"
+          }
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "maximum": 2000,
+            "minimum": 1,
+            "default": 500,
+            "title": "Limit"
+          }
+        },
+        {
+          "name": "before_id",
+          "in": "query",
+          "required": false,
+          "description": "Continue below the last referral_id returned",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Continue below the last referral_id returned",
+            "title": "Before Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "request_content_type": null,
+      "response_schema": {
+        "title": "Envelope[list[ReferralOut]]",
+        "properties": {
+          "data": {
+            "items": {
+              "title": "ReferralOut",
+              "properties": {
+                "referral_id": {
+                  "type": "integer",
+                  "title": "Referral Id"
+                },
+                "referral_number": {
+                  "type": "string",
+                  "title": "Referral Number"
+                },
+                "patient_id": {
+                  "type": "integer",
+                  "title": "Patient Id"
+                },
+                "mrn": {
+                  "type": "string",
+                  "title": "Mrn"
+                },
+                "patient_name": {
+                  "type": "string",
+                  "title": "Patient Name"
+                },
+                "father_or_husband_name": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Father Or Husband Name"
+                },
+                "gender": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "male",
+                        "female",
+                        "other",
+                        "unknown"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Gender"
+                },
+                "age_years": {
+                  "anyOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Age Years"
+                },
+                "address": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Address"
+                },
+                "mobile": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Mobile"
+                },
+                "ticket_id": {
+                  "anyOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Ticket Id"
+                },
+                "er_visit_id": {
+                  "anyOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Er Visit Id"
+                },
+                "encounter_id": {
+                  "anyOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Encounter Id"
+                },
+                "referred_by": {
+                  "type": "integer",
+                  "title": "Referred By"
+                },
+                "referred_by_name": {
+                  "type": "string",
+                  "title": "Referred By Name"
+                },
+                "referred_by_stamp": {
+                  "$ref": "#/components/schemas/AuthorStampOut"
+                },
+                "destination_contact_id": {
+                  "anyOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Destination Contact Id"
+                },
+                "destination_name": {
+                  "type": "string",
+                  "title": "Destination Name"
+                },
+                "destination_department": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Destination Department"
+                },
+                "reason": {
+                  "type": "string",
+                  "title": "Reason"
+                },
+                "urgency": {
+                  "type": "string",
+                  "enum": [
+                    "Routine",
+                    "Urgent",
+                    "Emergency"
+                  ],
+                  "title": "Urgency"
+                },
+                "clinical_summary": {
+                  "type": "string",
+                  "title": "Clinical Summary"
+                },
+                "treatment_given": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Treatment Given"
+                },
+                "at_patient_request": {
+                  "type": "boolean",
+                  "title": "At Patient Request"
+                },
+                "transport": {
+                  "type": "string",
+                  "enum": [
+                    "Own",
+                    "Ambulance",
+                    "Rescue",
+                    "WithStaff"
+                  ],
+                  "title": "Transport"
+                },
+                "escort_name": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Escort Name"
+                },
+                "care_during_transfer": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Care During Transfer"
+                },
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "Issued",
+                    "Acknowledged",
+                    "Cancelled"
+                  ],
+                  "title": "Status"
+                },
+                "acknowledged_by_name": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Acknowledged By Name"
+                },
+                "acknowledged_at": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Acknowledged At"
+                },
+                "acknowledgement_note": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Acknowledgement Note"
+                },
+                "cancel_reason": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Cancel Reason"
+                },
+                "cancelled_at": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Cancelled At"
+                },
+                "created_at": {
+                  "type": "string",
+                  "format": "date-time",
+                  "title": "Created At"
+                },
+                "row_version": {
+                  "type": "integer",
+                  "title": "Row Version"
+                },
+                "acknowledgement_pending": {
+                  "type": "boolean",
+                  "title": "Acknowledgement Pending",
+                  "description": "Our staff took the patient and the receiving facility's acknowledgement is not recorded yet"
+                }
+              },
+              "type": "object",
+              "required": [
+                "referral_id",
+                "referral_number",
+                "patient_id",
+                "mrn",
+                "patient_name",
+                "father_or_husband_name",
+                "gender",
+                "age_years",
+                "address",
+                "mobile",
+                "ticket_id",
+                "er_visit_id",
+                "encounter_id",
+                "referred_by",
+                "referred_by_name",
+                "referred_by_stamp",
+                "destination_contact_id",
+                "destination_name",
+                "destination_department",
+                "reason",
+                "urgency",
+                "clinical_summary",
+                "treatment_given",
+                "at_patient_request",
+                "transport",
+                "escort_name",
+                "care_during_transfer",
+                "status",
+                "acknowledged_by_name",
+                "acknowledged_at",
+                "acknowledgement_note",
+                "cancel_reason",
+                "cancelled_at",
+                "created_at",
+                "row_version",
+                "acknowledgement_pending"
+              ]
+            },
+            "type": "array",
+            "title": "Data"
+          },
+          "meta": {
+            "title": "Meta",
+            "properties": {
+              "server_time": {
+                "type": "string",
+                "title": "Server Time",
+                "description": "Server clock (UTC). Use it to detect terminal clock skew."
+              },
+              "page": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Page"
+              },
+              "page_size": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Page Size"
+              },
+              "total_count": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Total Count"
+              },
+              "next_cursor": {
+                "title": "Next Cursor"
+              }
+            },
+            "type": "object",
+            "required": [
+              "server_time"
+            ]
+          },
+          "request_id": {
+            "type": "string",
+            "title": "Request Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data",
+          "meta",
+          "request_id"
+        ]
+      },
+      "recorded_example": {
+        "request": {
+          "path": "/api/v1/referrals",
+          "query": {
+            "acknowledgement_pending": "true"
+          }
+        },
+        "response": {
+          "status": 200,
+          "body": {
+            "data": [
+              {
+                "referral_id": 1,
+                "referral_number": "REF-2026-00001",
+                "patient_id": 1,
+                "mrn": "MRN-2026-000001",
+                "patient_name": "Ali Khan",
+                "father_or_husband_name": null,
+                "gender": "male",
+                "age_years": 40,
+                "address": null,
+                "mobile": "03007091288",
+                "ticket_id": 1,
+                "er_visit_id": null,
+                "encounter_id": 1,
+                "referred_by": 1,
+                "referred_by_name": "Dr Ahmed",
+                "referred_by_stamp": {
+                  "at": "2026-10-14T11:29:20.867797+00:00",
+                  "name": "Dr Ahmed",
+                  "text": "Dr Ahmed, Doctor, PMDC PMDC-29705, 14-Oct-2026 16:29",
+                  "user_id": 1,
+                  "designation": "Doctor",
+                  "employee_id": 1,
+                  "registration": "PMDC PMDC-29705"
+                },
+                "destination_contact_id": 3,
+                "destination_name": "Services Hospital",
+                "destination_department": "Cardiology",
+                "reason": "Chest pain with ST elevation",
+                "urgency": "Emergency",
+                "clinical_summary": "Central chest pain for 2 hours; ECG ST elevation V1-V4; provisional anterior MI",
+                "treatment_given": "Aspirin 300 mg chewed",
+                "at_patient_request": false,
+                "transport": "WithStaff",
+                "escort_name": "Nurse Saima",
+                "care_during_transfer": "Oxygen 4 L/min, IV line",
+                "status": "Issued",
+                "acknowledged_by_name": null,
+                "acknowledged_at": null,
+                "acknowledgement_note": null,
+                "cancel_reason": null,
+                "cancelled_at": null,
+                "created_at": "2026-10-14T11:29:20.867797+00:00",
+                "row_version": 1,
+                "acknowledgement_pending": true
+              }
+            ],
+            "meta": {
+              "server_time": "2026-10-14T11:29:20.933802+00:00"
+            },
+            "request_id": "252e37488f3a4094976e1fbf9dd54363"
+          }
+        }
+      },
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "category": "request",
+          "ui_action": "Show field errors from details.fields / the message."
+        }
+      ],
+      "errors_seen_in_tests": [],
+      "used_by_screens": [
+        "referral_register"
+      ],
+      "used_by_workflows": [
+        "external-referrals"
+      ],
+      "typescript_example": "// The referral register (default: the last 12 months)  (permissions: referral.view, referral.create)\nexport const registerReferrals = () =>\n  api(\"GET\", `/referrals`, undefined);   // api(): see get_guide('envelope-and-errors')",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "referral.view",
+          "referral.create"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of referral.view or referral.create",
+        "roles_allowed": [
+          "anaesthetist",
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer",
+          "receptionist",
+          "surgeon",
+          "triage_nurse"
+        ]
+      },
+      "write_semantics": null,
+      "emits_events": [],
+      "list": {
+        "returns": "list",
+        "paging": [
+          {
+            "name": "limit",
+            "required": false,
+            "type": "integer",
+            "default": 500,
+            "minimum": 1,
+            "maximum": 2000
+          }
+        ],
+        "search": [],
+        "filters": [
+          {
+            "name": "date_from",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "date_to",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "status",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "Issued",
+              "Acknowledged",
+              "Cancelled"
+            ]
+          },
+          {
+            "name": "acknowledgement_pending",
+            "required": false,
+            "type": "boolean",
+            "default": false,
+            "description": "Only those our staff took and the receiving facility has not acknowledged yet"
+          },
+          {
+            "name": "before_id",
+            "required": false,
+            "type": "integer",
+            "minimum": 1,
+            "description": "Continue below the last referral_id returned"
+          }
+        ],
+        "note": "Lists are bounded by `limit` (no cursor paging): ask for what the screen shows, filter on the server."
+      },
+      "cross_field_rules": {},
+      "errors_detail": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "endpoint": "GET /referrals",
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "title": "Envelope[list[ReferralOut]]",
+                "properties": {
+                  "data": {
+                    "items": {
+                      "title": "ReferralOut",
+                      "properties": {
+                        "referral_id": {
+                          "type": "integer",
+                          "title": "Referral Id"
+                        },
+                        "referral_number": {
+                          "type": "string",
+                          "title": "Referral Number"
+                        },
+                        "patient_id": {
+                          "type": "integer",
+                          "title": "Patient Id"
+                        },
+                        "mrn": {
+                          "type": "string",
+                          "title": "Mrn"
+                        },
+                        "patient_name": {
+                          "type": "string",
+                          "title": "Patient Name"
+                        },
+                        "father_or_husband_name": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "title": "Father Or Husband Name"
+                        },
+                        "gender": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "enum": [
+                                "male",
+                                "female",
+                                "other",
+                                "unknown"
+                              ]
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "title": "Gender"
+                        },
+                        "age_years": {
+                          "anyOf": [
+                            {
+                              "type": "integer"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "title": "Age Years"
+                        },
+                        "address": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "title": "Address"
+                        },
+                        "mobile": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "title": "Mobile"
+                        },
+                        "ticket_id": {
+                          "anyOf": [
+                            {
+                              "type": "integer"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "title": "Ticket Id"
+                        },
+                        "er_visit_id": {
+                          "anyOf": [
+                            {
+                              "type": "integer"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "title": "Er Visit Id"
+                        },
+                        "encounter_id": {
+                          "anyOf": [
+                            {
+                              "type": "integer"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "title": "Encounter Id"
+                        },
+                        "referred_by": {
+                          "type": "integer",
+                          "title": "Referred By"
+                        },
+                        "referred_by_name": {
+                          "type": "string",
+                          "title": "Referred By Name"
+                        },
+                        "referred_by_stamp": {
+                          "$ref": "#/components/schemas/AuthorStampOut"
+                        },
+                        "destination_contact_id": {
+                          "anyOf": [
+                            {
+                              "type": "integer"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "title": "Destination Contact Id"
+                        },
+                        "destination_name": {
+                          "type": "string",
+                          "title": "Destination Name"
+                        },
+                        "destination_department": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "title": "Destination Department"
+                        },
+                        "reason": {
+                          "type": "string",
+                          "title": "Reason"
+                        },
+                        "urgency": {
+                          "type": "string",
+                          "enum": [
+                            "Routine",
+                            "Urgent",
+                            "Emergency"
+                          ],
+                          "title": "Urgency"
+                        },
+                        "clinical_summary": {
+                          "type": "string",
+                          "title": "Clinical Summary"
+                        },
+                        "treatment_given": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "title": "Treatment Given"
+                        },
+                        "at_patient_request": {
+                          "type": "boolean",
+                          "title": "At Patient Request"
+                        },
+                        "transport": {
+                          "type": "string",
+                          "enum": [
+                            "Own",
+                            "Ambulance",
+                            "Rescue",
+                            "WithStaff"
+                          ],
+                          "title": "Transport"
+                        },
+                        "escort_name": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "title": "Escort Name"
+                        },
+                        "care_during_transfer": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "title": "Care During Transfer"
+                        },
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "Issued",
+                            "Acknowledged",
+                            "Cancelled"
+                          ],
+                          "title": "Status"
+                        },
+                        "acknowledged_by_name": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "title": "Acknowledged By Name"
+                        },
+                        "acknowledged_at": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "format": "date-time"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "title": "Acknowledged At"
+                        },
+                        "acknowledgement_note": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "title": "Acknowledgement Note"
+                        },
+                        "cancel_reason": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "title": "Cancel Reason"
+                        },
+                        "cancelled_at": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "format": "date-time"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "title": "Cancelled At"
+                        },
+                        "created_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "title": "Created At"
+                        },
+                        "row_version": {
+                          "type": "integer",
+                          "title": "Row Version"
+                        },
+                        "acknowledgement_pending": {
+                          "type": "boolean",
+                          "title": "Acknowledgement Pending",
+                          "description": "Our staff took the patient and the receiving facility's acknowledgement is not recorded yet"
+                        }
+                      },
+                      "type": "object",
+                      "required": [
+                        "referral_id",
+                        "referral_number",
+                        "patient_id",
+                        "mrn",
+                        "patient_name",
+                        "father_or_husband_name",
+                        "gender",
+                        "age_years",
+                        "address",
+                        "mobile",
+                        "ticket_id",
+                        "er_visit_id",
+                        "encounter_id",
+                        "referred_by",
+                        "referred_by_name",
+                        "referred_by_stamp",
+                        "destination_contact_id",
+                        "destination_name",
+                        "destination_department",
+                        "reason",
+                        "urgency",
+                        "clinical_summary",
+                        "treatment_given",
+                        "at_patient_request",
+                        "transport",
+                        "escort_name",
+                        "care_during_transfer",
+                        "status",
+                        "acknowledged_by_name",
+                        "acknowledged_at",
+                        "acknowledgement_note",
+                        "cancel_reason",
+                        "cancelled_at",
+                        "created_at",
+                        "row_version",
+                        "acknowledgement_pending"
+                      ]
+                    },
+                    "type": "array",
+                    "title": "Data"
+                  },
+                  "meta": {
+                    "title": "Meta",
+                    "properties": {
+                      "server_time": {
+                        "type": "string",
+                        "title": "Server Time",
+                        "description": "Server clock (UTC). Use it to detect terminal clock skew."
+                      },
+                      "page": {
+                        "anyOf": [
+                          {
+                            "type": "integer"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ],
+                        "title": "Page"
+                      },
+                      "page_size": {
+                        "anyOf": [
+                          {
+                            "type": "integer"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ],
+                        "title": "Page Size"
+                      },
+                      "total_count": {
+                        "anyOf": [
+                          {
+                            "type": "integer"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ],
+                        "title": "Total Count"
+                      },
+                      "next_cursor": {
+                        "title": "Next Cursor"
+                      }
+                    },
+                    "type": "object",
+                    "required": [
+                      "server_time"
+                    ]
+                  },
+                  "request_id": {
+                    "type": "string",
+                    "title": "Request Id"
+                  }
+                },
+                "type": "object",
+                "required": [
+                  "data",
+                  "meta",
+                  "request_id"
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

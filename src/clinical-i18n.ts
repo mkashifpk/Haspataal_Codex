@@ -1,0 +1,12 @@
+// Draft clinical interface vocabulary; native Urdu/clinical review remains pending.
+export const clinicalUr:Record<string,string>={
+ Immunization:'حفاظتی ٹیکے',FamilyPlanning:'خاندانی منصوبہ بندی',Tuberculosis:'تپ دق',Malaria:'ملیریا',Dengue:'ڈینگی',
+ OPD:'بیرونی مریض',FollowUp:'فالو اپ',ER:'ہنگامی شعبہ',IPD:'داخل مریض',CodeRed:'کوڈ ریڈ',Procedure:'طریقہ کار',Standard:'معمول کا داخلہ',Planned:'طے شدہ داخلہ',Local:'مقامی',Sedation:'سکون آور',Regional:'علاقائی',General:'مکمل',
+ ManagedAtHome:'گھر پر نگہداشت',AskedToAttend:'ہسپتال آنے کو کہا',Referred:'حوالہ دیا',VerbalObtained:'زبانی رضامندی حاصل',Declined:'معائنہ مسترد',NotExamined:'معائنہ نہیں کیا',
+ Verbal:'زبانی',Leaflet:'پرچہ',WrittenInstructions:'تحریری ہدایات',Demonstration:'عملی مظاہرہ',Video:'ویڈیو',Patient:'مریض',Attendant:'تیماردار',Both:'دونوں',Poster:'پوسٹر',Booklet:'کتابچہ',English:'انگریزی',Urdu:'اردو',Punjabi:'پنجابی',Other:'دیگر',
+ WithStaff:'ہمارے عملے کے ساتھ',Own:'اپنی سواری',Ambulance:'ایمبولینس',Rescue:'ریسکیو',Issued:'جاری',Acknowledged:'وصولی درج',Cancelled:'منسوخ',Routine:'عام',Urgent:'فوری',Emergency:'ایمرجنسی',HospitalPharmacy:'ہسپتال کی فارمیسی',ExternalMarket:'بیرونی بازار',ExternalPrinted:'بیرونی پرچی جاری',Electronic:'برقی نقل',CarbonCopy:'کاربن نقل',Scan:'اسکین',
+ InStock:'دستیاب',Low:'کم اسٹاک',OutOfStock:'اسٹاک ختم',Oral:'منہ کے راستے',IV:'ورید میں',IM:'پٹھے میں',SC:'جلد کے نیچے',Topical:'جلد پر',Inhaled:'سانس کے ذریعے',PR:'مقعد کے راستے',SL:'زبان کے نیچے',Ophthalmic:'آنکھ میں',Otic:'کان میں',Nasal:'ناک میں',
+ OD:'روزانہ ایک بار',BD:'روزانہ دو بار',TDS:'روزانہ تین بار',QID:'روزانہ چار بار',Q4H:'ہر4گھنٹے',Q6H:'ہر6گھنٹے',Q8H:'ہر8گھنٹے',Q12H:'ہر12گھنٹے',HS:'رات سوتے وقت',STAT:'فوری ترین',PRN:'حسب ضرورت',
+ Left:'بائیں',Right:'دائیں',Bilateral:'دونوں طرف',NotApplicable:'غیر متعلق',Walking:'پیدل',Wheelchair:'وہیل چیئر',Trolley:'ٹرالی',Bed:'بیڈ',Portable:'بستر پر قابل نقل',Nurse:'نرس',Doctor:'ڈاکٹر',InHouse:'اپنی لیب',SendOut:'بیرونی لیب',Published:'جاری نتیجہ',PendingVerification:'تصدیق باقی',Rejected:'مسترد',Superseded:'نئے نتیجے سے تبدیل',SampleCollected:'نمونہ لیا گیا',Processing:'جانچ جاری',Ordered:'آرڈر دیا گیا',Reported:'رپورٹ جاری',ReRunRequired:'دوبارہ جانچ لازم',None:'کوئی نہیں',
+ Completed:'مکمل',TransferredOut:'باہر منتقل',Discontinued:'بند',Enrolled:'اندراج جاری',XRay:'ایکس رے',Ultrasound:'الٹراساؤنڈ',Doppler:'ڈوپلر',Mammography:'میموگرافی',Fluoroscopy:'فلوروسکوپی'
+};

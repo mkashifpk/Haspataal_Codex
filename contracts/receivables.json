@@ -1,0 +1,1753 @@
+{
+  "screen_id": "receivables",
+  "contract_fingerprint": "57d137222f1ca637655d",
+  "knowledge_revision": "17436af4d784122d",
+  "delivery_gate": {
+    "required": true,
+    "status": "required",
+    "progress_reporting": {
+      "required": true,
+      "submit": "propose_progress",
+      "verify": "progress_proposals",
+      "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+    },
+    "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+    "compulsory": [
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+        "points": 2
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+        "points": 3
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+        "points": 2
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+        "points": 4
+      }
+    ],
+    "zoom": {
+      "min_pct": 100.0,
+      "max_pct": 250.0,
+      "reset_pct": 100,
+      "keys": [
+        "Ctrl + or Ctrl = (zoom in)",
+        "Ctrl - (zoom out)",
+        "Ctrl 0 (reset to 100 %)",
+        "Command on macOS"
+      ],
+      "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+    },
+    "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')). Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+    "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+  },
+  "ui_quality": {
+    "source": "frontend-docs/guides/16-ui-quality.md",
+    "standard_revision": "3f27760c7bc06e2d",
+    "context": {
+      "workspace": "finance_cashier",
+      "purpose": "Collect old dues, aging, write-offs.",
+      "roles": [
+        "cashier"
+      ],
+      "screens": [
+        {
+          "id": "receivables",
+          "title": "Outstanding dues (Udhaar)"
+        }
+      ],
+      "also_uses": [
+        "my_cash_shift",
+        "cash_back_prompts"
+      ],
+      "handbook": "get_handbook_outline('finance_cashier')",
+      "screen_id": "receivables",
+      "workflow": "§1.9",
+      "contract": "get_screen_bundle('receivables')"
+    },
+    "requirements": [
+      {
+        "id": "Q1",
+        "title": "Establish the purpose and staff context",
+        "instruction": "Before choosing a layout, state who is doing what, what starts the task, what success looks like and what could\nconfuse them. Use the screen's purpose, workspace, playbook and demo role. Distinguish a busy reception counter,\nbedside nursing, a laboratory scanner and an office review. Record the relevant input devices, interruptions,\nlanguage and display conditions. Keep the patient, visit, money or stock context clear throughout the task.\n\nWrite down why the proposed interaction fits this work. Use actual staff-task evidence and references approved by\nthe frontend lead; do not substitute an attractive generic dashboard for the job. Do not invent software screens\nfor staff whose specified interaction is a physical badge tap."
+      },
+      {
+        "id": "Q2",
+        "title": "Reuse intent through complete patterns",
+        "instruction": "Use the frontend team's approved design system and record its version and owner. Where no shared system has been\napproved, use the team's established components within the backend constraints and record the outstanding decision.\nReuse complete patterns: patient selection and identity, search and selection, a validated write and its result,\npending approval and handover, printing and recovery, corrections to finalized records. Follow the relevant\nplaybook; a template must preserve the permissions and transitions of this particular task.\n\nDocument the reason for a variation. Explore alternatives where they make a task clearer or reduce effort, then\nreview them in the whole journey. Do not introduce arbitrary colours, motion, alerts or different meanings for the\nsame control. Read the relevant standards when building or reviewing the flow; do not rely on an old chat summary."
+      },
+      {
+        "id": "Q3",
+        "title": "Complete the interaction and its recovery",
+        "instruction": "For every task show prerequisites, editable and read-only information, validation, the pending state, the confirmed\nresult and the next step. Distinguish loading, empty, unavailable, denied, stale and failed states. Explain disabled\nactions when the user needs to know how to proceed. Include keyboard and scanner interactions, focus after actions,\nconfirmation, cancellation and navigation with unsaved work.\n\nUse each endpoint's repeat rules, version checks and reconciliation instructions after an uncertain result. Never\nshow success merely because a button was pressed, queue clinical or money writes offline, or offer an unsupported\nundo. Follow the existing guides for printing, reconnects, sessions, realtime refreshes and in-memory form recovery.\nNever persist a co-signer's credentials. Distinguish server-owned rules from frontend presentation choices."
+      },
+      {
+        "id": "Q4",
+        "title": "Make the details work in the actual environment",
+        "instruction": "Review both Light and DarkHighContrast, 100-250 percent zoom, English and Urdu, right-to-left layout, mixed-direction\nidentifiers, long names and dense tables. Bundle the required Urdu font. Keep meaning available through text and\nicons, not colour alone. Verify labels, focus order, keyboard operation and readable status messages using the\nfrontend's accessibility tests and a person using the app.\n\nKeyboard zoom shortcuts are compulsory: Ctrl++ (including Ctrl+=) increases, Ctrl+- decreases, and Ctrl+0 resets\nto 100%; use Command on macOS. Clamp the application's zoom to **100% through 250%, inclusive**. Settings, keyboard,\nmenu and any enabled wheel/pinch zoom must share that bound and one zoom state. Persist `ui_scale_pct` through\n`PUT /settings/me` and restore it on login; do not layer CSS scaling over an independent browser zoom. Touch clients\nmust expose equivalent visible controls and handle shortcuts when a hardware keyboard is attached. Test both bounds,\nreset, intermediate values, reopened windows and dense forms/tables without clipped controls or lost data.\n\nUse the actual terminal workflow and supported devices: a scanner must not type into the wrong field, a printer\nproblem must leave the task understandable, and a realtime update must not silently change the selected patient.\nReview consistency across screens and helpful details such as an explicit selected date, shift or patient. Give\nthe product character through clarity, wording and care for staff, within the approved visual system. Any new\nperformance target or clinical presentation rule needs its designated owner's decision."
+      },
+      {
+        "id": "Q5",
+        "title": "Teach the delivered UI as part of building it",
+        "instruction": "Create or revise the screen handbook and the workspace guide with its role-specific FAQ in the same change as\nthe UI. Follow `get_end_user_handbook_brief` and `get_handbook_outline(workspace)` and the\n[end-user handbook contract](12-end-user-handbook.md). Explain every user-facing control and meaningful outcome,\nincluding frontend-only filters, navigation and dialogs that have no API call. Use actual labels and demo-data\nscreenshots in English and Urdu; flag translations awaiting human review.\n\nCover every supported job task in the role's workspace FAQ, including shared screens and handovers. A help page's\nexistence does not establish completeness. Kiosks also need an operator job aid available through the authorized\nstaff help or training material; do not add a login to the kiosk to deliver it."
+      },
+      {
+        "id": "Q6",
+        "title": "Require evidence before reporting completion",
+        "instruction": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.\n\nThe frontend repository must make these checks part of its build or CI:\n\n- Maintain an inventory of implemented screens, workspaces, supported role tasks and interactive controls. Map each\n  to handbook pages and sections in both languages. Include frontend-only behaviour; catalogue tasks are a minimum.\n- Fail on missing or empty pages/sections, uncovered tasks or controls, broken help links or missing referenced\n  screenshots. Test F1, screen Help, workspace Help, offline help, deep links, search and permission filtering; changing\n  user or roles must not retain another user's navigation or search results.\n- Run the relevant API scenario and frontend interaction tests, including repeat submissions, concurrent edits,\n  uncertain outcomes and hardware failures. A non-applicable case needs a reason, not a silent omission.\n- Apply every section of the [human workspace acceptance checklist](17-workspace-review-checklist.md) to each role\n  and supported task. Create fresh synthetic records through the UI, then read, update and cancel/deactivate/delete\n  only as the API permits. Test refusal where deletion or editing is forbidden. Read-only roles inspect new records\n  created by an authorized upstream role. Record the actual new IDs and outcomes; never treat seeded records alone\n  or an agent's API calls as a human journey pass.\n- Record the standards revision, implemented scope, test results, guide paths, demo screenshots and outstanding\n  decisions in the change's review evidence. A named human reviewer must walk through a complete role journey using\n  only the handbook, check that it matches the UI and review translations. Revise misleading or incomplete details.\n\nThe frontend lead owns the component and flow patterns, the delivery checks and their maintenance. The designated\nclinical/language owners approve their wording and decisions. The backend supplies the contract and examples.\nMCP supplies requirements, not proof that a frontend file exists, that a build passed or that staff can use it.\nAn agent may critique the work and collect evidence; it cannot approve its own human review or award progress."
+      }
+    ],
+    "human_review": {
+      "source": "frontend-docs/guides/17-workspace-review-checklist.md",
+      "required": true,
+      "checklist": [
+        {
+          "id": "R1",
+          "title": "Identify the implementation and complete scope",
+          "instruction": "- [ ] Record implementation ID/name, repository, commit/build, backend/standards revision, workspace, roles,\n  reviewer, date, device/OS, languages and peripherals tested.\n- [ ] Inventory each role's screens, tasks, controls, permissions and required handovers. Every task needs a test\n  result and matching FAQ answer. A read-only role or non-applicable operation needs a specific contract-based reason."
+        },
+        {
+          "id": "R2",
+          "title": "Create fresh data through the frontend",
+          "instruction": "- [ ] Use a unique review-run label where a free-text field permits it. Create new records through each applicable\n  create form: patient/visit, request/order, master record, transaction or register entry. Record their returned IDs.\n- [ ] Try required fields missing, invalid values, duplicate identifiers and cancellation before saving. Verify\n  the visible validation, server refusal and that no partial or duplicate business record is reported as saved.\n- [ ] Complete the valid path and check the generated number, defaults, ownership, patient/visit context and next step.\n  A seeded master may be a prerequisite; the transaction being accepted must be new. Do not create destructive test\n  masters on a shared server without coordinating with its backend team."
+        },
+        {
+          "id": "R3",
+          "title": "Read and retrieve those new records",
+          "instruction": "- [ ] Find each new record by its actual ID/number and relevant search/filter/sort controls. Open list and detail\n  views, refresh, navigate away/back and sign in again. Confirm persistence and exact values, units, dates and status.\n- [ ] Check empty/no-match results and pagination where applicable. A read-only role must read a fresh record created\n  by an authorized upstream role and demonstrate that write actions are unavailable/refused."
+        },
+        {
+          "id": "R4",
+          "title": "Update, correct and exercise permitted deletion",
+          "instruction": "- [ ] Edit each supported field on the new record, save and re-read it. Check cancellation, unsaved-work navigation,\n  stale versions and simultaneous edits from a second session; one user's changes must not silently replace another's.\n- [ ] Test the actual permitted lifecycle: delete a draft where supported, or cancel, deactivate, stop, reverse or\n  append a correction with the required reason/approval. Verify list/detail/history and downstream effects afterwards.\n- [ ] Where deletion or editing is forbidden (for example finalized clinical or financial records), verify the\n  frontend offers the permitted correction and the server refuses the forbidden action. Never invent hard deletion\n  to tick a CRUD box. Record an explicit not-applicable/refused result with the supporting contract."
+        },
+        {
+          "id": "R5",
+          "title": "Permissions, handovers and end-to-end outcomes",
+          "instruction": "- [ ] Test allowed and denied actions with the appropriate accounts, including separation of requester/approver,\n  sign-off, counter-signature and multi-role switching. Check patient and workspace context after every switch.\n- [ ] Follow the new record into the next role's queue and complete the supported journey. Verify live refresh,\n  balances/stock/bed state where relevant, notifications and printable output against the new record's values.\n- [ ] Shared task coverage belongs to every role that uses it; do not mark a workspace done with an unfinished handover."
+        },
+        {
+          "id": "R6",
+          "title": "F1 help and detailed role FAQs",
+          "instruction": "- [ ] Press **F1** on each screen and with a field/dialog focused. Correct contextual help must open without losing\n  input; closing it restores focus. Test visible Help, workspace help, offline reading, search and deep links.\n- [ ] Follow each role task's FAQ using only its instructions. Check prerequisites, actual labels, steps, outcomes,\n  errors, recovery and handovers in English and Urdu. Missing/generic answers fail acceptance.\n- [ ] Change user/permissions and verify restricted pages/search results disappear. Login/locked/kiosk help must\n  reveal only permitted public/operator guidance. Hardware keyboard shortcuts and touch Help must both work where supported."
+        },
+        {
+          "id": "R7",
+          "title": "Zoom, language and usable layouts",
+          "instruction": "- [ ] Test Ctrl++/Ctrl+=, Ctrl+-, Ctrl+0 (Command equivalents on macOS), Settings and any enabled wheel/pinch/menu\n  routes. Verify **100% minimum, 250% maximum**, reset to 100%, persistence and a single shared application zoom state.\n- [ ] Repeatedly try beyond both bounds. Test at 100%, 150%, 200% and 250%, in both themes and languages, including\n  Urdu reading direction, long labels, tables, dialogs, validation messages and Help. All actions remain reachable.\n- [ ] Check tab order, focus, scanner input and visible controls on touch clients. Do not confuse OS magnification\n  with the application's saved zoom preference."
+        },
+        {
+          "id": "R8",
+          "title": "Failures, retries and devices",
+          "instruction": "- [ ] Test double submit, lost reply, disconnect/reconnect, session expiry, stale data and refused operations on\n  the new records. Confirm honest pending/error messages, correct reconciliation and no duplicate writes.\n- [ ] Test required printers/scanners/cameras, denied device permission and unavailable hardware. Verify recovery\n  preserves appropriate form context and does not display success before the server confirms it.\n- [ ] Patient workflows: register and admit a new patient **without** a photo (the form must let you skip it with no\n  reason), then take one and see it on the patient and the admission; a PDF as the photo must be refused. Upload a\n  synthetic outside report with its facility and date, re-open it under the correct patient and check it is labelled\n  as an outside report, never shown as this hospital's result."
+        },
+        {
+          "id": "R9",
+          "title": "Keep reproducible evidence",
+          "instruction": "- [ ] For each task record new record IDs, ordered UI steps, expected/actual outcome, pass/fail/not-applicable,\n  reason for non-applicability, test output, synthetic screenshots, handbook/FAQ paths and remaining limitations.\n- [ ] Start from the workspace's **review worksheet**: *Download the review worksheet* on the portal's page of the\n  workspace (*Human review with new records*), in the accept box of a proposal or on *Save this screen*\n  (`/docs/api/review-worksheet/<workspace>`, `shared` for the screens every workspace has). It is one Markdown file,\n  made from the backend's catalogue: R1's fields, the four compulsory checks, R1-R10, the workspace's own checklist,\n  every write operation to exercise and the results table below, one row per screen to start from. Agents may prepare\n  its lists; only the named reviewer fills in the results.\n- [ ] Keep the filled worksheet in the frontend repository or its review system. The portal note is a summary, not\n  storage for the whole test report.\n- [ ] Accepting or reporting **F1 help, the role FAQs, zoom or the fresh-data review** (on a proposal, on *Save this\n  screen* or in the transfer of legacy work) needs the worksheet's reference (its path or link, and the build) in\n  **Review worksheet**. The portal refuses those four without it (`VALIDATION_ERROR`, `details.field` = `worksheet`)\n  and shows the reference to the backend team's inspectors.\n- [ ] In the proposal inbox, the worksheet reference can be entered once for all selected proposals. Use a proposal's\n  override when its worksheet differs. **Approve all reported progress** is one human declaration for that displayed\n  selection; untick any untested items first. Each proposal retains its build and your decision.\n\n| Role / task / screen | New record IDs | Create | Read | Update / correction | Delete / permitted alternative | Help / FAQ / zoom | Evidence / result |\n|---|---|---|---|---|---|---|---|\n| Fill one row per supported task | IDs from this review run | Pass/fail/N-A + reason | Pass/fail | Pass/fail/N-A + reason | Exact action and outcome | Pass/fail | Steps, expected/actual, evidence reference |"
+        },
+        {
+          "id": "R10",
+          "title": "Decide and report honestly",
+          "instruction": "- [ ] Every applicable task and mandatory quality check must pass. A blocker, missing FAQ, broken F1, out-of-bounds\n  zoom or untested fresh-data lifecycle keeps the screen/workspace pending. Partial item acceptance remains possible.\n- [ ] The named human signs the review for this build (the worksheet's *Decision*), accepts only tested proposal\n  items or reports them manually, gives the worksheet's reference with the compulsory items, and returns failures with\n  reproduction steps. Agents cannot approve their own claims. Backend inspection can confirm\n  or withdraw accepted claims; verified points are a subset of completion, never an additional award.\n- [ ] Retest affected tasks after fixes or backend changes; stale evidence does not establish the new build's behavior."
+        }
+      ],
+      "workspace_checklist": "- [ ] **Create:** open a shift, collect a payment of a bill made in this review, settle a receivable.\n- [ ] **Read:** the shift's totals and the receipts.\n- [ ] **Update / correct:** none in place.\n- [ ] **Cancel / delete:** hand back a refund approved in this review.\n- [ ] **Refused:** writing off a receivable (`FORBIDDEN`: the Owner or the Hospital Admin writes it off).\n- [ ] **Hand over:** the closed shift reaches the accountant.",
+      "operations": {
+        "create": [
+          {
+            "call": "POST /finance/invoices/{invoice_id}/payments",
+            "summary": "Collect a payment (lab / pharmacy / final IPD bill ...)",
+            "screen": "receivables"
+          }
+        ],
+        "update_or_correct": [],
+        "cancel_or_delete": [
+          {
+            "call": "POST /finance/ar/{ar_id}/write-off",
+            "summary": "Write off a receivable",
+            "screen": "receivables"
+          }
+        ],
+        "other_actions": [
+          {
+            "call": "POST /finance/ar/{ar_id}/settle",
+            "summary": "Settle Debt (patient returns to pay)",
+            "screen": "receivables"
+          }
+        ]
+      },
+      "operations_rule": "Exercise each operation on records you create new in this review, through the app: create, then read them back, update or correct them, and cancel, withdraw or delete them where the contract allows (and see the refusal where it does not). The other_actions are the steps of the record's life (sign, approve, dispense ...).",
+      "worksheet": "The named human reviewer downloads this workspace's review worksheet from the portal (GET /docs/api/review-worksheet/finance_cashier: the workspace's page, Human review with new records), fills it in while testing and keeps it with the app. The portal refuses F1 help, the role FAQs, zoom or the fresh-data review, accepted or reported, without that worksheet's reference (guide 17 R9). You may prepare its lists; never its results."
+    },
+    "verification": {
+      "frontend_files_inspected": false,
+      "progress_recorded": false,
+      "rule": "Requirements only. Frontend CI checks coverage; a named human reviews the working journey."
+    }
+  },
+  "screen": {
+    "id": "receivables",
+    "workspace": "finance_cashier",
+    "title": "Outstanding dues (Udhaar)",
+    "purpose": "Collect old dues, aging, write-offs.",
+    "workflow": "§1.9",
+    "rule_objects": [
+      {
+        "id": "rule:61ddcf1727",
+        "text": "'Write off' (with its reason) only for finance.ar.write_off: the Owner and the Hospital Admin, who open this screen from their workspace; a cashier collects and settles but never writes off.",
+        "cites": []
+      }
+    ],
+    "related_workflows": [
+      "finance-and-owner",
+      "laboratory-and-radiology",
+      "opd-reception",
+      "refunds-waivers-credit"
+    ]
+  },
+  "rules_in_force": null,
+  "build_order": {
+    "screen": "receivables",
+    "title": "Outstanding dues (Udhaar)",
+    "workspace": "finance_cashier",
+    "phase": "P2",
+    "position": 18,
+    "points": 52,
+    "capabilities": [
+      "idempotent_writes",
+      "f1_help",
+      "zoom"
+    ],
+    "depends_on": [
+      {
+        "from": "receivables",
+        "to": "my_cash_shift",
+        "kind": "error_prerequisite",
+        "evidence": "POST /finance/ar/{ar_id}/settle answers SHIFT_NOT_OPEN (documented); resolved on my_cash_shift",
+        "ordering": true,
+        "forward": false
+      }
+    ],
+    "needed_by": [],
+    "go_live_setup": false,
+    "note": "`forward`: a dependency on a later phase; use the demo data or a scenario (sandbox_scenario) until that screen exists. `ordering: false`: a hand-off or a hint, not a reason to wait."
+  },
+  "definition_of_done": {
+    "points": 52,
+    "items": [
+      {
+        "id": "ep:GET /finance/ar/outstanding",
+        "label": "GET /finance/ar/outstanding",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:GET /finance/ar/aging",
+        "label": "GET /finance/ar/aging",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:POST /finance/ar/{ar_id}/settle",
+        "label": "POST /finance/ar/{ar_id}/settle",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:POST /finance/ar/{ar_id}/write-off",
+        "label": "POST /finance/ar/{ar_id}/write-off",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:POST /finance/invoices/{invoice_id}/payments",
+        "label": "POST /finance/invoices/{invoice_id}/payments",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:GET /finance/invoices",
+        "label": "GET /finance/invoices",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:GET /finance/invoices/{invoice_id}",
+        "label": "GET /finance/invoices/{invoice_id}",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "rule:61ddcf1727",
+        "label": "'Write off' (with its reason) only for finance.ar.write_off: the Owner and the Hospital Admin, who open this screen from their workspace; a cashier collects and settles but never writes off.",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:states",
+        "label": "Loading, empty and error states",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:permissions",
+        "label": "Actions by permission",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:writes",
+        "label": "Safe writes",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:tested",
+        "label": "Test plan passed",
+        "points": 4,
+        "claimed": false
+      },
+      {
+        "id": "q:handbook",
+        "label": "Handbook page",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "points": 4,
+        "claimed": false
+      },
+      {
+        "id": "q:character",
+        "label": "Design principles applied",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "q:editor",
+        "label": "Editor's pass",
+        "points": 2,
+        "claimed": false
+      }
+    ],
+    "rule": "Agents MUST submit propose_progress after implementing this screen and verify it with progress_proposals. Only the developer accepts items on My progress for what this implementation does on the DEV server. No tool awards progress."
+  },
+  "endpoints": [
+    {
+      "endpoint": "GET /finance/ar/outstanding",
+      "summary": "Outstanding Patient Dues queue (with age of debt)",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "finance.ar.view"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of finance.ar.view",
+        "roles_allowed": [
+          "accountant",
+          "billing_admin",
+          "cashier",
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_ReceivableQueueItemOut__"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "GET /finance/ar/aging",
+      "summary": "Receivables aging buckets",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "finance.ar.view"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of finance.ar.view",
+        "roles_allowed": [
+          "accountant",
+          "billing_admin",
+          "cashier",
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_ReceivableAgingOut__"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "POST /finance/ar/{ar_id}/settle",
+      "summary": "Settle Debt (patient returns to pay)",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "finance.ar.collect"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of finance.ar.collect",
+        "roles_allowed": [
+          "accountant",
+          "cashier",
+          "receptionist"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": true,
+      "errors": [
+        {
+          "code": "SHIFT_NOT_OPEN",
+          "http_status": 409,
+          "message": "Open a cash shift before handling cash.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "status"
+          ],
+          "details_from": "POST /api/v1/finance/cash-shifts/{shift_id}/close"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "ar_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Ar Id"
+          }
+        },
+        {
+          "name": "Idempotency-Key",
+          "in": "header",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Idempotency-Key"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/SettleArIn"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_ReceivableSettlementOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "application/json",
+        "model": "SettleArIn",
+        "fields": [
+          {
+            "pointer": "/amount",
+            "type": "one of",
+            "required": true,
+            "nullable": false
+          },
+          {
+            "pointer": "/method",
+            "type": "string",
+            "required": false,
+            "nullable": false,
+            "enum": [
+              "Cash",
+              "Card",
+              "BankTransfer"
+            ],
+            "default": "Cash"
+          },
+          {
+            "pointer": "/reference_no",
+            "type": "string",
+            "required": false,
+            "nullable": true
+          }
+        ],
+        "cross_field_rules": {},
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "idempotency_key",
+        "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+        "reconcile_with": null,
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "POST /finance/ar/{ar_id}/write-off",
+      "summary": "Write off a receivable",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "finance.ar.write_off"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of finance.ar.write_off",
+        "roles_allowed": [
+          "hospital_admin",
+          "owner"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": true,
+      "errors": [
+        {
+          "code": "FORBIDDEN",
+          "http_status": 403,
+          "message": "You do not have permission to do this.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "any_of",
+            "required"
+          ],
+          "details_from": "POST /api/v1/admin/departments"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "ar_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Ar Id"
+          }
+        },
+        {
+          "name": "Idempotency-Key",
+          "in": "header",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Idempotency-Key"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/WriteOffIn"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_ReceivableOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "application/json",
+        "model": "WriteOffIn",
+        "fields": [
+          {
+            "pointer": "/amount",
+            "type": "one of",
+            "required": true,
+            "nullable": false
+          },
+          {
+            "pointer": "/reason",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "min_length": 5,
+            "max_length": 500
+          }
+        ],
+        "cross_field_rules": {},
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "idempotency_key",
+        "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+        "reconcile_with": null,
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "POST /finance/invoices/{invoice_id}/payments",
+      "summary": "Collect a payment (lab / pharmacy / final IPD bill ...)",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "finance.payment.collect"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of finance.payment.collect",
+        "roles_allowed": [
+          "cashier",
+          "pharmacist",
+          "receptionist"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": true,
+      "errors": [
+        {
+          "code": "SHIFT_NOT_OPEN",
+          "http_status": 409,
+          "message": "Open a cash shift before handling cash.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "status"
+          ],
+          "details_from": "POST /api/v1/finance/cash-shifts/{shift_id}/close"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "invoice_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Invoice Id"
+          }
+        },
+        {
+          "name": "Idempotency-Key",
+          "in": "header",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Idempotency-Key"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/CollectIn"
+            }
+          }
+        }
+      },
+      "responses": {
+        "201": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_InvoicePaymentOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "application/json",
+        "model": "CollectIn",
+        "fields": [
+          {
+            "pointer": "/amount",
+            "type": "one of",
+            "required": false,
+            "nullable": false,
+            "description": "Defaults to the full balance due"
+          },
+          {
+            "pointer": "/method",
+            "type": "string",
+            "required": false,
+            "nullable": false,
+            "enum": [
+              "Cash",
+              "Card",
+              "BankTransfer"
+            ],
+            "default": "Cash"
+          },
+          {
+            "pointer": "/reference_no",
+            "type": "string",
+            "required": false,
+            "nullable": true
+          }
+        ],
+        "cross_field_rules": {},
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "idempotency_key",
+        "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+        "reconcile_with": "GET /finance/invoices/{invoice_id}",
+        "emits_events": [
+          "opd.ticket.status_changed"
+        ],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "GET /finance/invoices",
+      "summary": "Invoices (filters)",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "finance.invoice.view"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of finance.invoice.view",
+        "roles_allowed": [
+          "accountant",
+          "admissions_officer",
+          "billing_admin",
+          "cashier",
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "pharmacist",
+          "receptionist"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [],
+      "parameters": [
+        {
+          "name": "patient_id",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Patient Id"
+          }
+        },
+        {
+          "name": "status",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          }
+        },
+        {
+          "name": "invoice_type",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Invoice Type"
+          }
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "maximum": 500,
+            "default": 100,
+            "title": "Limit"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_InvoiceListItemOut__"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [
+          {
+            "name": "limit",
+            "required": false,
+            "type": "integer",
+            "default": 100,
+            "maximum": 500
+          }
+        ],
+        "search": [],
+        "filters": [
+          {
+            "name": "patient_id",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "status",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "invoice_type",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "note": "Lists are bounded by `limit` (no cursor paging): ask for what the screen shows, filter on the server."
+      }
+    },
+    {
+      "endpoint": "GET /finance/invoices/{invoice_id}",
+      "summary": "Invoice with lines and balance",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "finance.invoice.view"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of finance.invoice.view",
+        "roles_allowed": [
+          "accountant",
+          "admissions_officer",
+          "billing_admin",
+          "cashier",
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "pharmacist",
+          "receptionist"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [],
+      "parameters": [
+        {
+          "name": "invoice_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Invoice Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_InvoiceDetailOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "object",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      }
+    }
+  ],
+  "realtime": {
+    "topics": [
+      "session.*",
+      "system.*",
+      "notification.created"
+    ],
+    "handlers": [],
+    "rule": "Refresh the listed reads when the event arrives (a list without a path id: every time; a detail read: when the payload names the same id). Never poll."
+  },
+  "handoffs": [
+    {
+      "call": "POST /finance/invoices/{invoice_id}/payments",
+      "emits": "opd.ticket.status_changed",
+      "audience": "permissions opd.queue.view / opd.ticket.view + assigned doctor",
+      "reaches_screens": [
+        "queue_management"
+      ]
+    }
+  ],
+  "patient_context": null,
+  "value_lists": [
+    {
+      "values": [
+        "PatientCredit",
+        "Panel"
+      ],
+      "column": "accounts_receivable.ar_type",
+      "used_at": "GET /finance/ar/outstanding[].ar_type",
+      "labels": {
+        "PatientCredit": "Patient credit",
+        "Panel": "Panel"
+      }
+    },
+    {
+      "values": [
+        "Active",
+        "PartiallySettled",
+        "Settled",
+        "WrittenOff",
+        "Cancelled"
+      ],
+      "column": "accounts_receivable.status",
+      "used_at": "GET /finance/ar/outstanding[].status",
+      "labels": {
+        "Active": "Active",
+        "PartiallySettled": "Partially settled",
+        "Settled": "Settled",
+        "WrittenOff": "Written off",
+        "Cancelled": "Cancelled"
+      }
+    },
+    {
+      "values": [
+        "Cash",
+        "Card",
+        "BankTransfer"
+      ],
+      "column": "credit_requests.payment_method",
+      "used_at": "POST /finance/ar/{ar_id}/settle body.method",
+      "labels": {
+        "Cash": "Cash",
+        "Card": "Card",
+        "BankTransfer": "Bank transfer"
+      }
+    },
+    {
+      "values": [
+        "Consultation",
+        "Service",
+        "Drug",
+        "LabTest",
+        "Imaging",
+        "OTProcedure",
+        "OTConsumable",
+        "RoomCharge",
+        "Reversal"
+      ],
+      "column": "invoice_items.line_type",
+      "used_at": "POST /finance/invoices/{invoice_id}/payments.invoice.lines[].line_type",
+      "labels": {
+        "Consultation": "Consultation",
+        "Service": "Service",
+        "Drug": "Drug",
+        "LabTest": "Lab test",
+        "Imaging": "Imaging",
+        "OTProcedure": "OT procedure",
+        "OTConsumable": "OT consumable",
+        "RoomCharge": "Room charge",
+        "Reversal": "Reversal"
+      }
+    },
+    {
+      "values": [
+        "OPD",
+        "IPD",
+        "Pharmacy",
+        "Lab",
+        "Imaging",
+        "OT",
+        "OTC",
+        "Other"
+      ],
+      "column": "invoices.invoice_type",
+      "used_at": "POST /finance/invoices/{invoice_id}/payments.invoice.invoice_type",
+      "labels": {
+        "OPD": "OPD",
+        "IPD": "IPD",
+        "Pharmacy": "Pharmacy",
+        "Lab": "Lab",
+        "Imaging": "Imaging",
+        "OT": "OT",
+        "OTC": "OTC",
+        "Other": "Other"
+      }
+    },
+    {
+      "values": [
+        "Draft",
+        "Open",
+        "PartiallyPaid",
+        "Paid",
+        "CreditAuthorized",
+        "Waivered",
+        "Refunded",
+        "Cancelled"
+      ],
+      "column": "invoices.status",
+      "used_at": "POST /finance/invoices/{invoice_id}/payments.invoice.status",
+      "labels": {
+        "Draft": "Draft",
+        "Open": "Open",
+        "PartiallyPaid": "Partially paid",
+        "Paid": "Paid",
+        "CreditAuthorized": "Credit authorized",
+        "Waivered": "Waivered",
+        "Refunded": "Refunded",
+        "Cancelled": "Cancelled"
+      }
+    },
+    {
+      "values": [
+        "Cash",
+        "Card",
+        "BankTransfer",
+        "PanelCredit",
+        "PayrollDeduction",
+        "Charity"
+      ],
+      "column": "payments.method",
+      "used_at": "POST /finance/ar/{ar_id}/settle.payment.method",
+      "labels": {
+        "Cash": "Cash",
+        "Card": "Card",
+        "BankTransfer": "Bank transfer",
+        "PanelCredit": "Panel credit",
+        "PayrollDeduction": "Payroll deduction",
+        "Charity": "Charity"
+      }
+    },
+    {
+      "values": [
+        "Collection",
+        "Refund",
+        "WaiverDispensation",
+        "ARCollection"
+      ],
+      "column": "payments.payment_type",
+      "used_at": "POST /finance/ar/{ar_id}/settle.payment.payment_type",
+      "labels": {
+        "Collection": "Collection",
+        "Refund": "Refund",
+        "WaiverDispensation": "Waiver dispensation",
+        "ARCollection": "AR collection"
+      }
+    }
+  ],
+  "states": [
+    {
+      "state": "loading",
+      "why": "every read"
+    },
+    {
+      "state": "error",
+      "why": "every call (show error.code's message)"
+    },
+    {
+      "state": "empty",
+      "why": "a list can be empty: say why and what to do next"
+    },
+    {
+      "state": "forbidden",
+      "why": "actions hidden or disabled by permission (GET /auth/me)"
+    },
+    {
+      "state": "submitting / outcome unknown",
+      "why": "a write in flight, or its answer lost: see each write's on_lost_answer"
+    }
+  ],
+  "scanner": [],
+  "copy": {
+    "workspace": {
+      "en": "Cashier",
+      "ur": "کیشیئر"
+    },
+    "error_messages": {
+      "FORBIDDEN": "You do not have permission to do this.",
+      "SHIFT_NOT_OPEN": "Open a cash shift before handling cash.",
+      "VALIDATION_ERROR": "The request is invalid."
+    },
+    "wording_quoted_in_rules": [],
+    "note": "Server-owned strings only: the error messages (English), the workspace labels (English and Urdu) and the wording the rules quote. The UI's own copy and its Urdu are yours (decision H08)."
+  },
+  "same_component_as": [],
+  "roles": {
+    "full": [],
+    "partial": [
+      "owner",
+      "hospital_admin",
+      "hospital_director",
+      "clinic_director",
+      "billing_admin",
+      "accountant",
+      "cashier",
+      "receptionist",
+      "admissions_officer",
+      "pharmacist"
+    ],
+    "note": null
+  },
+  "test_plan": {
+    "screen": "receivables",
+    "title": "Outstanding dues (Udhaar)",
+    "cases": [
+      {
+        "id": "case:GET /finance/ar/outstanding",
+        "call": "GET /api/v1/finance/ar/outstanding",
+        "summary": "Outstanding Patient Dues queue (with age of debt)",
+        "denied": {
+          "as_one_of": [
+            "admissions_officer",
+            "anaesthetist",
+            "clinical_specialist",
+            "cssd_technician",
+            "doctor"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [],
+        "as_one_of": [
+          "accountant",
+          "billing_admin",
+          "cashier",
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner"
+        ]
+      },
+      {
+        "id": "case:GET /finance/ar/aging",
+        "call": "GET /api/v1/finance/ar/aging",
+        "summary": "Receivables aging buckets",
+        "denied": {
+          "as_one_of": [
+            "admissions_officer",
+            "anaesthetist",
+            "clinical_specialist",
+            "cssd_technician",
+            "doctor"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [],
+        "as_one_of": [
+          "accountant",
+          "billing_admin",
+          "cashier",
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner"
+        ]
+      },
+      {
+        "id": "case:POST /finance/ar/{ar_id}/settle",
+        "call": "POST /api/v1/finance/ar/{ar_id}/settle",
+        "summary": "Settle Debt (patient returns to pay)",
+        "denied": {
+          "as_one_of": [
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "clinic_director",
+            "clinical_specialist"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "SHIFT_NOT_OPEN"
+        ],
+        "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)",
+        "as_one_of": [
+          "accountant",
+          "cashier",
+          "receptionist"
+        ]
+      },
+      {
+        "id": "case:POST /finance/ar/{ar_id}/write-off",
+        "call": "POST /api/v1/finance/ar/{ar_id}/write-off",
+        "summary": "Write off a receivable",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "FORBIDDEN",
+          "VALIDATION_ERROR"
+        ],
+        "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)",
+        "as_one_of": [
+          "hospital_admin",
+          "owner"
+        ]
+      },
+      {
+        "id": "case:POST /finance/invoices/{invoice_id}/payments",
+        "call": "POST /api/v1/finance/invoices/{invoice_id}/payments",
+        "summary": "Collect a payment (lab / pharmacy / final IPD bill ...)",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "clinic_director"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "SHIFT_NOT_OPEN"
+        ],
+        "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)",
+        "as_one_of": [
+          "cashier",
+          "pharmacist",
+          "receptionist"
+        ]
+      },
+      {
+        "id": "case:GET /finance/invoices",
+        "call": "GET /api/v1/finance/invoices",
+        "summary": "Invoices (filters)",
+        "denied": {
+          "as_one_of": [
+            "anaesthetist",
+            "clinical_specialist",
+            "cssd_technician",
+            "doctor",
+            "employee_self"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [],
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "billing_admin",
+          "cashier",
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "pharmacist",
+          "receptionist"
+        ]
+      },
+      {
+        "id": "case:GET /finance/invoices/{invoice_id}",
+        "call": "GET /api/v1/finance/invoices/{invoice_id}",
+        "summary": "Invoice with lines and balance",
+        "denied": {
+          "as_one_of": [
+            "anaesthetist",
+            "clinical_specialist",
+            "cssd_technician",
+            "doctor",
+            "employee_self"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [],
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "billing_admin",
+          "cashier",
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "pharmacist",
+          "receptionist"
+        ]
+      }
+    ],
+    "service_cases": [],
+    "delivery_gate": {
+      "required": true,
+      "status": "required",
+      "progress_reporting": {
+        "required": true,
+        "submit": "propose_progress",
+        "verify": "progress_proposals",
+        "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+      },
+      "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+      "compulsory": [
+        {
+          "id": "q:f1_help",
+          "label": "F1 contextual help",
+          "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+          "points": 2
+        },
+        {
+          "id": "q:role_faq",
+          "label": "Complete role-specific FAQs",
+          "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+          "points": 3
+        },
+        {
+          "id": "q:zoom",
+          "label": "Keyboard zoom: 100-250% only",
+          "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+          "points": 2
+        },
+        {
+          "id": "q:fresh_data",
+          "label": "Human review with newly created data",
+          "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+          "points": 4
+        }
+      ],
+      "zoom": {
+        "min_pct": 100.0,
+        "max_pct": 250.0,
+        "reset_pct": 100,
+        "keys": [
+          "Ctrl + or Ctrl = (zoom in)",
+          "Ctrl - (zoom out)",
+          "Ctrl 0 (reset to 100 %)",
+          "Command on macOS"
+        ],
+        "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+      },
+      "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')). Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+      "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+    },
+    "handbook_page": "screens/receivables",
+    "workspace_guide": "get_handbook_outline('finance_cashier')",
+    "realtime": [],
+    "acceptance_rules": [
+      "'Write off' (with its reason) only for finance.ar.write_off: the Owner and the Hospital Admin, who open this screen from their workspace; a cashier collects and settles but never writes off."
+    ],
+    "demo_accounts": "demo_accounts() lists a login per role; sandbox_call runs each case on the DEV server"
+  },
+  "handbook": {
+    "page": "screens/receivables",
+    "screen_id": "receivables",
+    "title": "Outstanding dues (Udhaar)",
+    "purpose": "Collect old dues, aging, write-offs.",
+    "tasks": [
+      {
+        "id": "receivables::GET /finance/ar/outstanding",
+        "task": "Outstanding Patient Dues queue (with age of debt)",
+        "call": "GET /finance/ar/outstanding",
+        "is_action": false,
+        "permissions": [
+          "finance.ar.view"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "receivables::GET /finance/ar/aging",
+        "task": "Receivables aging buckets",
+        "call": "GET /finance/ar/aging",
+        "is_action": false,
+        "permissions": [
+          "finance.ar.view"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "receivables::POST /finance/ar/{ar_id}/settle",
+        "task": "Settle Debt (patient returns to pay)",
+        "call": "POST /finance/ar/{ar_id}/settle",
+        "is_action": true,
+        "permissions": [
+          "finance.ar.collect"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "receivables::POST /finance/ar/{ar_id}/write-off",
+        "task": "Write off a receivable",
+        "call": "POST /finance/ar/{ar_id}/write-off",
+        "is_action": true,
+        "permissions": [
+          "finance.ar.write_off"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "receivables::POST /finance/invoices/{invoice_id}/payments",
+        "task": "Collect a payment (lab / pharmacy / final IPD bill ...)",
+        "call": "POST /finance/invoices/{invoice_id}/payments",
+        "is_action": true,
+        "permissions": [
+          "finance.payment.collect"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "receivables::GET /finance/invoices",
+        "task": "Invoices (filters)",
+        "call": "GET /finance/invoices",
+        "is_action": false,
+        "permissions": [
+          "finance.invoice.view"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "receivables::GET /finance/invoices/{invoice_id}",
+        "task": "Invoice with lines and balance",
+        "call": "GET /finance/invoices/{invoice_id}",
+        "is_action": false,
+        "permissions": [
+          "finance.invoice.view"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      }
+    ],
+    "rules_to_explain": [
+      "'Write off' (with its reason) only for finance.ar.write_off: the Owner and the Hospital Admin, who open this screen from their workspace; a cashier collects and settles but never writes off."
+    ],
+    "updates_by_itself_on": [],
+    "errors_the_user_can_meet": [
+      {
+        "code": "FORBIDDEN",
+        "message": "You do not have permission to do this.",
+        "ui_action": "Explain and hide the action (check x-permissions)."
+      },
+      {
+        "code": "SHIFT_NOT_OPEN",
+        "message": "Open a cash shift before handling cash.",
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      },
+      {
+        "code": "VALIDATION_ERROR",
+        "message": "The request is invalid.",
+        "ui_action": "Show field errors from details.fields / the message."
+      }
+    ],
+    "sections": [
+      "Purpose and audience",
+      "Step by step (one per task, where to click)",
+      "Every control and its effects",
+      "States and feedback",
+      "Messages, mistakes and recovery",
+      "Language and visual examples",
+      "Related help and delivery"
+    ],
+    "requirement_ids": [
+      "S1",
+      "S2",
+      "S3",
+      "S4",
+      "S5",
+      "S6",
+      "S7"
+    ],
+    "delivery": "F1 and contextual screen Help",
+    "requirements": [
+      {
+        "id": "S1",
+        "title": "Purpose and audience",
+        "instruction": "Explain what this screen accomplishes, when to use it, who uses it and how to open it. State the patient, visit,\nshift or other context the user must verify. Name the expected result in staff language."
+      },
+      {
+        "id": "S2",
+        "title": "Step by step (one per task, where to click)",
+        "instruction": "For every supported task give prerequisites, permissions or approvals, exact navigation and control labels,\nwhat to enter or select, validation, the ordered steps and how to recognize completion. Include demo screenshots,\nprinted output and the next task or handover. Link to the corresponding workspace FAQ answer."
+      },
+      {
+        "id": "S3",
+        "title": "Every control and its effects",
+        "instruction": "Maintain a control inventory covering buttons, fields, selectors, tabs, menus, filters, sorting, scanners, shortcuts,\ndialogs and navigation. For each user-facing control explain its label and purpose, when it is available, required\ninput, immediate effect, whether it saves or only changes the view, any confirmation, and what cancellation does.\nDescribe resulting data/state changes, notifications, printed output and consequences for other staff where relevant.\nInclude controls without API calls. Group repeated controls only when their behaviour is genuinely identical."
+      },
+      {
+        "id": "S4",
+        "title": "States and feedback",
+        "instruction": "Explain loading, no results, pending approval, success, stale data, denied actions and unavailable services. Describe\nautomatic realtime updates and how staff recognize that displayed information has changed. Explain disabled controls\nand how to meet their prerequisites. Document only states and effects the implemented UI and backend support."
+      },
+      {
+        "id": "S5",
+        "title": "Messages, mistakes and recovery",
+        "instruction": "Explain the messages staff can encounter, why an action is refused and the permitted next step. Cover corrections,\nduplicate clicks, a lost reply, concurrent changes, leaving unsaved work, session expiry, lost connection and printer\nor scanner problems where applicable. Say what may have been saved, what to check before retrying and whom to contact.\nNever promise unsupported undo or automatic offline submission. Use staff wording, not API paths or JSON."
+      },
+      {
+        "id": "S6",
+        "title": "Language and visual examples",
+        "instruction": "Supply English and Urdu pages matching the app's labels and reading direction, with legible demo-data screenshots\nfor each task and no real patient information. Keep terminology consistent across UI, FAQs and screenshots. Record\ntranslation review status; a draft must not be represented as approved clinical wording."
+      },
+      {
+        "id": "S7",
+        "title": "Related help and delivery",
+        "instruction": "Link to the role's workspace guide, related tasks and handovers. F1 and contextual Help must open this screen's page.\nVerify offline access, search, deep links, print-friendly output and the server's permission filtering. Update the\npage, control inventory and FAQ links in the same release as the UI; retain the review evidence required by Q6."
+      }
+    ],
+    "workspace_guide": "get_handbook_outline('finance_cashier')"
+  },
+  "workflows": [
+    {
+      "slug": "finance-and-owner",
+      "title": "Cash shifts, payables, receivables, owner dashboards & risk",
+      "recipe": "get_workflow_recipe('finance-and-owner')"
+    },
+    {
+      "slug": "laboratory-and-radiology",
+      "title": "Laboratory & radiology",
+      "recipe": "get_workflow_recipe('laboratory-and-radiology')"
+    },
+    {
+      "slug": "opd-reception",
+      "title": "OPD reception, queues & re-routing",
+      "recipe": "get_workflow_recipe('opd-reception')"
+    },
+    {
+      "slug": "refunds-waivers-credit",
+      "title": "Refunds, VIP waivers & credit (Udhaar)",
+      "recipe": "get_workflow_recipe('refunds-waivers-credit')"
+    }
+  ],
+  "scenarios": [],
+  "unknowns": [],
+  "omitted_sections": [
+    "decisions",
+    "examples",
+    "schemas"
+  ],
+  "next": "Request omitted sections separately with max_chars=200000; for an oversized endpoints/schemas section use get_endpoint / get_schema for each operation/type."
+}

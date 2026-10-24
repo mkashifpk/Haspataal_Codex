@@ -22,10 +22,31 @@ import { RefundRequests } from "./screens/RefundRequests";
 import { CashBack } from "./screens/CashBack";
 import { PatientDocuments } from "./screens/PatientDocuments";
 import { Tariff } from "./screens/Tariff";
+import { Receivables } from "./screens/Receivables";
+import { DoctorQueue } from "./screens/DoctorQueue";
+import { ICDPicker } from "./screens/ICDPicker";
+import { Consultation } from "./screens/Consultation";
+import { EPrescription } from "./screens/EPrescription";
+import { LabOrdersResults } from "./screens/LabOrdersResults";
+import { ExternalReferral } from "./screens/ExternalReferral";
+import { ReferralRegister } from "./screens/ReferralRegister";
+import { PatientEducation } from "./screens/PatientEducation";
+import { HomeVisitRecord } from "./screens/HomeVisitRecord";
+import { PatientProgrammes } from "./screens/PatientProgrammes";
 import { Help } from "./screens/Help";
 import { setLanguage, tr } from "./i18n";
 import { hasUnsavedChanges } from "./unsaved";
 const labels: Record<string, [string, string, string]> = {
+  home_visit_record: ["Record a home visit", "گھر کے دورے کا اندراج", "⌂"],
+  patient_programmes: ["Preventive programmes of a patient", "مریض کے حفاظتی پروگرام", "◷"],
+  patient_education: ["Health education given", "دی گئی صحت کی رہنمائی", "◉"],
+  referral_register: ["Referral register", "حوالہ رجسٹر", "▤"],
+  external_referral: ["Refer out (external referral)", "بیرونی مرکز کو حوالہ", "↗"],
+  lab_orders_results: ["Lab & imaging orders + results", "لیب و عکس کے احکامات اور نتائج", "⌁"],
+  eprescription: ["E-prescription builder", "دوائی کا نسخہ", "Rx"],
+  consultation: ["Consultation (EMR)", "معائنہ (طبی ریکارڈ)", "▤"],
+  icd_picker: ["ICD code picker", "تشخیصی کوڈ کا انتخاب", "⌕"],
+  doctor_queue: ["My live queue", "میری جاری قطار", "≡"],
   app_shell: ["Workspace home", "کام کی جگہ", "⌂"],
   workspace_picker: ["Workspaces", "کام کی جگہیں", "▦"],
   notifications: ["Notifications", "اطلاعات", "◷"],
@@ -42,6 +63,11 @@ const labels: Record<string, [string, string, string]> = {
   patient_search: ["Patient search", "مریض کی تلاش", "⌕"],
   patient_documents: ["Patient document vault", "مریض کی دستاویزات", "▤"],
   tariff_display: ["Tariff", "نرخ نامہ", "₨"],
+  receivables: [
+    "Outstanding dues (Udhaar)",
+    "بقایا جات (ادھار)",
+    "₨",
+  ],
   registration: [
     "New registration + OPD slip",
     "نئی رجسٹریشن اور او پی ڈی پرچی",
@@ -52,13 +78,25 @@ const labels: Record<string, [string, string, string]> = {
   settings: ["Settings", "ترتیبات", "⚙"],
 };
 const frontDeskScreens = new Set([
+  "home_visit_record",
+  "patient_programmes",
+  "patient_education",
+  "referral_register",
+  "external_referral",
+  "lab_orders_results",
+  "eprescription",
+  "consultation",
+  "icd_picker",
+  "doctor_queue",
   "queue_management",
   "refund_waiver_credit",
   "cash_back_prompts",
   "patient_documents",
   "tariff_display",
+  "receivables",
 ]);
 export function App() {
+  const [clinicalSelection,setClinicalSelection]=useState<{userId:number;ticketId:number}>();
   const [user, setUser] = useState<MeOut | null>(null),
     [server, setServer] = useState<any>(),
     [connected, setConnected] = useState(false),
@@ -193,6 +231,9 @@ export function App() {
         ) {
           if (available.length === 1) {
             await call("workspace", { code: available[0].code });
+            setOutline(undefined);
+            setHelpOpen(false);
+            setHelpPage(undefined);
             setWorkspace(available[0].code);
             setScreen(currentScreen => ["login", "workspace_picker", "app_shell"].includes(currentScreen) ? "app_shell" : currentScreen);
           } else {
@@ -407,7 +448,7 @@ export function App() {
     const key = (e: KeyboardEvent) => {
       if (e.key === "F1") {
         e.preventDefault();
-        setHelpPage(undefined);
+        setHelpPage(document.activeElement?.closest("[data-help-screen]")?.getAttribute("data-help-screen") || undefined);
         setHelpOpen(true);
       }
       if ((e.ctrlKey || e.metaKey) && e.key === ",") {
@@ -457,6 +498,7 @@ export function App() {
   }
   function navigate(next: string) {
     if (sessionRecovery) return false;
+    if (frontDeskScreens.has(next) && !workspace) return false;
     const required: Record<string, string[]> = {
       facility_profile: ["establishment.manage"],
       report_incident: ["incident.report"],
@@ -470,7 +512,7 @@ export function App() {
     };
     if (
       (frontDeskScreens.has(next) &&
-        !outline?.workspaces.some((w) =>
+        !outline?.shared_screens.some(s => s.id === next) && !outline?.workspaces.some((w) =>
           w.screens.some((s) => s.id === next),
         )) ||
       est?.views.screens.some(
@@ -580,7 +622,20 @@ export function App() {
     ...(user?.permissions.includes("patient.document.view") || user?.permissions.includes("patient.document.upload")
       ? ["patient_documents"]
       : []),
+    ...(user?.permissions.includes("opd.queue.doctor") ? ["doctor_queue"] : []),
+    ...(user?.permissions.includes("clinical.encounter.view") || user?.permissions.includes("clinical.encounter.create") ? ["consultation"] : []),
+    ...(user?.permissions.includes("prescription.view") || user?.permissions.includes("prescription.create") ? ["eprescription"] : []),
+    ...(user?.permissions.some(p=>["lab.result.view","lab.requisition.view","lab.requisition.create","imaging.order.view","imaging.order.create"].includes(p)) ? ["lab_orders_results"] : []),
+    ...(user?.permissions.includes("referral.create") ? ["external_referral"] : []),
+    ...(user?.permissions.some(p=>["referral.view","referral.create"].includes(p)) ? ["referral_register"] : []),
+    ...(user?.permissions.some(p=>["education.give","education.manage"].includes(p)) ? ["patient_education"] : []),
+    ...(user?.permissions.some(p=>["homevisit.record","homevisit.view","msds.view"].includes(p)) ? ["home_visit_record"] : []),
+    ...(user?.permissions.some(p=>["programme.view","programme.manage","programme.give"].includes(p)) ? ["patient_programmes"] : []),
+    "icd_picker",
     "tariff_display",
+    ...(user?.permissions.includes("finance.ar.view")
+      ? ["receivables"]
+      : []),
     ...(workspace === "reception" &&
     user?.permissions.includes("opd.ticket.create")
       ? ["registration"]
@@ -602,10 +657,11 @@ export function App() {
     "settings",
   ].filter(
     (id) =>
-      (!frontDeskScreens.has(id) ||
+      (!frontDeskScreens.has(id) || (!!workspace && (
+        !!outline?.shared_screens.some(s => s.id === id) ||
         !!outline?.workspaces.some((w) =>
           w.screens.some((s) => s.id === id),
-        )) &&
+        )))) &&
       est?.views.screens.find((v) => v.screen_id === id)?.view !== "hidden",
   );
   const view = est?.views.workspaces.find(
@@ -744,15 +800,6 @@ export function App() {
               ))}
             </nav>
             <div className="sidebar-bottom">
-              <small>
-                {t("FOUNDATION · DEVELOPMENT", "بنیادی نظام · زیرِ تعمیر")}
-              </small>
-              <p>
-                {t(
-                  "Clinical workspaces follow in later phases.",
-                  "طبی کام کی جگہیں اگلے مراحل میں آئیں گی۔",
-                )}
-              </p>
               <button
                 data-help="shell.logout"
                 onClick={() => setLogoutOpen(true)}
@@ -961,6 +1008,24 @@ export function App() {
               )}
               {screen === "patient_documents" && <PatientDocuments user={user} revision={revision} />}
               {screen === "tariff_display" && <Tariff revision={revision} />}
+              {screen === "icd_picker" && <ICDPicker />}
+              {screen === "doctor_queue" && <DoctorQueue key={user.user_id} permissions={user.permissions} connected={connected} stream={stream} timeZone={meta?.hospital_timezone} onConsultation={nav.includes("consultation") ? id=>{if(navigate("consultation"))setClinicalSelection({userId:user.user_id,ticketId:id})}:undefined} readOnly={view === "records" || est?.views.screens.find(s => s.screen_id === "doctor_queue")?.view === "records"} />}
+              {screen === "home_visit_record" && <HomeVisitRecord key={user.user_id} user={user} revision={revision} initialTicket={clinicalSelection?.userId===user.user_id?clinicalSelection.ticketId:undefined} readOnly={view==="records"||est?.views.screens.find(s=>s.screen_id==="home_visit_record")?.view==="records"} connected={connected} timeZone={meta?.hospital_timezone} establishment={est}/>}
+              {screen === "patient_programmes" && <PatientProgrammes key={user.user_id} user={user} revision={revision} initialTicket={clinicalSelection?.userId===user.user_id?clinicalSelection.ticketId:undefined} readOnly={view==="records"||est?.views.screens.find(s=>s.screen_id==="patient_programmes")?.view==="records"} connected={connected} timeZone={meta?.hospital_timezone} establishment={est}/>}
+              {screen === "patient_education" && <PatientEducation key={user.user_id} user={user} revision={revision} initialTicket={clinicalSelection?.userId===user.user_id?clinicalSelection.ticketId:undefined} readOnly={view==="records"||est?.views.screens.find(s=>s.screen_id==="patient_education")?.view==="records"} connected={connected} timeZone={meta?.hospital_timezone}/>}
+              {screen === "referral_register" && <ReferralRegister key={user.user_id} user={user} revision={revision} connected={connected} timeZone={meta?.hospital_timezone}/>}
+              {screen === "external_referral" && <ExternalReferral key={user.user_id} user={user} revision={revision} initialTicket={clinicalSelection?.userId===user.user_id?clinicalSelection.ticketId:undefined} readOnly={view==="records"||est?.views.screens.find(s=>s.screen_id==="external_referral")?.view==="records"} connected={connected} timeZone={meta?.hospital_timezone} availableScreens={nav} onRoute={(next,id)=>{if(navigate(next)&&id)setClinicalSelection({userId:user.user_id,ticketId:id})}}/>}
+              {screen === "lab_orders_results" && <LabOrdersResults key={user.user_id} user={user} revision={revision} initialTicket={clinicalSelection?.userId===user.user_id?clinicalSelection.ticketId:undefined} readOnly={view==="records"||est?.views.screens.find(s=>s.screen_id==="lab_orders_results")?.view==="records"} connected={connected} active={est?.active||[]} timeZone={meta?.hospital_timezone} availableScreens={nav} onRoute={(next,id)=>{if(navigate(next))setClinicalSelection({userId:user.user_id,ticketId:id})}}/>}
+              {screen === "eprescription" && <EPrescription key={user.user_id} user={user} revision={revision} initialTicket={clinicalSelection?.userId===user.user_id?clinicalSelection.ticketId:undefined} readOnly={view==="records"||est?.views.screens.find(s=>s.screen_id==="eprescription")?.view==="records"} connected={connected} active={est?.active||[]} timeZone={meta?.hospital_timezone}/>}
+              {screen === "consultation" && <Consultation key={user.user_id} user={user} revision={revision} initialTicket={clinicalSelection?.userId===user.user_id?clinicalSelection.ticketId:undefined} readOnly={view==="records"||est?.views.screens.find(s=>s.screen_id==="consultation")?.view==="records"} connected={connected} active={est?.active||[]} timeZone={meta?.hospital_timezone} availableScreens={nav} onRoute={(next,id)=>{if(navigate(next))setClinicalSelection({userId:user.user_id,ticketId:id})}}/>}
+              {screen === "receivables" && (
+                <Receivables
+                  user={user}
+                  revision={revision}
+                  currency={meta?.currency_code}
+                  readOnly={view === "records" || est?.views.screens.find(s => s.screen_id === "receivables")?.view === "records"}
+                />
+              )}
               {screen === "queue_management" && (
                 <QueueManagement
                   currency={meta?.currency_code}

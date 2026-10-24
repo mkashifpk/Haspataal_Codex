@@ -1,0 +1,11 @@
+import fs from 'node:fs';
+const b=JSON.parse(fs.readFileSync('contracts/lab_orders_results.json'));
+const p='src/foundation-catalogue.json',c=JSON.parse(fs.readFileSync(p));
+c.screens.lab_orders_results={taskCalls:b.endpoints.map(e=>e.endpoint)};
+fs.writeFileSync(p,JSON.stringify(c,null,2)+'\n');
+const m='src/foundation-task-map.json',map=JSON.parse(fs.readFileSync(m));
+map.lab_orders_results=Object.fromEntries(b.endpoints.map(e=>[e.endpoint,e.endpoint.includes('/report/')?'diagnostics.print':e.endpoint.endsWith('/cancel')?'diagnostics.cancel':e.endpoint==='GET /lab/tests'?'diagnostics.tests':e.endpoint.includes('/results')?'diagnostics.trends':e.endpoint.startsWith('POST')?'diagnostics.order':'diagnostics.history']));
+fs.writeFileSync(m,JSON.stringify(map,null,2)+'\n');
+const file='src/foundation-help.ts';let h=fs.readFileSync(file,'utf8');
+h=h.replaceAll('["consultation","eprescription"]','["consultation","eprescription","lab_orders_results"]').replace('["eprescription", "consultation", "queue_management"','["lab_orders_results", "eprescription", "consultation", "queue_management"');
+fs.writeFileSync(file,h);

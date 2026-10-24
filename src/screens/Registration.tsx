@@ -6,7 +6,7 @@ import * as registration from "../generated/registration";
 import * as patients from "../generated/patient_search";
 import { RegistrationDocuments } from "./RegistrationDocuments";
 import { RegistrationActions } from "./RegistrationActions";
-import { tr } from "../i18n";
+import { tr, bilingual as t } from "../i18n";
 import { writeAttempt, canRetryWrite, definiteWriteRefusal, type WriteAttempt } from "../write-attempt";
 
 type Mode = "new" | "returning";
@@ -343,6 +343,13 @@ export function Registration({
       </div>
     );
   const activeServices = catalog.data?.filter((item) => item.is_active) || [];
+  const refusal = error instanceof ApiError ? error.response.error : undefined;
+  const ceiling = refusal?.code === "DISCOUNT_CEILING_EXCEEDED" ? refusal.details : undefined;
+  const rawMaximum = ceiling?.max_amount;
+  const maximumDiscount = typeof rawMaximum === "number" ? rawMaximum
+    : typeof rawMaximum === "string" && /^\d+(\.\d+)?$/.test(rawMaximum) ? Number(rawMaximum) : undefined;
+  const draftDiscount = maximumDiscount !== undefined && Number.isFinite(maximumDiscount) && maximumDiscount >= 0 ? maximumDiscount : 0;
+  const dues = refusal?.code === "AR_OUTSTANDING_BLOCK" ? refusal.details?.outstanding as {banner_text?:unknown} | undefined : undefined;
 
   return (
     <div
@@ -930,6 +937,16 @@ export function Registration({
               )}
             </fieldset>
             <ErrorBox error={error} />
+            {ceiling && (
+              <aside className="notice" role="alert">
+                <p>{t("Discount limit returned by the server", "سرور کی بتائی ہوئی رعایت کی حد")}: <bdi>{String(ceiling.max_pct ?? "—")}%</bdi> · <bdi>{rawMaximum == null ? "—" : String(rawMaximum)}</bdi></p>
+                <p>{t("For a larger concession, issue an unpaid slip within your limit, then use Request VIP waiver in Payment, approval and printing. An eligible approver decides the requested percentage. Preparing the draft does not register, collect money or submit a waiver.", "زیادہ رعایت کے لیے اپنی حد کے اندر غیر ادا پرچی جاری کریں، پھر ادائیگی، منظوری اور پرنٹ میں وی آئی پی رعایت مانگیں۔ مجاز فرد درخواست کی شرح کا فیصلہ کرے گا۔ مسودہ تیار کرنے سے رجسٹریشن، وصولی یا رعایت کی درخواست نہیں ہوتی۔")}</p>
+                <button type="button" data-help="registration.intake" disabled={busy || uncertain} onClick={() => {setDiscount(String(draftDiscount));setPayNow(false);}}>
+                  {maximumDiscount === undefined ? t("Prepare unpaid slip with no discount", "بغیر رعایت غیر ادا پرچی تیار کریں") : t("Prepare unpaid slip within my limit", "اپنی حد کے اندر غیر ادا پرچی تیار کریں")}
+                </button>
+              </aside>
+            )}
+            {typeof dues?.banner_text === "string" && <p className="error" role="alert">{dues.banner_text}</p>}
             {uncertain && (
               <p role="alert">
                 {tr(

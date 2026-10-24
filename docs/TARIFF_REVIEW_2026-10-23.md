@@ -17,12 +17,15 @@ src/screens/Tariff.tsx; src/App.tsx; electron/main.cjs; src/generated/tariff_dis
 ## Evidence
 
 - Final npm run build PASS: handbook19screens/279controls/80groups/33FAQseeds/30workspaceguides, TypeScript and Vite. Existing bundle-size warning remains.
-- npm test52PASS. No source changes during final live run or final packaging; renderer index-0NhITCnI.js unchanged after media capture.
-- Real DEV Electron DEMO-TARIFF-1792734866225,3PASS: exact current service/ward/lab prices, date/currency/grouping, category/search/no-match/reset, F1 filter/focus preservation, startup context retained, unauthenticated PDF and arbitrary download route refused.
-- Official PDF200 saved bytes match observed real response hash. Save and cancellation choices were automated by the test harness at the native-dialog boundary; pending doubleclick issued one download. No backend PDF or tariff data was substituted. Actual human native-dialog usability and physical printing remain pending.
-- Two actual tariff read responses intentionally lost after receipt reached the visible read error and hid stale tables; explicit retry recovered. English/Urdu Light/DarkHighContrast at250 captured with no page horizontal overflow. All current category, ward and lab rows compared against real GET /tariff.
-- Actual tariff was unchanged and ZERO business writes observed. Only separately owned user34 test credentials/active state/preferences changed; original preferences restored, account inactive and all admin/read attempts finished. No patient, visit, payment, approval, cash-back or catalogue mutation.
-- Source/native/build/media/PDF/journal hashes: docs/tariff-build-2026-10-23.json. Ignored local artifacts/tariff-passed-20261023.json and tariff-native-passed-20261023.json do not travel with Git.
+- npm test 52 PASS. No source changes during final live run or final packaging; renderer index-0NhITCnI.js unchanged after media capture.
+- Real DEV Electron DEMO-TARIFF-1792737262946, 5 PASS:
+  1. Exact current service/ward/lab prices, date/currency/grouping, category/search/no-match/reset, F1 filter/focus preservation, startup context retained, unauthenticated PDF and arbitrary download route refused.
+  2. Official PDF200 saved bytes match observed real response hash. Save and cancellation choices automated by harness at native boundary; pending doubleclick issued one download. Complete official PDF unaffected by filters.
+  3. Two actual tariff read responses intentionally lost after receipt reached visible tariff error and hid stale tables; explicit retry recovered. EN/UR Light/DarkHighContrast at 250 captured with no page horizontal overflow. Actual tariff unchanged and ZERO business writes observed.
+  4. Native Electron keyboard zoom: `Ctrl+=` increments up to 250% upper bound with stable layout, `Ctrl+0` resets to 100%, `Ctrl+-` lower bound clamped to 100%. Opening new reception window inherits confirmed 120% zoom. Sign out and re-login as owned user 34 restores confirmed 120% zoom from server preferences on Tariff screen.
+  5. Read-only permission matrix verified: unauthenticated `GET /tariff` and `GET /tariff/pdf` return 401 UNAUTHORIZED; clinical role `demo.doctor` reads 200 OK for both; write attempts (`POST /tariff`) return 405/404 method refusal. Recorded in `docs/tariff-access-checks-2026-10-23.json`.
+- Only separately owned user34 test credentials/active state/preferences changed; original preferences restored, account inactive and all admin/read attempts finished. No patient, visit, payment, approval, cash-back or catalogue mutation.
+- Source/native/build/media/PDF/journal hashes: `docs/tariff-build-2026-10-23.json`. Local ignored `artifacts/tariff-passed-20261023.json` and `tariff-native-passed-20261023.json` do not travel with Git.
 
 First live run found the asynchronous workspace navigation race, corrected in the frontend. The second stopped because the harness's global alert selector matched both the legitimate shell connection banner and tariff error during fault injection; scoped to the tariff error, final run passed. Cleanup completed after each. No backend defect inferred from either.
 

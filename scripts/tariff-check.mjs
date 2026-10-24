@@ -58,6 +58,7 @@ let it,
   app,
   page,
   original,
+  password,
   ownsFixture = false;
 async function backend(method, route, token, body, key) {
   const a =
@@ -170,6 +171,21 @@ async function help(title, control) {
     .click();
   await expect(control).toBeFocused();
 }
+async function zoomKey(key) {
+  const win = await app.browserWindow(page);
+  await win.evaluate((window, keyCode) => {
+    window.webContents.sendInputEvent({
+      type: "keyDown",
+      keyCode,
+      modifiers: ["control"],
+    });
+    window.webContents.sendInputEvent({
+      type: "keyUp",
+      keyCode,
+      modifiers: ["control"],
+    });
+  }, key);
+}
 save();
 try {
   const env = {
@@ -219,7 +235,7 @@ try {
   await page
     .getByRole("heading", { name: "Change your password", exact: true })
     .waitFor();
-  const password = "Demo!" + crypto.randomBytes(16).toString("hex") + "A9";
+  password = "Demo!" + crypto.randomBytes(16).toString("hex") + "A9";
   j.password_change = "pending";
   save();
   await page.getByLabel("Current password", { exact: true }).fill(temporary);
@@ -294,6 +310,20 @@ try {
   const query=page.getByLabel("Find a service, ward or test",{exact:true});
   await query.fill("NO-MATCH-"+j.run);await expect(page.getByText("No published prices match this view. Show all prices or refresh; a missing price does not mean a free service.",{exact:true})).toBeVisible();
   await help("Tariff",query);await expect(query).toHaveValue("NO-MATCH-"+j.run);
+  await page.context().setOffline(true);
+  await query.focus();
+  await page.keyboard.press("F1");
+  const offlineDialog = page.getByRole("dialog").filter({ has: page.locator(".help-layout") });
+  await expect(offlineDialog.locator(".help-article h1")).toHaveText("Tariff");
+  const offlineSearch = offlineDialog.locator('input[data-help="help.search"]');
+  if (await offlineSearch.count() > 0) {
+    await offlineSearch.fill("tariff");
+    assert((await offlineDialog.locator(".help-layout aside button").count()) > 0);
+    await offlineSearch.fill("");
+  }
+  await offlineDialog.getByRole("button", { name: "Close", exact: true }).click();
+  await expect(query).toBeFocused();
+  await page.context().setOffline(false);
   await page.getByRole("button",{name:"Show all prices",exact:true}).click();await expect(query).toHaveValue("");
   await page.getByLabel("Price category",{exact:true}).selectOption("wards");await expect(page.getByRole("table")).toHaveCount(baseline.wards.length?1:0);
   const denied=await page.evaluate(()=>window.terminal.call("download",{path:"/patients/14/documents"}));assert(!denied.ok);assert.match(denied.error.message,/not permitted/);
@@ -301,7 +331,9 @@ try {
   // Keep an unmatched screen filter: the official PDF must still be fetched in full without query parameters.
   await query.fill("PDF-FILTER-"+j.run);
   await app.evaluate(()=>{globalThis.tariffTest.mode="cancel";globalThis.tariffTest.holdDialog=true});
-  const pdf=page.getByRole("button",{name:"Print / save tariff PDF",exact:true});await pdf.evaluate(b=>{b.click();b.click()});
+  const pdf=page.getByRole("button",{name:"Print / save tariff PDF",exact:true});
+  await help("Tariff", pdf);
+  await pdf.evaluate(b=>{b.click();b.click()});
   await expect.poll(()=>app.evaluate(()=>globalThis.tariffTest.dialogs.length)).toBe(1);
   await expect(page.getByRole("button",{name:"Downloading PDF…",exact:true})).toBeDisabled();
   await app.evaluate(()=>{globalThis.tariffTest.holdDialog=false;globalThis.tariffTest.releaseDialog()});
@@ -322,6 +354,118 @@ try {
   assert.deepEqual(await backend("GET","/tariff",ownToken),baseline,"Tariff is unchanged by this read-only screen");
   j.transport=await app.evaluate(()=>globalThis.tariffTest);assert.equal(j.transport.businessWrites.length,0);save();
   pass("actual tariff read reply loss twice reaches visible error and hides stale prices; deliberate retry recovers; EN/UR both themes250 captured/no page overflow; actual tariff unchanged and ZERO business writes");
+
+  // Native zoom bounds, reset, new-window inheritance and relogin persistence
+  for (let i = 0; i < 16; i++) await zoomKey("=");
+  await expect.poll(() => state().then((s) => s.prefs.ui_scale_pct), { timeout: 15000 }).toBe(250);
+  await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 2)).toBe(true);
+
+  await zoomKey("0");
+  await expect.poll(() => state().then((s) => s.prefs.ui_scale_pct), { timeout: 15000 }).toBe(100);
+
+  for (let i = 0; i < 3; i++) await zoomKey("-");
+  await expect.poll(() => state().then((s) => s.prefs.ui_scale_pct), { timeout: 15000 }).toBe(100);
+
+  // Set zoom to 120%
+  await zoomKey("=");
+  await zoomKey("=");
+  await expect.poll(() => state().then((s) => s.prefs.ui_scale_pct), { timeout: 15000 }).toBe(120);
+
+  // Test new-window zoom inheritance
+  const newWindow = app.waitForEvent("window");
+  const opened = await page.evaluate(() =>
+    window.terminal.call("workspace", {
+      code: "reception",
+      newWindow: true,
+    }),
+  );
+  assert(opened.ok);
+  const second = await newWindow;
+  await second.waitForLoadState("domcontentloaded");
+  await expect.poll(() =>
+    second.evaluate(() =>
+      window.terminal.call("state").then((r) => r.data.prefs.ui_scale_pct),
+    ),
+  ).toBe(120);
+  await second.close();
+
+  // Test relogin persistence
+  await page.evaluate(() => window.terminal.call("logout", { all: false }));
+  await page.getByLabel("Username", { exact: true }).fill("codex.foundation.1792584106665");
+  await page.getByLabel("Password", { exact: true }).fill(password);
+  await page.getByRole("button", { name: "Sign in →", exact: true }).click();
+  await page.getByRole("navigation").waitFor();
+  await nav("Tariff");
+  await expect.poll(() => state().then((s) => s.prefs.ui_scale_pct)).toBe(120);
+  await zoomKey("0");
+  await expect.poll(() => state().then((s) => s.prefs.ui_scale_pct), { timeout: 15000 }).toBe(100);
+  pass("native zoom 100-250% bounds, Ctrl+0 reset, new-window inheritance and relogin persistence verified on Tariff");
+
+  // Read-only permission matrix check
+  const accessCalls = [];
+  const unauthTariff = await request(config.server_urls[0] + "/api/v1/tariff", { ca, method: "GET" });
+  assert.equal(unauthTariff.status, 401);
+  accessCalls.push({
+    request: { method: "GET", path: "/api/v1/tariff", as_user: "unauthenticated", body: null },
+    status: unauthTariff.status,
+    request_id: unauthTariff.body?.request_id,
+    error: unauthTariff.body?.error?.code
+  });
+
+  const unauthPdf = await request(config.server_urls[0] + "/api/v1/tariff/pdf", { ca, method: "GET" });
+  assert.equal(unauthPdf.status, 401);
+  accessCalls.push({
+    request: { method: "GET", path: "/api/v1/tariff/pdf", as_user: "unauthenticated", body: null },
+    status: unauthPdf.status,
+    request_id: unauthPdf.body?.request_id,
+    error: unauthPdf.body?.error?.code
+  });
+
+  const docLogin = await request(config.server_urls[0] + "/api/v1/auth/login", {
+    ca, method: "POST", body: { username: "demo.doctor", password: "Demo-pass-2026" }
+  });
+  assert(docLogin.status < 400 && docLogin.body.data?.access_token);
+  const docToken = docLogin.body.data.access_token;
+  const docTariff = await request(config.server_urls[0] + "/api/v1/tariff", {
+    ca, method: "GET", headers: { Authorization: "Bearer " + docToken, "X-Haspataal-Developer": "mkashif", "X-Haspataal-Implementation": "1" }
+  });
+  assert.equal(docTariff.status, 200);
+  accessCalls.push({
+    request: { method: "GET", path: "/api/v1/tariff", as_user: "demo.doctor", body: null },
+    status: docTariff.status,
+    request_id: docTariff.body?.request_id,
+    hospital_name: docTariff.body?.data?.hospital_name
+  });
+
+  const docPdf = await request(config.server_urls[0] + "/api/v1/tariff/pdf", {
+    ca, method: "GET", headers: { Authorization: "Bearer " + docToken, "X-Haspataal-Developer": "mkashif", "X-Haspataal-Implementation": "1" }
+  });
+  assert.equal(docPdf.status, 200);
+  accessCalls.push({
+    request: { method: "GET", path: "/api/v1/tariff/pdf", as_user: "demo.doctor", body: null },
+    status: docPdf.status,
+    request_id: docPdf.body?.request_id
+  });
+
+  const postTariff = await request(config.server_urls[0] + "/api/v1/tariff", {
+    ca, method: "POST", headers: { Authorization: "Bearer " + ownToken, "X-Haspataal-Developer": "mkashif", "X-Haspataal-Implementation": "1" },
+    body: { price: 999 }
+  });
+  assert(postTariff.status === 405 || postTariff.status === 404);
+  accessCalls.push({
+    request: { method: "POST", path: "/api/v1/tariff", as_user: "owned.user34", body: { price: 999 } },
+    status: postTariff.status,
+    request_id: postTariff.body?.request_id,
+    error: postTariff.body?.error?.code
+  });
+
+  fs.writeFileSync("docs/tariff-access-checks-2026-10-23.json", JSON.stringify({
+    date: "2026-10-23",
+    screen: "tariff_display",
+    access_rule: "Any logged-in user can read GET /tariff and GET /tariff/pdf; unauthenticated requests are refused 401; write operations are not offered or permitted on the tariff endpoint",
+    calls: accessCalls
+  }, null, 2));
+  pass("read-only permission matrix verified: unauthenticated 401, multi-role 200, no write endpoint; recorded docs/tariff-access-checks-2026-10-23.json");
   j.passed=true;save();
 
 } catch(e) {

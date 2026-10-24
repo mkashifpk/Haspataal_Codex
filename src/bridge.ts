@@ -9,6 +9,7 @@ export type Reply<T = unknown> = {
   };
   request_id?: string;
   status?: number;
+  meta?: {server_time:string};
 };
 declare global {
   interface Window {
@@ -22,6 +23,15 @@ export class ApiError extends Error {
   constructor(public response: Reply<any>) {
     super(response.error?.message || "Request failed");
   }
+}
+// Clinical date checks use the authenticated server clock, never a guessed visit time.
+export async function getWithClock<T>(path:string):Promise<{data:T;now:string}> {
+  if(!window.terminal)throw new Error("Open Haspataal in the desktop terminal.");
+  const reply=await window.terminal.call("api",{method:"GET",path}) as Reply<T>;
+  if(!reply.ok)throw new ApiError(reply);
+  const now=reply.meta?.server_time;
+  if(!now || !/^\d{4}-\d{2}-\d{2}T/.test(now) || !Number.isFinite(Date.parse(now)))throw new Error("The server clock is unavailable. Refresh before recording a clinical time.");
+  return {data:reply.data,now};
 }
 export async function call<T = any>(
   action: string,

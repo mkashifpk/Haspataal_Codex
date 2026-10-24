@@ -60,6 +60,11 @@ let connected = false,
   prefs = { theme: "Light", language: "en", ui_scale_pct: 100 };
 const windows = new Map(),
   streams = new Map();
+const clinicalViewers = new Set();
+function closeClinicalViewers() {
+  for (const viewer of clinicalViewers) if(!viewer.isDestroyed()) viewer.destroy();
+  clinicalViewers.clear();
+}
 const root = path.join(__dirname, "..");
 const bundles = fs
   .readdirSync(path.join(root, "contracts"))
@@ -125,6 +130,7 @@ function stopStreams() {
   streams.clear();
 }
 function clearSession(reason = "Signed out") {
+  closeClinicalViewers();
   preferenceContext++;
   clearTimeout(refreshTimer);
   auth = null;
@@ -314,6 +320,7 @@ async function refresh() {
           stream.socket?.close();
         }
         streams.clear();
+        closeClinicalViewers();
         broadcast({ type: "session-recovery", message: auth.recovery });
       }
       throw e;
@@ -384,6 +391,7 @@ async function api(method, p, body, workspace, key, retried = false) {
     const me = await raw("GET", "/auth/me");
     if (me.status === 200) {
       auth.user = me.body.data;
+      closeClinicalViewers();
       broadcast({ type: "permissions", user: auth.user });
     }
   }
@@ -910,6 +918,99 @@ ipcMain.handle("terminal", async (event, action, args = {}) => {
         return { ok: true, data: { saved: !target.canceled, type } };
       }
       return { ok: true, data: { type, base64: r.bytes.toString("base64") } };
+    }
+    if (action === "print-prescription") {
+      if (!Number.isSafeInteger(args.prescriptionId) || args.prescriptionId <= 0) throw new Error("Invalid prescription");
+      const requestUser = auth?.user.user_id;
+      const payload = await api("GET", `/prescriptions/${args.prescriptionId}/print-payload`, undefined, windows.get(win.id));
+      if (!payload.ok) return payload;
+      if (payload.data.document_type !== "prescription") throw new Error("Unexpected prescription print payload");
+      const terminal = await api("GET", "/terminals/whoami");
+      if (!terminal.ok) return terminal;
+      if (!requestUser || requestUser !== auth?.user.user_id) throw new Error("The session changed before printing");
+      const { printSlip } = require("./opd-print.cjs");
+      const printed = await printSlip(payload.data, terminal.data, {owner:win,pdf:!!args.pdf});
+      if (printed.bytes) {
+        const selected=await dialog.showSaveDialog(win,{defaultPath:`Prescription-${args.prescriptionId}.pdf`,filters:[{name:"PDF",extensions:["pdf"]}]});
+        if(!selected.canceled)fs.writeFileSync(selected.filePath,printed.bytes);
+        return {ok:true,data:{saved:!selected.canceled}};
+      }
+      return {ok:true,data:printed};
+    }
+    if (action === "print-clinical-note") {
+      if (!Number.isSafeInteger(args.encounterId) || args.encounterId <= 0) throw new Error("Invalid clinical note");
+      const requestUser = auth?.user.user_id;
+      const payload = await api("GET", `/clinical-encounters/${args.encounterId}/print-payload`, undefined, windows.get(win.id));
+      if (!payload.ok) return payload;
+      const terminal = await api("GET", "/terminals/whoami");
+      if (!terminal.ok) return terminal;
+      const releases = await api("GET", "/icd/releases");
+      if (!releases.ok) return releases;
+      if (!requestUser || requestUser !== auth?.user.user_id) throw new Error("The session changed before printing");
+      const { printClinical } = require("./clinical-print.cjs");
+      const printed = await printClinical({...payload.data, icd11_citation:releases.data.icd11_citation}, terminal.data, {owner: win, pdf: !!args.pdf, language: prefs.language});
+      if (printed.bytes) {
+        const selected = await dialog.showSaveDialog(win, {defaultPath:`Clinical-note-${args.encounterId}.pdf`,filters:[{name:"PDF",extensions:["pdf"]}]});
+        if (!selected.canceled) fs.writeFileSync(selected.filePath, printed.bytes);
+        return {ok:true,data:{saved:!selected.canceled}};
+      }
+      return {ok:true,data:printed};
+    }
+    if (action === "print-diagnostic") {
+      if (!Number.isSafeInteger(args.id) || args.id<=0 || !["lab","imaging"].includes(args.kind)) throw new Error("Invalid diagnostic report");
+      const requestUser=auth?.user.user_id;
+      const base=args.kind==="lab"?`/lab/requisitions/${args.id}`:`/imaging/orders/${args.id}`;
+      const payload=await api("GET",`${base}/report/print-payload`,undefined,windows.get(win.id));
+      if(!payload.ok)return payload;
+      const terminal=await api("GET","/terminals/whoami");if(!terminal.ok)return terminal;
+      if(!requestUser || requestUser!==auth?.user.user_id)throw new Error("Session changed before printing");
+      const printed=await require("./diagnostic-print.cjs").printDiagnostic(payload.data,terminal.data,{owner:win,pdf:!!args.pdf,language:prefs.language});
+      if(printed.bytes){const target=await dialog.showSaveDialog(win,{defaultPath:`${args.kind}-report-${args.id}.pdf`,filters:[{name:"PDF",extensions:["pdf"]}]});if(!target.canceled)fs.writeFileSync(target.filePath,printed.bytes);return{ok:true,data:{saved:!target.canceled}}}
+      return {ok:true,data:printed};
+    }
+    if (action === "pacs-viewer") {
+      if(!Number.isSafeInteger(args.orderId)||args.orderId<=0)throw new Error("Invalid imaging order");
+      const requestUser=auth?.user.user_id;
+      const record=await api("GET",`/imaging/orders/${args.orderId}`,undefined,windows.get(win.id));if(!record.ok)return record;
+      if(!requestUser||requestUser!==auth?.user.user_id)throw new Error("Session changed before opening the viewer");
+      if(!record.data.viewer_url)throw new Error("No PACS viewer URL is available for this study. Ask radiology to check its study link.");
+      const target=new URL(record.data.viewer_url);if(!["https:","http:"].includes(target.protocol)||target.username||target.password)throw new Error("Unsafe PACS viewer URL");
+      const viewer=new BrowserWindow({width:1200,height:850,parent:win,webPreferences:{sandbox:true,contextIsolation:true,nodeIntegration:false}});
+      clinicalViewers.add(viewer);viewer.once("closed",()=>clinicalViewers.delete(viewer));
+      viewer.webContents.setWindowOpenHandler(()=>({action:"deny"}));
+      viewer.webContents.on("will-navigate",(e,url)=>{try{if(new URL(url).origin!==target.origin)e.preventDefault()}catch{e.preventDefault()}});
+      viewer.webContents.on("will-redirect",(e,url)=>{try{if(new URL(url).origin!==target.origin)e.preventDefault()}catch{e.preventDefault()}});
+      viewer.webContents.on("will-attach-webview",e=>e.preventDefault());
+      await viewer.loadURL(target.href);
+      return{ok:true,data:{opened:true}};
+    }
+    if (action === "clinical-pdf") {
+      if (typeof args.path !== "string" || !/^(?:\/(?:clinical-encounters|referrals)\/[1-9]\d*\/pdf|\/(?:lab\/requisitions|imaging\/orders)\/[1-9]\d*\/report\/pdf|\/preventive-programmes\/list\/pdf|\/home-visits\/notice\/pdf)$/.test(args.path)) throw new Error("Clinical download not permitted");
+      const op=matchOperation("GET",args.path);
+      if(!op || !auth || !permissionAllows(op,auth.user)) throw new Error("You do not have permission to download this document");
+      if(Date.now()>auth.expires-60000)await refresh();
+      const requestSession=auth;
+      const r=await raw("GET",args.path,undefined,windows.get(win.id),undefined,true);
+      if(requestSession!==auth)throw new Error("The session changed during download");
+      if(r.status!==200){try{r.body=JSON.parse(r.bytes.toString("utf8"))}catch{}return errorResult(r)}
+      if(String(r.headers["content-type"]).split(";")[0]!=="application/pdf" || !r.bytes.subarray(0,5).equals(Buffer.from("%PDF-")))throw new Error("The server did not return a PDF");
+      if(args.preview){
+        const viewer=new BrowserWindow({width:1050,height:850,parent:win,webPreferences:{sandbox:true,contextIsolation:true,nodeIntegration:false,plugins:true}});
+        clinicalViewers.add(viewer);viewer.once("closed",()=>clinicalViewers.delete(viewer));
+        viewer.webContents.setWindowOpenHandler(()=>({action:"deny"}));
+        viewer.webContents.on("will-navigate",e=>e.preventDefault());
+        try {
+          await viewer.loadURL("data:application/pdf;base64,"+r.bytes.toString("base64"));
+        } catch {
+          if(viewer.isDestroyed())return{ok:true,data:{opened:false,cancelled:true}};
+          viewer.destroy();
+          throw new Error("The PDF preview could not open. Save the document and open it in your PDF reader.");
+        }
+        return{ok:true,data:{opened:true}};
+      }
+      const selected=await dialog.showSaveDialog(win,{defaultPath:`Clinical-document-${args.path.split("/")[2]}.pdf`,filters:[{name:"PDF",extensions:["pdf"]}]});
+      if(!selected.canceled)fs.writeFileSync(selected.filePath,r.bytes);
+      return {ok:true,data:{saved:!selected.canceled}};
     }
     if (action === "print-opd") {
       if (!Number.isSafeInteger(args.ticketId) || args.ticketId <= 0)
