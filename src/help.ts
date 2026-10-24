@@ -562,6 +562,7 @@ export const help: Record<string, HelpPage> = {
     purposeUr:
       "ڈیوٹی کے دوران عملے کے لیے: شناخت، کام کی جگہ، رابطہ اور مشترکہ سہولیات واضح رکھیں۔",
     steps: [
+      "After sign-in, Preparing your workspace loads your permitted tasks and settings. The complete menu appears together. If a read fails, Retry loading workspace re-reads it without signing in again or creating a patient, payment or visit.",
       "Check your name and current workspace in the header before working. Use Workspaces to switch duties.",
       "Use the side navigation for notifications, approvals, incident reporting and settings. Facility configuration is a separate administrator entry.",
       "Live means the event stream has caught up. Reconnecting means displayed information may be stale. An unreachable-server banner blocks writes while keeping your input.",
@@ -569,6 +570,7 @@ export const help: Record<string, HelpPage> = {
       "Sign out when you finish. Sign out everywhere also ends your other sessions. A revoked session clears every open window.",
     ],
     stepsUr: [
+      "سائن اِن کے بعد آپ کی کام کی جگہ تیار ہو رہی ہے مجاز کام اور ترتیبات حاصل کرتا ہے۔ مکمل فہرست ایک ساتھ دکھتی ہے۔ خرابی پر کام کی جگہ دوبارہ حاصل کریں دبائیں؛ دوبارہ سائن اِن یا مریض، ادائیگی یا وزٹ نہیں بنتی۔",
       "کام سے پہلے اوپر اپنا نام اور موجودہ کام کی جگہ دیکھیں۔ ذمہ داری بدلنے کے لیے کام کی جگہیں کھولیں۔",
       "اطلاعات، منظوریوں، واقعہ رپورٹ اور ترتیبات کے لیے سائیڈ مینو استعمال کریں۔ ہسپتال کی ترتیب منتظم کا الگ حصہ ہے۔",
       "لائیو کا مطلب تازہ اطلاعات مکمل ہیں۔ دوبارہ رابطے کے دوران معلومات پرانی ہو سکتی ہیں۔ رابطہ نہ ہو تو اندراج محفوظ نہیں ہوتا مگر فارم برقرار رہتا ہے۔",

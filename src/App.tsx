@@ -36,6 +36,7 @@ import { PatientProgrammes } from "./screens/PatientProgrammes";
 import { Help } from "./screens/Help";
 import { setLanguage, tr } from "./i18n";
 import { hasUnsavedChanges } from "./unsaved";
+import { createMetadataFlight } from "./metadata-flight";
 const labels: Record<string, [string, string, string]> = {
   home_visit_record: ["Record a home visit", "گھر کے دورے کا اندراج", "⌂"],
   patient_programmes: ["Preventive programmes of a patient", "مریض کے حفاظتی پروگرام", "◷"],
@@ -134,6 +135,9 @@ export function App() {
     [sessionBusy, setSessionBusy] = useState(false),
     [sessionError, setSessionError] = useState<unknown>();
   const reauthFlight = useRef(false);
+  const [metadataFlight] = useState(createMetadataFlight);
+  const metadataEpoch = useRef(0);
+  const [readyContext, setReadyContext] = useState<{userId:number;workspace:string|null;epoch:number}>();
   const logoutFlight = useRef(false);
   const first = useRef(true),
     loaded = useRef(false),
@@ -172,6 +176,10 @@ export function App() {
   const refreshData = useCallback(async () => {
     const current = liveState.current;
     if (!current.user || current.user.must_change_password) return;
+    const userId = current.user.user_id;
+    const epoch = metadataEpoch.current;
+    const isCurrent = () => metadataEpoch.current === epoch && liveState.current.user?.user_id === userId && liveState.current.workspace === current.workspace;
+    return metadataFlight(`${epoch}:${userId}:${current.workspace || ""}`, async () => {
     try {
       const [
         establishment,
@@ -193,12 +201,16 @@ export function App() {
         api<{ unread: number }>("GET", "/notifications/unread-count"),
         api<MeOut>("GET", "/auth/me"),
         api<MeOut["workspaces"]>("GET", "/auth/workspaces"),
+        // Catalogue reads are independent of the workspace metadata. Start them
+        // in the same batch instead of delaying workspace selection afterwards.
+        ...(!loaded.current ? [Promise.all([
+          api("GET", "/meta/enums"),
+          api("GET", "/meta/workspaces"),
+          api("GET", "/meta/error-codes"),
+          api("GET", "/meta/events"),
+        ])] : []),
       ]);
-      if (
-        liveState.current.user?.user_id !== current.user.user_id ||
-        liveState.current.workspace !== current.workspace
-      )
-        return;
+      if (!isCurrent()) return;
       setEst(establishment);
       setOutline(handbook);
       setMeta(settings);
@@ -212,12 +224,6 @@ export function App() {
       );
       if (!loaded.current) {
         loaded.current = true;
-        await Promise.all([
-          api("GET", "/meta/enums"),
-          api("GET", "/meta/workspaces"),
-          api("GET", "/meta/error-codes"),
-          api("GET", "/meta/events"),
-        ]);
         const available = permittedWorkspaces.filter(
           (w) =>
             establishment.views.workspaces.find((v) => v.workspace === w.code)
@@ -231,11 +237,13 @@ export function App() {
         ) {
           if (available.length === 1) {
             await call("workspace", { code: available[0].code });
+            if (!isCurrent()) return;
             setOutline(undefined);
             setHelpOpen(false);
             setHelpPage(undefined);
             setWorkspace(available[0].code);
             setScreen(currentScreen => ["login", "workspace_picker", "app_shell"].includes(currentScreen) ? "app_shell" : currentScreen);
+            return; // Scoped handbook must arrive before publishing its menu.
           } else {
             setScreen("workspace_picker");
           }
@@ -249,13 +257,17 @@ export function App() {
           ))
       ) {
         await call("workspace", { code: null });
+        if (!isCurrent()) return;
         setWorkspace(null);
         setScreen("workspace_picker");
+        return;
       }
+      setReadyContext({userId,workspace:current.workspace,epoch});
     } catch (e) {
-      setError(e);
+      if (isCurrent()) setError(e);
     }
-  }, []);
+    });
+  }, [metadataFlight]);
   useEffect(() => {
     void refreshState();
     const timer = setInterval(() => setClock(Date.now()), 1000);
@@ -265,6 +277,8 @@ export function App() {
     if (!window.terminal) return;
     return window.terminal.subscribe((e) => {
       if (e.type === "login") {
+        metadataEpoch.current++;
+        setReadyContext(undefined);
         if (e.license) setLicense(e.license);
         loaded.current = false;
         setUser(e.user);
@@ -276,6 +290,8 @@ export function App() {
         setSessionRecovery(e.message);
       }
       if (e.type === "session-restored") {
+        metadataEpoch.current++;
+        setReadyContext(undefined);
         setSessionRecovery(null);
         setSessionPassword("");
         setSessionError(undefined);
@@ -284,6 +300,8 @@ export function App() {
         void refreshData();
       }
       if (e.type === "logout") {
+        metadataEpoch.current++;
+        setReadyContext(undefined);
         setSessionRecovery(null);
         setSessionPassword("");
         resetRequests();
@@ -307,6 +325,8 @@ export function App() {
       if (e.type === "prefs") setPrefs({ ...e.prefs });
       if (e.type === "connection") setConnected(e.connected);
       if (e.type === "permissions") {
+        metadataEpoch.current++;
+        setReadyContext(undefined);
         setOutline(undefined);
         setHelpOpen(false);
         setHelpPage(undefined);
@@ -609,7 +629,8 @@ export function App() {
         est?.views.workspaces.find((v) => v.workspace === w.code)?.view !==
         "hidden",
     ) || [];
-  const nav = [
+  const workspaceReady = !!user && !!outline && !!est && !!meta && readyContext?.userId === user.user_id && readyContext.workspace === workspace && readyContext.epoch === metadataEpoch.current;
+  const nav = (workspaceReady ? [
     "app_shell",
     "workspace_picker",
     "notifications",
@@ -658,7 +679,7 @@ export function App() {
       ? ["facility_profile"]
       : []),
     "settings",
-  ].filter(
+  ] : []).filter(
     (id) =>
       (!frontDeskScreens.has(id) || (!!workspace && (
         !!outline?.shared_screens.some(s => s.id === id) ||
@@ -854,6 +875,12 @@ export function App() {
                 onLogin={refreshState}
               />
             )
+          ) : !workspaceReady && screen !== "settings" ? (
+            <section className="card" data-help="shell.navigation" aria-busy={!error}>
+              <h1>{t("Preparing your workspace…", "آپ کی کام کی جگہ تیار ہو رہی ہے…")}</h1>
+              <p role="status">{t("Loading your permitted tasks and hospital settings together.", "آپ کے مجاز کام اور ہسپتال کی ترتیبات ایک ساتھ حاصل کی جا رہی ہیں۔")}</p>
+              {!!error && <button data-help="shell.navigation" onClick={() => {setError(undefined);void refreshData();}}>{t("Retry loading workspace", "کام کی جگہ دوبارہ حاصل کریں")}</button>}
+            </section>
           ) : (
             <>
               {view && view !== "full" && (
