@@ -1,0 +1,336 @@
+{
+  "payload": {
+    "implementation_id": 1,
+    "agent": "Codex",
+    "kind": "Bug",
+    "severity": "High",
+    "request_id": "codex-patient-search-alphanumeric-20261024-v1",
+    "title": "Patient name search loses matches when the name query contains digits",
+    "endpoint": "GET /patients/search",
+    "screen_id": "patient_search",
+    "workflow": "opd-reception patient search; registration/clinical patient lookup; paused patient.merged test",
+    "build": "edfc9a985b59274c1ca7125cb64a1463b4bf1152 / index-CPl0GzO7.js",
+    "actual": "Fresh DEV scenario patient.trauma_unmerged run43c858 created patients6 and7 named 'SCN 43c858 Unknown Female' and 'SCN 43c858 Identified'. Exact queries 'SCN 43c858', '43c858' and 'SCN 43c858 Identified' return200 with data[]. Query 'SCN' returns both correct records, 'Identified' returns7, and the exact source MRN returns6. Reproduced in actual Electron app and direct MCP sandbox API, before any merge. The paused previous-epoch merge test failed similarly on a new synthetic name containing a timestamp; current report uses only new epoch records.",
+    "expected": "The documented name lookup should find a patient's stored name, including a complete copied name or alphanumeric substring, while also supporting identifier lookup. A valid exact/partial name must not silently return no patients solely because it contains digits. Frontend must not fabricate results or silently replace the user's search.",
+    "steps": "On serverbuild2026-10-24T06:32:06.067860+00:00 as demo.reception, GET /patients/6 and /7 confirm the new scenario names (created2026-10-24T08:51:54/55UTC). GET /patients/search?q=SCN%2043c858&limit=30 -> []; repeat q=SCN -> records6/7, q=SCN%2043c858%20Identified -> [], q=Identified ->7, q=MRN-2026-000004 ->6. In Patient search type SCN43c858 with its actual separating space; zero matches. No merge submitted, no extra records required.",
+    "evidence": "[\n  {\n    \"query\": \"SCN 43c858\",\n    \"status\": 200,\n    \"request_id\": \"b05caa5f7ea14789ae10c7e66913b990\",\n    \"hits\": []\n  },\n  {\n    \"query\": \"SCN\",\n    \"status\": 200,\n    \"request_id\": \"2f75c9ccbc454e4b87db46ea9d550392\",\n    \"hits\": [\n      {\n        \"patient_id\": 7,\n        \"full_name\": \"SCN 43c858 Identified\",\n        \"mrn\": \"MRN-2026-000005\"\n      },\n      {\n        \"patient_id\": 6,\n        \"full_name\": \"SCN 43c858 Unknown Female\",\n        \"mrn\": \"MRN-2026-000004\"\n      }\n    ]\n  },\n  {\n    \"query\": \"Identified\",\n    \"status\": 200,\n    \"request_id\": \"800f9af7aa1743feb7ec7ef0b44e057f\",\n    \"hits\": [\n      {\n        \"patient_id\": 7,\n        \"full_name\": \"SCN 43c858 Identified\",\n        \"mrn\": \"MRN-2026-000005\"\n      }\n    ]\n  },\n  {\n    \"query\": \"43c858\",\n    \"status\": 200,\n    \"request_id\": \"8c06dbf37c264d3ebe88e4064ca50886\",\n    \"hits\": []\n  },\n  {\n    \"query\": \"SCN 43c858 Identified\",\n    \"status\": 200,\n    \"request_id\": \"69cc049b601d42938439e1ab168859ff\",\n    \"hits\": []\n  },\n  {\n    \"query\": \"MRN-2026-000004\",\n    \"status\": 200,\n    \"request_id\": \"ec7adc3ae90d45eaa456181338e532ac\",\n    \"hits\": [\n      {\n        \"patient_id\": 6,\n        \"full_name\": \"SCN 43c858 Unknown Female\",\n        \"mrn\": \"MRN-2026-000004\"\n      }\n    ]\n  }\n]"
+  },
+  "probes": [
+    {
+      "q": "SCN 43c858",
+      "result": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v1/patients/search",
+          "as_user": "demo.reception",
+          "query": {
+            "q": "SCN 43c858",
+            "limit": 30
+          },
+          "body": null,
+          "idempotency_key": null
+        },
+        "status": 200,
+        "ms": 729,
+        "request_id": "b05caa5f7ea14789ae10c7e66913b990",
+        "body": {
+          "data": [],
+          "meta": {
+            "server_time": "2026-10-24T08:57:59.932022+00:00"
+          },
+          "request_id": "b05caa5f7ea14789ae10c7e66913b990"
+        }
+      }
+    },
+    {
+      "q": "SCN",
+      "result": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v1/patients/search",
+          "as_user": "demo.reception",
+          "query": {
+            "q": "SCN",
+            "limit": 30
+          },
+          "body": null,
+          "idempotency_key": null
+        },
+        "status": 200,
+        "ms": 921,
+        "request_id": "2f75c9ccbc454e4b87db46ea9d550392",
+        "body": {
+          "data": [
+            {
+              "patient_id": 7,
+              "mrn": "MRN-2026-000005",
+              "registration_type": "Regular",
+              "full_name": "SCN 43c858 Identified",
+              "father_or_husband_name": null,
+              "gender": "female",
+              "dob": null,
+              "age_years": 30,
+              "age_recorded_on": "2026-10-24",
+              "mobile": "03995807429",
+              "cnic": null,
+              "upmrn": null,
+              "address": null,
+              "emergency_contact_name": null,
+              "emergency_contact_phone": null,
+              "blood_group": null,
+              "allergies": null,
+              "billing_category": "Cash",
+              "panel_id": null,
+              "panel_name": null,
+              "panel_member_no": null,
+              "temp_identifier": null,
+              "merged_into_id": null,
+              "linked_employee_id": null,
+              "is_deceased": false,
+              "created_at": "2026-10-24T08:51:55.373627+00:00",
+              "row_version": 1,
+              "death_id": null,
+              "death_at": null,
+              "photo_document_id": null,
+              "mlc_numbers": [],
+              "outstanding": {
+                "has_outstanding_ar": false,
+                "outstanding_ar_balance": 0,
+                "ar_block_applies": false,
+                "banner_text": null
+              }
+            },
+            {
+              "patient_id": 6,
+              "mrn": "MRN-2026-000004",
+              "registration_type": "TraumaTemp",
+              "full_name": "SCN 43c858 Unknown Female",
+              "father_or_husband_name": null,
+              "gender": "female",
+              "dob": null,
+              "age_years": 30,
+              "age_recorded_on": null,
+              "mobile": null,
+              "cnic": null,
+              "upmrn": null,
+              "address": null,
+              "emergency_contact_name": null,
+              "emergency_contact_phone": null,
+              "blood_group": null,
+              "allergies": null,
+              "billing_category": "Cash",
+              "panel_id": null,
+              "panel_name": null,
+              "panel_member_no": null,
+              "temp_identifier": "SCN 43c858 Unknown Female",
+              "merged_into_id": null,
+              "linked_employee_id": null,
+              "is_deceased": false,
+              "created_at": "2026-10-24T08:51:54.626157+00:00",
+              "row_version": 1,
+              "death_id": null,
+              "death_at": null,
+              "photo_document_id": null,
+              "mlc_numbers": [],
+              "outstanding": {
+                "has_outstanding_ar": false,
+                "outstanding_ar_balance": 0,
+                "ar_block_applies": false,
+                "banner_text": null
+              }
+            }
+          ],
+          "meta": {
+            "server_time": "2026-10-24T08:58:01.070227+00:00"
+          },
+          "request_id": "2f75c9ccbc454e4b87db46ea9d550392"
+        }
+      }
+    },
+    {
+      "q": "Identified",
+      "result": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v1/patients/search",
+          "as_user": "demo.reception",
+          "query": {
+            "q": "Identified",
+            "limit": 30
+          },
+          "body": null,
+          "idempotency_key": null
+        },
+        "status": 200,
+        "ms": 761,
+        "request_id": "800f9af7aa1743feb7ec7ef0b44e057f",
+        "body": {
+          "data": [
+            {
+              "patient_id": 7,
+              "mrn": "MRN-2026-000005",
+              "registration_type": "Regular",
+              "full_name": "SCN 43c858 Identified",
+              "father_or_husband_name": null,
+              "gender": "female",
+              "dob": null,
+              "age_years": 30,
+              "age_recorded_on": "2026-10-24",
+              "mobile": "03995807429",
+              "cnic": null,
+              "upmrn": null,
+              "address": null,
+              "emergency_contact_name": null,
+              "emergency_contact_phone": null,
+              "blood_group": null,
+              "allergies": null,
+              "billing_category": "Cash",
+              "panel_id": null,
+              "panel_name": null,
+              "panel_member_no": null,
+              "temp_identifier": null,
+              "merged_into_id": null,
+              "linked_employee_id": null,
+              "is_deceased": false,
+              "created_at": "2026-10-24T08:51:55.373627+00:00",
+              "row_version": 1,
+              "death_id": null,
+              "death_at": null,
+              "photo_document_id": null,
+              "mlc_numbers": [],
+              "outstanding": {
+                "has_outstanding_ar": false,
+                "outstanding_ar_balance": 0,
+                "ar_block_applies": false,
+                "banner_text": null
+              }
+            }
+          ],
+          "meta": {
+            "server_time": "2026-10-24T08:58:02.082929+00:00"
+          },
+          "request_id": "800f9af7aa1743feb7ec7ef0b44e057f"
+        }
+      }
+    },
+    {
+      "q": "43c858",
+      "result": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v1/patients/search",
+          "as_user": "demo.reception",
+          "query": {
+            "q": "43c858",
+            "limit": 30
+          },
+          "body": null,
+          "idempotency_key": null
+        },
+        "status": 200,
+        "ms": 808,
+        "request_id": "8c06dbf37c264d3ebe88e4064ca50886",
+        "body": {
+          "data": [],
+          "meta": {
+            "server_time": "2026-10-24T08:58:03.087397+00:00"
+          },
+          "request_id": "8c06dbf37c264d3ebe88e4064ca50886"
+        }
+      }
+    },
+    {
+      "q": "SCN 43c858 Identified",
+      "result": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v1/patients/search",
+          "as_user": "demo.reception",
+          "query": {
+            "q": "SCN 43c858 Identified",
+            "limit": 30
+          },
+          "body": null,
+          "idempotency_key": null
+        },
+        "status": 200,
+        "ms": 819,
+        "request_id": "69cc049b601d42938439e1ab168859ff",
+        "body": {
+          "data": [],
+          "meta": {
+            "server_time": "2026-10-24T08:58:04.103508+00:00"
+          },
+          "request_id": "69cc049b601d42938439e1ab168859ff"
+        }
+      }
+    },
+    {
+      "q": "MRN-2026-000004",
+      "result": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v1/patients/search",
+          "as_user": "demo.reception",
+          "query": {
+            "q": "MRN-2026-000004",
+            "limit": 30
+          },
+          "body": null,
+          "idempotency_key": null
+        },
+        "status": 200,
+        "ms": 867,
+        "request_id": "ec7adc3ae90d45eaa456181338e532ac",
+        "body": {
+          "data": [
+            {
+              "patient_id": 6,
+              "mrn": "MRN-2026-000004",
+              "registration_type": "TraumaTemp",
+              "full_name": "SCN 43c858 Unknown Female",
+              "father_or_husband_name": null,
+              "gender": "female",
+              "dob": null,
+              "age_years": 30,
+              "age_recorded_on": null,
+              "mobile": null,
+              "cnic": null,
+              "upmrn": null,
+              "address": null,
+              "emergency_contact_name": null,
+              "emergency_contact_phone": null,
+              "blood_group": null,
+              "allergies": null,
+              "billing_category": "Cash",
+              "panel_id": null,
+              "panel_name": null,
+              "panel_member_no": null,
+              "temp_identifier": "SCN 43c858 Unknown Female",
+              "merged_into_id": null,
+              "linked_employee_id": null,
+              "is_deceased": false,
+              "created_at": "2026-10-24T08:51:54.626157+00:00",
+              "row_version": 1,
+              "death_id": null,
+              "death_at": null,
+              "photo_document_id": null,
+              "mlc_numbers": [],
+              "outstanding": {
+                "has_outstanding_ar": false,
+                "outstanding_ar_balance": 0,
+                "ar_block_applies": false,
+                "banner_text": null
+              }
+            }
+          ],
+          "meta": {
+            "server_time": "2026-10-24T08:58:05.197553+00:00"
+          },
+          "request_id": "ec7adc3ae90d45eaa456181338e532ac"
+        }
+      }
+    }
+  ],
+  "status": "pending report"
+}

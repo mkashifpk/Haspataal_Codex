@@ -1,0 +1,104 @@
+{
+  "status": "confirmed",
+  "cases": [
+    {
+      "as_user": "demo.reception",
+      "method": "POST",
+      "path": "/patients/2/merge",
+      "body": {
+        "target_patient_id": 1,
+        "reason": "DEMO software test: permanent merge must require a co-signer"
+      },
+      "idempotency_key": "reset-regular-merge-denied-20261024",
+      "expect": "MERGE_COSIGNER_REQUIRED"
+    },
+    {
+      "as_user": "demo.reception",
+      "method": "POST",
+      "path": "/patients/6/merge",
+      "body": {
+        "target_patient_id": 5,
+        "reason": "DEMO software test: refuse distinct identities with conflicting sex"
+      },
+      "idempotency_key": "reset-trauma-identity-denied-20261024",
+      "expect": "MERGE_IDENTITY_CONFLICT"
+    }
+  ],
+  "results": [
+    {
+      "expected": "MERGE_COSIGNER_REQUIRED",
+      "result": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v1/patients/2/merge",
+          "as_user": "demo.reception",
+          "query": null,
+          "body": {
+            "target_patient_id": 1,
+            "reason": "DEMO software test: permanent merge must require a co-signer"
+          },
+          "idempotency_key": "reset-regular-merge-denied-20261024"
+        },
+        "status": 403,
+        "ms": 780,
+        "request_id": "6b5181c95f18438c87eb1ee3158270aa",
+        "body": {
+          "error": {
+            "code": "MERGE_COSIGNER_REQUIRED",
+            "message": "Two permanent records are merged by two people: a second person who holds patient.merge.approve co-signs (cosigner_username, cosigner_password).",
+            "details": {
+              "source_type": "Regular",
+              "permission": "patient.merge.approve"
+            },
+            "retryable": false,
+            "retry_after_seconds": null
+          },
+          "request_id": "6b5181c95f18438c87eb1ee3158270aa"
+        },
+        "explain": {
+          "http_status": 403,
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions)."
+        }
+      }
+    },
+    {
+      "expected": "MERGE_IDENTITY_CONFLICT",
+      "result": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v1/patients/6/merge",
+          "as_user": "demo.reception",
+          "query": null,
+          "body": {
+            "target_patient_id": 5,
+            "reason": "DEMO software test: refuse distinct identities with conflicting sex"
+          },
+          "idempotency_key": "reset-trauma-identity-denied-20261024"
+        },
+        "status": 409,
+        "ms": 942,
+        "request_id": "85b9455ec2e54e3b838cce50b20fe464",
+        "body": {
+          "error": {
+            "code": "MERGE_IDENTITY_CONFLICT",
+            "message": "These profiles are two different people (gender)",
+            "details": {
+              "conflicts": [
+                "gender"
+              ]
+            },
+            "retryable": false,
+            "retry_after_seconds": null
+          },
+          "request_id": "85b9455ec2e54e3b838cce50b20fe464"
+        },
+        "explain": {
+          "http_status": 409,
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+        }
+      }
+    }
+  ]
+}

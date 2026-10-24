@@ -1,0 +1,901 @@
+{
+  "scenario": "patient.trauma_unmerged",
+  "run": "43c858",
+  "status": "confirmed fresh creates201; no merge submitted yet",
+  "source": {
+    "patient_id": 6,
+    "mrn": "MRN-2026-000004",
+    "registration_type": "TraumaTemp",
+    "full_name": "SCN 43c858 Unknown Female",
+    "father_or_husband_name": null,
+    "gender": "female",
+    "dob": null,
+    "age_years": 30,
+    "age_recorded_on": null,
+    "mobile": null,
+    "cnic": null,
+    "upmrn": null,
+    "address": null,
+    "emergency_contact_name": null,
+    "emergency_contact_phone": null,
+    "blood_group": null,
+    "allergies": null,
+    "billing_category": "Cash",
+    "panel_id": null,
+    "panel_name": null,
+    "panel_member_no": null,
+    "temp_identifier": "SCN 43c858 Unknown Female",
+    "merged_into_id": null,
+    "linked_employee_id": null,
+    "is_deceased": false,
+    "created_at": "2026-10-24T08:51:54.626157+00:00",
+    "row_version": 1,
+    "death_id": null,
+    "death_at": null,
+    "photo_document_id": null,
+    "mlc_numbers": [],
+    "outstanding": {
+      "has_outstanding_ar": false,
+      "outstanding_ar_balance": 0,
+      "ar_block_applies": false,
+      "banner_text": null
+    },
+    "master_patient_id": 6,
+    "merged_profiles": []
+  },
+  "target": {
+    "patient_id": 7,
+    "mrn": "MRN-2026-000005",
+    "registration_type": "Regular",
+    "full_name": "SCN 43c858 Identified",
+    "father_or_husband_name": null,
+    "gender": "female",
+    "dob": null,
+    "age_years": 30,
+    "age_recorded_on": "2026-10-24",
+    "mobile": "03995807429",
+    "cnic": null,
+    "upmrn": null,
+    "address": null,
+    "emergency_contact_name": null,
+    "emergency_contact_phone": null,
+    "blood_group": null,
+    "allergies": null,
+    "billing_category": "Cash",
+    "panel_id": null,
+    "panel_name": null,
+    "panel_member_no": null,
+    "temp_identifier": null,
+    "merged_into_id": null,
+    "linked_employee_id": null,
+    "is_deceased": false,
+    "created_at": "2026-10-24T08:51:55.373627+00:00",
+    "row_version": 1,
+    "death_id": null,
+    "death_at": null,
+    "photo_document_id": null,
+    "mlc_numbers": [],
+    "outstanding": {
+      "has_outstanding_ar": false,
+      "outstanding_ar_balance": 0,
+      "ar_block_applies": false,
+      "banner_text": null
+    },
+    "master_patient_id": 7,
+    "merged_profiles": []
+  },
+  "merge_endpoint": {
+    "method": "POST",
+    "path": "/api/v1/patients/{patient_id}/merge",
+    "summary": "Merge this temporary/duplicate profile into a master profile",
+    "tags": [
+      "Patients"
+    ],
+    "permissions": [
+      "patient.merge"
+    ],
+    "permissions_mode": "all",
+    "idempotency_key": false,
+    "description": "Workflow §2.4: the temporary trauma record is RETAINED (marked Merged) and all clinical data\ndisplays consolidated under the master. The merged record can no longer be used for new\ntransactions (`PATIENT_MERGED_CANNOT_TRANSACT`). A merge is for good, and a death recorded on the merged profile\nmoves to the master, so:\n\n* a trauma or lab-only profile is merged by the registration desk alone; a **permanent (Regular) profile** (a\n  duplicate) only with a second person who holds `patient.merge.approve` and co-signs at the same terminal\n  (`cosigner_username`, `cosigner_password`): `MERGE_COSIGNER_REQUIRED` without one; `STEP_UP_REQUIRED`,\n  `ACCOUNT_LOCKED` or `DUAL_CONTROL_SAME_PERSON` for a co-signer who cannot co-sign;\n* profiles that name two different people are refused, never overridden: two CNICs, two universal patient medical\n  record numbers (UPMRN), two sexes, two dates of birth, or one seen alive after the other's recorded death: `MERGE_IDENTITY_CONFLICT` (details.conflicts). Correct the\n  wrong profile first.\n\nA CNIC or UPMRN that only the merged profile carried is copied to the master, so the search (which hides merged\nprofiles) still finds the person by it.\n\nAn id in the request body that does not exist: `REFERENCE_NOT_FOUND` (details.field).\n`MERGE_INVALID`: these records cannot be merged.\n\n**Required permission:** `patient.merge`\n\n**Required permission:** `patient.merge`",
+    "roles_allowed": [
+      "receptionist"
+    ],
+    "parameters": [
+      {
+        "name": "patient_id",
+        "in": "path",
+        "required": true,
+        "description": "",
+        "schema": {
+          "type": "integer",
+          "title": "Patient Id"
+        }
+      }
+    ],
+    "request_body": {
+      "title": "MergeIn",
+      "properties": {
+        "target_patient_id": {
+          "type": "integer",
+          "title": "Target Patient Id",
+          "description": "The permanent (master) profile that survives"
+        },
+        "reason": {
+          "type": "string",
+          "maxLength": 500,
+          "minLength": 3,
+          "title": "Reason"
+        },
+        "cosigner_username": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 64
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cosigner Username",
+          "description": "Merging a permanent (Regular) profile: the second person, who holds patient.merge.approve"
+        },
+        "cosigner_password": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 200
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cosigner Password",
+          "description": "The second person's password (never stored)"
+        }
+      },
+      "type": "object",
+      "required": [
+        "target_patient_id",
+        "reason"
+      ]
+    },
+    "request_content_type": "application/json",
+    "response_schema": {
+      "title": "Envelope[PatientDetailOut]",
+      "properties": {
+        "data": {
+          "title": "PatientDetailOut",
+          "properties": {
+            "patient_id": {
+              "type": "integer",
+              "title": "Patient Id"
+            },
+            "photo_document_id": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Photo Document Id",
+              "description": "The newest Patient Photo of the merge chain, for the identity check; null when none was taken (it is optional). GET /patient-documents/{document_id}/download"
+            },
+            "mrn": {
+              "type": "string",
+              "title": "Mrn"
+            },
+            "registration_type": {
+              "type": "string",
+              "enum": [
+                "Regular",
+                "LabOnly",
+                "TraumaTemp",
+                "Merged"
+              ],
+              "title": "Registration Type"
+            },
+            "full_name": {
+              "type": "string",
+              "title": "Full Name"
+            },
+            "father_or_husband_name": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Father Or Husband Name"
+            },
+            "gender": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "enum": [
+                    "male",
+                    "female",
+                    "other",
+                    "unknown"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Gender"
+            },
+            "dob": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Dob"
+            },
+            "age_years": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Age Years"
+            },
+            "age_recorded_on": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Age Recorded On",
+              "description": "When age_years was recorded (the age grows from that date)"
+            },
+            "mobile": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Mobile"
+            },
+            "cnic": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cnic"
+            },
+            "upmrn": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Upmrn",
+              "description": "The Universal Patient Medical Record Number when one was recorded (optional)"
+            },
+            "address": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Address"
+            },
+            "emergency_contact_name": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Emergency Contact Name"
+            },
+            "emergency_contact_phone": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Emergency Contact Phone"
+            },
+            "blood_group": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "enum": [
+                    "A+",
+                    "A-",
+                    "B+",
+                    "B-",
+                    "AB+",
+                    "AB-",
+                    "O+",
+                    "O-",
+                    "Unknown"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Blood Group"
+            },
+            "allergies": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Allergies"
+            },
+            "billing_category": {
+              "type": "string",
+              "enum": [
+                "Cash",
+                "Panel"
+              ],
+              "title": "Billing Category"
+            },
+            "panel_id": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Panel Id"
+            },
+            "panel_name": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Panel Name"
+            },
+            "panel_member_no": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Panel Member No"
+            },
+            "temp_identifier": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Temp Identifier",
+              "description": "Unknown-trauma label, e.g. \"Unknown Male 3\""
+            },
+            "merged_into_id": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Merged Into Id"
+            },
+            "linked_employee_id": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Linked Employee Id"
+            },
+            "is_deceased": {
+              "type": "boolean",
+              "title": "Is Deceased"
+            },
+            "death_id": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Death Id",
+              "description": "The death record (GET /deaths/{death_id}) when the death is recorded"
+            },
+            "death_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Death At"
+            },
+            "mlc_numbers": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array",
+              "title": "Mlc Numbers",
+              "description": "Medico-legal case numbers of this person: show a MEDICO-LEGAL banner when not empty (MSDS 154: the record is clearly so marked)"
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time",
+              "title": "Created At"
+            },
+            "row_version": {
+              "type": "integer",
+              "title": "Row Version"
+            },
+            "outstanding": {
+              "$ref": "#/components/schemas/OutstandingBannerOut"
+            },
+            "master_patient_id": {
+              "type": "integer",
+              "title": "Master Patient Id",
+              "description": "The record every merged profile points to"
+            },
+            "merged_profiles": {
+              "items": {
+                "$ref": "#/components/schemas/MergedProfileOut"
+              },
+              "type": "array",
+              "title": "Merged Profiles"
+            }
+          },
+          "type": "object",
+          "required": [
+            "patient_id",
+            "photo_document_id",
+            "mrn",
+            "registration_type",
+            "full_name",
+            "father_or_husband_name",
+            "gender",
+            "dob",
+            "age_years",
+            "age_recorded_on",
+            "mobile",
+            "cnic",
+            "upmrn",
+            "address",
+            "emergency_contact_name",
+            "emergency_contact_phone",
+            "blood_group",
+            "allergies",
+            "billing_category",
+            "panel_id",
+            "panel_name",
+            "panel_member_no",
+            "temp_identifier",
+            "merged_into_id",
+            "linked_employee_id",
+            "is_deceased",
+            "death_id",
+            "death_at",
+            "mlc_numbers",
+            "created_at",
+            "row_version",
+            "outstanding",
+            "master_patient_id",
+            "merged_profiles"
+          ]
+        },
+        "meta": {
+          "title": "Meta",
+          "properties": {
+            "server_time": {
+              "type": "string",
+              "title": "Server Time",
+              "description": "Server clock (UTC). Use it to detect terminal clock skew."
+            },
+            "page": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Page"
+            },
+            "page_size": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Page Size"
+            },
+            "total_count": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Total Count"
+            },
+            "next_cursor": {
+              "title": "Next Cursor"
+            }
+          },
+          "type": "object",
+          "required": [
+            "server_time"
+          ]
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ]
+    },
+    "recorded_example": {
+      "request": {
+        "path": "/api/v1/patients/1/merge",
+        "body": {
+          "target_patient_id": 2,
+          "reason": "Identified after stabilization"
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": {
+            "patient_id": 2,
+            "mrn": "MRN-2026-000002",
+            "registration_type": "Regular",
+            "full_name": "Ali Khan",
+            "father_or_husband_name": null,
+            "gender": "male",
+            "dob": null,
+            "age_years": 40,
+            "age_recorded_on": "2026-10-24",
+            "mobile": "03003745526",
+            "cnic": null,
+            "upmrn": null,
+            "address": null,
+            "emergency_contact_name": null,
+            "emergency_contact_phone": null,
+            "blood_group": null,
+            "allergies": null,
+            "billing_category": "Cash",
+            "panel_id": null,
+            "panel_name": null,
+            "panel_member_no": null,
+            "temp_identifier": null,
+            "merged_into_id": null,
+            "linked_employee_id": null,
+            "is_deceased": false,
+            "created_at": "2026-10-23T19:09:23.842167+00:00",
+            "row_version": 1,
+            "death_id": null,
+            "death_at": null,
+            "photo_document_id": 1,
+            "mlc_numbers": [],
+            "outstanding": {
+              "has_outstanding_ar": false,
+              "outstanding_ar_balance": 0,
+              "ar_block_applies": false,
+              "banner_text": null
+            },
+            "master_patient_id": 2,
+            "merged_profiles": [
+              {
+                "patient_id": 1,
+                "mrn": "MRN-2026-000001",
+                "full_name": "Unknown Patient 1",
+                "registration_type": "Merged",
+                "temp_identifier": "Unknown Patient 1"
+              }
+            ]
+          },
+          "meta": {
+            "server_time": "2026-10-23T19:09:24.140125+00:00"
+          },
+          "request_id": "ed15014d9a0f4c0f9d1479d434810349"
+        }
+      },
+      "errors_seen": [
+        "MERGE_COSIGNER_REQUIRED",
+        "MERGE_IDENTITY_CONFLICT",
+        "MERGE_INVALID",
+        "STEP_UP_REQUIRED"
+      ],
+      "events_emitted": [
+        "patient.merged"
+      ]
+    },
+    "errors": [
+      {
+        "code": "ACCOUNT_LOCKED",
+        "http_status": 423,
+        "message": "Too many failed attempts; the account is temporarily locked.",
+        "retryable": true,
+        "category": "auth",
+        "ui_action": "Show a countdown from retry_after_seconds."
+      },
+      {
+        "code": "DUAL_CONTROL_SAME_PERSON",
+        "http_status": 403,
+        "message": "The second approver must be a different person.",
+        "retryable": false,
+        "category": "business",
+        "ui_action": "Explain and hide the action (check x-permissions)."
+      },
+      {
+        "code": "MERGE_COSIGNER_REQUIRED",
+        "http_status": 403,
+        "message": "Two permanent records are merged by two people: a second person who holds patient.merge.approve co-signs (cosigner_username, cosigner_password).",
+        "retryable": false,
+        "category": "auth",
+        "ui_action": "Explain and hide the action (check x-permissions)."
+      },
+      {
+        "code": "MERGE_IDENTITY_CONFLICT",
+        "http_status": 409,
+        "message": "These profiles are two different people (details.conflicts: cnic, upmrn, gender, dob, seen_after_death); correct the wrong profile first, a merge is for good.",
+        "retryable": false,
+        "category": "business",
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      },
+      {
+        "code": "MERGE_INVALID",
+        "http_status": 422,
+        "message": "These records cannot be merged.",
+        "retryable": false,
+        "category": "business",
+        "ui_action": "Show field errors from details.fields / the message."
+      },
+      {
+        "code": "PATIENT_MERGED_CANNOT_TRANSACT",
+        "http_status": 409,
+        "message": "This patient record was merged; use the master record.",
+        "retryable": false,
+        "category": "business",
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      },
+      {
+        "code": "REFERENCE_NOT_FOUND",
+        "http_status": 422,
+        "message": "A referenced record does not exist.",
+        "retryable": false,
+        "category": "request",
+        "ui_action": "Show field errors from details.fields / the message."
+      },
+      {
+        "code": "STEP_UP_REQUIRED",
+        "http_status": 403,
+        "message": "A second authorised person must co-sign this action.",
+        "retryable": false,
+        "category": "auth",
+        "ui_action": "Explain and hide the action (check x-permissions)."
+      }
+    ],
+    "errors_seen_in_tests": [
+      "MERGE_COSIGNER_REQUIRED",
+      "MERGE_IDENTITY_CONFLICT",
+      "MERGE_INVALID",
+      "STEP_UP_REQUIRED"
+    ],
+    "used_by_screens": [
+      "trauma_merge"
+    ],
+    "used_by_workflows": [
+      "inpatient-and-discharge",
+      "opd-reception"
+    ],
+    "typescript_example": "// Merge this temporary/duplicate profile into a master profile  (permissions: patient.merge)\nexport const merge = (patient_id, body) =>\n  api(\"POST\", `/patients/${patient_id}/merge`, body);   // api(): see get_guide('envelope-and-errors')",
+    "access": {
+      "authentication": "user",
+      "permissions": [
+        "patient.merge"
+      ],
+      "permissions_mode": "all",
+      "who": "holders of patient.merge",
+      "roles_allowed": [
+        "receptionist"
+      ]
+    },
+    "write_semantics": {
+      "protection": "state_guard",
+      "on_lost_answer": "A repeat is refused with MERGE_INVALID: the profile is merged already. The first call may have succeeded; this error does not replay its result. Never retry automatically; re-read the record, then offer the action again only if it is still needed.",
+      "reconcile_with": "GET /patients/{patient_id}",
+      "refused_with": "MERGE_INVALID",
+      "emits_events": [
+        "patient.merged"
+      ],
+      "prints": false,
+      "related_state_machine": null
+    },
+    "emits_events": [
+      "patient.merged"
+    ],
+    "list": null,
+    "cross_field_rules": {},
+    "errors_detail": [
+      {
+        "code": "ACCOUNT_LOCKED",
+        "http_status": 423,
+        "message": "Too many failed attempts; the account is temporarily locked.",
+        "retryable": true,
+        "ui_action": "Show a countdown from retry_after_seconds.",
+        "source": [
+          "documented"
+        ],
+        "details_fields": [
+          "retry_after_seconds"
+        ],
+        "details_from": "POST /api/v1/auth/login"
+      },
+      {
+        "code": "DUAL_CONTROL_SAME_PERSON",
+        "http_status": 403,
+        "message": "The second approver must be a different person.",
+        "retryable": false,
+        "ui_action": "Explain and hide the action (check x-permissions).",
+        "source": [
+          "documented"
+        ],
+        "details_fields": [],
+        "details_from": "POST /api/v1/prescriptions/{prescription_id}/dispense"
+      },
+      {
+        "code": "MERGE_COSIGNER_REQUIRED",
+        "http_status": 403,
+        "message": "Two permanent records are merged by two people: a second person who holds patient.merge.approve co-signs (cosigner_username, cosigner_password).",
+        "retryable": false,
+        "ui_action": "Explain and hide the action (check x-permissions).",
+        "source": [
+          "documented",
+          "seen_in_tests"
+        ],
+        "details_fields": [
+          "permission",
+          "source_type"
+        ],
+        "details_from": "POST /api/v1/patients/{patient_id}/merge"
+      },
+      {
+        "code": "MERGE_IDENTITY_CONFLICT",
+        "http_status": 409,
+        "message": "These profiles are two different people (details.conflicts: cnic, upmrn, gender, dob, seen_after_death); correct the wrong profile first, a merge is for good.",
+        "retryable": false,
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+        "source": [
+          "documented",
+          "seen_in_tests"
+        ],
+        "details_fields": [
+          "conflicts"
+        ],
+        "details_from": "POST /api/v1/patients/{patient_id}/merge"
+      },
+      {
+        "code": "MERGE_INVALID",
+        "http_status": 422,
+        "message": "These records cannot be merged.",
+        "retryable": false,
+        "ui_action": "Show field errors from details.fields / the message.",
+        "source": [
+          "documented",
+          "seen_in_tests"
+        ],
+        "details_fields": [],
+        "details_from": "POST /api/v1/patients/{patient_id}/merge"
+      },
+      {
+        "code": "PATIENT_MERGED_CANNOT_TRANSACT",
+        "http_status": 409,
+        "message": "This patient record was merged; use the master record.",
+        "retryable": false,
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+        "source": [
+          "documented"
+        ],
+        "details_fields": [],
+        "details_from": "POST /api/v1/patients/{patient_id}/death"
+      },
+      {
+        "code": "REFERENCE_NOT_FOUND",
+        "http_status": 422,
+        "message": "A referenced record does not exist.",
+        "retryable": false,
+        "ui_action": "Show field errors from details.fields / the message.",
+        "source": [
+          "documented"
+        ],
+        "details_fields": [
+          "ward_id"
+        ],
+        "details_from": "POST /api/v1/pharmacy/storage-checks"
+      },
+      {
+        "code": "STEP_UP_REQUIRED",
+        "http_status": 403,
+        "message": "A second authorised person must co-sign this action.",
+        "retryable": false,
+        "ui_action": "Explain and hide the action (check x-permissions).",
+        "source": [
+          "documented",
+          "seen_in_tests"
+        ],
+        "details_fields": [],
+        "details_from": "POST /api/v1/blood/requests/{request_id}/issue"
+      }
+    ]
+  },
+  "reason": "SCN 43c858 synthetic software merge test only; trauma and identified profiles represent the same simulated person",
+  "key": "codex-reset-trauma-merge-43c858",
+  "write_status": "pending UI subscription test before upstream merge"
+}

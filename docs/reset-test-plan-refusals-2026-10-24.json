@@ -1,0 +1,877 @@
+{
+  "status": "executed; 14 documented refusals matched",
+  "cases": [
+    {
+      "name": "search forbidden",
+      "as_user": "demo.cssd",
+      "method": "GET",
+      "path": "/patients/search",
+      "query": {
+        "q": "DEV/1792831058277-A"
+      },
+      "status": 403,
+      "code": "FORBIDDEN",
+      "key": "codex-reset-plan-refusal-0-20261024"
+    },
+    {
+      "name": "patient create forbidden",
+      "as_user": "demo.cssd",
+      "method": "POST",
+      "path": "/patients",
+      "body": {
+        "full_name": "DEMO refused duplicate only",
+        "gender": "female",
+        "age_years": 34,
+        "mobile": "03000000000"
+      },
+      "status": 403,
+      "code": "FORBIDDEN",
+      "key": "codex-reset-plan-refusal-1-20261024"
+    },
+    {
+      "name": "profile edit forbidden",
+      "as_user": "demo.cssd",
+      "method": "PATCH",
+      "path": "/patients/1",
+      "body": {
+        "expected_version": 1,
+        "full_name": "DEMO-RESET-1792831058277 a"
+      },
+      "status": 403,
+      "code": "FORBIDDEN",
+      "key": "codex-reset-plan-refusal-2-20261024"
+    },
+    {
+      "name": "profile read forbidden",
+      "as_user": "demo.cssd",
+      "method": "GET",
+      "path": "/patients/1",
+      "status": 403,
+      "code": "FORBIDDEN",
+      "key": "codex-reset-plan-refusal-3-20261024"
+    },
+    {
+      "name": "financial read forbidden",
+      "as_user": "demo.cssd",
+      "method": "GET",
+      "path": "/patients/1/financial-summary",
+      "status": 403,
+      "code": "FORBIDDEN",
+      "key": "codex-reset-plan-refusal-4-20261024"
+    },
+    {
+      "name": "document list forbidden",
+      "as_user": "demo.cssd",
+      "method": "GET",
+      "path": "/patients/1/documents",
+      "status": 403,
+      "code": "FORBIDDEN",
+      "key": "codex-reset-plan-refusal-5-20261024"
+    },
+    {
+      "name": "registration forbidden",
+      "as_user": "demo.cssd",
+      "method": "POST",
+      "path": "/reception/registrations",
+      "body": {
+        "patient_id": 1,
+        "doctor_id": 10
+      },
+      "status": 403,
+      "code": "FORBIDDEN",
+      "key": "codex-reset-plan-refusal-6-20261024"
+    },
+    {
+      "name": "home write forbidden",
+      "as_user": "demo.cssd",
+      "method": "POST",
+      "path": "/home-visits",
+      "body": {
+        "patient_id": 1,
+        "requested_by": "DEMO test",
+        "requested_at": "2026-10-24T01:00:00Z",
+        "visited_at": "2026-10-24T02:00:00Z",
+        "reason": "DEMO request refusal check",
+        "address": "DEMO synthetic address",
+        "examination_consent": "NotExamined",
+        "history": "DEMO history only",
+        "assessment": "DEMO software test",
+        "care_given": "No real care provided",
+        "outcome": "ManagedAtHome"
+      },
+      "status": 403,
+      "code": "FORBIDDEN",
+      "key": "codex-reset-plan-refusal-7-20261024"
+    },
+    {
+      "name": "patient missing required demographics",
+      "as_user": "demo.reception",
+      "method": "POST",
+      "path": "/patients",
+      "body": {
+        "full_name": "DEMO invalid only",
+        "gender": "female"
+      },
+      "status": 422,
+      "code": "VALIDATION_ERROR",
+      "key": "codex-reset-plan-refusal-8-20261024"
+    },
+    {
+      "name": "atomic duplicate cnic",
+      "as_user": "demo.reception",
+      "method": "POST",
+      "path": "/reception/registrations",
+      "body": {
+        "new_patient": {
+          "full_name": "DEMO refused duplicate only",
+          "gender": "female",
+          "age_years": 34,
+          "mobile": "03000000000",
+          "cnic": "99999-1058277-3"
+        },
+        "doctor_id": 10
+      },
+      "status": 409,
+      "code": "PATIENT_CNIC_EXISTS",
+      "key": "codex-reset-plan-refusal-9-20261024"
+    },
+    {
+      "name": "atomic duplicate upmrn",
+      "as_user": "demo.reception",
+      "method": "POST",
+      "path": "/reception/registrations",
+      "body": {
+        "new_patient": {
+          "full_name": "DEMO refused duplicate only",
+          "gender": "female",
+          "age_years": 34,
+          "mobile": "03000000000",
+          "upmrn": "DEV/1792831058277-A"
+        },
+        "doctor_id": 10
+      },
+      "status": 409,
+      "code": "PATIENT_UPMRN_EXISTS",
+      "key": "codex-reset-plan-refusal-10-20261024"
+    },
+    {
+      "name": "home future refused",
+      "as_user": "demo.doctor",
+      "method": "POST",
+      "path": "/home-visits",
+      "body": {
+        "patient_id": 1,
+        "requested_by": "DEMO test",
+        "requested_at": "2026-10-24T01:00:00Z",
+        "visited_at": "2099-01-01T01:00:00Z",
+        "reason": "DEMO request refusal check",
+        "address": "DEMO synthetic address",
+        "examination_consent": "NotExamined",
+        "history": "DEMO history only",
+        "assessment": "DEMO software test",
+        "care_given": "No real care provided",
+        "outcome": "ManagedAtHome"
+      },
+      "status": 422,
+      "code": "VALIDATION_ERROR",
+      "key": "codex-reset-plan-refusal-11-20261024"
+    },
+    {
+      "name": "home before request refused",
+      "as_user": "demo.doctor",
+      "method": "POST",
+      "path": "/home-visits",
+      "body": {
+        "patient_id": 1,
+        "requested_by": "DEMO test",
+        "requested_at": "2026-10-24T01:00:00Z",
+        "visited_at": "2026-10-24T00:00:00Z",
+        "reason": "DEMO request refusal check",
+        "address": "DEMO synthetic address",
+        "examination_consent": "NotExamined",
+        "history": "DEMO history only",
+        "assessment": "DEMO software test",
+        "care_given": "No real care provided",
+        "outcome": "ManagedAtHome"
+      },
+      "status": 422,
+      "code": "VALIDATION_ERROR",
+      "key": "codex-reset-plan-refusal-12-20261024"
+    },
+    {
+      "name": "home missing reference refused",
+      "as_user": "demo.doctor",
+      "method": "POST",
+      "path": "/home-visits",
+      "body": {
+        "patient_id": 2147483647,
+        "requested_by": "DEMO test",
+        "requested_at": "2026-10-24T01:00:00Z",
+        "visited_at": "2026-10-24T02:00:00Z",
+        "reason": "DEMO request refusal check",
+        "address": "DEMO synthetic address",
+        "examination_consent": "NotExamined",
+        "history": "DEMO history only",
+        "assessment": "DEMO software test",
+        "care_given": "No real care provided",
+        "outcome": "ManagedAtHome"
+      },
+      "status": 422,
+      "code": "REFERENCE_NOT_FOUND",
+      "key": "codex-reset-plan-refusal-13-20261024"
+    }
+  ],
+  "results": [
+    {
+      "name": "search forbidden",
+      "expected": {
+        "status": 403,
+        "code": "FORBIDDEN"
+      },
+      "actual": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v1/patients/search",
+          "as_user": "demo.cssd",
+          "query": {
+            "q": "DEV/1792831058277-A"
+          },
+          "body": null,
+          "idempotency_key": null
+        },
+        "status": 403,
+        "ms": 740,
+        "request_id": "b860b8813b3442c5aaddd552b0a6dbce",
+        "body": {
+          "error": {
+            "code": "FORBIDDEN",
+            "message": "Missing permission: patient.search",
+            "details": {
+              "required": [
+                "patient.search"
+              ],
+              "any_of": false
+            },
+            "retryable": false,
+            "retry_after_seconds": null
+          },
+          "request_id": "b860b8813b3442c5aaddd552b0a6dbce"
+        },
+        "explain": {
+          "http_status": 403,
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions)."
+        }
+      },
+      "pass": true
+    },
+    {
+      "name": "patient create forbidden",
+      "expected": {
+        "status": 403,
+        "code": "FORBIDDEN"
+      },
+      "actual": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v1/patients",
+          "as_user": "demo.cssd",
+          "query": null,
+          "body": {
+            "full_name": "DEMO refused duplicate only",
+            "gender": "female",
+            "age_years": 34,
+            "mobile": "03000000000"
+          },
+          "idempotency_key": "codex-reset-plan-refusal-1-20261024"
+        },
+        "status": 403,
+        "ms": 797,
+        "request_id": "a8c9cb62fdef4429b12ec93cf7f606b4",
+        "body": {
+          "error": {
+            "code": "FORBIDDEN",
+            "message": "Missing permission: patient.create",
+            "details": {
+              "required": [
+                "patient.create"
+              ],
+              "any_of": false
+            },
+            "retryable": false,
+            "retry_after_seconds": null
+          },
+          "request_id": "a8c9cb62fdef4429b12ec93cf7f606b4"
+        },
+        "explain": {
+          "http_status": 403,
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions)."
+        }
+      },
+      "pass": true
+    },
+    {
+      "name": "profile edit forbidden",
+      "expected": {
+        "status": 403,
+        "code": "FORBIDDEN"
+      },
+      "actual": {
+        "request": {
+          "method": "PATCH",
+          "path": "/api/v1/patients/1",
+          "as_user": "demo.cssd",
+          "query": null,
+          "body": {
+            "expected_version": 1,
+            "full_name": "DEMO-RESET-1792831058277 a"
+          },
+          "idempotency_key": "codex-reset-plan-refusal-2-20261024"
+        },
+        "status": 403,
+        "ms": 811,
+        "request_id": "998e20c1201145389a6696023f635e79",
+        "body": {
+          "error": {
+            "code": "FORBIDDEN",
+            "message": "Missing permission: patient.update",
+            "details": {
+              "required": [
+                "patient.update"
+              ],
+              "any_of": false
+            },
+            "retryable": false,
+            "retry_after_seconds": null
+          },
+          "request_id": "998e20c1201145389a6696023f635e79"
+        },
+        "explain": {
+          "http_status": 403,
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions)."
+        }
+      },
+      "pass": true
+    },
+    {
+      "name": "profile read forbidden",
+      "expected": {
+        "status": 403,
+        "code": "FORBIDDEN"
+      },
+      "actual": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v1/patients/1",
+          "as_user": "demo.cssd",
+          "query": null,
+          "body": null,
+          "idempotency_key": null
+        },
+        "status": 403,
+        "ms": 754,
+        "request_id": "8a28e513fbbd4ac3a14f348d2649e026",
+        "body": {
+          "error": {
+            "code": "FORBIDDEN",
+            "message": "Missing permission: patient.view",
+            "details": {
+              "required": [
+                "patient.view"
+              ],
+              "any_of": false
+            },
+            "retryable": false,
+            "retry_after_seconds": null
+          },
+          "request_id": "8a28e513fbbd4ac3a14f348d2649e026"
+        },
+        "explain": {
+          "http_status": 403,
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions)."
+        }
+      },
+      "pass": true
+    },
+    {
+      "name": "financial read forbidden",
+      "expected": {
+        "status": 403,
+        "code": "FORBIDDEN"
+      },
+      "actual": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v1/patients/1/financial-summary",
+          "as_user": "demo.cssd",
+          "query": null,
+          "body": null,
+          "idempotency_key": null
+        },
+        "status": 403,
+        "ms": 775,
+        "request_id": "7cdeccf64fb94f65ab2f7c13405116aa",
+        "body": {
+          "error": {
+            "code": "FORBIDDEN",
+            "message": "Missing permission: patient.view, finance.ar.view",
+            "details": {
+              "required": [
+                "patient.view",
+                "finance.ar.view"
+              ],
+              "any_of": true
+            },
+            "retryable": false,
+            "retry_after_seconds": null
+          },
+          "request_id": "7cdeccf64fb94f65ab2f7c13405116aa"
+        },
+        "explain": {
+          "http_status": 403,
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions)."
+        }
+      },
+      "pass": true
+    },
+    {
+      "name": "document list forbidden",
+      "expected": {
+        "status": 403,
+        "code": "FORBIDDEN"
+      },
+      "actual": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v1/patients/1/documents",
+          "as_user": "demo.cssd",
+          "query": null,
+          "body": null,
+          "idempotency_key": null
+        },
+        "status": 403,
+        "ms": 696,
+        "request_id": "9c517e162a6c4da3909831b1a69d44a3",
+        "body": {
+          "error": {
+            "code": "FORBIDDEN",
+            "message": "Missing permission: patient.document.view",
+            "details": {
+              "required": [
+                "patient.document.view"
+              ],
+              "any_of": false
+            },
+            "retryable": false,
+            "retry_after_seconds": null
+          },
+          "request_id": "9c517e162a6c4da3909831b1a69d44a3"
+        },
+        "explain": {
+          "http_status": 403,
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions)."
+        }
+      },
+      "pass": true
+    },
+    {
+      "name": "registration forbidden",
+      "expected": {
+        "status": 403,
+        "code": "FORBIDDEN"
+      },
+      "actual": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v1/reception/registrations",
+          "as_user": "demo.cssd",
+          "query": null,
+          "body": {
+            "patient_id": 1,
+            "doctor_id": 10
+          },
+          "idempotency_key": "codex-reset-plan-refusal-6-20261024"
+        },
+        "status": 403,
+        "ms": 740,
+        "request_id": "f449f442ece04528b24ae166c248a9b9",
+        "body": {
+          "error": {
+            "code": "FORBIDDEN",
+            "message": "Missing permission: opd.ticket.create",
+            "details": {
+              "required": [
+                "opd.ticket.create"
+              ],
+              "any_of": false
+            },
+            "retryable": false,
+            "retry_after_seconds": null
+          },
+          "request_id": "f449f442ece04528b24ae166c248a9b9"
+        },
+        "explain": {
+          "http_status": 403,
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions)."
+        }
+      },
+      "pass": true
+    },
+    {
+      "name": "home write forbidden",
+      "expected": {
+        "status": 403,
+        "code": "FORBIDDEN"
+      },
+      "actual": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v1/home-visits",
+          "as_user": "demo.cssd",
+          "query": null,
+          "body": {
+            "patient_id": 1,
+            "requested_by": "DEMO test",
+            "requested_at": "2026-10-24T01:00:00Z",
+            "visited_at": "2026-10-24T02:00:00Z",
+            "reason": "DEMO request refusal check",
+            "address": "DEMO synthetic address",
+            "examination_consent": "NotExamined",
+            "history": "DEMO history only",
+            "assessment": "DEMO software test",
+            "care_given": "No real care provided",
+            "outcome": "ManagedAtHome"
+          },
+          "idempotency_key": "codex-reset-plan-refusal-7-20261024"
+        },
+        "status": 403,
+        "ms": 752,
+        "request_id": "95db795a908c4d45b7f8ffaa431deea0",
+        "body": {
+          "error": {
+            "code": "FORBIDDEN",
+            "message": "Missing permission: homevisit.record",
+            "details": {
+              "required": [
+                "homevisit.record"
+              ],
+              "any_of": false
+            },
+            "retryable": false,
+            "retry_after_seconds": null
+          },
+          "request_id": "95db795a908c4d45b7f8ffaa431deea0"
+        },
+        "explain": {
+          "http_status": 403,
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions)."
+        }
+      },
+      "pass": true
+    },
+    {
+      "name": "patient missing required demographics",
+      "expected": {
+        "status": 422,
+        "code": "VALIDATION_ERROR"
+      },
+      "actual": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v1/patients",
+          "as_user": "demo.reception",
+          "query": null,
+          "body": {
+            "full_name": "DEMO invalid only",
+            "gender": "female"
+          },
+          "idempotency_key": "codex-reset-plan-refusal-8-20261024"
+        },
+        "status": 422,
+        "ms": 797,
+        "request_id": "dd95c0c41fa145d4a3cb8b075a3583ed",
+        "body": {
+          "error": {
+            "code": "VALIDATION_ERROR",
+            "message": "The request is invalid.",
+            "details": {
+              "fields": [
+                {
+                  "field": "mobile",
+                  "message": "Field required",
+                  "type": "missing"
+                }
+              ]
+            },
+            "retryable": false,
+            "retry_after_seconds": null
+          },
+          "request_id": "dd95c0c41fa145d4a3cb8b075a3583ed"
+        },
+        "explain": {
+          "http_status": 422,
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message."
+        }
+      },
+      "pass": true
+    },
+    {
+      "name": "atomic duplicate cnic",
+      "expected": {
+        "status": 409,
+        "code": "PATIENT_CNIC_EXISTS"
+      },
+      "actual": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v1/reception/registrations",
+          "as_user": "demo.reception",
+          "query": null,
+          "body": {
+            "new_patient": {
+              "full_name": "DEMO refused duplicate only",
+              "gender": "female",
+              "age_years": 34,
+              "mobile": "03000000000",
+              "cnic": "99999-1058277-3"
+            },
+            "doctor_id": 10
+          },
+          "idempotency_key": "codex-reset-plan-refusal-9-20261024"
+        },
+        "status": 409,
+        "ms": 749,
+        "request_id": "8e0220c1756e49f3bb6a269b377b60c4",
+        "body": {
+          "error": {
+            "code": "PATIENT_CNIC_EXISTS",
+            "message": "A patient with this CNIC already exists.",
+            "details": {
+              "constraint": "patients_active_cnic_unique"
+            },
+            "retryable": false,
+            "retry_after_seconds": null
+          },
+          "request_id": "8e0220c1756e49f3bb6a269b377b60c4"
+        },
+        "explain": {
+          "http_status": 409,
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+        }
+      },
+      "pass": true
+    },
+    {
+      "name": "atomic duplicate upmrn",
+      "expected": {
+        "status": 409,
+        "code": "PATIENT_UPMRN_EXISTS"
+      },
+      "actual": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v1/reception/registrations",
+          "as_user": "demo.reception",
+          "query": null,
+          "body": {
+            "new_patient": {
+              "full_name": "DEMO refused duplicate only",
+              "gender": "female",
+              "age_years": 34,
+              "mobile": "03000000000",
+              "upmrn": "DEV/1792831058277-A"
+            },
+            "doctor_id": 10
+          },
+          "idempotency_key": "codex-reset-plan-refusal-10-20261024"
+        },
+        "status": 409,
+        "ms": 768,
+        "request_id": "1698d7405c814ecab240ff4bddd9b6ce",
+        "body": {
+          "error": {
+            "code": "PATIENT_UPMRN_EXISTS",
+            "message": "A patient with this universal patient medical record number (UPMRN) already exists: search for it instead of registering again.",
+            "details": {
+              "constraint": "patients_active_upmrn_unique"
+            },
+            "retryable": false,
+            "retry_after_seconds": null
+          },
+          "request_id": "1698d7405c814ecab240ff4bddd9b6ce"
+        },
+        "explain": {
+          "http_status": 409,
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+        }
+      },
+      "pass": true
+    },
+    {
+      "name": "home future refused",
+      "expected": {
+        "status": 422,
+        "code": "VALIDATION_ERROR"
+      },
+      "actual": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v1/home-visits",
+          "as_user": "demo.doctor",
+          "query": null,
+          "body": {
+            "patient_id": 1,
+            "requested_by": "DEMO test",
+            "requested_at": "2026-10-24T01:00:00Z",
+            "visited_at": "2099-01-01T01:00:00Z",
+            "reason": "DEMO request refusal check",
+            "address": "DEMO synthetic address",
+            "examination_consent": "NotExamined",
+            "history": "DEMO history only",
+            "assessment": "DEMO software test",
+            "care_given": "No real care provided",
+            "outcome": "ManagedAtHome"
+          },
+          "idempotency_key": "codex-reset-plan-refusal-11-20261024"
+        },
+        "status": 422,
+        "ms": 789,
+        "request_id": "42d9c032469d436695e4d8ea02be86d9",
+        "body": {
+          "error": {
+            "code": "VALIDATION_ERROR",
+            "message": "A home visit cannot be recorded before it happens",
+            "details": {},
+            "retryable": false,
+            "retry_after_seconds": null
+          },
+          "request_id": "42d9c032469d436695e4d8ea02be86d9"
+        },
+        "explain": {
+          "http_status": 422,
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message."
+        }
+      },
+      "pass": true
+    },
+    {
+      "name": "home before request refused",
+      "expected": {
+        "status": 422,
+        "code": "VALIDATION_ERROR"
+      },
+      "actual": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v1/home-visits",
+          "as_user": "demo.doctor",
+          "query": null,
+          "body": {
+            "patient_id": 1,
+            "requested_by": "DEMO test",
+            "requested_at": "2026-10-24T01:00:00Z",
+            "visited_at": "2026-10-24T00:00:00Z",
+            "reason": "DEMO request refusal check",
+            "address": "DEMO synthetic address",
+            "examination_consent": "NotExamined",
+            "history": "DEMO history only",
+            "assessment": "DEMO software test",
+            "care_given": "No real care provided",
+            "outcome": "ManagedAtHome"
+          },
+          "idempotency_key": "codex-reset-plan-refusal-12-20261024"
+        },
+        "status": 422,
+        "ms": 920,
+        "request_id": "9c894097b63c47fd8bce159ae9fde8bd",
+        "body": {
+          "error": {
+            "code": "VALIDATION_ERROR",
+            "message": "The request is invalid.",
+            "details": {
+              "fields": [
+                {
+                  "field": "",
+                  "message": "Value error, visited_at must not be before requested_at",
+                  "type": "value_error"
+                }
+              ]
+            },
+            "retryable": false,
+            "retry_after_seconds": null
+          },
+          "request_id": "9c894097b63c47fd8bce159ae9fde8bd"
+        },
+        "explain": {
+          "http_status": 422,
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message."
+        }
+      },
+      "pass": true
+    },
+    {
+      "name": "home missing reference refused",
+      "expected": {
+        "status": 422,
+        "code": "REFERENCE_NOT_FOUND"
+      },
+      "actual": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v1/home-visits",
+          "as_user": "demo.doctor",
+          "query": null,
+          "body": {
+            "patient_id": 2147483647,
+            "requested_by": "DEMO test",
+            "requested_at": "2026-10-24T01:00:00Z",
+            "visited_at": "2026-10-24T02:00:00Z",
+            "reason": "DEMO request refusal check",
+            "address": "DEMO synthetic address",
+            "examination_consent": "NotExamined",
+            "history": "DEMO history only",
+            "assessment": "DEMO software test",
+            "care_given": "No real care provided",
+            "outcome": "ManagedAtHome"
+          },
+          "idempotency_key": "codex-reset-plan-refusal-13-20261024"
+        },
+        "status": 422,
+        "ms": 654,
+        "request_id": "e57f8a9ac1f44c579d493481a5250022",
+        "body": {
+          "error": {
+            "code": "REFERENCE_NOT_FOUND",
+            "message": "Patient not found",
+            "details": {
+              "resource": "Patient",
+              "field": "patient_id"
+            },
+            "retryable": false,
+            "retry_after_seconds": null
+          },
+          "request_id": "e57f8a9ac1f44c579d493481a5250022"
+        },
+        "explain": {
+          "http_status": 422,
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message."
+        }
+      },
+      "pass": true,
+      "note": "Initial harness expected resource NOT_FOUND; this is a referenced patient and the endpoint documents REFERENCE_NOT_FOUND as well. Correct expectation; no product/backend failure."
+    }
+  ]
+}
