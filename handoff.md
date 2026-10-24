@@ -78,4 +78,15 @@ Screen 24 (`eprescription`) Outpatient Handover check PASS:
 - Preferences restored and signed out cleanly.
 - Durable evidence: `docs/eprescription-handover-evidence-2026-10-24.json`.
 - Proposal #127 submitted and verified Pending: **awaiting human review on /docs -> My progress**. Items claimed: `ep:POST /prescriptions/{prescription_id}/handover`, `rule:7874298bee`, `rule:116b498e61`, `rule:5a13c8d3a4`, `rule:a0b954034e`, `rule:72ad58bc73`, `q:writes`, `q:f1_help`.
-- Next concrete action: Continue remaining Phase 2 screens in dependency order. Next screen: `tariff_display` (Screen 20) or `icd_picker` (Screen 22) quality gates (bounded zoom 100–250%, states, role FAQ, permissions) or `queue_management` remaining rules/events. No running commands or uncertain writes.
+
+Screen 20 (`tariff_display`) Quality check PASS:
+- `node scripts/tariff-quality-check.mjs` real DEV Electron check PASS.
+- Loading, empty, and reset states (`q:states`): live prices, hospital header, currency, and as_of date displayed; category filters (All, Wards, Lab) filter rows; non-matching search displays `<Empty>` guidance message; "Show all prices" button resets query and category and restores tables.
+- Test plan passed (`q:tested`): "Refresh tariff" executes on-demand `GET /tariff` reload; "Print / save tariff PDF" downloads `/tariff/pdf` via native bridge, verified valid `%PDF-` file header.
+- Contextual F1 help (`q:f1_help`): F1 on search input opens Tariff handbook page, restores focus and preserves draft value.
+- Bounded zoom (`q:zoom`): 100-250% bounded zoom in Light and DarkHighContrast themes, English and Urdu without overflow.
+- Read-only inspection; zero business writes.
+- Preferences restored and signed out cleanly.
+- Durable evidence: `docs/tariff-quality-evidence-2026-10-24.json`.
+- Proposal #128 submitted and verified Pending: **awaiting human review on /docs -> My progress**. Items claimed: `q:states`, `q:tested`, `q:f1_help`, `q:zoom`.
+- Next concrete action: Continue remaining Phase 2 screens in dependency order. Next screen: `icd_picker` (Screen 22) quality verification (`q:permissions`, `q:f1_help`, `q:zoom`, `q:tested`). No running commands or uncertain writes.
