@@ -1,6 +1,6 @@
 # Haspataal checkpoint
 
-Updated **24 October 2026 — Codex/functions, Asia/Karachi**. Current request: shorten the Preparing your workspace delay after login. Baseline clean1290e29. Implementation and verification complete; source commit and immediate tested progress proposals are next. No agent command/app currently running, no business writes.
+Updated **24 October 2026 — Codex/functions, Asia/Karachi**. Current request: shorten the Preparing your workspace delay after login. Baseline clean1290e29. Implementation and verification complete in **0648ac02213465ac1ff01593551118ab40deeae8**; proposals confirmed. No agent command/app currently running, no business writes.
 
 ## Current startup optimization
 
@@ -8,9 +8,9 @@ Updated **24 October 2026 — Codex/functions, Asia/Karachi**. Current request: 
 - Reference catalogues and unread badge load after readiness, with separate visible bilingual Retry; required authority/handbook failure still blocks entry. No fake success/records, no persistent permission cache. New src/bootstrap-seed.ts and tests; bilingual src/help.ts/src/foundation-help.ts updated.
 - npm run build PASS (30screens556controls; TS/Vite); npm test **74 PASS**; git diff --check PASS. Renderer **index-BKH9BhkL.js**. Normal DEV samples5378/5811ms versus previous8701ms; gap0/all12cards first frame. Timing varies; structural assertions prove no global handbook, no repeated initial auth/me+auth/workspaces+meta/settings, references after scoped handbook.
 - Read-only scripts/reception-startup-check.mjs background-verified: lost real reference response leaves home available, visible Retry disappears after successful restored reads, same login, signedout PASS. Required scoped-handbook loss blocks cards until valid Retry PASS. Owner picker->Doctor/reopen/separateOwnerwindow regression PASS; prefs restored. Exact traces/limits docs/workspace-critical-path-evidence-2026-10-24.json. Earlier background-recovery logout failed Server unreachable; isolated app closed, its session revocation unconfirmed. Later full rerun signedout PASS; no business write to reconcile.
-- MCP overview/guide/roadmap/what_changed/progress/proposals/issues and both screen bundles/quality/design read; contract unchanged. Proposals105/106 Accepted,99–104 Accepted. New material app_shell/workspace_picker proposals pending submission after source commit. Backend17/18 stillNew; no backend defect inferred merely from network latency.
+- MCP overview/guide/roadmap/what_changed/progress/proposals/issues and both screen bundles/quality/design read; contract unchanged. Proposals105/106 Accepted,99–104 Accepted. New material proposals **107 app_shell / 108 workspace_picker** server-confirmed pending: **awaiting human review on /docs -> My progress**. Exact payloads/request IDs docs/workspace-critical-path-proposals-0648ac0.json. Backend17/18 stillNew; no backend defect inferred merely from network latency.
 
-Next: commit source/evidence, submit narrowly scoped material consumer changes and verify proposals; final checkpoint. Human check: restart terminal, sign into Reception, confirm all12permitted cards appear together and reference Retry/help translations. Phase2 overall still pending, see below.
+No implementation/test step remains in progress. Final docs commit includes this checkpoint and proposal payloads; no known running commands. Next human check: restart terminal, sign into Reception, confirm all12permitted cards appear together and reference Retry/help translations. Phase2 overall still pending, see below.
 
 ## Standing Phase2 context
 
