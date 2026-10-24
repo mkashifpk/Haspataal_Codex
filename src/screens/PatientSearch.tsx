@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { tr, bilingual as t } from "../i18n";
 import { isDuplicatePatient, patientErrorCode, patientEditNeedsReconcile } from "../patient-errors";
 import { resolvePatientMaster } from "../patient-profile";
+import { PatientSearchMatch } from "../patient-search-match";
 import * as pts from "../generated/patient_search";
 import { api } from "../bridge";
 import { formatHospitalTime } from "../hospital-time";
@@ -572,6 +573,7 @@ export function PatientSearch({
                       >
                         {hit.mrn}
                       </span>
+                      <PatientSearchMatch hit={hit} />
                     </div>
                     <span className="badge">{tr(hit.registration_type)}</span>
                   </div>

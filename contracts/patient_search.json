@@ -1,7 +1,7 @@
 {
   "screen_id": "patient_search",
-  "contract_fingerprint": "992b7799991463f180bc",
-  "knowledge_revision": "0266ade0bf511c86",
+  "contract_fingerprint": "a9063847cb6fd629bfa0",
+  "knowledge_revision": "85970bc300a07875",
   "delivery_gate": {
     "required": true,
     "status": "required",
@@ -206,6 +206,11 @@
         "cites": []
       },
       {
+        "id": "rule:4b48fd699f",
+        "text": "matched_merged_profile set: the search found the patient by a profile merged into this record (the MRN on an old slip, a trauma label): show the master record and say 'Found by <its mrn>, merged into this record', so a scanned slip whose MRN differs is not taken for a wrong match.",
+        "cites": []
+      },
+      {
         "id": "rule:abc016fdd8",
         "text": "mlc_numbers not empty: a red MEDICO-LEGAL banner with the numbers (MSDS 154). is_deceased: a DECEASED banner (death_at); never start a new visit for a deceased patient.",
         "cites": [
@@ -227,7 +232,7 @@
     "workspace": "reception",
     "phase": "P2",
     "position": 13,
-    "points": 51,
+    "points": 53,
     "capabilities": [
       "realtime",
       "patient_context",
@@ -258,7 +263,7 @@
     "note": "`forward`: a dependency on a later phase; use the demo data or a scenario (sandbox_scenario) until that screen exists. `ordering: false`: a hand-off or a hint, not a reason to wait."
   },
   "definition_of_done": {
-    "points": 51,
+    "points": 53,
     "items": [
       {
         "id": "ep:PATCH /patients/{patient_id}",
@@ -288,7 +293,7 @@
         "id": "ev:patient.merged",
         "label": "patient.merged",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:5c7aabbadf",
@@ -305,6 +310,12 @@
       {
         "id": "rule:fd66e16ee9",
         "label": "Merged records resolve to the master record automatically; never show merged duplicates as separate patients.",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "rule:4b48fd699f",
+        "label": "matched_merged_profile set: the search found the patient by a profile merged into this record (the MRN on an old slip, a trauma label): show the master record and say 'Found by <its mrn>, merged into this record', so a scanned slip whose MRN differs is not taken for a wrong match.",
         "points": 2,
         "claimed": false
       },
@@ -330,7 +341,7 @@
         "id": "q:writes",
         "label": "Safe writes",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:tested",
@@ -714,6 +725,18 @@
             "required"
           ],
           "details_from": "POST /api/v1/admin/departments"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
         }
       ],
       "parameters": [
@@ -1214,9 +1237,12 @@
       "PATIENT_CNIC_EXISTS": "A patient with this CNIC already exists.",
       "PATIENT_TYPE_TRANSITION_INVALID": "Registration type change not allowed.",
       "PATIENT_UPMRN_EXISTS": "A patient with this universal patient medical record number (UPMRN) already exists: search for it instead of registering again.",
+      "VALIDATION_ERROR": "The request is invalid.",
       "VERSION_CONFLICT": "The record was changed by someone else; reload and try again."
     },
-    "wording_quoted_in_rules": [],
+    "wording_quoted_in_rules": [
+      "Found by <its mrn>, merged into this record"
+    ],
     "note": "Server-owned strings only: the error messages (English), the workspace labels (English and Urdu) and the wording the rules quote. The UI's own copy and its Urdu are yours (decision H08)."
   },
   "same_component_as": [],
@@ -1298,7 +1324,8 @@
           "expect": "403 FORBIDDEN"
         },
         "errors_to_handle": [
-          "FORBIDDEN"
+          "FORBIDDEN",
+          "VALIDATION_ERROR"
         ],
         "as_one_of": [
           "accountant",
@@ -1482,6 +1509,7 @@
       "Search as the user types (debounce 250 ms); a USB scanner types an MRN barcode + Enter.",
       "If outstanding.has_outstanding_ar: show outstanding.banner_text in a red banner above the patient card.",
       "Merged records resolve to the master record automatically; never show merged duplicates as separate patients.",
+      "matched_merged_profile set: the search found the patient by a profile merged into this record (the MRN on an old slip, a trauma label): show the master record and say 'Found by <its mrn>, merged into this record', so a scanned slip whose MRN differs is not taken for a wrong match.",
       "mlc_numbers not empty: a red MEDICO-LEGAL banner with the numbers (MSDS 154). is_deceased: a DECEASED banner (death_at); never start a new visit for a deceased patient."
     ],
     "demo_accounts": "demo_accounts() lists a login per role; sandbox_call runs each case on the DEV server"
@@ -1542,6 +1570,7 @@
       "Search as the user types (debounce 250 ms); a USB scanner types an MRN barcode + Enter.",
       "If outstanding.has_outstanding_ar: show outstanding.banner_text in a red banner above the patient card.",
       "Merged records resolve to the master record automatically; never show merged duplicates as separate patients.",
+      "matched_merged_profile set: the search found the patient by a profile merged into this record (the MRN on an old slip, a trauma label): show the master record and say 'Found by <its mrn>, merged into this record', so a scanned slip whose MRN differs is not taken for a wrong match.",
       "mlc_numbers not empty: a red MEDICO-LEGAL banner with the numbers (MSDS 154). is_deceased: a DECEASED banner (death_at); never start a new visit for a deceased patient."
     ],
     "updates_by_itself_on": [
@@ -1567,6 +1596,11 @@
         "code": "PATIENT_UPMRN_EXISTS",
         "message": "A patient with this universal patient medical record number (UPMRN) already exists: search for it instead of registering again.",
         "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      },
+      {
+        "code": "VALIDATION_ERROR",
+        "message": "The request is invalid.",
+        "ui_action": "Show field errors from details.fields / the message."
       },
       {
         "code": "VERSION_CONFLICT",
@@ -1903,7 +1937,7 @@
               "dob": null,
               "age_years": 40,
               "age_recorded_on": "2026-10-24",
-              "mobile": "03002663623",
+              "mobile": "03004648043",
               "cnic": null,
               "upmrn": null,
               "address": null,
@@ -1919,12 +1953,13 @@
               "merged_into_id": null,
               "linked_employee_id": null,
               "is_deceased": false,
-              "created_at": "2026-10-23T19:09:32.922576+00:00",
+              "created_at": "2026-10-24T10:22:47.211654+00:00",
               "row_version": 1,
               "death_id": null,
               "death_at": null,
               "photo_document_id": null,
               "mlc_numbers": [],
+              "matched_merged_profile": null,
               "outstanding": {
                 "has_outstanding_ar": true,
                 "outstanding_ar_balance": 600,
@@ -1934,9 +1969,9 @@
             }
           ],
           "meta": {
-            "server_time": "2026-10-23T19:09:33.279708+00:00"
+            "server_time": "2026-10-24T10:22:47.821541+00:00"
           },
-          "request_id": "2cc13fb5ee91471cbbfb9706f7951864"
+          "request_id": "4d98edf634a347f1a9685ccd268ae47f"
         }
       }
     },
@@ -3168,6 +3203,17 @@
         },
         "outstanding": {
           "$ref": "#/components/schemas/OutstandingBannerOut"
+        },
+        "matched_merged_profile": {
+          "anyOf": [
+            {
+              "$ref": "#/components/schemas/MergedProfileOut"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The profile merged into this record that the search matched when this record itself did not (an old slip's MRN, a trauma label such as \"Unknown Male 3\", a duplicate's name or numbers): say \"Found by MRN-…, merged into this record\". Null when this record matched"
         }
       },
       "type": "object",
@@ -3203,9 +3249,11 @@
         "mlc_numbers",
         "created_at",
         "row_version",
-        "outstanding"
+        "outstanding",
+        "matched_merged_profile"
       ],
-      "title": "PatientSearchHitOut"
+      "title": "PatientSearchHitOut",
+      "description": "A person the search found, always as their master record (merged profiles are never hits of their own)."
     },
     "PatientUpdate": {
       "properties": {

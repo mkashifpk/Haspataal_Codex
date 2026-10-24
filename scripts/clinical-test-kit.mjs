@@ -86,6 +86,7 @@ export async function session(name, account = "demo.doctor") {
     }
     try {
       await native("logout");
+      j.signed_out = !(await native("state")).user;
     } catch (e) {
       j.logout_diagnostic = e.message;
       try {
@@ -216,6 +217,7 @@ export async function session(name, account = "demo.doctor") {
     return s;
   } catch (e) {
     j.error = e.stack;
+    try { j.startup_ui = await p.locator("body").innerText(); } catch {}
     save();
     await s.close();
     throw e;

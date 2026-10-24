@@ -1,7 +1,7 @@
 {
   "screen_id": "home_visit_record",
-  "contract_fingerprint": "992b7799991463f180bc",
-  "knowledge_revision": "0266ade0bf511c86",
+  "contract_fingerprint": "a9063847cb6fd629bfa0",
+  "knowledge_revision": "85970bc300a07875",
   "delivery_gate": {
     "required": true,
     "status": "required",
@@ -798,6 +798,18 @@
             "required"
           ],
           "details_from": "POST /api/v1/admin/departments"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
         }
       ],
       "parameters": [
@@ -1210,7 +1222,8 @@
           "expect": "403 FORBIDDEN"
         },
         "errors_to_handle": [
-          "FORBIDDEN"
+          "FORBIDDEN",
+          "VALIDATION_ERROR"
         ],
         "as_one_of": [
           "accountant",
@@ -1737,7 +1750,7 @@
               "dob": null,
               "age_years": 40,
               "age_recorded_on": "2026-10-24",
-              "mobile": "03002663623",
+              "mobile": "03004648043",
               "cnic": null,
               "upmrn": null,
               "address": null,
@@ -1753,12 +1766,13 @@
               "merged_into_id": null,
               "linked_employee_id": null,
               "is_deceased": false,
-              "created_at": "2026-10-23T19:09:32.922576+00:00",
+              "created_at": "2026-10-24T10:22:47.211654+00:00",
               "row_version": 1,
               "death_id": null,
               "death_at": null,
               "photo_document_id": null,
               "mlc_numbers": [],
+              "matched_merged_profile": null,
               "outstanding": {
                 "has_outstanding_ar": true,
                 "outstanding_ar_balance": 600,
@@ -1768,9 +1782,9 @@
             }
           ],
           "meta": {
-            "server_time": "2026-10-23T19:09:33.279708+00:00"
+            "server_time": "2026-10-24T10:22:47.821541+00:00"
           },
-          "request_id": "2cc13fb5ee91471cbbfb9706f7951864"
+          "request_id": "4d98edf634a347f1a9685ccd268ae47f"
         }
       }
     }
@@ -2289,6 +2303,53 @@
       ],
       "title": "HomeVisitPolicyOut"
     },
+    "MergedProfileOut": {
+      "properties": {
+        "patient_id": {
+          "type": "integer",
+          "title": "Patient Id"
+        },
+        "mrn": {
+          "type": "string",
+          "title": "Mrn"
+        },
+        "full_name": {
+          "type": "string",
+          "title": "Full Name"
+        },
+        "registration_type": {
+          "type": "string",
+          "enum": [
+            "Regular",
+            "LabOnly",
+            "TraumaTemp",
+            "Merged"
+          ],
+          "title": "Registration Type"
+        },
+        "temp_identifier": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Temp Identifier"
+        }
+      },
+      "type": "object",
+      "required": [
+        "patient_id",
+        "mrn",
+        "full_name",
+        "registration_type",
+        "temp_identifier"
+      ],
+      "title": "MergedProfileOut",
+      "description": "Another record of the same person, merged into this one (e.g. a trauma registration)."
+    },
     "Meta": {
       "properties": {
         "server_time": {
@@ -2699,6 +2760,17 @@
         },
         "outstanding": {
           "$ref": "#/components/schemas/OutstandingBannerOut"
+        },
+        "matched_merged_profile": {
+          "anyOf": [
+            {
+              "$ref": "#/components/schemas/MergedProfileOut"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The profile merged into this record that the search matched when this record itself did not (an old slip's MRN, a trauma label such as \"Unknown Male 3\", a duplicate's name or numbers): say \"Found by MRN-…, merged into this record\". Null when this record matched"
         }
       },
       "type": "object",
@@ -2734,9 +2806,11 @@
         "mlc_numbers",
         "created_at",
         "row_version",
-        "outstanding"
+        "outstanding",
+        "matched_merged_profile"
       ],
-      "title": "PatientSearchHitOut"
+      "title": "PatientSearchHitOut",
+      "description": "A person the search found, always as their master record (merged profiles are never hits of their own)."
     },
     "ValidationError": {
       "properties": {

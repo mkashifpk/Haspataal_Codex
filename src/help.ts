@@ -16,6 +16,7 @@ export const help: Record<string, HelpPage> = {
   purpose: "The doctor, clinical specialist, head or ward nurse who actually made the home visit records completed care, consent and the outcome. Authorized clinical/quality readers consult immutable history and display the official current policy notice. This screen neither dispatches a planned visit nor offers a service the hospital has not enabled.",
   purposeUr: "اصل دورہ کرنے والا ڈاکٹر، ماہر، ہیڈ یا وارڈ نرس نگہداشت، رضامندی و نتیجہ درج کرتا۔ مجاز طبی/معیار ناظر تاریخ و اصل پالیسی اطلاع پڑھتے۔ منصوبہ روانہ یا غیر فعال خدمت فراہم نہیں کرتا۔ اردو مقامی جائزے تک مسودہ ہے۔",
   steps: [
+    "When an old merged MRN matches, Found by the old MRN, merged into this record explains why the current master MRN differs. Verify the actual master before selecting or recording a visit.",
     "Read the actual provided/state/arrangements/notice before offering home visits. Refresh home-visit policy rereads the server; it saves no policy and does not enable a service. Active alone permits a new record, including a corrective new record; Retiring says No new records. Records stay readable with permission. A failure is not a statement that no visits exist.",
     "Open official home-visit notice PDF fetches the current authenticated server PDF in a separate sandbox viewer. With homevisit.view or msds.view, use its print/download controls independently of any patient save. While inactive the notice states that home visits are not provided; never turn this policy notice into a patient certificate. Cancel or printer failure never repeats a visit.",
     "Only the clinician or nurse who made the visit records who requested it and relationship, reason, actual address, companion, reported history, assessment, care and follow-up. Required: requester2–200, reason3–1000, address3–500, history3–4000, assessment3–2000 and care3–4000characters. Companion/follow-up optional except a corrective entry needs its original #reference and actual explanation. These inputs stay in memory; they do not dispatch or bill a visit.",
@@ -30,6 +31,7 @@ export const help: Record<string, HelpPage> = {
     "While the service is Active and record permission remains, Record a corrective home visit for #ID opens a separate draft with the old facts for review. Keep the original #reference and replace the explanation placeholder with the actual correction in Follow-up; recheck times/consent/outcome and sign separately. Original and separate stamps remain. Retired/retiring service never silently starts new work through correction."
   ],
   stepsUr: [
+    "پرانے ضم نمبر سے ملنے پر پرانی شناخت سے ملا، اس ریکارڈ میں ضم ہے کا پیغام موجودہ اصل نمبر کا فرق واضح کرتا ہے۔ مریض چننے یا دورہ درج کرنے سے پہلے اصل شناخت ملائیں۔",
     "دورہ دینے سے پہلے اصل فعال حالت، انتظام و اطلاع پڑھیں۔ تازہ کرنا صرف پڑھتا، پالیسی محفوظ یا خدمت فعال نہیں کرتا۔ صرف فعال میں نیا/تصحیح اندراج؛ بند ہوتی میں نئے نہیں۔ مجاز تاریخ باقی؛ خرابی کو کوئی دورہ نہ ہونے کا ثبوت نہ سمجھیں۔",
     "مجاز اجازت سے اصل سرور پی ڈی ایف الگ محفوظ ناظر میں کھولیں؛ پرنٹ/محفوظ مریض کے اندراج سے الگ ہیں۔ غیر فعال اطلاع دورے نہ دینے کی ہے، مریض کا سرٹیفکیٹ نہیں۔ منسوخ یا پرنٹ خرابی دورہ نہیں دہراتی۔",
     "دورہ کرنے والا معالج/نرس درخواست کنندہ و رشتہ، وجہ، اصل پتہ، ساتھی، تاریخ، رائے، نگہداشت و فالو اپ لکھے۔ درخواست2تا200، وجہ3تا1000، پتہ3تا500، تاریخ/نگہداشت3تا4000، رائے3تا2000حروف لازم۔ ساتھی/فالو اپ اختیاری؛ تصحیح میں اصل #حوالہ و وضاحت لازم۔ صرف یادداشت میں؛ دورہ روانہ یا بل نہیں۔",
@@ -966,7 +968,7 @@ export const help: Record<string, HelpPage> = {
     purposeUr:
       "ایم آر این، موبائل، شناختی کارڈ یا نام سے مریض تلاش کریں؛ بقایا جات کا بینر دیکھیں۔",
     steps: [
-      "A merged identity opens the actual master profile. If your open edit belongs to the old identity, keep the draft for comparison, read the current master, then explicitly discard/reload before another save.",
+      "When a search matches an old merged MRN, the result shows the current master and Found by the old MRN, merged into this record. Names containing letters and digits are searched as typed. A merged identity opens the actual master profile. If your open edit belongs to the old identity, keep the draft for comparison, read the current master, then explicitly discard/reload before another save.",
       "Type at least two characters into the search field (name, phone, CNIC, or MRN), or scan the patient's MRN barcode with a handheld scanner.",
       "The system searches with a 250ms debounce. Select the patient from the results to view their complete profile.",
       "Check the patient banners: an outstanding dues banner indicates unpaid balances (reception may block new OPD slips until cleared); a Medico-Legal banner marks an active MLC (MSDS 154); a Deceased banner prohibits new visits.",
@@ -975,7 +977,7 @@ export const help: Record<string, HelpPage> = {
       "Click 'View dues & invoices' to inspect outstanding receivables and past invoices across the patient's whole merge chain.",
     ],
     stepsUr: [
-      "ضم شدہ شناخت سے اصل پروفائل کھلتی ہے۔ کھلا مسودہ پرانی شناخت کا ہو تو موازنے کے لیے محفوظ رکھیں، موجودہ اصل ریکارڈ پڑھیں، پھر دوبارہ محفوظ کرنے سے پہلے خود مسودہ چھوڑ کر تازہ کریں۔",
+      "پرانے ضم نمبر سے نتیجہ موجودہ اصل مریض دکھاتا اور پرانی شناخت سے ملا، اس ریکارڈ میں ضم ہے کا پیغام واضح کرتا ہے۔ حروف اور اعداد والے نام ویسے ہی تلاش ہوتے ہیں۔ ضم شدہ شناخت سے اصل پروفائل کھلتی ہے۔ کھلا مسودہ پرانی شناخت کا ہو تو موازنے کے لیے محفوظ رکھیں، موجودہ اصل ریکارڈ پڑھیں، پھر دوبارہ محفوظ کرنے سے پہلے خود مسودہ چھوڑ کر تازہ کریں۔",
       "تلاش کے خانے میں کم از کم دو حروف (نام، فون، شناختی کارڈ یا ایم آر این) درج کریں، یا بارکوڈ سکینر سے ایم آر این سکین کریں۔",
       "نظام 250 ملی سیکنڈ کے وقفے سے خودکار تلاش کرتا ہے۔ مکمل پروفائل دیکھنے کے لیے نتائج میں سے مریض منتخب کریں۔",
       "مریض کے بینرز دیکھیں: سرخ بینر بقایا رقم ظاہر کرتا ہے (جس سے نئی او پی ڈی پرچی رک سکتی ہے)؛ میڈیکو لیگل بینر ایم ایل سی کیس ظاہر کرتا ہے؛ اور وفات یافتہ کا بینر نئی وزٹ سے روکتا ہے۔",

@@ -94,6 +94,7 @@ export interface MergedProfileOut {
   temp_identifier: string | null;
 }
 
+/** A person the search found, always as their master record (merged profiles are never hits of their own). */
 export interface PatientSearchHitOut {
   patient_id: number;
   /** The newest Patient Photo of the merge chain, for the identity check; null when none was taken (it is optional). GET /patient-documents/{document_id}/download */
@@ -133,6 +134,8 @@ export interface PatientSearchHitOut {
   created_at: string;
   row_version: number;
   outstanding: OutstandingBannerOut;
+  /** The profile merged into this record that the search matched when this record itself did not (an old slip's MRN, a trauma label such as "Unknown Male 3", a duplicate's name or numbers): say "Found by MRN-…, merged into this record". Null when this record matched */
+  matched_merged_profile: MergedProfileOut | null;
 }
 
 /** Money across the patient's merge chain. */

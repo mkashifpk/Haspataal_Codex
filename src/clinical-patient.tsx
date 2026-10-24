@@ -8,6 +8,7 @@ import {
 import { bilingual as t, tr } from "./i18n";
 import { Details, Empty, Field, LoadState, useLoad } from "./components";
 import * as patients from "./generated/patient_search";
+import { PatientSearchMatch } from "./patient-search-match";
 export type PatientContext = {
   patient: patients.PatientDetailOut;
   ready: boolean;
@@ -137,6 +138,7 @@ function PatientLookup({
               onClick={() => change(p.patient_id)}
             >
               {p.full_name} · <bdi>{p.mrn}</bdi>
+              <PatientSearchMatch hit={p} />
             </button>
           </p>
         ))}

@@ -85,6 +85,7 @@ export interface HomeVisitPolicyOut {
   notice: string;
 }
 
+/** A person the search found, always as their master record (merged profiles are never hits of their own). */
 export interface PatientSearchHitOut {
   patient_id: number;
   /** The newest Patient Photo of the merge chain, for the identity check; null when none was taken (it is optional). GET /patient-documents/{document_id}/download */
@@ -124,6 +125,8 @@ export interface PatientSearchHitOut {
   created_at: string;
   row_version: number;
   outstanding: OutstandingBannerOut;
+  /** The profile merged into this record that the search matched when this record itself did not (an old slip's MRN, a trauma label such as "Unknown Male 3", a duplicate's name or numbers): say "Found by MRN-…, merged into this record". Null when this record matched */
+  matched_merged_profile: MergedProfileOut | null;
 }
 
 /** Outstanding dues of the patient's whole merge chain (workflow sections 1.2 and 1.9). */
@@ -134,6 +137,15 @@ export interface OutstandingBannerOut {
   ar_block_applies: boolean;
   /** Show it prominently, e.g. "OUTSTANDING BALANCE: RS. 2,500" */
   banner_text: string | null;
+}
+
+/** Another record of the same person, merged into this one (e.g. a trauma registration). */
+export interface MergedProfileOut {
+  patient_id: number;
+  mrn: string;
+  full_name: string;
+  registration_type: "Regular" | "LabOnly" | "TraumaTemp" | "Merged";
+  temp_identifier: string | null;
 }
 
 /** Record a home visit — POST /api/v1/home-visits (who may call: holders of homevisit.record). */
