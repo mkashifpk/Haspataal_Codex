@@ -3,11 +3,8 @@
 import { api } from "./api";
 
 const withQuery = (path: string, q?: Record<string, unknown>) => {
-  const s = new URLSearchParams(
-    Object.entries(q ?? {})
-      .filter(([, v]) => v !== undefined && v !== null)
-      .map(([k, v]) => [k, String(v)]),
-  ).toString();
+  const s = new URLSearchParams(Object.entries(q ?? {}).filter(([, v]) => v !== undefined && v !== null)
+    .map(([k, v]) => [k, String(v)])).toString();
   return s ? `${path}?${s}` : path;
 };
 
@@ -20,6 +17,8 @@ export interface PatientUpdate {
   age_years?: number | null;
   mobile?: string | null;
   cnic?: string | null;
+  /** The Universal Patient Medical Record Number, once the PHC's HMIS issues one (announced for Category I hospitals; its format is not published yet): optional, unique among active records (PATIENT_UPMRN_EXISTS) */
+  upmrn?: string | null;
   father_or_husband_name?: string | null;
   address?: string | null;
   emergency_contact_name?: string | null;
@@ -47,6 +46,8 @@ export interface PatientDetailOut {
   age_recorded_on: string | null;
   mobile: string | null;
   cnic: string | null;
+  /** The Universal Patient Medical Record Number when one was recorded (optional) */
+  upmrn: string | null;
   address: string | null;
   emergency_contact_name: string | null;
   emergency_contact_phone: string | null;
@@ -108,6 +109,8 @@ export interface PatientSearchHitOut {
   age_recorded_on: string | null;
   mobile: string | null;
   cnic: string | null;
+  /** The Universal Patient Medical Record Number when one was recorded (optional) */
+  upmrn: string | null;
   address: string | null;
   emergency_contact_name: string | null;
   emergency_contact_phone: string | null;
@@ -168,22 +171,22 @@ export interface InvoiceBalanceOut {
   created_at: string;
 }
 
-/** Update demographics (optimistic locking) — PATCH /api/v1/patients/{patient_id} (permissions: patient.update). */
+/** Update demographics (optimistic locking) — PATCH /api/v1/patients/{patient_id} (who may call: holders of patient.update). */
 export function updatePatient(patient_id: number, body: PatientUpdate): Promise<PatientDetailOut> {
   return api<PatientDetailOut>("PATCH", `/patients/${patient_id}`, body);
 }
 
-/** Returning-patient lookup by name / phone / CNIC / MRN — GET /api/v1/patients/search (permissions: patient.search). */
-export function search(query: { q: string; limit?: number }): Promise<PatientSearchHitOut[]> {
+/** Returning-patient lookup by name / phone / CNIC / UPMRN / MRN — GET /api/v1/patients/search (who may call: holders of patient.search). */
+export function searchPatients(query: { q: string; limit?: number }): Promise<PatientSearchHitOut[]> {
   return api<PatientSearchHitOut[]>("GET", withQuery(`/patients/search`, query), undefined);
 }
 
-/** Patient profile (+ outstanding banner, merged profiles) — GET /api/v1/patients/{patient_id} (permissions: patient.view). */
+/** Patient profile (+ outstanding banner, merged profiles) — GET /api/v1/patients/{patient_id} (who may call: holders of patient.view). */
 export function getPatient(patient_id: number): Promise<PatientDetailOut> {
   return api<PatientDetailOut>("GET", `/patients/${patient_id}`, undefined);
 }
 
-/** Dues, receivables and invoices across the merge chain — GET /api/v1/patients/{patient_id}/financial-summary (permissions: patient.view, finance.ar.view). */
+/** Dues, receivables and invoices across the merge chain — GET /api/v1/patients/{patient_id}/financial-summary (who may call: holders of patient.view or finance.ar.view). */
 export function financialSummary(patient_id: number): Promise<FinancialSummaryOut> {
   return api<FinancialSummaryOut>("GET", `/patients/${patient_id}/financial-summary`, undefined);
 }

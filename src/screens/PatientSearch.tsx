@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { tr } from "../i18n";
+import { tr, bilingual as t } from "../i18n";
+import { isDuplicatePatient, patientErrorCode, patientEditNeedsReconcile } from "../patient-errors";
 import * as pts from "../generated/patient_search";
 import { api } from "../bridge";
 import { formatHospitalTime } from "../hospital-time";
@@ -97,6 +98,7 @@ export function PatientSearch({
   const [formAgeYears, setFormAgeYears] = useState("");
   const [formMobile, setFormMobile] = useState("");
   const [formCnic, setFormCnic] = useState("");
+  const [formUpmrn, setFormUpmrn] = useState("");
   const [formFatherHusband, setFormFatherHusband] = useState("");
   const [formAddress, setFormAddress] = useState("");
   const [formEmergencyName, setFormEmergencyName] = useState("");
@@ -127,7 +129,7 @@ export function PatientSearch({
     setResults([]);
     setSearchError(undefined);
     try {
-      const hits = await pts.search({ q: trimmed, limit: 20 });
+      const hits = await pts.searchPatients({ q: trimmed, limit: 20 });
       if (generation !== searchGeneration.current) return;
       setResults(hits);
       setSearched(true);
@@ -243,6 +245,7 @@ export function PatientSearch({
     setFormAgeYears(record.age_years !== null ? String(record.age_years) : "");
     setFormMobile(record.mobile || "");
     setFormCnic(record.cnic || "");
+    setFormUpmrn(record.upmrn || "");
     setFormFatherHusband(record.father_or_husband_name || "");
     setFormAddress(record.address || "");
     setFormEmergencyName(record.emergency_contact_name || "");
@@ -277,6 +280,7 @@ export function PatientSearch({
       age_years: formAgeYears ? parseInt(formAgeYears, 10) : null,
       mobile: formMobile || null,
       cnic: formCnic || null,
+      upmrn: formUpmrn.trim() || null,
       father_or_husband_name: formFatherHusband || null,
       address: formAddress || null,
       emergency_contact_name: formEmergencyName || null,
@@ -286,7 +290,7 @@ export function PatientSearch({
       billing_category: formBillingCat,
       panel_id: formPanelId ? parseInt(formPanelId, 10) : null,
       panel_member_no: formPanelMemberNo || null,
-      upgrade_to_regular: formUpgradeRegular,
+      ...(formUpgradeRegular ? { upgrade_to_regular: true } : {}),
     };
 
     // PATCH only changed fields; do not erase unedited server data.
@@ -308,11 +312,9 @@ export function PatientSearch({
       );
     } catch (err: any) {
       setEditError(err);
-      {
-        // A lost response might already have advanced the version. Never replay.
-        setVersionConflict(true);
-        // Keep the original version and draft until the user explicitly reloads.
-      }
+      setVersionConflict(patientEditNeedsReconcile(err));
+      // A transition refusal never silently upgrades a different registration type.
+      if (patientErrorCode(err) === "PATIENT_TYPE_TRANSITION_INVALID") setFormUpgradeRegular(false);
     } finally {
       editFlight.current = false;
       setEditBusy(false);
@@ -755,6 +757,10 @@ export function PatientSearch({
                   <dd dir="ltr">{patient.cnic || tr("Not recorded")}</dd>
                 </div>
                 <div>
+                  <dt>{t("UPMRN", "یونیورسل مریض نمبر")}</dt>
+                  <dd dir="ltr">{patient.upmrn || tr("Not recorded")}</dd>
+                </div>
+                <div>
                   <dt>{tr("Blood group")}</dt>
                   <dd>{patient.blood_group || tr("Not recorded")}</dd>
                 </div>
@@ -1139,7 +1145,7 @@ export function PatientSearch({
               {tr("Discard draft and reload latest record")}
             </button>
           </div>}
-          <ErrorBox error={editError} />
+          {isDuplicatePatient(editError) ? <p className="error" role="alert">{t("This patient is already registered: search for them instead", "یہ مریض پہلے سے رجسٹرڈ ہے: دوبارہ اندراج کے بجائے اسے تلاش کریں")} <bdi>{patientErrorCode(editError)}</bdi></p> : patientErrorCode(editError) === "PATIENT_TYPE_TRANSITION_INVALID" ? <p className="error" role="alert">{t("Only lab-only or trauma profiles can become regular patients. Review the registration type before saving again.", "صرف لیب یا ٹراما پروفائل کو مستقل مریض بنایا جا سکتا ہے۔ دوبارہ محفوظ کرنے سے پہلے اندراج کی قسم دیکھیں۔")} <bdi>PATIENT_TYPE_TRANSITION_INVALID</bdi></p> : <ErrorBox error={editError} />}
 
           <form data-help="patients.edit" onSubmit={handleSaveEdit} data-unsaved={editDirty || editBusy} onChange={() => setEditDirty(true)}>
             <div className="form-grid">
@@ -1222,6 +1228,10 @@ export function PatientSearch({
                   disabled={editBusy}
                   placeholder="35202-1234567-1"
                 />
+              </Field>
+
+              <Field label={t("UPMRN (optional)", "یونیورسل مریض نمبر (اختیاری)")} hint={t("Enter only an issued Universal Patient Medical Record Number.", "صرف پہلے سے جاری کردہ یونیورسل مریض نمبر درج کریں۔")}>
+                <input data-help="patients.edit" aria-label={t("UPMRN (optional)", "یونیورسل مریض نمبر (اختیاری)")} dir="ltr" value={formUpmrn} onChange={e => setFormUpmrn(e.target.value)} disabled={editBusy} maxLength={40} pattern={"[A-Za-z0-9][A-Za-z0-9\\/\\-]{3,39}"} />
               </Field>
 
               <Field label={tr("Blood group")}>

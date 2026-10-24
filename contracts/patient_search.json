@@ -1,7 +1,7 @@
 {
   "screen_id": "patient_search",
-  "contract_fingerprint": "57d137222f1ca637655d",
-  "knowledge_revision": "cdafb44b06354a92",
+  "contract_fingerprint": "992b7799991463f180bc",
+  "knowledge_revision": "0266ade0bf511c86",
   "delivery_gate": {
     "required": true,
     "status": "required",
@@ -55,7 +55,7 @@
   },
   "ui_quality": {
     "source": "frontend-docs/guides/16-ui-quality.md",
-    "standard_revision": "3f27760c7bc06e2d",
+    "standard_revision": "53a2f0d4f1cfeb73",
     "context": {
       "workspace": "reception",
       "purpose": "Find returning patients by MRN, mobile, CNIC or name; show outstanding dues banner.",
@@ -264,7 +264,7 @@
         "id": "ep:PATCH /patients/{patient_id}",
         "label": "PATCH /patients/{patient_id}",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:GET /patients/search",
@@ -403,12 +403,52 @@
       "idempotency_key": false,
       "errors": [
         {
+          "code": "PATIENT_CNIC_EXISTS",
+          "http_status": 409,
+          "message": "A patient with this CNIC already exists.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": null
+        },
+        {
+          "code": "PATIENT_TYPE_TRANSITION_INVALID",
+          "http_status": 422,
+          "message": "Registration type change not allowed.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": null
+        },
+        {
+          "code": "PATIENT_UPMRN_EXISTS",
+          "http_status": 409,
+          "message": "A patient with this universal patient medical record number (UPMRN) already exists: search for it instead of registering again.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "constraint"
+          ],
+          "details_from": "POST /api/v1/patients"
+        },
+        {
           "code": "VERSION_CONFLICT",
           "http_status": 409,
           "message": "The record was changed by someone else; reload and try again.",
           "retryable": false,
           "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
           "source": [
+            "documented",
             "seen_in_tests"
           ],
           "details_fields": [
@@ -522,6 +562,14 @@
             "pattern": "^[0-9]{5}-?[0-9]{7}-?[0-9]$"
           },
           {
+            "pointer": "/upmrn",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9/-]{3,39}$",
+            "description": "The Universal Patient Medical Record Number, once the PHC's HMIS issues one (announced for Category I hospitals; its format is not published yet): optional, unique among active records (PATIENT_UPMRN_EXISTS)"
+          },
+          {
             "pointer": "/father_or_husband_name",
             "type": "string",
             "required": false,
@@ -612,7 +660,7 @@
     },
     {
       "endpoint": "GET /patients/search",
-      "summary": "Returning-patient lookup by name / phone / CNIC / MRN",
+      "summary": "Returning-patient lookup by name / phone / CNIC / UPMRN / MRN",
       "access": {
         "authentication": "user",
         "permissions": [
@@ -1163,6 +1211,9 @@
     },
     "error_messages": {
       "FORBIDDEN": "You do not have permission to do this.",
+      "PATIENT_CNIC_EXISTS": "A patient with this CNIC already exists.",
+      "PATIENT_TYPE_TRANSITION_INVALID": "Registration type change not allowed.",
+      "PATIENT_UPMRN_EXISTS": "A patient with this universal patient medical record number (UPMRN) already exists: search for it instead of registering again.",
       "VERSION_CONFLICT": "The record was changed by someone else; reload and try again."
     },
     "wording_quoted_in_rules": [],
@@ -1221,6 +1272,9 @@
           "expect": "403 FORBIDDEN"
         },
         "errors_to_handle": [
+          "PATIENT_CNIC_EXISTS",
+          "PATIENT_TYPE_TRANSITION_INVALID",
+          "PATIENT_UPMRN_EXISTS",
           "VERSION_CONFLICT"
         ],
         "concurrent_edit": "send a stale expected_version: expect 409 VERSION_CONFLICT, reload and retry",
@@ -1232,7 +1286,7 @@
       {
         "id": "case:GET /patients/search",
         "call": "GET /api/v1/patients/search",
-        "summary": "Returning-patient lookup by name / phone / CNIC / MRN",
+        "summary": "Returning-patient lookup by name / phone / CNIC / UPMRN / MRN",
         "denied": {
           "as_one_of": [
             "cssd_technician",
@@ -1451,7 +1505,7 @@
       },
       {
         "id": "patient_search::GET /patients/search",
-        "task": "Returning-patient lookup by name / phone / CNIC / MRN",
+        "task": "Returning-patient lookup by name / phone / CNIC / UPMRN / MRN",
         "call": "GET /patients/search",
         "is_action": false,
         "permissions": [
@@ -1498,6 +1552,21 @@
         "code": "FORBIDDEN",
         "message": "You do not have permission to do this.",
         "ui_action": "Explain and hide the action (check x-permissions)."
+      },
+      {
+        "code": "PATIENT_CNIC_EXISTS",
+        "message": "A patient with this CNIC already exists.",
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      },
+      {
+        "code": "PATIENT_TYPE_TRANSITION_INVALID",
+        "message": "Registration type change not allowed.",
+        "ui_action": "Show field errors from details.fields / the message."
+      },
+      {
+        "code": "PATIENT_UPMRN_EXISTS",
+        "message": "A patient with this universal patient medical record number (UPMRN) already exists: search for it instead of registering again.",
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
       },
       {
         "code": "VERSION_CONFLICT",
@@ -1774,9 +1843,10 @@
             "gender": "male",
             "dob": null,
             "age_years": 40,
-            "age_recorded_on": "2026-10-13",
+            "age_recorded_on": "2026-10-24",
             "mobile": "0300-1112223",
             "cnic": "35202-7654321-3",
+            "upmrn": null,
             "address": null,
             "emergency_contact_name": null,
             "emergency_contact_phone": null,
@@ -1790,7 +1860,7 @@
             "merged_into_id": null,
             "linked_employee_id": null,
             "is_deceased": false,
-            "created_at": "2026-10-13T12:17:10.334731+00:00",
+            "created_at": "2026-10-23T19:42:35.280806+00:00",
             "row_version": 2,
             "death_id": null,
             "death_at": null,
@@ -1806,9 +1876,9 @@
             "merged_profiles": []
           },
           "meta": {
-            "server_time": "2026-10-13T12:17:10.413555+00:00"
+            "server_time": "2026-10-23T19:42:35.452664+00:00"
           },
-          "request_id": "ce6e366d16274f60b07c0f67ad967dcb"
+          "request_id": "2cd2f06946fb46668a3bd6dc490b29bf"
         }
       }
     },
@@ -1832,9 +1902,10 @@
               "gender": "male",
               "dob": null,
               "age_years": 40,
-              "age_recorded_on": "2026-10-13",
-              "mobile": "03008475071",
+              "age_recorded_on": "2026-10-24",
+              "mobile": "03002663623",
               "cnic": null,
+              "upmrn": null,
               "address": null,
               "emergency_contact_name": null,
               "emergency_contact_phone": null,
@@ -1848,7 +1919,7 @@
               "merged_into_id": null,
               "linked_employee_id": null,
               "is_deceased": false,
-              "created_at": "2026-10-13T12:08:52.472447+00:00",
+              "created_at": "2026-10-23T19:09:32.922576+00:00",
               "row_version": 1,
               "death_id": null,
               "death_at": null,
@@ -1863,9 +1934,9 @@
             }
           ],
           "meta": {
-            "server_time": "2026-10-13T12:08:52.761124+00:00"
+            "server_time": "2026-10-23T19:09:33.279708+00:00"
           },
-          "request_id": "6242014455454f27be1f7598e9d88090"
+          "request_id": "2cc13fb5ee91471cbbfb9706f7951864"
         }
       }
     },
@@ -1885,9 +1956,10 @@
             "gender": "male",
             "dob": null,
             "age_years": 40,
-            "age_recorded_on": "2026-10-13",
-            "mobile": "03007621406",
+            "age_recorded_on": "2026-10-24",
+            "mobile": "03009882208",
             "cnic": null,
+            "upmrn": null,
             "address": null,
             "emergency_contact_name": null,
             "emergency_contact_phone": null,
@@ -1901,10 +1973,10 @@
             "merged_into_id": null,
             "linked_employee_id": null,
             "is_deceased": true,
-            "created_at": "2026-10-13T11:28:11.215631+00:00",
+            "created_at": "2026-10-23T19:42:10.690475+00:00",
             "row_version": 2,
             "death_id": 2,
-            "death_at": "2026-10-13T11:18:11.547055+00:00",
+            "death_at": "2026-10-23T19:32:11.183396+00:00",
             "photo_document_id": null,
             "mlc_numbers": [],
             "outstanding": {
@@ -1917,9 +1989,9 @@
             "merged_profiles": []
           },
           "meta": {
-            "server_time": "2026-10-13T11:28:11.592417+00:00"
+            "server_time": "2026-10-23T19:42:11.271680+00:00"
           },
-          "request_id": "d0a72af3b66d4c0e9a37f788056c7e8c"
+          "request_id": "6fb937ed7bb54db281df58c0d5d19b66"
         }
       }
     },
@@ -2427,6 +2499,18 @@
           ],
           "title": "Cnic"
         },
+        "upmrn": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Upmrn",
+          "description": "The Universal Patient Medical Record Number when one was recorded (optional)"
+        },
         "address": {
           "anyOf": [
             {
@@ -2643,6 +2727,7 @@
         "age_recorded_on",
         "mobile",
         "cnic",
+        "upmrn",
         "address",
         "emergency_contact_name",
         "emergency_contact_phone",
@@ -2883,6 +2968,18 @@
           ],
           "title": "Cnic"
         },
+        "upmrn": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Upmrn",
+          "description": "The Universal Patient Medical Record Number when one was recorded (optional)"
+        },
         "address": {
           "anyOf": [
             {
@@ -3087,6 +3184,7 @@
         "age_recorded_on",
         "mobile",
         "cnic",
+        "upmrn",
         "address",
         "emergency_contact_name",
         "emergency_contact_phone",
@@ -3200,6 +3298,19 @@
             }
           ],
           "title": "Cnic"
+        },
+        "upmrn": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9/-]{3,39}$"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Upmrn",
+          "description": "The Universal Patient Medical Record Number, once the PHC's HMIS issues one (announced for Category I hospitals; its format is not published yet): optional, unique among active records (PATIENT_UPMRN_EXISTS)"
         },
         "father_or_husband_name": {
           "anyOf": [

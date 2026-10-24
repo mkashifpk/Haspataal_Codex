@@ -1,7 +1,7 @@
 {
   "screen_id": "registration",
-  "contract_fingerprint": "57d137222f1ca637655d",
-  "knowledge_revision": "cdafb44b06354a92",
+  "contract_fingerprint": "992b7799991463f180bc",
+  "knowledge_revision": "0266ade0bf511c86",
   "delivery_gate": {
     "required": true,
     "status": "required",
@@ -55,7 +55,7 @@
   },
   "ui_quality": {
     "source": "frontend-docs/guides/16-ui-quality.md",
-    "standard_revision": "3f27760c7bc06e2d",
+    "standard_revision": "53a2f0d4f1cfeb73",
     "context": {
       "workspace": "reception",
       "purpose": "One atomic call: patient → OPD ticket → invoice → payment → queue token → print payload.",
@@ -406,7 +406,7 @@
         "id": "rule:729d6adf26",
         "label": "Always send an Idempotency-Key header: one UUID per registration the user starts, the same one on every retry of it (a second click after a lost answer is a retry), so a retry never double-charges.",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:72363c4772",
@@ -430,7 +430,7 @@
         "id": "rule:e19c1ca085",
         "label": "Discount above the user's ceiling → DISCOUNT_CEILING_EXCEEDED (details.max_pct): issue the ticket within the ceiling, then offer 'Request VIP waiver' with waiver_pct for the rest (Billing Admin / Owner approve).",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:17eacdfd42",
@@ -974,6 +974,45 @@
           "details_from": "POST /api/v1/admin/departments"
         },
         {
+          "code": "PATIENT_CNIC_EXISTS",
+          "http_status": 409,
+          "message": "A patient with this CNIC already exists.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": null
+        },
+        {
+          "code": "PATIENT_UPMRN_EXISTS",
+          "http_status": 409,
+          "message": "A patient with this universal patient medical record number (UPMRN) already exists: search for it instead of registering again.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "constraint"
+          ],
+          "details_from": "POST /api/v1/patients"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        },
+        {
           "code": "WORKSPACE_NOT_ALLOWED",
           "http_status": 403,
           "message": "This window's workspace (X-Active-Workspace) is not one of yours.",
@@ -1117,6 +1156,14 @@
             "required": false,
             "nullable": true,
             "pattern": "^[0-9]{5}-?[0-9]{7}-?[0-9]$"
+          },
+          {
+            "pointer": "/upmrn",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9/-]{3,39}$",
+            "description": "The Universal Patient Medical Record Number, once the PHC's HMIS issues one (announced for Category I hospitals; its format is not published yet): optional, unique among active records (PATIENT_UPMRN_EXISTS)"
           },
           {
             "pointer": "/father_or_husband_name",
@@ -1597,6 +1644,14 @@
             "required": false,
             "nullable": true,
             "pattern": "^[0-9]{5}-?[0-9]{7}-?[0-9]$"
+          },
+          {
+            "pointer": "/new_patient/upmrn",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9/-]{3,39}$",
+            "description": "The Universal Patient Medical Record Number, once the PHC's HMIS issues one (announced for Category I hospitals; its format is not published yet): optional, unique among active records (PATIENT_UPMRN_EXISTS)"
           },
           {
             "pointer": "/new_patient/father_or_husband_name",
@@ -2894,7 +2949,9 @@
       "FORBIDDEN": "You do not have permission to do this.",
       "IDEMPOTENCY_CONFLICT": "Idempotency-Key was reused with a different request body.",
       "NOT_FOUND": "The requested resource was not found.",
+      "PATIENT_CNIC_EXISTS": "A patient with this CNIC already exists.",
       "PATIENT_MERGED_CANNOT_TRANSACT": "This patient record was merged; use the master record.",
+      "PATIENT_UPMRN_EXISTS": "A patient with this universal patient medical record number (UPMRN) already exists: search for it instead of registering again.",
       "PAYLOAD_TOO_LARGE": "The uploaded file is too large.",
       "REFERENCE_NOT_FOUND": "A referenced record does not exist.",
       "SHIFT_NOT_OPEN": "Open a cash shift before handling cash.",
@@ -3048,6 +3105,9 @@
         },
         "errors_to_handle": [
           "FORBIDDEN",
+          "PATIENT_CNIC_EXISTS",
+          "PATIENT_UPMRN_EXISTS",
+          "VALIDATION_ERROR",
           "WORKSPACE_NOT_ALLOWED"
         ],
         "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)",
@@ -3425,8 +3485,18 @@
         "ui_action": "Say 'not found'; refresh the list."
       },
       {
+        "code": "PATIENT_CNIC_EXISTS",
+        "message": "A patient with this CNIC already exists.",
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      },
+      {
         "code": "PATIENT_MERGED_CANNOT_TRANSACT",
         "message": "This patient record was merged; use the master record.",
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      },
+      {
+        "code": "PATIENT_UPMRN_EXISTS",
+        "message": "A patient with this universal patient medical record number (UPMRN) already exists: search for it instead of registering again.",
         "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
       },
       {
@@ -3860,27 +3930,28 @@
       "request": {
         "path": "/api/v1/patients",
         "body": {
-          "full_name": "Bilal Ahmed",
+          "full_name": "Ali Khan",
           "gender": "male",
           "age_years": 40,
-          "mobile": "0300-1112223"
+          "mobile": "03001555248"
         }
       },
       "response": {
         "status": 201,
         "body": {
           "data": {
-            "patient_id": 1,
-            "mrn": "MRN-2026-000001",
+            "patient_id": 2,
+            "mrn": "MRN-2026-000002",
             "registration_type": "Regular",
-            "full_name": "Bilal Ahmed",
+            "full_name": "Ali Khan",
             "father_or_husband_name": null,
             "gender": "male",
             "dob": null,
             "age_years": 40,
-            "age_recorded_on": "2026-10-13",
-            "mobile": "0300-1112223",
+            "age_recorded_on": "2026-10-24",
+            "mobile": "03001555248",
             "cnic": null,
+            "upmrn": null,
             "address": null,
             "emergency_contact_name": null,
             "emergency_contact_phone": null,
@@ -3894,7 +3965,7 @@
             "merged_into_id": null,
             "linked_employee_id": null,
             "is_deceased": false,
-            "created_at": "2026-10-13T12:17:10.334731+00:00",
+            "created_at": "2026-10-23T19:53:29.889830+00:00",
             "row_version": 1,
             "death_id": null,
             "death_at": null,
@@ -3906,13 +3977,13 @@
               "ar_block_applies": false,
               "banner_text": null
             },
-            "master_patient_id": 1,
+            "master_patient_id": 2,
             "merged_profiles": []
           },
           "meta": {
-            "server_time": "2026-10-13T12:17:10.370618+00:00"
+            "server_time": "2026-10-23T19:53:29.898946+00:00"
           },
-          "request_id": "24a4648fe9f74817b176d0fd34e8eccc"
+          "request_id": "d6ffc15649654aa8b53f9a1696638605"
         }
       }
     },
@@ -6092,6 +6163,19 @@
             "35202-1234567-1"
           ]
         },
+        "upmrn": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9/-]{3,39}$"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Upmrn",
+          "description": "The Universal Patient Medical Record Number, once the PHC's HMIS issues one (announced for Category I hospitals; its format is not published yet): optional, unique among active records (PATIENT_UPMRN_EXISTS)"
+        },
         "father_or_husband_name": {
           "anyOf": [
             {
@@ -6318,6 +6402,18 @@
           ],
           "title": "Cnic"
         },
+        "upmrn": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Upmrn",
+          "description": "The Universal Patient Medical Record Number when one was recorded (optional)"
+        },
         "address": {
           "anyOf": [
             {
@@ -6534,6 +6630,7 @@
         "age_recorded_on",
         "mobile",
         "cnic",
+        "upmrn",
         "address",
         "emergency_contact_name",
         "emergency_contact_phone",

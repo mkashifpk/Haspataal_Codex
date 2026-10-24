@@ -1,0 +1,960 @@
+{
+  "screen": "registration",
+  "title": "New registration + OPD slip",
+  "cases": [
+    {
+      "id": "case:POST /patients/{patient_id}/documents",
+      "call": "POST /api/v1/patients/{patient_id}/documents",
+      "summary": "Upload a patient document (PDF/JPEG/PNG)",
+      "happy_path": {
+        "as_one_of": [
+          "admissions_officer",
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "receptionist",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/patients/1/documents",
+            "multipart": {
+              "file": "<file>",
+              "doc_type": "CNIC"
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "document_id": 1,
+                "patient_id": 1,
+                "doc_type": "CNIC",
+                "title": null,
+                "content_type": "application/pdf",
+                "size_bytes": 31,
+                "is_outside": false,
+                "source_facility": null,
+                "document_date": null,
+                "uploaded_at": "2026-10-13T11:27:11.017375+00:00"
+              },
+              "meta": {
+                "server_time": "2026-10-13T11:27:11.028856+00:00"
+              },
+              "request_id": "16803b23adfa4ca89f6674d80ff160a0"
+            }
+          },
+          "errors_seen": [
+            "FORBIDDEN",
+            "IDEMPOTENCY_CONFLICT",
+            "NOT_FOUND",
+            "PAYLOAD_TOO_LARGE",
+            "UNSUPPORTED_MEDIA_TYPE",
+            "VALIDATION_ERROR"
+          ],
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "billing_admin",
+          "cashier",
+          "clinic_director",
+          "cssd_technician"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "FORBIDDEN",
+        "IDEMPOTENCY_CONFLICT",
+        "NOT_FOUND",
+        "PAYLOAD_TOO_LARGE",
+        "UNSUPPORTED_MEDIA_TYPE",
+        "VALIDATION_ERROR"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:GET /patients/{patient_id}/documents",
+      "call": "GET /api/v1/patients/{patient_id}/documents",
+      "summary": "List patient documents",
+      "happy_path": {
+        "as_one_of": [
+          "admissions_officer",
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "receptionist",
+          "surgeon",
+          "ward_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/patients/1/documents"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "document_id": 2,
+                  "patient_id": 1,
+                  "doc_type": "Photo",
+                  "title": null,
+                  "content_type": "image/jpeg",
+                  "size_bytes": 644,
+                  "is_outside": false,
+                  "source_facility": null,
+                  "document_date": null,
+                  "is_verified": false,
+                  "uploaded_at": "2026-10-13T12:12:55.831057+00:00",
+                  "uploaded_by": 3
+                },
+                {
+                  "document_id": 1,
+                  "patient_id": 1,
+                  "doc_type": "Photo",
+                  "title": "Synthetic patient photo",
+                  "content_type": "image/png",
+                  "size_bytes": 116,
+                  "is_outside": false,
+                  "source_facility": null,
+                  "document_date": null,
+                  "is_verified": false,
+                  "uploaded_at": "2026-10-13T12:12:55.809462+00:00",
+                  "uploaded_by": 3
+                }
+              ],
+              "meta": {
+                "server_time": "2026-10-13T12:12:55.869196+00:00"
+              },
+              "request_id": "afb5df5d2f324ca1ac957110ee282f2c"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "billing_admin",
+          "cashier",
+          "clinic_director",
+          "cssd_technician"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": []
+    },
+    {
+      "id": "case:GET /patient-documents/{document_id}/download",
+      "call": "GET /api/v1/patient-documents/{document_id}/download",
+      "summary": "Download a patient document",
+      "happy_path": {
+        "as_one_of": [
+          "admissions_officer",
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "receptionist",
+          "surgeon",
+          "ward_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/patient-documents/1/download"
+          },
+          "response": {
+            "status": 200,
+            "content_type": "application/pdf",
+            "bytes": 28
+          },
+          "errors_seen": [
+            "FORBIDDEN",
+            "NOT_FOUND"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "billing_admin",
+          "cashier",
+          "clinic_director",
+          "cssd_technician"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "FORBIDDEN",
+        "NOT_FOUND"
+      ]
+    },
+    {
+      "id": "case:POST /patients",
+      "call": "POST /api/v1/patients",
+      "summary": "Register a patient (full intake form)",
+      "happy_path": {
+        "as_one_of": [
+          "admissions_officer",
+          "receptionist",
+          "triage_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/patients",
+            "body": {
+              "full_name": "Ali Khan",
+              "gender": "male",
+              "age_years": 40,
+              "mobile": "03001555248"
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "patient_id": 2,
+                "mrn": "MRN-2026-000002",
+                "registration_type": "Regular",
+                "full_name": "Ali Khan",
+                "father_or_husband_name": null,
+                "gender": "male",
+                "dob": null,
+                "age_years": 40,
+                "age_recorded_on": "2026-10-24",
+                "mobile": "03001555248",
+                "cnic": null,
+                "upmrn": null,
+                "address": null,
+                "emergency_contact_name": null,
+                "emergency_contact_phone": null,
+                "blood_group": null,
+                "allergies": null,
+                "billing_category": "Cash",
+                "panel_id": null,
+                "panel_name": null,
+                "panel_member_no": null,
+                "temp_identifier": null,
+                "merged_into_id": null,
+                "linked_employee_id": null,
+                "is_deceased": false,
+                "created_at": "2026-10-23T19:53:29.889830+00:00",
+                "row_version": 1,
+                "death_id": null,
+                "death_at": null,
+                "photo_document_id": null,
+                "mlc_numbers": [],
+                "outstanding": {
+                  "has_outstanding_ar": false,
+                  "outstanding_ar_balance": 0,
+                  "ar_block_applies": false,
+                  "banner_text": null
+                },
+                "master_patient_id": 2,
+                "merged_profiles": []
+              },
+              "meta": {
+                "server_time": "2026-10-23T19:53:29.898946+00:00"
+              },
+              "request_id": "d6ffc15649654aa8b53f9a1696638605"
+            }
+          },
+          "errors_seen": [
+            "FORBIDDEN",
+            "PATIENT_UPMRN_EXISTS",
+            "VALIDATION_ERROR",
+            "WORKSPACE_NOT_ALLOWED"
+          ],
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "anaesthetist",
+          "billing_admin",
+          "cashier",
+          "clinic_director"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "FORBIDDEN",
+        "PATIENT_CNIC_EXISTS",
+        "PATIENT_UPMRN_EXISTS",
+        "VALIDATION_ERROR",
+        "WORKSPACE_NOT_ALLOWED"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:POST /opd-tickets/{ticket_id}/pay",
+      "call": "POST /api/v1/opd-tickets/{ticket_id}/pay",
+      "summary": "Collect payment for an unpaid ticket (then queues it)",
+      "happy_path": {
+        "as_one_of": [
+          "cashier",
+          "pharmacist",
+          "receptionist"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/opd-tickets/1/pay",
+            "body": {
+              "method": "Cash"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "payment": {
+                  "payment_id": 1,
+                  "receipt_no": "RCT-2026-0000001",
+                  "payment_type": "Collection",
+                  "amount": 1000,
+                  "method": "Cash",
+                  "invoice_id": 1,
+                  "shift_id": 1,
+                  "collected_at": "2026-09-27T17:42:11.407540+00:00"
+                },
+                "ticket": {
+                  "ticket_id": 1,
+                  "ticket_number": "OPD-2026-000001",
+                  "patient_id": 1,
+                  "mrn": "MRN-2026-000001",
+                  "patient_name": "Ali Khan",
+                  "gender": "male",
+                  "age_years": 40,
+                  "dob": null,
+                  "doctor_id": 1,
+                  "doctor_name": "Dr Ahmed",
+                  "department_id": 1,
+                  "department_name": "General Medicine",
+                  "service_id": 1,
+                  "source": "WalkIn",
+                  "status": "Waiting",
+                  "payment_status": "Paid",
+                  "approval_lock": "None",
+                  "gross_amount": 1000,
+                  "discount_amount": 0,
+                  "net_payable": 1000,
+                  "discount_reason": null,
+                  "issued_at": "2026-09-27T17:42:11.180230+00:00",
+                  "paid_at": "2026-09-27T17:42:11.407540+00:00",
+                  "valid_until": "2026-09-30T17:42:11.407540+00:00",
+                  "called_at": null,
+                  "examined_at": null,
+                  "completed_at": null,
+                  "deferred_at": null,
+                  "reactivated_at": null,
+                  "expired_at": null,
+                  "voided_at": null,
+                  "void_reason": null,
+                  "cancelled_at": null,
+                  "is_clinical_locked": false,
+                  "clinical_lock_reason": null,
+                  "is_emergency_bypass": false,
+                  "is_ar_block_overridden": false,
+                  "row_version": 8,
+                  "queue": {
+                    "queue_id": 1,
+                    "queue_group": "doctor:1",
+                    "token_no": 1,
+                    "token_date": "2026-09-27",
+                    "priority": 0,
+                    "status": "Active",
+                    "queued_at": "2026-09-27T17:42:11.407540+00:00",
+                    "called_at": null,
+                    "rerouted_from_queue_id": null
+                  },
+                  "invoice": {
+                    "invoice_id": 1,
+                    "invoice_no": "INV-2026-0000001",
+                    "invoice_type": "OPD",
+                    "patient_id": 1,
+                    "admission_id": null,
+                    "ticket_id": 1,
+                    "panel_id": null,
+                    "employee_id": null,
+                    "walkin_customer_name": null,
+                    "walkin_customer_mobile": null,
+                    "gross_total": 1000,
+                    "discount_total": 0,
+                    "net_payable": 1000,
+                    "amount_paid": 1000,
+                    "amount_refunded": 0,
+                    "waiver_amount": 0,
+                    "waiver_dispensed_amount": 0,
+                    "credit_amount": 0,
+                    "status": "Paid",
+                    "is_locked": false,
+                    "locked_reason": null,
+                    "finalized_at": "2026-09-27T17:42:11.180230+00:00",
+                    "business_date": "2026-09-27",
+                    "created_at": "2026-09-27T17:42:11.180230+00:00",
+                    "row_version": 9,
+                    "lines": [
+                      {
+                        "invoice_item_id": 1,
+                        "line_type": "Consultation",
+                        "description": "OPD Consultation - GM",
+                        "qty": 1,
+                        "unit_price": 1000,
+                        "line_total": 1000,
+                        "bed_day": null,
+                        "reverses_item_id": null,
+                        "reversal_reason": null,
+                        "created_at": "2026-09-27T17:42:11.180230+00:00"
+                      }
+                    ],
+                    "balance_due": 0
+                  },
+                  "pending_approval": null,
+                  "cash_back_prompts": []
+                }
+              },
+              "meta": {
+                "server_time": "2026-09-27T17:42:11.441642+00:00"
+              },
+              "request_id": "7950bdacb4c04c45994c4889e01ef882"
+            }
+          },
+          "events_emitted": [
+            "opd.queue.updated",
+            "opd.ticket.status_changed"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "clinic_director"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "SHIFT_NOT_OPEN"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:POST /reception/registrations",
+      "call": "POST /api/v1/reception/registrations",
+      "summary": "Register + OPD slip + payment + queue token (atomic)",
+      "happy_path": {
+        "as_one_of": [
+          "receptionist"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/reception/registrations",
+            "body": {
+              "new_patient": {
+                "full_name": "Ali Khan",
+                "gender": "male",
+                "age_years": 40,
+                "mobile": "03003562680"
+              },
+              "doctor_id": 1,
+              "payment": {
+                "method": "Cash"
+              }
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "ticket_id": 1,
+                "ticket_number": "OPD-2026-000001",
+                "patient_id": 1,
+                "mrn": "MRN-2026-000001",
+                "patient_name": "Ali Khan",
+                "gender": "male",
+                "age_years": 40,
+                "dob": null,
+                "doctor_id": 1,
+                "doctor_name": "Dr Ahmed",
+                "department_id": 1,
+                "department_name": "General Medicine",
+                "service_id": 1,
+                "source": "WalkIn",
+                "status": "Waiting",
+                "payment_status": "Paid",
+                "approval_lock": "None",
+                "gross_amount": 1000,
+                "discount_amount": 0,
+                "net_payable": 1000,
+                "discount_reason": null,
+                "issued_at": "2026-09-27T17:36:46.406822+00:00",
+                "paid_at": "2026-09-27T17:36:46.406822+00:00",
+                "valid_until": "2026-09-30T17:36:46.406822+00:00",
+                "called_at": null,
+                "examined_at": null,
+                "completed_at": null,
+                "deferred_at": null,
+                "reactivated_at": null,
+                "expired_at": null,
+                "voided_at": null,
+                "void_reason": null,
+                "cancelled_at": null,
+                "is_clinical_locked": false,
+                "clinical_lock_reason": null,
+                "is_emergency_bypass": false,
+                "is_ar_block_overridden": false,
+                "row_version": 4,
+                "queue": {
+                  "queue_id": 1,
+                  "queue_group": "doctor:1",
+                  "token_no": 1,
+                  "token_date": "2026-09-27",
+                  "priority": 0,
+                  "status": "Active",
+                  "queued_at": "2026-09-27T17:36:46.406822+00:00",
+                  "called_at": null,
+                  "rerouted_from_queue_id": null
+                },
+                "invoice": {
+                  "invoice_id": 1,
+                  "invoice_no": "INV-2026-0000001",
+                  "invoice_type": "OPD",
+                  "patient_id": 1,
+                  "admission_id": null,
+                  "ticket_id": 1,
+                  "panel_id": null,
+                  "employee_id": null,
+                  "walkin_customer_name": null,
+                  "walkin_customer_mobile": null,
+                  "gross_total": 1000,
+                  "discount_total": 0,
+                  "net_payable": 1000,
+                  "amount_paid": 1000,
+                  "amount_refunded": 0,
+                  "waiver_amount": 0,
+                  "waiver_dispensed_amount": 0,
+                  "credit_amount": 0,
+                  "status": "Paid",
+                  "is_locked": false,
+                  "locked_reason": null,
+                  "finalized_at": "2026-09-27T17:36:46.406822+00:00",
+                  "business_date": "2026-09-27",
+                  "created_at": "2026-09-27T17:36:46.406822+00:00",
+                  "row_version": 5,
+                  "lines": [
+                    {
+                      "invoice_item_id": 1,
+                      "line_type": "Consultation",
+                      "description": "OPD Consultation - GM",
+                      "qty": 1,
+                      "unit_price": 1000,
+                      "line_total": 1000,
+                      "bed_day": null,
+                      "reverses_item_id": null,
+                      "reversal_reason": null,
+                      "created_at": "2026-09-27T17:36:46.406822+00:00"
+                    }
+                  ],
+                  "balance_due": 0
+                },
+                "pending_approval": null,
+                "cash_back_prompts": [],
+                "payment": {
+                  "payment_id": 1,
+                  "receipt_no": "RCT-2026-0000001",
+                  "payment_type": "Collection",
+                  "amount": 1000,
+                  "method": "Cash",
+                  "invoice_id": 1,
+                  "shift_id": 1,
+                  "collected_at": "2026-09-27T17:36:46.406822+00:00"
+                },
+                "queue_entry_created": true,
+                "print_payload": {
+                  "document_type": "opd_slip",
+                  "printer_role": "receipt",
+                  "paper_width_mm": 80,
+                  "fields": {
+                    "hospital_name": "Haspataal Hospital",
+                    "ticket_number": "OPD-2026-000001",
+                    "token_no": 1,
+                    "patient_name": "Ali Khan",
+                    "mrn": "MRN-2026-000001",
+                    "doctor_name": "Dr Ahmed",
+                    "department_name": "General Medicine",
+                    "issued_at": "2026-09-27T17:36:46.406822+00:00",
+                    "valid_until": "2026-09-30T17:36:46.406822+00:00",
+                    "gross_amount": 1000,
+                    "discount_amount": 0,
+                    "net_payable": 1000,
+                    "amount_paid": 1000,
+                    "payment_status": "Paid",
+                    "cash_back_prompts": []
+                  },
+                  "text": "               Haspataal Hospital\n                    OPD SLIP\n------------------------------------------------\nTicket                           OPD-2026-000001\nToken                                         #1\nPatient                                 Ali Khan\nMRN                              MRN-2026-000001\nDoctor                                  Dr Ahmed\nIssued                         27-Sep-2026 …",
+                  "barcode_svg": "<svg version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" width=\"53.840mm\" height=\"18.411mm\">\r\n    <!--Autogenerated with python-barcode 0.16.1-->\r\n    <g id=\"barcode_group\">\r\n        <rect width=\"100%\" height=\"100%\" style=\"fill:white\"/>\r\n        <rect x=\"2.000mm\" y=\"1.000mm\" width=\"0.560mm\" height=\"12.000mm\" style=\"fill:black;\"/>\r\n        <rect x=\"2.840mm\" y=\"1.000mm\" width=\"0.280mm\" height=\"12.000mm…",
+                  "qr_svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"132\" height=\"132\" class=\"segno\"><path transform=\"scale(4)\" class=\"qrline\" stroke=\"#000\" d=\"M2 2.5h7m4 0h1m2 0h3m1 0h1m3 0h7m-29 1h1m5 0h1m1 0h1m3 0h1m2 0h3m4 0h1m5 0h1m-29 1h1m1 0h3m1 0h1m1 0h1m3 0h1m6 0h1m2 0h1m1 0h3m1 0h1m-29 1h1m1 0h3m1 0h1m2 0h1m1 0h1m3 0h1m1 0h1m2 0h1m1 0h1m1 0h3m1 0h1m-29 1h1m1 0h3m1 0h1m4 0h5m1 0h4m1 0h1m1 0h3m1 0h1m-29 1h1m5 0…",
+                  "pdf_url": null
+                }
+              },
+              "meta": {
+                "server_time": "2026-09-27T17:36:46.571870+00:00"
+              },
+              "request_id": "374920c562bd44be808dac2637cd2cdc"
+            }
+          },
+          "errors_seen": [
+            "AR_OUTSTANDING_BLOCK",
+            "CAPABILITY_INACTIVE",
+            "DISCOUNT_CEILING_EXCEEDED",
+            "IDEMPOTENCY_CONFLICT",
+            "PATIENT_MERGED_CANNOT_TRANSACT"
+          ],
+          "events_emitted": [
+            "er.visit.updated",
+            "opd.queue.updated",
+            "opd.ticket.status_changed"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "AR_OUTSTANDING_BLOCK",
+        "CAPABILITY_INACTIVE",
+        "DISCOUNT_CEILING_EXCEEDED",
+        "IDEMPOTENCY_CONFLICT",
+        "PATIENT_MERGED_CANNOT_TRANSACT",
+        "REFERENCE_NOT_FOUND",
+        "SHIFT_NOT_OPEN"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:GET /finance/service-catalog",
+      "call": "GET /api/v1/finance/service-catalog",
+      "summary": "Hospital service prices (lab prices live in the lab catalogue)",
+      "happy_path": {
+        "as_one_of": [
+          "any logged-in user"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/finance/service-catalog",
+            "query": {
+              "category": "Imaging"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "service_id": 1,
+                  "code": "XRAY-CHEST",
+                  "name": "Chest X-ray",
+                  "category": "Imaging",
+                  "department_id": null,
+                  "doctor_id": null,
+                  "default_price": 1800,
+                  "is_active": true,
+                  "row_version": 2,
+                  "department_name": null,
+                  "doctor_name": null
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-27T17:36:31.736009+00:00"
+              },
+              "request_id": "0fa665ef7ed648b384ec51bc04d07331"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": []
+    },
+    {
+      "id": "case:GET /opd-tickets/{ticket_id}/print-payload",
+      "call": "GET /api/v1/opd-tickets/{ticket_id}/print-payload",
+      "summary": "OPD slip print payload (text + barcode + QR)",
+      "happy_path": {
+        "as_one_of": [
+          "accountant",
+          "anaesthetist",
+          "billing_admin",
+          "cashier",
+          "clinical_specialist",
+          "doctor",
+          "receptionist",
+          "surgeon"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/opd-tickets/1/print-payload"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "document_type": "opd_slip",
+                "printer_role": "receipt",
+                "paper_width_mm": 80,
+                "fields": {
+                  "hospital_name": "Haspataal Hospital",
+                  "ticket_number": "OPD-2026-000001",
+                  "token_no": 1,
+                  "patient_name": "Ali Khan",
+                  "mrn": "MRN-2026-000001",
+                  "doctor_name": "Dr Ahmed",
+                  "department_name": "General Medicine",
+                  "issued_at": "2026-09-27T17:42:06.555355+00:00",
+                  "valid_until": "2026-09-30T17:42:06.555355+00:00",
+                  "gross_amount": 1000,
+                  "discount_amount": 0,
+                  "net_payable": 1000,
+                  "amount_paid": 1000,
+                  "payment_status": "Paid",
+                  "cash_back_prompts": []
+                },
+                "text": "               Haspataal Hospital\n                    OPD SLIP\n------------------------------------------------\nTicket                           OPD-2026-000001\nToken                                         #1\nPatient                                 Ali Khan\nMRN                              MRN-2026-000001\nDoctor                                  Dr Ahmed\nIssued                         27-Sep-2026 …",
+                "barcode_svg": "<svg version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" width=\"53.840mm\" height=\"18.411mm\">\r\n    <!--Autogenerated with python-barcode 0.16.1-->\r\n    <g id=\"barcode_group\">\r\n        <rect width=\"100%\" height=\"100%\" style=\"fill:white\"/>\r\n        <rect x=\"2.000mm\" y=\"1.000mm\" width=\"0.560mm\" height=\"12.000mm\" style=\"fill:black;\"/>\r\n        <rect x=\"2.840mm\" y=\"1.000mm\" width=\"0.280mm\" height=\"12.000mm…",
+                "qr_svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"132\" height=\"132\" class=\"segno\"><path transform=\"scale(4)\" class=\"qrline\" stroke=\"#000\" d=\"M2 2.5h7m4 0h1m2 0h3m1 0h1m3 0h7m-29 1h1m5 0h1m1 0h1m3 0h1m2 0h3m4 0h1m5 0h1m-29 1h1m1 0h3m1 0h1m1 0h1m3 0h1m6 0h1m2 0h1m1 0h3m1 0h1m-29 1h1m1 0h3m1 0h1m2 0h1m1 0h1m3 0h1m1 0h1m2 0h1m1 0h1m1 0h3m1 0h1m-29 1h1m1 0h3m1 0h1m4 0h5m1 0h4m1 0h1m1 0h3m1 0h1m-29 1h1m5 0…",
+                "pdf_url": null
+              },
+              "meta": {
+                "server_time": "2026-09-27T17:42:06.833348+00:00"
+              },
+              "request_id": "a169a957441e42948dbadd2a86843f00"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "admissions_officer",
+          "clinic_director",
+          "cssd_technician",
+          "employee_self",
+          "head_nurse"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": []
+    },
+    {
+      "id": "case:GET /opd-queues/reception-dashboard",
+      "call": "GET /api/v1/opd-queues/reception-dashboard",
+      "summary": "All queues, deferred tickets, pending approvals, cash-back prompts",
+      "happy_path": {
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "receptionist",
+          "triage_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/opd-queues/reception-dashboard"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "queues": [
+                  {
+                    "queue_group": "department:1",
+                    "doctor_id": null,
+                    "doctor_name": null,
+                    "department_id": 1,
+                    "department_name": "General Medicine",
+                    "waiting": 1,
+                    "in_consultation": 0,
+                    "entries": [
+                      {
+                        "queue_id": 2,
+                        "ticket_id": 2,
+                        "ticket_number": "OPD-2026-000002",
+                        "token_no": 1,
+                        "patient_name": "Ali Khan",
+                        "status": "Waiting",
+                        "priority": 0,
+                        "payment_status": "Paid",
+                        "approval_lock": "None"
+                      }
+                    ]
+                  }
+                ],
+                "deferred": [],
+                "awaiting_approval": [],
+                "cash_back_prompts": []
+              },
+              "meta": {
+                "server_time": "2026-09-27T17:42:01.757905+00:00"
+              },
+              "request_id": "f3df6bd01d0744bcba669be6164c5704"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": []
+    },
+    {
+      "id": "case:GET /staff/lookup",
+      "call": "GET /api/v1/staff/lookup",
+      "summary": "Find a staff member for a form (badge facts only)",
+      "happy_path": {
+        "as_one_of": [
+          "any logged-in user"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/staff/lookup",
+            "query": {
+              "q": "sana look"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "employee_id": 2,
+                  "emp_number": "EMP-2026-0002",
+                  "full_name": "Sana Lookuptest",
+                  "designation": "Officer",
+                  "department_name": null
+                }
+              ],
+              "meta": {
+                "server_time": "2026-10-18T11:40:23.634678+00:00"
+              },
+              "request_id": "d101388fcfb7459b8049d5fca80fe22d"
+            }
+          },
+          "errors_seen": [
+            "UNAUTHENTICATED",
+            "VALIDATION_ERROR"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "UNAUTHENTICATED",
+        "VALIDATION_ERROR"
+      ]
+    }
+  ],
+  "service_cases": [
+    {
+      "call": "POST /api/v1/reception/registrations",
+      "set_up": "emergency_department not Active in GET /establishment",
+      "expect": "the choice for an emergency patient (source Emergency) without an open emergency visit is hidden or disabled; the rest of the action stays"
+    }
+  ],
+  "delivery_gate": {
+    "required": true,
+    "status": "required",
+    "progress_reporting": {
+      "required": true,
+      "submit": "propose_progress",
+      "verify": "progress_proposals",
+      "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+    },
+    "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+    "compulsory": [
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+        "points": 2
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+        "points": 3
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+        "points": 2
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+        "points": 4
+      }
+    ],
+    "zoom": {
+      "min_pct": 100,
+      "max_pct": 250,
+      "reset_pct": 100,
+      "keys": [
+        "Ctrl + or Ctrl = (zoom in)",
+        "Ctrl - (zoom out)",
+        "Ctrl 0 (reset to 100 %)",
+        "Command on macOS"
+      ],
+      "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+    },
+    "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')). Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+    "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+  },
+  "handbook_page": "screens/registration",
+  "workspace_guide": "get_handbook_outline('reception')",
+  "realtime": [
+    {
+      "event": "opd.queue.updated",
+      "check": "the screen refreshes without polling"
+    }
+  ],
+  "acceptance_rules": [
+    "Always send an Idempotency-Key header: one UUID per registration the user starts, the same one on every retry of it (a second click after a lost answer is a retry), so a retry never double-charges.",
+    "Only name, gender, age/DOB and mobile are required for Regular patients; CNIC optional.",
+    "Patient Photo is OPTIONAL here and everywhere (never a required field, never a blocker): offer 'Take photo' (camera) or 'Choose file' (JPEG or PNG), preview, retake, and 'Skip' needing no reason. Ask first; respect a refusal (purdah, privacy) and never delay an emergency, an injured face or a patient who cannot cooperate. Upload it after the patient exists: POST /patients/{patient_id}/documents doc_type=Photo, its own Idempotency-Key, so a failed upload never repeats a registration, a payment or an admission. Show photo_document_id (patient, admission) through GET /patient-documents/{document_id}/download.",
+    "'Reports brought by the patient' (optional, any number): file (PDF, or a JPEG/PNG scan or photo of the paper), type (LabReport, Imaging, DischargeSummary, Prescription, ReferralLetter, Other), title (the test or report, e.g. 'CBC'), issued by (source_facility, required) and the date on it (document_date) → POST /patients/{patient_id}/documents with is_outside=true. List them labelled 'Outside: <facility>, <date>', apart from this hospital's own results: they are never shown or counted as this hospital's lab or imaging results.",
+    "Discount above the user's ceiling → DISCOUNT_CEILING_EXCEEDED (details.max_pct): issue the ticket within the ceiling, then offer 'Request VIP waiver' with waiver_pct for the rest (Billing Admin / Owner approve).",
+    "AR_OUTSTANDING_BLOCK: show the dues banner; Emergency source bypasses the block.",
+    "Print print_payload.text on the 80 mm thermal printer mapped to this terminal (GET /terminals/whoami).",
+    "POST /reception/registrations starts new emergency_department work for an emergency patient (source Emergency) without an open emergency visit: offer that choice only while emergency_department is Active (GET /establishment active); the rest of the action stays."
+  ],
+  "demo_accounts": "demo_accounts() lists a login per role; sandbox_call runs each case on the DEV server"
+}

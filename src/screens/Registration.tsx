@@ -79,6 +79,7 @@ export function Registration({
   const [dob, setDob] = useState("");
   const [mobile, setMobile] = useState("");
   const [cnic, setCnic] = useState("");
+  const [upmrn, setUpmrn] = useState("");
   const [serviceId, setServiceId] = useState("");
   const [source, setSource] =
     useState<registration.RegistrationIn["source"]>("WalkIn");
@@ -114,7 +115,7 @@ export function Registration({
     setSearching(true);
     const timer = setTimeout(async () => {
       try {
-        const found = await patients.search({ q: query.trim(), limit: 20 });
+        const found = await patients.searchPatients({ q: query.trim(), limit: 20 });
         if (generation === searchGeneration.current) setHits(found);
       } catch (cause) {
         if (generation === searchGeneration.current) setSearchError(cause);
@@ -253,6 +254,7 @@ export function Registration({
         mobile: mobile.trim(),
         ...(dob ? { dob } : { age_years: Number(age) }),
         ...(cnic.trim() ? { cnic: cnic.trim() } : {}),
+        ...(upmrn.trim() ? { upmrn: upmrn.trim() } : {}),
         billing_category: billing,
         ...(billing === "Panel"
           ? { panel_id: Number(panelId), panel_member_no: member || null }
@@ -270,6 +272,7 @@ export function Registration({
               mobile: mobile.trim(),
               ...(dob ? { dob } : { age_years: Number(age) }),
               ...(cnic.trim() ? { cnic: cnic.trim() } : {}),
+              ...(upmrn.trim() ? { upmrn: upmrn.trim() } : {}),
               billing_category: billing,
               ...(billing === "Panel"
                 ? { panel_id: Number(panelId), panel_member_no: member || null }
@@ -314,6 +317,7 @@ export function Registration({
     setDob("");
     setMobile("");
     setCnic("");
+    setUpmrn("");
     setExtras({});
     setBilling("Cash");
     setPanelId("");
@@ -344,6 +348,7 @@ export function Registration({
     );
   const activeServices = catalog.data?.filter((item) => item.is_active) || [];
   const refusal = error instanceof ApiError ? error.response.error : undefined;
+  const duplicate = ["PATIENT_CNIC_EXISTS", "PATIENT_UPMRN_EXISTS"].includes(refusal?.code || "");
   const ceiling = refusal?.code === "DISCOUNT_CEILING_EXCEEDED" ? refusal.details : undefined;
   const rawMaximum = ceiling?.max_amount;
   const maximumDiscount = typeof rawMaximum === "number" ? rawMaximum
@@ -567,6 +572,9 @@ export function Registration({
                       onChange={(e) => setCnic(e.target.value)}
                       pattern="[0-9]{5}-?[0-9]{7}-?[0-9]"
                     />
+                  </Field>
+                  <Field label={t("UPMRN (optional)", "یونیورسل مریض نمبر (اختیاری)")} hint={t("Enter only an issued Universal Patient Medical Record Number.", "صرف پہلے سے جاری کردہ یونیورسل مریض نمبر درج کریں۔")}>
+                    <input data-help="registration.intake" aria-label={t("UPMRN (optional)", "یونیورسل مریض نمبر (اختیاری)")} dir="ltr" value={upmrn} onChange={e => setUpmrn(e.target.value)} maxLength={40} pattern={"[A-Za-z0-9][A-Za-z0-9\\/\\-]{3,39}"} />
                   </Field>
                 </div>
               ) : (
@@ -936,7 +944,7 @@ export function Registration({
                 </>
               )}
             </fieldset>
-            <ErrorBox error={error} />
+            {duplicate ? <aside role="alert" className="error"><p>{t("This patient is already registered: search for them instead", "یہ مریض پہلے سے رجسٹرڈ ہے: دوبارہ اندراج کے بجائے اسے تلاش کریں")} <bdi>{refusal?.code}</bdi></p><button type="button" data-help="registration.intake" onClick={() => {setMode("returning");setQuery(refusal?.code === "PATIENT_UPMRN_EXISTS" ? upmrn.trim() : cnic.trim());setSelected(undefined);setError(undefined);}}>{t("Search existing patient", "پہلے سے درج مریض تلاش کریں")}</button></aside> : <ErrorBox error={error} />}
             {ceiling && (
               <aside className="notice" role="alert">
                 <p>{t("Discount limit returned by the server", "سرور کی بتائی ہوئی رعایت کی حد")}: <bdi>{String(ceiling.max_pct ?? "—")}%</bdi> · <bdi>{rawMaximum == null ? "—" : String(rawMaximum)}</bdi></p>

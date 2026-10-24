@@ -3,11 +3,8 @@
 import { api } from "./api";
 
 const withQuery = (path: string, q?: Record<string, unknown>) => {
-  const s = new URLSearchParams(
-    Object.entries(q ?? {})
-      .filter(([, v]) => v !== undefined && v !== null)
-      .map(([k, v]) => [k, String(v)]),
-  ).toString();
+  const s = new URLSearchParams(Object.entries(q ?? {}).filter(([, v]) => v !== undefined && v !== null)
+    .map(([k, v]) => [k, String(v)])).toString();
   return s ? `${path}?${s}` : path;
 };
 
@@ -15,21 +12,7 @@ const withQuery = (path: string, q?: Record<string, unknown>) => {
 export interface PatientDocumentUploadOut {
   document_id: number;
   patient_id: number;
-  doc_type:
-    | "Photo"
-    | "CNIC"
-    | "PanelCard"
-    | "Consent"
-    | "ReferralLetter"
-    | "DeathCertificate"
-    | "AutopsyReport"
-    | "PostMortemReport"
-    | "MedicoLegalReport"
-    | "LabReport"
-    | "Imaging"
-    | "DischargeSummary"
-    | "Prescription"
-    | "Other";
+  doc_type: "Photo" | "CNIC" | "PanelCard" | "Consent" | "ReferralLetter" | "DeathCertificate" | "AutopsyReport" | "PostMortemReport" | "MedicoLegalReport" | "LabReport" | "Imaging" | "DischargeSummary" | "Prescription" | "Other";
   title: string | null;
   content_type: "application/pdf" | "image/jpeg" | "image/png";
   size_bytes: number;
@@ -45,21 +28,7 @@ export interface PatientDocumentUploadOut {
 export interface PatientDocumentOut {
   document_id: number;
   patient_id: number;
-  doc_type:
-    | "Photo"
-    | "CNIC"
-    | "PanelCard"
-    | "Consent"
-    | "ReferralLetter"
-    | "DeathCertificate"
-    | "AutopsyReport"
-    | "PostMortemReport"
-    | "MedicoLegalReport"
-    | "LabReport"
-    | "Imaging"
-    | "DischargeSummary"
-    | "Prescription"
-    | "Other";
+  doc_type: "Photo" | "CNIC" | "PanelCard" | "Consent" | "ReferralLetter" | "DeathCertificate" | "AutopsyReport" | "PostMortemReport" | "MedicoLegalReport" | "LabReport" | "Imaging" | "DischargeSummary" | "Prescription" | "Other";
   title: string | null;
   content_type: "application/pdf" | "image/jpeg" | "image/png";
   size_bytes: number;
@@ -85,12 +54,13 @@ export interface PatientCreate {
   panel_id?: number | null;
   panel_member_no?: string | null;
   cnic?: string | null;
+  /** The Universal Patient Medical Record Number, once the PHC's HMIS issues one (announced for Category I hospitals; its format is not published yet): optional, unique among active records (PATIENT_UPMRN_EXISTS) */
+  upmrn?: string | null;
   father_or_husband_name?: string | null;
   address?: string | null;
   emergency_contact_name?: string | null;
   emergency_contact_phone?: string | null;
-  blood_group?:
-    "A+" | "A-" | "B+" | "B-" | "AB+" | "AB-" | "O+" | "O-" | "Unknown" | null;
+  blood_group?: "A+" | "A-" | "B+" | "B-" | "AB+" | "AB-" | "O+" | "O-" | "Unknown" | null;
   allergies?: string | null;
   /** Staff member registering as a patient (payroll deduction) */
   linked_employee_id?: number | null;
@@ -111,11 +81,12 @@ export interface PatientDetailOut {
   age_recorded_on: string | null;
   mobile: string | null;
   cnic: string | null;
+  /** The Universal Patient Medical Record Number when one was recorded (optional) */
+  upmrn: string | null;
   address: string | null;
   emergency_contact_name: string | null;
   emergency_contact_phone: string | null;
-  blood_group:
-    "A+" | "A-" | "B+" | "B-" | "AB+" | "AB-" | "O+" | "O-" | "Unknown" | null;
+  blood_group: "A+" | "A-" | "B+" | "B-" | "AB+" | "AB-" | "O+" | "O-" | "Unknown" | null;
   allergies: string | null;
   billing_category: "Cash" | "Panel";
   panel_id: number | null;
@@ -178,13 +149,7 @@ export interface PaymentOut {
   receipt_no: string;
   payment_type: "Collection" | "Refund" | "WaiverDispensation" | "ARCollection";
   amount: number;
-  method:
-    | "Cash"
-    | "Card"
-    | "BankTransfer"
-    | "PanelCredit"
-    | "PayrollDeduction"
-    | "Charity";
+  method: "Cash" | "Card" | "BankTransfer" | "PanelCredit" | "PayrollDeduction" | "Charity";
   invoice_id: number | null;
   shift_id: number | null;
   collected_at: string;
@@ -207,26 +172,8 @@ export interface OpdTicketDetailOut {
   department_name: string | null;
   service_id: number | null;
   source: "WalkIn" | "Emergency" | "CodeRed" | "Referred" | "ReturnVisit";
-  status:
-    | "Issued"
-    | "Waiting"
-    | "InConsultation"
-    | "Examined"
-    | "Completed"
-    | "Deferred"
-    | "Expired"
-    | "Forfeited"
-    | "Refunded"
-    | "Void"
-    | "Cancelled";
-  payment_status:
-    | "Unpaid"
-    | "PartiallyPaid"
-    | "Paid"
-    | "CreditAuthorized"
-    | "Waivered"
-    | "Refunded"
-    | "PanelBilled";
+  status: "Issued" | "Waiting" | "InConsultation" | "Examined" | "Completed" | "Deferred" | "Expired" | "Forfeited" | "Refunded" | "Void" | "Cancelled";
+  payment_status: "Unpaid" | "PartiallyPaid" | "Paid" | "CreditAuthorized" | "Waivered" | "Refunded" | "PanelBilled";
   approval_lock: "None" | "RefundPending" | "WaiverPending" | "CreditPending";
   gross_amount: number;
   discount_amount: number;
@@ -265,14 +212,7 @@ export interface OpdQueueEntryOut {
   token_no: number;
   token_date: string;
   priority: number;
-  status:
-    | "Active"
-    | "Suspended"
-    | "Deferred"
-    | "Rerouted"
-    | "Completed"
-    | "Cancelled"
-    | "Expired";
+  status: "Active" | "Suspended" | "Deferred" | "Rerouted" | "Completed" | "Cancelled" | "Expired";
   queued_at: string;
   called_at: string | null;
   rerouted_from_queue_id: number | null;
@@ -282,8 +222,7 @@ export interface OpdQueueEntryOut {
 export interface InvoiceDetailOut {
   invoice_id: number;
   invoice_no: string;
-  invoice_type:
-    "OPD" | "IPD" | "Pharmacy" | "Lab" | "Imaging" | "OT" | "OTC" | "Other";
+  invoice_type: "OPD" | "IPD" | "Pharmacy" | "Lab" | "Imaging" | "OT" | "OTC" | "Other";
   patient_id: number | null;
   admission_id: number | null;
   ticket_id: number | null;
@@ -300,15 +239,7 @@ export interface InvoiceDetailOut {
   waiver_amount: number;
   waiver_dispensed_amount: number;
   credit_amount: number;
-  status:
-    | "Draft"
-    | "Open"
-    | "PartiallyPaid"
-    | "Paid"
-    | "CreditAuthorized"
-    | "Waivered"
-    | "Refunded"
-    | "Cancelled";
+  status: "Draft" | "Open" | "PartiallyPaid" | "Paid" | "CreditAuthorized" | "Waivered" | "Refunded" | "Cancelled";
   /** Locked while an approval (waiver, credit, refund) is pending */
   is_locked: boolean;
   locked_reason: string | null;
@@ -322,16 +253,7 @@ export interface InvoiceDetailOut {
 
 export interface InvoiceLineOut {
   invoice_item_id: number;
-  line_type:
-    | "Consultation"
-    | "Service"
-    | "Drug"
-    | "LabTest"
-    | "Imaging"
-    | "OTProcedure"
-    | "OTConsumable"
-    | "RoomCharge"
-    | "Reversal";
+  line_type: "Consultation" | "Service" | "Drug" | "LabTest" | "Imaging" | "OTProcedure" | "OTConsumable" | "RoomCharge" | "Reversal";
   description: string;
   qty: number;
   unit_price: number;
@@ -346,17 +268,7 @@ export interface InvoiceLineOut {
 /** The pending approval that currently locks a subject (e.g. an OPD ticket). */
 export interface ApprovalSummaryOut {
   request_id: number;
-  approval_type:
-    | "Refund"
-    | "VIPWaiverPreConsult"
-    | "VIPWaiverPostConsult"
-    | "PatientCredit"
-    | "PharmacyCharityOverride"
-    | "LargeCashDrop"
-    | "WardIndent"
-    | "APPayment"
-    | "PolicyChange"
-    | "PrivilegedAccess";
+  approval_type: "Refund" | "VIPWaiverPreConsult" | "VIPWaiverPostConsult" | "PatientCredit" | "PharmacyCharityOverride" | "LargeCashDrop" | "WardIndent" | "APPayment" | "PolicyChange" | "PrivilegedAccess";
   status: "Pending" | "Approved" | "Rejected" | "Cancelled";
   requested_at: string;
   summary: string;
@@ -419,26 +331,8 @@ export interface RegistrationOut {
   department_name: string | null;
   service_id: number | null;
   source: "WalkIn" | "Emergency" | "CodeRed" | "Referred" | "ReturnVisit";
-  status:
-    | "Issued"
-    | "Waiting"
-    | "InConsultation"
-    | "Examined"
-    | "Completed"
-    | "Deferred"
-    | "Expired"
-    | "Forfeited"
-    | "Refunded"
-    | "Void"
-    | "Cancelled";
-  payment_status:
-    | "Unpaid"
-    | "PartiallyPaid"
-    | "Paid"
-    | "CreditAuthorized"
-    | "Waivered"
-    | "Refunded"
-    | "PanelBilled";
+  status: "Issued" | "Waiting" | "InConsultation" | "Examined" | "Completed" | "Deferred" | "Expired" | "Forfeited" | "Refunded" | "Void" | "Cancelled";
+  payment_status: "Unpaid" | "PartiallyPaid" | "Paid" | "CreditAuthorized" | "Waivered" | "Refunded" | "PanelBilled";
   approval_lock: "None" | "RefundPending" | "WaiverPending" | "CreditPending";
   gross_amount: number;
   discount_amount: number;
@@ -473,34 +367,7 @@ export interface RegistrationOut {
 }
 
 export interface PrintOut_OpdSlipFieldsOut_ {
-  document_type:
-    | "autopsy_order"
-    | "bed_labels"
-    | "blood_component_label"
-    | "blood_donation_labels"
-    | "clinical_note"
-    | "complaint_letter"
-    | "complaints_notice"
-    | "consent_form"
-    | "cost_estimate"
-    | "cssd_labels"
-    | "death_certificate"
-    | "discharge_summary"
-    | "dispensing_label"
-    | "dose_label"
-    | "id_card"
-    | "imaging_report"
-    | "lab_label"
-    | "lab_report"
-    | "mlc_intimation"
-    | "opd_slip"
-    | "pharmacy_receipt"
-    | "prescription"
-    | "referral_slip"
-    | "send_out_manifest"
-    | "surgical_record"
-    | "triage_algorithm"
-    | "wristband";
+  document_type: "autopsy_order" | "bed_labels" | "blood_component_label" | "blood_donation_labels" | "clinical_note" | "complaint_letter" | "complaints_notice" | "consent_form" | "cost_estimate" | "cssd_labels" | "death_certificate" | "discharge_summary" | "dispensing_label" | "dose_label" | "id_card" | "imaging_report" | "lab_label" | "lab_report" | "mlc_intimation" | "opd_slip" | "pharmacy_receipt" | "prescription" | "referral_slip" | "send_out_manifest" | "surgical_record" | "triage_algorithm" | "wristband";
   /** Which printer of the terminal to use (GET /api/v1/terminals/whoami) */
   printer_role: "receipt" | "label" | "document" | "card";
   paper_width_mm: number;
@@ -527,14 +394,7 @@ export interface OpdSlipFieldsOut {
   discount_amount: number;
   net_payable: number | null;
   amount_paid: number | null;
-  payment_status:
-    | "Unpaid"
-    | "PartiallyPaid"
-    | "Paid"
-    | "CreditAuthorized"
-    | "Waivered"
-    | "Refunded"
-    | "PanelBilled";
+  payment_status: "Unpaid" | "PartiallyPaid" | "Paid" | "CreditAuthorized" | "Waivered" | "Refunded" | "PanelBilled";
   cash_back_prompts: CashBackPromptOut[];
 }
 
@@ -542,8 +402,7 @@ export interface ServiceListItemOut {
   service_id: number;
   code: string;
   name: string;
-  category:
-    "OPD" | "IPD" | "OT" | "Imaging" | "RoomCharge" | "Procedure" | "Other";
+  category: "OPD" | "IPD" | "OT" | "Imaging" | "RoomCharge" | "Procedure" | "Other";
   department_id: number | null;
   doctor_id: number | null;
   default_price: number;
@@ -580,27 +439,9 @@ export interface QueueBoardEntryOut {
   token_no: number;
   patient_name: string;
   /** The ticket's status */
-  status:
-    | "Issued"
-    | "Waiting"
-    | "InConsultation"
-    | "Examined"
-    | "Completed"
-    | "Deferred"
-    | "Expired"
-    | "Forfeited"
-    | "Refunded"
-    | "Void"
-    | "Cancelled";
+  status: "Issued" | "Waiting" | "InConsultation" | "Examined" | "Completed" | "Deferred" | "Expired" | "Forfeited" | "Refunded" | "Void" | "Cancelled";
   priority: number;
-  payment_status:
-    | "Unpaid"
-    | "PartiallyPaid"
-    | "Paid"
-    | "CreditAuthorized"
-    | "Waivered"
-    | "Refunded"
-    | "PanelBilled";
+  payment_status: "Unpaid" | "PartiallyPaid" | "Paid" | "CreditAuthorized" | "Waivered" | "Refunded" | "PanelBilled";
   approval_lock: "None" | "RefundPending" | "WaiverPending" | "CreditPending";
 }
 
@@ -621,26 +462,8 @@ export interface OpdTicketOut {
   department_name: string | null;
   service_id: number | null;
   source: "WalkIn" | "Emergency" | "CodeRed" | "Referred" | "ReturnVisit";
-  status:
-    | "Issued"
-    | "Waiting"
-    | "InConsultation"
-    | "Examined"
-    | "Completed"
-    | "Deferred"
-    | "Expired"
-    | "Forfeited"
-    | "Refunded"
-    | "Void"
-    | "Cancelled";
-  payment_status:
-    | "Unpaid"
-    | "PartiallyPaid"
-    | "Paid"
-    | "CreditAuthorized"
-    | "Waivered"
-    | "Refunded"
-    | "PanelBilled";
+  status: "Issued" | "Waiting" | "InConsultation" | "Examined" | "Completed" | "Deferred" | "Expired" | "Forfeited" | "Refunded" | "Void" | "Cancelled";
+  payment_status: "Unpaid" | "PartiallyPaid" | "Paid" | "CreditAuthorized" | "Waivered" | "Refunded" | "PanelBilled";
   approval_lock: "None" | "RefundPending" | "WaiverPending" | "CreditPending";
   gross_amount: number;
   discount_amount: number;
@@ -685,36 +508,18 @@ export interface StaffLookupOut {
 }
 
 /** Upload a patient document (PDF/JPEG/PNG) — POST /api/v1/patients/{patient_id}/documents (who may call: holders of patient.document.upload). */
-export function uploadDocument(
-  patient_id: number,
-  body: FormData,
-): Promise<PatientDocumentUploadOut> {
-  return api<PatientDocumentUploadOut>(
-    "POST",
-    `/patients/${patient_id}/documents`,
-    body,
-    { idempotent: true },
-  );
+export function uploadDocumentPatientsDocuments(patient_id: number, body: FormData): Promise<PatientDocumentUploadOut> {
+  return api<PatientDocumentUploadOut>("POST", `/patients/${patient_id}/documents`, body, { idempotent: true });
 }
 
 /** List patient documents — GET /api/v1/patients/{patient_id}/documents (who may call: holders of patient.document.view). */
-export function listDocuments(
-  patient_id: number,
-): Promise<PatientDocumentOut[]> {
-  return api<PatientDocumentOut[]>(
-    "GET",
-    `/patients/${patient_id}/documents`,
-    undefined,
-  );
+export function listDocumentsPatients(patient_id: number): Promise<PatientDocumentOut[]> {
+  return api<PatientDocumentOut[]>("GET", `/patients/${patient_id}/documents`, undefined);
 }
 
 /** Download a patient document — GET /api/v1/patient-documents/{document_id}/download (who may call: holders of patient.document.view). */
-export function downloadDocument(document_id: number): Promise<unknown> {
-  return api<unknown>(
-    "GET",
-    `/patient-documents/${document_id}/download`,
-    undefined,
-  );
+export function downloadDocumentPatientDocuments(document_id: number): Promise<unknown> {
+  return api<unknown>("GET", `/patient-documents/${document_id}/download`, undefined);
 }
 
 /** Register a patient (full intake form) — POST /api/v1/patients (who may call: holders of patient.create). */
@@ -723,62 +528,31 @@ export function createPatient(body: PatientCreate): Promise<PatientDetailOut> {
 }
 
 /** Collect payment for an unpaid ticket (then queues it) — POST /api/v1/opd-tickets/{ticket_id}/pay (who may call: holders of finance.payment.collect). */
-export function pay(
-  ticket_id: number,
-  body: TicketPayIn,
-): Promise<TicketPaymentOut> {
-  return api<TicketPaymentOut>("POST", `/opd-tickets/${ticket_id}/pay`, body, {
-    idempotent: true,
-  });
+export function pay(ticket_id: number, body: TicketPayIn): Promise<TicketPaymentOut> {
+  return api<TicketPaymentOut>("POST", `/opd-tickets/${ticket_id}/pay`, body, { idempotent: true });
 }
 
 /** Register + OPD slip + payment + queue token (atomic) — POST /api/v1/reception/registrations (who may call: holders of opd.ticket.create). */
-export function register(body: RegistrationIn): Promise<RegistrationOut> {
-  return api<RegistrationOut>("POST", `/reception/registrations`, body, {
-    idempotent: true,
-  });
+export function registerReceptionRegistrations(body: RegistrationIn): Promise<RegistrationOut> {
+  return api<RegistrationOut>("POST", `/reception/registrations`, body, { idempotent: true });
 }
 
 /** Hospital service prices (lab prices live in the lab catalogue) — GET /api/v1/finance/service-catalog (who may call: any logged-in user). */
-export function serviceCatalog(query?: {
-  category?: string | null;
-}): Promise<ServiceListItemOut[]> {
-  return api<ServiceListItemOut[]>(
-    "GET",
-    withQuery(`/finance/service-catalog`, query),
-    undefined,
-  );
+export function serviceCatalog(query?: { category?: string | null }): Promise<ServiceListItemOut[]> {
+  return api<ServiceListItemOut[]>("GET", withQuery(`/finance/service-catalog`, query), undefined);
 }
 
 /** OPD slip print payload (text + barcode + QR) — GET /api/v1/opd-tickets/{ticket_id}/print-payload (who may call: holders of opd.ticket.view). */
-export function printPayload(
-  ticket_id: number,
-): Promise<PrintOut_OpdSlipFieldsOut_> {
-  return api<PrintOut_OpdSlipFieldsOut_>(
-    "GET",
-    `/opd-tickets/${ticket_id}/print-payload`,
-    undefined,
-  );
+export function printPayload(ticket_id: number): Promise<PrintOut_OpdSlipFieldsOut_> {
+  return api<PrintOut_OpdSlipFieldsOut_>("GET", `/opd-tickets/${ticket_id}/print-payload`, undefined);
 }
 
 /** All queues, deferred tickets, pending approvals, cash-back prompts — GET /api/v1/opd-queues/reception-dashboard (who may call: holders of opd.queue.view). */
 export function receptionDashboard(): Promise<ReceptionDashboardOut> {
-  return api<ReceptionDashboardOut>(
-    "GET",
-    `/opd-queues/reception-dashboard`,
-    undefined,
-  );
+  return api<ReceptionDashboardOut>("GET", `/opd-queues/reception-dashboard`, undefined);
 }
 
 /** Find a staff member for a form (badge facts only) — GET /api/v1/staff/lookup (who may call: any logged-in user). */
-export function lookupStaff(query: {
-  q: string;
-  department_id?: number | null;
-  limit?: number;
-}): Promise<StaffLookupOut[]> {
-  return api<StaffLookupOut[]>(
-    "GET",
-    withQuery(`/staff/lookup`, query),
-    undefined,
-  );
+export function lookupStaff(query: { q: string; department_id?: number | null; limit?: number }): Promise<StaffLookupOut[]> {
+  return api<StaffLookupOut[]>("GET", withQuery(`/staff/lookup`, query), undefined);
 }

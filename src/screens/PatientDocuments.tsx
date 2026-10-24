@@ -36,7 +36,7 @@ export function PatientDocuments({ user, revision }: { user: any; revision: numb
     const n = ++generation.current;
     setSearching(true); setHits([]); setSearchError(undefined); setSearched(false);
     try {
-      const result = await patients.search({ q: query.trim(), limit: 20 });
+      const result = await patients.searchPatients({ q: query.trim(), limit: 20 });
       if (n === generation.current) { setHits(result); setSearched(true); }
     } catch (error) { if (n === generation.current) setSearchError(error); }
     finally { if (n === generation.current) setSearching(false); }

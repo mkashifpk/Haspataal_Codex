@@ -100,6 +100,8 @@ export interface PatientSearchHitOut {
   age_recorded_on: string | null;
   mobile: string | null;
   cnic: string | null;
+  /** The Universal Patient Medical Record Number when one was recorded (optional) */
+  upmrn: string | null;
   address: string | null;
   emergency_contact_name: string | null;
   emergency_contact_phone: string | null;
@@ -144,7 +146,7 @@ export function policy(): Promise<HomeVisitPolicyOut> {
   return api<HomeVisitPolicyOut>("GET", `/home-visits/policy`, undefined);
 }
 
-/** Returning-patient lookup by name / phone / CNIC / MRN — GET /api/v1/patients/search (who may call: holders of patient.search). */
+/** Returning-patient lookup by name / phone / CNIC / UPMRN / MRN — GET /api/v1/patients/search (who may call: holders of patient.search). */
 export function searchPatients(query: { q: string; limit?: number }): Promise<PatientSearchHitOut[]> {
   return api<PatientSearchHitOut[]>("GET", withQuery(`/patients/search`, query), undefined);
 }

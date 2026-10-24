@@ -7,7 +7,7 @@ export const registrationHelp: HelpPage = {
   purposeUr:
     "استقبالیہ عملے کے لیے: مریض کی شناخت اور معلومات درج کریں، او پی ڈی ٹکٹ جاری یا دوبارہ کھولیں، ادائیگی وصول کریں، اختیاری کاغذات منسلک کریں اور پرچی چھاپیں۔",
   steps: [
-    "For a new patient enter name, gender, mobile and age or date of birth. CNIC and all other intake fields are optional. Select Panel billing only with an active panel. Patient record only creates the patient without an OPD visit.",
+    "For a new patient enter name, gender, mobile and age or date of birth. CNIC, an issued UPMRN (Universal Patient Medical Record Number) and all other intake fields are optional. Never invent a UPMRN. Duplicate CNIC or UPMRN: this patient is already registered; search for them instead. Select Panel billing only with an active panel. Patient record only creates the patient without an OPD visit.",
     "For a returning patient search or scan the MRN into Search patient. Confirm name and MRN plus age or date of birth; review allergies, medico-legal status, death and outstanding-dues banners.",
     "Choose an active OPD service and source. Emergency is offered only when the hospital emergency service is active. Use emergency bypass only for the clinical emergency described by the option. Only permitted staff can override dues, and must record a reason.",
     "Enter a discount and reason if needed. If the server refuses a discount above your ceiling, reduce it to the allowed amount or issue unpaid, then request a VIP waiver with a reason and percentage. The ticket stays frozen while approval is pending.",
@@ -16,7 +16,7 @@ export const registrationHelp: HelpPage = {
     "After success keep the ticket number. Preview the slip, print to the mapped receipt printer or save its PDF. If printing fails, reprint the same ticket. If any write's answer is lost, retry the original action and payload; do not create another registration or payment.",
   ],
   stepsUr: [
-    "نئے مریض کا نام، جنس، موبائل اور عمر یا تاریخ پیدائش درج کریں۔ شناختی کارڈ اور باقی معلومات اختیاری ہیں۔ پینل بلنگ کے لیے فعال پینل منتخب کریں۔ صرف مریض کا ریکارڈ بنانے سے او پی ڈی وزٹ نہیں بنتی۔",
+    "نئے مریض کا نام، جنس، موبائل اور عمر یا تاریخ پیدائش درج کریں۔ شناختی کارڈ، جاری کردہ یونیورسل مریض نمبر اور باقی معلومات اختیاری ہیں۔ نمبر خود نہ بنائیں۔ شناختی کارڈ یا نمبر پہلے موجود ہو تو مریض دوبارہ درج کرنے کے بجائے تلاش کریں۔ پینل بلنگ کے لیے فعال پینل منتخب کریں۔ صرف مریض کا ریکارڈ بنانے سے او پی ڈی وزٹ نہیں بنتی۔",
     "واپس آنے والے مریض کو تلاش کریں یا تلاش کے خانے میں ایم آر این سکین کریں۔ نام، ایم آر این اور عمر یا تاریخ پیدائش سے شناخت کی تصدیق کریں۔ الرجی، میڈیکو لیگل حیثیت، وفات اور واجبات کی تنبیہ دیکھیں۔",
     "فعال او پی ڈی خدمت اور آمد کی قسم منتخب کریں۔ ایمرجنسی صرف ہسپتال کی ایمرجنسی خدمت فعال ہونے پر ملتی ہے۔ ہنگامی استثنا صرف حقیقی طبی ایمرجنسی کے لیے استعمال کریں۔ واجبات کا استثنا صرف مجاز عملہ وجہ لکھ کر دے سکتا ہے۔",
     "رعایت اور وجہ درج کریں۔ اگر رعایت اجازت سے زیادہ ہو تو اسے مجاز حد تک کم کریں یا بلا ادائیگی ٹکٹ جاری کرکے وجہ اور شرح کے ساتھ وی آئی پی رعایت کی درخواست دیں۔ منظوری تک ٹکٹ مقفل رہتا ہے۔",

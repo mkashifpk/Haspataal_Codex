@@ -1,0 +1,4446 @@
+[
+  {
+    "method": "POST",
+    "path": "/api/v1/patients",
+    "summary": "Register a patient (full intake form)",
+    "tags": [
+      "Patients"
+    ],
+    "permissions": [
+      "patient.create"
+    ],
+    "permissions_mode": "all",
+    "idempotency_key": true,
+    "description": "Creates the patient only. To register AND issue an OPD slip + queue in one atomic step use\n`POST /reception/registrations`. Send an `Idempotency-Key` (one per user action, the same on a retry): without one,\na retry after a lost answer creates a second record unless a CNIC or a UPMRN was given.\n`PATIENT_CNIC_EXISTS`, `PATIENT_UPMRN_EXISTS`: a patient with this CNIC or universal patient medical record number\nis registered already: search for them instead.\n\n**Required permission:** `patient.create`\n\n**Required permission:** `patient.create`",
+    "roles_allowed": [
+      "admissions_officer",
+      "receptionist",
+      "triage_nurse"
+    ],
+    "parameters": [
+      {
+        "name": "Idempotency-Key",
+        "in": "header",
+        "required": false,
+        "description": "Unique per logical action; retries return the first result",
+        "schema": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Unique per logical action; retries return the first result",
+          "title": "Idempotency-Key"
+        }
+      }
+    ],
+    "request_body": {
+      "title": "PatientCreate",
+      "properties": {
+        "full_name": {
+          "type": "string",
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Full Name",
+          "examples": [
+            "Muhammad Ali"
+          ]
+        },
+        "gender": {
+          "type": "string",
+          "enum": [
+            "male",
+            "female",
+            "other",
+            "unknown"
+          ],
+          "title": "Gender"
+        },
+        "dob": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Dob"
+        },
+        "age_years": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "maximum": 150,
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Age Years"
+        },
+        "mobile": {
+          "type": "string",
+          "pattern": "^\\+?[0-9][0-9 -]{6,19}$",
+          "title": "Mobile",
+          "examples": [
+            "0300-1234567"
+          ]
+        },
+        "billing_category": {
+          "type": "string",
+          "enum": [
+            "Cash",
+            "Panel"
+          ],
+          "title": "Billing Category",
+          "default": "Cash"
+        },
+        "panel_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Panel Id"
+        },
+        "panel_member_no": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 50
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Panel Member No"
+        },
+        "cnic": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[0-9]{5}-?[0-9]{7}-?[0-9]$"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cnic",
+          "examples": [
+            "35202-1234567-1"
+          ]
+        },
+        "upmrn": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9/-]{3,39}$"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Upmrn",
+          "description": "The Universal Patient Medical Record Number, once the PHC's HMIS issues one (announced for Category I hospitals; its format is not published yet): optional, unique among active records (PATIENT_UPMRN_EXISTS)"
+        },
+        "father_or_husband_name": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 200
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Father Or Husband Name"
+        },
+        "address": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 500
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Address"
+        },
+        "emergency_contact_name": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 200
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Emergency Contact Name"
+        },
+        "emergency_contact_phone": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 30
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Emergency Contact Phone"
+        },
+        "blood_group": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "A+",
+                "A-",
+                "B+",
+                "B-",
+                "AB+",
+                "AB-",
+                "O+",
+                "O-",
+                "Unknown"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Blood Group"
+        },
+        "allergies": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 1000
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Allergies"
+        },
+        "linked_employee_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Linked Employee Id",
+          "description": "Staff member registering as a patient (payroll deduction)"
+        }
+      },
+      "type": "object",
+      "required": [
+        "full_name",
+        "gender",
+        "mobile"
+      ],
+      "description": "Full registration. REQUIRED: full_name, gender, dob OR age_years, mobile, billing_category\n(+ panel_id when billing_category = Panel). Everything else is optional."
+    },
+    "request_content_type": "application/json",
+    "response_schema": {
+      "title": "Envelope[PatientDetailOut]",
+      "properties": {
+        "data": {
+          "title": "PatientDetailOut",
+          "properties": {
+            "patient_id": {
+              "type": "integer",
+              "title": "Patient Id"
+            },
+            "photo_document_id": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Photo Document Id",
+              "description": "The newest Patient Photo of the merge chain, for the identity check; null when none was taken (it is optional). GET /patient-documents/{document_id}/download"
+            },
+            "mrn": {
+              "type": "string",
+              "title": "Mrn"
+            },
+            "registration_type": {
+              "type": "string",
+              "enum": [
+                "Regular",
+                "LabOnly",
+                "TraumaTemp",
+                "Merged"
+              ],
+              "title": "Registration Type"
+            },
+            "full_name": {
+              "type": "string",
+              "title": "Full Name"
+            },
+            "father_or_husband_name": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Father Or Husband Name"
+            },
+            "gender": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "enum": [
+                    "male",
+                    "female",
+                    "other",
+                    "unknown"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Gender"
+            },
+            "dob": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Dob"
+            },
+            "age_years": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Age Years"
+            },
+            "age_recorded_on": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Age Recorded On",
+              "description": "When age_years was recorded (the age grows from that date)"
+            },
+            "mobile": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Mobile"
+            },
+            "cnic": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cnic"
+            },
+            "upmrn": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Upmrn",
+              "description": "The Universal Patient Medical Record Number when one was recorded (optional)"
+            },
+            "address": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Address"
+            },
+            "emergency_contact_name": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Emergency Contact Name"
+            },
+            "emergency_contact_phone": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Emergency Contact Phone"
+            },
+            "blood_group": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "enum": [
+                    "A+",
+                    "A-",
+                    "B+",
+                    "B-",
+                    "AB+",
+                    "AB-",
+                    "O+",
+                    "O-",
+                    "Unknown"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Blood Group"
+            },
+            "allergies": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Allergies"
+            },
+            "billing_category": {
+              "type": "string",
+              "enum": [
+                "Cash",
+                "Panel"
+              ],
+              "title": "Billing Category"
+            },
+            "panel_id": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Panel Id"
+            },
+            "panel_name": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Panel Name"
+            },
+            "panel_member_no": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Panel Member No"
+            },
+            "temp_identifier": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Temp Identifier",
+              "description": "Unknown-trauma label, e.g. \"Unknown Male 3\""
+            },
+            "merged_into_id": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Merged Into Id"
+            },
+            "linked_employee_id": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Linked Employee Id"
+            },
+            "is_deceased": {
+              "type": "boolean",
+              "title": "Is Deceased"
+            },
+            "death_id": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Death Id",
+              "description": "The death record (GET /deaths/{death_id}) when the death is recorded"
+            },
+            "death_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Death At"
+            },
+            "mlc_numbers": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array",
+              "title": "Mlc Numbers",
+              "description": "Medico-legal case numbers of this person: show a MEDICO-LEGAL banner when not empty (MSDS 154: the record is clearly so marked)"
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time",
+              "title": "Created At"
+            },
+            "row_version": {
+              "type": "integer",
+              "title": "Row Version"
+            },
+            "outstanding": {
+              "$ref": "#/components/schemas/OutstandingBannerOut"
+            },
+            "master_patient_id": {
+              "type": "integer",
+              "title": "Master Patient Id",
+              "description": "The record every merged profile points to"
+            },
+            "merged_profiles": {
+              "items": {
+                "$ref": "#/components/schemas/MergedProfileOut"
+              },
+              "type": "array",
+              "title": "Merged Profiles"
+            }
+          },
+          "type": "object",
+          "required": [
+            "patient_id",
+            "photo_document_id",
+            "mrn",
+            "registration_type",
+            "full_name",
+            "father_or_husband_name",
+            "gender",
+            "dob",
+            "age_years",
+            "age_recorded_on",
+            "mobile",
+            "cnic",
+            "upmrn",
+            "address",
+            "emergency_contact_name",
+            "emergency_contact_phone",
+            "blood_group",
+            "allergies",
+            "billing_category",
+            "panel_id",
+            "panel_name",
+            "panel_member_no",
+            "temp_identifier",
+            "merged_into_id",
+            "linked_employee_id",
+            "is_deceased",
+            "death_id",
+            "death_at",
+            "mlc_numbers",
+            "created_at",
+            "row_version",
+            "outstanding",
+            "master_patient_id",
+            "merged_profiles"
+          ]
+        },
+        "meta": {
+          "title": "Meta",
+          "properties": {
+            "server_time": {
+              "type": "string",
+              "title": "Server Time",
+              "description": "Server clock (UTC). Use it to detect terminal clock skew."
+            },
+            "page": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Page"
+            },
+            "page_size": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Page Size"
+            },
+            "total_count": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Total Count"
+            },
+            "next_cursor": {
+              "title": "Next Cursor"
+            }
+          },
+          "type": "object",
+          "required": [
+            "server_time"
+          ]
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ]
+    },
+    "recorded_example": {
+      "request": {
+        "path": "/api/v1/patients",
+        "body": {
+          "full_name": "Ali Khan",
+          "gender": "male",
+          "age_years": 40,
+          "mobile": "03001555248"
+        }
+      },
+      "response": {
+        "status": 201,
+        "body": {
+          "data": {
+            "patient_id": 2,
+            "mrn": "MRN-2026-000002",
+            "registration_type": "Regular",
+            "full_name": "Ali Khan",
+            "father_or_husband_name": null,
+            "gender": "male",
+            "dob": null,
+            "age_years": 40,
+            "age_recorded_on": "2026-10-24",
+            "mobile": "03001555248",
+            "cnic": null,
+            "upmrn": null,
+            "address": null,
+            "emergency_contact_name": null,
+            "emergency_contact_phone": null,
+            "blood_group": null,
+            "allergies": null,
+            "billing_category": "Cash",
+            "panel_id": null,
+            "panel_name": null,
+            "panel_member_no": null,
+            "temp_identifier": null,
+            "merged_into_id": null,
+            "linked_employee_id": null,
+            "is_deceased": false,
+            "created_at": "2026-10-23T19:53:29.889830+00:00",
+            "row_version": 1,
+            "death_id": null,
+            "death_at": null,
+            "photo_document_id": null,
+            "mlc_numbers": [],
+            "outstanding": {
+              "has_outstanding_ar": false,
+              "outstanding_ar_balance": 0,
+              "ar_block_applies": false,
+              "banner_text": null
+            },
+            "master_patient_id": 2,
+            "merged_profiles": []
+          },
+          "meta": {
+            "server_time": "2026-10-23T19:53:29.898946+00:00"
+          },
+          "request_id": "d6ffc15649654aa8b53f9a1696638605"
+        }
+      },
+      "errors_seen": [
+        "FORBIDDEN",
+        "PATIENT_UPMRN_EXISTS",
+        "VALIDATION_ERROR",
+        "WORKSPACE_NOT_ALLOWED"
+      ],
+      "events_emitted": []
+    },
+    "errors": [
+      {
+        "code": "FORBIDDEN",
+        "http_status": 403,
+        "message": "You do not have permission to do this.",
+        "retryable": false,
+        "category": "auth",
+        "ui_action": "Explain and hide the action (check x-permissions)."
+      },
+      {
+        "code": "PATIENT_CNIC_EXISTS",
+        "http_status": 409,
+        "message": "A patient with this CNIC already exists.",
+        "retryable": false,
+        "category": "business",
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      },
+      {
+        "code": "PATIENT_UPMRN_EXISTS",
+        "http_status": 409,
+        "message": "A patient with this universal patient medical record number (UPMRN) already exists: search for it instead of registering again.",
+        "retryable": false,
+        "category": "business",
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      },
+      {
+        "code": "VALIDATION_ERROR",
+        "http_status": 422,
+        "message": "The request is invalid.",
+        "retryable": false,
+        "category": "request",
+        "ui_action": "Show field errors from details.fields / the message."
+      },
+      {
+        "code": "WORKSPACE_NOT_ALLOWED",
+        "http_status": 403,
+        "message": "This window's workspace (X-Active-Workspace) is not one of yours.",
+        "retryable": false,
+        "category": "auth",
+        "ui_action": "Explain and hide the action (check x-permissions)."
+      }
+    ],
+    "errors_seen_in_tests": [
+      "FORBIDDEN",
+      "PATIENT_UPMRN_EXISTS",
+      "VALIDATION_ERROR",
+      "WORKSPACE_NOT_ALLOWED"
+    ],
+    "used_by_screens": [
+      "registration"
+    ],
+    "used_by_workflows": [],
+    "typescript_example": "// Register a patient (full intake form)  (permissions: patient.create)\nexport const createPatient = (body) =>\n  api(\"POST\", `/patients`, body, { idempotent: true });   // api(): see get_guide('envelope-and-errors')",
+    "access": {
+      "authentication": "user",
+      "permissions": [
+        "patient.create"
+      ],
+      "permissions_mode": "all",
+      "who": "holders of patient.create",
+      "roles_allowed": [
+        "admissions_officer",
+        "receptionist",
+        "triage_nurse"
+      ]
+    },
+    "write_semantics": {
+      "protection": "idempotency_key",
+      "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+      "reconcile_with": null,
+      "emits_events": [],
+      "prints": false,
+      "related_state_machine": null
+    },
+    "emits_events": [],
+    "list": null,
+    "cross_field_rules": {
+      "PatientCreate": [
+        "dob or age_years is required",
+        "panel_id is required for Panel billing"
+      ]
+    },
+    "errors_detail": [
+      {
+        "code": "FORBIDDEN",
+        "http_status": 403,
+        "message": "You do not have permission to do this.",
+        "retryable": false,
+        "ui_action": "Explain and hide the action (check x-permissions).",
+        "source": [
+          "seen_in_tests"
+        ],
+        "details_fields": [
+          "any_of",
+          "required"
+        ],
+        "details_from": "POST /api/v1/admin/departments"
+      },
+      {
+        "code": "PATIENT_CNIC_EXISTS",
+        "http_status": 409,
+        "message": "A patient with this CNIC already exists.",
+        "retryable": false,
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+        "source": [
+          "documented"
+        ],
+        "details_fields": [],
+        "details_from": null
+      },
+      {
+        "code": "PATIENT_UPMRN_EXISTS",
+        "http_status": 409,
+        "message": "A patient with this universal patient medical record number (UPMRN) already exists: search for it instead of registering again.",
+        "retryable": false,
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+        "source": [
+          "documented",
+          "seen_in_tests"
+        ],
+        "details_fields": [
+          "constraint"
+        ],
+        "details_from": "POST /api/v1/patients"
+      },
+      {
+        "code": "VALIDATION_ERROR",
+        "http_status": 422,
+        "message": "The request is invalid.",
+        "retryable": false,
+        "ui_action": "Show field errors from details.fields / the message.",
+        "source": [
+          "seen_in_tests"
+        ],
+        "details_fields": [],
+        "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+      },
+      {
+        "code": "WORKSPACE_NOT_ALLOWED",
+        "http_status": 403,
+        "message": "This window's workspace (X-Active-Workspace) is not one of yours.",
+        "retryable": false,
+        "ui_action": "Explain and hide the action (check x-permissions).",
+        "source": [
+          "seen_in_tests"
+        ],
+        "details_fields": [
+          "allowed",
+          "workspace"
+        ],
+        "details_from": "GET /api/v1/auth/me"
+      }
+    ]
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/patients/{patient_id}",
+    "summary": "Update demographics (optimistic locking)",
+    "tags": [
+      "Patients"
+    ],
+    "permissions": [
+      "patient.update"
+    ],
+    "permissions_mode": "all",
+    "idempotency_key": false,
+    "description": "Send only the fields that change, with `expected_version` (`VERSION_CONFLICT` when another terminal changed the\nprofile first). `PATIENT_CNIC_EXISTS`, `PATIENT_UPMRN_EXISTS`: another active profile has this CNIC or universal\npatient medical record number (a duplicate: merge it instead). `PATIENT_TYPE_TRANSITION_INVALID`: only a lab-only or\ntrauma profile is upgraded to a permanent one.\n\n**Required permission:** `patient.update`\n\n**Required permission:** `patient.update`",
+    "roles_allowed": [
+      "admissions_officer",
+      "receptionist"
+    ],
+    "parameters": [
+      {
+        "name": "patient_id",
+        "in": "path",
+        "required": true,
+        "description": "",
+        "schema": {
+          "type": "integer",
+          "title": "Patient Id"
+        }
+      }
+    ],
+    "request_body": {
+      "title": "PatientUpdate",
+      "properties": {
+        "expected_version": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Expected Version"
+        },
+        "full_name": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 200,
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Full Name"
+        },
+        "gender": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "male",
+                "female",
+                "other",
+                "unknown"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Gender"
+        },
+        "dob": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Dob"
+        },
+        "age_years": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "maximum": 150,
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Age Years"
+        },
+        "mobile": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^\\+?[0-9][0-9 -]{6,19}$"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Mobile"
+        },
+        "cnic": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[0-9]{5}-?[0-9]{7}-?[0-9]$"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cnic"
+        },
+        "upmrn": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9/-]{3,39}$"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Upmrn",
+          "description": "The Universal Patient Medical Record Number, once the PHC's HMIS issues one (announced for Category I hospitals; its format is not published yet): optional, unique among active records (PATIENT_UPMRN_EXISTS)"
+        },
+        "father_or_husband_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Father Or Husband Name"
+        },
+        "address": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Address"
+        },
+        "emergency_contact_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Emergency Contact Name"
+        },
+        "emergency_contact_phone": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Emergency Contact Phone"
+        },
+        "blood_group": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "A+",
+                "A-",
+                "B+",
+                "B-",
+                "AB+",
+                "AB-",
+                "O+",
+                "O-",
+                "Unknown"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Blood Group"
+        },
+        "allergies": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Allergies"
+        },
+        "billing_category": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "Cash",
+                "Panel"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Billing Category"
+        },
+        "panel_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Panel Id"
+        },
+        "panel_member_no": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Panel Member No"
+        },
+        "upgrade_to_regular": {
+          "type": "boolean",
+          "title": "Upgrade To Regular",
+          "default": false
+        }
+      },
+      "type": "object",
+      "description": "Partial update. Send `expected_version` (row_version you edited) to avoid overwriting\nanother terminal's changes (409 VERSION_CONFLICT). A LabOnly patient becomes Regular by\nsending `upgrade_to_regular: true` with the required fields."
+    },
+    "request_content_type": "application/json",
+    "response_schema": {
+      "title": "Envelope[PatientDetailOut]",
+      "properties": {
+        "data": {
+          "title": "PatientDetailOut",
+          "properties": {
+            "patient_id": {
+              "type": "integer",
+              "title": "Patient Id"
+            },
+            "photo_document_id": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Photo Document Id",
+              "description": "The newest Patient Photo of the merge chain, for the identity check; null when none was taken (it is optional). GET /patient-documents/{document_id}/download"
+            },
+            "mrn": {
+              "type": "string",
+              "title": "Mrn"
+            },
+            "registration_type": {
+              "type": "string",
+              "enum": [
+                "Regular",
+                "LabOnly",
+                "TraumaTemp",
+                "Merged"
+              ],
+              "title": "Registration Type"
+            },
+            "full_name": {
+              "type": "string",
+              "title": "Full Name"
+            },
+            "father_or_husband_name": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Father Or Husband Name"
+            },
+            "gender": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "enum": [
+                    "male",
+                    "female",
+                    "other",
+                    "unknown"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Gender"
+            },
+            "dob": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Dob"
+            },
+            "age_years": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Age Years"
+            },
+            "age_recorded_on": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Age Recorded On",
+              "description": "When age_years was recorded (the age grows from that date)"
+            },
+            "mobile": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Mobile"
+            },
+            "cnic": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cnic"
+            },
+            "upmrn": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Upmrn",
+              "description": "The Universal Patient Medical Record Number when one was recorded (optional)"
+            },
+            "address": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Address"
+            },
+            "emergency_contact_name": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Emergency Contact Name"
+            },
+            "emergency_contact_phone": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Emergency Contact Phone"
+            },
+            "blood_group": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "enum": [
+                    "A+",
+                    "A-",
+                    "B+",
+                    "B-",
+                    "AB+",
+                    "AB-",
+                    "O+",
+                    "O-",
+                    "Unknown"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Blood Group"
+            },
+            "allergies": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Allergies"
+            },
+            "billing_category": {
+              "type": "string",
+              "enum": [
+                "Cash",
+                "Panel"
+              ],
+              "title": "Billing Category"
+            },
+            "panel_id": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Panel Id"
+            },
+            "panel_name": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Panel Name"
+            },
+            "panel_member_no": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Panel Member No"
+            },
+            "temp_identifier": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Temp Identifier",
+              "description": "Unknown-trauma label, e.g. \"Unknown Male 3\""
+            },
+            "merged_into_id": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Merged Into Id"
+            },
+            "linked_employee_id": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Linked Employee Id"
+            },
+            "is_deceased": {
+              "type": "boolean",
+              "title": "Is Deceased"
+            },
+            "death_id": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Death Id",
+              "description": "The death record (GET /deaths/{death_id}) when the death is recorded"
+            },
+            "death_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Death At"
+            },
+            "mlc_numbers": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array",
+              "title": "Mlc Numbers",
+              "description": "Medico-legal case numbers of this person: show a MEDICO-LEGAL banner when not empty (MSDS 154: the record is clearly so marked)"
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time",
+              "title": "Created At"
+            },
+            "row_version": {
+              "type": "integer",
+              "title": "Row Version"
+            },
+            "outstanding": {
+              "$ref": "#/components/schemas/OutstandingBannerOut"
+            },
+            "master_patient_id": {
+              "type": "integer",
+              "title": "Master Patient Id",
+              "description": "The record every merged profile points to"
+            },
+            "merged_profiles": {
+              "items": {
+                "$ref": "#/components/schemas/MergedProfileOut"
+              },
+              "type": "array",
+              "title": "Merged Profiles"
+            }
+          },
+          "type": "object",
+          "required": [
+            "patient_id",
+            "photo_document_id",
+            "mrn",
+            "registration_type",
+            "full_name",
+            "father_or_husband_name",
+            "gender",
+            "dob",
+            "age_years",
+            "age_recorded_on",
+            "mobile",
+            "cnic",
+            "upmrn",
+            "address",
+            "emergency_contact_name",
+            "emergency_contact_phone",
+            "blood_group",
+            "allergies",
+            "billing_category",
+            "panel_id",
+            "panel_name",
+            "panel_member_no",
+            "temp_identifier",
+            "merged_into_id",
+            "linked_employee_id",
+            "is_deceased",
+            "death_id",
+            "death_at",
+            "mlc_numbers",
+            "created_at",
+            "row_version",
+            "outstanding",
+            "master_patient_id",
+            "merged_profiles"
+          ]
+        },
+        "meta": {
+          "title": "Meta",
+          "properties": {
+            "server_time": {
+              "type": "string",
+              "title": "Server Time",
+              "description": "Server clock (UTC). Use it to detect terminal clock skew."
+            },
+            "page": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Page"
+            },
+            "page_size": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Page Size"
+            },
+            "total_count": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Total Count"
+            },
+            "next_cursor": {
+              "title": "Next Cursor"
+            }
+          },
+          "type": "object",
+          "required": [
+            "server_time"
+          ]
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ]
+    },
+    "recorded_example": {
+      "request": {
+        "path": "/api/v1/patients/1",
+        "body": {
+          "cnic": "35202-7654321-3",
+          "expected_version": 1
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": {
+            "patient_id": 1,
+            "mrn": "MRN-2026-000001",
+            "registration_type": "Regular",
+            "full_name": "Bilal Ahmed",
+            "father_or_husband_name": null,
+            "gender": "male",
+            "dob": null,
+            "age_years": 40,
+            "age_recorded_on": "2026-10-24",
+            "mobile": "0300-1112223",
+            "cnic": "35202-7654321-3",
+            "upmrn": null,
+            "address": null,
+            "emergency_contact_name": null,
+            "emergency_contact_phone": null,
+            "blood_group": null,
+            "allergies": null,
+            "billing_category": "Cash",
+            "panel_id": null,
+            "panel_name": null,
+            "panel_member_no": null,
+            "temp_identifier": null,
+            "merged_into_id": null,
+            "linked_employee_id": null,
+            "is_deceased": false,
+            "created_at": "2026-10-23T19:42:35.280806+00:00",
+            "row_version": 2,
+            "death_id": null,
+            "death_at": null,
+            "photo_document_id": null,
+            "mlc_numbers": [],
+            "outstanding": {
+              "has_outstanding_ar": false,
+              "outstanding_ar_balance": 0,
+              "ar_block_applies": false,
+              "banner_text": null
+            },
+            "master_patient_id": 1,
+            "merged_profiles": []
+          },
+          "meta": {
+            "server_time": "2026-10-23T19:42:35.452664+00:00"
+          },
+          "request_id": "2cd2f06946fb46668a3bd6dc490b29bf"
+        }
+      },
+      "errors_seen": [
+        "PATIENT_UPMRN_EXISTS",
+        "VERSION_CONFLICT"
+      ],
+      "events_emitted": []
+    },
+    "errors": [
+      {
+        "code": "PATIENT_CNIC_EXISTS",
+        "http_status": 409,
+        "message": "A patient with this CNIC already exists.",
+        "retryable": false,
+        "category": "business",
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      },
+      {
+        "code": "PATIENT_TYPE_TRANSITION_INVALID",
+        "http_status": 422,
+        "message": "Registration type change not allowed.",
+        "retryable": false,
+        "category": "business",
+        "ui_action": "Show field errors from details.fields / the message."
+      },
+      {
+        "code": "PATIENT_UPMRN_EXISTS",
+        "http_status": 409,
+        "message": "A patient with this universal patient medical record number (UPMRN) already exists: search for it instead of registering again.",
+        "retryable": false,
+        "category": "business",
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      },
+      {
+        "code": "VERSION_CONFLICT",
+        "http_status": 409,
+        "message": "The record was changed by someone else; reload and try again.",
+        "retryable": false,
+        "category": "request",
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      }
+    ],
+    "errors_seen_in_tests": [
+      "PATIENT_UPMRN_EXISTS",
+      "VERSION_CONFLICT"
+    ],
+    "used_by_screens": [
+      "patient_search"
+    ],
+    "used_by_workflows": [
+      "opd-reception"
+    ],
+    "typescript_example": "// Update demographics (optimistic locking)  (permissions: patient.update)\nexport const updatePatient = (patient_id, body) =>\n  api(\"PATCH\", `/patients/${patient_id}`, body);   // api(): see get_guide('envelope-and-errors')",
+    "access": {
+      "authentication": "user",
+      "permissions": [
+        "patient.update"
+      ],
+      "permissions_mode": "all",
+      "who": "holders of patient.update",
+      "roles_allowed": [
+        "admissions_officer",
+        "receptionist"
+      ]
+    },
+    "write_semantics": {
+      "protection": "version_check",
+      "on_lost_answer": "Send expected_version from the record you edited. If the first call advances that version, a repeat with the old version is refused (VERSION_CONFLICT or a final-state error). Omitting this optional field gives no version protection. Re-read the record and let the user decide; never retry automatically.",
+      "reconcile_with": "GET /patients/{patient_id}",
+      "emits_events": [],
+      "prints": false,
+      "related_state_machine": null
+    },
+    "emits_events": [],
+    "list": null,
+    "cross_field_rules": {},
+    "errors_detail": [
+      {
+        "code": "PATIENT_CNIC_EXISTS",
+        "http_status": 409,
+        "message": "A patient with this CNIC already exists.",
+        "retryable": false,
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+        "source": [
+          "documented"
+        ],
+        "details_fields": [],
+        "details_from": null
+      },
+      {
+        "code": "PATIENT_TYPE_TRANSITION_INVALID",
+        "http_status": 422,
+        "message": "Registration type change not allowed.",
+        "retryable": false,
+        "ui_action": "Show field errors from details.fields / the message.",
+        "source": [
+          "documented"
+        ],
+        "details_fields": [],
+        "details_from": null
+      },
+      {
+        "code": "PATIENT_UPMRN_EXISTS",
+        "http_status": 409,
+        "message": "A patient with this universal patient medical record number (UPMRN) already exists: search for it instead of registering again.",
+        "retryable": false,
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+        "source": [
+          "documented",
+          "seen_in_tests"
+        ],
+        "details_fields": [
+          "constraint"
+        ],
+        "details_from": "POST /api/v1/patients"
+      },
+      {
+        "code": "VERSION_CONFLICT",
+        "http_status": 409,
+        "message": "The record was changed by someone else; reload and try again.",
+        "retryable": false,
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+        "source": [
+          "documented",
+          "seen_in_tests"
+        ],
+        "details_fields": [
+          "current_version",
+          "expected_version"
+        ],
+        "details_from": "PATCH /api/v1/finance/service-catalog/{service_id}"
+      }
+    ]
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/reception/registrations",
+    "summary": "Register + OPD slip + payment + queue token (atomic)",
+    "tags": [
+      "OPD"
+    ],
+    "permissions": [
+      "opd.ticket.create"
+    ],
+    "permissions_mode": "all",
+    "idempotency_key": true,
+    "service_gates": [
+      {
+        "capability": "emergency_department",
+        "when": "for an emergency patient (source Emergency) without an open emergency visit",
+        "continues_while_retiring": false
+      }
+    ],
+    "description": "Workflow §1.1/§1.3. Returns the ticket, invoice, queue token and a ready-to-print OPD slip\n(`print_payload`). The assigned doctor's screen updates live via `opd.queue.updated`.\n\nBlocking rules: outstanding dues → `AR_OUTSTANDING_BLOCK` (unless `emergency_bypass` or\n`ar_override_reason` + permission); discount above your ceiling → `DISCOUNT_CEILING_EXCEEDED`.\n\nCash goes through the caller's own open cash shift: `SHIFT_NOT_OPEN` without one (open it on My cash shift).\nAn id in the request body that does not exist: `REFERENCE_NOT_FOUND` (details.field).\n`PATIENT_MERGED_CANNOT_TRANSACT`: this patient record was merged; use the master record.\n\n**Required permission:** `opd.ticket.create`\n\n**Needs the service:** `emergency_department` Active for an emergency patient (source Emergency) without an open emergency visit (`CAPABILITY_INACTIVE` otherwise; GET /establishment)\n\n**Required permission:** `opd.ticket.create`\n\n**Needs the service:** `emergency_department` Active for an emergency patient (source Emergency) without an open emergency visit (`CAPABILITY_INACTIVE` otherwise; GET /establishment)",
+    "roles_allowed": [
+      "receptionist"
+    ],
+    "parameters": [
+      {
+        "name": "Idempotency-Key",
+        "in": "header",
+        "required": false,
+        "description": "Unique per logical action; retries return the first result",
+        "schema": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Unique per logical action; retries return the first result",
+          "title": "Idempotency-Key"
+        }
+      }
+    ],
+    "request_body": {
+      "title": "RegistrationIn",
+      "properties": {
+        "patient_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Patient Id",
+          "description": "Existing patient (from /patients/search)"
+        },
+        "new_patient": {
+          "anyOf": [
+            {
+              "title": "PatientCreate",
+              "properties": {
+                "full_name": {
+                  "type": "string",
+                  "maxLength": 200,
+                  "minLength": 1,
+                  "title": "Full Name",
+                  "examples": [
+                    "Muhammad Ali"
+                  ]
+                },
+                "gender": {
+                  "type": "string",
+                  "enum": [
+                    "male",
+                    "female",
+                    "other",
+                    "unknown"
+                  ],
+                  "title": "Gender"
+                },
+                "dob": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "format": "date"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Dob"
+                },
+                "age_years": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "maximum": 150,
+                      "minimum": 0
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Age Years"
+                },
+                "mobile": {
+                  "type": "string",
+                  "pattern": "^\\+?[0-9][0-9 -]{6,19}$",
+                  "title": "Mobile",
+                  "examples": [
+                    "0300-1234567"
+                  ]
+                },
+                "billing_category": {
+                  "type": "string",
+                  "enum": [
+                    "Cash",
+                    "Panel"
+                  ],
+                  "title": "Billing Category",
+                  "default": "Cash"
+                },
+                "panel_id": {
+                  "anyOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Panel Id"
+                },
+                "panel_member_no": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "maxLength": 50
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Panel Member No"
+                },
+                "cnic": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "pattern": "^[0-9]{5}-?[0-9]{7}-?[0-9]$"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Cnic",
+                  "examples": [
+                    "35202-1234567-1"
+                  ]
+                },
+                "upmrn": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9/-]{3,39}$"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Upmrn",
+                  "description": "The Universal Patient Medical Record Number, once the PHC's HMIS issues one (announced for Category I hospitals; its format is not published yet): optional, unique among active records (PATIENT_UPMRN_EXISTS)"
+                },
+                "father_or_husband_name": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "maxLength": 200
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Father Or Husband Name"
+                },
+                "address": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "maxLength": 500
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Address"
+                },
+                "emergency_contact_name": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "maxLength": 200
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Emergency Contact Name"
+                },
+                "emergency_contact_phone": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "maxLength": 30
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Emergency Contact Phone"
+                },
+                "blood_group": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "A+",
+                        "A-",
+                        "B+",
+                        "B-",
+                        "AB+",
+                        "AB-",
+                        "O+",
+                        "O-",
+                        "Unknown"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Blood Group"
+                },
+                "allergies": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "maxLength": 1000
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Allergies"
+                },
+                "linked_employee_id": {
+                  "anyOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Linked Employee Id",
+                  "description": "Staff member registering as a patient (payroll deduction)"
+                }
+              },
+              "type": "object",
+              "required": [
+                "full_name",
+                "gender",
+                "mobile"
+              ],
+              "description": "Full registration. REQUIRED: full_name, gender, dob OR age_years, mobile, billing_category\n(+ panel_id when billing_category = Panel). Everything else is optional."
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Full intake form for a new patient"
+        },
+        "doctor_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Doctor Id",
+          "description": "Target doctor (employee id); or give department_id"
+        },
+        "department_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Department Id"
+        },
+        "service_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Service Id",
+          "description": "Override the consultation service/fee"
+        },
+        "source": {
+          "type": "string",
+          "enum": [
+            "WalkIn",
+            "Emergency",
+            "Referred",
+            "ReturnVisit"
+          ],
+          "title": "Source",
+          "default": "WalkIn"
+        },
+        "discount_amount": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0
+            },
+            {
+              "type": "string",
+              "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+            }
+          ],
+          "title": "Discount Amount",
+          "description": "Within your discount ceiling (else request a waiver)",
+          "default": "0"
+        },
+        "discount_reason": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 300
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Discount Reason"
+        },
+        "payment": {
+          "anyOf": [
+            {
+              "title": "PaymentIn",
+              "properties": {
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "Cash",
+                    "Card",
+                    "BankTransfer"
+                  ],
+                  "title": "Method",
+                  "default": "Cash"
+                },
+                "amount": {
+                  "anyOf": [
+                    {
+                      "type": "number",
+                      "exclusiveMinimum": 0
+                    },
+                    {
+                      "type": "string",
+                      "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Amount",
+                  "description": "Defaults to the full amount due"
+                },
+                "reference_no": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "maxLength": 60
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Reference No",
+                  "description": "Card slip / bank reference"
+                }
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Pay now. Omit to issue an unpaid slip (e.g. to request a waiver/credit)."
+        },
+        "emergency_bypass": {
+          "type": "boolean",
+          "title": "Emergency Bypass",
+          "description": "ER/Trauma: skip the outstanding-dues block and payment-before-queue",
+          "default": false
+        },
+        "ar_override_reason": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 300
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ar Override Reason",
+          "description": "Needs permission opd.ticket.ar_override when dues block applies"
+        }
+      },
+      "type": "object",
+      "description": "Atomic front-desk registration: (new or existing) patient → OPD ticket → invoice →\npayment → queue token. Send an `Idempotency-Key` header so a retry never double-charges."
+    },
+    "request_content_type": "application/json",
+    "response_schema": {
+      "title": "Envelope[RegistrationOut]",
+      "properties": {
+        "data": {
+          "title": "RegistrationOut",
+          "properties": {
+            "ticket_id": {
+              "type": "integer",
+              "title": "Ticket Id"
+            },
+            "ticket_number": {
+              "type": "string",
+              "title": "Ticket Number"
+            },
+            "patient_id": {
+              "type": "integer",
+              "title": "Patient Id"
+            },
+            "mrn": {
+              "type": "string",
+              "title": "Mrn"
+            },
+            "patient_name": {
+              "type": "string",
+              "title": "Patient Name"
+            },
+            "gender": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "enum": [
+                    "male",
+                    "female",
+                    "other",
+                    "unknown"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Gender"
+            },
+            "age_years": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Age Years"
+            },
+            "dob": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Dob"
+            },
+            "doctor_id": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Doctor Id",
+              "description": "Null for a department-level ticket (no doctor chosen)"
+            },
+            "doctor_name": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Doctor Name"
+            },
+            "department_id": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Department Id"
+            },
+            "department_name": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Department Name"
+            },
+            "service_id": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Service Id"
+            },
+            "source": {
+              "type": "string",
+              "enum": [
+                "WalkIn",
+                "Emergency",
+                "CodeRed",
+                "Referred",
+                "ReturnVisit"
+              ],
+              "title": "Source"
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "Issued",
+                "Waiting",
+                "InConsultation",
+                "Examined",
+                "Completed",
+                "Deferred",
+                "Expired",
+                "Forfeited",
+                "Refunded",
+                "Void",
+                "Cancelled"
+              ],
+              "title": "Status"
+            },
+            "payment_status": {
+              "type": "string",
+              "enum": [
+                "Unpaid",
+                "PartiallyPaid",
+                "Paid",
+                "CreditAuthorized",
+                "Waivered",
+                "Refunded",
+                "PanelBilled"
+              ],
+              "title": "Payment Status"
+            },
+            "approval_lock": {
+              "type": "string",
+              "enum": [
+                "None",
+                "RefundPending",
+                "WaiverPending",
+                "CreditPending"
+              ],
+              "title": "Approval Lock"
+            },
+            "gross_amount": {
+              "type": "number",
+              "title": "Gross Amount"
+            },
+            "discount_amount": {
+              "type": "number",
+              "title": "Discount Amount"
+            },
+            "net_payable": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Net Payable"
+            },
+            "discount_reason": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Discount Reason"
+            },
+            "issued_at": {
+              "type": "string",
+              "format": "date-time",
+              "title": "Issued At"
+            },
+            "paid_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Paid At"
+            },
+            "valid_until": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Valid Until",
+              "description": "The slip is valid for re-entry until then (set when settled)"
+            },
+            "called_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Called At"
+            },
+            "examined_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Examined At"
+            },
+            "completed_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Completed At"
+            },
+            "deferred_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Deferred At"
+            },
+            "reactivated_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Reactivated At"
+            },
+            "expired_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Expired At"
+            },
+            "voided_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Voided At"
+            },
+            "void_reason": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Void Reason"
+            },
+            "cancelled_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cancelled At"
+            },
+            "is_clinical_locked": {
+              "type": "boolean",
+              "title": "Is Clinical Locked",
+              "description": "Clinical notes are frozen (e.g. after an approved refund)"
+            },
+            "clinical_lock_reason": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Clinical Lock Reason"
+            },
+            "is_emergency_bypass": {
+              "type": "boolean",
+              "title": "Is Emergency Bypass"
+            },
+            "is_ar_block_overridden": {
+              "type": "boolean",
+              "title": "Is Ar Block Overridden"
+            },
+            "row_version": {
+              "type": "integer",
+              "title": "Row Version"
+            },
+            "queue": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/OpdQueueEntryOut"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "invoice": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/InvoiceDetailOut"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "pending_approval": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/ApprovalSummaryOut"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "cash_back_prompts": {
+              "items": {
+                "$ref": "#/components/schemas/CashBackPromptOut"
+              },
+              "type": "array",
+              "title": "Cash Back Prompts"
+            },
+            "payment": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/PaymentOut"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "queue_entry_created": {
+              "type": "boolean",
+              "title": "Queue Entry Created"
+            },
+            "print_payload": {
+              "$ref": "#/components/schemas/PrintOut_OpdSlipFieldsOut_"
+            }
+          },
+          "type": "object",
+          "required": [
+            "ticket_id",
+            "ticket_number",
+            "patient_id",
+            "mrn",
+            "patient_name",
+            "gender",
+            "age_years",
+            "dob",
+            "doctor_id",
+            "doctor_name",
+            "department_id",
+            "department_name",
+            "service_id",
+            "source",
+            "status",
+            "payment_status",
+            "approval_lock",
+            "gross_amount",
+            "discount_amount",
+            "net_payable",
+            "discount_reason",
+            "issued_at",
+            "paid_at",
+            "valid_until",
+            "called_at",
+            "examined_at",
+            "completed_at",
+            "deferred_at",
+            "reactivated_at",
+            "expired_at",
+            "voided_at",
+            "void_reason",
+            "cancelled_at",
+            "is_clinical_locked",
+            "clinical_lock_reason",
+            "is_emergency_bypass",
+            "is_ar_block_overridden",
+            "row_version",
+            "queue",
+            "invoice",
+            "pending_approval",
+            "cash_back_prompts",
+            "payment",
+            "queue_entry_created",
+            "print_payload"
+          ],
+          "description": "The new ticket after registration, with the payment taken, whether it is queued, and the slip to print."
+        },
+        "meta": {
+          "title": "Meta",
+          "properties": {
+            "server_time": {
+              "type": "string",
+              "title": "Server Time",
+              "description": "Server clock (UTC). Use it to detect terminal clock skew."
+            },
+            "page": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Page"
+            },
+            "page_size": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Page Size"
+            },
+            "total_count": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Total Count"
+            },
+            "next_cursor": {
+              "title": "Next Cursor"
+            }
+          },
+          "type": "object",
+          "required": [
+            "server_time"
+          ]
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ]
+    },
+    "recorded_example": {
+      "request": {
+        "path": "/api/v1/reception/registrations",
+        "body": {
+          "new_patient": {
+            "full_name": "Ali Khan",
+            "gender": "male",
+            "age_years": 40,
+            "mobile": "03003562680"
+          },
+          "doctor_id": 1,
+          "payment": {
+            "method": "Cash"
+          }
+        }
+      },
+      "response": {
+        "status": 201,
+        "body": {
+          "data": {
+            "ticket_id": 1,
+            "ticket_number": "OPD-2026-000001",
+            "patient_id": 1,
+            "mrn": "MRN-2026-000001",
+            "patient_name": "Ali Khan",
+            "gender": "male",
+            "age_years": 40,
+            "dob": null,
+            "doctor_id": 1,
+            "doctor_name": "Dr Ahmed",
+            "department_id": 1,
+            "department_name": "General Medicine",
+            "service_id": 1,
+            "source": "WalkIn",
+            "status": "Waiting",
+            "payment_status": "Paid",
+            "approval_lock": "None",
+            "gross_amount": 1000,
+            "discount_amount": 0,
+            "net_payable": 1000,
+            "discount_reason": null,
+            "issued_at": "2026-09-27T17:36:46.406822+00:00",
+            "paid_at": "2026-09-27T17:36:46.406822+00:00",
+            "valid_until": "2026-09-30T17:36:46.406822+00:00",
+            "called_at": null,
+            "examined_at": null,
+            "completed_at": null,
+            "deferred_at": null,
+            "reactivated_at": null,
+            "expired_at": null,
+            "voided_at": null,
+            "void_reason": null,
+            "cancelled_at": null,
+            "is_clinical_locked": false,
+            "clinical_lock_reason": null,
+            "is_emergency_bypass": false,
+            "is_ar_block_overridden": false,
+            "row_version": 4,
+            "queue": {
+              "queue_id": 1,
+              "queue_group": "doctor:1",
+              "token_no": 1,
+              "token_date": "2026-09-27",
+              "priority": 0,
+              "status": "Active",
+              "queued_at": "2026-09-27T17:36:46.406822+00:00",
+              "called_at": null,
+              "rerouted_from_queue_id": null
+            },
+            "invoice": {
+              "invoice_id": 1,
+              "invoice_no": "INV-2026-0000001",
+              "invoice_type": "OPD",
+              "patient_id": 1,
+              "admission_id": null,
+              "ticket_id": 1,
+              "panel_id": null,
+              "employee_id": null,
+              "walkin_customer_name": null,
+              "walkin_customer_mobile": null,
+              "gross_total": 1000,
+              "discount_total": 0,
+              "net_payable": 1000,
+              "amount_paid": 1000,
+              "amount_refunded": 0,
+              "waiver_amount": 0,
+              "waiver_dispensed_amount": 0,
+              "credit_amount": 0,
+              "status": "Paid",
+              "is_locked": false,
+              "locked_reason": null,
+              "finalized_at": "2026-09-27T17:36:46.406822+00:00",
+              "business_date": "2026-09-27",
+              "created_at": "2026-09-27T17:36:46.406822+00:00",
+              "row_version": 5,
+              "lines": [
+                {
+                  "invoice_item_id": 1,
+                  "line_type": "Consultation",
+                  "description": "OPD Consultation - GM",
+                  "qty": 1,
+                  "unit_price": 1000,
+                  "line_total": 1000,
+                  "bed_day": null,
+                  "reverses_item_id": null,
+                  "reversal_reason": null,
+                  "created_at": "2026-09-27T17:36:46.406822+00:00"
+                }
+              ],
+              "balance_due": 0
+            },
+            "pending_approval": null,
+            "cash_back_prompts": [],
+            "payment": {
+              "payment_id": 1,
+              "receipt_no": "RCT-2026-0000001",
+              "payment_type": "Collection",
+              "amount": 1000,
+              "method": "Cash",
+              "invoice_id": 1,
+              "shift_id": 1,
+              "collected_at": "2026-09-27T17:36:46.406822+00:00"
+            },
+            "queue_entry_created": true,
+            "print_payload": {
+              "document_type": "opd_slip",
+              "printer_role": "receipt",
+              "paper_width_mm": 80,
+              "fields": {
+                "hospital_name": "Haspataal Hospital",
+                "ticket_number": "OPD-2026-000001",
+                "token_no": 1,
+                "patient_name": "Ali Khan",
+                "mrn": "MRN-2026-000001",
+                "doctor_name": "Dr Ahmed",
+                "department_name": "General Medicine",
+                "issued_at": "2026-09-27T17:36:46.406822+00:00",
+                "valid_until": "2026-09-30T17:36:46.406822+00:00",
+                "gross_amount": 1000,
+                "discount_amount": 0,
+                "net_payable": 1000,
+                "amount_paid": 1000,
+                "payment_status": "Paid",
+                "cash_back_prompts": []
+              },
+              "text": "               Haspataal Hospital\n                    OPD SLIP\n------------------------------------------------\nTicket                           OPD-2026-000001\nToken                                         #1\nPatient                                 Ali Khan\nMRN                              MRN-2026-000001\nDoctor                                  Dr Ahmed\nIssued                         27-Sep-2026 …",
+              "barcode_svg": "<svg version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" width=\"53.840mm\" height=\"18.411mm\">\r\n    <!--Autogenerated with python-barcode 0.16.1-->\r\n    <g id=\"barcode_group\">\r\n        <rect width=\"100%\" height=\"100%\" style=\"fill:white\"/>\r\n        <rect x=\"2.000mm\" y=\"1.000mm\" width=\"0.560mm\" height=\"12.000mm\" style=\"fill:black;\"/>\r\n        <rect x=\"2.840mm\" y=\"1.000mm\" width=\"0.280mm\" height=\"12.000mm…",
+              "qr_svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"132\" height=\"132\" class=\"segno\"><path transform=\"scale(4)\" class=\"qrline\" stroke=\"#000\" d=\"M2 2.5h7m4 0h1m2 0h3m1 0h1m3 0h7m-29 1h1m5 0h1m1 0h1m3 0h1m2 0h3m4 0h1m5 0h1m-29 1h1m1 0h3m1 0h1m1 0h1m3 0h1m6 0h1m2 0h1m1 0h3m1 0h1m-29 1h1m1 0h3m1 0h1m2 0h1m1 0h1m3 0h1m1 0h1m2 0h1m1 0h1m1 0h3m1 0h1m-29 1h1m1 0h3m1 0h1m4 0h5m1 0h4m1 0h1m1 0h3m1 0h1m-29 1h1m5 0…",
+              "pdf_url": null
+            }
+          },
+          "meta": {
+            "server_time": "2026-09-27T17:36:46.571870+00:00"
+          },
+          "request_id": "374920c562bd44be808dac2637cd2cdc"
+        }
+      },
+      "errors_seen": [
+        "AR_OUTSTANDING_BLOCK",
+        "CAPABILITY_INACTIVE",
+        "DISCOUNT_CEILING_EXCEEDED",
+        "IDEMPOTENCY_CONFLICT",
+        "PATIENT_MERGED_CANNOT_TRANSACT"
+      ],
+      "events_emitted": [
+        "er.visit.updated",
+        "opd.queue.updated",
+        "opd.ticket.status_changed"
+      ]
+    },
+    "errors": [
+      {
+        "code": "AR_OUTSTANDING_BLOCK",
+        "http_status": 409,
+        "message": "The patient has outstanding dues; settle or override before issuing a new slip.",
+        "retryable": false,
+        "category": "business",
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      },
+      {
+        "code": "CAPABILITY_INACTIVE",
+        "http_status": 409,
+        "message": "This service is not active here, so no new work of it can start (Settings, facility; GET /establishment).",
+        "retryable": false,
+        "category": "business",
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      },
+      {
+        "code": "DISCOUNT_CEILING_EXCEEDED",
+        "http_status": 403,
+        "message": "The discount exceeds your ceiling: issue the ticket within it and request a VIP waiver for the rest.",
+        "retryable": false,
+        "category": "business",
+        "ui_action": "Explain and hide the action (check x-permissions)."
+      },
+      {
+        "code": "IDEMPOTENCY_CONFLICT",
+        "http_status": 422,
+        "message": "Idempotency-Key was reused with a different request body.",
+        "retryable": false,
+        "category": "request",
+        "ui_action": "Show field errors from details.fields / the message."
+      },
+      {
+        "code": "PATIENT_MERGED_CANNOT_TRANSACT",
+        "http_status": 409,
+        "message": "This patient record was merged; use the master record.",
+        "retryable": false,
+        "category": "business",
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      },
+      {
+        "code": "REFERENCE_NOT_FOUND",
+        "http_status": 422,
+        "message": "A referenced record does not exist.",
+        "retryable": false,
+        "category": "request",
+        "ui_action": "Show field errors from details.fields / the message."
+      },
+      {
+        "code": "SHIFT_NOT_OPEN",
+        "http_status": 409,
+        "message": "Open a cash shift before handling cash.",
+        "retryable": false,
+        "category": "business",
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      }
+    ],
+    "errors_seen_in_tests": [
+      "AR_OUTSTANDING_BLOCK",
+      "CAPABILITY_INACTIVE",
+      "DISCOUNT_CEILING_EXCEEDED",
+      "IDEMPOTENCY_CONFLICT",
+      "PATIENT_MERGED_CANNOT_TRANSACT"
+    ],
+    "used_by_screens": [
+      "registration"
+    ],
+    "used_by_workflows": [
+      "emergency-department",
+      "facility-profile-and-services",
+      "opd-reception"
+    ],
+    "typescript_example": "// Register + OPD slip + payment + queue token (atomic)  (permissions: opd.ticket.create)\nexport const registerReceptionRegistrations = (body) =>\n  api(\"POST\", `/reception/registrations`, body, { idempotent: true });   // api(): see get_guide('envelope-and-errors')",
+    "access": {
+      "authentication": "user",
+      "permissions": [
+        "opd.ticket.create"
+      ],
+      "permissions_mode": "all",
+      "who": "holders of opd.ticket.create",
+      "roles_allowed": [
+        "receptionist"
+      ]
+    },
+    "write_semantics": {
+      "protection": "idempotency_key",
+      "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+      "reconcile_with": null,
+      "emits_events": [
+        "er.visit.updated",
+        "opd.queue.updated",
+        "opd.ticket.status_changed"
+      ],
+      "prints": false,
+      "related_state_machine": null
+    },
+    "emits_events": [
+      "er.visit.updated",
+      "opd.queue.updated",
+      "opd.ticket.status_changed"
+    ],
+    "list": null,
+    "cross_field_rules": {
+      "RegistrationIn": [
+        "Give exactly one of patient_id or new_patient",
+        "discount_reason is required with a discount"
+      ],
+      "PatientCreate": [
+        "dob or age_years is required",
+        "panel_id is required for Panel billing"
+      ]
+    },
+    "errors_detail": [
+      {
+        "code": "AR_OUTSTANDING_BLOCK",
+        "http_status": 409,
+        "message": "The patient has outstanding dues; settle or override before issuing a new slip.",
+        "retryable": false,
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+        "source": [
+          "documented",
+          "seen_in_tests"
+        ],
+        "details_fields": [
+          "outstanding"
+        ],
+        "details_from": "POST /api/v1/reception/registrations"
+      },
+      {
+        "code": "CAPABILITY_INACTIVE",
+        "http_status": 409,
+        "message": "This service is not active here, so no new work of it can start (Settings, facility; GET /establishment).",
+        "retryable": false,
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+        "source": [
+          "documented",
+          "seen_in_tests"
+        ],
+        "details_fields": [],
+        "details_from": "POST /api/v1/er/visits"
+      },
+      {
+        "code": "DISCOUNT_CEILING_EXCEEDED",
+        "http_status": 403,
+        "message": "The discount exceeds your ceiling: issue the ticket within it and request a VIP waiver for the rest.",
+        "retryable": false,
+        "ui_action": "Explain and hide the action (check x-permissions).",
+        "source": [
+          "documented",
+          "seen_in_tests"
+        ],
+        "details_fields": [
+          "max_amount",
+          "max_pct",
+          "next_step",
+          "requested_pct"
+        ],
+        "details_from": "POST /api/v1/reception/registrations",
+        "next_step": "POST /api/v1/opd-tickets/{ticket_id}/vip-waiver-request {\"reason\": \"...\", \"waiver_pct\": <1-100>}"
+      },
+      {
+        "code": "IDEMPOTENCY_CONFLICT",
+        "http_status": 422,
+        "message": "Idempotency-Key was reused with a different request body.",
+        "retryable": false,
+        "ui_action": "Show field errors from details.fields / the message.",
+        "source": [
+          "seen_in_tests"
+        ],
+        "details_fields": [],
+        "details_from": "POST /api/v1/reception/registrations"
+      },
+      {
+        "code": "PATIENT_MERGED_CANNOT_TRANSACT",
+        "http_status": 409,
+        "message": "This patient record was merged; use the master record.",
+        "retryable": false,
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+        "source": [
+          "documented",
+          "seen_in_tests"
+        ],
+        "details_fields": [],
+        "details_from": "POST /api/v1/patients/{patient_id}/death"
+      },
+      {
+        "code": "REFERENCE_NOT_FOUND",
+        "http_status": 422,
+        "message": "A referenced record does not exist.",
+        "retryable": false,
+        "ui_action": "Show field errors from details.fields / the message.",
+        "source": [
+          "documented"
+        ],
+        "details_fields": [
+          "ward_id"
+        ],
+        "details_from": "POST /api/v1/pharmacy/storage-checks"
+      },
+      {
+        "code": "SHIFT_NOT_OPEN",
+        "http_status": 409,
+        "message": "Open a cash shift before handling cash.",
+        "retryable": false,
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+        "source": [
+          "documented"
+        ],
+        "details_fields": [
+          "status"
+        ],
+        "details_from": "POST /api/v1/finance/cash-shifts/{shift_id}/close"
+      }
+    ]
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/patients/{patient_id}",
+    "summary": "Patient profile (+ outstanding banner, merged profiles)",
+    "tags": [
+      "Patients"
+    ],
+    "permissions": [
+      "patient.view"
+    ],
+    "permissions_mode": "all",
+    "idempotency_key": false,
+    "description": "**Required permission:** `patient.view`\n\n**Required permission:** `patient.view`",
+    "roles_allowed": [
+      "accountant",
+      "admissions_officer",
+      "anaesthetist",
+      "billing_admin",
+      "cashier",
+      "clinic_director",
+      "clinical_specialist",
+      "doctor",
+      "head_nurse",
+      "hospital_admin",
+      "hospital_director",
+      "ipc_nurse",
+      "lab_technician",
+      "lab_verifier",
+      "ot_admin",
+      "ot_nurse",
+      "owner",
+      "pharmacist",
+      "quality_officer",
+      "radiographer",
+      "radiologist",
+      "receptionist",
+      "surgeon",
+      "triage_nurse",
+      "ward_nurse",
+      "zakat_officer"
+    ],
+    "parameters": [
+      {
+        "name": "patient_id",
+        "in": "path",
+        "required": true,
+        "description": "",
+        "schema": {
+          "type": "integer",
+          "title": "Patient Id"
+        }
+      }
+    ],
+    "request_body": null,
+    "request_content_type": null,
+    "response_schema": {
+      "title": "Envelope[PatientDetailOut]",
+      "properties": {
+        "data": {
+          "title": "PatientDetailOut",
+          "properties": {
+            "patient_id": {
+              "type": "integer",
+              "title": "Patient Id"
+            },
+            "photo_document_id": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Photo Document Id",
+              "description": "The newest Patient Photo of the merge chain, for the identity check; null when none was taken (it is optional). GET /patient-documents/{document_id}/download"
+            },
+            "mrn": {
+              "type": "string",
+              "title": "Mrn"
+            },
+            "registration_type": {
+              "type": "string",
+              "enum": [
+                "Regular",
+                "LabOnly",
+                "TraumaTemp",
+                "Merged"
+              ],
+              "title": "Registration Type"
+            },
+            "full_name": {
+              "type": "string",
+              "title": "Full Name"
+            },
+            "father_or_husband_name": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Father Or Husband Name"
+            },
+            "gender": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "enum": [
+                    "male",
+                    "female",
+                    "other",
+                    "unknown"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Gender"
+            },
+            "dob": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Dob"
+            },
+            "age_years": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Age Years"
+            },
+            "age_recorded_on": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Age Recorded On",
+              "description": "When age_years was recorded (the age grows from that date)"
+            },
+            "mobile": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Mobile"
+            },
+            "cnic": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cnic"
+            },
+            "upmrn": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Upmrn",
+              "description": "The Universal Patient Medical Record Number when one was recorded (optional)"
+            },
+            "address": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Address"
+            },
+            "emergency_contact_name": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Emergency Contact Name"
+            },
+            "emergency_contact_phone": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Emergency Contact Phone"
+            },
+            "blood_group": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "enum": [
+                    "A+",
+                    "A-",
+                    "B+",
+                    "B-",
+                    "AB+",
+                    "AB-",
+                    "O+",
+                    "O-",
+                    "Unknown"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Blood Group"
+            },
+            "allergies": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Allergies"
+            },
+            "billing_category": {
+              "type": "string",
+              "enum": [
+                "Cash",
+                "Panel"
+              ],
+              "title": "Billing Category"
+            },
+            "panel_id": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Panel Id"
+            },
+            "panel_name": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Panel Name"
+            },
+            "panel_member_no": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Panel Member No"
+            },
+            "temp_identifier": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Temp Identifier",
+              "description": "Unknown-trauma label, e.g. \"Unknown Male 3\""
+            },
+            "merged_into_id": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Merged Into Id"
+            },
+            "linked_employee_id": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Linked Employee Id"
+            },
+            "is_deceased": {
+              "type": "boolean",
+              "title": "Is Deceased"
+            },
+            "death_id": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Death Id",
+              "description": "The death record (GET /deaths/{death_id}) when the death is recorded"
+            },
+            "death_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Death At"
+            },
+            "mlc_numbers": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array",
+              "title": "Mlc Numbers",
+              "description": "Medico-legal case numbers of this person: show a MEDICO-LEGAL banner when not empty (MSDS 154: the record is clearly so marked)"
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time",
+              "title": "Created At"
+            },
+            "row_version": {
+              "type": "integer",
+              "title": "Row Version"
+            },
+            "outstanding": {
+              "$ref": "#/components/schemas/OutstandingBannerOut"
+            },
+            "master_patient_id": {
+              "type": "integer",
+              "title": "Master Patient Id",
+              "description": "The record every merged profile points to"
+            },
+            "merged_profiles": {
+              "items": {
+                "$ref": "#/components/schemas/MergedProfileOut"
+              },
+              "type": "array",
+              "title": "Merged Profiles"
+            }
+          },
+          "type": "object",
+          "required": [
+            "patient_id",
+            "photo_document_id",
+            "mrn",
+            "registration_type",
+            "full_name",
+            "father_or_husband_name",
+            "gender",
+            "dob",
+            "age_years",
+            "age_recorded_on",
+            "mobile",
+            "cnic",
+            "upmrn",
+            "address",
+            "emergency_contact_name",
+            "emergency_contact_phone",
+            "blood_group",
+            "allergies",
+            "billing_category",
+            "panel_id",
+            "panel_name",
+            "panel_member_no",
+            "temp_identifier",
+            "merged_into_id",
+            "linked_employee_id",
+            "is_deceased",
+            "death_id",
+            "death_at",
+            "mlc_numbers",
+            "created_at",
+            "row_version",
+            "outstanding",
+            "master_patient_id",
+            "merged_profiles"
+          ]
+        },
+        "meta": {
+          "title": "Meta",
+          "properties": {
+            "server_time": {
+              "type": "string",
+              "title": "Server Time",
+              "description": "Server clock (UTC). Use it to detect terminal clock skew."
+            },
+            "page": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Page"
+            },
+            "page_size": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Page Size"
+            },
+            "total_count": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Total Count"
+            },
+            "next_cursor": {
+              "title": "Next Cursor"
+            }
+          },
+          "type": "object",
+          "required": [
+            "server_time"
+          ]
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ]
+    },
+    "recorded_example": {
+      "request": {
+        "path": "/api/v1/patients/1"
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": {
+            "patient_id": 1,
+            "mrn": "MRN-2026-000001",
+            "registration_type": "Regular",
+            "full_name": "Ali Khan",
+            "father_or_husband_name": null,
+            "gender": "male",
+            "dob": null,
+            "age_years": 40,
+            "age_recorded_on": "2026-10-24",
+            "mobile": "03009882208",
+            "cnic": null,
+            "upmrn": null,
+            "address": null,
+            "emergency_contact_name": null,
+            "emergency_contact_phone": null,
+            "blood_group": null,
+            "allergies": null,
+            "billing_category": "Cash",
+            "panel_id": null,
+            "panel_name": null,
+            "panel_member_no": null,
+            "temp_identifier": null,
+            "merged_into_id": null,
+            "linked_employee_id": null,
+            "is_deceased": true,
+            "created_at": "2026-10-23T19:42:10.690475+00:00",
+            "row_version": 2,
+            "death_id": 2,
+            "death_at": "2026-10-23T19:32:11.183396+00:00",
+            "photo_document_id": null,
+            "mlc_numbers": [],
+            "outstanding": {
+              "has_outstanding_ar": false,
+              "outstanding_ar_balance": 0,
+              "ar_block_applies": false,
+              "banner_text": null
+            },
+            "master_patient_id": 1,
+            "merged_profiles": []
+          },
+          "meta": {
+            "server_time": "2026-10-23T19:42:11.271680+00:00"
+          },
+          "request_id": "6fb937ed7bb54db281df58c0d5d19b66"
+        }
+      }
+    },
+    "errors": [],
+    "errors_seen_in_tests": [],
+    "used_by_screens": [
+      "patient_search"
+    ],
+    "used_by_workflows": [
+      "deaths-and-medico-legal-cases",
+      "opd-reception"
+    ],
+    "typescript_example": "// Patient profile (+ outstanding banner, merged profiles)  (permissions: patient.view)\nexport const getPatient = (patient_id) =>\n  api(\"GET\", `/patients/${patient_id}`, undefined);   // api(): see get_guide('envelope-and-errors')",
+    "access": {
+      "authentication": "user",
+      "permissions": [
+        "patient.view"
+      ],
+      "permissions_mode": "all",
+      "who": "holders of patient.view",
+      "roles_allowed": [
+        "accountant",
+        "admissions_officer",
+        "anaesthetist",
+        "billing_admin",
+        "cashier",
+        "clinic_director",
+        "clinical_specialist",
+        "doctor",
+        "head_nurse",
+        "hospital_admin",
+        "hospital_director",
+        "ipc_nurse",
+        "lab_technician",
+        "lab_verifier",
+        "ot_admin",
+        "ot_nurse",
+        "owner",
+        "pharmacist",
+        "quality_officer",
+        "radiographer",
+        "radiologist",
+        "receptionist",
+        "surgeon",
+        "triage_nurse",
+        "ward_nurse",
+        "zakat_officer"
+      ]
+    },
+    "write_semantics": null,
+    "emits_events": [],
+    "list": {
+      "returns": "object",
+      "paging": [],
+      "search": [],
+      "filters": [],
+      "note": null
+    },
+    "cross_field_rules": {},
+    "errors_detail": []
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/patients/search",
+    "summary": "Returning-patient lookup by name / phone / CNIC / UPMRN / MRN",
+    "tags": [
+      "Patients"
+    ],
+    "permissions": [
+      "patient.search"
+    ],
+    "permissions_mode": "all",
+    "idempotency_key": false,
+    "description": "Each hit includes `outstanding` → show the red **OUTSTANDING BALANCE: RS. X** banner when\n`has_outstanding_ar` is true (workflow §1.2). Merged profiles are hidden (their master is shown).\n\n**Required permission:** `patient.search`\n\n**Required permission:** `patient.search`",
+    "roles_allowed": [
+      "accountant",
+      "admissions_officer",
+      "anaesthetist",
+      "billing_admin",
+      "cashier",
+      "clinic_director",
+      "clinical_specialist",
+      "doctor",
+      "head_nurse",
+      "hospital_admin",
+      "hospital_director",
+      "ipc_nurse",
+      "lab_technician",
+      "lab_verifier",
+      "ot_admin",
+      "ot_nurse",
+      "owner",
+      "pharmacist",
+      "quality_officer",
+      "radiographer",
+      "radiologist",
+      "receptionist",
+      "surgeon",
+      "triage_nurse",
+      "ward_nurse",
+      "zakat_officer"
+    ],
+    "parameters": [
+      {
+        "name": "q",
+        "in": "query",
+        "required": true,
+        "description": "",
+        "schema": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 100,
+          "title": "Q"
+        }
+      },
+      {
+        "name": "limit",
+        "in": "query",
+        "required": false,
+        "description": "",
+        "schema": {
+          "type": "integer",
+          "maximum": 100,
+          "minimum": 1,
+          "default": 20,
+          "title": "Limit"
+        }
+      }
+    ],
+    "request_body": null,
+    "request_content_type": null,
+    "response_schema": {
+      "title": "Envelope[list[PatientSearchHitOut]]",
+      "properties": {
+        "data": {
+          "items": {
+            "title": "PatientSearchHitOut",
+            "properties": {
+              "patient_id": {
+                "type": "integer",
+                "title": "Patient Id"
+              },
+              "photo_document_id": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Photo Document Id",
+                "description": "The newest Patient Photo of the merge chain, for the identity check; null when none was taken (it is optional). GET /patient-documents/{document_id}/download"
+              },
+              "mrn": {
+                "type": "string",
+                "title": "Mrn"
+              },
+              "registration_type": {
+                "type": "string",
+                "enum": [
+                  "Regular",
+                  "LabOnly",
+                  "TraumaTemp",
+                  "Merged"
+                ],
+                "title": "Registration Type"
+              },
+              "full_name": {
+                "type": "string",
+                "title": "Full Name"
+              },
+              "father_or_husband_name": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Father Or Husband Name"
+              },
+              "gender": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "male",
+                      "female",
+                      "other",
+                      "unknown"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Gender"
+              },
+              "dob": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Dob"
+              },
+              "age_years": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Age Years"
+              },
+              "age_recorded_on": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Age Recorded On",
+                "description": "When age_years was recorded (the age grows from that date)"
+              },
+              "mobile": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Mobile"
+              },
+              "cnic": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Cnic"
+              },
+              "upmrn": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Upmrn",
+                "description": "The Universal Patient Medical Record Number when one was recorded (optional)"
+              },
+              "address": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Address"
+              },
+              "emergency_contact_name": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Emergency Contact Name"
+              },
+              "emergency_contact_phone": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Emergency Contact Phone"
+              },
+              "blood_group": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "A+",
+                      "A-",
+                      "B+",
+                      "B-",
+                      "AB+",
+                      "AB-",
+                      "O+",
+                      "O-",
+                      "Unknown"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Blood Group"
+              },
+              "allergies": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Allergies"
+              },
+              "billing_category": {
+                "type": "string",
+                "enum": [
+                  "Cash",
+                  "Panel"
+                ],
+                "title": "Billing Category"
+              },
+              "panel_id": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Panel Id"
+              },
+              "panel_name": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Panel Name"
+              },
+              "panel_member_no": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Panel Member No"
+              },
+              "temp_identifier": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Temp Identifier",
+                "description": "Unknown-trauma label, e.g. \"Unknown Male 3\""
+              },
+              "merged_into_id": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Merged Into Id"
+              },
+              "linked_employee_id": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Linked Employee Id"
+              },
+              "is_deceased": {
+                "type": "boolean",
+                "title": "Is Deceased"
+              },
+              "death_id": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Death Id",
+                "description": "The death record (GET /deaths/{death_id}) when the death is recorded"
+              },
+              "death_at": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Death At"
+              },
+              "mlc_numbers": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array",
+                "title": "Mlc Numbers",
+                "description": "Medico-legal case numbers of this person: show a MEDICO-LEGAL banner when not empty (MSDS 154: the record is clearly so marked)"
+              },
+              "created_at": {
+                "type": "string",
+                "format": "date-time",
+                "title": "Created At"
+              },
+              "row_version": {
+                "type": "integer",
+                "title": "Row Version"
+              },
+              "outstanding": {
+                "$ref": "#/components/schemas/OutstandingBannerOut"
+              }
+            },
+            "type": "object",
+            "required": [
+              "patient_id",
+              "photo_document_id",
+              "mrn",
+              "registration_type",
+              "full_name",
+              "father_or_husband_name",
+              "gender",
+              "dob",
+              "age_years",
+              "age_recorded_on",
+              "mobile",
+              "cnic",
+              "upmrn",
+              "address",
+              "emergency_contact_name",
+              "emergency_contact_phone",
+              "blood_group",
+              "allergies",
+              "billing_category",
+              "panel_id",
+              "panel_name",
+              "panel_member_no",
+              "temp_identifier",
+              "merged_into_id",
+              "linked_employee_id",
+              "is_deceased",
+              "death_id",
+              "death_at",
+              "mlc_numbers",
+              "created_at",
+              "row_version",
+              "outstanding"
+            ]
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "title": "Meta",
+          "properties": {
+            "server_time": {
+              "type": "string",
+              "title": "Server Time",
+              "description": "Server clock (UTC). Use it to detect terminal clock skew."
+            },
+            "page": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Page"
+            },
+            "page_size": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Page Size"
+            },
+            "total_count": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Total Count"
+            },
+            "next_cursor": {
+              "title": "Next Cursor"
+            }
+          },
+          "type": "object",
+          "required": [
+            "server_time"
+          ]
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ]
+    },
+    "recorded_example": {
+      "request": {
+        "path": "/api/v1/patients/search",
+        "query": {
+          "q": "MRN-2026-000001"
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": [
+            {
+              "patient_id": 1,
+              "mrn": "MRN-2026-000001",
+              "registration_type": "Regular",
+              "full_name": "Ali Khan",
+              "father_or_husband_name": null,
+              "gender": "male",
+              "dob": null,
+              "age_years": 40,
+              "age_recorded_on": "2026-10-24",
+              "mobile": "03002663623",
+              "cnic": null,
+              "upmrn": null,
+              "address": null,
+              "emergency_contact_name": null,
+              "emergency_contact_phone": null,
+              "blood_group": null,
+              "allergies": null,
+              "billing_category": "Cash",
+              "panel_id": null,
+              "panel_name": null,
+              "panel_member_no": null,
+              "temp_identifier": null,
+              "merged_into_id": null,
+              "linked_employee_id": null,
+              "is_deceased": false,
+              "created_at": "2026-10-23T19:09:32.922576+00:00",
+              "row_version": 1,
+              "death_id": null,
+              "death_at": null,
+              "photo_document_id": null,
+              "mlc_numbers": [],
+              "outstanding": {
+                "has_outstanding_ar": true,
+                "outstanding_ar_balance": 600,
+                "ar_block_applies": true,
+                "banner_text": "OUTSTANDING BALANCE: RS. 600.00"
+              }
+            }
+          ],
+          "meta": {
+            "server_time": "2026-10-23T19:09:33.279708+00:00"
+          },
+          "request_id": "2cc13fb5ee91471cbbfb9706f7951864"
+        }
+      },
+      "errors_seen": [
+        "FORBIDDEN"
+      ]
+    },
+    "errors": [
+      {
+        "code": "FORBIDDEN",
+        "http_status": 403,
+        "message": "You do not have permission to do this.",
+        "retryable": false,
+        "category": "auth",
+        "ui_action": "Explain and hide the action (check x-permissions)."
+      }
+    ],
+    "errors_seen_in_tests": [
+      "FORBIDDEN"
+    ],
+    "used_by_screens": [
+      "patient_search",
+      "trauma_merge",
+      "record_complaint_reception",
+      "record_complaint_admissions",
+      "record_complaint_ward",
+      "record_complaint_er",
+      "home_visit_record",
+      "msds_inspection_pack",
+      "msds_inspection_pack_owner",
+      "msds_inspection_pack_inspector"
+    ],
+    "used_by_workflows": [
+      "opd-reception",
+      "phc-inspection",
+      "refunds-waivers-credit"
+    ],
+    "typescript_example": "// Returning-patient lookup by name / phone / CNIC / UPMRN / MRN  (permissions: patient.search)\nexport const searchPatients = () =>\n  api(\"GET\", `/patients/search`, undefined);   // api(): see get_guide('envelope-and-errors')",
+    "access": {
+      "authentication": "user",
+      "permissions": [
+        "patient.search"
+      ],
+      "permissions_mode": "all",
+      "who": "holders of patient.search",
+      "roles_allowed": [
+        "accountant",
+        "admissions_officer",
+        "anaesthetist",
+        "billing_admin",
+        "cashier",
+        "clinic_director",
+        "clinical_specialist",
+        "doctor",
+        "head_nurse",
+        "hospital_admin",
+        "hospital_director",
+        "ipc_nurse",
+        "lab_technician",
+        "lab_verifier",
+        "ot_admin",
+        "ot_nurse",
+        "owner",
+        "pharmacist",
+        "quality_officer",
+        "radiographer",
+        "radiologist",
+        "receptionist",
+        "surgeon",
+        "triage_nurse",
+        "ward_nurse",
+        "zakat_officer"
+      ]
+    },
+    "write_semantics": null,
+    "emits_events": [],
+    "list": {
+      "returns": "list",
+      "paging": [
+        {
+          "name": "limit",
+          "required": false,
+          "type": "integer",
+          "default": 20,
+          "minimum": 1,
+          "maximum": 100
+        }
+      ],
+      "search": [
+        {
+          "name": "q",
+          "required": true,
+          "type": "string",
+          "min_length": 2
+        }
+      ],
+      "filters": [],
+      "note": "Lists are bounded by `limit` (no cursor paging): ask for what the screen shows, filter on the server."
+    },
+    "cross_field_rules": {},
+    "errors_detail": [
+      {
+        "code": "FORBIDDEN",
+        "http_status": 403,
+        "message": "You do not have permission to do this.",
+        "retryable": false,
+        "ui_action": "Explain and hide the action (check x-permissions).",
+        "source": [
+          "seen_in_tests"
+        ],
+        "details_fields": [
+          "any_of",
+          "required"
+        ],
+        "details_from": "POST /api/v1/admin/departments"
+      }
+    ]
+  }
+]

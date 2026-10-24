@@ -88,7 +88,7 @@ function PatientLookup({
   const found = useLoad(
     () =>
       user.permissions.includes("patient.search") && query.length >= 2
-        ? patients.search({ q: query, limit: 30 })
+        ? patients.searchPatients({ q: query, limit: 30 })
         : Promise.resolve([]),
     [query, revision],
   );
