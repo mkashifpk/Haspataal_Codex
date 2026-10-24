@@ -6,6 +6,8 @@ Updated 2026-10-24 / Codex (functions). ACTIVE: user resumed after backend reins
 
 Clean mainHEAD9c3fb8b323434d9fb5dc038744e1203417934dff at takeover; previous implementationfb7aca039c1d7edcc15a0b825cfeb7e190ab1bd4. Current request: refresh Registration/Patient Search/Home Visit contracts/types, optional UPMRN, friendly identifier duplicates, code-based PATCH recovery; execute new DEV test plans, smoke other started screens, commit, propose changed/tested items only, then resume merge/search and registration-event checks with NEW records. No Phase3 scope. Preserve user app/profile/drafts.
 
+Current tested implementation commit **a18726c74838607588feb767a0706e23cff9a1ce**. Confirmed new progress proposals **99 Registration** (changed POST/patients only) and **100 Patient Search** (changed search/detail/PATCH) are **awaiting human review on /docs -> My progress**. Exact payloads/request IDs in docs/patient-reset-proposals-a18726c.json; verified via progress_proposals. Do not duplicate these unchanged pending claims. No q:tested/human item proposed.
+
 ## Completed this resume
 
 - Read AGENTS/checkpoint/Git, overview/roadmap/guide/what_changed/progress/proposals/issues. Server build2026-10-24T06:32:06.067860+00:00; contract992b7799991463f180bc; knowledge0266ade0bf511c86; rubric66605e3aa343; mkashif implementation1. Proposals86–98 now Accepted, not to duplicate; score863points,0/268complete.
@@ -16,7 +18,7 @@ Clean mainHEAD9c3fb8b323434d9fb5dc038744e1203417934dff at takeover; previous imp
 ## In progress / exact next steps
 
 1. Community setup confirmed: arrangements PUT200, software-only programme1 POST201, Active preview allowed and apply201revision3. Receipts/payloads/keys in docs/dev-reset-community*.json. No real service/care asserted. Do not recreate these.
-2. RUNNING node scripts/home-visit-reset-check.mjs (session45321); uses this epoch patient1/UPMRN from fresh identifier journal, never oldpatient18. Inspect artifacts/home-visit-reset-20261024.json before retry, use --resume if original exists. Preparing first tested commit/proposals for Registration/PatientSearch now. Remaining: atomicUPMRN registration/live queue, lost-PATCH/CNIC edit, current plan refusal cases, Home consent/time/referral/idempotency/append-only correction, screenshots, smoke30surfaces. No claim navigation proves full workflow acceptance.
+2. Home reset test PASS and closed/restored/logout: new patient1 by actual UPMRN search; new Home1original+2corrective. Actual lost201 reply and identicalkey/body replay samevisit, initial blank/consent/destination/future/before-request ZEROPOST, immutable original/stamps/history/cursors; current official policy PDF preview/save200, ENURboth themes250/no overflow/F1. Refreshed2Home screenshots. Evidence docs/home-visit-reset-evidence-2026-10-24.json. Never repeat these writes; use --resume/read same journal if more checks. Preparing Home changed-search proposal now. Remaining: atomicUPMRN registration/live queue, lost-PATCH/CNIC edit, current plan refusal cases, smoke30surfaces. No claim navigation proves full workflow acceptance.
 3. Fix failures/report reproduced backend gaps once, commit tested changes, propose per-screen material changed/tested rubric items only with commit, verify IDs. Then NEW merge/search and Registration queue-event follow-on from paused checkpoint. New MergeIn safety/co-signature contracts must be read first; old27/28 no longer exist as fixtures.
 
 ## State, tests and limits
