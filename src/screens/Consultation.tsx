@@ -26,6 +26,7 @@ import { hasUnsavedChanges } from "../unsaved";
 import { hospitalTimeInput, hospitalTimeToUtc } from "../hospital-time";
 import * as emr from "../generated/consultation";
 import { listConsents } from "../generated/clinical_consents";
+import { consultationRequirements, consultationFieldMissing } from "../consultation-requirements";
 type Props = {
   user: ClinicalUser;
   revision: number;
@@ -33,6 +34,7 @@ type Props = {
   readOnly: boolean;
   connected: boolean;
   active: string[];
+  rulesInForce?: { code: string; applies: boolean }[];
   timeZone?: string;
   availableScreens: string[];
   onRoute: (screen: string, ticket: number) => void;
@@ -89,6 +91,7 @@ function ConsultationEditor({
   readOnly,
   connected,
   active,
+  rulesInForce,
   timeZone,
   availableScreens,
   onRoute,
@@ -231,8 +234,9 @@ function ConsultationEditor({
   const rawError =
     write.error instanceof ApiError ? write.error.response.error : undefined;
   const missing = Array.isArray(rawError?.details?.missing)
-    ? (rawError!.details!.missing as string[])
+    ? rawError.details.missing.filter((value): value is string => typeof value === "string")
     : [];
+  const requirements = consultationRequirements(kind, rulesInForce);
   async function inspectNote(id: number) {
     if (write.blocked) return;
     if (
@@ -789,6 +793,14 @@ function ConsultationEditor({
             </button>
           </>
         )}
+        {requirements.consent && <p className="notice" data-help="consultation.consent">{t(
+          "Before signing this outpatient note, record whether the patient gave verbal consent, declined, or was not examined. No choice is assumed.",
+          "بیرونی مریض کا نوٹ حتمی کرنے سے پہلے زبانی رضامندی، انکار یا معائنہ نہ ہونے کا انتخاب درج کریں۔ کوئی انتخاب فرض نہیں کیا جاتا۔",
+        )}</p>}
+        {requirements.completeRecord && <p className="notice" data-help="consultation.note">{t(
+          "Signing requires a complaint or history, examination findings when consent was given, a diagnosis, and a treatment or referral plan. You can save an unfinished draft.",
+          "حتمی نوٹ میں شکایت یا سابقہ معلومات، رضامندی پر معائنے کے نتائج، تشخیص اور علاج یا حوالے کا منصوبہ لازم ہیں۔ نامکمل مسودہ محفوظ کر سکتے ہیں۔",
+        )}</p>}
         <fieldset disabled={!editable}>
           <Field label={t("Note type", "نوٹ کی قسم")}>
             <select
@@ -901,7 +913,7 @@ function ConsultationEditor({
                   disabled={
                     key === "examination" && consent !== "VerbalObtained"
                   }
-                  aria-invalid={missing.some((m) => m.includes(key))}
+                  aria-invalid={consultationFieldMissing(key, missing)}
                   value={form[key]}
                   onChange={(e) => {
                     setForm((f) => ({ ...f, [key]: e.target.value }));
