@@ -10,6 +10,9 @@ const {
   net,
 } = require("electron");
 const fs = require("node:fs");
+// Replaced with a literal by the distributable build. Source Electron runs are DEV.
+const BUILD_IS_DEV = typeof __BUILD_IS_DEV__ === "undefined" ? !app.isPackaged : __BUILD_IS_DEV__;
+const devReview = BUILD_IS_DEV ? require("./dev-review.cjs").createDevReview() : null;
 const path = require("node:path");
 const os = require("node:os");
 const { X509Certificate } = require("node:crypto");
@@ -194,15 +197,13 @@ function acceptTokens(data) {
         JSON.stringify({ type: "auth", access_token: auth.access }),
       );
 }
+function devBuildHeaders() {
+  return BUILD_IS_DEV ? devReview.headers() : {};
+}
 function headers(workspace) {
   return {
     ...(mac ? { "X-Terminal-Mac": mac } : {}),
-    ...(!app.isPackaged
-      ? {
-          "X-Haspataal-Developer": "mkashif",
-          "X-Haspataal-Implementation": "1",
-        }
-      : {}),
+    ...devBuildHeaders(),
     ...(auth?.access ? { Authorization: `Bearer ${auth.access}` } : {}),
     ...(workspace ? { "X-Active-Workspace": workspace } : {}),
   };
@@ -460,6 +461,7 @@ async function pickPinnedAddress(target, failedUrl) {
     try {
       const r = await request(url + "/health/live", {
         ca: target.ca_pem,
+        headers: headers(),
         timeoutMs: 4000,
       });
       if (r.status === 200) {
@@ -748,6 +750,7 @@ async function loadProvisioning() {
       try {
         const response = await request(url + "/ca.crt", {
           bootstrap: true,
+          headers: devBuildHeaders(),
           timeoutMs: 4000,
         });
         if (response.status !== 200)
@@ -801,6 +804,13 @@ ipcMain.handle("terminal", async (event, action, args = {}) => {
     if (credentialAction && refreshFlight) await refreshFlight;
     if (action === "state")
       return { ok: true, data: { ...state(), workspace: windows.get(win.id) } };
+    if (BUILD_IS_DEV && action === "dev-review") {
+      if (Object.hasOwn(args, "code")) {
+        devReview.set(args.code);
+        broadcast({ type: "dev-review-changed" });
+      }
+      return { ok: true, data: { code: devReview.get() } };
+    }
     if (action === "discover")
       return { ok: true, data: await discover(configuredDiscoveryPort) };
     if (action === "inspect-server") {
@@ -819,7 +829,7 @@ ipcMain.handle("terminal", async (event, action, args = {}) => {
         u.hash
       )
         throw new Error("Enter an HTTPS server address, without a path");
-      const r = await request(u.origin + "/ca.crt", { bootstrap: true });
+      const r = await request(u.origin + "/ca.crt", { bootstrap: true, headers: devBuildHeaders() });
       if (r.status !== 200)
         throw new Error("Cannot download hospital root certificate");
       const cert = new X509Certificate(r.body);

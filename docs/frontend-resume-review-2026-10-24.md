@@ -22,3 +22,7 @@ Frontend fixes: reviewed-shift read failure now invalidates closure eligibility 
 ## Outstanding dues continuation —25 October
 
 Frontend findings fixed: partial write-off result lacked remaining balance; empty invoice filters showed a blank table without recovery guidance; Actions/View labels remained English in Urdu. Receipt balance, EN/UR empty-state guidance and missing labels added. Real Owner partial/full write-off and same-key lost-reply recovery passed on isolated AR3, followed by invoice read-failure/empty/detail/F1/layout checks and final translation check. See docs/RECEIVABLES_REVIEW_2026-10-25.md. Test harness lookup/translated locator/alert ambiguity failures and explicit test-profile restoration are retained separately; no new backend defect. Backend19 opening-float contract remains New/unanswered.
+
+## Backend reset continuation —25 October
+
+Updated whole-drawer UI/types/help after backend19 fixed, raw maintenance message paths for health/error/event, and DEV-only process-wide Review code/release compilation boundary. Old degraded-health fixture missing new maintenance_message corrected. Actual fresh cash/AR/refund/waiver/liquidity/login/session/permission regressions passed; authorised maintenance window restored. Unsent amount/reference harness omissions, guard expectations and transient network failure were reconciled without duplicate business writes. See BACKEND_RESET_REVIEW_2026-10-25.md. No new reproduced functional backend issue remained.

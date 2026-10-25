@@ -53,6 +53,7 @@ export function Help({
     "settings.display",
     "settings.zoom",
     "settings.diagnostics",
+    ...(typeof __BUILD_IS_DEV__ === "undefined" || __BUILD_IS_DEV__ ? ["settings.review-code"] : []),
   ]);
   const controlsFor = (id: string) =>
     Object.entries(controlGuides).filter(

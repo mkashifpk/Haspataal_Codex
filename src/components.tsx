@@ -15,7 +15,7 @@ export function ErrorBox({ error, verbatim = false }: { error: unknown; verbatim
   return (
     <div className="error" role="alert">
       <strong>
-        {verbatim ? (error instanceof Error ? error.message : String(error)) : tr(error instanceof Error ? error.message : String(error))}
+        {verbatim || r?.error?.code === "MAINTENANCE" ? (error instanceof Error ? error.message : String(error)) : tr(error instanceof Error ? error.message : String(error))}
       </strong>
       {r && (
         <small>

@@ -100,7 +100,7 @@ export function publicSettings(): Promise<HospitalSettingsOut> {
 }
 
 /** UI workspaces and the screens each should contain — GET /api/v1/meta/workspaces (who may call: any logged-in user). */
-export function workspaces(): Promise<WorkspaceInfoOut[]> {
+export function workspacesMeta(): Promise<WorkspaceInfoOut[]> {
   return api<WorkspaceInfoOut[]>("GET", `/meta/workspaces`, undefined);
 }
 

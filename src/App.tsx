@@ -224,11 +224,6 @@ export function App() {
       setMeta(settings);
       setUser({ ...me, workspaces: permittedWorkspaces });
       setPrefs(me.preferences);
-      setMaintenance(
-        settings.maintenance_mode
-          ? { message: "Hospital maintenance is in progress." }
-          : undefined,
-      );
       if (!loaded.current) {
         const available = permittedWorkspaces.filter(
           (w) =>
@@ -436,7 +431,7 @@ export function App() {
     };
   }, [server?.current, !!license?.reason?.startsWith("standby_"), user?.user_id]);
   useEffect(() => {
-    if (user || !server) return;
+    if (!server) return;
     let cancelled = false;
     let timer: ReturnType<typeof setTimeout>;
     setLoginHealth(undefined);
@@ -446,7 +441,8 @@ export function App() {
         await api("GET", "/health/live");
         const health = await api<HealthOut>("GET", "/health");
         if (!cancelled) {
-          setLoginHealth(health);
+          if (user) setMaintenance(health.maintenance_mode ? {message:health.maintenance_message} : undefined);
+          else setLoginHealth(health);
           setHealthError(undefined);
         }
       } catch (e) {
@@ -464,6 +460,11 @@ export function App() {
       clearTimeout(timer);
     };
   }, [user?.user_id, server?.current]);
+  useEffect(() => {
+    const receive = (event: Event) => setMaintenance({message:(event as CustomEvent<string>).detail});
+    window.addEventListener("haspataal-maintenance", receive);
+    return () => window.removeEventListener("haspataal-maintenance", receive);
+  }, []);
   useEffect(() => {
     document.documentElement.lang = prefs.language;
     document.documentElement.dir = ur ? "rtl" : "ltr";
@@ -1249,15 +1250,13 @@ export function App() {
       {maintenance && (
         <div className="blocking-banner" role="alert">
           <h1>Hospital maintenance</h1>
-          <p>
-            {maintenance.message || "The server is undergoing maintenance."}
-          </p>
+          <p style={{whiteSpace:"pre-wrap"}}>{maintenance.message}</p>
           <button
             data-help="shell.maintenance"
             onClick={() =>
-              api("GET", "/meta/settings")
+              api<HealthOut>("GET", "/health")
                 .then((s) =>
-                  setMaintenance(s.maintenance_mode ? maintenance : undefined),
+                  setMaintenance(s.maintenance_mode ? {message:s.maintenance_message} : undefined),
                 )
                 .catch(setError)
             }

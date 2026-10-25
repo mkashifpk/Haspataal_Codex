@@ -1,5 +1,5 @@
 import { tr } from "../i18n";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { api, call } from "../bridge";
 import { Details, ErrorBox, Field, LoadState, useLoad } from "../components";
 import type {
@@ -181,7 +181,7 @@ export function Settings({
             <ChangePassword settings onDone={onPrefs} />
           )}{" "}
           {chosen === "connection" && <Diagnostics />}
-          {chosen === "terminal_identity" && <TerminalIdentity />}
+          {chosen === "terminal_identity" && <><TerminalIdentity />{__BUILD_IS_DEV__ && <ReviewCode />}</>}
           {chosen === "policy" && <Policy revision={revision} />}
           {user &&
             result.data?.tiers.some(
@@ -242,6 +242,44 @@ export function TerminalIdentity() {
       {r.data && <Details value={r.data} />}
     </>
   );
+}
+function ReviewCode() {
+  const [code, setCode] = useState(""), [error, setError] = useState<unknown>();
+  const [busy, setBusy] = useState(false), [ready, setReady] = useState(false);
+  const [saved, setSaved] = useState("");
+  const flight = useRef(false);
+  useEffect(() => {
+    let active = true;
+    async function load() {
+      try {
+        const value = await call<{ code: string }>("dev-review");
+        if (active && !flight.current) { setCode(value.code); setSaved(value.code); setReady(true); }
+      } catch (cause) { if (active) setError(cause); }
+    }
+    void load();
+    const unsubscribe = window.terminal.subscribe(event => {
+      if (event.type === "dev-review-changed") void load();
+    });
+    return () => { active = false; unsubscribe(); };
+  }, []);
+  async function save() {
+    if (flight.current) return;
+    flight.current = true; setBusy(true); setError(undefined);
+    try {
+      const value = await call<{ code: string }>("dev-review", { code });
+      setCode(value.code); setSaved(value.code);
+    } catch (cause) { setError(cause); }
+    finally { flight.current = false; setBusy(false); }
+  }
+  return <div data-unsaved={code !== saved} data-write-pending={busy}>
+    <Field label={tr("Review code")} hint={tr("DEV only. Enter the code when you start a review on the portal. It applies across all roles and windows until cleared or the app closes.")}>
+      <input data-help="settings.review-code" aria-label={tr("Review code")} dir="ltr" autoComplete="off" spellCheck={false}
+        disabled={!ready || busy} value={code} onChange={event => setCode(event.target.value)} />
+    </Field>
+    <button data-help="settings.review-code" disabled={!ready || busy || code === saved} onClick={save}>{tr("Apply review code")}</button>
+    <p role="status">{tr(saved ? "Review code is active. Clear the field and apply when your review ends." : "No review code is active.")}</p>
+    <ErrorBox error={error} />
+  </div>;
 }
 function Policy({ revision }: { revision: number }) {
   const r = useLoad(

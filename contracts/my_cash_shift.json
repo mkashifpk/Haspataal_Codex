@@ -1,10 +1,16 @@
 {
   "screen_id": "my_cash_shift",
-  "contract_fingerprint": "bde3c5f94776075b2abd",
-  "knowledge_revision": "933cb79d7aa9f9b7",
+  "contract_fingerprint": "a48efc9c8254ac5137e2",
+  "knowledge_revision": "5d997abd8847f89d",
   "delivery_gate": {
     "required": true,
     "status": "required",
+    "progress_reporting": {
+      "required": true,
+      "submit": "propose_progress",
+      "verify": "progress_proposals",
+      "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+    },
     "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
     "compulsory": [
       {
@@ -33,8 +39,8 @@
       }
     ],
     "zoom": {
-      "min_pct": 100.0,
-      "max_pct": 250.0,
+      "min_pct": 100,
+      "max_pct": 250,
       "reset_pct": 100,
       "keys": [
         "Ctrl + or Ctrl = (zoom in)",
@@ -44,12 +50,12 @@
       ],
       "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
     },
-    "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')). Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+    "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
     "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
   },
   "ui_quality": {
     "source": "frontend-docs/guides/16-ui-quality.md",
-    "standard_revision": "955624dcfc85ddb2",
+    "standard_revision": "721dd86027802160",
     "context": {
       "workspace": "reception",
       "purpose": "Open/close the drawer; see collections by type; hand over the cash drop.",
@@ -107,12 +113,12 @@
         {
           "id": "R1",
           "title": "Identify the implementation and complete scope",
-          "instruction": "- [ ] Record implementation ID/name, repository, commit/build, backend/standards revision, workspace, roles,\n  reviewer, date, device/OS, languages and peripherals tested.\n- [ ] Inventory each role's screens, tasks, controls, permissions and required handovers. Every task needs a test\n  result and matching FAQ answer. A read-only role or non-applicable operation needs a specific contract-based reason."
+          "instruction": "- [ ] Record implementation ID/name, repository, commit/build, backend/standards revision, workspace, roles,\n  reviewer, date, device/OS, languages and peripherals tested (the review's *Start* step: the portal fills in what it\n  knows).\n- [ ] Inventory each role's screens, tasks, controls, permissions and required handovers. Every task needs a test\n  result and matching FAQ answer. A read-only role or non-applicable operation needs a specific contract-based reason."
         },
         {
           "id": "R2",
           "title": "Create fresh data through the frontend",
-          "instruction": "- [ ] Use a unique review-run label where a free-text field permits it. Create new records through each applicable\n  create form: patient/visit, request/order, master record, transaction or register entry. Record their returned IDs.\n- [ ] Try required fields missing, invalid values, duplicate identifiers and cancellation before saving. Verify\n  the visible validation, server refusal and that no partial or duplicate business record is reported as saved.\n- [ ] Complete the valid path and check the generated number, defaults, ownership, patient/visit context and next step.\n  A seeded master may be a prerequisite; the transaction being accepted must be new. Do not create destructive test\n  masters on a shared server without coordinating with its backend team."
+          "instruction": "- [ ] With the review code in your app's DEV settings, create new records through each applicable create form:\n  patient/visit, request/order, master record, transaction or register entry. The review lists them with their IDs as\n  the server sees them; where a free-text field permits it, you may type the code there too, to find them again.\n- [ ] Try required fields missing, invalid values, duplicate identifiers and cancellation before saving. Verify\n  the visible validation, server refusal and that no partial or duplicate business record is reported as saved.\n- [ ] Complete the valid path and check the generated number, defaults, ownership, patient/visit context and next step.\n  A seeded master may be a prerequisite; the transaction being accepted must be new. Do not create destructive test\n  masters on a shared server without coordinating with its backend team."
         },
         {
           "id": "R3",
@@ -147,12 +153,12 @@
         {
           "id": "R9",
           "title": "Keep reproducible evidence",
-          "instruction": "- [ ] For each task record new record IDs, ordered UI steps, expected/actual outcome, pass/fail/not-applicable,\n  reason for non-applicability, test output, synthetic screenshots, handbook/FAQ paths and remaining limitations.\n- [ ] Start from the workspace's **review worksheet**: *Download the review worksheet* on the portal's page of the\n  workspace (*Human review with new records*), in the accept box of a proposal or on *Save this screen*\n  (`/docs/api/review-worksheet/<workspace>`, `shared` for the screens every workspace has). It is one Markdown file,\n  made from the backend's catalogue: R1's fields, the four compulsory checks, R1-R10, the workspace's own checklist,\n  every write operation to exercise and the results table below, one row per screen to start from. Agents may prepare\n  its lists; only the named reviewer fills in the results.\n- [ ] Keep the filled worksheet in the frontend repository or its review system. The portal note is a summary, not\n  storage for the whole test report.\n- [ ] Accepting or reporting **F1 help, the role FAQs, zoom or the fresh-data review** (on a proposal, on *Save this\n  screen* or in the transfer of legacy work) needs the worksheet's reference (its path or link, and the build) in\n  **Review worksheet**. The portal refuses those four without it (`VALIDATION_ERROR`, `details.field` = `worksheet`)\n  and shows the reference to the backend team's inspectors.\n\n| Role / task / screen | New record IDs | Create | Read | Update / correction | Delete / permitted alternative | Help / FAQ / zoom | Evidence / result |\n|---|---|---|---|---|---|---|---|\n| Fill one row per supported task | IDs from this review run | Pass/fail/N-A + reason | Pass/fail | Pass/fail/N-A + reason | Exact action and outcome | Pass/fail | Steps, expected/actual, evidence reference |"
+          "instruction": "- [ ] The review on the portal is the evidence, kept on the DEV server: what the server saw your app do (records new\n  and existing, refusals, each operation by lifecycle step and screen), your answers and a note for every Fail and N/A\n  (what failed and how to reproduce it, or why it does not apply). Keep screenshots and longer test output with your\n  app; mention where in the note.\n- [ ] *Test in the app* is a to-do list that ticks itself: an operation turns **Done on a new record** when the server\n  sees your app do it with the code, **Done on existing records only** when it changed demo data alone (the inspectors\n  see that), **Refused** when you tested a refusal. Mark only what is not seen: *Not applicable* or *Fail*, with the note.\n- [ ] *Screens*: for each screen, F1 help, the role FAQs and zoom (one click passes a whole column; then mark the\n  exceptions). The **fresh-data** column is the server's: it passes where your app made new records with that screen's\n  own write operations (any new record, for a screen that only reads); you can only reject it.\n- [ ] *Export* gives the review as one Markdown file for your repository or review system, whenever you want it.\n- [ ] Accepting or reporting **F1 help, the role FAQs, zoom or the fresh-data review** (on a proposal, on *Save this\n  screen* or in the transfer of legacy work) needs **your signed review** of that screen's workspace. The portal\n  preselects the review that passes them and refuses, saying why (`details.field` = `review_id`), an item without a\n  signed review, on a review that does not cover the screen or one that does not pass it there. The backend team's\n  inspectors see the review beside your agent's proposals.\n- [ ] **Approve all reported progress** is one human declaration for the displayed selection; untick any untested items\n  first. Each proposal retains its build, the review it was accepted with and your decision."
         },
         {
           "id": "R10",
           "title": "Decide and report honestly",
-          "instruction": "- [ ] Every applicable task and mandatory quality check must pass. A blocker, missing FAQ, broken F1, out-of-bounds\n  zoom or untested fresh-data lifecycle keeps the screen/workspace pending. Partial item acceptance remains possible.\n- [ ] The named human signs the review for this build (the worksheet's *Decision*), accepts only tested proposal\n  items or reports them manually, gives the worksheet's reference with the compulsory items, and returns failures with\n  reproduction steps. Agents cannot approve their own claims. Backend inspection can confirm\n  or withdraw accepted claims; verified points are a subset of completion, never an additional award.\n- [ ] Retest affected tasks after fixes or backend changes; stale evidence does not establish the new build's behavior."
+          "instruction": "- [ ] Every applicable task and mandatory quality check must pass. A blocker, missing FAQ, broken F1, out-of-bounds\n  zoom or untested fresh-data lifecycle keeps the screen/workspace pending. Partial item acceptance remains possible.\n- [ ] The named human signs the review for this build (its *Sign* step: every question answered or decided by the\n  server, the declaration that the writes with the code are theirs, not their agent's), clears the code from the app,\n  accepts only tested proposal items or reports them manually, and returns failures: the agent reads the signed\n  review's failures and notes (`progress_proposals` → `human_reviews`). Agents cannot start, fill or sign a review, nor\n  approve their own claims. Backend inspection can confirm or withdraw accepted claims; verified points are a subset of\n  completion, never an additional award.\n- [ ] Retest affected tasks after fixes or backend changes; stale evidence does not establish the new build's behavior."
         }
       ],
       "workspace_checklist": "- [ ] **Create:** open your cash shift; register a new patient with *Register + OPD slip* (and one with the full\n  intake form), skip the optional Patient Photo on one and take it on the other; upload a synthetic outside report\n  with its facility and date; a lab-only walk-in; a complaint.\n- [ ] **Read:** find each new patient by MRN, mobile and name; the slip, the queue token, the documents (the outside\n  report labelled as outside) and the dues banner.\n- [ ] **Update / correct:** edit the new patient's demographics, and from a second session the same patient\n  (`VERSION_CONFLICT`); defer the ticket and reactivate it.\n- [ ] **Cancel / delete:** cancel or void an unpaid ticket; request the refund of a paid one, then hand the cash back\n  once approved; merge a trauma profile made in this review into the new patient. Nothing is deleted.\n- [ ] **Refused:** a discount above your ceiling (`DISCOUNT_CEILING_EXCEEDED`, then request the waiver); a PDF as the\n  photo (`UNSUPPORTED_MEDIA_TYPE`); an outside report without its facility (`VALIDATION_ERROR`).\n- [ ] **Hand over:** the ticket reaches the doctor's live queue; the refund and the waiver reach the approval queue;\n  the closed shift reaches the accountant.",
@@ -175,7 +181,17 @@
         ]
       },
       "operations_rule": "Exercise each operation on records you create new in this review, through the app: create, then read them back, update or correct them, and cancel, withdraw or delete them where the contract allows (and see the refusal where it does not). The other_actions are the steps of the record's life (sign, approve, dispense ...).",
-      "worksheet": "The named human reviewer downloads this workspace's review worksheet from the portal (GET /docs/api/review-worksheet/reception: the workspace's page, Human review with new records), fills it in while testing and keeps it with the app. The portal refuses F1 help, the role FAQs, zoom or the fresh-data review, accepted or reported, without that worksheet's reference (guide 17 R9). You may prepare its lists; never its results."
+      "portal_review": "The human tester records this review on the portal (My progress → the workspace → Start the review), with its code in the app's DEV settings: the server sees the operations the app did on new records, the tester answers the rest and signs. The four compulsory items need that signed review; fresh data needs the server's evidence. You build the Review code setting (dev_build_headers), never start, fill or sign a review; progress_proposals → human_reviews lists the failures to fix.",
+      "dev_build_headers": {
+        "send": [
+          "X-Haspataal-Developer: <portal username>",
+          "X-Haspataal-Implementation: <implementation id>",
+          "X-Haspataal-Review: <the DEV settings' Review code, while the tester has one set>"
+        ],
+        "review_code_setting": "One app-wide field, Review code, in Settings → This terminal (open before login too), empty by default; the shared API client adds the header. Not on any screen or the login form.",
+        "release_build": "The field and all three headers behind the DEV build flag (compiled out, never a runtime switch): the hospital's release build has neither (guide 19, I6 and I9).",
+        "never": "Never set a review code yourself, in tests or scripts: only the tester's writes with it count."
+      }
     },
     "verification": {
       "frontend_files_inspected": false,
@@ -199,6 +215,11 @@
         "id": "rule:a38ea1222b",
         "text": "Closing asks for the counted cash; the Accountant verifies it later.",
         "cites": []
+      },
+      {
+        "id": "rule:e107caec45",
+        "text": "The drawer is counted whole: expected_cash includes the opening float (1500 for a float of 1500 and no movement). Ask the cashier to count everything in the drawer, the float included, and show declared_variance after the close; never subtract the float or compute a balance yourself.",
+        "cites": []
       }
     ],
     "related_workflows": [
@@ -213,7 +234,7 @@
     "workspace": "reception",
     "phase": "P2",
     "position": 12,
-    "points": 45,
+    "points": 47,
     "capabilities": [
       "idempotent_writes",
       "f1_help",
@@ -275,31 +296,31 @@
     "note": "`forward`: a dependency on a later phase; use the demo data or a scenario (sandbox_scenario) until that screen exists. `ordering: false`: a hand-off or a hint, not a reason to wait."
   },
   "definition_of_done": {
-    "points": 45,
+    "points": 47,
     "items": [
       {
         "id": "ep:POST /finance/cash-shifts/open",
         "label": "POST /finance/cash-shifts/open",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:GET /finance/cash-shifts/mine",
         "label": "GET /finance/cash-shifts/mine",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:GET /finance/cash-shifts/{shift_id}/transactions",
         "label": "GET /finance/cash-shifts/{shift_id}/transactions",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:POST /finance/cash-shifts/{shift_id}/close",
         "label": "POST /finance/cash-shifts/{shift_id}/close",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:6d79bd21de",
@@ -310,6 +331,12 @@
       {
         "id": "rule:a38ea1222b",
         "label": "Closing asks for the counted cash; the Accountant verifies it later.",
+        "points": 2,
+        "claimed": true
+      },
+      {
+        "id": "rule:e107caec45",
+        "label": "The drawer is counted whole: expected_cash includes the opening float (1500 for a float of 1500 and no movement). Ask the cashier to count everything in the drawer, the float included, and show declared_variance after the close; never subtract the float or compute a balance yourself.",
         "points": 2,
         "claimed": false
       },
@@ -341,13 +368,13 @@
         "id": "q:handbook",
         "label": "Handbook page",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:f1_help",
         "label": "F1 contextual help",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:role_faq",
@@ -359,7 +386,7 @@
         "id": "q:zoom",
         "label": "Keyboard zoom: 100-250% only",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:fresh_data",
@@ -380,7 +407,7 @@
         "claimed": false
       }
     ],
-    "rule": "Agents may propose evidence with propose_progress. Only the developer accepts items on My progress for what this implementation does on the DEV server. No tool records progress."
+    "rule": "Agents MUST submit propose_progress after implementing this screen and verify it with progress_proposals. Only the developer accepts items on My progress for what this implementation does on the DEV server. No tool awards progress."
   },
   "endpoints": [
     {
@@ -401,7 +428,20 @@
       },
       "service_gates": [],
       "idempotency_key": true,
-      "errors": [],
+      "errors": [
+        {
+          "code": "SHIFT_ALREADY_OPEN",
+          "http_status": 409,
+          "message": "You already have an open shift at this counter.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": null
+        }
+      ],
       "parameters": [
         {
           "name": "Idempotency-Key",
@@ -476,7 +516,8 @@
             "type": "one of",
             "required": false,
             "nullable": false,
-            "default": "0"
+            "default": "0",
+            "description": "Cash issued from the main vault to start the drawer (change); part of the drawer until the cash drop"
           }
         ],
         "cross_field_rules": {},
@@ -631,7 +672,20 @@
           ],
           "details_fields": [
             "status"
-          ]
+          ],
+          "details_from": "POST /api/v1/finance/cash-shifts/{shift_id}/close"
+        },
+        {
+          "code": "SHIFT_NOT_OWNED",
+          "http_status": 403,
+          "message": "Cash must go through your own open shift.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": null
         }
       ],
       "parameters": [
@@ -687,7 +741,7 @@
             "type": "one of",
             "required": true,
             "nullable": false,
-            "description": "Cash the cashier counted in the drawer (excluding the opening float)"
+            "description": "Everything the cashier counted in the drawer, the opening float included"
           }
         ],
         "cross_field_rules": {},
@@ -766,6 +820,7 @@
     },
     {
       "values": [
+        "OpeningFloat",
         "Sale",
         "ARCollection",
         "Refund",
@@ -777,6 +832,7 @@
       "column": "shift_transactions.txn_type",
       "used_at": "GET /finance/cash-shifts/mine.by_type[].txn_type",
       "labels": {
+        "OpeningFloat": "Opening float",
         "Sale": "Sale",
         "ARCollection": "AR collection",
         "Refund": "Refund",
@@ -836,7 +892,9 @@
       "ur": "استقبالیہ"
     },
     "error_messages": {
-      "SHIFT_NOT_OPEN": "Open a cash shift before handling cash."
+      "SHIFT_ALREADY_OPEN": "You already have an open shift at this counter.",
+      "SHIFT_NOT_OPEN": "Open a cash shift before handling cash.",
+      "SHIFT_NOT_OWNED": "Cash must go through your own open shift."
     },
     "wording_quoted_in_rules": [],
     "note": "Server-owned strings only: the error messages (English), the workspace labels (English and Urdu) and the wording the rules quote. The UI's own copy and its Urdu are yours (decision H08)."
@@ -875,7 +933,9 @@
           ],
           "expect": "403 FORBIDDEN"
         },
-        "errors_to_handle": [],
+        "errors_to_handle": [
+          "SHIFT_ALREADY_OPEN"
+        ],
         "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)",
         "as_one_of": [
           "cashier",
@@ -945,7 +1005,8 @@
           "expect": "403 FORBIDDEN"
         },
         "errors_to_handle": [
-          "SHIFT_NOT_OPEN"
+          "SHIFT_NOT_OPEN",
+          "SHIFT_NOT_OWNED"
         ],
         "as_one_of": [
           "cashier",
@@ -958,6 +1019,12 @@
     "delivery_gate": {
       "required": true,
       "status": "required",
+      "progress_reporting": {
+        "required": true,
+        "submit": "propose_progress",
+        "verify": "progress_proposals",
+        "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+      },
       "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
       "compulsory": [
         {
@@ -986,8 +1053,8 @@
         }
       ],
       "zoom": {
-        "min_pct": 100.0,
-        "max_pct": 250.0,
+        "min_pct": 100,
+        "max_pct": 250,
         "reset_pct": 100,
         "keys": [
           "Ctrl + or Ctrl = (zoom in)",
@@ -997,7 +1064,7 @@
         ],
         "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
       },
-      "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')). Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+      "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
       "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
     },
     "handbook_page": "screens/my_cash_shift",
@@ -1005,7 +1072,8 @@
     "realtime": [],
     "acceptance_rules": [
       "Every cash action needs an open shift at this counter (node from GET /terminals/whoami cash_node).",
-      "Closing asks for the counted cash; the Accountant verifies it later."
+      "Closing asks for the counted cash; the Accountant verifies it later.",
+      "The drawer is counted whole: expected_cash includes the opening float (1500 for a float of 1500 and no movement). Ask the cashier to count everything in the drawer, the float included, and show declared_variance after the close; never subtract the float or compute a balance yourself."
     ],
     "demo_accounts": "demo_accounts() lists a login per role; sandbox_call runs each case on the DEV server"
   },
@@ -1063,14 +1131,25 @@
     ],
     "rules_to_explain": [
       "Every cash action needs an open shift at this counter (node from GET /terminals/whoami cash_node).",
-      "Closing asks for the counted cash; the Accountant verifies it later."
+      "Closing asks for the counted cash; the Accountant verifies it later.",
+      "The drawer is counted whole: expected_cash includes the opening float (1500 for a float of 1500 and no movement). Ask the cashier to count everything in the drawer, the float included, and show declared_variance after the close; never subtract the float or compute a balance yourself."
     ],
     "updates_by_itself_on": [],
     "errors_the_user_can_meet": [
       {
+        "code": "SHIFT_ALREADY_OPEN",
+        "message": "You already have an open shift at this counter.",
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      },
+      {
         "code": "SHIFT_NOT_OPEN",
         "message": "Open a cash shift before handling cash.",
         "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      },
+      {
+        "code": "SHIFT_NOT_OWNED",
+        "message": "Cash must go through your own open shift.",
+        "ui_action": "Explain and hide the action (check x-permissions)."
       }
     ],
     "sections": [
@@ -1314,8 +1393,8 @@
             "user_id": 3,
             "node": "MainReception",
             "terminal_id": null,
-            "opening_float": 0.0,
-            "expected_cash": 0.0,
+            "opening_float": 0,
+            "expected_cash": 0,
             "declared_cash": null,
             "status": "Open",
             "opened_at": "2026-09-27T17:36:46.342193+00:00",
@@ -1341,28 +1420,29 @@
             "user_id": 3,
             "node": "MainReception",
             "terminal_id": null,
-            "opening_float": 0.0,
-            "expected_cash": 1000.0,
+            "opening_float": 0,
+            "expected_cash": 1000,
             "declared_cash": null,
             "status": "Open",
-            "opened_at": "2026-09-27T17:36:46.342193+00:00",
+            "opened_at": "2026-10-24T18:46:18.384118+00:00",
             "closed_at": null,
-            "business_date": "2026-09-27",
+            "business_date": "2026-10-24",
             "cashier_name": "Receptionist",
+            "declared_variance": null,
             "by_type": [
               {
                 "txn_type": "Sale",
                 "count": 1,
-                "total": 1000.0
+                "total": 1000
               }
             ],
             "non_cash": [],
             "cash_drop": null
           },
           "meta": {
-            "server_time": "2026-09-27T17:36:46.588350+00:00"
+            "server_time": "2026-10-24T18:46:18.738132+00:00"
           },
-          "request_id": "95a524093b1545b9b2696a80fd5a644f"
+          "request_id": "097c3bb071834c53b6d6b143a18491fb"
         }
       }
     },
@@ -1377,7 +1457,7 @@
             {
               "shift_txn_id": 1,
               "txn_type": "Sale",
-              "amount": 1000.0,
+              "amount": 1000,
               "payment_id": 1,
               "receipt_no": "RCT-2026-0000001",
               "invoice_id": 1,
@@ -1397,7 +1477,7 @@
       "request": {
         "path": "/api/v1/finance/cash-shifts/1/close",
         "body": {
-          "declared_cash": 2000
+          "declared_cash": 1000
         }
       },
       "response": {
@@ -1408,28 +1488,29 @@
             "user_id": 3,
             "node": "MainReception",
             "terminal_id": null,
-            "opening_float": 0.0,
-            "expected_cash": 2000.0,
-            "declared_cash": 2000.0,
+            "opening_float": 0,
+            "expected_cash": 1000,
+            "declared_cash": 1000,
             "status": "PendingCollection",
-            "opened_at": "2026-09-27T17:41:55.591334+00:00",
-            "closed_at": "2026-09-27T17:41:55.919005+00:00",
-            "business_date": "2026-09-27",
+            "opened_at": "2026-10-24T18:46:40.653452+00:00",
+            "closed_at": "2026-10-24T18:46:40.987615+00:00",
+            "business_date": "2026-10-24",
             "cashier_name": "Receptionist",
+            "declared_variance": 0,
             "by_type": [
               {
                 "txn_type": "Sale",
-                "count": 2,
-                "total": 2000.0
+                "count": 1,
+                "total": 1000
               }
             ],
             "non_cash": [],
             "cash_drop": null
           },
           "meta": {
-            "server_time": "2026-09-27T17:41:55.928170+00:00"
+            "server_time": "2026-10-24T18:46:40.993927+00:00"
           },
-          "request_id": "46abb265094540f38141d4051c259552"
+          "request_id": "a007287ac8344288bbcf9536b62b25c8"
         }
       }
     }
@@ -1579,11 +1660,13 @@
         },
         "opening_float": {
           "type": "number",
-          "title": "Opening Float"
+          "title": "Opening Float",
+          "description": "The cash the drawer started with, issued from the main vault: the drawer's first entry (OpeningFloat)"
         },
         "expected_cash": {
           "type": "number",
-          "title": "Expected Cash"
+          "title": "Expected Cash",
+          "description": "What the drawer should hold now: the opening float plus every cash movement of the shift (by_type). Count all of it at the close. 0 once the verified cash drop has taken it to the vault (cash_drop.expected_cash keeps the amount)"
         },
         "declared_cash": {
           "anyOf": [
@@ -1594,7 +1677,8 @@
               "type": "null"
             }
           ],
-          "title": "Declared Cash"
+          "title": "Declared Cash",
+          "description": "What the cashier counted in the whole drawer at the close, the float included (null while open)"
         },
         "status": {
           "type": "string",
@@ -1680,11 +1764,13 @@
         },
         "opening_float": {
           "type": "number",
-          "title": "Opening Float"
+          "title": "Opening Float",
+          "description": "The cash the drawer started with, issued from the main vault: the drawer's first entry (OpeningFloat)"
         },
         "expected_cash": {
           "type": "number",
-          "title": "Expected Cash"
+          "title": "Expected Cash",
+          "description": "What the drawer should hold now: the opening float plus every cash movement of the shift (by_type). Count all of it at the close. 0 once the verified cash drop has taken it to the vault (cash_drop.expected_cash keeps the amount)"
         },
         "declared_cash": {
           "anyOf": [
@@ -1695,7 +1781,8 @@
               "type": "null"
             }
           ],
-          "title": "Declared Cash"
+          "title": "Declared Cash",
+          "description": "What the cashier counted in the whole drawer at the close, the float included (null while open)"
         },
         "status": {
           "type": "string",
@@ -1731,6 +1818,18 @@
         "cashier_name": {
           "type": "string",
           "title": "Cashier Name"
+        },
+        "declared_variance": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Declared Variance",
+          "description": "declared_cash minus what the drawer held at the close, its float included (null until the shift is closed)"
         },
         "by_type": {
           "items": {
@@ -1771,6 +1870,7 @@
         "closed_at",
         "business_date",
         "cashier_name",
+        "declared_variance",
         "by_type",
         "non_cash",
         "cash_drop"
@@ -1784,7 +1884,7 @@
           "anyOf": [
             {
               "type": "number",
-              "minimum": 0.0
+              "minimum": 0
             },
             {
               "type": "string",
@@ -1792,7 +1892,7 @@
             }
           ],
           "title": "Declared Cash",
-          "description": "Cash the cashier counted in the drawer (excluding the opening float)"
+          "description": "Everything the cashier counted in the drawer, the opening float included"
         }
       },
       "type": "object",
@@ -2008,7 +2108,7 @@
           "anyOf": [
             {
               "type": "number",
-              "minimum": 0.0
+              "minimum": 0
             },
             {
               "type": "string",
@@ -2016,6 +2116,7 @@
             }
           ],
           "title": "Opening Float",
+          "description": "Cash issued from the main vault to start the drawer (change); part of the drawer until the cash drop",
           "default": "0"
         }
       },
@@ -2030,6 +2131,7 @@
         "txn_type": {
           "type": "string",
           "enum": [
+            "OpeningFloat",
             "Sale",
             "ARCollection",
             "Refund",
@@ -2066,6 +2168,7 @@
         "txn_type": {
           "type": "string",
           "enum": [
+            "OpeningFloat",
             "Sale",
             "ARCollection",
             "Refund",

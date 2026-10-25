@@ -4,6 +4,7 @@ import { api } from "./api";
 
 export interface OpenShiftIn {
   node: "MainReception" | "PharmacyCounter" | "LabReception" | "IPDBilling" | "EmergencyCounter" | "CashierDesk";
+  /** Cash issued from the main vault to start the drawer (change); part of the drawer until the cash drop */
   opening_float?: number | string;
 }
 
@@ -13,8 +14,11 @@ export interface CashShiftOut {
   /** The cash counter */
   node: "MainReception" | "PharmacyCounter" | "LabReception" | "IPDBilling" | "EmergencyCounter" | "CashierDesk";
   terminal_id: number | null;
+  /** The cash the drawer started with, issued from the main vault: the drawer's first entry (OpeningFloat) */
   opening_float: number;
+  /** What the drawer should hold now: the opening float plus every cash movement of the shift (by_type). Count all of it at the close. 0 once the verified cash drop has taken it to the vault (cash_drop.expected_cash keeps the amount) */
   expected_cash: number;
+  /** What the cashier counted in the whole drawer at the close, the float included (null while open) */
   declared_cash: number | null;
   status: "Open" | "PendingCollection" | "Verified";
   opened_at: string;
@@ -29,21 +33,26 @@ export interface CashShiftSummaryOut {
   /** The cash counter */
   node: "MainReception" | "PharmacyCounter" | "LabReception" | "IPDBilling" | "EmergencyCounter" | "CashierDesk";
   terminal_id: number | null;
+  /** The cash the drawer started with, issued from the main vault: the drawer's first entry (OpeningFloat) */
   opening_float: number;
+  /** What the drawer should hold now: the opening float plus every cash movement of the shift (by_type). Count all of it at the close. 0 once the verified cash drop has taken it to the vault (cash_drop.expected_cash keeps the amount) */
   expected_cash: number;
+  /** What the cashier counted in the whole drawer at the close, the float included (null while open) */
   declared_cash: number | null;
   status: "Open" | "PendingCollection" | "Verified";
   opened_at: string;
   closed_at: string | null;
   business_date: string;
   cashier_name: string;
+  /** declared_cash minus what the drawer held at the close, its float included (null until the shift is closed) */
+  declared_variance: number | null;
   by_type: ShiftTotalOut[];
   non_cash: NonCashTotalOut[];
   cash_drop: CashDropOut | null;
 }
 
 export interface ShiftTotalOut {
-  txn_type: "Sale" | "ARCollection" | "Refund" | "WaiverDispensation" | "APPayout" | "Adjustment" | "CashDrop";
+  txn_type: "OpeningFloat" | "Sale" | "ARCollection" | "Refund" | "WaiverDispensation" | "APPayout" | "Adjustment" | "CashDrop";
   count: number;
   total: number;
 }
@@ -72,7 +81,7 @@ export interface CashDropOut {
 
 export interface ShiftTransactionOut {
   shift_txn_id: number;
-  txn_type: "Sale" | "ARCollection" | "Refund" | "WaiverDispensation" | "APPayout" | "Adjustment" | "CashDrop";
+  txn_type: "OpeningFloat" | "Sale" | "ARCollection" | "Refund" | "WaiverDispensation" | "APPayout" | "Adjustment" | "CashDrop";
   amount: number;
   payment_id: number | null;
   receipt_no: string | null;
@@ -83,7 +92,7 @@ export interface ShiftTransactionOut {
 }
 
 export interface CloseShiftIn {
-  /** Cash the cashier counted in the drawer (excluding the opening float) */
+  /** Everything the cashier counted in the drawer, the opening float included */
   declared_cash: number | string;
 }
 

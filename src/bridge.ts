@@ -28,7 +28,10 @@ export class ApiError extends Error {
 export async function getWithClock<T>(path:string):Promise<{data:T;now:string}> {
   if(!window.terminal)throw new Error("Open Haspataal in the desktop terminal.");
   const reply=await window.terminal.call("api",{method:"GET",path}) as Reply<T>;
-  if(!reply.ok)throw new ApiError(reply);
+  if(!reply.ok){
+    if(reply.error?.code === "MAINTENANCE")window.dispatchEvent(new CustomEvent("haspataal-maintenance",{detail:reply.error.message}));
+    throw new ApiError(reply);
+  }
   const now=reply.meta?.server_time;
   if(!now || !/^\d{4}-\d{2}-\d{2}T/.test(now) || !Number.isFinite(Date.parse(now)))throw new Error("The server clock is unavailable. Refresh before recording a clinical time.");
   return {data:reply.data,now};
@@ -42,7 +45,10 @@ export async function call<T = any>(
       "Open Haspataal in the desktop terminal. A browser has no secure terminal connection.",
     );
   const r = await window.terminal.call(action, args);
-  if (!r.ok) throw new ApiError(r);
+  if (!r.ok) {
+    if (r.error?.code === "MAINTENANCE") window.dispatchEvent(new CustomEvent("haspataal-maintenance", { detail: r.error.message }));
+    throw new ApiError(r);
+  }
   return r.data as T;
 }
 const pending = new Map<string, string>();

@@ -33,6 +33,7 @@ const NODE_LABELS: Record<string, [string, string]> = {
 };
 
 const TXN_LABELS: Record<string, [string, string]> = {
+  OpeningFloat: ["Opening float", "ابتدائی نقد رقم (فلوٹ)"],
   Sale: ["Sale", "فروخت"],
   ARCollection: ["AR collection", "بقایا وصولی"],
   Refund: ["Refund", "واپسی (ریفنڈ)"],
@@ -567,6 +568,10 @@ export function CashShift({
                 <dt>{tr("Declared cash")}</dt>
                 <dd dir="ltr">{money(shift.declared_cash)}</dd>
               </div>
+              {shift.status !== "Open" && <div>
+                <dt>{tr("Declared variance")}</dt>
+                <dd dir="ltr">{money(shift.declared_variance)}</dd>
+              </div>}
             </dl>
             {!sameCounter && (
               <p className="notice">
@@ -658,7 +663,7 @@ export function CashShift({
               <Field
                 label={tr("Counted cash in drawer")}
                 hint={tr(
-                  "Cash the cashier counted in the drawer (excluding the opening float).",
+                  "Count everything in the drawer, including the opening float.",
                 )}
               >
                 <input

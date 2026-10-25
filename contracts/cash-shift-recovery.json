@@ -1,7 +1,7 @@
 {
-  "contract_fingerprint": "0b5ab90e400dfbb822d3",
-  "knowledge_revision": "318d65bdd91cd873",
-  "source": "MCP get_endpoint GET /finance/cash-shifts/{shift_id}, 2026-10-20",
+  "contract_fingerprint": "a48efc9c8254ac5137e2",
+  "knowledge_revision": "5d997abd8847f89d",
+  "source": "MCP get_endpoint GET /finance/cash-shifts/{shift_id}, 2026-10-25",
   "endpoints": [
     {
       "endpoint": "GET /finance/cash-shifts/{shift_id}",
@@ -83,11 +83,13 @@
                       },
                       "opening_float": {
                         "type": "number",
-                        "title": "Opening Float"
+                        "title": "Opening Float",
+                        "description": "The cash the drawer started with, issued from the main vault: the drawer's first entry (OpeningFloat)"
                       },
                       "expected_cash": {
                         "type": "number",
-                        "title": "Expected Cash"
+                        "title": "Expected Cash",
+                        "description": "What the drawer should hold now: the opening float plus every cash movement of the shift (by_type). Count all of it at the close. 0 once the verified cash drop has taken it to the vault (cash_drop.expected_cash keeps the amount)"
                       },
                       "declared_cash": {
                         "anyOf": [
@@ -98,7 +100,8 @@
                             "type": "null"
                           }
                         ],
-                        "title": "Declared Cash"
+                        "title": "Declared Cash",
+                        "description": "What the cashier counted in the whole drawer at the close, the float included (null while open)"
                       },
                       "status": {
                         "type": "string",
@@ -134,6 +137,18 @@
                       "cashier_name": {
                         "type": "string",
                         "title": "Cashier Name"
+                      },
+                      "declared_variance": {
+                        "anyOf": [
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ],
+                        "title": "Declared Variance",
+                        "description": "declared_cash minus what the drawer held at the close, its float included (null until the shift is closed)"
                       },
                       "by_type": {
                         "items": {
@@ -174,6 +189,7 @@
                       "closed_at",
                       "business_date",
                       "cashier_name",
+                      "declared_variance",
                       "by_type",
                       "non_cash",
                       "cash_drop"
@@ -247,5 +263,43 @@
         }
       }
     }
-  ]
+  ],
+  "recorded_example": {
+    "request": {
+      "path": "/api/v1/finance/cash-shifts/1"
+    },
+    "response": {
+      "status": 200,
+      "body": {
+        "data": {
+          "shift_id": 1,
+          "user_id": 3,
+          "node": "MainReception",
+          "terminal_id": null,
+          "opening_float": 0,
+          "expected_cash": 1000,
+          "declared_cash": null,
+          "status": "Open",
+          "opened_at": "2026-10-24T18:22:17.225397+00:00",
+          "closed_at": null,
+          "business_date": "2026-10-24",
+          "cashier_name": "Receptionist",
+          "declared_variance": null,
+          "by_type": [
+            {
+              "txn_type": "Sale",
+              "count": 1,
+              "total": 1000
+            }
+          ],
+          "non_cash": [],
+          "cash_drop": null
+        },
+        "meta": {
+          "server_time": "2026-10-24T18:22:17.939040+00:00"
+        },
+        "request_id": "24d14d07f53d404fac6c4f067603b0f8"
+      }
+    }
+  }
 }

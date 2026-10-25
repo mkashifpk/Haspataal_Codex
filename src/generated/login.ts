@@ -61,18 +61,7 @@ export interface PreferencesOut {
 /** The server's license state (licensing.public_view): no hardware details. */
 export interface LicenseStatusOut {
   state: "ok" | "grace" | "locked" | "dev";
-  reason:
-    | "hardware_changed"
-    | "license_missing"
-    | "license_invalid"
-    | "license_outdated"
-    | "license_expired"
-    | "hardware_unreadable"
-    | "check_failed"
-    | "standby_main_active"
-    | "standby_check_failed"
-    | "standby_invalid"
-    | null;
+  reason: "hardware_changed" | "license_missing" | "license_invalid" | "license_outdated" | "license_expired" | "hardware_unreadable" | "check_failed" | "standby_main_active" | "standby_check_failed" | "standby_invalid" | null;
   /** One sentence for people: show it as the banner */
   message: string;
   hospital: string | null;
@@ -102,14 +91,7 @@ export interface TerminalIdentityOut {
   mac: string | null;
   hint?: string | null;
   location_label?: string | null;
-  cash_node?:
-    | "MainReception"
-    | "PharmacyCounter"
-    | "LabReception"
-    | "IPDBilling"
-    | "EmergencyCounter"
-    | "CashierDesk"
-    | null;
+  cash_node?: "MainReception" | "PharmacyCounter" | "LabReception" | "IPDBilling" | "EmergencyCounter" | "CashierDesk" | null;
   ip?: string | null;
   receipt_printer?: string | null;
   receipt_printer_address?: string | null;
@@ -150,6 +132,8 @@ export interface HealthOut {
   server_time: string;
   components: HealthComponentsOut;
   maintenance_mode: boolean;
+  /** While maintenance_mode: the message for the maintenance screen, to show word for word. IT's own (written in the Control Center or PUT /admin/maintenance), else the server's default: the same text as the MAINTENANCE error's message. null otherwise */
+  maintenance_message: string | null;
   license: HealthLicenseOut;
   uptime_seconds: number;
 }
@@ -164,18 +148,7 @@ export interface HealthComponentsOut {
 export interface HealthLicenseOut {
   state: "ok" | "grace" | "locked" | "dev";
   /** Empty when there is nothing to report */
-  reason:
-    | ""
-    | "hardware_changed"
-    | "license_missing"
-    | "license_invalid"
-    | "license_outdated"
-    | "license_expired"
-    | "hardware_unreadable"
-    | "check_failed"
-    | "standby_main_active"
-    | "standby_check_failed"
-    | "standby_invalid";
+  reason: "" | "hardware_changed" | "license_missing" | "license_invalid" | "license_outdated" | "license_expired" | "hardware_unreadable" | "check_failed" | "standby_main_active" | "standby_check_failed" | "standby_invalid";
   /** One sentence for people */
   detail: string;
   grace_until: string | null;

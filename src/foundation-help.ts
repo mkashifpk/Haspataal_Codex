@@ -429,8 +429,8 @@ export const controlGuides: Record<string, ControlGuide> = {
       "گنی ہوئی نقدی / شفٹ بند کریں / واپس",
     ],
     [
-      "On your open shift at the mapped counter, count physical cash excluding the opening float. Enter Counted cash in drawer (zero is allowed), choose Close shift, compare shift/counter and amounts, then Confirm & Close Shift. The confirmation retains the reviewed shift, counter and amounts. If the shift or expected cash changes, confirmation is blocked: Go back, Refresh and review again. Go back or Close dismisses confirmation without saving and keeps the amount. PendingCollection is server-confirmed closure, not accountant verification. A refused or lost close answer must be checked against the original shift; it is never blindly repeated. Another counter or missing identity blocks closing here.",
-      "مقررہ کاؤنٹر کی اپنی کھلی شفٹ میں ابتدائی فلوٹ نکال کر نقد گنیں۔ دراز میں گنی ہوئی نقدی درج کریں، صفر بھی درست ہے۔ شفٹ بند کریں، نمبر، کاؤنٹر اور رقم دیکھیں پھر تصدیق کریں۔ تصدیق میں جائزہ شدہ شفٹ، کاؤنٹر اور رقم برقرار رہتے ہیں۔ شفٹ یا متوقع نقد بدل جائے تو تصدیق رک جاتی ہے؛ واپس جائیں، تازہ کریں اور دوبارہ جائزہ لیں۔ واپس یا بند سے کچھ محفوظ نہیں ہوتا اور رقم رہتی ہے۔ وصولی کا انتظار اکاؤنٹنٹ کی تصدیق نہیں۔ انکار یا گم جواب پر اصل شفٹ چیک کریں، اندھا دوبارہ ارسال نہ کریں۔ دوسرے کاؤنٹر یا نامعلوم شناخت پر بندش رکے گی۔",
+      "On your open shift at the mapped counter, count all physical cash including the opening float. Enter Counted cash in drawer (zero is allowed), choose Close shift, compare shift/counter and amounts, then Confirm & Close Shift. The confirmation retains the reviewed shift, counter and amounts. If the shift or expected cash changes, confirmation is blocked: Go back, Refresh and review again. Go back or Close dismisses confirmation without saving and keeps the amount. PendingCollection is server-confirmed closure, not accountant verification. Read Declared variance exactly as returned by the server; Expected cash includes the opening float. Opening float appears in the ledger and transaction totals; never subtract it or compute a drawer balance. A refused or lost close answer must be checked against the original shift; it is never blindly repeated. Another counter or missing identity blocks closing here.",
+      "مقررہ کاؤنٹر کی اپنی کھلی شفٹ میں ابتدائی فلوٹ سمیت تمام نقد گنیں۔ دراز میں گنی ہوئی نقدی درج کریں، صفر بھی درست ہے۔ شفٹ بند کریں، نمبر، کاؤنٹر اور رقم دیکھیں پھر تصدیق کریں۔ تصدیق میں جائزہ شدہ شفٹ، کاؤنٹر اور رقم برقرار رہتے ہیں۔ شفٹ یا متوقع نقد بدل جائے تو تصدیق رک جاتی ہے؛ واپس جائیں، تازہ کریں اور دوبارہ جائزہ لیں۔ واپس یا بند سے کچھ محفوظ نہیں ہوتا اور رقم رہتی ہے۔ وصولی کا انتظار اکاؤنٹنٹ کی تصدیق نہیں۔ اعلانیہ نقد رقم کا فرق بعینہ سرور سے دیکھیں؛ متوقع نقد میں فلوٹ شامل ہے۔ ابتدائی فلوٹ لیجر اور مجموعوں میں ہے؛ اسے نہ نکالیں اور خود بیلنس نہ بنائیں۔ انکار یا گم جواب پر اصل شفٹ چیک کریں، اندھا دوبارہ ارسال نہ کریں۔ دوسرے کاؤنٹر یا نامعلوم شناخت پر بندش رکے گی۔",
     ],
   ),
   "cash.recovery": g(
@@ -524,7 +524,7 @@ export const controlGuides: Record<string, ControlGuide> = {
       "دیکھ بھال: دوبارہ چیک کریں اور سائن آؤٹ",
     ],
     [
-      "When maintenance interrupts work, keep unsaved input in this window and follow the hospital's downtime procedure. Check again rechecks the server; it does not switch maintenance off. Sign out opens the normal sign-out confirmation. Contact IT if the notice persists.",
+      "When maintenance interrupts work, keep unsaved input in this window and follow the hospital's downtime procedure. The message is IT’s exact server text, including changes while you wait. Check again reads health again; it does not switch maintenance off. Sign out opens the normal sign-out confirmation. Contact IT if the notice persists.",
       "دیکھ بھال کی وجہ سے کام رکے تو غیر محفوظ اندراج اسی ونڈو میں رکھیں اور ہسپتال کے منظور شدہ متبادل طریقے پر عمل کریں۔ دوبارہ چیک کریں سرور کی حالت دیکھتا ہے، دیکھ بھال بند نہیں کرتا۔ سائن آؤٹ معمول کی تصدیق کھولتا ہے۔ پیغام برقرار رہے تو آئی ٹی سے رابطہ کریں۔",
     ],
   ),
@@ -631,6 +631,16 @@ export const controlGuides: Record<string, ControlGuide> = {
       "رابطہ آزمائیں سے صحت، سرور کے پتے، سرٹیفکیٹ اور لائسنس کی معلومات تازہ ہوتی ہیں۔ یہ ٹرمینل اس مشین کا مقام اور مقررہ پرنٹر دکھاتا ہے۔ ان سے نقشہ بندی یا سرور درست نہیں ہوتا۔ جانچ ناکام ہو تو نظر آنے والا خطا حوالہ آئی ٹی کو دیں۔",
     ],
   ),
+  ...(typeof __BUILD_IS_DEV__ === "undefined" || __BUILD_IS_DEV__ ? {
+    "settings.review-code": g(
+      ["settings"],
+      ["Review code (DEV only)", "جائزے کا کوڈ (صرف ڈیَو)"],
+      [
+        "The human tester opens Settings → This terminal before or after login, starts a review on the portal and types its code here. Apply review code activates it for all API requests across roles and windows. It starts empty and stays in memory until the app closes. When the review ends, empty the field and Apply review code to stop sending it. This is separate from account preferences and never authenticates you. Agents and automated tests must never enter a code. The hospital release build omits this field and the three DEV attribution/review headers.",
+        "انسانی جائزہ لینے والا سائن اِن سے پہلے یا بعد ترتیبات ← یہ ٹرمینل کھولتا، پورٹل پر جائزہ شروع کرتا اور یہاں اس کا کوڈ درج کرتا ہے۔ کوڈ لاگو کرنے سے تمام کرداروں اور ونڈوز کی درخواستوں پر وہ فعال ہوتا ہے۔ ابتدا میں خالی ہے اور ایپ بند ہونے تک صرف یادداشت میں رہتا ہے۔ جائزہ ختم ہو تو خانہ خالی کرکے کوڈ لاگو کریں تاکہ بھیجنا بند ہو۔ یہ ذاتی ترتیبات سے الگ ہے اور سائن اِن نہیں کرتا۔ ایجنٹ اور خودکار ٹیسٹ کبھی کوڈ درج نہ کریں۔ ہسپتال کی ریلیز میں یہ خانہ اور تین ڈیَو ہیڈر شامل نہیں ہوتے۔",
+      ],
+    ),
+  } : {}),
   "settings.policy": g(
     ["settings"],
     [

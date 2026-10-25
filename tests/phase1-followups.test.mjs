@@ -32,6 +32,7 @@ test("documented health 503 is a readable degraded envelope; other failures are 
       server_time: "2026-10-19T15:30:00Z",
       components: { database: "down", realtime: "up" },
       maintenance_mode: false,
+      maintenance_message: null,
       license: {
         state: "grace",
         reason: "hardware_changed",

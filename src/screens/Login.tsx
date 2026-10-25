@@ -71,9 +71,7 @@ export function Login({
                     "The server is starting or has a problem: ask IT. Its database is unavailable.",
                   )
                 : health.maintenance_mode
-                  ? tr(
-                      "Hospital maintenance is in progress. Sign-in restrictions are enforced by the server.",
-                    )
+                  ? <span style={{ whiteSpace: "pre-wrap" }}>{health.maintenance_message}</span>
                   : tr("Hospital server ready.")}
         </p>
         <form

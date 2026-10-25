@@ -9,6 +9,15 @@ export function setLanguage(value: string) {
   language = value;
 }
 const ur: Record<string, string> = {
+  ...(typeof __BUILD_IS_DEV__ === "undefined" || __BUILD_IS_DEV__ ? {
+    "Review code": "جائزے کا کوڈ",
+    "Apply review code": "جائزے کا کوڈ لاگو کریں",
+    "DEV only. Enter the code when you start a review on the portal. It applies across all roles and windows until cleared or the app closes.": "صرف ڈیَو میں۔ پورٹل پر جائزہ شروع کرتے وقت کوڈ درج کریں۔ یہ تمام کرداروں اور ونڈوز پر لاگو رہتا ہے، جب تک صاف نہ کریں یا ایپ بند نہ ہو۔",
+    "Review code is active. Clear the field and apply when your review ends.": "جائزے کا کوڈ فعال ہے۔ جائزہ ختم ہونے پر خانہ خالی کرکے لاگو کریں۔",
+    "No review code is active.": "جائزے کا کوئی کوڈ فعال نہیں ہے۔",
+    "Use the review code exactly as shown on the portal, without line breaks.": "پورٹل پر دکھایا گیا جائزے کا کوڈ بعینہ درج کریں، بغیر نئی سطر کے۔",
+    "Review code must be text.": "جائزے کا کوڈ متن ہونا چاہیے۔",
+  } : {}),
   "Ask an authorised administrator about debt write-offs.": "قرض کی معافی کے لیے مجاز منتظم سے رابطہ کریں۔",
   "Cash-shift permission changed. Refresh your session before continuing.": "کیش شفٹ کی اجازت بدل گئی ہے۔ آگے بڑھنے سے پہلے سیشن تازہ کریں۔",
   "The terminal counter changed or is unavailable. Refresh and ask IT before handling cash.": "ٹرمینل کاؤنٹر بدل گیا یا دستیاب نہیں۔ نقدی کے کام سے پہلے تازہ کریں اور آئی ٹی سے رابطہ کریں۔",
@@ -587,8 +596,9 @@ const ur: Record<string, string> = {
   "Closing asks for the counted cash; the Accountant verifies it later.":
     "شفٹ بند کرتے وقت گنی ہوئی نقد رقم پوچھی جاتی ہے؛ اکاؤنٹنٹ بعد میں تصدیق کرتا ہے۔",
   "Counted cash in drawer": "دراز میں شمار کردہ نقد رقم",
-  "Cash the cashier counted in the drawer (excluding the opening float).":
-    "دراز میں کیشیئر کی گنی ہوئی رقم (ابتدائی فلوٹ کے علاوہ)۔",
+  "Count everything in the drawer, including the opening float.":
+    "دراز کی تمام نقد رقم گنیں، ابتدائی فلوٹ سمیت۔",
+  "Declared variance": "اعلانیہ نقد رقم کا فرق",
   "Close shift": "شفٹ بند کریں",
   "Confirm Shift Closure": "شفٹ بندش کی تصدیق",
   "Are you sure you want to close this cash shift?":
