@@ -38,12 +38,13 @@ export function Registration({
     () => api<{ active: string[] }>("GET", "/establishment"),
     [revision],
   );
+  const [queueRevision, setQueueRevision] = useState(0);
   const dashboard = useLoad(
     () =>
       user.permissions.includes("opd.queue.view")
         ? registration.receptionDashboard()
         : Promise.resolve(null),
-    [revision],
+    [revision, queueRevision, user.permissions.includes("opd.queue.view")],
   );
   const [extras, setExtras] = useState<Partial<registration.PatientCreate>>({});
   const [billing, setBilling] = useState<"Cash" | "Panel">("Cash");
@@ -155,6 +156,7 @@ export function Registration({
       pendingBody.current = null;
       setUncertain(false);
       setResult(created);
+      setQueueRevision((n) => n + 1);
     } catch (cause) {
       setError(cause);
       const refused = definiteWriteRefusal(cause);
@@ -916,6 +918,7 @@ export function Registration({
                     />
                     {tr("Collect full payment now")}
                   </label>
+                  {!payNow && <p className="muted">{tr("An unpaid OPD slip normally enters the queue after payment or billing authorisation. Patient record only creates no visit or queue token.")}</p>}
                   {payNow && (
                     <div className="form-grid">
                       <Field label={tr("Payment method")}>
@@ -1007,13 +1010,14 @@ export function Registration({
           permissions={user.permissions}
           revision={revision}
           onPending={setActionPending}
-          onTicket={(ticket) =>
+          onTicket={(ticket) => {
             setResult((current) =>
               current
                 ? { ...current, ...ticket, queue_entry_created: !!ticket.queue }
                 : current,
-            )
-          }
+            );
+            setQueueRevision((n) => n + 1);
+          }}
         />
       )}
       {(result || patientRecord) && (
@@ -1070,22 +1074,32 @@ export function Registration({
         onPending={setDocumentsPending}
         onChanged={context.reload}
       />
-      {dashboard.data && (
-        <section className="card">
-          <h2>{tr("Live OPD queues")}</h2>
-          {dashboard.data.queues.length === 0 && (
+      {user.permissions.includes("opd.queue.view") && (
+        <section className="card" data-testid="registration-live-queues">
+          <div className="section-heading">
+            <h2>{tr("Live OPD queues")}</h2>
+            <button type="button" data-help="registration.queue" onClick={() => void dashboard.reload()} disabled={dashboard.loading}>
+              {tr("Refresh queues")}
+            </button>
+          </div>
+          <p className="muted">{tr("Find the patient by OPD slip and token below. Doctor-linked visits appear in that doctor's queue; department visits appear under the department.")}</p>
+          <LoadState {...dashboard} retry={dashboard.reload} />
+          {!dashboard.loading && !dashboard.error && dashboard.data?.queues.length === 0 && (
             <p>{tr("No patients are currently queued.")}</p>
           )}
-          {dashboard.data.queues.map((q) => (
-            <p key={q.queue_group}>
-              {q.doctor_name || q.department_name} · {tr("Waiting")}:{" "}
-              {q.waiting} · {tr("In consultation")}: {q.in_consultation}
-            </p>
+          {!dashboard.loading && !dashboard.error && dashboard.data?.queues.map((q) => (
+            <section key={q.queue_group}>
+              <h3>{q.doctor_name || q.department_name || q.queue_group}</h3>
+              <p>{tr("Waiting")}: {q.waiting} · {tr("In consultation")}: {q.in_consultation}</p>
+              {q.entries.map((entry) => (
+                <article className="card" key={entry.queue_id} data-testid="registration-queue-entry">
+                  <strong>{tr("Token")} <bdi>{entry.token_no}</bdi> · <bdi>{entry.patient_name}</bdi></strong>
+                  <p><bdi>{entry.ticket_number}</bdi> · {tr(entry.status)} · {tr(entry.payment_status)}</p>
+                </article>
+              ))}
+            </section>
           ))}
         </section>
-      )}
-      {user.permissions.includes("opd.queue.view") && (
-        <LoadState {...dashboard} retry={dashboard.reload} />
       )}
     </div>
   );

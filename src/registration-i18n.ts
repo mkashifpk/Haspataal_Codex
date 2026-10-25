@@ -1,4 +1,6 @@
 export const registrationUr: Record<string, string> = {
+  "An unpaid OPD slip normally enters the queue after payment or billing authorisation. Patient record only creates no visit or queue token.": "غیر ادا او پی ڈی پرچی عموماً ادائیگی یا بلنگ کی منظوری کے بعد قطار میں آتی ہے۔ صرف مریض ریکارڈ سے وزٹ یا قطار کا ٹوکن نہیں بنتا۔",
+  "Find the patient by OPD slip and token below. Doctor-linked visits appear in that doctor's queue; department visits appear under the department.": "نیچے او پی ڈی پرچی اور ٹوکن سے مریض تلاش کریں۔ ڈاکٹر سے منسلک وزٹ اسی ڈاکٹر کی قطار میں، جبکہ شعبے کے وزٹ شعبے کے تحت دکھتے ہیں۔",
   "No photo selected": "کوئی تصویر منتخب نہیں",
   "No active panels are configured. Ask billing administration to add one, or choose Cash billing.":
     "کوئی فعال پینل درج نہیں۔ بلنگ انتظامیہ سے پینل شامل کرائیں یا نقد بلنگ منتخب کریں۔",
