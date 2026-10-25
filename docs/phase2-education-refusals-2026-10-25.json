@@ -1,0 +1,368 @@
+{
+  "note": "Intentional missing IDs test refusals; only synthetic identities. Sandbox errors retried with identical original keys/body after concurrent tool response parsing failed; all confirmed refusals below, no success.",
+  "cases": [
+    {
+      "request": {
+        "as_user": "demo.cashier",
+        "method": "GET",
+        "path": "/patients/5/education"
+      },
+      "response": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v1/patients/5/education",
+          "as_user": "demo.cashier",
+          "query": null,
+          "body": null,
+          "idempotency_key": null
+        },
+        "status": 403,
+        "ms": 596,
+        "request_id": "5a5cc668191447239ff62a3c4aadd392",
+        "body": {
+          "error": {
+            "code": "FORBIDDEN",
+            "message": "Missing permission: education.give, education.manage",
+            "details": {
+              "required": [
+                "education.give",
+                "education.manage"
+              ],
+              "any_of": true
+            },
+            "retryable": false,
+            "retry_after_seconds": null
+          },
+          "request_id": "5a5cc668191447239ff62a3c4aadd392"
+        },
+        "explain": {
+          "http_status": 403,
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions)."
+        }
+      }
+    },
+    {
+      "request": {
+        "as_user": "demo.cashier",
+        "method": "GET",
+        "path": "/education/materials"
+      },
+      "response": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v1/education/materials",
+          "as_user": "demo.cashier",
+          "query": null,
+          "body": null,
+          "idempotency_key": null
+        },
+        "status": 403,
+        "ms": 754,
+        "request_id": "46fc8a6561b64ae78dc2c66e3ede05a8",
+        "body": {
+          "error": {
+            "code": "FORBIDDEN",
+            "message": "Missing permission: education.give, education.manage, msds.view",
+            "details": {
+              "required": [
+                "education.give",
+                "education.manage",
+                "msds.view"
+              ],
+              "any_of": true
+            },
+            "retryable": false,
+            "retry_after_seconds": null
+          },
+          "request_id": "46fc8a6561b64ae78dc2c66e3ede05a8"
+        },
+        "explain": {
+          "http_status": 403,
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions)."
+        }
+      }
+    },
+    {
+      "request": {
+        "as_user": "demo.cashier",
+        "method": "POST",
+        "path": "/patients/5/education",
+        "body": {
+          "topic": "DEMO forbidden education software check",
+          "method": "Verbal",
+          "given_to": "Patient"
+        },
+        "idempotency_key": "DEMO-EDUCATION-1792909010056-denied"
+      },
+      "response": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v1/patients/5/education",
+          "as_user": "demo.cashier",
+          "query": null,
+          "body": {
+            "topic": "DEMO forbidden education software check",
+            "method": "Verbal",
+            "given_to": "Patient"
+          },
+          "idempotency_key": "DEMO-EDUCATION-1792909010056-denied"
+        },
+        "status": 403,
+        "ms": 882,
+        "request_id": "c4fbfc413a4f443197e4698bff91f2d1",
+        "body": {
+          "error": {
+            "code": "FORBIDDEN",
+            "message": "Missing permission: education.give",
+            "details": {
+              "required": [
+                "education.give"
+              ],
+              "any_of": false
+            },
+            "retryable": false,
+            "retry_after_seconds": null
+          },
+          "request_id": "c4fbfc413a4f443197e4698bff91f2d1"
+        },
+        "explain": {
+          "http_status": 403,
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions)."
+        }
+      }
+    },
+    {
+      "request": {
+        "as_user": "demo.doctor",
+        "method": "GET",
+        "path": "/patients/2147483647/education"
+      },
+      "response": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v1/patients/2147483647/education",
+          "as_user": "demo.doctor",
+          "query": null,
+          "body": null,
+          "idempotency_key": null
+        },
+        "status": 404,
+        "ms": 720,
+        "request_id": "548a9a4c21174864a1ddba3530ae2562",
+        "body": {
+          "error": {
+            "code": "NOT_FOUND",
+            "message": "Patient not found",
+            "details": {
+              "resource": "Patient"
+            },
+            "retryable": false,
+            "retry_after_seconds": null
+          },
+          "request_id": "548a9a4c21174864a1ddba3530ae2562"
+        },
+        "explain": {
+          "http_status": 404,
+          "retryable": false,
+          "ui_action": "Say 'not found'; refresh the list."
+        }
+      }
+    },
+    {
+      "request": {
+        "as_user": "demo.doctor",
+        "method": "POST",
+        "path": "/patients/2147483647/education",
+        "body": {
+          "topic": "DEMO missing patient refusal check",
+          "method": "Verbal",
+          "given_to": "Patient"
+        },
+        "idempotency_key": "DEMO-EDUCATION-1792909010056-missing"
+      },
+      "response": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v1/patients/2147483647/education",
+          "as_user": "demo.doctor",
+          "query": null,
+          "body": {
+            "topic": "DEMO missing patient refusal check",
+            "method": "Verbal",
+            "given_to": "Patient"
+          },
+          "idempotency_key": "DEMO-EDUCATION-1792909010056-missing"
+        },
+        "status": 404,
+        "ms": 758,
+        "request_id": "55eb840eb5ef4fa383d44b57bb5386d4",
+        "body": {
+          "error": {
+            "code": "NOT_FOUND",
+            "message": "Patient not found",
+            "details": {
+              "resource": "Patient"
+            },
+            "retryable": false,
+            "retry_after_seconds": null
+          },
+          "request_id": "55eb840eb5ef4fa383d44b57bb5386d4"
+        },
+        "explain": {
+          "http_status": 404,
+          "retryable": false,
+          "ui_action": "Say 'not found'; refresh the list."
+        }
+      }
+    },
+    {
+      "request": {
+        "as_user": "demo.doctor",
+        "method": "POST",
+        "path": "/patients/5/education",
+        "body": {
+          "topic": "DEMO material required refusal check",
+          "method": "Video",
+          "given_to": "Both"
+        },
+        "idempotency_key": "DEMO-EDUCATION-1792909010056-required"
+      },
+      "response": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v1/patients/5/education",
+          "as_user": "demo.doctor",
+          "query": null,
+          "body": {
+            "topic": "DEMO material required refusal check",
+            "method": "Video",
+            "given_to": "Both"
+          },
+          "idempotency_key": "DEMO-EDUCATION-1792909010056-required"
+        },
+        "status": 422,
+        "ms": 746,
+        "request_id": "88c9b0650b7248a0b7b6d8c50d7fa742",
+        "body": {
+          "error": {
+            "code": "VALIDATION_ERROR",
+            "message": "Name the leaflet or the video used",
+            "details": {
+              "method": "Video"
+            },
+            "retryable": false,
+            "retry_after_seconds": null
+          },
+          "request_id": "88c9b0650b7248a0b7b6d8c50d7fa742"
+        },
+        "explain": {
+          "http_status": 422,
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message."
+        }
+      }
+    },
+    {
+      "request": {
+        "as_user": "demo.doctor",
+        "method": "POST",
+        "path": "/patients/5/education",
+        "body": {
+          "topic": "DEMO unknown material refusal check",
+          "method": "Leaflet",
+          "given_to": "Patient",
+          "material_id": 2147483647
+        },
+        "idempotency_key": "DEMO-EDUCATION-1792909010056-unknown-material"
+      },
+      "response": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v1/patients/5/education",
+          "as_user": "demo.doctor",
+          "query": null,
+          "body": {
+            "topic": "DEMO unknown material refusal check",
+            "method": "Leaflet",
+            "given_to": "Patient",
+            "material_id": 2147483647
+          },
+          "idempotency_key": "DEMO-EDUCATION-1792909010056-unknown-material"
+        },
+        "status": 422,
+        "ms": 762,
+        "request_id": "3174618678a64fd1bcc1d9dd1e8e97eb",
+        "body": {
+          "error": {
+            "code": "REFERENCE_NOT_FOUND",
+            "message": "Unknown or retired material",
+            "details": {
+              "field": "material_id",
+              "material_id": 2147483647
+            },
+            "retryable": false,
+            "retry_after_seconds": null
+          },
+          "request_id": "3174618678a64fd1bcc1d9dd1e8e97eb"
+        },
+        "explain": {
+          "http_status": 422,
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message."
+        }
+      }
+    },
+    {
+      "request": {
+        "as_user": "demo.doctor",
+        "method": "POST",
+        "path": "/patients/2/education",
+        "body": {
+          "topic": "DEMO wrong encounter refusal check",
+          "method": "Verbal",
+          "given_to": "Patient",
+          "encounter_id": 1
+        },
+        "idempotency_key": "DEMO-EDUCATION-1792909010056-encounter-mismatch"
+      },
+      "response": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v1/patients/2/education",
+          "as_user": "demo.doctor",
+          "query": null,
+          "body": {
+            "topic": "DEMO wrong encounter refusal check",
+            "method": "Verbal",
+            "given_to": "Patient",
+            "encounter_id": 1
+          },
+          "idempotency_key": "DEMO-EDUCATION-1792909010056-encounter-mismatch"
+        },
+        "status": 422,
+        "ms": 756,
+        "request_id": "3c5cb25dafc04f31bcf72df47f5d7e45",
+        "body": {
+          "error": {
+            "code": "VALIDATION_ERROR",
+            "message": "The consultation belongs to another patient",
+            "details": {
+              "encounter_id": 1
+            },
+            "retryable": false,
+            "retry_after_seconds": null
+          },
+          "request_id": "3c5cb25dafc04f31bcf72df47f5d7e45"
+        },
+        "explain": {
+          "http_status": 422,
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message."
+        }
+      }
+    }
+  ]
+}

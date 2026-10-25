@@ -108,6 +108,7 @@ function EducationForm({
     !!ctx.patient.merged_into_id ||
     write.blocked ||
     !canGive;
+  const materialReady = !materials.loading && !materials.error;
   const time = (s: string) => (timeZone ? formatHospitalTime(s, timeZone) : s);
   function clear() {
     setTopic("");
@@ -159,6 +160,13 @@ function EducationForm({
           t(
             "A leaflet or video requires the actual active material used.",
             "پرچے یا ویڈیو کے لیے استعمال شدہ اصل فعال مواد لازم ہے۔",
+          ),
+        );
+      if (material && !materialReady)
+        throw new Error(
+          t(
+            "Refresh education materials before saving this selected material. Your draft is kept.",
+            "منتخب مواد محفوظ کرنے سے پہلے رہنمائی مواد تازہ کریں۔ مسودہ برقرار ہے۔",
           ),
         );
       if (
@@ -338,22 +346,53 @@ function EducationForm({
               </select>
             </Field>
             <LoadState {...materials} retry={materials.reload} />
+            <button
+              data-help="education.material"
+              disabled={materials.loading}
+              onClick={() => void materials.reload()}
+            >
+              {t("Refresh education materials", "رہنمائی مواد تازہ کریں")}
+            </button>
             <Field label={t("Material actually used", "اصل استعمال شدہ مواد")}>
               <select
                 data-help="education.material"
+                disabled={!materialReady}
                 value={material}
                 onChange={(e) => setMaterial(e.target.value)}
               >
                 <option value="">
                   {t("No material selected", "مواد منتخب نہیں")}
                 </option>
-                {materials.data
-                  ?.filter((m) => m.is_active)
-                  .map((m) => (
-                    <option key={m.material_id} value={m.material_id}>
-                      {m.title} · {tr(m.kind)} · {tr(m.language)} · {m.topic}
+                {!materialReady && material && (
+                  <option value={material} disabled>
+                    {t(
+                      "Selected material awaiting recheck",
+                      "منتخب مواد دوبارہ جانچ کا منتظر",
+                    )}{" "}
+                    · #{material}
+                  </option>
+                )}
+                {materialReady &&
+                  material &&
+                  !materials.data?.some(
+                    (m) => m.is_active && String(m.material_id) === material,
+                  ) && (
+                    <option value={material} disabled>
+                      {t(
+                        "Selected material no longer active; choose again",
+                        "منتخب مواد اب فعال نہیں؛ دوبارہ چنیں",
+                      )}{" "}
+                      · #{material}
                     </option>
-                  ))}
+                  )}
+                {materialReady &&
+                  materials.data
+                    ?.filter((m) => m.is_active)
+                    .map((m) => (
+                      <option key={m.material_id} value={m.material_id}>
+                        {m.title} · {tr(m.kind)} · {tr(m.language)} · {m.topic}
+                      </option>
+                    ))}
               </select>
             </Field>
             <p>
@@ -512,7 +551,21 @@ function EducationForm({
                 </p>
               </article>
             ))}
-        {!materials.loading && !materials.error && !!materials.data?.length && !materials.data.some(m=>`${m.title} ${m.topic} ${m.language} ${m.kind}`.toLowerCase().includes(materialFilter.toLowerCase())) && <Empty>{t('No material matches this filter. Clear the filter to review the catalogue.','اس تلاش سے مواد نہیں ملا۔ پوری فہرست کے لیے تلاش صاف کریں۔')}</Empty>}
+        {!materials.loading &&
+          !materials.error &&
+          !!materials.data?.length &&
+          !materials.data.some((m) =>
+            `${m.title} ${m.topic} ${m.language} ${m.kind}`
+              .toLowerCase()
+              .includes(materialFilter.toLowerCase()),
+          ) && (
+            <Empty>
+              {t(
+                "No material matches this filter. Clear the filter to review the catalogue.",
+                "اس تلاش سے مواد نہیں ملا۔ پوری فہرست کے لیے تلاش صاف کریں۔",
+              )}
+            </Empty>
+          )}
         {!materials.loading && !materials.error && !materials.data?.length && (
           <Empty>
             {t(
