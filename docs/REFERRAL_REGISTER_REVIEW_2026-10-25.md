@@ -25,3 +25,5 @@ DEV build/help/TS passed30screens557controls181groups. Release rebuilt as B3NEUi
 ## Human checks
 
 Open Quality & Medical Records → Referral register. Find REF-2026-00001 and verify Cancelled, source patient/MRN, cancellation reason and original PDF. It is completed synthetic evidence: do not cancel it again or record a fictional receiving acknowledgement. Check date/pending/search filters, F1, PDF preparing/cancel/error recovery, Urdu and250% layouts. For portal fresh-data acceptance, the named human must create their own new synthetic upstream referral and walk the permitted role handover. Only that human enters their Review code and completes/signs portal review. No agent worksheet, physical printing or receiving acknowledgement is asserted.
+
+Source2115db3 committed. Proposal138 saved/verified Pending for q:states/permissions/tested/handbook/F1/zoom; awaiting human review on /docs -> My progress. Exact payload referral-register-proposal-2115db3.json. No unchanged approved endpoint/rule or pending claim duplicated.

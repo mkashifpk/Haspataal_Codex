@@ -2,7 +2,7 @@
 
 Phase2 is Outpatient front desk and consultation,19 screens. All have UI; partial approvals do not establish full acceptance. The reset preserved accounts/keys/progress but ALL pre-reset record IDs are obsolete. Root handoff.md is authoritative. The prior detailed review is archived as PHASE2_PRE_RESET_REVIEW_2026-10-25.md and is not a runnable checklist.
 
-Backend-refresh source0284ea4, proposal checkpoint44adba8. Serverbuild2026-10-24T21:23:38.916290+00:00/contracta48efc9c8254ac5137e2/rubrica400860f309d. Issue19 Fixed/retested: whole drawer includes float; actual1500->3000->1500, insufficient cash refusal/recovery and whole closes/servervariance0. No new functional backend issue remained reproduced.131/132Accepted;109/133 and new134–137 Pending at latest read: awaiting human review on /docs -> My progress. Read feedback before claims; never duplicate unchanged accepted/pending work.
+Backend-refresh source0284ea4, proposal checkpoint44adba8. Serverbuild2026-10-24T21:23:38.916290+00:00/contracta48efc9c8254ac5137e2/rubrica400860f309d. Issue19 Fixed/retested: whole drawer includes float; actual1500->3000->1500, insufficient cash refusal/recovery and whole closes/servervariance0. No new functional backend issue remained reproduced.131/132Accepted;109/133 and new134–138 Pending at latest read: awaiting human review on /docs -> My progress. Read feedback before claims; never duplicate unchanged accepted/pending work.
 
 | Screen | Current post-reset evidence | Pending |
 |---|---|---|
@@ -31,3 +31,5 @@ Backend refresh detail: BACKEND_RESET_REVIEW_2026-10-25.md. Current register det
 Fresh synthetic identities (verify before any action): DEMO-RESET-CASH-1792903058875 patient1/ticket1 fully refunded; patient2/ticket2/invoice2/AR1 Cash-settled once; Card-refund patient3/ticket3 paid out after insufficient-cash test; patient4/ticket4 is the separately recorded liquidity cash sale. Owned employee36/user34/terminal2 and drawers closed/inactive; snapshot shift8 (gaps may belong to others). Separate employee37/user35/terminal3/shift5: patient5/ticket5/invoice5/FinalNotExamined note1, waiver cash-back complete, endsWaivered. NEW referral1 REF-2026-00001 issued and cancelled through Doctor UI, no receiving acknowledgement. Do not reuse historical pre-reset referral1/2 just because an ID now coincides. Exact keys/results/cleanup in current dated reset/referral evidence; no transaction should be recreated to inspect it.
 
 No Phase2 completion claimed.
+
+Referral continuation source2115db3 committed, proposal138 saved/verified for six tested quality items; awaiting human review on /docs -> My progress. No implementation/test process remains running.

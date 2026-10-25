@@ -2,7 +2,7 @@
 
 ## Current task / status
 
-User requested backend-reset refresh: issue19 whole-drawer accounting, verbatim maintenance text, six screen plans on fresh own DEV fixtures, DEV-only human-entered Review code with release exclusion, commit/report tested changes, then continue Referral Register. Backend refresh implementation/targeted live verification committed **0284ea4**; proposals134–137 saved and verified Pending. Full screen/Phase2 human acceptance is not claimed. No subagents. No command/Electron session/uncertain financial write remains running.
+User requested backend-reset refresh: issue19 whole-drawer accounting, verbatim maintenance text, six screen plans on fresh own DEV fixtures, DEV-only human-entered Review code with release exclusion, commit/report tested changes, then continue Referral Register. Backend refresh implementation/targeted live verification committed **0284ea4**; proposals134–137 saved and verified Pending. Full screen/Phase2 human acceptance is not claimed. No subagents. No command/Electron session/uncertain financial write remains running. Final source **2115db3**, preceding backend source0284ea4 and proposal checkpoint44adba8 preserved; final proposal/documentation checkpoint follows.
 
 Baseline HEAD **ccd69e7** verified. Existing recorded uncommitted Review-code/cash/maintenance changes were preserved, reviewed and finished. Current source/contracts/types/help/tests/evidence committed0284ea4; proposal/checkpoint docs will follow in a documentation commit. No unrelated user changes discarded. See docs/BACKEND_RESET_REVIEW_2026-10-25.md for coverage and honest limits.
 
@@ -23,7 +23,7 @@ Latest portal read:131/132Accepted;109MyCashShift and133SettingsF1 Pending: awai
 - Final review-code DEV/release actual HTTP/UI checks PASS, empty code only; public bootstrap guards PASS. Independent refresh rotation/reuse-family revocation/logout TOKEN_REVOKED PASS. Login disabled/invalid/lock countdown/lost200/double submit/forced change/policy/lost passwordchange recovery/two-window all-own-session logout PASS.21 real forbidden-role API checks plus current metadata/health/registration/ledger/AR/invoice reads PASS.
 - User explicitly authorised brief shared DEV maintenance. Actual bilingual multiline health/loginUrpoll/event/fullscreen/APIerror text matched exactly. **Original maintenance_mode=false/messageempty restored and re-read**, apps closed/prefs restored/signedout. Timed restore guard disarmed. docs/maintenance-live-evidence-2026-10-25.json. Do not enable another shared window without coordination.
 
-## Referral Register continuation — completed, about to commit/report
+## Referral Register continuation — committed2115db3, proposal138 saved/verified
 
 Baseline44adba8 verified. Read register fullbundle+schemas/quality/design/testplan/builddependencies/qualityhandbook, upstream ExternalReferral bundle/omitted sections/create+cancel contracts/workflow; validate_request passed and generated Register types match. Current bundle saved contracts/referral_register.json. No prescribed referral event exists; cross-role refresh uses explicitReset/re-read, no fabricated event or polling.
 
@@ -31,7 +31,7 @@ NEW current synthetic Ref1 REF-2026-00001 linkedpatient5/ticket5/FinalNotExamine
 
 Found frontendPDFpending gap: realdelayedPDF leftbothcontrolsenabled/doubleclick2GETs. Baselineproof docs/referral-pdf-progress-baseline-2026-10-25.json. Shared src/referral-record.tsx now paperFlight/busy status ENUR/disablebothcontrols/finallyrecovery, src/foundation-help.ts newrecoveryinstructions. scripts/referral-pdf-progress-check.mjs and --doctor PASS on **CyGQqxCF**: actualdelayedread/doubleclickoneGET, pending/cancel/exhaustedreadfailure/recovery/F1/Urdu;0businesswrites, bothprofilesrestored/signedout. Exactdatedevidence includesDoctorvariant. SharedExternalReferral fullcontact/historystates remainuntested; no independentfullunclaimedqualityitemready for thatscreen, acceptedhandbook/endpoints notduplicated. Explain this limit rather than submittingempty/inventedclaims.
 
-Latest DEV **CyGQqxCF**, release **B3NEUiIq** rebuilt/help/TS PASS and compiledDEVcode/headerexclusionverified. Previous77unitPASS belongsbackendrefreshcore; targetedactualUIchecks coverlaterPDFchange. Existinglargebundlewarning. No commands/unknownwrites. docs/REFERRAL_REGISTER_REVIEW_2026-10-25.md and refreshedPHASE2_REVIEW_STATUS_2026-10-24.md covercurrentresetstate; historicalreviewarchivedPHASE2_PRE_RESET_REVIEW_2026-10-25.md. Next commitcurrentRegister/sharedPDF/evidence, propose only newtestedRegisterq:states/permissions/tested/handbook/F1/zoom, verify savedproposal; humanfreshdata/roleFAQ/Urdu/editor/physicalreview remains pending.
+Latest DEV **CyGQqxCF**, release **B3NEUiIq** rebuilt/help/TS PASS and compiledDEVcode/headerexclusionverified. Previous77unitPASS belongsbackendrefreshcore; targetedactualUIchecks coverlaterPDFchange. Existinglargebundlewarning. No commands/unknownwrites. docs/REFERRAL_REGISTER_REVIEW_2026-10-25.md and refreshedPHASE2_REVIEW_STATUS_2026-10-24.md covercurrentresetstate; historicalreviewarchivedPHASE2_PRE_RESET_REVIEW_2026-10-25.md. Source2115db3 committed. **Proposal138** saved/verified Pending q:states/permissions/tested/handbook/F1/zoom: awaiting human review on /docs -> My progress. Exact docs/referral-register-proposal-2115db3.json/requestcodex-referral-register-2115db3-20261025-quality-v1 retained. Humanfreshdata/roleFAQ/Urdu/editor/physicalreview remains pending.
 
 ## Current reset fixtures — confirmed complete, NEVER replay
 
@@ -41,7 +41,7 @@ Latest DEV **CyGQqxCF**, release **B3NEUiIq** rebuilt/help/TS PASS and compiledD
 
 ## Exact next actions
 
-1.Backend source0284ea4/proposals134–137 committed/verified. Commit/testedRegisterPDFcontinuation and report only its newreadyqualityitems; do not repeat109/133/134–137 or unchangedapprovedclaims. CurrentRef1cancelledandallfixturecleanupcomplete; no businesswork in progress.
+1.No implementation or business step is in progress. Backend source0284ea4 and Register2115db3 committed;134–138 saved/verified Pending, alongside109/133. Final docs checkpoint committed; inspect Git on takeover. Do not resubmit these or unchangedapprovedclaims. CurrentRef1cancelled/alltestprofilesrestored/signedout/allownfixturecleanupcomplete; no runningcommands/unknownwrites.
 2.Next Phase2 gap: read Patient education currentbundle/quality/design/testplan and currentmaterial/service setup; validate positive material branch with NEW controlledsyntheticrecord if appropriate. Do not use pre-reset education1/2 or programme/homevisit activationIDs. Keepone testablescreen atatime.
 3.Human starts/resumes appropriateportalreview for finalidentifiedbuild; onlyhuman typesOWNReviewcode. CheckSettingsfield/releaseabsence, whole-drawercount/variance, QualityReferralRegisterread-only/PDF/F1/Urdu/zoom. Completefreshdata/roleFAQ/editor/hardware/physical reviews; no agent starts/fills/signs review. Fullsixplan limits remain inBACKEND_RESET_REVIEW, no Phase2completionclaimed.
 
