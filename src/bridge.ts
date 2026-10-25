@@ -9,6 +9,8 @@ export type Reply<T = unknown> = {
   };
   request_id?: string;
   status?: number;
+  local_rejection?: boolean;
+  request_sent?: boolean;
   meta?: {server_time:string};
 };
 declare global {

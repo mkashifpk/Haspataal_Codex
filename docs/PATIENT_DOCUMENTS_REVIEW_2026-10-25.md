@@ -1,0 +1,21 @@
+# Patient document vault — 25 October 2026
+
+Read current full MCP bundle/schemas/quality/design/roadmap/testplan and all three endpoint contracts; generated TypeScript matches source. Current synthetic patient5 identity was verified before every attachment. No old patient13/18/21 records were used.
+
+Fixed shared `RegistrationDocuments.tsx` empty/list states: loading or failed refresh hides cached rows and cannot assert that the vault is empty. Actual empty/populated read failures and retries passed. Added readable English/Urdu names for all document kinds without changing wire values; verified outside6/hospital13 report choices and refreshed full-page images in both themes at250.
+
+A real invalid-file test found a second frontend defect: native validation rejected a file before HTTP, but generic TERMINAL_ERROR left its draft locked. `LocalUploadError` now marks only field/MIME/32MB checks that run before HTTP exists. `raw` skips connection probing for these known local refusals; IPC returns local_rejection/request_sent=false without inventing an HTTP response. The shared write classifier releases only that explicit native marker/code. Generic network/5xx/unknown responses still retain the original hold. Urdu messages and bilingual recovery guidance added.
+
+Actual DEV verification:
+
+- Optional photo consent starts blank; PDF photo refused locally; Skip clears stale error/consent and permits the same file to be chosen again; preview/F1 works. Synthetic PNG document1 becomes the patient photo. Outside PNG document2 stores source/date separately from hospital results. One POST per doubleclick, distinct keys; no automatic download or registration/payment.
+- A separate outside PNG document3 deliberately lost201; retry sent the identical original file/metadata/key, returned the SAME documentID with replay, and stored one attachment. Original file hash/bytes and receipts retained.
+- Explicit protected file-read failure shows an error and no stale viewer; deliberate retry opens the actual image. Failed lists never assert falseempty. ModalF1/focus and native zoom100/250/reset/server-preference persistence passed. Cashier has no vault menu; native list/upload/download guards send no HTTP; actual server list/download403 and missing-document404 verified.
+- Local unsupported file leaves connection healthy, editable/removable draft and ZERO HTTP. False PNG gets actual415; recognised but truncated PNG and future-dated valid PNG get422; drafts unlock for correction/removal and no extra file is stored. The initial eight-byte PNG-header fixture was unrecognisable and correctly returned415; it was corrected with a recognisable truncated image, preserving the initial failure evidence.
+- Meaningful transport tests prove invalid field/type/oversized multipart send zero HTTP. Write-classification tests prove missing/mismatched native markers, sent/unknown/5xx outcomes cannot unlock.79 unitPASS; final build/help/TS/Vite PASS30screens/558controls/181groups. Final mhOHBwRj; local rejection live CAOF01WS, earlier file/read workflow B4BguGnZ. Final readonly bilingual-label check passed. Existing bundle warning persists.
+
+All profiles restored/signedout; documents1–3 remain intentionally stored audit fixtures. No unknown business write or running command. Never rerun confirmed uploads to inspect them. Evidence: dated phase2-document-fresh/recovery/states/refusals/read-refusals JSON and guarded scripts. Original baseline failures remain in dated files. The copied textual patient13 label was corrected transparently; every actual identity guard/path used patient5.
+
+No physical camera, scanner, printer, named human/translation/roleFAQ/editor or independent access-log review claimed. Complete server payload-size/idempotency-conflict variants remain pending, so full upload-rule/photo-rule/testplan items are not proposed. Accepted endpoints/provenance/safe-write/F1/handbook claims are not duplicated. The shared Registration post-intake widget also benefits; no new independent complete Registration rubric item is ready from these isolated file checks.
+
+Unrelated broad regression found scoped Doctor Patient Search help missing: backend issue21 New, to be handled after this screen is committed/reported. Issue20 New tracks intermittent MCP sandbox transport closure; both community services remain Active at revision9.

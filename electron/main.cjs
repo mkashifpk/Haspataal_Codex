@@ -34,7 +34,7 @@ protocol.registerSchemesAsPrivileged([
   },
 ]);
 const WebSocket = require("ws");
-const { request, checkedRoot } = require("./transport.cjs");
+const { request, checkedRoot, LocalUploadError } = require("./transport.cjs");
 const { discover } = require("./discovery.cjs");
 const { validate, permissionAllows, matchOperation: findOperation } = require("./contract.cjs");
 const { createPreferenceQueue } = require("./preference-queue.cjs");
@@ -242,6 +242,7 @@ async function raw(method, p, body, workspace, key, binary = false) {
     }
     return result;
   } catch (e) {
+    if (e instanceof LocalUploadError) throw e;
     if (server !== originalServer) throw e;
     try {
       // Probe the other pinned addresses before announcing an outage. A write
@@ -1349,6 +1350,12 @@ ipcMain.handle("terminal", async (event, action, args = {}) => {
     }
     throw new Error("Unsupported terminal action");
   } catch (e) {
+    if (e instanceof LocalUploadError) return {
+      ok: false,
+      local_rejection: true,
+      request_sent: false,
+      error: { code: "LOCAL_UPLOAD_REJECTED", message: e.message },
+    };
     return { ok: false, error: { code: "TERMINAL_ERROR", message: e.message } };
   } finally {
     if (credentialAction) credentialFlight = false;

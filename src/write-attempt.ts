@@ -16,9 +16,22 @@ export function canRetryWrite(
 }
 export function definiteWriteRefusal(cause: unknown) {
   const response = (
-    cause as { response?: { status?: number; error?: { code?: string } } }
+    cause as {
+      response?: {
+        status?: number;
+        local_rejection?: boolean;
+        request_sent?: boolean;
+        error?: { code?: string };
+      };
+    }
   )?.response;
   if (!response) return false;
+  if (
+    response.local_rejection === true &&
+    response.request_sent === false &&
+    response.error?.code === "LOCAL_UPLOAD_REJECTED"
+  )
+    return true;
   const { status, error } = response;
   return (
     !!status &&

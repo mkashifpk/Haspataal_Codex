@@ -1,0 +1,15 @@
+{
+  "implementation_id": 1,
+  "request_id": "codex-doctor-patient-search-handbook-20261025-v1",
+  "kind": "MissingWorkflow",
+  "severity": "Medium",
+  "title": "Doctor partial Patient Search has no permitted contextual handbook page",
+  "screen_id": "patient_search",
+  "endpoint": "GET /meta/handbook",
+  "build": "4894e7c / BtG-9zaw; backend2026-10-24T21:23:38.916290+00:00",
+  "agent": "Codex/functions",
+  "actual": "demo.doctor has patient.search/patient.view and the Patient Search bundle lists doctor as a partial role. The app's existing shared Patient Search menu successfully opens its readonly UI, but F1 shows 'This help page is not available or permitted in this workspace.' GET /meta/handbook?workspace=doctor omits patient_search from both shared_screens and doctor.screens. Unscoped GET /meta/handbook also omits it (the partial role lacks patient.update); workspace=reception returns403. Existing ClinicalPatient lookup in consultation works and is documented under the consultation page.",
+  "expected": "Please clarify/support the intended partial Doctor Patient Search journey. If its standalone readonly screen is intended (as catalogue partial roles indicates), include patient_search through Doctor also_uses with only permitted tasks in the scoped handbook, so F1/search/guide remain permission-filtered. The compulsory screen handbook gate requires help for an exposed screen. We will not inject unpermitted help pages or fabricated metadata.",
+  "steps": "1. As demo.doctor, GET /auth/me (patient.search and patient.view). 2. GET /patients/search?q=DEMO and /patients/5 permitted. 3. Read get_screen_bundle(patient_search) roles.partial includes doctor. 4. GET /meta/handbook?workspace=doctor and unscoped; neither includes patient_search. 5. In current existing app menu open Patient Search, pressF1: unavailable page. Reception's Patient Search/F1 works.",
+  "evidence": "Read-only fresh regression: artifacts/phase2-screen-smoke-failure-ui.txt/png; docs/phase2-screen-smoke-2026-10-25.json will retain scope/result once navigation is aligned. No clinical writes. GET /meta/handbook docs explicitly include another workspace's screen when also_uses or all endpoints permitted; Doctor has readonly subset. Frontend will stop offering standalone screens absent from scoped handbook; consultation patient lookup remains usable. Root cause/routing choice is backend metadata/workflow, not a reason to bypass permission filtering."
+}

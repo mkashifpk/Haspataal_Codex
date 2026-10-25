@@ -9,6 +9,9 @@ export function setLanguage(value: string) {
   language = value;
 }
 const ur: Record<string, string> = {
+  "Only PDF, JPEG and PNG patient files are supported": "مریض کی صرف پی ڈی ایف، جے پیگ اور پی این جی فائلیں قبول ہیں۔",
+  "Upload exceeds the terminal's 32 MB limit": "اپ لوڈ اس ٹرمینل کی ۳۲ ایم بی حد سے بڑا ہے۔",
+  "Invalid upload field": "اپ لوڈ کا خانہ درست نہیں۔",
   ...(typeof __BUILD_IS_DEV__ === "undefined" || __BUILD_IS_DEV__ ? {
     "Review code": "جائزے کا کوڈ",
     "Apply review code": "جائزے کا کوڈ لاگو کریں",

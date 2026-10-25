@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { api, call, ApiError } from "../bridge";
 import { ErrorBox, Field, LoadState, Modal, useLoad } from "../components";
 import type { PatientDocumentOut } from "../generated/registration";
-import { tr } from "../i18n";
+import { bilingual, tr } from "../i18n";
 import { definiteWriteRefusal } from "../write-attempt";
 
 type Draft = {
@@ -19,6 +19,26 @@ type Draft = {
   locked?: boolean;
   outside?: boolean;
 };
+const documentLabels: Record<string, [string, string]> = {
+  Photo: ["Photo", "تصویر"],
+  CNIC: ["CNIC", "شناختی کارڈ"],
+  PanelCard: ["Panel card", "پینل کارڈ"],
+  Consent: ["Consent", "رضامندی"],
+  ReferralLetter: ["Referral letter", "حوالہ خط"],
+  DeathCertificate: ["Death certificate", "وفات کا سرٹیفکیٹ"],
+  AutopsyReport: ["Autopsy report", "آٹوپسی کی رپورٹ"],
+  PostMortemReport: ["Post-mortem report", "پوسٹ مارٹم رپورٹ"],
+  MedicoLegalReport: ["Medico-legal report", "میڈیکو لیگل رپورٹ"],
+  LabReport: ["Lab report", "لیب رپورٹ"],
+  Imaging: ["Imaging report", "عکس کی رپورٹ"],
+  DischargeSummary: ["Discharge summary", "ڈسچارج کا خلاصہ"],
+  Prescription: ["Prescription", "نسخہ"],
+  Other: ["Other", "دیگر"],
+};
+function documentLabel(value: string) {
+  const label = documentLabels[value];
+  return label ? bilingual(...label) : tr(value);
+}
 export function RegistrationDocuments({
   patientId,
   photoId,
@@ -400,7 +420,7 @@ export function RegistrationDocuments({
                         "ReferralLetter",
                         "Other",
                       ]).map((t) => (
-                        <option key={t} value={t}>{tr(t)}</option>
+                        <option key={t} value={t}>{documentLabel(t)}</option>
                       ))}
                     </select>
                   </Field>
@@ -463,18 +483,18 @@ export function RegistrationDocuments({
           <h3>{tr("Stored patient documents")}</h3>
           <button data-help="registration.documents" type="button" onClick={() => void list.reload()} disabled={list.loading}>{tr("Refresh documents")}</button>
           <LoadState {...list} retry={list.reload} />
-          {list.data?.length === 0 && (
+          {!list.loading && !list.error && list.data?.length === 0 && (
             <p>{tr("No patient documents have been uploaded.")}</p>
           )}
-          {!list.error && list.data?.map((d) => (
+          {!list.loading && !list.error && list.data?.map((d) => (
             <p key={d.document_id}>
               <button data-help="registration.documents" type="button" onClick={() => void open(d.document_id)}>
-              {d.title || tr(d.doc_type)} · #{d.document_id}
+              {d.title || documentLabel(d.doc_type)} · #{d.document_id}
               </button>{" "}
               ·{" "}
               {d.is_outside
                 ? `${tr("Outside")}: ${d.source_facility}, ${d.document_date}`
-                : tr("Hospital document")} · {tr(d.doc_type)} · {d.content_type} · {d.size_bytes} {tr("bytes")}
+                : tr("Hospital document")} · {documentLabel(d.doc_type)} · {d.content_type} · {d.size_bytes} {tr("bytes")}
             </p>
           ))}
         </>

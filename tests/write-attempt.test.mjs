@@ -32,3 +32,31 @@ test("lost/in-progress/throttled/server replies keep original identity; only def
     }),
   );
 });
+
+test("only a confirmed native rejection before HTTP can release a local upload hold", () => {
+  assert(
+    definiteWriteRefusal({
+      response: {
+        local_rejection: true,
+        request_sent: false,
+        error: { code: "LOCAL_UPLOAD_REJECTED" },
+      },
+    }),
+  );
+  for (const response of [
+    { error: { code: "LOCAL_UPLOAD_REJECTED" } },
+    { request_sent: false, error: { code: "LOCAL_UPLOAD_REJECTED" } },
+    {
+      local_rejection: true,
+      request_sent: true,
+      error: { code: "LOCAL_UPLOAD_REJECTED" },
+    },
+    {
+      local_rejection: true,
+      request_sent: false,
+      error: { code: "TERMINAL_ERROR" },
+    },
+    { status: 503, error: { code: "LOCAL_UPLOAD_REJECTED" } },
+  ])
+    assert(!definiteWriteRefusal({ response }));
+});

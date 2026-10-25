@@ -2,6 +2,10 @@ const https = require("node:https");
 const http = require("node:http");
 const { X509Certificate } = require("node:crypto");
 
+// These checks happen before an HTTP request exists. They are safe to correct,
+// unlike a transport failure after submission whose server result is unknown.
+class LocalUploadError extends Error {}
+
 function checkedRoot(pem, fingerprint) {
   const cert = new X509Certificate(pem);
   const normalize = (x) => String(x).replace(/:/g, "").toUpperCase();
@@ -42,13 +46,15 @@ function request(
       const parts = [];
       for (const part of body.__multipart) {
         if (!/^[a-z_]+$/.test(part.name))
-          throw new Error("Invalid upload field");
+          throw new LocalUploadError("Invalid upload field");
         const filename = part.filename?.replace(/[\r\n"\\]/g, "_");
         if (
           filename &&
           !["image/jpeg", "image/png", "application/pdf"].includes(part.type)
         )
-          throw new Error("Only PDF, JPEG and PNG patient files are supported");
+          throw new LocalUploadError(
+            "Only PDF, JPEG and PNG patient files are supported",
+          );
         parts.push(
           Buffer.from(
             `--${boundary}\r\nContent-Disposition: form-data; name="${part.name}"${filename ? `; filename="${filename}"` : ""}\r\n${filename ? `Content-Type: ${part.type}\r\n` : ""}\r\n`,
@@ -62,7 +68,7 @@ function request(
       parts.push(Buffer.from(`--${boundary}--\r\n`));
       data = Buffer.concat(parts);
       if (data.length > 32 * 1024 * 1024)
-        throw new Error("Upload exceeds the terminal's 32 MB limit");
+        throw new LocalUploadError("Upload exceeds the terminal's 32 MB limit");
     } else data = body === undefined ? undefined : JSON.stringify(body);
     const req = (target.protocol === "https:" ? https : http).request(
       target,
@@ -121,4 +127,4 @@ function request(
     req.end();
   });
 }
-module.exports = { request, checkedRoot };
+module.exports = { request, checkedRoot, LocalUploadError };
