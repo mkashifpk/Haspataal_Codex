@@ -1,0 +1,15 @@
+{
+  "implementation_id": 1,
+  "request_id": "codex-rx-queue-partial-role-scope-20261025-v1",
+  "kind": "Documentation",
+  "severity": "Low",
+  "title": "Prescription queue partial Pharmacy Admin role has no permitted handbook route",
+  "screen_id": "rx_queue",
+  "endpoint": "GET /meta/handbook",
+  "build": "Phase3 bootstrap DEV DqAhRua8 / baseline006c151",
+  "agent": "Codex",
+  "actual": "rx_queue bundle lists pharmacy_admin as a partial role and GET /prescriptions/pending permits that role. Real demo.pharmadmin returns200 for pending,403 for prescription detail (expected separate prescription.view). But GET /meta/handbook?workspace=pharmacy_admin lists only pharmacy_admin/medication_safety_setup/drug_recalls/pharmacy_storage_log and shared pages; rx_queue is absent. Our menu follows scoped handbook, so queue-only partial role cannot reach the page/F1. Full Pharmacist Pharmacy workspace includes rx_queue and works.",
+  "expected": "Please clarify the intended queue-only partial Pharmacy Admin journey. If intended, add rx_queue through the permitted workspace also_uses/handbook with only GET pending and queue controls, so its required F1/help remains authorized. Otherwise document that pending is API access without a standalone queue entry for this role. We will not inject unpermitted help or grant detail access.",
+  "steps": "As demo.pharmadmin GET /prescriptions/pending ->200; GET /prescriptions/1 ->403 FORBIDDEN; GET /meta/handbook?workspace=pharmacy_admin ->200 omits rx_queue. Compare get_screen_bundle('rx_queue').roles.partial and GET pending permissions.",
+  "evidence": "Build2026-10-24T21:23:38.916290+00:00 / contracta48efc9c8254ac5137e2. Related issue21 concerns Doctor PatientSearch; this report is the distinct PharmacyAdmin/rx_queue scope. No patient details or credentials included. Full Pharmacist flow unaffected."
+}
