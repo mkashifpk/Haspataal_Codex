@@ -4,7 +4,7 @@
 
 User explicitly moved to Phase3 and will handle remaining Phase1/2 issues/acceptance. Build step by step, ONE screen at a time. First screen **rx_queue Prescription queue** implemented and agent-tested, ready for Pharmacist manual testing. **Dispense is next, not implemented in this step.** Phase1/2 and whole Phase3/workspace are not declared complete. No subagents. No agent entered a Review code, started/filled/signed a human review or approved claims.
 
-Baseline006c151 verified clean. Runtime DEV **DqAhRua8**; mandatory build PASS; unit81/81PASS. Source commit/proposal checkpoint pending below. No running command, pending business write or uncertain outcome. Test profiles all preferences-restored and signed out. Full previous notes archived in docs/HANDOFF_PHASE2_TO_PHASE3_2026-10-25.md; this root file supersedes stale earlier next steps.
+Baseline006c151 verified clean. Tested source **e3b1efd**, runtime DEV **DqAhRua8**; mandatory build PASS; unit81/81PASS. Proposal **145** confirmed pending by progress_proposals: **awaiting human review on /docs -> My progress**. Exact credential-free payload docs/rx-queue-proposal-e3b1efd.json. Claimed tested endpoints/two events/states/permissions/handbook/F1 only; no full badge/service/test-plan/human gates claim. Do not resubmit unchanged. AppShell integration only, no independently tested new AppShell rubric item ready; existing accepted work not duplicated. Documentation-only checkpoint follows source; no runtime edits after tested build. No running command, pending business write, uncertain outcome or implementation step remains. Test profiles all preferences-restored and signed out. Full previous notes archived in docs/HANDOFF_PHASE2_TO_PHASE3_2026-10-25.md; this root file supersedes stale earlier next steps.
 
 ## Implemented screen / files
 
@@ -45,6 +45,6 @@ Ignored .dev-terminal.json/CA and project-local MCP configuration provide author
 
 ## Next3 steps
 
-1. Finish commit/progress proposal for this tested queue screen and verify with progress_proposals; record exact source commit/proposal ID/status below. No more business tests required just to commit.
+1. Read current progress_proposals feedback for145 and my_backend_issues20/21/22 on takeover. Only address newly reproduced issues/returned evidence; do not recreate confirmed synthetic writes or duplicate proposals. No active command/implementation pending.
 2. User manual test: restart DEV, demo.pharmacist → Pharmacy Counter → Prescription queue. Doctor creates a new synthetic valid HospitalPharmacy prescription via existing E-prescription builder; confirm live arrival, identity/detail/safety, search/refresh/F1/UR/zoom. ExternalMarket stays out. Own cancelled ID1/3 can be read but not dispensed. Only human handles portal review/code.
 3. Next implementation is **dispense**, only after reading its bundle/quality/design/contracts/test plan and dependency roadmap; retain one-screen-at-a-time scope. Phase1/2 acceptance/issues remain user-owned. On takeover first read Git/feedback/issues; re-test Fixed reports only when deployed. Preserve synthetic write journals and terminal4 setup.
