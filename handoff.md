@@ -8,7 +8,7 @@ No implementation or business step is currently in progress. **No known running 
 
 ## Git state and completed checkpoints
 
-Tested source **959db8e**; proposal checkpoint **546ec1a**. The final documentation checkpoint containing this file follows546ec1a with message `Checkpoint Phase 2 fixes, acceptance limits and manual testing`. Verify HEAD/status/log on takeover; expected tree clean after that commit. No unrelated changes discarded, no PR/push/installer shipped.
+Tested source **959db8e**; proposal checkpoint **546ec1a**. Delivery checkpointdd3990f contains the final manual/status records; this read-only verification documentation follows it. Source959db8e is unchanged. Verify HEAD/status/log on takeover; expected tree clean after that commit. No unrelated changes discarded, no PR/push/installer shipped.
 
 | Source commit | Change / current evidence | Proposal / last portal state |
 |---|---|---|
@@ -16,7 +16,7 @@ Tested source **959db8e**; proposal checkpoint **546ec1a**. The final documentat
 |6c359a1 | Programmes hide stale selected history and catalogue choices, preserve draft. Actual enrol/entry replay, duplicate prevention, due/cards/refusals/closure lost-answer read reconciliation; true Active/Retiring/Retired/Active tested. |140 accepted selected rules288/aeee/700+states/permissions/writes; zoom not accepted |
 |090ed4f | Home policy readiness and stale detail clearing, draft/retry recovery. New home1/correction2; consent/time/referral/confirmation/replay/stamps/history/PDF/refusals/F1/nativezoom/service gates passed. |141 accepted selected a148/15c+states/permissions/writes; zoom not accepted |
 |ab4cc0d | Vault no falseempty/stale lists; readable bilingual document labels. Native LocalUploadError distinguishes known preHTTP field/MIME/32MB rejection from uncertain network writes, safely unlocks only known local rejection and avoids false offline probing. Real files/list/download/refusal/recovery/permissions/zoom passed. |142 accepted states/permissions; zoom not accepted |
-|959db8e | App navigation and direct guards use the same scoped server handbook for all19P2 screens. All19 actual startup/F1/read-only checks pass across Reception/Doctor/Quality/Cashier; Doctor contextual patient lookup retained. |143 Pending |
+|959db8e | App navigation and direct guards use the same scoped server handbook for all19P2 screens. All19 actual startup/F1/read-only checks pass across Reception/Doctor/Quality/Cashier; Doctor contextual patient lookup retained. |143 accepted selected permission claim at next read |
 
 Exact proposal payloads/request IDs retained in docs/*proposal-d0bd7c1.json, *proposal-6c359a1.json, *proposal-090ed4f.json, *proposal-ab4cc0d.json and app-shell-scope-proposal-959db8e.json. Do not resubmit unchanged accepted or pending claims. Shared Registration post-intake document widget benefits from the Vault fix, but no independently complete new Registration rubric item was inferred; no empty proposal submitted.
 
@@ -29,7 +29,7 @@ Exact proposal payloads/request IDs retained in docs/*proposal-d0bd7c1.json, *pr
 - Release staging under ignored artifacts/release-terminal verified inside workspace/nonlink before replacement. Release field/IPC/all3DEVheaders compiled out; actual release HTTP checks PASS. DEV empty field/F1/focus/ENUR250/verified attribution checks PASS; no Review code supplied. Final DEV dist restored. No signed Windows installer built/shipped.
 - Final evidence: docs/phase2-final-build-checks-2026-10-25.json and phase2-screen-smoke-2026-10-25.json. Each screen has a dated REVIEW file plus guarded scripts and original credential-free write receipts.
 
-Latest portal snapshot: **1044points,6.48% global,163endpoints,0fully complete screens/0workspaces**.134–142 accepted selected items; **109cashshift,133Settings and143AppShell awaiting human review on /docs -> My progress**. No signed human reviews recorded; a shared review was in progress at last read. Do not enter its code or fill/sign it. Unselected zoom/full-human items remain unclaimed despite agent checks; do not infer rejection/failure without feedback. Old returned1–14 generic notes were superseded by later accepted claims. See docs/phase2-progress-snapshot-2026-10-25.json.
+Latest portal snapshot: **1044points,6.48% global,163endpoints,0fully complete screens/0workspaces**.134–142 accepted selected items; **109cashshift and133Settings awaiting human review on /docs -> My progress** (143AppShell accepted at the next read). No signed human reviews recorded; a shared review was in progress at last read. Do not enter its code or fill/sign it. Unselected zoom/full-human items remain unclaimed despite agent checks; do not infer rejection/failure without feedback. Old returned1–14 generic notes were superseded by later accepted claims. See docs/phase2-progress-snapshot-2026-10-25.json.
 
 ## Backend/MCP state and unresolved issues
 
@@ -62,3 +62,6 @@ All pre-reset IDs13/18/21/oldOPD14 etc are obsolete. Verify actual identity/stat
 ## Environment and protected configuration
 
 Ignored .dev-terminal.json/CA/local MCP config supply authorised DEV connection. Never copy tokens/passwords/MCPkeys/privateCA/reviewcodes/real patient data into tracked files or handoff. artifacts/profiles/dist are ignored; Git does not preserve their process/backend state. Detailed historical checkpoint docs/HANDOFF_PHASE2_EDUCATION_COMMUNITY_2026-10-25.md preserves intermediate decisions; this file supersedes its old tasks/statuses. Tests clear reply-loss faults, verify auth/me healthy, restore prefs and sign out. No unrelated processes killed or user changes reset.
+
+## Read-only follow-up — 25 October 2026, Codex/functions
+User asked whether Reception registration feeds the relevant Doctor live queue. Verified cleanGitdd3990f, currentsourceRegistration passes selected service doctor_id/department_id; issued result exposes queue_entry_created/token or Not queued until payment. DoctorQueue subscribes opd.queue.updated and resync, rereads GET /opd-queues/me without polling. Current MCP endpoint confirms WebSocket live contract; stored DoctorQueue review records prior real settled-registration/event handoff. For normal OPD choose doctor-linked service and pay/obtain required billing authorisation; patient registration alone/unpaid slip is not the same as a queued visit. No new registration/payment/live-business test performed for this answer, no code change or new proposal ready. CurrentMCPbuild/fingerprint unchanged;20/21stillNew;143nowaccepted, only109/133pending. All commands finished/no uncertain write.
