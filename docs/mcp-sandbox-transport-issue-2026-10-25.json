@@ -1,0 +1,15 @@
+{
+  "implementation_id": 1,
+  "request_id": "codex-mcp-sandbox-transport-20261025-v1",
+  "kind": "Other",
+  "severity": "Medium",
+  "title": "MCP sandbox_call intermittently closes transport after DEV writes commit",
+  "endpoint": "POST /establishment/changes",
+  "screen_id": "home_visit_record",
+  "build": "6c359a1 / BtG-9zaw, backend2026-10-24T21:23:38.916290+00:00",
+  "agent": "Codex/functions",
+  "actual": "During repeated real DEV MCP sandbox calls, the tool intermittently returns only `tool call error ... Transport closed`, with no status/envelope. At least two Owner establishment writes committed despite that tool failure: preventive service restore produced change6/revision6 Active at2026-10-25T06:39:16.805064Z; home service Retired produced change8/revision8 at06:56:45.418961Z. Reads confirmed those original changes; neither write was repeated. Similar lost tool responses occurred on refusal-only calls. This is the MCP connection/tool surface; the Electron API workflows themselves passed. Root cause not established.",
+  "expected": "The MCP sandbox should normally return the actual status/envelope/request_id for a committed call, or a clearly classified uncertain transport failure with diagnostics to help operators reconcile it. Per endpoint write semantics and connecting-agent guide, an absent response must not cause a replacement write. Please investigate server/MCP connection lifetime; no unsafe client workaround requested.",
+  "steps": "1. Using this implementation's DEV MCP connection, run documented sandbox_call reads/previews and controlled synthetic service changes as demo.owner. 2. POST /establishment/changes with the previewed expected_revision/acknowledged and original idempotency key. 3. Intermittently tool transport closes instead of returning response. 4. GET /establishment and /establishment/changes verifies the original mutation. Do not intentionally repeat clinical/financial records to reproduce. Both community services now restored Active atrevision9.",
+  "evidence": "Credential-free receipts/payloads: docs/phase2-programme-service-gates-2026-10-25.json (restore change6) and docs/phase2-home-service-gates-2026-10-25.json (Retired change8, restoration9). Known original request keys DEMO-P2-PROGRAMME-20261025-restore-active and DEMO-HOME-P2-20261025-retired; these are synthetic idempotency identifiers, not credentials. GET history confirmed matching actor Hospital Owner/reason/revision and final currentstate Active. No clinical/payment replay, unknown business write, real care or money."
+}

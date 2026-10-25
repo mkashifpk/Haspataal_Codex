@@ -79,6 +79,7 @@ export function HomeVisitRecord(props: Props) {
   const policy = useLoad(() => home.policy(), [props.revision]);
   const [error, setError] = useState<unknown>(),
     [printing, setPrinting] = useState(false);
+  const policyReady = !policy.loading && !policy.error && !!policy.data;
   async function notice() {
     if (printing) return;
     setPrinting(true);
@@ -100,7 +101,7 @@ export function HomeVisitRecord(props: Props) {
       <section className="card">
         <h2>{t("Home-visit policy", "گھر کے دورے کی پالیسی")}</h2>
         <LoadState {...policy} retry={policy.reload} />
-        {policy.data && (
+        {policyReady && policy.data && (
           <>
             <p>
               {tr(policy.data.state)} ·{" "}
@@ -117,7 +118,7 @@ export function HomeVisitRecord(props: Props) {
         )}
         <button
           data-help="home.policy"
-          disabled={printing || !props.connected || !policy.data}
+          disabled={printing || !props.connected || policy.loading}
           onClick={() => void policy.reload()}
         >
           {t("Refresh home-visit policy", "دورے کی پالیسی تازہ کریں")}
@@ -138,14 +139,24 @@ export function HomeVisitRecord(props: Props) {
         )}
         <ErrorBox error={error} verbatim />
       </section>
-      {(!policy.data?.provided || policy.data.state !== "Active") && (
+      {!!policy.error && (
         <p className="notice">
           {t(
-            "No new home-visit records from now on while this service is inactive or retiring. Authorized history and the current public notice remain available. Ask facility staff about service arrangements.",
-            "غیر فعال یا بند ہوتی خدمت میں اب نئے دورے درج نہیں۔ مجاز تاریخ اور اصل اطلاع دستیاب ہیں۔ انتظام کے لیے مجاز عملے سے رابطہ کریں۔",
+            "Home-visit policy could not be verified. Retry before recording a visit; your draft is kept.",
+            "دورے کی پالیسی کی تصدیق نہیں ہو سکی۔ اندراج سے پہلے دوبارہ کوشش کریں؛ مسودہ برقرار ہے۔",
           )}
         </p>
       )}
+      {policyReady &&
+        policy.data &&
+        (!policy.data.provided || policy.data.state !== "Active") && (
+          <p className="notice">
+            {t(
+              "No new home-visit records from now on while this service is inactive or retiring. Authorized history and the current public notice remain available. Ask facility staff about service arrangements.",
+              "غیر فعال یا بند ہوتی خدمت میں اب نئے دورے درج نہیں۔ مجاز تاریخ اور اصل اطلاع دستیاب ہیں۔ انتظام کے لیے مجاز عملے سے رابطہ کریں۔",
+            )}
+          </p>
+        )}
       <ClinicalPatient
         user={props.user}
         revision={props.revision}
@@ -706,6 +717,7 @@ function VisitHistory({
   async function open(r: home.HomeVisitOut) {
     if (detailBusy) return;
     setError(undefined);
+    setSelected(undefined);
     setDetailBusy(true);
     try {
       const fresh = user.permissions.includes("homevisit.view")
@@ -764,6 +776,11 @@ function VisitHistory({
       </div>
       <ErrorBox error={error} verbatim />
       <LoadState {...list} retry={list.reload} />
+      {detailBusy && (
+        <p role="status">
+          {t("Reading the selected home visit…", "منتخب دورہ پڑھا جا رہا ہے…")}
+        </p>
+      )}
       {query && !list.loading && !list.error && list.data?.length === 0 && (
         <Empty>
           {t(
@@ -818,7 +835,7 @@ function VisitHistory({
           </button>
         </div>
       )}
-      {selected && (
+      {selected && !detailBusy && !list.loading && !list.error && !error && (
         <>
           <VisitDetail record={selected} timeZone={timeZone} />
           {canCorrect && (
