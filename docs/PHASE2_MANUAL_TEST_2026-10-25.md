@@ -1,0 +1,27 @@
+# Phase2 manual test — final DEV CLR89vns
+
+The targeted engineering changes and19-screen startup/F1 regression pass. This is **ready for manual review, not a claim that Phase2 has passed its complete MCP acceptance gate**. Detailed remaining coverage is in PHASE2_REVIEW_STATUS_2026-10-24.md and each dated screen review. Use DEV synthetic data only; do not move real money or record real care in these examples.
+
+Reopen the terminal at a safe checkpoint to load the current build (`npm start` from this project). Start/resume the relevant review on `/docs → My progress`; only you type your own Review code in DEV Settings → This terminal. No agent/test entered a code. Release builds have no review field or any of the three DEV headers. Save the record numbers and outcomes in your portal review; merely approving selected progress claims does not sign a fresh-data workspace review.
+
+## Reception → Doctor journey
+
+1. Sign into the permitted Reception workspace. For cash testing, open **your own** assigned counter's cash shift with a clearly synthetic nonzero float. Expected cash initially includes the float. Count the entire drawer on close and compare the server's declared variance; do not use another person's drawer. If terminal/counter assignment is absent, have authorised IT configure it rather than guessing IDs.
+2. Register a **new** uniquely named DEMO patient. Choose the actual OPD service for the doctor you will sign into; a department-only ticket with no assigned doctor is not the same test. Verify optional UPMRN, duplicate-patient guidance, dues and appropriate payment/queue state. Cancel/retry printing separately; never repeat registration or payment because printing failed.
+3. As the assigned doctor, verify the new patient arrives live without a queue polling loop; call/open the actual slip. Use synthetic consultation facts, deliberate examination consent and a real catalogue ICD code; finalise, retrieve and append a correction, preserving the original stamp. Exercise prescription and lab/imaging handoffs according to their F1 checklists; no real dispensing, sampling or clinical care is implied. Review actual print/PDF output on your hardware.
+
+## New changes to check
+
+- **Patient education:** record a new Verbal entry and append a correction, then inspect both stamps/IDs. Leaflet/Video must refuse without an active material. The two agent-owned positive-test materials were retired after their tests; positive physical resource use needs authorised actual material setup, not an invented file/video. Refresh/retry must preserve the draft and visibly retain a selected material awaiting recheck.
+- **Preventive programmes:** DEV is Active with an explicitly labelled Other software-test programme. Enrol a new synthetic patient using a distinct DEMO card number. Record only a synthetic test service; next date starts blank and must be copied deliberately from the test card, never calculated. Verify due list, duplicate prevention and permitted closure. All agent enrollments1/2/4 are already closed; do not reopen/repeat them.
+- **Home visits:** DEV is Active with an explicit software-only notice. Create a new synthetic completed-visit scenario; consent/time/outcome must start unselected. Check non-VCO findings and future/before-request/referral-destination refusal, saved stamp, separate correction, immutable original, signed history and current notice PDF. There is no actual visit/exam/care/consent or transfer in agent fixtures1/2.
+- **Document vault:** photo consent/Skip remain optional. Use a labelled synthetic image or report, verify outside facility/date and explicit viewing. Invalid formats or known local size rejection must unlock the draft for removal/correction; an unknown save result must retain its original file/key. Failed refresh must not claim the vault is empty. Types now have readable English/Urdu labels. Agent documents1–3 belong to patient5 and are already stored; never upload them again to inspect them.
+- **Navigation/help:** Reception, Doctor, Quality and Cashier show only tasks permitted by the active server workspace. Open F1 from controls/dialogs and confirm draft/focus recovery. Doctor's standalone Patient Search is currently absent because the server omits its handbook scope (issue21); contextual patient lookup within the offered clinical tasks remains available. No unpermitted help is fabricated.
+
+For each role, verify English/Urdu, both themes, native Ctrl+=/Ctrl+- bounds100–250%, Ctrl+0 reset100%, Settings agreement and persistence after a safe sign-out/in. Verify scanner/camera/printer behaviour on the actual hardware, role-specific FAQs and translations with their named reviewers/editor. A successful startup screenshot is not that acceptance.
+
+## Backend and portal state at checkpoint
+
+Issue19 Fixed/retested. Issue20 New: intermittent MCP sandbox transport closures, original writes read-reconciled without repetition. Issue21 New: partial-role standalone Patient Search handbook scope. Both community services were restored Active at establishment revision9; other services/profile preserved.
+
+Portal accepted selected items from139–142 during this work; unselected zoom and compulsory human items remain unclaimed. Latest pending proposals143 navigation,133 Settings and109 cash shift: **awaiting human review on /docs → My progress**. The latest snapshot is phase2-progress-snapshot-2026-10-25.json; check current state before another submission. Do not move to Phase3 on the assumption that these partial approvals complete Phase2.
