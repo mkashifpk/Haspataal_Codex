@@ -1,0 +1,15 @@
+{
+  "implementation_id": 1,
+  "request_id": "codex-pharmacy-discharge-status-read-20261025-v1",
+  "kind": "MissingWorkflow",
+  "severity": "Medium",
+  "title": "Pharmacist can clear Pharmacy discharge but cannot read its current stage or reconcile a lost answer",
+  "screen_id": "dispense",
+  "endpoint": "GET /admissions/{admission_id}/discharge-status",
+  "build": "DEV CFMQIKF2 / baseline8cc1d6d",
+  "agent": "Codex",
+  "actual": "demo.pharmacist has ipd.discharge.clear_pharmacy and prescription.view, but lacks ipd.admission.view. On NEW own labelled synthetic admission1, GET /admissions/1 and GET /admissions/1/discharge-status both403 FORBIDDEN. GET /admissions/1/own-medicines200. Dispense bundle requires PharmacyClearance and clear endpoint state-guard lost-answer rule explicitly says GET /admissions/{id} reconciliation. No permission-scoped discharge read route is documented for pharmacist, so UI cannot safely verify next stage/patient or reconcile clearance without granting broader admission access.",
+  "expected": "Provide a minimum-necessary pharmacist discharge read/status route (identity, next stage, clearance result) allowed by ipd.discharge.clear_pharmacy, or extend the intended existing read authorization and contract. Its response must support PharmacyClearance prerequisite check and lost-answer read reconciliation. We keep clearance disabled with an explanation until current stage can be verified; no guessed success/replayed clearance.",
+  "steps": "1. As demo.doctor create labelled synthetic admission on own test patient (actual admission1). 2. As demo.pharmacist GET /auth/me -> ipd.discharge.clear_pharmacy present, ipd.admission.view absent. 3. GET /admissions/1 ->403; GET /admissions/1/discharge-status ->403; GET /admissions/1/own-medicines ->200. 4. Read dispense rule83ef3c740f and clear endpoint write_semantics.reconcile_with.",
+  "evidence": "Serverbuild2026-10-24T21:23:38.916290+00:00 contracta48efc9c8254ac5137e2. RequestIDs:07555c966ce24112a6e5f95f03a4491a and cb50f089bc574323b4a42980184b360a (403),824e2ea420464e10af07bb9b52268268 (200). No clearance write submitted; no patient data/credentials in report."
+}

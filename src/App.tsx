@@ -34,6 +34,7 @@ import { PatientEducation } from "./screens/PatientEducation";
 import { HomeVisitRecord } from "./screens/HomeVisitRecord";
 import { PatientProgrammes } from "./screens/PatientProgrammes";
 import { PrescriptionQueue } from "./screens/PrescriptionQueue";
+import { Dispense } from "./screens/Dispense";
 import { Help } from "./screens/Help";
 import { setLanguage, tr } from "./i18n";
 import { hasUnsavedChanges } from "./unsaved";
@@ -41,6 +42,7 @@ import { createMetadataFlight } from "./metadata-flight";
 import { createBootstrapSeed } from "./bootstrap-seed";
 type WorkspaceSnapshot = {establishment:EstablishmentOut;settings:any;me:MeOut;permittedWorkspaces:MeOut["workspaces"]};
 const labels: Record<string, [string, string, string]> = {
+  dispense: ["Dispense", "دوا فراہم کریں", "Rx"],
   rx_queue: ["Prescription queue", "نسخوں کی قطار", "Rx"],
   home_visit_record: ["Record a home visit", "گھر کے دورے کا اندراج", "⌂"],
   patient_programmes: ["Preventive programmes of a patient", "مریض کے حفاظتی پروگرام", "◷"],
@@ -83,6 +85,7 @@ const labels: Record<string, [string, string, string]> = {
   settings: ["Settings", "ترتیبات", "⚙"],
 };
 const frontDeskScreens = new Set([
+  "dispense",
   "rx_queue",
   // Navigation and contextual help must share the active workspace's server scope.
   "patient_search",
@@ -106,6 +109,7 @@ const frontDeskScreens = new Set([
   "receivables",
 ]);
 export function App() {
+  const [pharmacySelection,setPharmacySelection]=useState<{userId:number;prescriptionId:number}>();
   const [clinicalSelection,setClinicalSelection]=useState<{userId:number;ticketId:number}>();
   const [user, setUser] = useState<MeOut | null>(null),
     [server, setServer] = useState<any>(),
@@ -551,6 +555,7 @@ export function App() {
     if (frontDeskScreens.has(next) && !workspace) return false;
     const required: Record<string, string[]> = {
       rx_queue: ["pharmacy.queue.view", "prescription.view"],
+      dispense: ["pharmacy.dispense", "prescription.view", "ipd.discharge.clear_pharmacy"],
       facility_profile: ["establishment.manage"],
       report_incident: ["incident.report"],
       patient_search: ["patient.search", "patient.view"],
@@ -636,6 +641,8 @@ export function App() {
     const known: Record<string, string> = {
       prescriptions: "rx_queue",
       rx_queue: "rx_queue",
+      dispensations: "dispense",
+      dispense: "dispense",
       approvals: "approval_queue",
       notifications: "notifications",
       incidents: "report_incident",
@@ -681,6 +688,7 @@ export function App() {
       : []),
     ...(user?.permissions.includes("opd.queue.doctor") ? ["doctor_queue"] : []),
     ...(user?.permissions.some(p => ["pharmacy.queue.view", "prescription.view"].includes(p)) ? ["rx_queue"] : []),
+    ...(user?.permissions.some(p => ["pharmacy.dispense", "prescription.view", "ipd.discharge.clear_pharmacy"].includes(p)) ? ["dispense"] : []),
     ...(user?.permissions.includes("clinical.encounter.view") || user?.permissions.includes("clinical.encounter.create") ? ["consultation"] : []),
     ...(user?.permissions.includes("prescription.view") || user?.permissions.includes("prescription.create") ? ["eprescription"] : []),
     ...(user?.permissions.some(p=>["lab.result.view","lab.requisition.view","lab.requisition.create","imaging.order.view","imaging.order.create"].includes(p)) ? ["lab_orders_results"] : []),
@@ -721,7 +729,7 @@ export function App() {
           w.screens.some((s) => s.id === id),
         )))) &&
       est?.views.screens.find((v) => v.screen_id === id)?.view !== "hidden" &&
-      (id !== "rx_queue" || ["full", "open_work", "records"].includes(est?.views.screens.find(v => v.screen_id === id)?.view || "")),
+      (!["rx_queue","dispense"].includes(id) || ["full", "open_work", "records"].includes(est?.views.screens.find(v => v.screen_id === id)?.view || "")),
   );
   const view = est?.views.workspaces.find(
     (v) => v.workspace === workspace,
@@ -1077,7 +1085,8 @@ export function App() {
                 <Registration user={user} revision={revision} />
               )}
               {screen === "patient_documents" && <PatientDocuments user={user} revision={revision} />}
-              {screen === "rx_queue" && <PrescriptionQueue key={user.user_id} permissions={user.permissions} connected={connected} stream={stream} timeZone={meta?.hospital_timezone} view={est?.views.screens.find(v => v.screen_id === "rx_queue")?.view || "hidden"} />}
+              {screen === "rx_queue" && <PrescriptionQueue key={user.user_id} permissions={user.permissions} connected={connected} stream={stream} timeZone={meta?.hospital_timezone} view={est?.views.screens.find(v => v.screen_id === "rx_queue")?.view || "hidden"} onDispense={nav.includes("dispense")?id=>{if(navigate("dispense"))setPharmacySelection({userId:user.user_id,prescriptionId:id})}:undefined} />}
+              {screen === "dispense" && est && <Dispense key={user.user_id} user={user} connected={connected} stream={stream} establishment={est} initialId={pharmacySelection?.userId===user.user_id?pharmacySelection.prescriptionId:undefined} onQueue={nav.includes("rx_queue")?()=>{navigate("rx_queue")}:undefined} />}
               {screen === "tariff_display" && <Tariff revision={revision} />}
               {screen === "icd_picker" && <ICDPicker />}
               {screen === "doctor_queue" && <DoctorQueue key={user.user_id} permissions={user.permissions} connected={connected} stream={stream} timeZone={meta?.hospital_timezone} onConsultation={nav.includes("consultation") ? id=>{if(navigate("consultation"))setClinicalSelection({userId:user.user_id,ticketId:id})}:undefined} readOnly={view === "records" || est?.views.screens.find(s => s.screen_id === "doctor_queue")?.view === "records"} />}

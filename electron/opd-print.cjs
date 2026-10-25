@@ -51,10 +51,11 @@ async function printSlip(payload, terminal, { pdf, owner } = {}) {
       });
       return { bytes };
     }
-    const deviceName = terminal.receipt_printer_address;
+    const label = payload.printer_role === "label";
+    const deviceName = label ? terminal.label_printer_address : terminal.receipt_printer_address;
     if (terminal.registered && !deviceName)
       throw new Error(
-        "No receipt printer is mapped to this terminal. Ask IT to configure it.",
+        label ? "No label printer is mapped to this terminal. Ask IT to configure it." : "No receipt printer is mapped to this terminal. Ask IT to configure it.",
       );
     const printers = await owner.webContents.getPrintersAsync();
     if (deviceName && !printers.some((p) => p.name === deviceName))

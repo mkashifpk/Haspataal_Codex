@@ -930,6 +930,29 @@ ipcMain.handle("terminal", async (event, action, args = {}) => {
       }
       return { ok: true, data: { type, base64: r.bytes.toString("base64") } };
     }
+    if (action === "print-pharmacy") {
+      if (!Number.isSafeInteger(args.dispensationId) || args.dispensationId <= 0) throw new Error("Invalid dispensation");
+      const requestUser = auth?.user.user_id, workspace = windows.get(win.id);
+      const payload = await api("GET", `/dispensations/${args.dispensationId}/${args.labels ? "labels" : "receipt-payload"}`, undefined, workspace);
+      if (!payload.ok) return payload;
+      const terminal = await api("GET", "/terminals/whoami");if(!terminal.ok)return terminal;
+      const documents = args.labels ? payload.data : [payload.data];
+      if(!Array.isArray(documents) || !documents.length)throw new Error("No pharmacy print documents returned");
+      const {printSlip} = require("./opd-print.cjs");let printedCount=0;
+      for(const document of documents) {
+        if(document.document_type !== (args.labels ? "dispensing_label" : "pharmacy_receipt") || document.printer_role !== (args.labels ? "label" : "receipt"))throw new Error("Unexpected pharmacy print document");
+        if((args.labels ? document.fields.dispensation_id : document.fields.dispensation.dispensation_id)!==args.dispensationId)throw new Error("Pharmacy print identity changed");
+        if(!requestUser || requestUser!==auth?.user.user_id)throw new Error("The session changed before printing");
+        const printed=await printSlip(document,terminal.data,{owner:win,pdf:!!args.pdf});
+        if(printed.bytes){
+          const target=await dialog.showSaveDialog(win,{defaultPath:`Dispensation-${args.dispensationId}${args.labels ? "-label-"+document.fields.dispensation_item_id : "-receipt"}.pdf`,filters:[{name:"PDF",extensions:["pdf"]}]});
+          if(target.canceled)return {ok:true,data:{saved:false,count:printedCount}};
+          fs.writeFileSync(target.filePath,printed.bytes);
+        }
+        printedCount++;
+      }
+      return {ok:true,data:{saved:!!args.pdf,printed:!args.pdf,count:printedCount}};
+    }
     if (action === "print-prescription") {
       if (!Number.isSafeInteger(args.prescriptionId) || args.prescriptionId <= 0) throw new Error("Invalid prescription");
       const requestUser = auth?.user.user_id;

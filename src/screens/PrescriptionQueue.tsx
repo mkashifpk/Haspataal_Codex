@@ -5,8 +5,8 @@ import { formatHospitalTime } from "../hospital-time";
 import * as rx from "../generated/rx_queue";
 import { prescriptionQueueAccess } from "../prescription-queue-policy";
 
-export function PrescriptionQueue({permissions, connected, stream, timeZone, view}: {
-  permissions: string[]; connected: boolean; stream: string; timeZone?: string; view: string;
+export function PrescriptionQueue({permissions, connected, stream, timeZone, view, onDispense}: {
+  permissions: string[]; connected: boolean; stream: string; timeZone?: string; view: string; onDispense?:(id:number)=>void;
 }) {
   const canQueue = permissions.includes("pharmacy.queue.view"), canDetail = permissions.includes("prescription.view");
   const access = prescriptionQueueAccess(permissions, view), visible = access.visible;
@@ -56,7 +56,7 @@ export function PrescriptionQueue({permissions, connected, stream, timeZone, vie
       </form><ErrorBox error={error} />
       {selected ? <><p>{t("Selected prescription ID", "منتخب نسخے کا شناختی نمبر")}: <bdi>{selected}</bdi></p><LoadState {...detail} retry={detail.reload} /><button data-help="rxqueue.close" onClick={() => {setSelected(undefined);setError(undefined);}}>{t("Close prescription details", "نسخے کی تفصیل بند کریں")}</button></> : <Empty>{t("Select a prescription to review its current details.", "تازہ تفصیل کے لیے نسخہ چنیں۔")}</Empty>}
       {record && <div data-testid="rxqueue-detail">
-        <h2><bdi>{record.prescription_number}</bdi> · <bdi>{record.patient_name}</bdi></h2><p><bdi>{record.mrn}</bdi> · {t("Patient ID", "مریض شناختی نمبر")}: {record.patient_id} · {tr(record.source)} · {tr(record.destination)} · {tr(record.status)}</p>
+        <h2><bdi>{record.prescription_number}</bdi> · <bdi>{record.patient_name}</bdi></h2>{onDispense&&<button data-help="rxqueue.handoff" onClick={()=>onDispense(record.prescription_id)}>{t("Open dispensing","دوا کی فراہمی کھولیں")}</button>}<p><bdi>{record.mrn}</bdi> · {t("Patient ID", "مریض شناختی نمبر")}: {record.patient_id} · {tr(record.source)} · {tr(record.destination)} · {tr(record.status)}</p>
         <p>{t("Ticket / admission / encounter", "پرچی / داخلہ / معائنہ")}: {record.ticket_id ?? "—"} / {record.admission_id ?? "—"} / {record.encounter_id ?? "—"}</p>
         <p>{t("Order mode / read back", "حکم کا طریقہ / دہرانے کی تصدیق")}: {tr(record.order_mode)} / {tr(record.read_back ? "Yes" : "No")}</p>
         {record.order_mode !== "Written" && <p>{t("Received by / countersigned", "وصول کنندہ / معالج کے تصدیقی دستخط")}: <bdi>{record.received_by_name || "—"}</bdi> / {record.countersigned_at ? time(record.countersigned_at) : t("Pending", "منتظر")}</p>}

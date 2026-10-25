@@ -9,6 +9,8 @@ export function setLanguage(value: string) {
   language = value;
 }
 const ur: Record<string, string> = {
+  "Check quantities and open queries before dispensing.": "فراہمی سے پہلے مقدار اور کھلے سوالات چیک کریں۔",
+  "Enter a quantity for at least one available line.": "کم از کم ایک دستیاب سطر کی مقدار درج کریں۔",
   "Only PDF, JPEG and PNG patient files are supported": "مریض کی صرف پی ڈی ایف، جے پیگ اور پی این جی فائلیں قبول ہیں۔",
   "Upload exceeds the terminal's 32 MB limit": "اپ لوڈ اس ٹرمینل کی ۳۲ ایم بی حد سے بڑا ہے۔",
   "Invalid upload field": "اپ لوڈ کا خانہ درست نہیں۔",

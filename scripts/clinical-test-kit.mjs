@@ -106,7 +106,7 @@ export async function session(name, account = "demo.doctor") {
     await p.getByLabel("Username", { exact: true }).fill(account);
     await p.getByLabel("Password", { exact: true }).fill("Demo-pass-2026");
     await p.getByRole("button", { name: "Sign in →", exact: true }).click();
-    await p.getByRole("navigation").waitFor();
+    await p.getByRole("navigation").waitFor({timeout:60000});
     s.original = (await native("state")).prefs;
     j.original_preferences = s.original;
     save();
@@ -197,6 +197,8 @@ export async function session(name, account = "demo.doctor") {
             if (c && typeof c !== "function") body.push(Buffer.from(c));
             try {
               a.body = JSON.parse(Buffer.concat(body).toString());
+              // A second person's co-signing credentials never enter test journals.
+              for (const field of ["checker_password", "checker_username"]) if(field in a.body)a.body[field]="[REDACTED]";
             } catch {}
             a.key = req.getHeader("Idempotency-Key");
             persist();
