@@ -26,3 +26,6 @@ Frontend findings fixed: partial write-off result lacked remaining balance; empt
 ## Backend reset continuation —25 October
 
 Updated whole-drawer UI/types/help after backend19 fixed, raw maintenance message paths for health/error/event, and DEV-only process-wide Review code/release compilation boundary. Old degraded-health fixture missing new maintenance_message corrected. Actual fresh cash/AR/refund/waiver/liquidity/login/session/permission regressions passed; authorised maintenance window restored. Unsent amount/reference harness omissions, guard expectations and transient network failure were reconciled without duplicate business writes. See BACKEND_RESET_REVIEW_2026-10-25.md. No new reproduced functional backend issue remained.
+
+## Referral Register continuation —25 October
+Fresh Quality register journey passed. Reproduced shared PDF controls remaining enabled during delayed actual read/doubleclick causing2GETs. Added preparing status/guard/disabled controls/finally recovery and ENUR guidance; Quality and Doctor real read-only PDF-state checks passed. Frontend issue fixed, not a backend report. See REFERRAL_REGISTER_REVIEW_2026-10-25.md.

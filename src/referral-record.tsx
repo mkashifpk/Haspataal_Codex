@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { api, call } from "./bridge";
 import { bilingual as t, tr } from "./i18n";
 import {
@@ -44,7 +44,9 @@ export function ReferralRecord({
     [actual, setActual] = useState(false),
     [dirty, setDirty] = useState(false),
     [error, setError] = useState<unknown>(),
-    [notice, setNotice] = useState("");
+    [notice, setNotice] = useState(""),
+    [paperBusy, setPaperBusy] = useState(false);
+  const paperFlight = useRef(false);
   const record = useLoad(() => ref.getReferrals(id), [id, revision, local]),
     value =
       record.data && !record.loading && !record.error ? record.data : undefined;
@@ -163,6 +165,9 @@ export function ReferralRecord({
     }
   }
   async function letter(preview: boolean) {
+    if (paperFlight.current || write.blocked || blocked) return;
+    paperFlight.current = true;
+    setPaperBusy(true);
     setError(undefined);
     setNotice("");
     try {
@@ -185,6 +190,9 @@ export function ReferralRecord({
       );
     } catch (e) {
       setError(e);
+    } finally {
+      paperFlight.current = false;
+      setPaperBusy(false);
     }
   }
   return (
@@ -196,7 +204,7 @@ export function ReferralRecord({
       <LoadState {...record} retry={record.reload} />
       <LoadState {...profile} retry={profile.reload} />
       <ErrorBox error={action ? undefined : error} verbatim />
-      <p role="status">{notice}</p>
+      <p role="status">{paperBusy ? t("Preparing referral PDF…", "حوالے کی پی ڈی ایف تیار ہو رہی ہے…") : notice}</p>
       {!action && <ClinicalWriteFeedback write={write} onReviewed={reviewed} />}
       {value && (
         <>
@@ -305,14 +313,14 @@ export function ReferralRecord({
           )}
           <button
             data-help="referral.print"
-            disabled={write.blocked || blocked}
+            disabled={write.blocked || blocked || paperBusy}
             onClick={() => void letter(true)}
           >
             {t("Open referral letter / print", "حوالے کا خط کھولیں / پرنٹ")}
           </button>
           <button
             data-help="referral.print"
-            disabled={write.blocked || blocked}
+            disabled={write.blocked || blocked || paperBusy}
             onClick={() => void letter(false)}
           >
             {t("Save referral letter PDF", "حوالے کا خط پی ڈی ایف محفوظ کریں")}
