@@ -2,9 +2,9 @@
 
 ## Current task / status
 
-User requested backend-reset refresh: issue19 whole-drawer accounting, verbatim maintenance text, six screen plans on fresh own DEV fixtures, DEV-only human-entered Review code with release exclusion, commit/report tested changes, then continue Referral Register. Backend refresh implementation and targeted live verification are complete; about to commit/propose three NEW rules. Full screen/Phase2 human acceptance is not claimed. No subagents. No command/Electron session/uncertain financial write remains running.
+User requested backend-reset refresh: issue19 whole-drawer accounting, verbatim maintenance text, six screen plans on fresh own DEV fixtures, DEV-only human-entered Review code with release exclusion, commit/report tested changes, then continue Referral Register. Backend refresh implementation/targeted live verification committed **0284ea4**; proposals134–137 saved and verified Pending. Full screen/Phase2 human acceptance is not claimed. No subagents. No command/Electron session/uncertain financial write remains running.
 
-Baseline HEAD **ccd69e7** verified. Existing recorded uncommitted Review-code/cash/maintenance changes were preserved, reviewed and finished. Current task source/contracts/types/help/tests/evidence/docs are about to commit; inspect Git for final hash. No unrelated user changes discarded. See docs/BACKEND_RESET_REVIEW_2026-10-25.md for coverage and honest limits.
+Baseline HEAD **ccd69e7** verified. Existing recorded uncommitted Review-code/cash/maintenance changes were preserved, reviewed and finished. Current source/contracts/types/help/tests/evidence committed0284ea4; proposal/checkpoint docs will follow in a documentation commit. No unrelated user changes discarded. See docs/BACKEND_RESET_REVIEW_2026-10-25.md for coverage and honest limits.
 
 ## Backend and progress
 
@@ -12,7 +12,7 @@ DEV https://hms-dev.netbird.cloud; build2026-10-24T21:23:38.916290+00:00; contra
 
 **Issue19 Fixed/deployed and live retested:** OpeningFloat is first ledger entry, expected_cash includes float, count the WHOLE drawer, render server declared_variance. No UI balance arithmetic/float subtraction. Actual new drawer1500 ->cashsale3000 ->refund1500, CashAR drawer3000, insufficient-liquidity refusal/no movement/recovery, whole counted closes/servervariance0 verified. No new reproduced functional backend issue remained. Earlier17/18 fixed search behavior is historical; revalidate on new records if needed.
 
-Latest portal read:131/132Accepted;109MyCashShift and133SettingsF1 Pending: awaiting human review on /docs -> My progress. Score987 at start/0fully accepted screens. No signed human review claimed. Do not duplicate109/133 or unchanged accepted endpoints/rules. New proposed candidates only: my_cash_shift rule:e107caec45, login rule:d975393728, app_shell rule:9e384556b6. Payloads/IDs will be recorded after confirmed submission.
+Latest portal read:131/132Accepted;109MyCashShift and133SettingsF1 Pending: awaiting human review on /docs -> My progress. Score987 at start/0fully accepted screens. No signed human review claimed. Do not duplicate109/133 or unchanged accepted endpoints/rules. New proposals134MyCashShift rule:e107caec45,135Login rule:d975393728,136AppShell rule:9e384556b6 and137AppShell ev:system.maintenance/rule:71c59cc220 saved/verified Pending: awaiting human review on /docs -> My progress. Exact docs/backend-reset-*-proposal-0284ea4.json payloads/requestids retained; no unchanged accepted/pending claims duplicated.
 
 ## Source / verification
 
@@ -31,7 +31,7 @@ Latest portal read:131/132Accepted;109MyCashShift and133SettingsF1 Pending: awai
 
 ## Exact next actions
 
-1.Commit current source/tests/evidence/docs; submit only three new tested rule items with current rubric and tested commit. Verify saved proposals. Do not re-propose unchanged approved items or109/133 pending. Keep exact credential-free payloads and requestids in docs. No full q:tested claim: remaining controlled licence/expiry/inactive service/file/camera/directinvoice/writeoff variants and human/physical cases are listed in BACKEND_RESET_REVIEW.
+1.Source0284ea4 committed;134–137 saved/verified. Commit proposal/checkpoint documentation, then move to Referral Register. Do not re-propose unchanged approved items or109/133 pending. Keep exact credential-free payloads and requestids in docs. No full q:tested claim: remaining controlled licence/expiry/inactive service/file/camera/directinvoice/writeoff variants and human/physical cases are listed in BACKEND_RESET_REVIEW.
 2.Then read Referral Register current bundle/quality/design/plan and build-order guidance; create NEW synthetic upstream referral if needed, because historical referrals1/2 no longer exist. Verify Quality filters/detail/cancellation/read recovery with current IDs, one screen at a time. No pre-reset replay.
 3.Human starts/resumes appropriate portal review for identified build and types OWN Review code only. Test role/window attribution, clear/apply afterwards. Complete freshdata/roleFAQ/Urdu/editor/hardware/physical handover reviews on portal. Never equate agent testing or partial points with Phase2 acceptance.
 
