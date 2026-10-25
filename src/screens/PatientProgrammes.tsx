@@ -60,7 +60,13 @@ export function PatientProgrammes(props: Props) {
         initialPatient={patient}
         initialTicket={patient ? undefined : props.initialTicket}
       >
-        {(ctx) => <ProgrammePatient {...props} ctx={ctx} onChanged={() => setChanges(n => n + 1)} />}
+        {(ctx) => (
+          <ProgrammePatient
+            {...props}
+            ctx={ctx}
+            onChanged={() => setChanges((n) => n + 1)}
+          />
+        )}
       </ClinicalPatient>
       <DueList
         {...props}
@@ -120,13 +126,18 @@ function ProgrammePatient({
         : Promise.resolve([]),
     [revision, local],
   );
-  const current = list.data?.find(
-      (e) =>
-        e.enrolment_id === selected && e.patient_id === ctx.patient.patient_id,
-    ),
-    definition = catalogue.data?.find(
-      (p) => p.programme_id === current?.programme_id,
-    );
+  const listReady = !list.loading && !list.error,
+    catalogueReady = !catalogue.loading && !catalogue.error;
+  const current = listReady
+      ? list.data?.find(
+          (e) =>
+            e.enrolment_id === selected &&
+            e.patient_id === ctx.patient.patient_id,
+        )
+      : undefined,
+    definition = catalogueReady
+      ? catalogue.data?.find((p) => p.programme_id === current?.programme_id)
+      : undefined;
   const cap = establishment?.capabilities.find(
     (c) => c.capability === "preventive_programmes",
   );
@@ -157,7 +168,8 @@ function ProgrammePatient({
       await ctx.reload();
     },
   );
-  const blocked = write.blocked || !ctx.ready || !!ctx.patient.merged_into_id;
+  const blocked =
+    write.blocked || !ctx.ready || !!ctx.patient.merged_into_id || !listReady;
   const time = (s: string) => (timeZone ? formatHospitalTime(s, timeZone) : s);
   async function fresh() {
     const [patient, me, est, enrolments, programmes] = await Promise.all([
@@ -189,6 +201,17 @@ function ProgrammePatient({
   function enrol() {
     setError(undefined);
     if (blocked || !work.enrol || ctx.patient.is_deceased) return;
+    if (!catalogueReady) {
+      setError(
+        new Error(
+          t(
+            "Refresh the programme catalogue before enrolling. Your selected programme and card draft are kept.",
+            "اندراج سے پہلے پروگرام کی فہرست تازہ کریں۔ منتخب پروگرام اور کارڈ کا مسودہ برقرار ہے۔",
+          ),
+        ),
+      );
+      return;
+    }
     if (
       !programme ||
       !card.trim() ||
@@ -437,19 +460,40 @@ function ProgrammePatient({
             <Field label={t("Offered programme", "دیا جانے والا پروگرام")}>
               <select
                 data-help="programme.enrol"
+                disabled={!catalogueReady}
                 value={programme}
                 onChange={(e) => setProgramme(e.target.value)}
               >
                 <option value="">
                   {t("Choose actual programme", "اصل پروگرام چنیں")}
                 </option>
-                {catalogue.data
-                  ?.filter((p) => p.is_offered)
-                  .map((p) => (
-                    <option key={p.programme_id} value={p.programme_id}>
-                      {p.name} · {tr(p.kind)} · {p.national_programme}
+                {programme &&
+                  (!catalogueReady ||
+                    !catalogue.data?.some(
+                      (p) =>
+                        p.is_offered && String(p.programme_id) === programme,
+                    )) && (
+                    <option value={programme} disabled>
+                      {catalogueReady
+                        ? t(
+                            "Selected programme no longer offered; choose again",
+                            "منتخب پروگرام اب دستیاب نہیں؛ دوبارہ چنیں",
+                          )
+                        : t(
+                            "Selected programme awaiting recheck",
+                            "منتخب پروگرام دوبارہ جانچ کا منتظر",
+                          )}{" "}
+                      · #{programme}
                     </option>
-                  ))}
+                  )}
+                {catalogueReady &&
+                  catalogue.data
+                    ?.filter((p) => p.is_offered)
+                    .map((p) => (
+                      <option key={p.programme_id} value={p.programme_id}>
+                        {p.name} · {tr(p.kind)} · {p.national_programme}
+                      </option>
+                    ))}
               </select>
             </Field>
             <Field
@@ -495,7 +539,19 @@ function ProgrammePatient({
       )}
       <section className="card">
         <h2>{t("Patient programme history", "مریض کے پروگرام کی تاریخ")}</h2>
-        <button data-help="programme.history" disabled={write.blocked || !canRead || !connected} onClick={() => { setLocal(n => n + 1); onChanged(); }}>{t("Refresh programme history and due list", "پروگرام کی تاریخ اور اگلی خدمت تازہ کریں")}</button>
+        <button
+          data-help="programme.history"
+          disabled={write.blocked || !canRead || !connected}
+          onClick={() => {
+            setLocal((n) => n + 1);
+            onChanged();
+          }}
+        >
+          {t(
+            "Refresh programme history and due list",
+            "پروگرام کی تاریخ اور اگلی خدمت تازہ کریں",
+          )}
+        </button>
         <LoadState {...list} retry={list.reload} />
         {!canRead && (
           <p>
@@ -578,7 +634,7 @@ function ProgrammePatient({
                 {work.entry && (
                   <button
                     data-help="programme.entry"
-                    disabled={blocked}
+                    disabled={blocked || !catalogueReady}
                     onClick={() => {
                       setAction("entry");
                       setService("");
@@ -627,19 +683,20 @@ function ProgrammePatient({
             "پروگرام کی فہرست اور قومی رہنما",
           )}
         </summary>
-        {catalogue.data?.map((p) => (
-          <article key={p.programme_id}>
-            <h3>
-              {p.name} · {tr(p.kind)} ·{" "}
-              {p.is_offered
-                ? t("Offered", "دیا جاتا ہے")
-                : t("Not offered", "نہیں دیا جاتا")}
-            </h3>
-            <p>{p.national_programme}</p>
-            <p>{p.guideline}</p>
-            <p>{p.services.join(" · ")}</p>
-          </article>
-        ))}
+        {catalogueReady &&
+          catalogue.data?.map((p) => (
+            <article key={p.programme_id}>
+              <h3>
+                {p.name} · {tr(p.kind)} ·{" "}
+                {p.is_offered
+                  ? t("Offered", "دیا جاتا ہے")
+                  : t("Not offered", "نہیں دیا جاتا")}
+              </h3>
+              <p>{p.national_programme}</p>
+              <p>{p.guideline}</p>
+              <p>{p.services.join(" · ")}</p>
+            </article>
+          ))}
         <p>
           {t(
             "No vaccination schedule, due date, dose or patient card is computed or invented here. The programme card and national guidance are authoritative.",
@@ -665,7 +722,10 @@ function ProgrammePatient({
             · {current.programme_name}
           </p>
           <section data-unsaved={actionDirty ? "true" : "false"}>
-            <fieldset disabled={blocked} onChange={() => setActionDirty(true)}>
+            <fieldset
+              disabled={blocked || (action === "entry" && !catalogueReady)}
+              onChange={() => setActionDirty(true)}
+            >
               {action === "entry" ? (
                 <>
                   <Field
@@ -959,7 +1019,19 @@ function DueList({
           )}
         </p>
       )}
-      {user.permissions.some(p=>['programme.manage','msds.view'].includes(p))&&<button data-help="programme.catalogue" onClick={()=>void printList()}>{t('Open offered-programme list PDF / print','دستیاب پروگرام کی پی ڈی ایف / پرنٹ کھولیں')}</button>}
+      {user.permissions.some((p) =>
+        ["programme.manage", "msds.view"].includes(p),
+      ) && (
+        <button
+          data-help="programme.catalogue"
+          onClick={() => void printList()}
+        >
+          {t(
+            "Open offered-programme list PDF / print",
+            "دستیاب پروگرام کی پی ڈی ایف / پرنٹ کھولیں",
+          )}
+        </button>
+      )}
     </section>
   );
 }
