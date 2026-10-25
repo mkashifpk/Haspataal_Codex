@@ -192,6 +192,7 @@ export function checkHelp({
       "HomeVisitRecord",
       "PrescriptionQueue",
       "Dispense",
+      "OrderQueries",
     ].map((n) => `src/screens/${n}.tsx`),
   ];
   const used = new Set(),

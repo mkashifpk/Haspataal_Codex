@@ -9,9 +9,16 @@ test("separately authored registration help must retain its Urdu title", () => {
 });
 test("all delivered controls, tasks, role guides and FAQ seeds have bilingual help", () => {
   const result = checkHelp({ media: false });
-  assert.equal(result.screens, 32);
+  assert.equal(result.screens, 33);
   assert(result.controls > 90);
   assert.equal(result.workspaceGuides, 30);
+});
+
+test("Order Queries cannot ship an unmapped confirmation control", () => {
+  assert.throws(() => checkHelp({media:false, read:file =>
+    file === "src/screens/OrderQueries.tsx"
+      ? read(file).replace('data-help="queries.confirm"', "") : read(file)
+  }), /missing\/broken control help mapping/);
 });
 test("the first Phase 2 screen cannot add an uncovered cash control", () => {
   assert.throws(

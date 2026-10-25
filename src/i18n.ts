@@ -9,6 +9,14 @@ export function setLanguage(value: string) {
   language = value;
 }
 const ur: Record<string, string> = {
+  ConfirmedAsWritten: "اصل حکم کی تصدیق",
+  Changed: "حکم تبدیل ہوا",
+  Answered: "جواب دیا گیا",
+  Withdrawn: "واپس لیا گیا",
+  Stopped: "بند",
+  "Choose the whole prescription or a current medicine line.": "پورا نسخہ یا موجودہ دوا کی سطر چنیں۔",
+  "Choose a reason and enter a question of 3–1000 characters.": "وجہ چنیں اور3تا1000حروف کا سوال درج کریں۔",
+  "An open query already exists for this selection. Review it instead.": "اس انتخاب کا کھلا سوال پہلے موجود ہے۔ اسی کا جائزہ لیں۔",
   "Check quantities and open queries before dispensing.": "فراہمی سے پہلے مقدار اور کھلے سوالات چیک کریں۔",
   "Enter a quantity for at least one available line.": "کم از کم ایک دستیاب سطر کی مقدار درج کریں۔",
   "Only PDF, JPEG and PNG patient files are supported": "مریض کی صرف پی ڈی ایف، جے پیگ اور پی این جی فائلیں قبول ہیں۔",
