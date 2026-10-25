@@ -1,10 +1,10 @@
 # Haspataal checkpoint — 25 October 2026
 
-Codex/functions, Asia/Karachi. Baseline9820aa0 clean, previous tested source0ccae88/OrderQueries. Current final OTC DEV index-BPkrBm6f.js. Source commit/proposal pending below; no unrelated changes discarded.
+Codex/functions, Asia/Karachi. Baseline9820aa0 clean, previous tested source0ccae88/OrderQueries. Tested OTC source4da5f0e /DEV index-BPkrBm6f.js; following commit is documentation/proposal payloads only. No runtime changes after tested source; no unrelated changes discarded.
 
 ## Current task/status
 
-User requested Phase3 screen4 OTC Mode, all MCP features step by step, one screen. Core implementation and Card journey verified; **positive Cash acceptance blocked by backend24/25**. No full screen/Phase3/Pharmacy/human completion claim. No implementation in progress, running command, active test account or uncertain write. Next commit tested source, propose only tested new OTC items and verify saved proposal before final handoff. No next screen started.
+User requested Phase3 screen4 OTC Mode, all MCP features step by step, one screen. Core implementation and Card journey verified; **positive Cash acceptance blocked by backend24/25**. No full screen/Phase3/Pharmacy/human completion claim. No implementation in progress, running command, active test account or uncertain write. Proposal150OTC confirmed pending by progress_proposals: awaiting human review on /docs -> My progress. Exact payload docs/otc-proposal-4da5f0e.json, requestcodex-otc-4da5f0e-20261025-v1; confirmed receipt docs/otc-proposal-receipt-2026-10-25.json. Only new tested items proposed, no unchanged accepted work resubmitted. No next screen started.
 
 ## Delivered/files
 
@@ -31,7 +31,7 @@ User requested Phase3 screen4 OTC Mode, all MCP features step by step, one scree
 
 ## Backend/MCP/environment
 
-DEV https://hms-dev.netbird.cloud; build2026-10-24T21:23:38.916290+00:00, contracta48efc9c8254ac5137e2, knowledge5d997abd8847f89d, rubrica400860f309d; implementation1/mkashif. Startup overview/progress/proposals/issues/roadmap plus full OTC bundle+omitted schemas/decisions, quality/design/Pharmacy outline/recipe/testplan, endpoints/types/validate_request read. Previous148OrderQueries/149changed Dispense selected claims accepted (not full compulsory review);109CashShift/133Settings still pending. No existing OTC proposal at pre-submit read. No signed human review; do not duplicate unchanged accepted/pending claims.
+DEV https://hms-dev.netbird.cloud; build2026-10-24T21:23:38.916290+00:00, contracta48efc9c8254ac5137e2, knowledge5d997abd8847f89d, rubrica400860f309d; implementation1/mkashif. Startup overview/progress/proposals/issues/roadmap plus full OTC bundle+omitted schemas/decisions, quality/design/Pharmacy outline/recipe/testplan, endpoints/types/validate_request read. Previous148OrderQueries/149changed Dispense selected claims accepted (not full compulsory review);109CashShift/133Settings still pending. No existing OTC proposal at pre-submit read; new150nowpending. No signed human review; do not duplicate unchanged accepted/pending claims.
 
 Closing25Oct reports20–25New/no answers:
 - **24 ContractMismatch:** OTC requires fixed PharmacyCounter despite caller's own actual mapped Open shift. Document/clarify intended counter and actionable prerequisite, or honor mapping as intended. Current terminal4MainReception cannot pass positive Cash. Payload docs/otc-cash-counter-issue-2026-10-25.json, confirmed report24New. No hard-coded invented required node; UI uses actual refusal details.
@@ -42,6 +42,6 @@ Terminal4 DEV Reception laptop(Codex) Active/MainReception deliberately retained
 
 ## Next3 steps
 
-1. Commit tested OTC source, submit only tested new items using current rubric/commit; verify progress_proposals, append actual proposal ID/payload path. Source commit and posting not yet confirmed at this write.
-2. User manually test fresh synthetic OTC Card journey via Pharmacy→OTC mode, actual barcode/search, quantities/refusals/review/receipt/PDF/F1/ENUR/zoom. Follow docs/OTC_REVIEW_2026-10-25.md. Cash positive and complete acceptance remain pending24/25 and named human role/translation/editor/portal review.
-3. Await24/25 answers/deployment, refresh affected contracts/roadmap/types, then test full Cash via a NEW owned shift on an authorized terminal counting whole drawer. Leave20–23blocked flows safe. Do not start charity_override/another screen until requested. Keep checkpoint current before new work.
+1. User manually test fresh synthetic OTC Card journey via Pharmacy→OTC mode, actual barcode/search, quantities/refusals/review/receipt/PDF/F1/ENUR/zoom. Follow docs/OTC_REVIEW_2026-10-25.md. Cash positive and complete acceptance remain pending24/25 and named human role/translation/editor/portal review.
+2. Await24/25 answers/deployment, refresh affected contracts/roadmap/types, then test full Cash via a NEW owned shift on an authorized terminal counting whole drawer. Leave20–23blocked flows safe.
+3. After manual review select the next Pharmacy screen from current MCP roadmap (charity_override follows OTC); do not start another screen until requested. Verify Git against tested4da5f0e +later documentation-only checkpoint, keep handoff current before work.
