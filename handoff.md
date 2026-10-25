@@ -1,10 +1,10 @@
 # Haspataal checkpoint — 25 October 2026
 
-Codex/functions, Asia/Karachi. Last update after final DEV verification; source commit and proposal IDs to be appended after the next steps below.
+Codex/functions, Asia/Karachi. Final checkpoint after DEV verification and confirmed progress submission. Tested source0ccae88; subsequent commit is documentation/proposal payloads only. No runtime changes after the tested source.
 
 ## Current task and status
 
-User requested Phase3 screen3 Order Queries, one screen at a time. Implementation and agent DEV checks complete. No Phase3/full Pharmacy/human completion claim. Baseline711a24b was clean. All current changes are this task; no unexplained/user changes discarded. Tested final DEV bundle index-Dng-PLU2.js; source commit pending. No running command, uncertain backend write or active test account. Next: commit, submit changed tested screen claims and verify saved proposals, then record exact IDs/commit here before final response.
+User requested Phase3 screen3 Order Queries, one screen at a time. Implementation and agent DEV checks complete. No Phase3/full Pharmacy/human completion claim. Baseline711a24b was clean. All current changes are this task; no unexplained/user changes discarded. Tested source0ccae88 / DEV index-Dng-PLU2.js. No implementation in progress, running command, uncertain backend write or active test account. Proposal148OrderQueries and149changed Dispense handoff confirmed pending by progress_proposals: awaiting human review on /docs -> My progress. Exact payloads docs/order-queries-proposal-0ccae88.json and docs/dispense-query-handoff-proposal-0ccae88.json; saved receipt summary docs/order-queries-proposal-receipts-2026-10-25.json. Only new tested claims proposed; no unchanged accepted work resubmitted.
 
 ## Delivered/files
 
@@ -36,6 +36,6 @@ Terminal4 DEV Reception laptop(Codex) Active/MainReception intentionally retaine
 
 ## Next3 steps
 
-1. Commit tested OrderQueries +changed Dispense handoff, submit only new tested current-rubric items with the commit; verify progress_proposals and append exact IDs here. Human must accept on /docs -> My progress.
-2. User manually test fresh own software RX →Dispense Query line/whole →required fields/duplicate/notification/withdrawal/live answer, F1/ENUR/zoom. See docs/ORDER_QUERIES_REVIEW_2026-10-25.md. Named role/translation/editor/portal worksheet/signature remains pending; Doctor answer-entry UI is not added by this screen.
-3. After requested review choose the next Phase3 dependency from fresh MCP roadmap/bundle; do not start another screen now. Await20–23 backend answers, refresh affected contracts and retest when deployed. Keep handoff current before any implementation or long command.
+1. User manually test fresh own software RX →Dispense Query line/whole →required fields/duplicate/notification/withdrawal/live answer, F1/ENUR/zoom. See docs/ORDER_QUERIES_REVIEW_2026-10-25.md. Named role/translation/editor/portal worksheet/signature remains pending; Doctor answer-entry UI is not added by this screen.
+2. After requested review choose the next Phase3 dependency from fresh MCP roadmap/bundle; do not start another screen now. 
+3. Await20–23 backend answers, refresh affected contracts and retest when deployed. Verify clean Git/log against source0ccae88 and later documentation-only checkpoint; keep handoff current before any implementation or long command.
