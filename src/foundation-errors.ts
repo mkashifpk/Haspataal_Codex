@@ -1,6 +1,10 @@
 import type { Bilingual } from "./foundation-help";
 // Recovery guidance, not a substitute for server validation or authorization.
 export const foundationErrors: Record<string, Bilingual> = {
+  OTC_PRESCRIPTION_REQUIRED: [
+    "Prescription required. Cannot sell via OTC. This medicine must go through the authorised prescription/dispensing workflow. Do not change its name, schedule or flags to bypass the refusal; ask the prescriber or Pharmacy Admin. The refused sale is not confirmed.",
+    "اس دوا کو مجاز نسخے و فراہمی طریقے سے دیں۔ ممانعت کو نام، درجہ یا نشان بدل کر نہ توڑیں؛ معالج یا فارمیسی منتظم سے کہیں۔ مسترد فروخت کی کامیابی نہیں ہوئی۔ اصل انگریزی ممانعت بعینہ دکھائی جاتی ہے۔",
+  ],
   DEMO_ACCOUNT_PROTECTED: [
     "This shared DEV demo account keeps its seeded password, roles and active state for everyone. Use an individually provisioned test account for password, role and deactivation checks. Ask the backend team to restore a broken demo login; do not reset shared demo accounts or reseed the server yourself.",
     "مشترکہ ڈیو ڈیمو اکاؤنٹ کا ابتدائی پاس ورڈ، کردار اور فعال حالت سب کے لیے محفوظ ہیں۔ پاس ورڈ، کردار یا غیر فعالیت کی جانچ اپنے الگ بنائے گئے اکاؤنٹ پر کریں۔ خراب ڈیمو لاگ اِن کی بحالی بیک اینڈ ٹیم سے کرائیں؛ خود مشترکہ اکاؤنٹ ری سیٹ یا سرور دوبارہ سیڈ نہ کریں۔",

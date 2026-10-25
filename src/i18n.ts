@@ -9,6 +9,13 @@ export function setLanguage(value: string) {
   language = value;
 }
 const ur: Record<string, string> = {
+  "Enter a positive quantity without exponent notation.": "قوت کی صورت کے بغیر مثبت مقدار درج کریں۔",
+  "Add between 1 and 50 different medicines.": "1سے50تک مختلف دوائیں شامل کریں۔",
+  "Check the payment method and customer details.": "ادائیگی کا طریقہ اور گاہک کی معلومات چیک کریں۔",
+  "This medicine is inactive. Refresh the formulary.": "یہ دوا غیر فعال ہے۔ دوا فہرست تازہ کریں۔",
+  "This medicine is already in the basket. Edit its quantity.": "یہ دوا ٹوکری میں موجود ہے۔ اسی کی مقدار بدلیں۔",
+  "The quantity exceeds current available stock. Refresh and review.": "مقدار اصل دستیاب اسٹاک سے زائد ہے۔ تازہ کرکے جائزہ لیں۔",
+  "The scanned medicine changed. Remove it and scan again.": "اسکین شدہ دوا بدل گئی۔ ہٹا کر دوبارہ اسکین کریں۔",
   ConfirmedAsWritten: "اصل حکم کی تصدیق",
   Changed: "حکم تبدیل ہوا",
   Answered: "جواب دیا گیا",

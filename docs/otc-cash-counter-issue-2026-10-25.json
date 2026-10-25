@@ -1,0 +1,16 @@
+{
+  "implementation_id": 1,
+  "request_id": "codex-otc-cash-counter-contract-20261025-v1",
+  "kind": "ContractMismatch",
+  "severity": "Medium",
+  "title": "OTC Cash requires PharmacyCounter despite caller's own mapped open shift; requirement omitted from OTC contract",
+  "endpoint": "POST /otc-sales",
+  "screen_id": "otc",
+  "workflow": "clinical-and-prescriptions",
+  "build": "DEV index-DdMx3fOl.js / source based on 9820aa0",
+  "agent": "Codex",
+  "actual": "demo.pharmacist user19 has own new synthetic shift10 Open, terminal4 cash_node MainReception, opening_float/expected_cash1500. GET mine and GET shift10 confirm that actual mapping and ownership. UI Cash OTC request original b62cfd91-4065-441d-8f09-feb81cc1292f is refused409 SHIFT_NOT_OPEN, message 'Open your cash shift before handling cash', details.node PharmacyCounter. The existing own shift is not acknowledged; following the documented instruction to open own mapped shift does not resolve it. No Cash sale/payment/stock effect; shift still expected_cash1500. Card sale D4 succeeded once and is unrelated.",
+  "expected": "Document the fixed required counter if intentional in get_screen_bundle/get_endpoint/handbook and expose an actionable wrong-counter response/prerequisite so clients can guide IT before collection, or honor the terminal's own mapped open drawer if intended. Current POST description says only caller's own open shift; no PharmacyCounter restriction or counter lookup is documented. A workstation used for multiple workspaces must not guess/change its terminal mapping or borrow another person's shift. Clarify intended per-service cash counter behavior.",
+  "steps": "1. At DEV terminal4 mapped MainReception, as demo.pharmacist verify GET /finance/cash-shifts/mine null. 2. POST /finance/cash-shifts/open {node:MainReception,opening_float:1500}, own shift10 returned201. 3. GET shift10 expected_cash1500, own statusOpen. 4. POST /otc-sales {items:[{drug_id:4,qty:\"1\"}],method:Cash,customer_name:\"DEMO-OTC-1792948845617 synthetic cash sale, no actual money\"}. 5. Observe409 SHIFT_NOT_OPEN details.node PharmacyCounter; GET shift10 still expected_cash1500. Do not repeat the original sale or change terminal4. Own drawer will be closed declaring whole server expected cash, not used by anyone else.",
+  "evidence": "Cash refusal request_id7e1c464532f94fc4902d94ef74a14f06; GET mine13e788f580044252bcdd6916373eeef2 and terminal5839ca70a7644fa6b0fa9321cc81a93c succeeded immediately before POST. Original open-shift keyef2f09b3-8bd8-411a-b4b3-a64b79d2aedd confirmed201. Current endpoint description: 'Cash goes through the caller’s own open cash shift: SHIFT_NOT_OPEN without one (open it on My cash shift).' No real care/medicines/money. Synthetic records and credential-free evidence in frontend journal; frontend preserves visible refusal and original idempotency handling."
+}

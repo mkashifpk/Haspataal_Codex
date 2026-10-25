@@ -193,6 +193,7 @@ export function checkHelp({
       "PrescriptionQueue",
       "Dispense",
       "OrderQueries",
+      "OTCMode",
     ].map((n) => `src/screens/${n}.tsx`),
   ];
   const used = new Set(),

@@ -1,0 +1,16 @@
+{
+  "implementation_id": 1,
+  "request_id": "codex-pharmacist-cash-shift-scoped-route-20261025-v1",
+  "kind": "MissingWorkflow",
+  "severity": "Medium",
+  "title": "Pharmacist can operate a cash shift but Pharmacy scoped handbook/navigation omits My cash shift prerequisite",
+  "endpoint": "GET /meta/handbook",
+  "screen_id": "otc",
+  "workflow": "clinical-and-prescriptions",
+  "build": "DEV index-Z030kzTQ.js / source based on 9820aa0",
+  "agent": "Codex",
+  "actual": "demo.pharmacist user19 GET /auth/me has finance.shift.operate and only selectable workspace pharmacy. GET /meta/handbook?workspace=pharmacy200 returns Pharmacy screens rx_queue,dispense,otc,charity_override,own_medicines_pharmacy,order_queries; shared_screens does not include my_cash_shift and its pages omit that screen. Unscoped GET /meta/handbook does include my_cash_shift under reception, but the user cannot select Reception. OTC roadmap explicitly depends on my_cash_shift and endpoint SHIFT_NOT_OPEN directs user to it. Our scoped menu/help correctly omits it, so the Pharmacist cannot open the required cash-shift UI, even on a correctly mapped PharmacyCounter terminal. Native permitted API open/read/close worked only as synthetic fixtures; that is not a staff UI workaround.",
+  "expected": "Expose My cash shift as a permitted linked/shared screen in Pharmacy's scoped navigation/handbook when finance.shift.operate is held (with matching runtime view/help), or document/provide an equivalent scoped cash-shift handoff. Do not require the frontend to ignore GET /meta/handbook workspace filtering or grant broad unrelated Reception access to open its own drawer. See OTC dependency my_cash_shift /SHIFT_NOT_OPEN and compulsory permission-filtered contextual help.",
+  "steps": "1. As demo.pharmacist GET /auth/me: finance.shift.operate true; workspaces only pharmacy. 2. GET /meta/handbook?workspace=pharmacy: search all shared/workspace screens/pages for my_cash_shift: absent. 3. GET /meta/handbook without workspace: my_cash_shift exists under reception. 4. Open Pharmacy OTC: Cash requires own shift; user cannot select Reception or reach My cash shift through the permitted scoped menu. Card flow remains operational. No user permissions/mappings were changed.",
+  "evidence": "Actual DEV GET /auth/me, unscoped and Pharmacy-scoped handbook200 inspected25Oct. Current read-only Electron run confirms Pharmacy nav lacks My cash shift while native permitted own-shift endpoints work. Synthetic shifts10/11 were opened and closed by this test user only, full server expected_cash1500 and variance0, never real money. This is separate from issue24's fixed-required-counter mismatch; resolving the counter alone does not expose this prerequisite UI."
+}
