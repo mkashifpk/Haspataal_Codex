@@ -81,6 +81,10 @@ const labels: Record<string, [string, string, string]> = {
   settings: ["Settings", "ترتیبات", "⚙"],
 };
 const frontDeskScreens = new Set([
+  // Navigation and contextual help must share the active workspace's server scope.
+  "patient_search",
+  "my_cash_shift",
+  "registration",
   "home_visit_record",
   "patient_programmes",
   "patient_education",
