@@ -1,6 +1,6 @@
 # Haspataal checkpoint — 26 October 2026
 
-Codex/functions, Asia/Karachi. Source baseline c748132; current Charity implementation is being committed as a checkpoint. Previous full OTC state is preserved in docs/HANDOFF_CHARITY_DEVELOPMENT_2026-10-26.md and earlier archives. No unrelated changes discarded.
+Codex/functions, Asia/Karachi. Source baseline c748132; Charity checkpoint committed as 8e8c070. Following commit contains only the proposal payload/receipt and this checkpoint. Previous full OTC state is preserved in docs/HANDOFF_CHARITY_DEVELOPMENT_2026-10-26.md and earlier archives. No unrelated changes discarded.
 
 ## Current task and status
 
@@ -38,7 +38,7 @@ Next3:
 ## MCP/backend/progress
 
 DEV https://hms-dev.netbird.cloud; server_build2026-10-26T01:17:08.510356+00:00, contract90f7a429e5aa519d440f, knowledgef2f42e3079bc34a3, rubric1f3d8a4d9746; implementation1/mkashif.
-Startup progress:150OTC/149Dispense/148OrderQueries selected claims accepted;109CashShift/133Settings pending. No Charity proposal existed at startup. No unchanged work resubmitted. Preparing only independently unit-tested Charity service-view policy proposal; live endpoints/events and changed Dispense claims have NO ready evidence and must stay out. Record exact proposal ID after confirmed submission; never say posted before server confirms.
+Startup progress:150OTC/149Dispense/148OrderQueries selected claims accepted;109CashShift/133Settings pending. New Charity proposal151 confirmed pending by progress_proposals: awaiting human review on /docs -> My progress. ONLY the independently unit-tested service-view policy rule4b6a177fcd is proposed, with explicit runtime/maintenance limits; no full rule-journey or screen completion claim. Payload docs/charity-proposal-8e8c070.json, requestcodex-charity-service-policy-8e8c070-20261026-v1, receipt docs/charity-proposal-receipt-2026-10-26.json. No unchanged work resubmitted. Live endpoints/events and changed Dispense claims have NO ready evidence and stay out.
 Reports20–25 now Fixed, deployed build>=fixed_in. Full responses in docs/backend-answers-2026-10-26.json:
 20 stateless/plain-JSON MCP +sandbox_status recent_calls, no frontend transport bypass.
 21 Doctor scoped read-only PatientSearch, no edit;22 PharmacyAdmin scoped queue-only RX, no detail/dispense.
@@ -55,4 +55,4 @@ Prior Card OTC D4 invoice12/payment13,total3 and D8 invoice13/payment14,total25 
 Home/preventive remain Active revision9 user-authorised, no shared service mutations.
 Ignored .dev-terminal.json/CA/local MCP config supplies authorised setup. No secrets, passwords, Review codes or private CA in Git/handoff. No agent-entered review code, portal review signature, PR/push, release installer, subagent or new worktree.
 
-No running Charity command or uncertain write. Local uncommitted source checkpoint consists solely of above listed implementation/help/contracts/tests/docs; final Git state/commit will be recorded after commit/proposal verification.
+Final GET /health at 2026-10-26T03:52:02Z still maintenance_mode=true with unchanged message. User answer to the maintenance question remains pending. Work cannot complete live acceptance until backend maintenance ends. No running Charity command, active test account or uncertain business write. Source8e8c070 committed; following documentation-only commit saves the proposal/receipt and this handoff; working tree should be clean afterward. No source changes after the checks above.
