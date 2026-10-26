@@ -1,47 +1,58 @@
-# Haspataal checkpoint — 25 October 2026
+# Haspataal checkpoint — 26 October 2026
 
-Codex/functions, Asia/Karachi. Baseline9820aa0 clean, previous tested source0ccae88/OrderQueries. Tested OTC source4da5f0e /DEV index-BPkrBm6f.js; following commit is documentation/proposal payloads only. No runtime changes after tested source; no unrelated changes discarded.
+Codex/functions, Asia/Karachi. Source baseline c748132; current Charity implementation is being committed as a checkpoint. Previous full OTC state is preserved in docs/HANDOFF_CHARITY_DEVELOPMENT_2026-10-26.md and earlier archives. No unrelated changes discarded.
 
-## Current task/status
+## Current task and status
 
-User requested Phase3 screen4 OTC Mode, all MCP features step by step, one screen. Core implementation and Card journey verified; **positive Cash acceptance blocked by backend24/25**. No full screen/Phase3/Pharmacy/human completion claim. No implementation in progress, running command, active test account or uncertain write. Proposal150OTC confirmed pending by progress_proposals: awaiting human review on /docs -> My progress. Exact payload docs/otc-proposal-4da5f0e.json, requestcodex-otc-4da5f0e-20261025-v1; confirmed receipt docs/otc-proposal-receipt-2026-10-25.json. Only new tested items proposed, no unchanged accepted work resubmitted. No next screen started.
+User asks to finish Phase3 screen5 Zakat/Charity Override and report reproduced backend gaps. Implementation is present; real DEV acceptance remains BLOCKED by server maintenance. No other new screen started. Do not say Charity/Pharmacy/Phase3 is complete.
 
-## Delivered/files
+GET /health200 at 2026-10-26T03:47:39Z reports maintenance_mode=true, message exactly "Maintenance underway .... Please wait." User was asked asynchronously whether backend work still continues; no reply yet. Do not disable maintenance or bypass authentication. No new backend defect established; planned maintenance itself is not a defect.
 
-- src/screens/OTCMode.tsx, otc-policy.ts, generated/otc.ts, contracts/otc.json +otc-support.json: actual barcode/formulary search, exact match/Enter/focus, bounded1–100results, safety/stock/expiry/status colours and high-alert red/text, explicit1–50line basket/positive decimals/remove, optional customer100/mobile30, Cash/Card/ref, reviewed sale and actual invoice/payment/receipt. Currency from metadata, no client price/balance/batch guesses.
-- App permission/service/scoped menu route; Active-only new sale; records/open_work receipt read, no profile branching. Fresh actor/service/product/stock/own mapped drawer preflight. Original UUID/body single-flight unknown retry within24h; no lost-answer lookup provided, outside retention ask IT. No offline writes/local success/unsupported edit/delete/undo.
-- Actual stock event +Live/resync refresh search/cart/receipt without polling/overwriting quantities. Confirmed sale distinguished from new basket/independent selected receipt. Secure existing native receipt printer/PDF renderer reused; wrong/non-OTC ID/failures hide stale receipt, no sale replay.
-- Actual server-required Cash counter parsed from SHIFT_NOT_OPEN details.node; mismatch explained and Cash review/confirm disabled, Card unaffected. Missing scoped My cash shift link shows contact-IT guidance; no metadata/mapping/permission bypass.
-- Authored bilingual page/control/task/FAQ/Pharmacy guidance, error seed/recovery, actual public/handbook/otc-en/ur.png; shared100–250native zoom. Scripts otc-check.mjs, otc-final-check.mjs, otc-readonly-check.mjs; docs/OTC_REVIEW_2026-10-25.md and evidence JSON. Full development/previous checkpoint archived docs/HANDOFF_OTC_DEVELOPMENT_2026-10-25.md; earlier OrderQueries/Dispense archives preserved.
+## Completed source checkpoints
 
-## Verification
+- src/screens/CharityOverride.tsx, charity-policy.ts, charity-write.ts, generated/charity_override.ts; contracts/charity_override*.json: actual RX-bound Zakat/SocialWelfare, queued request or independent counter co-sign, bounded own/decision status registers, current decision reads/events/resync, exact approved assistance handoff.
+- App/scoped navigation and Dispense request link plus exact RX/patient/fund/approval recheck. Approved handoff prefills fund/ID, never quantity; separate supply confirmation. IPD billing preserved.
+- Password is not retained in original request state or logs. Ephemeral salted verifier requires original officer to re-enter identical secret for explicit original-key replay after uncertainty. Clears field after each attempt; no automatic retry/replacement. Recorder redacts approver fields.
+- Bilingual screen/control/task/help/Pharmacy text and mapped inventory; shared F1/zoom integrated. Actual new EN/UR screenshots and live help/layout verification PENDING.
+- scripts/charity-check.mjs journals original writes and plans synthetic queue/counter/refusal/replay/decision/handoff checks, virtual dispensing and owned cleanup. Four policy tests and negative help mapping test added.
+- docs/CHARITY_REVIEW_2026-10-26.md: manual checks, actual verification limits. Backend fixed answers saved docs/backend-answers-2026-10-26.json.
 
-- Final mandatory npm run build PASS34screens625controls219groups34FAQseeds30workspaceguides/TS/Vite; final npm test94/94PASS including3meaningful OTC policy tests and negative unmapped confirmation check. git diff --check PASS. Existing bundle-size warning only. No release installer/physical/human review.
-- Original real UI barcode Card D4: lost201/double-click one flight/exact UUID+body replay/one invoice-payment-stock effect. Unknown/repeated scan, blank/zero/excess quantities, exact ScheduleH/high-alert local+server409 refusals, F1field/dialog retention/focus, bounded search/no-match/add/remove, missing own Cash shift local+server409 and actual receipt native PDF/cancel/missing-printer no-repeat PASS.
-- Updated functional source: existingD4read afterlogin, separate own drawer11, actual Cash409 requiring PharmacyCounter with disabled Cash review/confirm/no effect. Switch after definitive refusal to distinct NEW Card action D8 has no stale Cash feedback, one stock/payment effect and field reset/actual receipt/PDF. Real lost-search/stale hiding/retry/limit, native socket Reconnecting/Live resync→formulary+receipt rereads/no polling, ENUR/themes250/native keyboard bounds/reset PASS. Real Cashier403both core endpoints; absent nav/native denied before HTTP.
-- Final read-only check on index-BPkrBm6f.js: stock colours/highalertdisabled, cancel unsaved navigation and review retains basket, F1focus, metadata Currency, exact own D8receipt after newlogin and actual fresh ENUR/themes250 screenshots, ZERO business writes. Visually inspected screenshots. All profiles preferences-restored/signedout; no agent Review code entered or human review touched.
-- Original broad test stopped expecting Cash201; actual409 reconciled/refused, no repeated sale. A final harness assertion assumed terminal_id on whoami; corrected to actual registered/location/cash_node before any write. Own final writes individually journaled. No full q:tested, shared lifecycle mutation, positive Cash, comprehensive role/native Urdu/editor/physical/signed human acceptance claimed. See docs/otc-evidence-2026-10-25.json, otc-readonly-evidence-2026-10-25.json, otc-server-evidence-2026-10-25.json.
+## Tests and strict limits
 
-## Confirmed own synthetic records — never repeat
+26Oct npm test99/99PASS, npx tsc --noEmit PASS, git diff --check PASS. Bootstrap npx vite build --mode development PASS index-CDbFS4j1.js. Script formatted afterward without semantic source changes; TS rerun PASS.
+Mandatory npm run build STOPPED at help check: charity_override missing EN screenshot; UR also not captured. Check remains enabled, no fabricated screenshot. Not a full build pass.
+MCP overview/progress/proposals/issues/roadmap/connecting-guide/current Charity bundle including omitted schemas/types/quality/design/Pharmacy outline/testplan and endpoint validation read/refreshed. Generated Charity types unchanged; bundle saved with current metadata.
+No live Charity endpoint/event/replay/approval/dispensing evidence, no human/translation/editor acceptance. ACCOUNT_LOCKED countdown only unit-tested; never deliberately lock shared demo officer accounts. Runtime service lifecycle mutations not tested; policy tests cover permission + full/open_work versus records/setup/hidden.
 
-- Original Card **D4 /INV-2026-0000012/payment13/total3**, Paracetamol1unit, original e93f066b-c7a7-49b4-911e-585e8164c3d8. NEW final Card **D8 /INV-2026-0000013/payment14/total25**, ORS1unit, original825d9a89-4446-4d4e-aa4f-a6ccfebb5066. Software-only customers, no patient registration/actual care/supply/card processing/money. Virtual stock/financial records retained, no fabricated refund/undo. Gaps in D-numbers after rolled-back refusals are not extra sales.
-- Owned synthetic shifts10/11 user19 at actual terminal4MainReception, each opened1500 and closed **PendingCollection**, full SERVER expected_cash1500/declared1500/variance0, independently reread. These are closed drawers, not completed accountant cash drops. Open10ef2f09b3-8bd8-411a-b4b3-a64b79d2aedd, close10ad10d20a-c653-42c8-9301-0ff9b92fd623; open11aba22caf-1624-490d-a7b6-ac0aadcc1af6, close11bde5d765-2295-4806-b37f-b03b0ee8559a. No other person's drawer/mapping touched.
-- Cash requests b62cfd91-4065-441d-8f09-feb81cc1292f and77a6db44-43b2-4a90-97ca-9a42f9decb7b definitively409SHIFT_NOT_OPEN requiredPharmacyCounter, ZERO Cash stock/payment effect. Exact bodies/keys/receipts in ignored artifacts/otc-check.json, otc-final-check.json, per-role transport and otc-shift10-close.json. Original journal cleaned via verified close, failed harness result remains truthful. Never rerun unfinished sale/shift journals.
-- Previous RX7/8Cancelled, queries2/4Answered/3Withdrawn, zero supplies. Earlier RX1/3Cancelled/query1Withdrawn; RX4/5/6FullyDispensed (4/6remainderStopped), virtual D1/D2Card/D3IPDBill, admission1Cancelled. Prior patient5/ticket5synthetic history in archives; do not recreate or repeat prior terminal supplies/cleanup.
+## Reconciliation and exact next actions
 
-## Backend/MCP/environment
+Both artifacts/charity-check.json runs stopped before login/business writes:
+- DEMO-CHARITY-1792952630403: connection timeout; empty writes/records; reconciled and archived before retry.
+- Current DEMO-CHARITY-1792986301658: connected but maintenance; finished, writes={}, prescriptions/approvals/dispensations empty. charity-pharmacist.json confirms preferences_restored and signed_out. No uncertain business write, active test command or active test account.
+Current journal cleaned flag is not set. Before retry: verify finished plus all empty write/record arrays, then mark cleaned with reconciliation reason; never use this shortcut on a nonempty journal. Existing session profile is finished/restored, test kit archives it.
+Next3:
+1. Once /health maintenance_mode=false, run node scripts/charity-check.mjs. First read its journal/profile/transport and test effects. Verify synthetic patient5/ticket5 identity before RX creation; if absent/reset, create fresh authorised synthetic records using current contracts, never guess IDs.
+2. Reconcile every actual request/supply by original key/read, fix frontend findings, deduplicate/report only reproduced backend findings. Capture/visually inspect real EN/UR screenshots, run npm run build + npm test.
+3. Commit verified changes, submit only newly changed/tested rubric items per screen with current fingerprint and commit, verify progress_proposals. Named human performs manual review from CHARITY_REVIEW. Then retest newly Fixed20–25 affected paths/refresh contracts as below.
 
-DEV https://hms-dev.netbird.cloud; build2026-10-24T21:23:38.916290+00:00, contracta48efc9c8254ac5137e2, knowledge5d997abd8847f89d, rubrica400860f309d; implementation1/mkashif. Startup overview/progress/proposals/issues/roadmap plus full OTC bundle+omitted schemas/decisions, quality/design/Pharmacy outline/recipe/testplan, endpoints/types/validate_request read. Previous148OrderQueries/149changed Dispense selected claims accepted (not full compulsory review);109CashShift/133Settings still pending. No existing OTC proposal at pre-submit read; new150nowpending. No signed human review; do not duplicate unchanged accepted/pending claims.
+## MCP/backend/progress
 
-Closing25Oct reports20–25New/no answers:
-- **24 ContractMismatch:** OTC requires fixed PharmacyCounter despite caller's own actual mapped Open shift. Document/clarify intended counter and actionable prerequisite, or honor mapping as intended. Current terminal4MainReception cannot pass positive Cash. Payload docs/otc-cash-counter-issue-2026-10-25.json, confirmed report24New. No hard-coded invented required node; UI uses actual refusal details.
-- **25 MissingWorkflow:** Pharmacist finance.shift.operate true, selectable workspaceonlyPharmacy. Scoped GETmeta/handbook?workspace=pharmacy omits Mycashshift from pages/shared/screens; unscoped puts it under unselectableReception. Request permitted linked/shared Pharmacy shift route/help/view. Payload docs/otc-cash-shift-scope-issue-2026-10-25.json, confirmed25New. API fixtures do not count as staff UI access.
--23Pharmacist discharge permission but admission/status403; clearance safely blocked.22partialPharmacyAdmin scoped queue/detail access.21Doctor PatientSearch scoped help.20MCP Transportclosed after committed writes; reconcile originalkeys/read first. Older1–19Fixed except rejected frontend4; #19 includes float/server expected_cash+variance, never subtract float. Retest Fixed only when build>=fixed_in, refresh contracts/types/help before updating UI.
+DEV https://hms-dev.netbird.cloud; server_build2026-10-26T01:17:08.510356+00:00, contract90f7a429e5aa519d440f, knowledgef2f42e3079bc34a3, rubric1f3d8a4d9746; implementation1/mkashif.
+Startup progress:150OTC/149Dispense/148OrderQueries selected claims accepted;109CashShift/133Settings pending. No Charity proposal existed at startup. No unchanged work resubmitted. Preparing only independently unit-tested Charity service-view policy proposal; live endpoints/events and changed Dispense claims have NO ready evidence and must stay out. Record exact proposal ID after confirmed submission; never say posted before server confirms.
+Reports20–25 now Fixed, deployed build>=fixed_in. Full responses in docs/backend-answers-2026-10-26.json:
+20 stateless/plain-JSON MCP +sandbox_status recent_calls, no frontend transport bypass.
+21 Doctor scoped read-only PatientSearch, no edit;22 PharmacyAdmin scoped queue-only RX, no detail/dispense.
+23 new DischargeStatusViewOut GET discharge-status permits stage-clearers with identity/clearer/time; reconcile lost clearance there, never auto-retry; old Dispense safe denial remains until UI updated/tested.
+24 owner decision Pharmacy Cash requires own PharmacyCounter shift; GET mine?node=PharmacyCounter before offering Cash, details.open_shift identifies own other-counter drawer. New rules/types/contracts need UI update/test.
+25 Pharmacy scoped handbook now links MyCashShift. Add scoped navigation/help; Pharmacy cash opening disabled on other counter with IT mapping explanation. Never offer counter picker.
+No fixes to these UI paths claimed this session. No new backend report submitted.
 
-Terminal4 DEV Reception laptop(Codex) Active/MainReception deliberately retained for user; never recreate/deactivate/re-map to bypass24. Older testusers34/35terminals2/3inactive/drawersclosed. Home/preventive Active revision9 by user authorization; no shared lifecycle mutations here. Authorized ignored .dev-terminal.json/CA/MCP config supplies setup, never track secrets/passwords/Review codes/privateCA. No release build/PR/push/new worktree/subagent.
+## Preserved DEV state / setup
 
-## Next3 steps
+Terminal4 "DEV Reception laptop (Codex)" Active/MainReception deliberately retained. Never recreate/deactivate/remap to bypass Pharmacy cash requirement. Positive Pharmacy Cash needs backend-team-authorised separate PharmacyCounter test terminal.
+Prior own shifts10/11 user19 terminal4 CLOSED PendingCollection, expected/declared1500 variance0; not accountant cash drops. No open test drawer or cash action here.
+Prior Card OTC D4 invoice12/payment13,total3 and D8 invoice13/payment14,total25 retained virtual sales; no physical supply/cash/card processing. Prior RX7/8Cancelled; query2/4Answered/3Withdrawn. Older own patient5/ticket5 has DEMO-FINANCIAL prefix and no actual care; verify current reads first. RX1/3Cancelled;4/5/6FullyDispensed, admission1Cancelled. Exact keys/older IDs in archive; never repeat terminal actions.
+Home/preventive remain Active revision9 user-authorised, no shared service mutations.
+Ignored .dev-terminal.json/CA/local MCP config supplies authorised setup. No secrets, passwords, Review codes or private CA in Git/handoff. No agent-entered review code, portal review signature, PR/push, release installer, subagent or new worktree.
 
-1. User manually test fresh synthetic OTC Card journey via Pharmacy→OTC mode, actual barcode/search, quantities/refusals/review/receipt/PDF/F1/ENUR/zoom. Follow docs/OTC_REVIEW_2026-10-25.md. Cash positive and complete acceptance remain pending24/25 and named human role/translation/editor/portal review.
-2. Await24/25 answers/deployment, refresh affected contracts/roadmap/types, then test full Cash via a NEW owned shift on an authorized terminal counting whole drawer. Leave20–23blocked flows safe.
-3. After manual review select the next Pharmacy screen from current MCP roadmap (charity_override follows OTC); do not start another screen until requested. Verify Git against tested4da5f0e +later documentation-only checkpoint, keep handoff current before work.
+No running Charity command or uncertain write. Local uncommitted source checkpoint consists solely of above listed implementation/help/contracts/tests/docs; final Git state/commit will be recorded after commit/proposal verification.

@@ -9,7 +9,7 @@ test("separately authored registration help must retain its Urdu title", () => {
 });
 test("all delivered controls, tasks, role guides and FAQ seeds have bilingual help", () => {
   const result = checkHelp({ media: false });
-  assert.equal(result.screens, 34);
+  assert.equal(result.screens, 35);
   assert(result.controls > 90);
   assert.equal(result.workspaceGuides, 30);
 });
@@ -24,6 +24,8 @@ test("Order Queries cannot ship an unmapped confirmation control", () => {
 test("OTC cannot ship an unmapped financial confirmation", () => {
   assert.throws(()=>checkHelp({media:false,read:file=>file === "src/screens/OTCMode.tsx" ? read(file).replace('data-help="otc.confirm"','') : read(file)}),/missing\/broken control help mapping/);
 });
+
+test("charity co-sign confirmation must retain mapped bilingual help",()=>{assert.throws(()=>checkHelp({media:false,read:file=>file==='src/screens/CharityOverride.tsx'?read(file).replace('data-help="charity.confirm"',''):read(file)}),/missing\/broken control help mapping/)});
 test("the first Phase 2 screen cannot add an uncovered cash control", () => {
   assert.throws(
     () =>

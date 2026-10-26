@@ -9,6 +9,12 @@ export function setLanguage(value: string) {
   language = value;
 }
 const ur: Record<string, string> = {
+  Zakat: "زکوٰۃ",
+  SocialWelfare: "سماجی بہبود",
+  "Open an existing prescription before requesting assistance.": "امداد سے پہلے اصل موجودہ نسخہ کھولیں۔",
+  "Choose a fund and enter a reason of 3–500 characters.": "فنڈ چنیں اور3تا500حروف کی وجہ درج کریں۔",
+  "This is not a matching approved pharmacy assistance request.": "یہ متعلقہ منظور شدہ فارمیسی امداد درخواست نہیں۔",
+  "This prescription is not ready for an outpatient charity dispense. Review the current billing and order.": "یہ نسخہ او پی ڈی امدادی فراہمی کے لیے تیار نہیں۔ اصل بل و حکم چیک کریں۔",
   "Enter a positive quantity without exponent notation.": "قوت کی صورت کے بغیر مثبت مقدار درج کریں۔",
   "Add between 1 and 50 different medicines.": "1سے50تک مختلف دوائیں شامل کریں۔",
   "Check the payment method and customer details.": "ادائیگی کا طریقہ اور گاہک کی معلومات چیک کریں۔",

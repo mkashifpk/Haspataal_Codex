@@ -194,6 +194,7 @@ export function checkHelp({
       "Dispense",
       "OrderQueries",
       "OTCMode",
+      "CharityOverride",
     ].map((n) => `src/screens/${n}.tsx`),
   ];
   const used = new Set(),

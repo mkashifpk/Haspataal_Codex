@@ -198,7 +198,7 @@ export async function session(name, account = "demo.doctor") {
             try {
               a.body = JSON.parse(Buffer.concat(body).toString());
               // A second person's co-signing credentials never enter test journals.
-              for (const field of ["checker_password", "checker_username"]) if(field in a.body)a.body[field]="[REDACTED]";
+              for (const field of ["checker_password", "checker_username", "approver_password", "approver_username"]) if(field in a.body)a.body[field]="[REDACTED]";
             } catch {}
             a.key = req.getHeader("Idempotency-Key");
             persist();
