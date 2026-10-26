@@ -1,6 +1,6 @@
 # Haspataal checkpoint — 26 October 2026
 
-Updated 14:36 UTC / 19:36 Pakistan time, Codex/functions. Baseline `1cdd605` was clean on takeover. Previous Antigravity handoff archived in `docs/HANDOFF_ANTIGRAVITY_REVIEW_2026-10-26.md`; its conflicting done/in-progress sections are superseded here. Earlier source: `c92563f` lab delivery, `5373cea` Charity.
+Updated 26 October 2026, Codex/functions, Asia/Karachi. Source **`019c491`** committed and tested; following docs-only commit records proposal161. Baseline `1cdd605` was clean on takeover. Previous Antigravity handoff archived in `docs/HANDOFF_ANTIGRAVITY_REVIEW_2026-10-26.md`; its conflicting done/in-progress sections are superseded here. Earlier source: `c92563f` lab delivery, `5373cea` Charity.
 
 ## Current scope and completed work
 
@@ -32,11 +32,11 @@ DEV `https://hms-dev.netbird.cloud`, build `2026-10-26T01:17:08.510356+00:00`, c
 
 New **#29 New**: verifier queue lacks deadline/author/requisition linkage and verify reconcile_with is null. Reproduced on own result6; exact payload `docs/verifier-context-gap-report-2026-10-26.json`. **#27 New** label GET undocumented mutation; **#28 New** receptionist publication event audience missing, no answers at takeover. **#26 Fixed** maintenance OFF retested. **#20–25 Fixed** deployed; scoped21/22/24/25 read-only UI checks passed earlier. Actual23 clearance/lost-answer and positive Pharmacy Cash still pending; do not equate backend Fixed with UI acceptance.
 
-Proposals156–160 were pending at startup,151–155 accepted. New corrected-build proposal will contain only materially changed, tested safety/state/permission/help evidence; exact payload and receipt must be saved and verified before handoff. Never resubmit unchanged work or claim human approval. No agent enters a Review code or signs portal reviews. Maintenance reminder was deleted after recovery.
+**Proposal161 confirmed pending via progress_proposals: awaiting human review on /docs -> My progress.** Only materially changed, tested safety/state/permission/help evidence from019c491; prior unchanged endpoints/rules not resubmitted. Exact payload `docs/lab-verifier-safety-proposal-019c491.json`, request_id `codex-verifier-safety-019c491-20261026-v1`; receipt `docs/lab-verifier-safety-proposal-receipt-2026-10-26.json`.156–160 remain pending,151–155 accepted. No agent entered a Review code or signed a portal review. Maintenance reminder was deleted after recovery.
 
 ## Next three actions / Git
 
-1. Commit this verifier follow-up and submit/verify its tested progress; record commit/proposal here. Current changes are all this audited source/help/test/evidence checkpoint; no unrelated changes discarded.
+1. Current verifier audit/fixes/tests/proposal are complete at019c491. No implementation is in progress. Following docs-only commit saves this checkpoint/161payload+receipt; expected clean tree afterward. Human checks are in `docs/LAB_VERIFIER_AUDIT_2026-10-26.md`.
 2. Human tests Lab Verifier on fresh synthetic data and reviews pending proposals on `/docs -> My progress`. Retest27/28/29 when backend answers/fixed build lands; refresh affected contracts then.
 3. Next roadmap screen is position39 `critical_results_bench` (Lab Technician,53points). Read its full MCP requirements before starting. Do not bundle the whole next workspace into one step.
 
