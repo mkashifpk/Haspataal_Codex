@@ -1,6 +1,6 @@
 # Haspataal checkpoint — 26 October 2026
 
-Codex/functions, Asia/Karachi. Current task: user authorised building ONLY Phase3 position39 `critical_results_bench`, Lab Technician. Baseline `70311f6` was clean; earlier verifier source `019c491`. Development history archived in `docs/HANDOFF_CRITICAL_BENCH_DEVELOPMENT_2026-10-26.md` and earlier handoffs. No unrelated changes discarded.
+Codex/functions, Asia/Karachi. Source **`51182f9`** committed/tested; following docs-only commit records confirmed proposal162. Current task: user authorised building ONLY Phase3 position39 `critical_results_bench`, Lab Technician. Baseline `70311f6` was clean; earlier verifier source `019c491`. Development history archived in `docs/HANDOFF_CRITICAL_BENCH_DEVELOPMENT_2026-10-26.md` and earlier handoffs. No unrelated changes discarded.
 
 ## Delivered / current status
 
@@ -33,11 +33,11 @@ Missing acceptance: actual overdue/escalation timing, shared service lifecycle m
 
 ## Progress / next actions / Git
 
-Source/tests/evidence ready for commit, then submit critical_results_bench tested items with current rubric/build and verify progress_proposals BEFORE final handoff. No previous proposal for this screen returned at startup. Avoid empty/untested claims; endpoints/event/defaults/communication/history/policy/states/writes/help have evidence, actual overdue alarm acceptance and human items remain unclaimed. Save exact payload/request_id/receipt here after confirmation.
+**Proposal162 confirmed pending via progress_proposals: awaiting human review on /docs -> My progress.** Tested commit51182f9 / index-unKuxXUS.js; exact payload `docs/critical-bench-proposal-51182f9.json`, request_id `codex-critical-bench-live-51182f9-20261026-v1`; receipt `docs/critical-bench-proposal-receipt-2026-10-26.json`. Only tested endpoints/event/defaults/communication/history/policy/states/writes/help proposed. Actual overdue/escalation/audio acceptance, full test-plan and human items remain unclaimed. No previous proposal for this screen returned at startup; no unchanged work resubmitted.
 
 Previous proposal161 verifier safety confirmed pending,156–160pending at startup;151–155accepted. Prior verifier audit `docs/LAB_VERIFIER_AUDIT_2026-10-26.md` limits160's untested critical/self-verification claims. No reminder active; maintenance reminder deleted after recovery.
 
-Next3: (1) commit and propose/verify new tested screen; (2) human tests fresh synthetic critical communication/read-back/authority/alarm/F1/Urdu/zoom and portal review; (3) query current roadmap for the next screen, one at a time. Check backend27–29 answers at next session and refresh/retest affected contracts when fixed. No next implementation in progress.
+Next3: (1) current screen source/tests/proposal are complete, no implementation or command in progress; following docs-only commit saves this checkpoint/payload/receipt and expected tree is clean; (2) human tests fresh synthetic critical communication/read-back/authority/alarm/F1/Urdu/zoom and portal review; (3) query current roadmap for the next screen, one at a time. Check backend27–29 answers at next session and refresh/retest affected contracts when fixed. Do not rerun terminal test business writes or start another screen without the next requested step.
 
 ## Preservation / setup
 
