@@ -195,6 +195,7 @@ export function checkHelp({
       "OrderQueries",
       "OTCMode",
       "CharityOverride",
+      "LabOnlyWalkIn",
     ].map((n) => `src/screens/${n}.tsx`),
   ];
   const used = new Set(),

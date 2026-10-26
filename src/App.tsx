@@ -28,6 +28,7 @@ import { ICDPicker } from "./screens/ICDPicker";
 import { Consultation } from "./screens/Consultation";
 import { EPrescription } from "./screens/EPrescription";
 import { LabOrdersResults } from "./screens/LabOrdersResults";
+import { LabOnlyWalkIn } from './screens/LabOnlyWalkIn';
 import { ExternalReferral } from "./screens/ExternalReferral";
 import { ReferralRegister } from "./screens/ReferralRegister";
 import { PatientEducation } from "./screens/PatientEducation";
@@ -67,6 +68,7 @@ const labels: Record<string, [string, string, string]> = {
   approval_queue: ["Approvals", "منظوریاں", "✓"],
   charity_approvals: ["Charity approvals", "فلاحی منظوری", "♡"],
   my_cash_shift: ["My cash shift", "میری کیش شفٹ", "₨"],
+  lab_only_walkin: ['Lab-only walk-in','صرف لیب کے لیے آمد','⚗'],
   queue_management: ["Queue management", "قطاروں کا انتظام", "≡"],
   refund_waiver_credit: [
     "Refund / waiver / credit",
@@ -92,6 +94,7 @@ const labels: Record<string, [string, string, string]> = {
   settings: ["Settings", "ترتیبات", "⚙"],
 };
 const frontDeskScreens = new Set([
+  'lab_only_walkin',
   "charity_override",
   "otc",
   "order_queries",
@@ -711,6 +714,7 @@ export function App() {
     ...(user?.permissions.some(p=>["prescription.view","prescription.query.raise"].includes(p)) ? ["order_queries"] : []),
     ...(user?.permissions.some(p=>["pharmacy.otc.sell","pharmacy.formulary.view"].includes(p)) ? ["otc"] : []),
     "charity_override",
+    'lab_only_walkin',
     ...(user?.permissions.includes("clinical.encounter.view") || user?.permissions.includes("clinical.encounter.create") ? ["consultation"] : []),
     ...(user?.permissions.includes("prescription.view") || user?.permissions.includes("prescription.create") ? ["eprescription"] : []),
     ...(user?.permissions.some(p=>["lab.result.view","lab.requisition.view","lab.requisition.create","imaging.order.view","imaging.order.create"].includes(p)) ? ["lab_orders_results"] : []),
@@ -1107,6 +1111,7 @@ export function App() {
               {screen === "registration" && (
                 <Registration user={user} revision={revision} />
               )}
+              {screen === 'lab_only_walkin' && est && <LabOnlyWalkIn key={user.user_id} user={user} connected={connected} stream={stream} establishment={est} timeZone={meta?.hospital_timezone} currency={meta?.currency_code} onCashShift={nav.includes('my_cash_shift')?()=>{navigate('my_cash_shift')}:undefined}/>}
               {screen === "patient_documents" && <PatientDocuments user={user} revision={revision} />}
               {screen === "rx_queue" && <PrescriptionQueue key={user.user_id} permissions={user.permissions} connected={connected} stream={stream} timeZone={meta?.hospital_timezone} view={est?.views.screens.find(v => v.screen_id === "rx_queue")?.view || "hidden"} onDispense={nav.includes("dispense")?id=>{if(navigate("dispense"))setPharmacySelection({userId:user.user_id,prescriptionId:id})}:undefined} />}
               {screen === "dispense" && est && <Dispense onCashShift={nav.includes("my_cash_shift")?()=>{navigate("my_cash_shift")}:undefined} initialAssistance={pharmacySelection?.userId===user.user_id?pharmacySelection.assistance:undefined} onCharity={nav.includes("charity_override")?id=>{if(navigate("charity_override"))setCharitySelection({userId:user.user_id,prescriptionId:id})}:undefined} key={user.user_id} user={user} connected={connected} stream={stream} establishment={est} initialId={pharmacySelection?.userId===user.user_id?pharmacySelection.prescriptionId:undefined} onQueue={nav.includes("rx_queue")?()=>{navigate("rx_queue")}:undefined} onQuery={nav.includes("order_queries")?(id,itemId)=>{if(navigate("order_queries"))setQuerySelection({userId:user.user_id,prescriptionId:id,itemId})}:undefined} />}

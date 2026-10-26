@@ -9,6 +9,12 @@ export function setLanguage(value: string) {
   language = value;
 }
 const ur: Record<string, string> = {
+  "Enter a name of 1–200 characters and a valid mobile number.": "1تا200حروف کا نام اور درست موبائل نمبر درج کریں۔",
+  "Check priority, clinical notes and referring doctor.": "ترجیح، طبی نوٹ اور حوالہ دینے والا معالج چیک کریں۔",
+  "A selected test is unavailable. Refresh and review the selection.": "منتخب ٹیسٹ دستیاب نہیں۔ تازہ کرکے انتخاب کا جائزہ لیں۔",
+  "Choose Cash, Card or Bank transfer.": "نقد، کارڈ یا بینک منتقلی چنیں۔",
+  "Enter a positive payment amount or leave it empty for the full server balance.": "مثبت رقم دیں یا سرور کے مکمل بقایا کے لیے خالی چھوڑیں۔",
+  "The payment must be positive and no more than the server balance.": "رقم مثبت اور سرور کے بقایا سے زیادہ نہ ہو۔",
   "This PC is not set up for pharmacy cash. Ask IT to map it to the Pharmacy Counter.": "یہ کمپیوٹر فارمیسی نقد کے لیے مقرر نہیں۔ آئی ٹی سے اسے فارمیسی کاؤنٹر پر مقرر کرائیں۔",
   Zakat: "زکوٰۃ",
   SocialWelfare: "سماجی بہبود",
