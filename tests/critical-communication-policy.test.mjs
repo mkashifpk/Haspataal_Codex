@@ -45,5 +45,6 @@ test('alarm is allowed only for the exact current open Lab record, never a handl
 test('native alarm uses the exact laboratory workspace service screen, denies unrelated workspaces',()=>{
  assert.equal(criticalAlarmScreen('lab_tech'),'critical_results_bench');
  assert.equal(criticalAlarmScreen('lab_verifier'),'critical_results_verifier');
- for(const workspace of ['doctor','radiology','pharmacy','',undefined,'toString','__proto__'])assert.equal(criticalAlarmScreen(workspace),undefined);
+ assert.equal(criticalAlarmScreen('doctor'),'critical_results_doctor');assert.equal(criticalAlarmScreen('anaesthesia'),'critical_results_doctor');
+ for(const workspace of ['radiology','pharmacy','',undefined,'toString','__proto__'])assert.equal(criticalAlarmScreen(workspace),undefined);
 });

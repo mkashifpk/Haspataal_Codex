@@ -31,6 +31,7 @@ import { LabOrdersResults } from "./screens/LabOrdersResults";
 import { LabOnlyWalkIn } from './screens/LabOnlyWalkIn';
 import { LabBench } from './screens/LabBench';
 import { LabVerification } from './screens/LabVerification';
+import { CriticalResultsDoctor, DoctorCriticalAlert } from './screens/CriticalResultsDoctor';
 import { CriticalResultsBench } from './screens/CriticalResultsBench';
 import { ExternalReferral } from "./screens/ExternalReferral";
 import { ReferralRegister } from "./screens/ReferralRegister";
@@ -74,6 +75,7 @@ const labels: Record<string, [string, string, string]> = {
   lab_only_walkin: ['Lab-only walk-in','صرف لیب کے لیے آمد','⚗'],
   lab_verification: ['Verification queue','تصدیق کی قطار','✓'],
   lab_bench: ['Scanner-first lab bench','اسکینر سے لیب بنچ','⚗'],
+  critical_results_doctor: ['Critical results to acknowledge','تسلیم کرنے والے اہم نتائج','!'],
   critical_results_verifier: ['Critical results to tell','فوری بتانے والے اہم نتائج','!'],
   critical_results_bench: ['Critical results to tell','فوری بتانے والے اہم نتائج','!'],
   queue_management: ["Queue management", "قطاروں کا انتظام", "≡"],
@@ -101,6 +103,7 @@ const labels: Record<string, [string, string, string]> = {
   settings: ["Settings", "ترتیبات", "⚙"],
 };
 const frontDeskScreens = new Set([
+  'critical_results_doctor',
   'critical_results_bench',
   'critical_results_verifier',
   'lab_only_walkin',
@@ -727,7 +730,7 @@ export function App() {
     "charity_override",
     'lab_only_walkin',
     'lab_bench',
-    ...(user?.permissions.includes('diagnostics.critical.view') ? ['critical_results_bench','critical_results_verifier'] : []),
+    ...(user?.permissions.includes('diagnostics.critical.view') ? ['critical_results_bench','critical_results_verifier','critical_results_doctor'] : []),
     ...(user?.permissions.some(p => ['lab.result.verify', 'lab.result.view'].includes(p)) ? ['lab_verification'] : []),
     ...(user?.permissions.includes("clinical.encounter.view") || user?.permissions.includes("clinical.encounter.create") ? ["consultation"] : []),
     ...(user?.permissions.includes("prescription.view") || user?.permissions.includes("prescription.create") ? ["eprescription"] : []),
@@ -769,7 +772,7 @@ export function App() {
           w.screens.some((s) => s.id === id),
         )))) &&
       est?.views.screens.find((v) => v.screen_id === id)?.view !== "hidden" &&
-      (!["rx_queue","dispense","order_queries","otc","charity_override","lab_only_walkin","lab_bench","lab_verification","critical_results_bench","critical_results_verifier"].includes(id) || ["full", "open_work", "records"].includes(est?.views.screens.find(v => v.screen_id === id)?.view || "")),
+      (!["rx_queue","dispense","order_queries","otc","charity_override","lab_only_walkin","lab_bench","lab_verification","critical_results_bench","critical_results_verifier","critical_results_doctor"].includes(id) || ["full", "open_work", "records"].includes(est?.views.screens.find(v => v.screen_id === id)?.view || "")),
   );
   const view = est?.views.workspaces.find(
     (v) => v.workspace === workspace,
@@ -1030,6 +1033,8 @@ export function App() {
                   </div>
                 </>
               )}
+              {est && nav.includes('critical_results_doctor') && <DoctorCriticalAlert key={user.user_id+':'+workspace} user={user} establishment={est} onOpen={()=>navigate('critical_results_doctor')}/>}
+              {screen === 'critical_results_doctor' && est && <CriticalResultsDoctor key={user.user_id} user={user} connected={connected} stream={stream} establishment={est} timeZone={meta?.hospital_timezone}/>}
               {screen === "app_shell" && (
                 <>
                   <span className="eyebrow">

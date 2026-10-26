@@ -199,6 +199,7 @@ export function checkHelp({
       "LabBench",
       "LabVerification",
       "CriticalResultsBench",
+      "CriticalResultsDoctor",
     ].map((n) => `src/screens/${n}.tsx`),
   ];
   const used = new Set(),

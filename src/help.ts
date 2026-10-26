@@ -10,6 +10,51 @@ export type HelpPage = {
   faqUr: [string, string][];
 };
 export const help: Record<string, HelpPage> = {
+ critical_results_doctor: {
+  title:'Critical results to acknowledge',titleUr:'تسلیم کرنے والے اہم نتائج',
+  purpose:'The treating doctor opens this screen when a critical laboratory or imaging result arrives for their patient, assesses the patient, reads the actual report, and records the action taken as a final acknowledgement.',
+  purposeUr:'معالج اپنے مریض کا اہم لیب یا عکس نتیجہ آنے پر یہ صفحہ کھول کر مریض کا جائزہ، اصل رپورٹ اور اصل کی گئی کارروائی کی حتمی تسلیم درج کرتا ہے۔',
+  steps:[
+   'Doctor → Critical results to acknowledge, or Review critical results on the sticky red workspace alert. This alert uses a separate unfiltered My patients/not-yet-acknowledged read and remains across workspace pages until a fresh server check confirms none remain. History filters and notification dismissal cannot clear it. Actual Opened events for server-confirmed My patients request a native alarm; sound failure is visible.',
+   'My urgent acknowledgement worklist contains CriticalToAcknowledge only, for my patients. My critical results log defaults to mine=true/open_only=true: mine means the requesting doctor or consultant, decided by the server. Choose Lab/Imaging/both, status, From/To date and1–1000limit, then Apply log filters. Disable Not yet acknowledged only for final history. Find searches returned records only; narrow a full limit. Records mode has no pending work or acknowledgement.',
+   'Use Review urgent result, Open critical result or Read known critical result with an actual ID. Verify name/MRN, finding, responsible doctor, admission/ward/bed, release author/time and actual deadline/overdue/escalation. A known-ID read does not prove treating eligibility. Review real communications, separate authority notification, acknowledgement author/time and action.',
+   'Open laboratory report or Open imaging report previews the linked server PDF with your current permission; Save report PDF saves one separate PDF. The actual requisition/order link and fresh context are checked. A report error or cancelled download never acknowledges the result or repeats care. Missing links/permission stay visible; ask the diagnostic team.',
+   'Assess the patient now. Enter Action taken3–2000characters describing only what you actually did. A doctor may acknowledge directly before a phone call. Review acknowledgement freezes the exact patient/result/finding/action. Confirm action and acknowledge submits once with the original server version after fresh actor/permission/service/history checks. Closing before confirmation keeps the draft. Acknowledged is final: no edit/delete/second acknowledgement.',
+   'Treating eligibility is server-owned. CRITICAL_RESULT_ACKNOWLEDGER_INVALID means hand over to an authorised treating doctor; FORBIDDEN means missing permission. VERSION_CONFLICT or CRITICAL_RESULT_STATE_INVALID refreshes the result; close the old confirmation and review the current history, never overwrite. A changed communication invalidates the reviewed version before submission.',
+   'A lost reply locks draft, confirmation, Escape and navigation. This operation has NO retry: Read current result inspects exact patient/status/acknowledging author/action. Result reviewed; return to draft releases the hold and refreshes current detail without resending or claiming success from a missing queue row. If identity differs, ask IT. Never submit a replacement merely because the answer disappeared.',
+   'Critical updates and actual reconnect refresh log/worklist/current detail without polling. Refresh my critical results also checks the independent sticky alert. Failed reads hide stale detail; an alert read error marks its last check not current and offers Check critical alerts again. Offline acknowledgement is blocked. Unsaved action drafts remain in memory and changing patient/workspace asks before discarding.',
+   'Use F1 from alert, action field or confirmation; close Help and verify draft/focus. Test English/Urdu, both themes and shared keyboard/Settings100–250%zoom. Urdu clinical wording, audible-device checks and a named human fresh-data role journey/editor review remain pending. Only the human starts/signs the DEV portal review and enters its Review code.'
+  ],
+  stepsUr:[
+   'ڈاکٹر سے تسلیم کرنے والے اہم نتائج یا سرخ قائم تنبیہ پر جائزہ۔ تنبیہ الگ بغیر چھانٹی میرے مریض/تسلیم بقایا پڑھتی، تمام صفحات پر تازہ سرور میں بقایا ختم ہونے تک رہے۔ تاریخ چھانٹی یا عام اطلاع چھپانا نہ ہٹائے۔ میرے اصل مریض کے نئے کھلے واقعے پر نظام الارم؛ خطا نظر آئے۔',
+   'فوری فہرست میں صرف میرے مریض کی تسلیم لازم۔ رجسٹر ابتدا میرے مریض/تسلیم بقایا؛ مانگنے والا یا کنسلٹنٹ سرور طے کرے۔ لیب/عکس، حالت، تاریخ اور1تا1000حد پھر چھانٹی۔ حتمی تاریخ کو بقایا شرط ہٹائیں۔ تلاش صرف موصولہ؛ حد پوری تو محدود کریں۔ ریکارڈ میں بقایا کام/تسلیم نہیں۔',
+   'فوری کام، لوٹی سطر یا اصل معلوم نمبر کھولیں۔ نام/ایم آر این، نتیجہ، معالج، داخلہ/وارڈ/بستر، جاری مصنف/وقت و اصل مدت، تاخیر، اگلی سطح دیکھیں۔ معلوم نمبر علاج اجازت ثابت نہیں۔ اصل اطلاعات، الگ ادارہ ذمہ داری، تسلیم مصنف/وقت و کارروائی چیک۔',
+   'لیب/عکس رپورٹ اصل ربط و اجازت سے سرور پی ڈی ایف کھولے؛ محفوظ سے ایک الگ پی ڈی ایف۔ اصل درخواست/حکم و تازہ سیاق جانچ۔ خطا یا منسوخی نتیجہ تسلیم یا علاج نہ دہرائے۔ ربط/اجازت نہ ہو تو تشخیصی ٹیم سے رابطہ۔',
+   'ابھی مریض کا جائزہ۔ صرف اصل کی گئی کارروائی3تا2000حروف۔ فون سے پہلے بھی معالج تسلیم کر سکتا ہے۔ جائزہ میں عین مریض/نتیجہ/کارروائی منجمد۔ تصدیق سے تازہ صارف/اجازت/خدمت/تاریخ جانچ اور اصل سرور نسخے کے ساتھ ایک ارسال۔ پہلے بند سے مسودہ رہے۔ تسلیم حتمی، ترمیم/حذف/دوبارہ نہیں۔',
+   'علاج اہلیت سرور کی۔ نااہل معالج انکار پر مجاز معالج کو حوالہ؛ ممنوع یعنی اجازت نہیں۔ نسخہ اختلاف یا حتمی انکار پر تازہ نتیجہ، پرانا جائزہ بند اور تاریخ چیک، اووررائٹ نہیں۔ بدلی اطلاع پرانا جائزہ ارسال سے پہلے روکے۔',
+   'گم جواب میں مسودہ، مکالمہ، ایسکیپ و جگہ مقفل۔ اس عمل کی دوبارہ کوشش نہیں؛ موجودہ نتیجہ پڑھ کر عین مریض/حالت/مصنف/کارروائی چیک۔ نتیجہ چیک پھر واپس سے قفل کھلے، تازہ تفصیل، دوبارہ ارسال یا قطار غائب سے کامیابی نہیں۔ شناخت مختلف تو آئی ٹی۔ غائب جواب پر نیا متبادل نہیں۔',
+   'اصل واقعات و رابطہ بحالی سے رجسٹر/کام/تفصیل تازہ، پولنگ نہیں۔ تازہ بٹن الگ تنبیہ بھی جانچے۔ خطا میں پرانی تفصیل پوشیدہ؛ تنبیہ خطا آخری جانچ پرانی اور پھر جانچ بٹن۔ آف لائن تسلیم بند۔ مسودہ یادداشت میں، مریض/صفحہ بدلنے سے پہلے چھوڑنے کا سوال۔',
+   'تنبیہ، کارروائی یا تصدیق میں ایف ون؛ بند سے مسودہ/فوکس چیک۔ اردو/انگریزی، دونوں تھیم اور مشترکہ کی بورڈ/ترتیبات100تا250زوم۔ طبی اردو، اصل آواز، انسانی تازہ ریکارڈ کردار و ادارتی جائزہ باقی۔ صرف انسان پورٹل جائزہ شروع/دستخط اور ریویو کوڈ درج کرے۔'
+  ],
+  faq:[
+   ['Why does the red alert stay after filtering?', 'It tracks a separate unfiltered not-yet-acknowledged My patients list. Open and Communicated both need the doctor’s final acknowledgement. A fresh server read clears it only when no pending records remain; history filters never clear it.'],
+   ['May I acknowledge before the laboratory phones?', 'Yes. Assess the patient and record only the actual action taken. Communication history and authority notification are separate; do not wait for a call to act clinically.'],
+   ['How do I read the report?', 'Select the exact result and verify identity, then Open laboratory report/Open imaging report. The actual linked server PDF opens separately. Save report PDF saves one PDF; failure never repeats acknowledgement.'],
+   ['Why am I refused?', 'The server decides who may treat the patient. A treating-doctor refusal needs handover to the authorised clinician; permission denial needs the appropriate granted access, never a role-name workaround.'],
+   ['Can I change or acknowledge it again?', 'No. Acknowledgement is final. Read the recorded author/time/action. Version conflict or final-state error requires a fresh review, never overwrite or deletion.'],
+   ['What if I lose the reply?', 'Do not retry. Use Read current result, compare exact patient/status/author/action, then return to current detail. A missing queue row proves nothing. If the state is unclear, ask IT before any new action.'],
+   ['How do I practise safely?', 'Use newly created explicitly synthetic records in DEV; describe only the actual labelled software simulation. Test F1, draft/focus, Urdu, both themes, native100–250%zoom and real device alarm. Only a named human can sign acceptance.']
+  ],
+  faqUr:[
+   ['چھانٹی کے بعد سرخ تنبیہ کیوں؟','الگ بغیر چھانٹی میرے مریض کی بقایا تسلیم دیکھتی ہے۔ کھلا و اطلاع دیا دونوں معالج کی حتمی تسلیم چاہتے۔ تازہ سرور میں سب ختم تب ہٹے؛ تاریخ چھانٹی نہیں۔'],
+   ['لیب فون سے پہلے تسلیم؟','ہاں، مریض کا جائزہ اور صرف اصل کارروائی درج۔ اطلاع تاریخ اور ادارہ ذمہ داری الگ؛ طبی اقدام کو فون کا انتظار نہیں۔'],
+   ['رپورٹ کیسے پڑھوں؟','عین نتیجہ و شناخت چیک پھر لیب/عکس رپورٹ کھولیں۔ اصل مربوط سرور پی ڈی ایف الگ؛ محفوظ سے ایک پی ڈی ایف۔ خطا تسلیم نہیں دہراتی۔'],
+   ['انکار کیوں؟','مریض کے علاج کی اجازت سرور طے کرے۔ معالج اہلیت انکار پر مجاز معالج کو حوالہ؛ اجازت نہ ہو تو اصل رسائی لیں، کردار کے نام سے راستہ نہیں۔'],
+   ['ترمیم یا دوبارہ تسلیم؟','نہیں، تسلیم حتمی۔ اصل مصنف/وقت/کارروائی پڑھیں۔ نسخہ اختلاف یا حتمی خطا پر تازہ جائزہ، اووررائٹ یا حذف نہیں۔'],
+   ['جواب غائب ہو تو؟','دوبارہ ارسال نہیں۔ موجودہ نتیجہ پڑھ کر اصل مریض/حالت/مصنف/کارروائی چیک پھر تازہ تفصیل۔ قطار غائب ثبوت نہیں۔ غیر واضح حالت پر آئی ٹی، نیا عمل نہیں۔'],
+   ['محفوظ مشق کیسے؟','DEV میں نئے واضح فرضی ریکارڈ، صرف اصل نشان زدہ سافٹ ویئر مشق لکھیں۔ ایف ون، مسودہ/فوکس، اردو، تھیم، اصل100تا250زوم و آلہ آواز جانچیں۔ صرف نامزد انسان قبولیت دستخط کرے۔']
+  ]
+ },
  critical_results_verifier: {
   title:'Critical results to tell',titleUr:'فوری بتانے والے اہم نتائج',
   purpose:'The lab verifier opens this screen when a released critical value or priority disease needs urgent communication: tell the responsible clinician now, record each completed communication, and track the separate doctor acknowledgement and health-authority duty.',

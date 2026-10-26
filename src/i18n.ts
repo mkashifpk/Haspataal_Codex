@@ -9,6 +9,9 @@ export function setLanguage(value: string) {
   language = value;
 }
 const ur: Record<string, string> = {
+ "This result is already acknowledged and final. Read its recorded action; do not submit again.":"یہ نتیجہ تسلیم شدہ و حتمی ہے۔ درج کارروائی پڑھیں؛ دوبارہ نہ بھیجیں۔",
+ "A current server version is required. Refresh this result.":"تازہ سرور نسخہ لازم۔ یہ نتیجہ تازہ کریں۔",
+ "Describe the actual action taken (3–2000 characters).":"اصل کی گئی کارروائی3تا2000حروف میں لکھیں۔",
   "Complete the required result fields.": "نتیجے کے لازم خانے مکمل کریں۔",
   "Enter a valid finite numeric result.": "درست محدود عددی نتیجہ دیں۔",
   "Enter at least one result value.": "کم از کم ایک نتیجے کی قدر دیں۔",

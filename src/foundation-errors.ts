@@ -121,6 +121,14 @@ export const foundationErrors: Record<string, Bilingual> = {
     "Open is a released critical result waiting for responsible-clinician communication. Record each actual completed conversation; Communicated still awaits the physician's separate acknowledgement and action taken. Acknowledged is the physician's final state, not a laboratory button. Priority disease health-authority notification is a separate duty: check authority_pending. Follow hospital urgent escalation procedures if nobody answers; never invent a communication, read-back or acknowledgement.",
     "کھلا جاری اہم نتیجہ ہے جس کی ذمہ دار معالج کو اطلاع باقی۔ ہر اصل مکمل گفتگو درج کریں؛ اطلاع دیا میں معالج کی الگ تسلیم اور کارروائی باقی۔ تسلیم شدہ معالج کی آخری حالت، لیب کا بٹن نہیں۔ ترجیحی بیماری کی ادارۂ صحت اطلاع الگ، بقایا دیکھیں۔ جواب نہ آئے تو ہسپتال فوری اگلی سطح طریقہ؛ اطلاع، دہرانا یا تسلیم فرض نہ کریں۔",
   ],
+  CRITICAL_RESULT_ACKNOWLEDGER_INVALID: [
+    "The server says this doctor may not treat this patient for acknowledgement. Keep the exact patient/result visible and hand over promptly to an authorised treating doctor. Do not guess ownership from names, change roles or fabricate an action. No acknowledgement is confirmed by this refusal.",
+    "سرور کے مطابق یہ معالج اس مریض کی تسلیم کا مجاز نہیں۔ عین مریض/نتیجہ رکھ کر فوری مجاز معالج کو حوالہ دیں۔ نام سے ملکیت، کردار بدلنا یا فرضی کارروائی نہیں۔ انکار تسلیم کی تصدیق نہیں۔",
+  ],
+  CRITICAL_RESULT_STATE_INVALID: [
+    "This critical result is final or cannot move that way. Refresh its exact detail and inspect acknowledgement author/time/action. Close the old confirmation; never edit/delete or acknowledge a final result again. For a lost reply use read-only reconciliation, never replay or assume success from a missing queue row.",
+    "اہم نتیجہ حتمی یا یہ تبدیلی مجاز نہیں۔ عین تفصیل تازہ کرکے اصل تسلیم مصنف/وقت/کارروائی دیکھیں۔ پرانا جائزہ بند؛ حتمی کی ترمیم/حذف/دوبارہ تسلیم نہیں۔ گم جواب میں صرف پڑھ کر چیک، نہ دوبارہ ارسال نہ قطار غائب سے کامیابی۔",
+  ],
   CRITICAL_RESULT_READ_BACK_REQUIRED: [
     "Telephone or in-person communication requires the actual recipient to repeat the result back. Do that first, then tick read-back and the completed-communication statement, review and confirm once. The refusal saved no communication. Do not choose Written/Electronic merely to bypass the real means. Changing the recipient or means clears prior assertions; a lost reply requires original-key recovery, not a new record.",
     "فون یا روبرو میں اصل وصول کنندہ نتیجہ دہرائے۔ پہلے یہ عمل، پھر دہرانا اور مکمل اطلاع نشان، جائزہ اور ایک تصدیق۔ انکار پر اطلاع محفوظ نہیں۔ اصل طریقہ چھوڑ کر تحریری/برقی سے شرط نہ ٹالیں۔ وصول کنندہ/طریقہ بدلنے سے نشان صاف؛ گم جواب اصل کلید سے بحال، نیا ریکارڈ نہیں۔",

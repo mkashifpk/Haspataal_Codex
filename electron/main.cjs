@@ -935,7 +935,7 @@ ipcMain.handle("terminal", async (event, action, args = {}) => {
       const actor = auth?.user.user_id;
       const workspace = windows.get(win.id);
       const screenId = require('./critical-alarm.cjs').criticalAlarmScreen(workspace);
-      if (!actor || !screenId || !auth.user.permissions.includes('diagnostics.critical.view')) throw new Error('Critical alarm requires the authorised laboratory workspace');
+      if (!actor || !screenId || !auth.user.permissions.includes('diagnostics.critical.view')) throw new Error('Critical alarm requires an authorised diagnostic workspace');
       if (!Number.isSafeInteger(args.criticalResultId) || args.criticalResultId <= 0) throw new Error('Invalid critical result');
       const [record, facility] = await Promise.all([
         api('GET', `/critical-results/${args.criticalResultId}`, undefined, windows.get(win.id)),
@@ -946,7 +946,14 @@ ipcMain.handle("terminal", async (event, action, args = {}) => {
       if (actor !== auth?.user.user_id || windows.get(win.id) !== workspace) throw new Error('The session changed before the alarm');
       const view = facility.data.views.screens.find(s => s.screen_id === screenId)?.view;
       if (!['full','open_work'].includes(view)) throw new Error('The laboratory critical-result work view is unavailable');
-      const played = require('./critical-alarm.cjs').criticalAlarmRecord(record.data, args.criticalResultId);
+      const doctor = screenId === 'critical_results_doctor';
+      if (doctor) {
+        const mine = await api('GET', '/critical-results?mine=true&open_only=true&limit=1000&patient_id='+record.data.patient_id, undefined, workspace);
+        if (!mine.ok) return mine;
+        if (actor !== auth?.user.user_id || windows.get(win.id) !== workspace) throw new Error('The session changed before the alarm');
+        if (!mine.data.some(r => r.critical_result_id === args.criticalResultId)) return {ok:true,data:{played:false}};
+      }
+      const played = require('./critical-alarm.cjs').criticalAlarmRecord(record.data, args.criticalResultId, doctor ? ['Lab','Imaging'] : ['Lab']);
       if (played) shell.beep();
       return {ok:true,data:{played}};
     }
