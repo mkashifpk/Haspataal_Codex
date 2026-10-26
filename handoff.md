@@ -1,6 +1,6 @@
 # Haspataal checkpoint — 26 October 2026
 
-Codex/functions, Asia/Karachi. Current task: user requested ONE next screen while manually testing previous screens, using MCP checklists and reporting reproduced backend issues. Implemented Phase3 position40 **critical_results_verifier**. Clean baseline `a50a639`; source commit is the commit containing this checkpoint (recorded explicitly in the following proposal/checkpoint commit). No next screen started. No running commands, uncertain writes or active test sessions remain. Development/prior checkpoint preserved in `docs/HANDOFF_CRITICAL_VERIFIER_DEVELOPMENT_2026-10-26.md`.
+Codex/functions, Asia/Karachi. Current task: user requested ONE next screen while manually testing previous screens, using MCP checklists and reporting reproduced backend issues. Implemented Phase3 position40 **critical_results_verifier**. Clean baseline `a50a639`; source commit **af4beeb** tested with final renderer `index-DJrw7g2k.js`; a following docs-only commit records the confirmed proposal. No next screen started. No running commands, uncertain writes or active test sessions remain. Development/prior checkpoint preserved in `docs/HANDOFF_CRITICAL_VERIFIER_DEVELOPMENT_2026-10-26.md`.
 
 ## Delivered
 
@@ -29,9 +29,9 @@ Missing: full test-plan, actual overdue/escalation timing, shared service lifecy
 
 ## Progress / next3 / Git
 
-Current new verifier proposal: pending submission after source commit; save exact payload/request_id then call propose_progress and verify progress_proposals BEFORE handoff. Only newly tested verifier items, no unchanged bench/verifier-queue resubmission. Previous162critical bench,161verifier safety and160verifier remain pending at startup;151–155accepted. Earlier audit `docs/LAB_VERIFIER_AUDIT_2026-10-26.md` preserves160's evidence limits.
+**Proposal163 confirmed pending via progress_proposals: awaiting human review on /docs -> My progress.** Build af4beeb / index-DJrw7g2k.js. Exact payload `docs/critical-verifier-proposal-af4beeb.json`, request_id `codex-critical-verifier-live-af4beeb-20261026-v1`, receipt `docs/critical-verifier-proposal-receipt-2026-10-26.json`.13tested endpoint/event/defaults/communication/history/service-policy/states/permissions/writes/handbook items only; excluded full testplan/overdue/device/human items. No unchanged bench/verifier-queue resubmission. Previous162critical bench,161verifier safety and160verifier remain pending at startup;151–155accepted. Earlier audit `docs/LAB_VERIFIER_AUDIT_2026-10-26.md` preserves160's evidence limits.
 
-Next3: (1) commit this source/test/evidence/checkpoint, submit/verify verifier proposal and record receipt in docs-only commit; (2) human manually tests new verifier screen with fresh synthetic results, truthful simulated communications/read-back/authority/alarm/F1/Urdu/zoom and portal review; (3) on next authorised screen query roadmap: expected position41critical_results_doctor, read fresh bundle before implementation. Check27–29 answers and retest only when fixed/deployed. No next screen is in progress. All currently uncommitted changes belong to this implementation and its documentation; no unrelated changes discarded.
+Next3: (1) source af4beeb and confirmed proposal163 are complete; following docs-only commit saves payload/receipt/checkpoint, expected tree clean, no command or implementation in progress; (2) human manually tests new verifier screen with fresh synthetic results, truthful simulated communications/read-back/authority/alarm/F1/Urdu/zoom and portal review; (3) on next authorised screen query roadmap: expected position41critical_results_doctor, read fresh bundle before implementation. Check27–29 answers and retest only when fixed/deployed. No next screen is in progress. After the final docs-only commit all changes are committed; no unrelated changes discarded.
 
 ## Preservation / environment
 

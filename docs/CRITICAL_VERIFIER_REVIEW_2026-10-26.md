@@ -1,6 +1,6 @@
 # Critical results to tell — Lab Verifier
 
-Phase3 position40, implemented by Codex on26October2026 from clean baseline `a50a639`. Source/build/proposal references are in `handoff.md`. This is agent implementation/test evidence; no human review was performed or signed by the agent.
+Phase3 position40, implemented by Codex on26October2026 from clean baseline `a50a639`. Source commit `af4beeb`, final renderer `index-DJrw7g2k.js`; proposal163 confirmed pending, awaiting human review on /docs -> My progress. Exact payload/receipt in docs; no unchanged work resubmitted. This is agent implementation/test evidence; no human review was performed or signed by the agent.
 
 ## Purpose and design
 
