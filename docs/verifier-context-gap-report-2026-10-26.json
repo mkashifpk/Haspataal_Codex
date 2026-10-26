@@ -1,0 +1,15 @@
+{
+  "implementation_id": 1,
+  "kind": "MissingWorkflow",
+  "severity": "Medium",
+  "title": "Verification queue lacks deadline and stable result context needed for delay prompt and decision recovery",
+  "actual": "Real DEV own synthetic result6/item6 appears in GET /lab/verification-queue with result_id,item_id,names,metrics,flags,entered_at only: no due_at, entered_by user ID, patient_id, requisition_id/number or barcode. Queue screen rule0cbab5b12c asks optional delay reason when past due time; entry time is not deadline. After lost verify/reject, endpoint write_semantics is state_guard but reconcile_with is null. Once decided the row disappears; queue absence does not establish Published vs Rejected. The supported detailed read GET /lab/requisitions/{id} has actual due_at/performer userID/result status/stamps but queue gives no way to identify its requisition.",
+  "expected": "Supply minimum required stable context (at least requisition_id and due_at; stable author ID for reliable separation-of-duties UI), or document an authorised result-context read/reconciliation route resolvable from actual queue IDs. Populate write_semantics.reconcile_with for verify/reject. Do not make clients compare names, invent deadlines/identifiers, infer publication from an absent row, or enumerate unrelated requisitions.",
+  "steps": "1. Create own synthetic walk-in req3 with CBC/RBS and software-only payment. 2. Labtech receives samples and enters noncritical synthetic results5/6. 3. As independent demo.labverifier GET /lab/verification-queue. 4. Inspect result6 keys: no due_at/entered_by/requisition_id/patient_id. 5. Read verifier screen rule0cbab5b12c and verify endpoint state_guard/reconcile_with:null. Actual req3 detail supplies deadline/stamp, but queue does not link it.",
+  "evidence": "MCP queue GET200 requestca579c4c2f584f3fbb30644491ec88a3; own runDEMO-VERIFY-SAFETY-1793024791999. No real specimens, clinical care or money. Frontend repaired its own defects: fresh preflight, honest deadline-unknown wording, optional delay reason, no name identity assumption, no automatic retry; fallback queue read says absence is not success, and matching manually known requisition can establish exact state. Existing reports27/28 are unrelated. This asks for queue/recovery contract support, not to waive server guards.",
+  "endpoint": "GET /lab/verification-queue",
+  "screen_id": "lab_verification",
+  "build": "1cdd605 plus verifier audit / index-kKIqMmzX.js",
+  "request_id": "codex-verifier-queue-deadline-recovery-context-20261026-v1",
+  "agent": "Codex"
+}

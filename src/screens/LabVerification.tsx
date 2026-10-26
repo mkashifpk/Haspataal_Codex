@@ -13,6 +13,7 @@ import {
 import { ClinicalWriteFeedback, useClinicalWrite } from "../clinical-write";
 import type { ClinicalUser } from "../clinical-context";
 import type { EstablishmentOut } from "../generated/facility_profile";
+import { formatHospitalTime } from "../hospital-time";
 import * as lab from "../generated/lab_verification";
 import {
   canVerifyResult,
@@ -20,6 +21,7 @@ import {
   sortVerificationQueue,
   validateVerification,
   verificationWritable,
+  verificationSnapshot,
 } from "../lab-verification-policy";
 
 export type VerificationUser = {
@@ -69,6 +71,9 @@ export function LabVerification({
     (v) => v.screen_id === "lab_verification"
   )?.view;
   const status = verificationWritable({ mode: viewMode }, user.permissions);
+  const live = connected && stream === "Live";
+  const recordsVisible = ["full", "open_work", "records"].includes(viewMode || "");
+  const time = (value: string) => timeZone ? formatHospitalTime(value, timeZone) : value;
 
   // Auto-refresh when relevant realtime events arrive
   useEffect(
@@ -99,18 +104,18 @@ export function LabVerification({
 
   const reqDetail = useLoad(
     () =>
-      inspectReqId && (user.permissions.includes("lab.requisition.view") || user.permissions.includes("lab.result.view"))
+      recordsVisible && inspectReqId && (user.permissions.includes("lab.requisition.view") || user.permissions.includes("lab.result.view"))
         ? lab.getRequisitionLabRequisitions(inspectReqId)
         : Promise.resolve(null),
-    [inspectReqId]
+    [inspectReqId, revision, recordsVisible, user.user_id]
   );
 
   const reportPayload = useLoad(
     () =>
-      reportReqId && (user.permissions.includes("lab.requisition.view") || user.permissions.includes("lab.result.view"))
+      recordsVisible && reportReqId && (user.permissions.includes("lab.requisition.view") || user.permissions.includes("lab.result.view"))
         ? lab.reportPrintLabRequisitionsPayload(reportReqId)
         : Promise.resolve(null),
-    [reportReqId]
+    [reportReqId, revision, recordsVisible, user.user_id]
   );
 
   const write = useClinicalWrite(
@@ -141,7 +146,7 @@ export function LabVerification({
   );
 
   const filteredQueue = useMemo(() => {
-    if (!queue.data) return [];
+    if (queue.loading || queue.error || !queue.data) return [];
     let items = queue.data;
     if (criticalOnly) {
       items = items.filter((x) => x.has_critical_value);
@@ -157,21 +162,65 @@ export function LabVerification({
       );
     }
     return sortVerificationQueue(items);
-  }, [queue.data, criticalOnly, search]);
+  }, [queue.data, queue.loading, queue.error, criticalOnly, search]);
 
   const counts = useMemo(() => {
-    if (!queue.data) return { total: 0, critical: 0, stat: 0 };
+    if (queue.loading || queue.error || !queue.data) return { total: 0, critical: 0, stat: 0 };
     return {
       total: queue.data.length,
       critical: queue.data.filter((x) => x.has_critical_value).length,
       stat: queue.data.filter((x) => x.priority === "STAT").length,
     };
-  }, [queue.data]);
+  }, [queue.data, queue.loading, queue.error]);
+
+  useEffect(() => {
+    if (write.blocked) return;
+    if (selected && (queue.loading || queue.error || !queue.data?.some(x =>
+      verificationSnapshot(x) === verificationSnapshot(selected)))) setSelected(null);
+  }, [queue.loading, queue.error, queue.data, write.blocked, selected]);
+  useEffect(() => {
+    if (!write.blocked) return;
+    const stop = (event: BeforeUnloadEvent) => { event.preventDefault(); event.returnValue = ""; };
+    window.addEventListener("beforeunload", stop);
+    return () => window.removeEventListener("beforeunload", stop);
+  }, [write.blocked]);
+
+  const boundRequisition = !reqDetail.loading && !reqDetail.error &&
+    reqDetail.data?.requisition_id === inspectReqId ? reqDetail.data : null;
+  const signedReport = !reportPayload.loading && !reportPayload.error && reportPayload.data;
+  function matchedResult(item: lab.VerificationItemOut) {
+    return boundRequisition?.mrn === item.mrn ? boundRequisition.results.find(r =>
+      r.result_id === item.result_id && r.lab_requisition_item_id === item.lab_requisition_item_id) : undefined;
+  }
+  function dueAt(item: lab.VerificationItemOut) {
+    return matchedResult(item) ? boundRequisition?.items.find(x =>
+      x.lab_requisition_item_id === item.lab_requisition_item_id)?.due_at : undefined;
+  }
+  function mayDecide(item: lab.VerificationItemOut) {
+    return canVerifyResult(user, {entered_by: matchedResult(item)?.performed_stamp.user_id ?? undefined});
+  }
+  async function preflight(item: lab.VerificationItemOut) {
+    const [me, est, pending] = await Promise.all([
+      api<ClinicalUser>("GET", "/auth/me"), api<EstablishmentOut>("GET", "/establishment"), lab.verificationQueue(),
+    ]);
+    const current = pending.find(x => x.result_id === item.result_id);
+    if (!live || me.user_id !== user.user_id || !verificationWritable({mode:
+      est.views.screens.find(x => x.screen_id === "lab_verification")?.view}, me.permissions).writable ||
+      !current || verificationSnapshot(current) !== verificationSnapshot(item)) {
+      throw Error(t("The result, permission or service changed. Close and review the current queue again.",
+        "نتیجہ، اجازت یا خدمت بدل گئی۔ بند کرکے تازہ قطار کا پھر جائزہ لیں۔"));
+    }
+    if (!mayDecide(item).allowed) throw Error(t("An independent verifier must decide this result.", "آزاد ویریفائر اس نتیجے کا فیصلہ کرے۔"));
+  }
+  function recoveryPath(item: lab.VerificationItemOut) {
+    return matchedResult(item) ? `/lab/requisitions/${boundRequisition!.requisition_id}` : "/lab/verification-queue";
+  }
 
   function handleOpenVerify(item: lab.VerificationItemOut) {
+    if (write.blocked || !live || !status.writable) return;
     setActionError(null);
     activeItemRef.current = item;
-    const check = canVerifyResult(user, item);
+    const check = mayDecide(item);
     if (!check.allowed) {
       setActionError(check.reason ?? t("Cannot verify own result", "اپنا نتیجہ خود تصدیق نہیں کر سکتے"));
       return;
@@ -181,6 +230,7 @@ export function LabVerification({
   }
 
   function handleOpenReject(item: lab.VerificationItemOut) {
+    if (write.blocked || !live || !status.writable || !mayDecide(item).allowed) return;
     setActionError(null);
     activeItemRef.current = item;
     setRejectNote("");
@@ -188,9 +238,9 @@ export function LabVerification({
   }
 
   function submitVerify() {
-    if (!verifyDialog) return;
-    const isLate = isResultOverdue(verifyDialog.entered_at);
-    const check = validateVerification("Verified", "", isLate, delayReason);
+    if (!verifyDialog || write.blocked || !live) return;
+    // The queue omits due_at. Ask for an optional reason without inventing a deadline.
+    const check = validateVerification("Verified", "", true, delayReason);
     if (!check.valid) {
       setActionError(check.error ?? "Invalid input");
       return;
@@ -201,15 +251,16 @@ export function LabVerification({
       body: check.body,
       permission: "lab.result.verify",
       protection: "reconcile",
+      reconcilePath: recoveryPath(verifyDialog),
       label: t(
         `Verify result #${verifyDialog.result_id} (${verifyDialog.code})`,
         `نتیجہ نمبر ${verifyDialog.result_id} کی تصدیق (${verifyDialog.code})`
       ),
-    });
+    }, () => preflight(verifyDialog));
   }
 
   function submitReject() {
-    if (!rejectDialog) return;
+    if (!rejectDialog || write.blocked || !live) return;
     const check = validateVerification("Rejected", rejectNote, false, "");
     if (!check.valid) {
       setActionError(check.error ?? "Invalid input");
@@ -221,16 +272,17 @@ export function LabVerification({
       body: check.body,
       permission: "lab.result.verify",
       protection: "reconcile",
+      reconcilePath: recoveryPath(rejectDialog),
       label: t(
         `Reject result #${rejectDialog.result_id} back to bench`,
         `نتیجہ نمبر ${rejectDialog.result_id} مسترد بنچ کو واپس`
       ),
-    });
+    }, () => preflight(rejectDialog));
   }
 
   return (
-    <div className="workspace-screen lab-verification" data-help-screen="lab_verification">
-      <header className="screen-header">
+    <div className="workspace-screen lab-verification" data-help-screen="lab_verification" data-write-pending={write.blocked}>
+      <header className="section-heading">
         <div>
           <h1>{t("Verification queue", "تصدیق کی قطار")}</h1>
           <p className="subtitle">
@@ -281,7 +333,15 @@ export function LabVerification({
         </aside>
       )}
 
-      <ClinicalWriteFeedback write={write} />
+      {!verifyDialog && !rejectDialog && <ClinicalWriteFeedback write={write} onReviewed={() => setRevision(n => n + 1)} />}
+      {!live && <p role="status">{t("Restore the live connection before deciding a result.", "نتیجہ فیصلہ کرنے سے پہلے لائیو رابطہ بحال کریں۔")}</p>}
+      <div className="actions">
+        <button data-help="verification.requisition" disabled={write.blocked || !recordsVisible}
+          onClick={() => setShowReqModal(true)}>{t("Requisition detail", "درخواست تفصیل")}</button>
+        <button data-help="verification.report" disabled={write.blocked || !recordsVisible}
+          onClick={() => setShowReportModal(true)}>{t("Signed report preview", "دستخط شدہ رپورٹ کا جائزہ")}</button>
+      </div>
+      <fieldset disabled={write.blocked || !!verifyDialog || !!rejectDialog}>
 
       {/* Summary KPI Cards */}
       <section className="stats-row">
@@ -338,7 +398,7 @@ export function LabVerification({
                 : t("No results are awaiting verification.", "کوئی نتیجہ تصدیق کا منتظر نہیں۔")}
             </Empty>
           ) : (
-            <div className="table-wrapper">
+            <div className="table-wrap">
               <table className="data-table">
                 <thead>
                   <tr>
@@ -354,8 +414,8 @@ export function LabVerification({
                 <tbody>
                   {filteredQueue.map((item) => {
                     const isSelected = selected?.result_id === item.result_id;
-                    const canVerify = canVerifyResult(user, item);
-                    const isLate = isResultOverdue(item.entered_at);
+                    const canVerify = mayDecide(item);
+                    const isLate = isResultOverdue(dueAt(item));
 
                     return (
                       <tr
@@ -371,7 +431,7 @@ export function LabVerification({
                             </span>
                             {item.has_critical_value && (
                               <span className="badge badge-critical" title={t("Critical Value", "انتہائی اہم قدر")}>
-                                CRITICAL
+                                {t("CRITICAL", "انتہائی اہم")}
                               </span>
                             )}
                             {item.is_correction && (
@@ -412,7 +472,7 @@ export function LabVerification({
                           </div>
                         </td>
                         <td>{item.entered_by_name}</td>
-                        <td>{new Date(item.entered_at).toLocaleTimeString()}</td>
+                        <td><bdi>{time(item.entered_at)}</bdi></td>
                         <td>
                           <div className="action-buttons">
                             <button
@@ -429,7 +489,7 @@ export function LabVerification({
                                   type="button"
                                   className="btn-sm btn-primary"
                                   data-help="verification.verify"
-                                  disabled={!canVerify.allowed || write.blocked}
+                                  disabled={!canVerify.allowed || write.blocked || !live}
                                   title={!canVerify.allowed ? canVerify.reason : undefined}
                                   onClick={() => handleOpenVerify(item)}
                                 >
@@ -439,7 +499,7 @@ export function LabVerification({
                                   type="button"
                                   className="btn-sm btn-danger"
                                   data-help="verification.reject"
-                                  disabled={write.blocked}
+                                  disabled={!canVerify.allowed || write.blocked || !live}
                                   onClick={() => handleOpenReject(item)}
                                 >
                                   {t("Reject", "مسترد")}
@@ -459,7 +519,7 @@ export function LabVerification({
       )}
 
       {/* Selected Result Inspection Card */}
-      {selected && (
+      {selected && !queue.loading && !queue.error && (
         <section className="card detail-inspection-card">
           <header className="card-header">
             <div>
@@ -506,13 +566,13 @@ export function LabVerification({
             </div>
           </header>
 
-          {!canVerifyResult(user, selected).allowed && (
+          {!mayDecide(selected).allowed && (
             <aside className="notice warning" role="alert">
-              {canVerifyResult(user, selected).reason}
+              {mayDecide(selected).reason}
             </aside>
           )}
 
-          <div className="metrics-grid-detail">
+          <div className="metrics-grid-detail table-wrap">
             <h4>{t("Entered Measurements & Metric Flags", "درج پیمائشیں اور انتباہات")}</h4>
             <table className="data-table">
               <thead>
@@ -524,7 +584,7 @@ export function LabVerification({
               </thead>
               <tbody>
                 {Object.entries(selected.metrics_jsonb || {}).map(([key, val]) => {
-                  const flag = selected.flags_jsonb?.[key] ?? "N";
+                  const flag = selected.flags_jsonb?.[key] ?? t("Not recorded", "درج نہیں");
                   const isCrit = ["CL", "CH", "C"].includes(flag);
                   const isAbn = ["L", "H"].includes(flag);
                   return (
@@ -552,7 +612,7 @@ export function LabVerification({
 
           <div className="stamps-box">
             <span className="text-muted">
-              {t("Performed by", "ٹیکنیشن")}: {selected.entered_by_name} ({new Date(selected.entered_at).toLocaleString()})
+              {t("Performed by", "ٹیکنیشن")}: {selected.entered_by_name} (<bdi>{time(selected.entered_at)}</bdi>)
             </span>
           </div>
 
@@ -562,7 +622,7 @@ export function LabVerification({
                 type="button"
                 className="btn-primary"
                 data-help="verification.verify"
-                disabled={!canVerifyResult(user, selected).allowed || write.blocked}
+                disabled={!mayDecide(selected).allowed || write.blocked || !live}
                 onClick={() => handleOpenVerify(selected)}
               >
                 {t("Verify and publish result", "نتیجہ کی تصدیق اور اشاعت")}
@@ -571,7 +631,7 @@ export function LabVerification({
                 type="button"
                 className="btn-danger"
                 data-help="verification.reject"
-                disabled={write.blocked}
+                disabled={!mayDecide(selected).allowed || write.blocked || !live}
                 onClick={() => handleOpenReject(selected)}
               >
                 {t("Reject back to bench", "بنچ کو مسترد کریں")}
@@ -581,11 +641,13 @@ export function LabVerification({
         </section>
       )}
 
+      </fieldset>
       {/* Verify & Publish Confirmation Modal */}
       {verifyDialog && (
         <Modal
           title={t("Confirm Verification and Publication", "تصدیق و اشاعت کی منظوری")}
-          onClose={() => !write.busy && setVerifyDialog(null)}
+          closable={!write.blocked}
+          onClose={() => !write.blocked && setVerifyDialog(null)}
         >
           <div className="dialog-body">
             <p>
@@ -612,7 +674,11 @@ export function LabVerification({
               </aside>
             )}
 
-            {isResultOverdue(verifyDialog.entered_at) && (
+            <p>{dueAt(verifyDialog)
+              ? t("Server deadline", "سرور مقرر وقت") + ": " + time(dueAt(verifyDialog)!)
+              : t("The queue does not provide the deadline. Entry time is not a due time; record a reason only if delayed.",
+                  "قطار میں مقرر وقت نہیں۔ درج وقت آخری وقت نہیں؛ تاخیر ہو تو وجہ لکھیں۔")}</p>
+            {(
               <Field label={t("Turnaround Delay Reason (optional, MSDS AAC 4)", "تاخیر کی وجہ (اختیاری، ایم ایس ڈی ایس)")}>
                 <input
                   type="text"
@@ -625,14 +691,17 @@ export function LabVerification({
               </Field>
             )}
 
-            <ErrorBox error={write.error} verbatim />
+            <ClinicalWriteFeedback write={write} onReviewed={() => {setVerifyDialog(null);setRevision(n => n + 1);}} />
+            {write.attempt && !write.busy && <p>{t(
+              "A missing queue row does not prove publication. Inspect the matching requisition and result status before another decision. Never replay verification.",
+              "قطار میں سطر نہ ہونا اشاعت کا ثبوت نہیں۔ دوسرے فیصلے سے پہلے متعلقہ درخواست و نتیجے کی حالت دیکھیں۔ تصدیق دوبارہ ارسال نہ کریں۔")}</p>}
 
             <div className="dialog-actions">
               <button
                 type="button"
                 className="btn-primary"
                 data-help="verification.confirm"
-                disabled={write.busy}
+                disabled={write.blocked || !live}
                 onClick={submitVerify}
               >
                 {write.busy ? t("Verifying...", "تصدیق ہو رہی ہے...") : t("Confirm & publish", "منظور اور شائع کریں")}
@@ -641,7 +710,7 @@ export function LabVerification({
                 type="button"
                 className="secondary"
                 data-help="verification.verify"
-                disabled={write.busy}
+                disabled={write.blocked}
                 onClick={() => setVerifyDialog(null)}
               >
                 {t("Cancel", "منسوخ")}
@@ -655,7 +724,8 @@ export function LabVerification({
       {rejectDialog && (
         <Modal
           title={t("Reject Result Back to Bench", "نتیجہ مسترد کر کے بنچ کو واپس بھیجیں")}
-          onClose={() => !write.busy && setRejectDialog(null)}
+          closable={!write.blocked}
+          onClose={() => !write.blocked && setRejectDialog(null)}
         >
           <div className="dialog-body">
             <p>
@@ -677,14 +747,14 @@ export function LabVerification({
               />
             </Field>
 
-            <ErrorBox error={write.error} verbatim />
+            <ClinicalWriteFeedback write={write} onReviewed={() => {setRejectDialog(null);setRevision(n => n + 1);}} />
 
             <div className="dialog-actions">
               <button
                 type="button"
                 className="btn-danger"
                 data-help="verification.confirm"
-                disabled={write.busy || !rejectNote.trim()}
+                disabled={write.blocked || !live || !rejectNote.trim()}
                 onClick={submitReject}
               >
                 {write.busy ? t("Rejecting...", "مسترد ہو رہا ہے...") : t("Confirm rejection", "مسترد کرنے کی تصدیق")}
@@ -693,7 +763,7 @@ export function LabVerification({
                 type="button"
                 className="secondary"
                 data-help="verification.reject"
-                disabled={write.busy}
+                disabled={write.blocked}
                 onClick={() => setRejectDialog(null)}
               >
                 {t("Cancel", "منسوخ")}
@@ -704,12 +774,11 @@ export function LabVerification({
       )}
 
       {/* Inspect Requisition Modal */}
-      {(showReqModal || inspectReqId !== null) && (
+      {showReqModal && (
         <Modal
           title={t("Requisition Detail", "لیب درخواست کی تفصیل")}
           onClose={() => {
             setShowReqModal(false);
-            setInspectReqId(null);
           }}
         >
           <div className="dialog-body">
@@ -727,8 +796,8 @@ export function LabVerification({
                   type="button"
                   data-help="verification.requisition"
                   onClick={() => {
-                    const id = parseInt(inspectReqInput, 10);
-                    if (id > 0) setInspectReqId(id);
+                    const id = Number(inspectReqInput);
+                    if (/^[1-9]\d*$/.test(inspectReqInput) && Number.isSafeInteger(id)) {setInspectReqId(id);reqDetail.reload();}
                   }}
                 >
                   {t("Load", "کھولیں")}
@@ -736,16 +805,16 @@ export function LabVerification({
               </div>
             </Field>
             {inspectReqId && <LoadState {...reqDetail} retry={reqDetail.reload} />}
-            {reqDetail.data && (
+            {boundRequisition && (
               <div className="requisition-overview">
-                <div><strong>{t("Requisition #", "درخواست نمبر")}:</strong> {reqDetail.data.requisition_number}</div>
-                <div><strong>{t("Patient", "مریض")}:</strong> {reqDetail.data.patient_name} ({reqDetail.data.mrn})</div>
-                <div><strong>{t("Status", "حالت")}:</strong> {reqDetail.data.status}</div>
-                <div><strong>{t("Priority", "ترجیح")}:</strong> {reqDetail.data.priority}</div>
-                <div><strong>{t("Ordered At", "آرڈر وقت")}:</strong> {new Date(reqDetail.data.ordered_at).toLocaleString()}</div>
+                <div><strong>{t("Requisition #", "درخواست نمبر")}:</strong> {boundRequisition.requisition_number}</div>
+                <div><strong>{t("Patient", "مریض")}:</strong> {boundRequisition.patient_name} ({boundRequisition.mrn})</div>
+                <div><strong>{t("Status", "حالت")}:</strong> {boundRequisition.status}</div>
+                <div><strong>{t("Priority", "ترجیح")}:</strong> {boundRequisition.priority}</div>
+                <div><strong>{t("Ordered At", "آرڈر وقت")}:</strong> {time(boundRequisition.ordered_at)}</div>
                 <h4>{t("Items & Tests", "آئٹمز اور ٹیسٹ")}</h4>
                 <ul>
-                  {reqDetail.data.items?.map((it) => (
+                  {boundRequisition.items?.map((it) => (
                     <li key={it.lab_requisition_item_id}>
                       {it.code} - {it.test_name} ({it.status}) {it.barcode ? `[Barcode: ${it.barcode}]` : ""}
                     </li>
@@ -760,7 +829,6 @@ export function LabVerification({
                 data-help="verification.requisition"
                 onClick={() => {
                   setShowReqModal(false);
-                  setInspectReqId(null);
                 }}
               >
                 {t("Close", "بند کریں")}
@@ -771,7 +839,7 @@ export function LabVerification({
       )}
 
       {/* View Signed Report Payload Modal */}
-      {(showReportModal || reportReqId !== null) && (
+      {showReportModal && (
         <Modal
           title={t("Printable Report Payload Preview", "رپورٹ پرنٹ ڈیٹا کا معائنہ")}
           onClose={() => {
@@ -794,8 +862,12 @@ export function LabVerification({
                   type="button"
                   data-help="verification.report"
                   onClick={() => {
-                    const id = parseInt(reportReqInput, 10);
-                    if (id > 0) setReportReqId(id);
+                    const id = Number(reportReqInput);
+                    if (/^[1-9]\d*$/.test(reportReqInput) && Number.isSafeInteger(id)) {
+                      setReportReqId(id);
+                      setPdfNotice(null);
+                      reportPayload.reload();
+                    }
                   }}
                 >
                   {t("Load", "کھولیں")}
@@ -804,13 +876,13 @@ export function LabVerification({
             </Field>
             {pdfNotice && <p role="status" className="notice info">{pdfNotice}</p>}
             {reportReqId && <LoadState {...reportPayload} retry={reportPayload.reload} />}
-            {reportPayload.data && (
+            {signedReport && (
               <div className="report-payload-view">
-                <div><strong>{t("Requisition #", "درخواست نمبر")}:</strong> {reportPayload.data.fields.requisition_number}</div>
-                <div><strong>{t("Patient", "مریض")}:</strong> {reportPayload.data.fields.patient_name} ({reportPayload.data.fields.mrn})</div>
-                <div><strong>{t("Report Complete", "مکمل رپورٹ")}:</strong> {reportPayload.data.fields.complete ? t("Yes (Complete)", "ہاں (مکمل)") : t("No (Partial Report)", "نہیں (جزوی رپورٹ)")}</div>
+                <div><strong>{t("Requisition #", "درخواست نمبر")}:</strong> {signedReport.fields.requisition_number}</div>
+                <div><strong>{t("Patient", "مریض")}:</strong> {signedReport.fields.patient_name} ({signedReport.fields.mrn})</div>
+                <div><strong>{t("Report Complete", "مکمل رپورٹ")}:</strong> {signedReport.fields.complete ? t("Yes (Complete)", "ہاں (مکمل)") : t("No (Partial Report)", "نہیں (جزوی رپورٹ)")}</div>
                 <h4>{t("Reported Results", "رپورٹ شدہ نتائج")}</h4>
-                {reportPayload.data.fields.results?.map((res) => (
+                {signedReport.fields.results?.map((res) => (
                   <div key={res.result_id} className="card result-card-preview">
                     <strong>{res.code} - {res.test_name}</strong>
                     <div className="text-muted">
@@ -830,7 +902,7 @@ export function LabVerification({
                 type="button"
                 className="btn-primary"
                 data-help="verification.report"
-                disabled={pdfSaving || !reportReqId}
+                disabled={pdfSaving || !signedReport || !reportReqId}
                 onClick={async () => {
                   setPdfSaving(true);
                   setPdfNotice(null);

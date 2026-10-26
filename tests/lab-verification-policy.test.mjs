@@ -6,6 +6,7 @@ import {
   isResultOverdue,
   validateVerification,
   verificationWritable,
+  verificationSnapshot,
 } from "../src/lab-verification-policy.ts";
 
 test("sortVerificationQueue prioritizes critical values first, then STAT, then FIFO by entered_at", () => {
@@ -34,17 +35,17 @@ test("canVerifyResult enforces separation of duties (LAB_VERIFIER_MUST_DIFFER)",
   const technician = { id: 21, name: "Lab Tech Zain", username: "demo.labtech" };
 
   // Different user allowed
-  const diffCheck = canVerifyResult(verifier, { entered_by_name: "Lab Tech Zain" });
+  const diffCheck = canVerifyResult(verifier, { entered_by:21, entered_by_name: "Lab Tech Zain" });
   assert.equal(diffCheck.allowed, true);
 
   // Same user disallowed
-  const sameCheck = canVerifyResult(technician, { entered_by_name: "Lab Tech Zain" });
+  const sameCheck = canVerifyResult(technician, { entered_by:21, entered_by_name: "Lab Tech Zain" });
   assert.equal(sameCheck.allowed, false);
   assert.match(sameCheck.reason, /LAB_VERIFIER_MUST_DIFFER/);
 
-  // Case-insensitive / trimmed match
-  const caseCheck = canVerifyResult(technician, { entered_by_name: " lab tech zain " });
-  assert.equal(caseCheck.allowed, false);
+  // Duplicate/changed display names never establish identity.
+  assert.equal(canVerifyResult(technician, {entered_by:22, entered_by_name:"Lab Tech Zain"}).allowed,true);
+  assert.equal(canVerifyResult(technician, {entered_by_name:" lab tech zain "}).allowed,true);
 });
 
 test("isResultOverdue correctly identifies results past due time", () => {
@@ -97,7 +98,7 @@ test("verificationWritable governs permissions and service lifecycle views", () 
 
   // Read-only with lab.result.view
   const viewOnly = verificationWritable({ mode: "full" }, ["lab.result.view"]);
-  assert.equal(viewOnly.readable, true);
+  assert.equal(viewOnly.readable, false);
   assert.equal(viewOnly.writable, false);
 
   // Full verifier
@@ -113,7 +114,7 @@ test("verificationWritable governs permissions and service lifecycle views", () 
 
   // Records only
   const records = verificationWritable({ mode: "records" }, ["lab.result.verify"]);
-  assert.equal(records.readable, true);
+  assert.equal(records.readable, false);
   assert.equal(records.writable, false);
   assert.match(records.banner, /Records only/);
 
@@ -121,4 +122,12 @@ test("verificationWritable governs permissions and service lifecycle views", () 
   const hidden = verificationWritable({ mode: "hidden" }, ["lab.result.verify"]);
   assert.equal(hidden.readable, false);
   assert.equal(hidden.writable, false);
+  assert.equal(verificationWritable(undefined,["lab.result.verify"]).writable,false);
+  assert.equal(verificationWritable({mode:"unexpected"},["lab.result.verify"]).readable,false);
+});
+
+test("verification review binds exact patient/result/measurements and refuses concurrent changed context",()=>{
+ const a={result_id:1,lab_requisition_item_id:9,mrn:"DEMO-1",patient_name:"Synthetic",code:"RBS",test_name:"RBS",metrics_jsonb:{glucose:100},flags_jsonb:{glucose:"N"},has_critical_value:false,interpretation:null,entered_at:"2026-10-26T10:00:00Z",entered_by_name:"Staff",is_correction:false,priority:"Routine"};
+ assert.equal(verificationSnapshot(a),verificationSnapshot(structuredClone(a)));
+ for(const change of [{result_id:2},{mrn:"DEMO-2"},{metrics_jsonb:{glucose:900}},{flags_jsonb:{glucose:"CH"}},{is_correction:true}])assert.notEqual(verificationSnapshot(a),verificationSnapshot({...a,...change}));
 });

@@ -10,6 +10,8 @@ import crypto from 'node:crypto';
 
 const file = 'artifacts/lab-verification-check.json';
 const resume = process.argv.includes('--resume');
+if (fs.existsSync(file) && !resume) throw Error('Existing verifier journal: reconcile original writes before a new run; never overwrite it.');
+if (resume && JSON.parse(fs.readFileSync(file,'utf8')).passed) throw Error('Completed verification is terminal; do not repeat its decisions. Use a new owned journal.');
 const j = (resume && fs.existsSync(file))
   ? JSON.parse(fs.readFileSync(file, 'utf8'))
   : {
@@ -71,7 +73,7 @@ try {
   console.log('Initial verification queue items count:', queueItems.length);
 
   // If queue is empty, create or prepare synthetic order + technician results
-  if (queueItems.length === 0) {
+  if (!j.order || queueItems.length === 0) {
     console.log('Queue empty; setting up synthetic walk-in order and technician results...');
 
     if (!j.order) {
@@ -240,6 +242,9 @@ try {
   // Refresh verifier queue
   await vp.getByRole('button', { name: 'Refresh queue', exact: true }).click();
   queueItems = await verifier.native('api', { method: 'GET', path: '/lab/verification-queue' });
+  assert(j.order?.requisition?.items?.length, 'Only a journal-owned requisition may be used');
+  const ownedItems = new Set(j.order.requisition.items.map(x=>x.lab_requisition_item_id));
+  queueItems = queueItems.filter(x=>ownedItems.has(x.lab_requisition_item_id));
   assert(queueItems.length > 0, 'Verification queue must have pending items');
   pass(`Verification queue loaded with ${queueItems.length} item(s)`);
 

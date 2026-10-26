@@ -28,16 +28,13 @@ export function sortVerificationQueue<
 
 export function canVerifyResult(
   user: { user_id?: number; id?: number; name?: string; username?: string; display_name?: string } | null | undefined,
-  item: { entered_by_name?: string }
+  item: { entered_by_name?: string; entered_by?: number }
 ): { allowed: boolean; reason?: string } {
   if (!user) return { allowed: false, reason: "Login required" };
-  const uName = (user.name ?? user.display_name ?? user.username ?? "").trim().toLowerCase();
-  const enteredByName = (item.entered_by_name ?? "").trim().toLowerCase();
-
-  if (
-    (uName && enteredByName && uName === enteredByName) ||
-    (user.username && enteredByName && user.username.trim().toLowerCase() === enteredByName)
-  ) {
+  // Display names are neither unique nor stable. When the queue lacks a stable
+  // author ID the server remains authoritative for LAB_VERIFIER_MUST_DIFFER.
+  const actor = user.user_id ?? user.id;
+  if (actor != null && item.entered_by != null && actor === item.entered_by) {
     return {
       allowed: false,
       reason: "You entered this result; verification requires an independent verifier (LAB_VERIFIER_MUST_DIFFER).",
@@ -108,7 +105,10 @@ export function verificationWritable(
     return { readable: false, writable: false, banner: "Access denied: missing lab verification permissions." };
   }
 
-  const mode = view?.mode ?? "full";
+  const mode = view?.mode;
+  if (!mode || !["full", "open_work", "records", "hidden", "setup"].includes(mode)) {
+    return { readable: false, writable: false, banner: "Service availability is unknown. Refresh before continuing." };
+  }
   if (mode === "hidden") {
     return { readable: false, writable: false, banner: "This service is currently hidden." };
   }
@@ -116,11 +116,18 @@ export function verificationWritable(
     return { readable: false, writable: false, banner: "This service is in setup mode." };
   }
   if (mode === "records") {
-    return { readable: true, writable: false, banner: "Records only: new verifications are not permitted." };
+    return { readable: false, writable: false, banner: "Records only: the pending queue is hidden; permitted known requisitions and reports remain readable." };
   }
   if (mode === "open_work") {
-    return { readable: true, writable: hasVerify, banner: "Retiring service: completing existing open work only." };
+    return { readable: hasVerify, writable: hasVerify, banner: "Retiring service: completing existing open work only." };
   }
 
-  return { readable: true, writable: hasVerify };
+  return { readable: hasVerify, writable: hasVerify };
+}
+
+export function verificationSnapshot(item: VerificationItemOut): string {
+  return JSON.stringify([item.result_id, item.lab_requisition_item_id, item.mrn,
+    item.patient_name, item.code, item.test_name, item.metrics_jsonb, item.flags_jsonb,
+    item.interpretation, item.entered_at, item.entered_by_name, item.priority,
+    item.has_critical_value, item.is_correction]);
 }
