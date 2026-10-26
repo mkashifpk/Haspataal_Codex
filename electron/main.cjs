@@ -930,6 +930,17 @@ ipcMain.handle("terminal", async (event, action, args = {}) => {
       }
       return { ok: true, data: { type, base64: r.bytes.toString("base64") } };
     }
+    if (action === "print-lab-label") {
+      if(!Number.isSafeInteger(args.sampleId)||args.sampleId<=0)throw new Error('Invalid lab sample');
+      const actor=auth?.user.user_id;
+      const payload=await api('GET',`/lab/samples/${args.sampleId}/label`,undefined,windows.get(win.id));if(!payload.ok)return payload;
+      require('./lab-label-safety.cjs').assertLabLabel(payload.data,args.sampleId);
+      const terminal=await api('GET','/terminals/whoami');if(!terminal.ok)return terminal;
+      if(!actor||actor!==auth?.user.user_id)throw new Error('The session changed before label printing');
+      const printed=await require('./opd-print.cjs').printSlip(payload.data,terminal.data,{owner:win,pdf:!!args.pdf});
+      if(printed.bytes){const target=await dialog.showSaveDialog(win,{defaultPath:`Lab-sample-${args.sampleId}.pdf`,filters:[{name:'PDF',extensions:['pdf']}]});if(!target.canceled)fs.writeFileSync(target.filePath,printed.bytes);return {ok:true,data:{saved:!target.canceled}};}
+      return {ok:true,data:printed};
+    }
     if (action === "print-pharmacy") {
       if (!Number.isSafeInteger(args.dispensationId) || args.dispensationId <= 0) throw new Error("Invalid dispensation");
       const requestUser = auth?.user.user_id, workspace = windows.get(win.id);

@@ -3,6 +3,8 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import { checkHelp } from "../scripts/check-help.mjs";
 const read = (file) => fs.readFileSync(file, "utf8");
+test('Lab bench cannot ship an unmapped result/identity confirmation',()=>{assert.throws(()=>checkHelp({media:false,read:file=>file==='src/screens/LabBench.tsx'?read(file).replace('data-help="bench.confirm"',''):read(file)}),/missing\/broken control help mapping/)});
+test('Lab technician rendering and reconciliation do not expose invoice/price objects',()=>{const source=read('src/screens/LabBench.tsx');assert(!source.includes('price_at_order'));assert(!source.includes('value={write.observed}'));assert(!source.includes('<Details'));assert(!source.includes('/payments'));});
 test('Lab walk-in confirmation cannot lose its bilingual control mapping',()=>{
  assert.throws(()=>checkHelp({media:false,read:file=>file==='src/screens/LabOnlyWalkIn.tsx'?read(file).replace('data-help="walkin.confirm"',''):read(file)}),/missing\/broken control help mapping/);
 });
@@ -12,7 +14,7 @@ test("separately authored registration help must retain its Urdu title", () => {
 });
 test("all delivered controls, tasks, role guides and FAQ seeds have bilingual help", () => {
   const result = checkHelp({ media: false });
-  assert.equal(result.screens, 36);
+  assert.equal(result.screens, 37);
   assert(result.controls > 90);
   assert.equal(result.workspaceGuides, 30);
 });

@@ -9,6 +9,14 @@ export function setLanguage(value: string) {
   language = value;
 }
 const ur: Record<string, string> = {
+  "Complete the required result fields.": "نتیجے کے لازم خانے مکمل کریں۔",
+  "Enter a valid finite numeric result.": "درست محدود عددی نتیجہ دیں۔",
+  "Enter at least one result value.": "کم از کم ایک نتیجے کی قدر دیں۔",
+  "Identity note must be at most 300 characters.": "شناخت کا نوٹ300حروف تک ہو۔",
+  "Scan the actual patient wristband.": "اصل مریض کی کلائی پٹی اسکین کریں۔",
+  "Identify the patient first; emergency override needs a factual note.": "پہلے مریض شناخت کریں؛ ہنگامی استثنا کے لیے اصل نوٹ لازم ہے۔",
+  "Choose the rejection reason; Other needs a note.": "نمونہ مسترد وجہ چنیں؛ دیگر کو نوٹ لازم ہے۔",
+  "The lab label does not match this sample.": "لیب لیبل اس نمونے سے نہیں ملتا۔",
   "Enter a name of 1–200 characters and a valid mobile number.": "1تا200حروف کا نام اور درست موبائل نمبر درج کریں۔",
   "Check priority, clinical notes and referring doctor.": "ترجیح، طبی نوٹ اور حوالہ دینے والا معالج چیک کریں۔",
   "A selected test is unavailable. Refresh and review the selection.": "منتخب ٹیسٹ دستیاب نہیں۔ تازہ کرکے انتخاب کا جائزہ لیں۔",
