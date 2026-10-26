@@ -2,6 +2,12 @@
 // api(): the helper from get_guide("envelope-and-errors"). Types come from the declared request and response models.
 import { api } from "./api";
 
+const withQuery = (path: string, q?: Record<string, unknown>) => {
+  const s = new URLSearchParams(Object.entries(q ?? {}).filter(([, v]) => v !== undefined && v !== null)
+    .map(([k, v]) => [k, String(v)])).toString();
+  return s ? `${path}?${s}` : path;
+};
+
 export interface OpenShiftIn {
   node: "MainReception" | "PharmacyCounter" | "LabReception" | "IPDBilling" | "EmergencyCounter" | "CashierDesk";
   /** Cash issued from the main vault to start the drawer (change); part of the drawer until the cash drop */
@@ -102,8 +108,8 @@ export function openShift(body: OpenShiftIn): Promise<CashShiftOut> {
 }
 
 /** My open shift (if any) — GET /api/v1/finance/cash-shifts/mine (who may call: holders of finance.shift.operate). */
-export function myShift(): Promise<CashShiftSummaryOut | null> {
-  return api<CashShiftSummaryOut | null>("GET", `/finance/cash-shifts/mine`, undefined);
+export function myShift(query?: { node?: "MainReception" | "PharmacyCounter" | "LabReception" | "IPDBilling" | "EmergencyCounter" | "CashierDesk" | null }): Promise<CashShiftSummaryOut | null> {
+  return api<CashShiftSummaryOut | null>("GET", withQuery(`/finance/cash-shifts/mine`, query), undefined);
 }
 
 /** Drawer ledger of a shift — GET /api/v1/finance/cash-shifts/{shift_id}/transactions (who may call: holders of finance.shift.operate or finance.shift.view_all). */

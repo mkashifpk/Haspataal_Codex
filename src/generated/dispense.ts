@@ -2,6 +2,39 @@
 // api(): the helper from get_guide("envelope-and-errors"). Types come from the declared request and response models.
 import { api } from "./api";
 
+const withQuery = (path: string, q?: Record<string, unknown>) => {
+  const s = new URLSearchParams(Object.entries(q ?? {}).filter(([, v]) => v !== undefined && v !== null)
+    .map(([k, v]) => [k, String(v)])).toString();
+  return s ? `${path}?${s}` : path;
+};
+
+/** Identity and clearance progress for the staff clearing a stage, without the full clinical admission. */
+export interface DischargeStatusViewOut {
+  stages: DischargeStageOut[];
+  /** The first pending stage (the one to clear next) */
+  blocked_on: "ClinicalDischarge" | "PharmacyClearance" | "NursingMARVerification" | "BillingSettlement" | "OpsCleaning" | null;
+  started: boolean;
+  complete: boolean;
+  admission_id: number;
+  admission_number: string;
+  patient_id: number;
+  mrn: string;
+  patient_name: string;
+  status: "AdmissionPending" | "Waitlisted" | "BedReserved" | "CodeRedActive" | "Admitted" | "DischargeInProgress" | "Discharged" | "Cancelled";
+}
+
+export interface DischargeStageOut {
+  clearance_id: number;
+  stage: "ClinicalDischarge" | "PharmacyClearance" | "NursingMARVerification" | "BillingSettlement" | "OpsCleaning";
+  sequence_no: number;
+  status: "Pending" | "Cleared" | "Cancelled";
+  cleared_by: number | null;
+  cleared_by_name: string | null;
+  cleared_at: string | null;
+  note: string | null;
+  physically_cleaned_at: string | null;
+}
+
 export interface ClearIn {
   note?: string | null;
 }
@@ -74,18 +107,6 @@ export interface DischargeStatusOut {
   blocked_on: "ClinicalDischarge" | "PharmacyClearance" | "NursingMARVerification" | "BillingSettlement" | "OpsCleaning" | null;
   started: boolean;
   complete: boolean;
-}
-
-export interface DischargeStageOut {
-  clearance_id: number;
-  stage: "ClinicalDischarge" | "PharmacyClearance" | "NursingMARVerification" | "BillingSettlement" | "OpsCleaning";
-  sequence_no: number;
-  status: "Pending" | "Cleared" | "Cancelled";
-  cleared_by: number | null;
-  cleared_by_name: string | null;
-  cleared_at: string | null;
-  note: string | null;
-  physically_cleaned_at: string | null;
 }
 
 export interface AdmissionInvoiceOut {
@@ -438,6 +459,64 @@ export interface DispensingLabelFieldsOut {
   warnings: string[];
 }
 
+/** A shift with the expected cash by transaction type, non-cash collections and its cash drop. */
+export interface CashShiftSummaryOut {
+  shift_id: number;
+  user_id: number;
+  /** The cash counter */
+  node: "MainReception" | "PharmacyCounter" | "LabReception" | "IPDBilling" | "EmergencyCounter" | "CashierDesk";
+  terminal_id: number | null;
+  /** The cash the drawer started with, issued from the main vault: the drawer's first entry (OpeningFloat) */
+  opening_float: number;
+  /** What the drawer should hold now: the opening float plus every cash movement of the shift (by_type). Count all of it at the close. 0 once the verified cash drop has taken it to the vault (cash_drop.expected_cash keeps the amount) */
+  expected_cash: number;
+  /** What the cashier counted in the whole drawer at the close, the float included (null while open) */
+  declared_cash: number | null;
+  status: "Open" | "PendingCollection" | "Verified";
+  opened_at: string;
+  closed_at: string | null;
+  business_date: string;
+  cashier_name: string;
+  /** declared_cash minus what the drawer held at the close, its float included (null until the shift is closed) */
+  declared_variance: number | null;
+  by_type: ShiftTotalOut[];
+  non_cash: NonCashTotalOut[];
+  cash_drop: CashDropOut | null;
+}
+
+export interface ShiftTotalOut {
+  txn_type: "OpeningFloat" | "Sale" | "ARCollection" | "Refund" | "WaiverDispensation" | "APPayout" | "Adjustment" | "CashDrop";
+  count: number;
+  total: number;
+}
+
+export interface NonCashTotalOut {
+  method: "Cash" | "Card" | "BankTransfer" | "PanelCredit" | "PayrollDeduction" | "Charity";
+  count: number;
+  total: number;
+}
+
+export interface CashDropOut {
+  cash_drop_id: number;
+  shift_id: number;
+  verified_by: number;
+  expected_cash: number;
+  counted_cash: number;
+  variance: number | null;
+  is_dual_control_required: boolean;
+  second_approver_id: number | null;
+  second_approved_at: string | null;
+  status: "AwaitingSecondApproval" | "Approved" | "Rejected";
+  note: string | null;
+  verified_at: string;
+  row_version: number;
+}
+
+/** Which clearance stage the discharge is blocked on — GET /api/v1/admissions/{admission_id}/discharge-status (who may call: holders of ipd.admission.view or ipd.discharge.clear_pharmacy or ipd.discharge.clear_nursing or ipd.discharge.clear_billing or ipd.discharge.clear_cleaning). */
+export function dischargeStatus(admission_id: number): Promise<DischargeStatusViewOut> {
+  return api<DischargeStatusViewOut>("GET", `/admissions/${admission_id}/discharge-status`, undefined);
+}
+
 /** Clear a discharge stage (in order) — POST /api/v1/admissions/{admission_id}/discharge/{stage}/clear (who may call: the permission of the stage: ipd.discharge.clear_pharmacy, clear_nursing, clear_billing or clear_cleaning). */
 export function clearStage(admission_id: number, stage: "PharmacyClearance" | "NursingMARVerification" | "BillingSettlement" | "OpsCleaning", body: ClearIn): Promise<AdmissionDetailOut> {
   return api<AdmissionDetailOut>("POST", `/admissions/${admission_id}/discharge/${stage}/clear`, body);
@@ -461,4 +540,9 @@ export function stop(prescription_id: number, item_id: number, body: PharmacyRea
 /** The labels of a dispensation — GET /api/v1/dispensations/{dispensation_id}/labels (who may call: holders of pharmacy.dispense or pharmacy.otc.sell). */
 export function dispensingLabels(dispensation_id: number): Promise<PrintOut_DispensingLabelFieldsOut_[]> {
   return api<PrintOut_DispensingLabelFieldsOut_[]>("GET", `/dispensations/${dispensation_id}/labels`, undefined);
+}
+
+/** My open shift (if any) — GET /api/v1/finance/cash-shifts/mine (who may call: holders of finance.shift.operate). */
+export function myShift(query?: { node?: "MainReception" | "PharmacyCounter" | "LabReception" | "IPDBilling" | "EmergencyCounter" | "CashierDesk" | null }): Promise<CashShiftSummaryOut | null> {
+  return api<CashShiftSummaryOut | null>("GET", withQuery(`/finance/cash-shifts/mine`, query), undefined);
 }

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { cashOpeningAllowed } from "../pharmacy-workflow-policy";
 import { tr } from "../i18n";
 import * as cashShift from "../generated/my_cash_shift";
 import { api } from "../bridge";
@@ -69,11 +70,13 @@ export function CashShift({
   revision,
   timeZone,
   currency,
+  workspace,
 }: {
   user: { user_id: number; permissions: string[] };
   revision: number;
   timeZone?: string;
   currency?: string;
+  workspace?: string;
 }) {
   const canOperate = user.permissions.includes("finance.shift.operate");
   const [openingFloat, setOpeningFloat] = useState("0");
@@ -107,6 +110,7 @@ export function CashShift({
   );
   const shift = review || shiftReq.data;
   const node = terminalReq.data?.cash_node;
+  const openingAllowed = cashOpeningAllowed(workspace, node);
   const sameCounter = !!node && !!shift && node === shift.node;
   const readyToClose =
     canOperate &&
@@ -211,6 +215,8 @@ export function CashShift({
           );
         if (
           !terminal.cash_node ||
+          (action.kind === "open" &&
+            !cashOpeningAllowed(workspace, terminal.cash_node)) ||
           terminal.cash_node !==
             (action.kind === "open" ? action.body.node : latest?.node)
         )
@@ -258,7 +264,9 @@ export function CashShift({
         setAttempt(undefined);
         setDeclaredCash("");
         setConfirmClose(undefined);
-        setNotice("Shift closed successfully. Pending collection by accountant.");
+        setNotice(
+          "Shift closed successfully. Pending collection by accountant.",
+        );
         await shiftReq.reload();
       }
     } catch (cause) {
@@ -288,6 +296,7 @@ export function CashShift({
       terminalReq.loading ||
       terminalReq.error ||
       !node ||
+      !openingAllowed ||
       amount === undefined
     )
       return;
@@ -343,7 +352,9 @@ export function CashShift({
     setAttempt(undefined);
     setChecked(undefined);
     setConfirmClose(undefined);
-    setNotice("Recovery hold cleared after review. Check the current shift before starting another action.");
+    setNotice(
+      "Recovery hold cleared after review. Check the current shift before starting another action.",
+    );
   }
 
   if (!canOperate)
@@ -393,7 +404,13 @@ export function CashShift({
       )}
       {notice && (
         <p className="notice" role="status">
-          {tr(notice)}{noticeShiftId !== undefined && <> #<bdi>{noticeShiftId}</bdi></>}
+          {tr(notice)}
+          {noticeShiftId !== undefined && (
+            <>
+              {" "}
+              #<bdi>{noticeShiftId}</bdi>
+            </>
+          )}
         </p>
       )}
       {review && (
@@ -493,6 +510,13 @@ export function CashShift({
       {!shiftReq.loading && !shiftReq.error && !shift && !attempt && (
         <section className="card narrow">
           <h2>{tr("Open cash shift")}</h2>
+          {workspace === "pharmacy" && !openingAllowed && (
+            <p role="alert" className="notice">
+              {tr(
+                "This PC is not set up for pharmacy cash. Ask IT to map it to the Pharmacy Counter.",
+              )}
+            </p>
+          )}
           <p>
             {tr(
               "The cash counter comes from this terminal's mapping. Ask IT if it is incorrect.",
@@ -521,6 +545,7 @@ export function CashShift({
                 className="primary"
                 disabled={
                   !node ||
+                  !openingAllowed ||
                   !!terminalReq.error ||
                   terminalReq.loading ||
                   cashAmount(openingFloat) === undefined
@@ -568,10 +593,12 @@ export function CashShift({
                 <dt>{tr("Declared cash")}</dt>
                 <dd dir="ltr">{money(shift.declared_cash)}</dd>
               </div>
-              {shift.status !== "Open" && <div>
-                <dt>{tr("Declared variance")}</dt>
-                <dd dir="ltr">{money(shift.declared_variance)}</dd>
-              </div>}
+              {shift.status !== "Open" && (
+                <div>
+                  <dt>{tr("Declared variance")}</dt>
+                  <dd dir="ltr">{money(shift.declared_variance)}</dd>
+                </div>
+              )}
             </dl>
             {!sameCounter && (
               <p className="notice">

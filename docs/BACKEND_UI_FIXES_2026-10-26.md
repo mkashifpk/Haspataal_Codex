@@ -1,0 +1,20 @@
+# Frontend follow-up for backend reports 20–25
+
+Implemented on 26 October. These are code and local policy checks; live DEV workflow acceptance remains pending maintenance report26.
+
+| Report | Frontend action | Verification / remaining work |
+| --- | --- | --- |
+|20 MCP transport | No terminal transport change required by backend. MCP reads/proposal/report calls answer under the upgraded transport. Original-key safeguards remain. | Lost-write backend retest not claimed. |
+|21 Doctor patient search | Current scoped-handbook navigation already admits the new linked page. PatientSearch already hides editing without patient.update. Doctor bilingual guide now explains search/profile/financial-summary read-only tasks. Refreshed bundle and roles.page_for. | Scoped Doctor runtime navigation and F1 retest pending. No permission granted or Reception bypass. |
+|22 Pharmacy Admin queue | Current scoped menu and independent queue/detail permissions already support the new queue-only page. Added bilingual Pharmacy Admin supervisor guidance; refreshed bundle. | Queue-only policy tests pass; runtime scoped route/live event/F1 retest pending. No details or dispensing granted by queue permission. |
+|23 Pharmacy clearance | Uses generated DischargeStatusViewOut and permitted discharge-status reads instead of full admission. Shows patient/MRN/admission identity, actual stage/clearer/time. Requires matching identity and next Pending Pharmacy stage, returned own medicines and fresh preflight. Lost results reconcile with discharge-status; no automatic replay. | Matching identity, pending/out-of-order/cleared state and advanced-next-stage recovery policies tested. Actual clearance/lost-reply UI test pending. |
+|24 Pharmacy cash | Dispense and OTC read mine?node=PharmacyCounter before offering Cash and immediately before submission. Cash disabled without the caller's own Open PharmacyCounter shift; Card remains. Server details.open_shift.node explains an own drawer at another counter, without borrowing it. No local drawer balance calculation. | Own user/node/status and other-counter refusal extraction tested. Real positive cash requires authorised PharmacyCounter test terminal; terminal4 remains MainReception. |
+|25 Pharmacy drawer | Existing scoped menu consumes the newly linked My cash shift page. CashShift receives active workspace; Pharmacy opening is disabled on wrong/missing mapping with bilingual IT explanation, and freshly rechecked before POST. No counter picker/remapping. Existing own drawer closure/reconciliation stays available for safe cleanup. | Pharmacy versus Reception mapping policies tested; real scoped route/open/close/F1 retest pending. |
+
+Current generated screen types and saved MCP bundles are refreshed. New read tasks are mapped into bilingual control/task help without disabling coverage checks.
+
+Verification: npm test104/104 PASS; TypeScript PASS; git diff --check PASS. Development bootstrap bundle index-C0Y-Na7A.js built successfully. Mandatory npm run build remains blocked at the pre-existing missing actual Charity English/Urdu handbook screenshots; bootstrap is not a full delivery pass. No agent Review code or portal signature supplied. No business writes, shared service mutations, cash/physical supply or terminal remapping in this follow-up.
+
+Operational issue26 was reported and confirmed New: DEV health is reachable and database/realtime up, but maintenance_mode remains true after the developer reports backend work complete. Original requestcodex-dev-maintenance-still-enabled-20261026-v1; payload maintenance-blocker-2026-10-26.json. Maintenance enforcement is preserved. No duplicate backend defect report was filed for20–25.
+
+Next: after authorised maintenance exit, rerun isolated Charity plus scoped role/cash/clearance tests with fresh owned synthetic records and original-key journals. Never repeat an unfinished write or use another person's drawer. Capture and inspect actual English/Urdu media, run mandatory build/tests, then propose only additional verified evidence. Named human review remains required.

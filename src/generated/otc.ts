@@ -180,6 +180,59 @@ export interface DrugStockOut {
   stock_status: "InStock" | "Low" | "OutOfStock";
 }
 
+/** A shift with the expected cash by transaction type, non-cash collections and its cash drop. */
+export interface CashShiftSummaryOut {
+  shift_id: number;
+  user_id: number;
+  /** The cash counter */
+  node: "MainReception" | "PharmacyCounter" | "LabReception" | "IPDBilling" | "EmergencyCounter" | "CashierDesk";
+  terminal_id: number | null;
+  /** The cash the drawer started with, issued from the main vault: the drawer's first entry (OpeningFloat) */
+  opening_float: number;
+  /** What the drawer should hold now: the opening float plus every cash movement of the shift (by_type). Count all of it at the close. 0 once the verified cash drop has taken it to the vault (cash_drop.expected_cash keeps the amount) */
+  expected_cash: number;
+  /** What the cashier counted in the whole drawer at the close, the float included (null while open) */
+  declared_cash: number | null;
+  status: "Open" | "PendingCollection" | "Verified";
+  opened_at: string;
+  closed_at: string | null;
+  business_date: string;
+  cashier_name: string;
+  /** declared_cash minus what the drawer held at the close, its float included (null until the shift is closed) */
+  declared_variance: number | null;
+  by_type: ShiftTotalOut[];
+  non_cash: NonCashTotalOut[];
+  cash_drop: CashDropOut | null;
+}
+
+export interface ShiftTotalOut {
+  txn_type: "OpeningFloat" | "Sale" | "ARCollection" | "Refund" | "WaiverDispensation" | "APPayout" | "Adjustment" | "CashDrop";
+  count: number;
+  total: number;
+}
+
+export interface NonCashTotalOut {
+  method: "Cash" | "Card" | "BankTransfer" | "PanelCredit" | "PayrollDeduction" | "Charity";
+  count: number;
+  total: number;
+}
+
+export interface CashDropOut {
+  cash_drop_id: number;
+  shift_id: number;
+  verified_by: number;
+  expected_cash: number;
+  counted_cash: number;
+  variance: number | null;
+  is_dual_control_required: boolean;
+  second_approver_id: number | null;
+  second_approved_at: string | null;
+  status: "AwaitingSecondApproval" | "Approved" | "Rejected";
+  note: string | null;
+  verified_at: string;
+  row_version: number;
+}
+
 /** OTC mode sale to a walk-in customer — POST /api/v1/otc-sales (who may call: holders of pharmacy.otc.sell). */
 export function otc(body: OtcIn): Promise<DispensationResultOut> {
   return api<DispensationResultOut>("POST", `/otc-sales`, body, { idempotent: true });
@@ -188,5 +241,10 @@ export function otc(body: OtcIn): Promise<DispensationResultOut> {
 /** Formulary search with live stock colour — GET /api/v1/drugs/search (who may call: holders of pharmacy.formulary.view). */
 export function searchDrugs(query?: { q?: string; limit?: number }): Promise<DrugStockOut[]> {
   return api<DrugStockOut[]>("GET", withQuery(`/drugs/search`, query), undefined);
+}
+
+/** My open shift (if any) — GET /api/v1/finance/cash-shifts/mine (who may call: holders of finance.shift.operate). */
+export function myShift(query?: { node?: "MainReception" | "PharmacyCounter" | "LabReception" | "IPDBilling" | "EmergencyCounter" | "CashierDesk" | null }): Promise<CashShiftSummaryOut | null> {
+  return api<CashShiftSummaryOut | null>("GET", withQuery(`/finance/cash-shifts/mine`, query), undefined);
 }
 

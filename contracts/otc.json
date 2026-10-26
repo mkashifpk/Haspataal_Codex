@@ -1,7 +1,7 @@
 {
   "screen_id": "otc",
-  "contract_fingerprint": "a48efc9c8254ac5137e2",
-  "knowledge_revision": "5d997abd8847f89d",
+  "contract_fingerprint": "90f7a429e5aa519d440f",
+  "knowledge_revision": "f2f42e3079bc34a3",
   "delivery_gate": {
     "required": true,
     "status": "required",
@@ -55,7 +55,7 @@
   },
   "ui_quality": {
     "source": "frontend-docs/guides/16-ui-quality.md",
-    "standard_revision": "721dd86027802160",
+    "standard_revision": "c81852646942368c",
     "context": {
       "workspace": "pharmacy",
       "purpose": "Barcode-driven walk-in sales for OTC-flagged items.",
@@ -68,7 +68,9 @@
           "title": "OTC mode"
         }
       ],
-      "also_uses": [],
+      "also_uses": [
+        "my_cash_shift"
+      ],
       "handbook": "get_handbook_outline('pharmacy')",
       "screen_id": "otc",
       "workflow": "§3.5",
@@ -167,7 +169,7 @@
           "instruction": "- [ ] Every applicable task and mandatory quality check must pass. A blocker, missing FAQ, broken F1, out-of-bounds\n  zoom or untested fresh-data lifecycle keeps the screen/workspace pending. Partial item acceptance remains possible.\n- [ ] The named human signs the review for this build (its *Sign* step: every question answered or decided by the\n  server, the declaration that the writes with the code are theirs, not their agent's), clears the code from the app,\n  accepts only tested proposal items or reports them manually, and returns failures: the agent reads the signed\n  review's failures and notes (`progress_proposals` → `human_reviews`). Agents cannot start, fill or sign a review, nor\n  approve their own claims. Backend inspection can confirm or withdraw accepted claims; verified points are a subset of\n  completion, never an additional award.\n- [ ] Retest affected tasks after fixes or backend changes; stale evidence does not establish the new build's behavior."
         }
       ],
-      "workspace_checklist": "- [ ] **Create:** dispense a prescription the doctor wrote in this review (in part, then the rest), an OTC sale, a\n  charity override request, a query on an unclear order.\n- [ ] **Read:** the queue, the dispensed batches (chosen by the server, never by you) and the receipt.\n- [ ] **Update / correct:** identify a patient's own medicine; for an order that must change, query it and see the\n  line come back stopped or changed by the doctor.\n- [ ] **Cancel / delete:** withdraw the query.\n- [ ] **Refused:** an OTC sale of a Schedule-H or high-alert medicine; stopping a medication line yourself\n  (`FORBIDDEN`: the doctor stops it).\n- [ ] **Hand over:** the override reaches the zakat officer; the pharmacy clearance stage reaches the discharge desk.",
+      "workspace_checklist": "- [ ] **Create:** open your cash shift on My cash shift, on a PC mapped to the Pharmacy Counter; dispense a\n  prescription the doctor wrote in this review (in part, then the rest), an OTC sale for cash and one by card, a\n  charity override request, a query on an unclear order.\n- [ ] **Read:** the queue, the dispensed batches (chosen by the server, never by you) and the receipt; your drawer's\n  expected cash after the cash sale, and My cash shift's F1 help in Pharmacy Counter.\n- [ ] **Update / correct:** identify a patient's own medicine; for an order that must change, query it and see the\n  line come back stopped or changed by the doctor; close your cash shift with the counted cash.\n- [ ] **Cancel / delete:** withdraw the query.\n- [ ] **Refused:** an OTC sale of a Schedule-H or high-alert medicine; stopping a medication line yourself\n  (`FORBIDDEN`: the doctor stops it); Cash with no drawer open at the Pharmacy Counter (Cash unavailable, or\n  `SHIFT_NOT_OPEN` naming your drawer at another counter), while Card still works.\n- [ ] **Hand over:** the override reaches the zakat officer; the pharmacy clearance stage reaches the discharge desk.",
       "operations": {
         "create": [
           {
@@ -212,6 +214,11 @@
         "cites": []
       },
       {
+        "id": "rule:678173636d",
+        "text": "Cash goes into the user's own open shift at the Pharmacy Counter only: before offering Cash, GET /finance/cash-shifts/mine?node=PharmacyCounter. Null: Cash unavailable until it is opened on My cash shift (Card still works). SHIFT_NOT_OPEN with details.open_shift: the user's drawer is open at another counter (details.open_shift.node), which pharmacy cash never goes into; say so, never borrow another person's shift.",
+        "cites": []
+      },
+      {
         "id": "rule:0a6a0661df",
         "text": "Exists for the service dispensing (work): show it as GET /establishment views.screens says for screen_id otc (full; open_work: without its new work, with the banner \"No new ... from now on\"; records: history and corrections only; setup: only from Facility settings; hidden: in no menu), after login and again on establishment.changed. Never decide it from the profile's category.",
         "cites": []
@@ -224,6 +231,7 @@
     ],
     "related_workflows": [
       "clinical-and-prescriptions",
+      "finance-and-owner",
       "medication-safety"
     ],
     "service": {
@@ -248,7 +256,7 @@
     "workspace": "pharmacy",
     "phase": "P3",
     "position": 34,
-    "points": 41,
+    "points": 46,
     "capabilities": [
       "idempotent_writes",
       "f1_help",
@@ -299,23 +307,35 @@
     "note": "`forward`: a dependency on a later phase; use the demo data or a scenario (sandbox_scenario) until that screen exists. `ordering: false`: a hand-off or a hint, not a reason to wait."
   },
   "definition_of_done": {
-    "points": 41,
+    "points": 46,
     "items": [
       {
         "id": "ep:POST /otc-sales",
         "label": "POST /otc-sales",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:GET /drugs/search",
         "label": "GET /drugs/search",
+        "points": 3,
+        "claimed": true
+      },
+      {
+        "id": "ep:GET /finance/cash-shifts/mine",
+        "label": "GET /finance/cash-shifts/mine",
         "points": 3,
         "claimed": false
       },
       {
         "id": "rule:ba4840e56e",
         "label": "OTC_PRESCRIPTION_REQUIRED → show exactly 'Prescription required. Cannot sell via OTC.'",
+        "points": 2,
+        "claimed": true
+      },
+      {
+        "id": "rule:678173636d",
+        "label": "Cash goes into the user's own open shift at the Pharmacy Counter only: before offering Cash, GET /finance/cash-shifts/mine?node=PharmacyCounter. Null: Cash unavailable until it is opened on My cash shift (Card still works). SHIFT_NOT_OPEN with details.open_shift: the user's drawer is open at another counter (details.open_shift.node), which pharmacy cash never goes into; say so, never borrow another person's shift.",
         "points": 2,
         "claimed": false
       },
@@ -329,25 +349,25 @@
         "id": "rule:77fa670b47",
         "label": "POST /otc-sales starts new dispensing work: offer it only while dispensing is Active (GET /establishment active).",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:states",
         "label": "Loading, empty and error states",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:permissions",
         "label": "Actions by permission",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:writes",
         "label": "Safe writes",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:tested",
@@ -359,7 +379,7 @@
         "id": "q:handbook",
         "label": "Handbook page",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:f1_help",
@@ -687,6 +707,97 @@
         "filters": [],
         "note": "Lists are bounded by `limit` (no cursor paging): ask for what the screen shows, filter on the server."
       }
+    },
+    {
+      "endpoint": "GET /finance/cash-shifts/mine",
+      "summary": "My open shift (if any)",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "finance.shift.operate"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of finance.shift.operate",
+        "roles_allowed": [
+          "cashier",
+          "pharmacist",
+          "receptionist"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [],
+      "parameters": [
+        {
+          "name": "node",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "enum": [
+                  "MainReception",
+                  "PharmacyCounter",
+                  "LabReception",
+                  "IPDBilling",
+                  "EmergencyCounter",
+                  "CashierDesk"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Node"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_Union_CashShiftSummaryOut__NoneType__"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "object",
+        "paging": [],
+        "search": [],
+        "filters": [
+          {
+            "name": "node",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "MainReception",
+              "PharmacyCounter",
+              "LabReception",
+              "IPDBilling",
+              "EmergencyCounter",
+              "CashierDesk"
+            ]
+          }
+        ],
+        "note": null
+      }
     }
   ],
   "realtime": {
@@ -713,6 +824,34 @@
   ],
   "patient_context": null,
   "value_lists": [
+    {
+      "values": [
+        "AwaitingSecondApproval",
+        "Approved",
+        "Rejected"
+      ],
+      "column": "cash_drops.status",
+      "used_at": "GET /finance/cash-shifts/mine.cash_drop.status",
+      "labels": {
+        "AwaitingSecondApproval": "Awaiting second approval",
+        "Approved": "Approved",
+        "Rejected": "Rejected"
+      }
+    },
+    {
+      "values": [
+        "Open",
+        "PendingCollection",
+        "Verified"
+      ],
+      "column": "cash_shifts.status",
+      "used_at": "GET /finance/cash-shifts/mine.status",
+      "labels": {
+        "Open": "Open",
+        "PendingCollection": "Pending collection",
+        "Verified": "Verified"
+      }
+    },
     {
       "values": [
         "Cash",
@@ -935,6 +1074,50 @@
     },
     {
       "values": [
+        "OpeningFloat",
+        "Sale",
+        "ARCollection",
+        "Refund",
+        "WaiverDispensation",
+        "APPayout",
+        "Adjustment",
+        "CashDrop"
+      ],
+      "column": "shift_transactions.txn_type",
+      "used_at": "GET /finance/cash-shifts/mine.by_type[].txn_type",
+      "labels": {
+        "OpeningFloat": "Opening float",
+        "Sale": "Sale",
+        "ARCollection": "AR collection",
+        "Refund": "Refund",
+        "WaiverDispensation": "Waiver dispensation",
+        "APPayout": "AP payout",
+        "Adjustment": "Adjustment",
+        "CashDrop": "Cash drop"
+      }
+    },
+    {
+      "values": [
+        "MainReception",
+        "PharmacyCounter",
+        "LabReception",
+        "IPDBilling",
+        "EmergencyCounter",
+        "CashierDesk"
+      ],
+      "column": "terminals.cash_node",
+      "used_at": "GET /finance/cash-shifts/mine.node",
+      "labels": {
+        "MainReception": "Main reception",
+        "PharmacyCounter": "Pharmacy counter",
+        "LabReception": "Lab reception",
+        "IPDBilling": "IPD billing",
+        "EmergencyCounter": "Emergency counter",
+        "CashierDesk": "Cashier desk"
+      }
+    },
+    {
+      "values": [
         "Cash",
         "Card"
       ],
@@ -1074,7 +1257,8 @@
     },
     "wording_quoted_in_rules": [
       "No new ... from now on",
-      "Prescription required. Cannot sell via OTC."
+      "Prescription required. Cannot sell via OTC.",
+      "s drawer is open at another counter (details.open_shift.node), which pharmacy cash never goes into; say so, never borrow another person"
     ],
     "note": "Server-owned strings only: the error messages (English), the workspace labels (English and Urdu) and the wording the rules quote. The UI's own copy and its Urdu are yours (decision H08)."
   },
@@ -1084,6 +1268,8 @@
       "pharmacist"
     ],
     "partial": [
+      "cashier",
+      "receptionist",
       "triage_nurse",
       "doctor",
       "clinical_specialist",
@@ -1095,7 +1281,10 @@
       "head_nurse",
       "pharmacy_admin"
     ],
-    "note": null
+    "page_for": [
+      "pharmacist"
+    ],
+    "note": "page_for: the roles whose GET /meta/handbook lists this screen (its menu entry and F1 page; for a user with that one role, every service Active). A partial role outside page_for only makes some of these calls from screens of its own: never offer it this screen. Build the menu from the logged-in user's GET /meta/handbook."
   },
   "test_plan": {
     "screen": "otc",
@@ -1153,6 +1342,27 @@
           "surgeon",
           "triage_nurse",
           "ward_nurse"
+        ]
+      },
+      {
+        "id": "case:GET /finance/cash-shifts/mine",
+        "call": "GET /api/v1/finance/cash-shifts/mine",
+        "summary": "My open shift (if any)",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "clinic_director"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [],
+        "as_one_of": [
+          "cashier",
+          "pharmacist",
+          "receptionist"
         ]
       }
     ],
@@ -1239,6 +1449,7 @@
     "realtime": [],
     "acceptance_rules": [
       "OTC_PRESCRIPTION_REQUIRED → show exactly 'Prescription required. Cannot sell via OTC.'",
+      "Cash goes into the user's own open shift at the Pharmacy Counter only: before offering Cash, GET /finance/cash-shifts/mine?node=PharmacyCounter. Null: Cash unavailable until it is opened on My cash shift (Card still works). SHIFT_NOT_OPEN with details.open_shift: the user's drawer is open at another counter (details.open_shift.node), which pharmacy cash never goes into; say so, never borrow another person's shift.",
       "Exists for the service dispensing (work): show it as GET /establishment views.screens says for screen_id otc (full; open_work: without its new work, with the banner \"No new ... from now on\"; records: history and corrections only; setup: only from Facility settings; hidden: in no menu), after login and again on establishment.changed. Never decide it from the profile's category.",
       "POST /otc-sales starts new dispensing work: offer it only while dispensing is Active (GET /establishment active)."
     ],
@@ -1271,10 +1482,22 @@
         ],
         "permissions_mode": "all",
         "access": null
+      },
+      {
+        "id": "otc::GET /finance/cash-shifts/mine",
+        "task": "My open shift (if any)",
+        "call": "GET /finance/cash-shifts/mine",
+        "is_action": false,
+        "permissions": [
+          "finance.shift.operate"
+        ],
+        "permissions_mode": "all",
+        "access": null
       }
     ],
     "rules_to_explain": [
       "OTC_PRESCRIPTION_REQUIRED → show exactly 'Prescription required. Cannot sell via OTC.'",
+      "Cash goes into the user's own open shift at the Pharmacy Counter only: before offering Cash, GET /finance/cash-shifts/mine?node=PharmacyCounter. Null: Cash unavailable until it is opened on My cash shift (Card still works). SHIFT_NOT_OPEN with details.open_shift: the user's drawer is open at another counter (details.open_shift.node), which pharmacy cash never goes into; say so, never borrow another person's shift.",
       "Exists for the service dispensing (work): show it as GET /establishment views.screens says for screen_id otc (full; open_work: without its new work, with the banner \"No new ... from now on\"; records: history and corrections only; setup: only from Facility settings; hidden: in no menu), after login and again on establishment.changed. Never decide it from the profile's category.",
       "POST /otc-sales starts new dispensing work: offer it only while dispensing is Active (GET /establishment active)."
     ],
@@ -1366,12 +1589,167 @@
       "recipe": "get_workflow_recipe('clinical-and-prescriptions')"
     },
     {
+      "slug": "finance-and-owner",
+      "title": "Cash shifts, payables, receivables, owner dashboards & risk",
+      "recipe": "get_workflow_recipe('finance-and-owner')"
+    },
+    {
       "slug": "medication-safety",
       "title": "Medication safety (MSDS)",
       "recipe": "get_workflow_recipe('medication-safety')"
     }
   ],
   "scenarios": [],
+  "unknowns": [],
+  "omitted_sections": [],
+  "next": "Request omitted sections separately with max_chars=200000; for an oversized endpoints/schemas section use get_endpoint / get_schema for each operation/type.",
+  "decisions": [
+    {
+      "id": "H02",
+      "question": "Digits in the Urdu UI and printouts: Latin 0-9 or Extended Arabic-Indic ۰-۹.",
+      "owner": [
+        "vendor"
+      ],
+      "affects": [
+        "every screen in Urdu"
+      ],
+      "meanwhile": "Latin digits; identifiers, doses and money stay left to right."
+    },
+    {
+      "id": "H03",
+      "question": "How dates and times are shown on screen, and a 12- or 24-hour clock.",
+      "owner": [
+        "vendor",
+        "clinical_lead"
+      ],
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "The server's print format (e.g. 27-Sep-2026) and the hospital time zone."
+    },
+    {
+      "id": "H04",
+      "question": "Money on screen: decimals shown, and digit grouping (1,234,567 or 12,34,567).",
+      "owner": [
+        "vendor"
+      ],
+      "affects": [
+        "every screen with money"
+      ],
+      "meanwhile": "The amounts as the API sends them, with the currency setting."
+    },
+    {
+      "id": "H08",
+      "question": "Who writes and signs off the Urdu text of the UI, above all clinical and consent wording.",
+      "owner": [
+        "vendor",
+        "translator",
+        "clinical_lead"
+      ],
+      "affects": [
+        "every screen in Urdu"
+      ],
+      "meanwhile": "Urdu you add is a draft: mark it so (the interview bank's pattern: a draft until a native speaker reviews it)."
+    },
+    {
+      "id": "H09",
+      "question": "One design system shared by every frontend team (who authors and approves it), or each team's own.",
+      "owner": [
+        "vendor",
+        "frontend_lead"
+      ],
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "Each team designs within the backend's constraints: themes Light and DarkHighContrast, zoom 100-250 %, Noto Nastaliq Urdu, status shown as text and icon, never colour alone. Follow the vendor's design principles (frontend guide 18, get_design_principles)."
+    },
+    {
+      "id": "H10",
+      "question": "How each realtime event is shown (interrupt, attention, inform, silent), alert sounds and which terminals play them. Only Code Red (interrupt), the licence and maintenance banners and the logout on session.revoked are prescribed (the event catalogue's `presentation`).",
+      "owner": [
+        "clinical_lead",
+        "vendor"
+      ],
+      "affects": [
+        "every screen with realtime events"
+      ],
+      "meanwhile": "Code Red interrupts; every other event updates the screen and, at most, a dismissible notice. `priority` is the delivery urgency, not a presentation rule."
+    },
+    {
+      "id": "H12",
+      "question": "Which workspaces run on web, Android and iOS, which cannot read a MAC address, discover the server by UDP or print silently; or are cash and printing Windows-only.",
+      "owner": [
+        "vendor",
+        "backend"
+      ],
+      "affects": [
+        "my_cash_shift",
+        "registration",
+        "every screen that prints"
+      ],
+      "meanwhile": "The guides describe the Windows (Electron) terminal; tell your developer when a screen needs a capability your platform lacks."
+    },
+    {
+      "id": "H18",
+      "question": "Noto Nastaliq Urdu everywhere, or the more compact Naskh in dense tables.",
+      "owner": [
+        "vendor",
+        "frontend_lead"
+      ],
+      "affects": [
+        "every table in Urdu"
+      ],
+      "meanwhile": "Noto Nastaliq Urdu, as the guides require."
+    },
+    {
+      "id": "H19",
+      "question": "Allergies: the patient record keeps free text, so it cannot tell \"no known allergies\" (asserted by a clinician) from \"not recorded\". Should it?",
+      "owner": [
+        "clinical_lead",
+        "backend"
+      ],
+      "affects": [
+        "every screen with a patient banner"
+      ],
+      "meanwhile": "Show the recorded text as recorded; an empty value is \"not recorded\", never \"none\"."
+    },
+    {
+      "id": "H20",
+      "question": "May unsaved form input be kept on the terminal (which fields, encrypted, for how long)?",
+      "owner": [
+        "vendor",
+        "hospital"
+      ],
+      "affects": [
+        "every form"
+      ],
+      "meanwhile": "In memory only; never a second checker's password."
+    },
+    {
+      "id": "H22",
+      "question": "Which documents may print on an unregistered terminal's default printer (sensitive A4 documents).",
+      "owner": [
+        "hospital",
+        "vendor"
+      ],
+      "affects": [
+        "every screen that prints"
+      ],
+      "meanwhile": "As the printing guide says: the hint, then the default printer."
+    },
+    {
+      "id": "H24",
+      "question": "Who approves frontend performance targets, alert thresholds and escalation timers.",
+      "owner": [
+        "vendor",
+        "clinical_lead"
+      ],
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "The server's own settings (e.g. critical_result_communicate_minutes)."
+    }
+  ],
   "examples": {
     "POST /otc-sales": {
       "request": {
@@ -1452,11 +1830,46 @@
           "request_id": "3c9f279059e64b359f9c572408414e0b"
         }
       }
+    },
+    "GET /finance/cash-shifts/mine": {
+      "request": {
+        "path": "/api/v1/finance/cash-shifts/mine"
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": {
+            "shift_id": 1,
+            "user_id": 3,
+            "node": "MainReception",
+            "terminal_id": null,
+            "opening_float": 0,
+            "expected_cash": 1000,
+            "declared_cash": null,
+            "status": "Open",
+            "opened_at": "2026-10-24T18:46:18.384118+00:00",
+            "closed_at": null,
+            "business_date": "2026-10-24",
+            "cashier_name": "Receptionist",
+            "declared_variance": null,
+            "by_type": [
+              {
+                "txn_type": "Sale",
+                "count": 1,
+                "total": 1000
+              }
+            ],
+            "non_cash": [],
+            "cash_drop": null
+          },
+          "meta": {
+            "server_time": "2026-10-24T18:46:18.738132+00:00"
+          },
+          "request_id": "097c3bb071834c53b6d6b143a18491fb"
+        }
+      }
     }
   },
-  "unknowns": [],
-  "omitted_sections": [],
-  "next": "Request omitted sections separately with max_chars=200000; for an oversized endpoints/schemas section use get_endpoint / get_schema for each operation/type.",
   "schemas": {
     "AllocatedLineOut": {
       "properties": {
@@ -1510,6 +1923,264 @@
       ],
       "title": "AllocatedLineOut",
       "description": "A dispensed quantity from one batch (FEFO: the earliest expiry first)."
+    },
+    "CashDropOut": {
+      "properties": {
+        "cash_drop_id": {
+          "type": "integer",
+          "title": "Cash Drop Id"
+        },
+        "shift_id": {
+          "type": "integer",
+          "title": "Shift Id"
+        },
+        "verified_by": {
+          "type": "integer",
+          "title": "Verified By"
+        },
+        "expected_cash": {
+          "type": "number",
+          "title": "Expected Cash"
+        },
+        "counted_cash": {
+          "type": "number",
+          "title": "Counted Cash"
+        },
+        "variance": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Variance"
+        },
+        "is_dual_control_required": {
+          "type": "boolean",
+          "title": "Is Dual Control Required"
+        },
+        "second_approver_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Second Approver Id"
+        },
+        "second_approved_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Second Approved At"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "AwaitingSecondApproval",
+            "Approved",
+            "Rejected"
+          ],
+          "title": "Status"
+        },
+        "note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Note"
+        },
+        "verified_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Verified At"
+        },
+        "row_version": {
+          "type": "integer",
+          "title": "Row Version"
+        }
+      },
+      "type": "object",
+      "required": [
+        "cash_drop_id",
+        "shift_id",
+        "verified_by",
+        "expected_cash",
+        "counted_cash",
+        "variance",
+        "is_dual_control_required",
+        "second_approver_id",
+        "second_approved_at",
+        "status",
+        "note",
+        "verified_at",
+        "row_version"
+      ],
+      "title": "CashDropOut"
+    },
+    "CashShiftSummaryOut": {
+      "properties": {
+        "shift_id": {
+          "type": "integer",
+          "title": "Shift Id"
+        },
+        "user_id": {
+          "type": "integer",
+          "title": "User Id"
+        },
+        "node": {
+          "type": "string",
+          "enum": [
+            "MainReception",
+            "PharmacyCounter",
+            "LabReception",
+            "IPDBilling",
+            "EmergencyCounter",
+            "CashierDesk"
+          ],
+          "title": "Node",
+          "description": "The cash counter"
+        },
+        "terminal_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Terminal Id"
+        },
+        "opening_float": {
+          "type": "number",
+          "title": "Opening Float",
+          "description": "The cash the drawer started with, issued from the main vault: the drawer's first entry (OpeningFloat)"
+        },
+        "expected_cash": {
+          "type": "number",
+          "title": "Expected Cash",
+          "description": "What the drawer should hold now: the opening float plus every cash movement of the shift (by_type). Count all of it at the close. 0 once the verified cash drop has taken it to the vault (cash_drop.expected_cash keeps the amount)"
+        },
+        "declared_cash": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Declared Cash",
+          "description": "What the cashier counted in the whole drawer at the close, the float included (null while open)"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "Open",
+            "PendingCollection",
+            "Verified"
+          ],
+          "title": "Status"
+        },
+        "opened_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Opened At"
+        },
+        "closed_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Closed At"
+        },
+        "business_date": {
+          "type": "string",
+          "format": "date",
+          "title": "Business Date"
+        },
+        "cashier_name": {
+          "type": "string",
+          "title": "Cashier Name"
+        },
+        "declared_variance": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Declared Variance",
+          "description": "declared_cash minus what the drawer held at the close, its float included (null until the shift is closed)"
+        },
+        "by_type": {
+          "items": {
+            "$ref": "#/components/schemas/ShiftTotalOut"
+          },
+          "type": "array",
+          "title": "By Type"
+        },
+        "non_cash": {
+          "items": {
+            "$ref": "#/components/schemas/NonCashTotalOut"
+          },
+          "type": "array",
+          "title": "Non Cash"
+        },
+        "cash_drop": {
+          "anyOf": [
+            {
+              "$ref": "#/components/schemas/CashDropOut"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "type": "object",
+      "required": [
+        "shift_id",
+        "user_id",
+        "node",
+        "terminal_id",
+        "opening_float",
+        "expected_cash",
+        "declared_cash",
+        "status",
+        "opened_at",
+        "closed_at",
+        "business_date",
+        "cashier_name",
+        "declared_variance",
+        "by_type",
+        "non_cash",
+        "cash_drop"
+      ],
+      "title": "CashShiftSummaryOut",
+      "description": "A shift with the expected cash by transaction type, non-cash collections and its cash drop."
     },
     "DispensationOut": {
       "properties": {
@@ -1918,6 +2589,34 @@
         "request_id"
       ],
       "title": "Envelope[DispensationResultOut]"
+    },
+    "Envelope_Union_CashShiftSummaryOut__NoneType__": {
+      "properties": {
+        "data": {
+          "anyOf": [
+            {
+              "$ref": "#/components/schemas/CashShiftSummaryOut"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[Union[CashShiftSummaryOut, NoneType]]"
     },
     "Envelope_list_DrugStockOut__": {
       "properties": {
@@ -2342,6 +3041,37 @@
       ],
       "title": "Meta"
     },
+    "NonCashTotalOut": {
+      "properties": {
+        "method": {
+          "type": "string",
+          "enum": [
+            "Cash",
+            "Card",
+            "BankTransfer",
+            "PanelCredit",
+            "PayrollDeduction",
+            "Charity"
+          ],
+          "title": "Method"
+        },
+        "count": {
+          "type": "integer",
+          "title": "Count"
+        },
+        "total": {
+          "type": "number",
+          "title": "Total"
+        }
+      },
+      "type": "object",
+      "required": [
+        "method",
+        "count",
+        "total"
+      ],
+      "title": "NonCashTotalOut"
+    },
     "OtcIn": {
       "properties": {
         "items": {
@@ -2704,6 +3434,39 @@
       ],
       "title": "ReceiptItemOut"
     },
+    "ShiftTotalOut": {
+      "properties": {
+        "txn_type": {
+          "type": "string",
+          "enum": [
+            "OpeningFloat",
+            "Sale",
+            "ARCollection",
+            "Refund",
+            "WaiverDispensation",
+            "APPayout",
+            "Adjustment",
+            "CashDrop"
+          ],
+          "title": "Txn Type"
+        },
+        "count": {
+          "type": "integer",
+          "title": "Count"
+        },
+        "total": {
+          "type": "number",
+          "title": "Total"
+        }
+      },
+      "type": "object",
+      "required": [
+        "txn_type",
+        "count",
+        "total"
+      ],
+      "title": "ShiftTotalOut"
+    },
     "ValidationError": {
       "properties": {
         "loc": {
@@ -2744,152 +3507,5 @@
       ],
       "title": "ValidationError"
     }
-  },
-  "decisions": [
-    {
-      "id": "H02",
-      "question": "Digits in the Urdu UI and printouts: Latin 0-9 or Extended Arabic-Indic ۰-۹.",
-      "owner": [
-        "vendor"
-      ],
-      "affects": [
-        "every screen in Urdu"
-      ],
-      "meanwhile": "Latin digits; identifiers, doses and money stay left to right."
-    },
-    {
-      "id": "H03",
-      "question": "How dates and times are shown on screen, and a 12- or 24-hour clock.",
-      "owner": [
-        "vendor",
-        "clinical_lead"
-      ],
-      "affects": [
-        "every screen"
-      ],
-      "meanwhile": "The server's print format (e.g. 27-Sep-2026) and the hospital time zone."
-    },
-    {
-      "id": "H04",
-      "question": "Money on screen: decimals shown, and digit grouping (1,234,567 or 12,34,567).",
-      "owner": [
-        "vendor"
-      ],
-      "affects": [
-        "every screen with money"
-      ],
-      "meanwhile": "The amounts as the API sends them, with the currency setting."
-    },
-    {
-      "id": "H08",
-      "question": "Who writes and signs off the Urdu text of the UI, above all clinical and consent wording.",
-      "owner": [
-        "vendor",
-        "translator",
-        "clinical_lead"
-      ],
-      "affects": [
-        "every screen in Urdu"
-      ],
-      "meanwhile": "Urdu you add is a draft: mark it so (the interview bank's pattern: a draft until a native speaker reviews it)."
-    },
-    {
-      "id": "H09",
-      "question": "One design system shared by every frontend team (who authors and approves it), or each team's own.",
-      "owner": [
-        "vendor",
-        "frontend_lead"
-      ],
-      "affects": [
-        "every screen"
-      ],
-      "meanwhile": "Each team designs within the backend's constraints: themes Light and DarkHighContrast, zoom 100-250 %, Noto Nastaliq Urdu, status shown as text and icon, never colour alone. Follow the vendor's design principles (frontend guide 18, get_design_principles)."
-    },
-    {
-      "id": "H10",
-      "question": "How each realtime event is shown (interrupt, attention, inform, silent), alert sounds and which terminals play them. Only Code Red (interrupt), the licence and maintenance banners and the logout on session.revoked are prescribed (the event catalogue's `presentation`).",
-      "owner": [
-        "clinical_lead",
-        "vendor"
-      ],
-      "affects": [
-        "every screen with realtime events"
-      ],
-      "meanwhile": "Code Red interrupts; every other event updates the screen and, at most, a dismissible notice. `priority` is the delivery urgency, not a presentation rule."
-    },
-    {
-      "id": "H12",
-      "question": "Which workspaces run on web, Android and iOS, which cannot read a MAC address, discover the server by UDP or print silently; or are cash and printing Windows-only.",
-      "owner": [
-        "vendor",
-        "backend"
-      ],
-      "affects": [
-        "my_cash_shift",
-        "registration",
-        "every screen that prints"
-      ],
-      "meanwhile": "The guides describe the Windows (Electron) terminal; tell your developer when a screen needs a capability your platform lacks."
-    },
-    {
-      "id": "H18",
-      "question": "Noto Nastaliq Urdu everywhere, or the more compact Naskh in dense tables.",
-      "owner": [
-        "vendor",
-        "frontend_lead"
-      ],
-      "affects": [
-        "every table in Urdu"
-      ],
-      "meanwhile": "Noto Nastaliq Urdu, as the guides require."
-    },
-    {
-      "id": "H19",
-      "question": "Allergies: the patient record keeps free text, so it cannot tell \"no known allergies\" (asserted by a clinician) from \"not recorded\". Should it?",
-      "owner": [
-        "clinical_lead",
-        "backend"
-      ],
-      "affects": [
-        "every screen with a patient banner"
-      ],
-      "meanwhile": "Show the recorded text as recorded; an empty value is \"not recorded\", never \"none\"."
-    },
-    {
-      "id": "H20",
-      "question": "May unsaved form input be kept on the terminal (which fields, encrypted, for how long)?",
-      "owner": [
-        "vendor",
-        "hospital"
-      ],
-      "affects": [
-        "every form"
-      ],
-      "meanwhile": "In memory only; never a second checker's password."
-    },
-    {
-      "id": "H22",
-      "question": "Which documents may print on an unregistered terminal's default printer (sensitive A4 documents).",
-      "owner": [
-        "hospital",
-        "vendor"
-      ],
-      "affects": [
-        "every screen that prints"
-      ],
-      "meanwhile": "As the printing guide says: the hint, then the default printer."
-    },
-    {
-      "id": "H24",
-      "question": "Who approves frontend performance targets, alert thresholds and escalation timers.",
-      "owner": [
-        "vendor",
-        "clinical_lead"
-      ],
-      "affects": [
-        "every screen"
-      ],
-      "meanwhile": "The server's own settings (e.g. critical_result_communicate_minutes)."
-    }
-  ]
+  }
 }

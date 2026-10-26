@@ -1,7 +1,7 @@
 {
   "screen_id": "dispense",
-  "contract_fingerprint": "a48efc9c8254ac5137e2",
-  "knowledge_revision": "5d997abd8847f89d",
+  "contract_fingerprint": "90f7a429e5aa519d440f",
+  "knowledge_revision": "f2f42e3079bc34a3",
   "delivery_gate": {
     "required": true,
     "status": "required",
@@ -55,7 +55,7 @@
   },
   "ui_quality": {
     "source": "frontend-docs/guides/16-ui-quality.md",
-    "standard_revision": "721dd86027802160",
+    "standard_revision": "c81852646942368c",
     "context": {
       "workspace": "pharmacy",
       "purpose": "Dispense Now (partial allowed); server picks batches FEFO; take payment.",
@@ -68,7 +68,9 @@
           "title": "Dispense"
         }
       ],
-      "also_uses": [],
+      "also_uses": [
+        "my_cash_shift"
+      ],
       "handbook": "get_handbook_outline('pharmacy')",
       "screen_id": "dispense",
       "workflow": "§3.2, §3.4",
@@ -167,7 +169,7 @@
           "instruction": "- [ ] Every applicable task and mandatory quality check must pass. A blocker, missing FAQ, broken F1, out-of-bounds\n  zoom or untested fresh-data lifecycle keeps the screen/workspace pending. Partial item acceptance remains possible.\n- [ ] The named human signs the review for this build (its *Sign* step: every question answered or decided by the\n  server, the declaration that the writes with the code are theirs, not their agent's), clears the code from the app,\n  accepts only tested proposal items or reports them manually, and returns failures: the agent reads the signed\n  review's failures and notes (`progress_proposals` → `human_reviews`). Agents cannot start, fill or sign a review, nor\n  approve their own claims. Backend inspection can confirm or withdraw accepted claims; verified points are a subset of\n  completion, never an additional award.\n- [ ] Retest affected tasks after fixes or backend changes; stale evidence does not establish the new build's behavior."
         }
       ],
-      "workspace_checklist": "- [ ] **Create:** dispense a prescription the doctor wrote in this review (in part, then the rest), an OTC sale, a\n  charity override request, a query on an unclear order.\n- [ ] **Read:** the queue, the dispensed batches (chosen by the server, never by you) and the receipt.\n- [ ] **Update / correct:** identify a patient's own medicine; for an order that must change, query it and see the\n  line come back stopped or changed by the doctor.\n- [ ] **Cancel / delete:** withdraw the query.\n- [ ] **Refused:** an OTC sale of a Schedule-H or high-alert medicine; stopping a medication line yourself\n  (`FORBIDDEN`: the doctor stops it).\n- [ ] **Hand over:** the override reaches the zakat officer; the pharmacy clearance stage reaches the discharge desk.",
+      "workspace_checklist": "- [ ] **Create:** open your cash shift on My cash shift, on a PC mapped to the Pharmacy Counter; dispense a\n  prescription the doctor wrote in this review (in part, then the rest), an OTC sale for cash and one by card, a\n  charity override request, a query on an unclear order.\n- [ ] **Read:** the queue, the dispensed batches (chosen by the server, never by you) and the receipt; your drawer's\n  expected cash after the cash sale, and My cash shift's F1 help in Pharmacy Counter.\n- [ ] **Update / correct:** identify a patient's own medicine; for an order that must change, query it and see the\n  line come back stopped or changed by the doctor; close your cash shift with the counted cash.\n- [ ] **Cancel / delete:** withdraw the query.\n- [ ] **Refused:** an OTC sale of a Schedule-H or high-alert medicine; stopping a medication line yourself\n  (`FORBIDDEN`: the doctor stops it); Cash with no drawer open at the Pharmacy Counter (Cash unavailable, or\n  `SHIFT_NOT_OPEN` naming your drawer at another counter), while Card still works.\n- [ ] **Hand over:** the override reaches the zakat officer; the pharmacy clearance stage reaches the discharge desk.",
       "operations": {
         "create": [
           {
@@ -223,6 +225,11 @@
         "cites": []
       },
       {
+        "id": "rule:db207e0a97",
+        "text": "Read discharge-status to confirm the patient identity and blocked_on PharmacyClearance before clearing. After a lost answer re-read the stage's status, cleared_by_name and cleared_at there; never retry automatically.",
+        "cites": []
+      },
+      {
         "id": "rule:d7b04e73ec",
         "text": "A high-alert line (high_alert_category): a second person (pharmacist, or the nurse or doctor collecting it) checks the order and the medicine and co-signs with checker_username/_password (HIGH_ALERT_CHECK_REQUIRED; DUAL_CONTROL_SAME_PERSON). Show lasa_with next to the medicine: 'looks like …'.",
         "cites": []
@@ -253,6 +260,11 @@
         "cites": []
       },
       {
+        "id": "rule:678173636d",
+        "text": "Cash goes into the user's own open shift at the Pharmacy Counter only: before offering Cash, GET /finance/cash-shifts/mine?node=PharmacyCounter. Null: Cash unavailable until it is opened on My cash shift (Card still works). SHIFT_NOT_OPEN with details.open_shift: the user's drawer is open at another counter (details.open_shift.node), which pharmacy cash never goes into; say so, never borrow another person's shift.",
+        "cites": []
+      },
+      {
         "id": "rule:11f96ec925",
         "text": "Exists for the service dispensing (work): show it as GET /establishment views.screens says for screen_id dispense (full; open_work: without its new work, with the banner \"No new ... from now on\"; records: history and corrections only; setup: only from Facility settings; hidden: in no menu), after login and again on establishment.changed. Never decide it from the profile's category.",
         "cites": []
@@ -266,6 +278,7 @@
     "related_workflows": [
       "clinical-and-prescriptions",
       "facility-profile-and-services",
+      "finance-and-owner",
       "inpatient-and-discharge",
       "medication-safety"
     ],
@@ -291,7 +304,7 @@
     "workspace": "pharmacy",
     "phase": "P3",
     "position": 32,
-    "points": 66,
+    "points": 76,
     "capabilities": [
       "realtime",
       "patient_context",
@@ -353,8 +366,14 @@
     "note": "`forward`: a dependency on a later phase; use the demo data or a scenario (sandbox_scenario) until that screen exists. `ordering: false`: a hand-off or a hint, not a reason to wait."
   },
   "definition_of_done": {
-    "points": 66,
+    "points": 76,
     "items": [
+      {
+        "id": "ep:GET /admissions/{admission_id}/discharge-status",
+        "label": "GET /admissions/{admission_id}/discharge-status",
+        "points": 3,
+        "claimed": false
+      },
       {
         "id": "ep:POST /admissions/{admission_id}/discharge/{stage}/clear",
         "label": "POST /admissions/{admission_id}/discharge/{stage}/clear",
@@ -365,13 +384,13 @@
         "id": "ep:POST /prescriptions/{prescription_id}/dispense",
         "label": "POST /prescriptions/{prescription_id}/dispense",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:GET /dispensations/{dispensation_id}/receipt-payload",
         "label": "GET /dispensations/{dispensation_id}/receipt-payload",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:POST /prescriptions/{prescription_id}/items/{item_id}/stop",
@@ -383,13 +402,19 @@
         "id": "ep:GET /dispensations/{dispensation_id}/labels",
         "label": "GET /dispensations/{dispensation_id}/labels",
         "points": 3,
+        "claimed": true
+      },
+      {
+        "id": "ep:GET /finance/cash-shifts/mine",
+        "label": "GET /finance/cash-shifts/mine",
+        "points": 3,
         "claimed": false
       },
       {
         "id": "ev:pharmacy.stock.updated",
         "label": "pharmacy.stock.updated",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ev:pharmacy.recall.updated",
@@ -404,16 +429,22 @@
         "claimed": false
       },
       {
+        "id": "rule:db207e0a97",
+        "label": "Read discharge-status to confirm the patient identity and blocked_on PharmacyClearance before clearing. After a lost answer re-read the stage's status, cleared_by_name and cleared_at there; never retry automatically.",
+        "points": 2,
+        "claimed": false
+      },
+      {
         "id": "rule:d7b04e73ec",
         "label": "A high-alert line (high_alert_category): a second person (pharmacist, or the nurse or doctor collecting it) checks the order and the medicine and co-signs with checker_username/_password (HIGH_ALERT_CHECK_REQUIRED; DUAL_CONTROL_SAME_PERSON). Show lasa_with next to the medicine: 'looks like …'.",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:8c2ef85533",
         "label": "After dispensing print one label per medicine: GET /dispensations/{dispensation_id}/labels (label printer).",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:dc12dca579",
@@ -425,7 +456,7 @@
         "id": "rule:f895bbd6d7",
         "label": "Never let the user pick a batch — FEFO is server-side.",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:43bfa6dc96",
@@ -436,6 +467,12 @@
       {
         "id": "rule:8c74b672c7",
         "label": "Send an Idempotency-Key per click.",
+        "points": 2,
+        "claimed": true
+      },
+      {
+        "id": "rule:678173636d",
+        "label": "Cash goes into the user's own open shift at the Pharmacy Counter only: before offering Cash, GET /finance/cash-shifts/mine?node=PharmacyCounter. Null: Cash unavailable until it is opened on My cash shift (Card still works). SHIFT_NOT_OPEN with details.open_shift: the user's drawer is open at another counter (details.open_shift.node), which pharmacy cash never goes into; say so, never borrow another person's shift.",
         "points": 2,
         "claimed": false
       },
@@ -455,19 +492,19 @@
         "id": "q:states",
         "label": "Loading, empty and error states",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:permissions",
         "label": "Actions by permission",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:writes",
         "label": "Safe writes",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:tested",
@@ -479,7 +516,7 @@
         "id": "q:handbook",
         "label": "Handbook page",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:f1_help",
@@ -521,6 +558,110 @@
     "rule": "Agents MUST submit propose_progress after implementing this screen and verify it with progress_proposals. Only the developer accepts items on My progress for what this implementation does on the DEV server. No tool awards progress."
   },
   "endpoints": [
+    {
+      "endpoint": "GET /admissions/{admission_id}/discharge-status",
+      "summary": "Which clearance stage the discharge is blocked on",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "ipd.admission.view",
+          "ipd.discharge.clear_pharmacy",
+          "ipd.discharge.clear_nursing",
+          "ipd.discharge.clear_billing",
+          "ipd.discharge.clear_cleaning"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of ipd.admission.view or ipd.discharge.clear_pharmacy or ipd.discharge.clear_nursing or ipd.discharge.clear_billing or ipd.discharge.clear_cleaning",
+        "roles_allowed": [
+          "admissions_officer",
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "ops_admin",
+          "pharmacist",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "FORBIDDEN",
+          "http_status": 403,
+          "message": "You do not have permission to do this.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "any_of",
+            "required"
+          ],
+          "details_from": "POST /api/v1/admin/departments"
+        },
+        {
+          "code": "NOT_FOUND",
+          "http_status": 404,
+          "message": "The requested resource was not found.",
+          "retryable": false,
+          "ui_action": "Say 'not found'; refresh the list.",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "resource"
+          ],
+          "details_from": "PUT /api/v1/admin/printers/{printer_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "admission_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Admission Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_DischargeStatusViewOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "object",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      }
+    },
     {
       "endpoint": "POST /admissions/{admission_id}/discharge/{stage}/clear",
       "summary": "Clear a discharge stage (in order)",
@@ -700,7 +841,7 @@
       "write": {
         "protection": "state_guard",
         "on_lost_answer": "A repeat is refused with DISCHARGE_STAGE_IMMUTABLE: the stage is cleared already. The first call may have succeeded; this error does not replay its result. Never retry automatically; re-read the record, then offer the action again only if it is still needed.",
-        "reconcile_with": "GET /admissions/{admission_id}",
+        "reconcile_with": "GET /admissions/{admission_id}/discharge-status",
         "refused_with": "DISCHARGE_STAGE_IMMUTABLE",
         "emits_events": [
           "admission.discharge.stage_changed"
@@ -1280,6 +1421,97 @@
         "filters": [],
         "note": null
       }
+    },
+    {
+      "endpoint": "GET /finance/cash-shifts/mine",
+      "summary": "My open shift (if any)",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "finance.shift.operate"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of finance.shift.operate",
+        "roles_allowed": [
+          "cashier",
+          "pharmacist",
+          "receptionist"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [],
+      "parameters": [
+        {
+          "name": "node",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "enum": [
+                  "MainReception",
+                  "PharmacyCounter",
+                  "LabReception",
+                  "IPDBilling",
+                  "EmergencyCounter",
+                  "CashierDesk"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Node"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_Union_CashShiftSummaryOut__NoneType__"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "object",
+        "paging": [],
+        "search": [],
+        "filters": [
+          {
+            "name": "node",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "MainReception",
+              "PharmacyCounter",
+              "LabReception",
+              "IPDBilling",
+              "EmergencyCounter",
+              "CashierDesk"
+            ]
+          }
+        ],
+        "note": null
+      }
     }
   ],
   "realtime": {
@@ -1307,7 +1539,9 @@
           "POST /pharmacy-admin/batches/{batch_id}/supplier-returns",
           "POST /prescriptions/{prescription_id}/dispense"
         ],
-        "refresh": []
+        "refresh": [
+          "GET /finance/cash-shifts/mine"
+        ]
       },
       {
         "event": "pharmacy.recall.updated",
@@ -1320,7 +1554,9 @@
           "POST /drug-recalls/{recall_id}/close",
           "POST /drug-recalls/{recall_id}/remove-stock"
         ],
-        "refresh": []
+        "refresh": [
+          "GET /finance/cash-shifts/mine"
+        ]
       }
     ],
     "rule": "Refresh the listed reads when the event arrives (a list without a path id: every time; a detail read: when the payload names the same id). Never poll."
@@ -1395,6 +1631,123 @@
     ],
     "rule": "Every screen that acts on a patient keeps at least two identifiers (name and MRN, with age or date of birth) and the flags visible; bed and room are location, not identity."
   },
+  "states": [
+    {
+      "state": "loading",
+      "why": "every read"
+    },
+    {
+      "state": "error",
+      "why": "every call (show error.code's message)"
+    },
+    {
+      "state": "empty",
+      "why": "a list can be empty: say why and what to do next"
+    },
+    {
+      "state": "forbidden",
+      "why": "actions hidden or disabled by permission (GET /auth/me)"
+    },
+    {
+      "state": "stale / reconnecting",
+      "why": "realtime: show Live / Reconnecting, reload after a truncated replay"
+    },
+    {
+      "state": "submitting / outcome unknown",
+      "why": "a write in flight, or its answer lost: see each write's on_lost_answer"
+    },
+    {
+      "state": "print failed",
+      "why": "printing is separate from the write: reprint, never redo it"
+    }
+  ],
+  "scanner": [],
+  "copy": {
+    "workspace": {
+      "en": "Pharmacy Counter",
+      "ur": "فارمیسی"
+    },
+    "error_messages": {
+      "ACCOUNT_LOCKED": "Too many failed attempts; the account is temporarily locked.",
+      "BILLING_DEFERRED": "Confirm how this emergency admission is paid first.",
+      "CAPABILITY_INACTIVE": "This service is not active here, so no new work of it can start (Settings, facility; GET /establishment).",
+      "CHARITY_APPROVAL_REQUIRED": "A Zakat/charity officer must approve this override.",
+      "DISCHARGE_NOT_ALLOWED": "Discharge cannot proceed in the admission's current state.",
+      "DISCHARGE_STAGE_IMMUTABLE": "A cleared discharge stage cannot change.",
+      "DISCHARGE_STAGE_OUT_OF_ORDER": "Discharge stages must be cleared in order.",
+      "DUAL_CONTROL_SAME_PERSON": "The second approver must be a different person.",
+      "FORBIDDEN": "You do not have permission to do this.",
+      "HIGH_ALERT_CHECK_REQUIRED": "A high-alert medicine needs a second person's check (their co-signature) before it is dispensed or given.",
+      "INSUFFICIENT_STOCK": "Not enough stock available.",
+      "NOT_FOUND": "The requested resource was not found.",
+      "OWN_MEDICINES_HELD": "The patient's own medicines are still held: hand them back, or record their destruction, first (details lists them).",
+      "PRESCRIPTION_NOT_DISPENSABLE": "This prescription cannot be dispensed.",
+      "PRESCRIPTION_QUERY_OPEN": "The pharmacist's query on this order is not answered yet.",
+      "REFERENCE_NOT_FOUND": "A referenced record does not exist.",
+      "SHIFT_NOT_OPEN": "Open a cash shift before handling cash.",
+      "STEP_UP_REQUIRED": "A second authorised person must co-sign this action.",
+      "VALIDATION_ERROR": "The request is invalid."
+    },
+    "wording_quoted_in_rules": [
+      "No new ... from now on",
+      "looks like …",
+      "s drawer is open at another counter (details.open_shift.node), which pharmacy cash never goes into; say so, never borrow another person"
+    ],
+    "note": "Server-owned strings only: the error messages (English), the workspace labels (English and Urdu) and the wording the rules quote. The UI's own copy and its Urdu are yours (decision H08)."
+  },
+  "same_component_as": [],
+  "roles": {
+    "full": [],
+    "partial": [
+      "cashier",
+      "receptionist",
+      "admissions_officer",
+      "triage_nurse",
+      "doctor",
+      "clinical_specialist",
+      "surgeon",
+      "anaesthetist",
+      "ward_nurse",
+      "head_nurse",
+      "pharmacist",
+      "ops_admin"
+    ],
+    "page_for": [
+      "pharmacist"
+    ],
+    "note": "page_for: the roles whose GET /meta/handbook lists this screen (its menu entry and F1 page; for a user with that one role, every service Active). A partial role outside page_for only makes some of these calls from screens of its own: never offer it this screen. Build the menu from the logged-in user's GET /meta/handbook."
+  },
+  "workflows": [
+    {
+      "slug": "clinical-and-prescriptions",
+      "title": "Consultation, e-prescriptions & pharmacy dispensing",
+      "recipe": "get_workflow_recipe('clinical-and-prescriptions')"
+    },
+    {
+      "slug": "facility-profile-and-services",
+      "title": "Facility settings: the PHC profile and the clinical services",
+      "recipe": "get_workflow_recipe('facility-profile-and-services')"
+    },
+    {
+      "slug": "finance-and-owner",
+      "title": "Cash shifts, payables, receivables, owner dashboards & risk",
+      "recipe": "get_workflow_recipe('finance-and-owner')"
+    },
+    {
+      "slug": "inpatient-and-discharge",
+      "title": "Admission, beds, nursing & discharge",
+      "recipe": "get_workflow_recipe('inpatient-and-discharge')"
+    },
+    {
+      "slug": "medication-safety",
+      "title": "Medication safety (MSDS)",
+      "recipe": "get_workflow_recipe('medication-safety')"
+    }
+  ],
+  "scenarios": [],
+  "unknowns": [],
+  "omitted_sections": [],
+  "next": "Request omitted sections separately with max_chars=200000; for an oversized endpoints/schemas section use get_endpoint / get_schema for each operation/type.",
   "value_lists": [
     {
       "values": [
@@ -1426,7 +1779,7 @@
         "Cancelled"
       ],
       "column": "admissions.status",
-      "used_at": "POST /admissions/{admission_id}/discharge/{stage}/clear.status",
+      "used_at": "GET /admissions/{admission_id}/discharge-status.status",
       "labels": {
         "AdmissionPending": "Admission pending",
         "Waitlisted": "Waitlisted",
@@ -1440,6 +1793,34 @@
     },
     {
       "values": [
+        "AwaitingSecondApproval",
+        "Approved",
+        "Rejected"
+      ],
+      "column": "cash_drops.status",
+      "used_at": "GET /finance/cash-shifts/mine.cash_drop.status",
+      "labels": {
+        "AwaitingSecondApproval": "Awaiting second approval",
+        "Approved": "Approved",
+        "Rejected": "Rejected"
+      }
+    },
+    {
+      "values": [
+        "Open",
+        "PendingCollection",
+        "Verified"
+      ],
+      "column": "cash_shifts.status",
+      "used_at": "GET /finance/cash-shifts/mine.status",
+      "labels": {
+        "Open": "Open",
+        "PendingCollection": "Pending collection",
+        "Verified": "Verified"
+      }
+    },
+    {
+      "values": [
         "ClinicalDischarge",
         "PharmacyClearance",
         "NursingMARVerification",
@@ -1447,7 +1828,7 @@
         "OpsCleaning"
       ],
       "column": "discharge_clearances.stage",
-      "used_at": "POST /admissions/{admission_id}/discharge/{stage}/clear.discharge.stages[].stage",
+      "used_at": "GET /admissions/{admission_id}/discharge-status.stages[].stage",
       "labels": {
         "ClinicalDischarge": "Clinical discharge",
         "PharmacyClearance": "Pharmacy clearance",
@@ -1463,7 +1844,7 @@
         "Cancelled"
       ],
       "column": "discharge_clearances.status",
-      "used_at": "POST /admissions/{admission_id}/discharge/{stage}/clear.discharge.stages[].status",
+      "used_at": "GET /admissions/{admission_id}/discharge-status.stages[].status",
       "labels": {
         "Pending": "Pending",
         "Cleared": "Cleared",
@@ -1933,6 +2314,50 @@
     },
     {
       "values": [
+        "OpeningFloat",
+        "Sale",
+        "ARCollection",
+        "Refund",
+        "WaiverDispensation",
+        "APPayout",
+        "Adjustment",
+        "CashDrop"
+      ],
+      "column": "shift_transactions.txn_type",
+      "used_at": "GET /finance/cash-shifts/mine.by_type[].txn_type",
+      "labels": {
+        "OpeningFloat": "Opening float",
+        "Sale": "Sale",
+        "ARCollection": "AR collection",
+        "Refund": "Refund",
+        "WaiverDispensation": "Waiver dispensation",
+        "APPayout": "AP payout",
+        "Adjustment": "Adjustment",
+        "CashDrop": "Cash drop"
+      }
+    },
+    {
+      "values": [
+        "MainReception",
+        "PharmacyCounter",
+        "LabReception",
+        "IPDBilling",
+        "EmergencyCounter",
+        "CashierDesk"
+      ],
+      "column": "terminals.cash_node",
+      "used_at": "GET /finance/cash-shifts/mine.node",
+      "labels": {
+        "MainReception": "Main reception",
+        "PharmacyCounter": "Pharmacy counter",
+        "LabReception": "Lab reception",
+        "IPDBilling": "IPD billing",
+        "EmergencyCounter": "Emergency counter",
+        "CashierDesk": "Cashier desk"
+      }
+    },
+    {
+      "values": [
         "Cash",
         "Card"
       ],
@@ -2042,83 +2467,41 @@
       }
     }
   ],
-  "states": [
-    {
-      "state": "loading",
-      "why": "every read"
-    },
-    {
-      "state": "error",
-      "why": "every call (show error.code's message)"
-    },
-    {
-      "state": "empty",
-      "why": "a list can be empty: say why and what to do next"
-    },
-    {
-      "state": "forbidden",
-      "why": "actions hidden or disabled by permission (GET /auth/me)"
-    },
-    {
-      "state": "stale / reconnecting",
-      "why": "realtime: show Live / Reconnecting, reload after a truncated replay"
-    },
-    {
-      "state": "submitting / outcome unknown",
-      "why": "a write in flight, or its answer lost: see each write's on_lost_answer"
-    },
-    {
-      "state": "print failed",
-      "why": "printing is separate from the write: reprint, never redo it"
-    }
-  ],
-  "scanner": [],
-  "copy": {
-    "workspace": {
-      "en": "Pharmacy Counter",
-      "ur": "فارمیسی"
-    },
-    "error_messages": {
-      "ACCOUNT_LOCKED": "Too many failed attempts; the account is temporarily locked.",
-      "BILLING_DEFERRED": "Confirm how this emergency admission is paid first.",
-      "CAPABILITY_INACTIVE": "This service is not active here, so no new work of it can start (Settings, facility; GET /establishment).",
-      "CHARITY_APPROVAL_REQUIRED": "A Zakat/charity officer must approve this override.",
-      "DISCHARGE_NOT_ALLOWED": "Discharge cannot proceed in the admission's current state.",
-      "DISCHARGE_STAGE_IMMUTABLE": "A cleared discharge stage cannot change.",
-      "DISCHARGE_STAGE_OUT_OF_ORDER": "Discharge stages must be cleared in order.",
-      "DUAL_CONTROL_SAME_PERSON": "The second approver must be a different person.",
-      "HIGH_ALERT_CHECK_REQUIRED": "A high-alert medicine needs a second person's check (their co-signature) before it is dispensed or given.",
-      "INSUFFICIENT_STOCK": "Not enough stock available.",
-      "OWN_MEDICINES_HELD": "The patient's own medicines are still held: hand them back, or record their destruction, first (details lists them).",
-      "PRESCRIPTION_NOT_DISPENSABLE": "This prescription cannot be dispensed.",
-      "PRESCRIPTION_QUERY_OPEN": "The pharmacist's query on this order is not answered yet.",
-      "REFERENCE_NOT_FOUND": "A referenced record does not exist.",
-      "SHIFT_NOT_OPEN": "Open a cash shift before handling cash.",
-      "STEP_UP_REQUIRED": "A second authorised person must co-sign this action.",
-      "VALIDATION_ERROR": "The request is invalid."
-    },
-    "wording_quoted_in_rules": [
-      "No new ... from now on",
-      "looks like …"
-    ],
-    "note": "Server-owned strings only: the error messages (English), the workspace labels (English and Urdu) and the wording the rules quote. The UI's own copy and its Urdu are yours (decision H08)."
-  },
-  "same_component_as": [],
-  "roles": {
-    "full": [],
-    "partial": [
-      "doctor",
-      "clinical_specialist",
-      "surgeon",
-      "anaesthetist",
-      "pharmacist"
-    ],
-    "note": null
-  },
   "test_plan": {
     "screen": "dispense",
     "title": "Dispense",
     "cases": [
+      {
+        "id": "case:GET /admissions/{admission_id}/discharge-status",
+        "call": "GET /api/v1/admissions/{admission_id}/discharge-status",
+        "summary": "Which clearance stage the discharge is blocked on",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "billing_admin",
+            "cashier",
+            "clinic_director",
+            "cssd_technician"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "FORBIDDEN",
+          "NOT_FOUND"
+        ],
+        "as_one_of": [
+          "admissions_officer",
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "ops_admin",
+          "pharmacist",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ]
+      },
       {
         "id": "case:POST /admissions/{admission_id}/discharge/{stage}/clear",
         "call": "POST /api/v1/admissions/{admission_id}/discharge/{stage}/clear",
@@ -2229,6 +2612,27 @@
         "as_one_of": [
           "pharmacist"
         ]
+      },
+      {
+        "id": "case:GET /finance/cash-shifts/mine",
+        "call": "GET /api/v1/finance/cash-shifts/mine",
+        "summary": "My open shift (if any)",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "clinic_director"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [],
+        "as_one_of": [
+          "cashier",
+          "pharmacist",
+          "receptionist"
+        ]
       }
     ],
     "service_cases": [
@@ -2323,12 +2727,14 @@
     ],
     "acceptance_rules": [
       "Clear the PharmacyClearance discharge stage once the patient's unused medicines are returned.",
+      "Read discharge-status to confirm the patient identity and blocked_on PharmacyClearance before clearing. After a lost answer re-read the stage's status, cleared_by_name and cleared_at there; never retry automatically.",
       "A high-alert line (high_alert_category): a second person (pharmacist, or the nurse or doctor collecting it) checks the order and the medicine and co-signs with checker_username/_password (HIGH_ALERT_CHECK_REQUIRED; DUAL_CONTROL_SAME_PERSON). Show lasa_with next to the medicine: 'looks like …'.",
       "After dispensing print one label per medicine: GET /dispensations/{dispensation_id}/labels (label printer).",
       "PRESCRIPTION_QUERY_OPEN: the line waits for the doctor's answer to a query (Order queries screen).",
       "Never let the user pick a batch — FEFO is server-side.",
       "OPD pharmacy is cash-and-carry; credit only via approved Zakat/charity (charity_approval_id).",
       "Send an Idempotency-Key per click.",
+      "Cash goes into the user's own open shift at the Pharmacy Counter only: before offering Cash, GET /finance/cash-shifts/mine?node=PharmacyCounter. Null: Cash unavailable until it is opened on My cash shift (Card still works). SHIFT_NOT_OPEN with details.open_shift: the user's drawer is open at another counter (details.open_shift.node), which pharmacy cash never goes into; say so, never borrow another person's shift.",
       "Exists for the service dispensing (work): show it as GET /establishment views.screens says for screen_id dispense (full; open_work: without its new work, with the banner \"No new ... from now on\"; records: history and corrections only; setup: only from Facility settings; hidden: in no menu), after login and again on establishment.changed. Never decide it from the profile's category.",
       "POST /prescriptions/{prescription_id}/dispense continues dispensing work started earlier: offer it while dispensing is Active or Retiring (GET /establishment)."
     ],
@@ -2340,6 +2746,21 @@
     "title": "Dispense",
     "purpose": "Dispense Now (partial allowed); server picks batches FEFO; take payment.",
     "tasks": [
+      {
+        "id": "dispense::GET /admissions/{admission_id}/discharge-status",
+        "task": "Which clearance stage the discharge is blocked on",
+        "call": "GET /admissions/{admission_id}/discharge-status",
+        "is_action": false,
+        "permissions": [
+          "ipd.admission.view",
+          "ipd.discharge.clear_pharmacy",
+          "ipd.discharge.clear_nursing",
+          "ipd.discharge.clear_billing",
+          "ipd.discharge.clear_cleaning"
+        ],
+        "permissions_mode": "any",
+        "access": null
+      },
       {
         "id": "dispense::POST /admissions/{admission_id}/discharge/{stage}/clear",
         "task": "Clear a discharge stage (in order)",
@@ -2394,16 +2815,29 @@
         ],
         "permissions_mode": "any",
         "access": null
+      },
+      {
+        "id": "dispense::GET /finance/cash-shifts/mine",
+        "task": "My open shift (if any)",
+        "call": "GET /finance/cash-shifts/mine",
+        "is_action": false,
+        "permissions": [
+          "finance.shift.operate"
+        ],
+        "permissions_mode": "all",
+        "access": null
       }
     ],
     "rules_to_explain": [
       "Clear the PharmacyClearance discharge stage once the patient's unused medicines are returned.",
+      "Read discharge-status to confirm the patient identity and blocked_on PharmacyClearance before clearing. After a lost answer re-read the stage's status, cleared_by_name and cleared_at there; never retry automatically.",
       "A high-alert line (high_alert_category): a second person (pharmacist, or the nurse or doctor collecting it) checks the order and the medicine and co-signs with checker_username/_password (HIGH_ALERT_CHECK_REQUIRED; DUAL_CONTROL_SAME_PERSON). Show lasa_with next to the medicine: 'looks like …'.",
       "After dispensing print one label per medicine: GET /dispensations/{dispensation_id}/labels (label printer).",
       "PRESCRIPTION_QUERY_OPEN: the line waits for the doctor's answer to a query (Order queries screen).",
       "Never let the user pick a batch — FEFO is server-side.",
       "OPD pharmacy is cash-and-carry; credit only via approved Zakat/charity (charity_approval_id).",
       "Send an Idempotency-Key per click.",
+      "Cash goes into the user's own open shift at the Pharmacy Counter only: before offering Cash, GET /finance/cash-shifts/mine?node=PharmacyCounter. Null: Cash unavailable until it is opened on My cash shift (Card still works). SHIFT_NOT_OPEN with details.open_shift: the user's drawer is open at another counter (details.open_shift.node), which pharmacy cash never goes into; say so, never borrow another person's shift.",
       "Exists for the service dispensing (work): show it as GET /establishment views.screens says for screen_id dispense (full; open_work: without its new work, with the banner \"No new ... from now on\"; records: history and corrections only; setup: only from Facility settings; hidden: in no menu), after login and again on establishment.changed. Never decide it from the profile's category.",
       "POST /prescriptions/{prescription_id}/dispense continues dispensing work started earlier: offer it while dispensing is Active or Retiring (GET /establishment)."
     ],
@@ -2448,6 +2882,11 @@
         "ui_action": "Explain and hide the action (check x-permissions)."
       },
       {
+        "code": "FORBIDDEN",
+        "message": "You do not have permission to do this.",
+        "ui_action": "Explain and hide the action (check x-permissions)."
+      },
+      {
         "code": "HIGH_ALERT_CHECK_REQUIRED",
         "message": "A high-alert medicine needs a second person's check (their co-signature) before it is dispensed or given.",
         "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
@@ -2456,6 +2895,11 @@
         "code": "INSUFFICIENT_STOCK",
         "message": "Not enough stock available.",
         "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      },
+      {
+        "code": "NOT_FOUND",
+        "message": "The requested resource was not found.",
+        "ui_action": "Say 'not found'; refresh the list."
       },
       {
         "code": "OWN_MEDICINES_HELD",
@@ -2551,29 +2995,6 @@
     ],
     "workspace_guide": "get_handbook_outline('pharmacy')"
   },
-  "workflows": [
-    {
-      "slug": "clinical-and-prescriptions",
-      "title": "Consultation, e-prescriptions & pharmacy dispensing",
-      "recipe": "get_workflow_recipe('clinical-and-prescriptions')"
-    },
-    {
-      "slug": "facility-profile-and-services",
-      "title": "Facility settings: the PHC profile and the clinical services",
-      "recipe": "get_workflow_recipe('facility-profile-and-services')"
-    },
-    {
-      "slug": "inpatient-and-discharge",
-      "title": "Admission, beds, nursing & discharge",
-      "recipe": "get_workflow_recipe('inpatient-and-discharge')"
-    },
-    {
-      "slug": "medication-safety",
-      "title": "Medication safety (MSDS)",
-      "recipe": "get_workflow_recipe('medication-safety')"
-    }
-  ],
-  "scenarios": [],
   "decisions": [
     {
       "id": "H02",
@@ -2748,182 +3169,165 @@
       "meanwhile": "The server's own settings (e.g. critical_result_communicate_minutes)."
     }
   ],
-  "unknowns": [
-    {
-      "what": "decision H02",
-      "owner": [
-        "vendor"
-      ],
-      "question": "Digits in the Urdu UI and printouts: Latin 0-9 or Extended Arabic-Indic ۰-۹.",
-      "affects": [
-        "every screen in Urdu"
-      ],
-      "meanwhile": "Latin digits; identifiers, doses and money stay left to right."
+  "examples": {
+    "GET /admissions/{admission_id}/discharge-status": {
+      "request": {
+        "path": "/api/v1/admissions/1/discharge-status"
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": {
+            "admission_id": 1,
+            "admission_number": "ADM-2026-00001",
+            "patient_id": 1,
+            "status": "DischargeInProgress",
+            "mrn": "MRN-2026-000001",
+            "patient_name": "Ali Khan",
+            "stages": [
+              {
+                "clearance_id": 1,
+                "stage": "ClinicalDischarge",
+                "sequence_no": 1,
+                "status": "Cleared",
+                "cleared_by": 1,
+                "cleared_by_name": "Dr Ahmed",
+                "cleared_at": "2026-10-25T17:28:30.238845+00:00",
+                "note": "clinical discharge",
+                "physically_cleaned_at": null
+              },
+              {
+                "clearance_id": 2,
+                "stage": "NursingMARVerification",
+                "sequence_no": 3,
+                "status": "Pending",
+                "cleared_by": null,
+                "cleared_by_name": null,
+                "cleared_at": null,
+                "note": null,
+                "physically_cleaned_at": null
+              },
+              {
+                "clearance_id": 3,
+                "stage": "BillingSettlement",
+                "sequence_no": 4,
+                "status": "Pending",
+                "cleared_by": null,
+                "cleared_by_name": null,
+                "cleared_at": null,
+                "note": null,
+                "physically_cleaned_at": null
+              }
+            ],
+            "blocked_on": "NursingMARVerification",
+            "started": true,
+            "complete": false
+          },
+          "meta": {
+            "server_time": "2026-10-25T17:28:30.263517+00:00"
+          },
+          "request_id": "14c7dd1704bf4a519a92651a7349fb44"
+        }
+      }
     },
-    {
-      "what": "decision H03",
-      "owner": [
-        "vendor",
-        "clinical_lead"
-      ],
-      "question": "How dates and times are shown on screen, and a 12- or 24-hour clock.",
-      "affects": [
-        "every screen"
-      ],
-      "meanwhile": "The server's print format (e.g. 27-Sep-2026) and the hospital time zone."
+    "POST /admissions/{admission_id}/discharge/{stage}/clear": {
+      "request": {
+        "path": "/api/v1/admissions/1/discharge/PharmacyClearance/clear",
+        "body": {}
+      },
+      "response": {
+        "status": 200,
+        "body_preview": "{\"status\": 200, \"body\": {\"data\": {\"admission_id\": 1, \"admission_number\": \"ADM-2026-00001\", \"patient_id\": 1, \"mrn\": \"MRN-2026-000001\", \"patient_name\": \"Ali Khan\", \"gender\": \"male\", \"age_years\": 40, \"requested_ward_id\": 2, \"requested_ward_name\": \"General Ward\", \"ward_id\": 2, \"ward_name\": \"General Ward\", \"bed_id\": 2, \"bed_label\": \"GW-1\", \"primary_doctor_id\": 1, \"primary_doctor_name\": \"Dr Ahmed\", \"admission_type\": \"Standard\", \"status\": \"DischargeInProgress\", \"billing_category\": \"Cash\", \"panel_id\": null, \"is_billing_confirmed\": true, \"is_billing_deferred\": false, \"is_overflow\": false, \"overflow_reason\": null, \"eta_minutes\": null, \"source_ticket_id\": 1, \"admission_reason\": \"Fever and productive cough for 5 days, SpO2 91% on air\", \"provisional_diagnosis\": \"Community-acquired pneumonia\", \"initial_care_plan\": null, \"photo_document_id\": null, \"details_stamp\": {\"at\": \"2026-10-13T11:58:07.001267+00:00\", \"name\": \"Dr Ahmed\", \"text\": \"Dr Ahmed, Doctor, PMDC PMDC-37440, 13-Oct-2026 16:58\", \"user_id\": 1, \"designation\": \"Doctor\", \"employee_id\": 1, \"registration\": \"PMDC PMDC-37440\"}, \"admission_notes\": null, \"requested_at\": \"2026-10-13T11:58:07.001267+00:00\", \"reserved_at\": \"2026-10-13T11:58:07.060463+00:00\", \"admitted_at\": \"2026-10-13T11:58:07.060463+00:00\", \"discharge_initiated_at\": \"2026-10-13T11:58:07.424943+00:00\", \"discharged_at\": null, \"row_version\": 5, \"discharge\": {\"stages\": [{\"clearance_id\": 1, \"stage\": \"ClinicalDischarge\", \"sequence_no\": 1, \"status\": \"Cleared\", \"cleared_by\": 1, \"clea…"
+      }
     },
-    {
-      "what": "decision H04",
-      "owner": [
-        "vendor"
-      ],
-      "question": "Money on screen: decimals shown, and digit grouping (1,234,567 or 12,34,567).",
-      "affects": [
-        "every screen with money"
-      ],
-      "meanwhile": "The amounts as the API sends them, with the currency setting."
+    "POST /prescriptions/{prescription_id}/dispense": {
+      "request": {
+        "path": "/api/v1/prescriptions/1/dispense",
+        "body": {
+          "items": [
+            {
+              "prescription_item_id": 1
+            },
+            {
+              "prescription_item_id": 2
+            }
+          ]
+        }
+      },
+      "response": {
+        "status": 201,
+        "body_preview": "{\"status\": 201, \"body\": {\"data\": {\"dispensation\": {\"dispensation_id\": 1, \"prescription_id\": 1, \"patient_id\": 1, \"admission_id\": 1, \"employee_id\": null, \"invoice_id\": 2, \"payment_mode\": \"IPDBill\", \"is_otc_sale\": false, \"walkin_customer_name\": null, \"walkin_customer_mobile\": null, \"charity_approval_id\": null, \"total_amount\": 2850.0, \"total_cost\": 1900.0, \"dispensed_by\": 9, \"checked_by\": null, \"dispensed_at\": \"2026-09-30T14:37:51.424130+00:00\", \"business_date\": \"2026-09-30\"}, \"lines\": [{\"prescription_item_id\": 1, \"drug_id\": 1, \"batch_id\": 1, \"unit_cost\": 100.0, \"retail_price\": 150.0, \"expiry_date\": \"2099-01-01\", \"take\": 4.0}, {\"prescription_item_id\": 2, \"drug_id\": 2, \"batch_id\": 2, \"unit_cost\": 100.0, \"retail_price\": 150.0, \"expiry_date\": \"2099-01-01\", \"take\": 15.0}], \"invoice\": {\"invoice_id\": 2, \"invoice_no\": \"INV-2026-0000002\", \"invoice_type\": \"IPD\", \"patient_id\": 1, \"admission_id\": 1, \"ticket_id\": null, \"panel_id\": null, \"employee_id\": null, \"walkin_customer_name\": null, \"walkin_customer_mobile\": null, \"gross_total\": 2850.0, \"discount_total\": 0.0, \"net_payable\": 2850.0, \"amount_paid\": 0.0, \"amount_refunded\": 0.0, \"waiver_amount\": 0.0, \"waiver_dispensed_amount\": 0.0, \"credit_amount\": 0.0, \"status\": \"Draft\", \"is_locked\": false, \"locked_reason\": null, \"finalized_at\": null, \"business_date\": \"2026-09-30\", \"created_at\": \"2026-09-30T14:37:51.283668+00:00\", \"row_version\": 3, \"lines\": [{\"invoice_item_id\": 2, \"line_type\": \"Drug\", \"description\": \"Ceftriaxone\", \"qty\": 4.0, \"unit_price\": …"
+      }
     },
-    {
-      "what": "decision H08",
-      "owner": [
-        "vendor",
-        "translator",
-        "clinical_lead"
-      ],
-      "question": "Who writes and signs off the Urdu text of the UI, above all clinical and consent wording.",
-      "affects": [
-        "every screen in Urdu"
-      ],
-      "meanwhile": "Urdu you add is a draft: mark it so (the interview bank's pattern: a draft until a native speaker reviews it)."
+    "GET /dispensations/{dispensation_id}/receipt-payload": {
+      "request": {
+        "path": "/api/v1/dispensations/1/receipt-payload"
+      },
+      "response": {
+        "status": 200,
+        "body_preview": "{\"status\": 200, \"body\": {\"data\": {\"document_type\": \"pharmacy_receipt\", \"printer_role\": \"receipt\", \"paper_width_mm\": 80, \"fields\": {\"dispensation\": {\"dispensation_id\": 1, \"prescription_id\": 1, \"patient_id\": 1, \"admission_id\": null, \"employee_id\": null, \"invoice_id\": 2, \"payment_mode\": \"Cash\", \"is_otc_sale\": false, \"walkin_customer_name\": null, \"walkin_customer_mobile\": null, \"charity_approval_id\": null, \"total_amount\": 140.0, \"total_cost\": 70.0, \"dispensed_by\": 7, \"checked_by\": null, \"dispensed_at\": \"2026-09-30T15:27:04.552558+00:00\", \"business_date\": \"2026-09-30\"}, \"items\": [{\"qty\": 2.0, \"retail_price\": 20.0, \"line_total\": 40.0, \"name\": \"Amoxicillin 500mg\", \"batch_no\": \"LATE\", \"expiry_date\": \"2099-01-01\"}, {\"qty\": 5.0, \"retail_price\": 20.0, \"line_total\": 100.0, \"name\": \"Amoxicillin 500mg\", \"batch_no\": \"EARLY\", \"expiry_date\": \"2098-01-01\"}], \"hospital_name\": \"Haspataal Hospital\"}, \"text\": \"               Haspataal Hospital\\n                PHARMACY RECEIPT\\n------------------------------------------------\\nNo.                                          D-1\\nDate                           30-Sep-2026 20:27\\nPayment                                     Cash\\n------------------------------------------------\\nAmoxicillin 500mg (B:LATE Exp:01/99)\\n  2.00 x 20.00                         Rs. 40.00\\nAm…\", \"barcode_svg\": \"<svg version=\\\"1.1\\\" xmlns=\\\"http://www.w3.org/2000/svg\\\" width=\\\"23.040mm\\\" height=\\\"18.411mm\\\">\\r\\n    <!--Autogenerated with python-barcode 0.16.1-->\\r\\n    <g id=\\\"b…"
+      }
     },
-    {
-      "what": "decision H09",
-      "owner": [
-        "vendor",
-        "frontend_lead"
-      ],
-      "question": "One design system shared by every frontend team (who authors and approves it), or each team's own.",
-      "affects": [
-        "every screen"
-      ],
-      "meanwhile": "Each team designs within the backend's constraints: themes Light and DarkHighContrast, zoom 100-250 %, Noto Nastaliq Urdu, status shown as text and icon, never colour alone. Follow the vendor's design principles (frontend guide 18, get_design_principles)."
+    "POST /prescriptions/{prescription_id}/items/{item_id}/stop": {
+      "request": {
+        "path": "/api/v1/prescriptions/1/items/1/stop",
+        "body": {
+          "reason": "rash"
+        }
+      },
+      "response": {
+        "status": 200,
+        "body_preview": "{\"status\": 200, \"body\": {\"data\": {\"prescription_id\": 1, \"prescription_number\": \"RX-2026-000001\", \"patient_id\": 1, \"prescriber_id\": 1, \"ticket_id\": 1, \"admission_id\": null, \"encounter_id\": null, \"source\": \"OPD\", \"destination\": \"HospitalPharmacy\", \"status\": \"FullyDispensed\", \"is_content_locked\": false, \"replaced_by_id\": null, \"notes\": null, \"cancelled_at\": null, \"cancel_reason\": null, \"external_printed_at\": null, \"order_mode\": \"Written\", \"received_by\": null, \"read_back\": false, \"countersigned_by\": null, \"countersigned_at\": null, \"countersign_alerted_at\": null, \"created_by\": 1, \"created_at\": \"2026-10-14T02:42:36.512575+00:00\", \"row_version\": 2, \"patient_name\": \"Ali Khan\", \"mrn\": \"MRN-2026-000001\", \"prescriber_name\": \"Dr Ahmed\", \"prescriber_stamp\": {\"at\": \"2026-10-14T02:42:36.512575+00:00\", \"name\": \"Dr Ahmed\", \"text\": \"Dr Ahmed, Doctor, PMDC PMDC-20014, 14-Oct-2026 07:42\", \"user_id\": 1, \"designation\": \"Doctor\", \"employee_id\": 1, \"registration\": \"PMDC PMDC-20014\"}, \"received_by_name\": null, \"items\": [{\"prescription_item_id\": 1, \"prescription_id\": 1, \"drug_id\": 1, \"is_external\": false, \"external_drug_name\": null, \"external_strength\": null, \"external_form\": null, \"qty_prescribed\": 12.0, \"qty_dispensed\": 0.0, \"dose_text\": \"500 mg\", \"route\": \"Oral\", \"frequency_code\": \"TDS\", \"interval_hours\": null, \"duration_days\": 4, \"instructions\": null, \"start_at\": null, \"end_at\": null, \"is_prn\": false, \"is_stat\": false, \"self_administration\": false, \"item_status\": \"Stopped\", \"stopped_at\": \"2026-10-…"
+      }
     },
-    {
-      "what": "decision H10",
-      "owner": [
-        "clinical_lead",
-        "vendor"
-      ],
-      "question": "How each realtime event is shown (interrupt, attention, inform, silent), alert sounds and which terminals play them. Only Code Red (interrupt), the licence and maintenance banners and the logout on session.revoked are prescribed (the event catalogue's `presentation`).",
-      "affects": [
-        "every screen with realtime events"
-      ],
-      "meanwhile": "Code Red interrupts; every other event updates the screen and, at most, a dismissible notice. `priority` is the delivery urgency, not a presentation rule."
+    "GET /dispensations/{dispensation_id}/labels": {
+      "request": {
+        "path": "/api/v1/dispensations/1/labels"
+      },
+      "response": {
+        "status": 200,
+        "body_preview": "{\"status\": 200, \"body\": {\"data\": [{\"document_type\": \"dispensing_label\", \"printer_role\": \"label\", \"paper_width_mm\": 50, \"fields\": {\"hospital_name\": \"Haspataal Hospital\", \"dispensation_id\": 1, \"dispensation_item_id\": 1, \"dispensed_at\": \"2026-09-30T15:01:47.063106+00:00\", \"dispensed_by_name\": \"ue85df46134\", \"patient_name\": \"Ali Khan\", \"mrn\": \"MRN-2026-000001\", \"drug_name\": \"Potassium chloride 15%\", \"generic_name\": null, \"strength\": null, \"form\": \"Injection\", \"qty\": 4.0, \"unit\": \"unit\", \"dose_text\": \"10 mmol\", \"route\": \"IV\", \"frequency_code\": \"BD\", \"duration_days\": 2, \"instructions\": \"in 500 ml normal saline over 4 hours\", \"directions\": \"10 mmol IV twice a day for 2 days in 500 ml normal saline over 4 hours\", \"prescriber_name\": \"Dr Ahmed\", \"batch_no\": \"KCL-1\", \"expiry_date\": \"2099-01-01\", \"warnings\": [\"HIGH ALERT (concentrated electrolyte): second check before use\"]}, \"text\": \"Haspataal Hospital\\nAli Khan MRN-2026-000001\\n----------------------------------------\\nPotassium chloride 15%\\n10 mmol IV twice a day for 2 days in 500\\nml normal saline over 4 hours\\nQty 4.00 unit          B:KCL-1 Exp 01/99\\nDr. Dr Ahmed\\nDispensed 30-Sep-2026 20:01\\nHIGH ALERT (concentrated electrolyte):\\nsecond check before use\\n\", \"barcode_svg\": \"<svg version=\\\"1.1\\\" xmlns=\\\"http://www.w3.org/2000/svg\\\" width=\\\"23.040mm\\\" height=\\\"12.411mm\\\">\\r\\n    <!--Autogenerated with python-barcode 0.16.1-->\\r\\n    <g id=\\\"barcode_group\\\">\\r\\n        <rect width=\\\"100%\\\" height=\\\"100%\\\" style=\\\"fill:white\\\"/>\\r\\n …"
+      }
     },
-    {
-      "what": "decision H11",
-      "owner": [
-        "clinical_lead",
-        "backend"
-      ],
-      "question": "May the second checker of a high-alert medicine use a badge and PIN instead of a username and password?",
-      "affects": [
-        "mar",
-        "dispense"
-      ],
-      "meanwhile": "Username and password, never stored by the app."
-    },
-    {
-      "what": "decision H12",
-      "owner": [
-        "vendor",
-        "backend"
-      ],
-      "question": "Which workspaces run on web, Android and iOS, which cannot read a MAC address, discover the server by UDP or print silently; or are cash and printing Windows-only.",
-      "affects": [
-        "my_cash_shift",
-        "registration",
-        "every screen that prints"
-      ],
-      "meanwhile": "The guides describe the Windows (Electron) terminal; tell your developer when a screen needs a capability your platform lacks."
-    },
-    {
-      "what": "decision H16",
-      "owner": [
-        "clinical_lead",
-        "backend"
-      ],
-      "question": "Tall-man names for look-alike medicines (a field on the drug master).",
-      "affects": [
-        "eprescription",
-        "dispense",
-        "mar"
-      ],
-      "meanwhile": "The look-alike pairs the API already returns."
-    },
-    {
-      "what": "decision H18",
-      "owner": [
-        "vendor",
-        "frontend_lead"
-      ],
-      "question": "Noto Nastaliq Urdu everywhere, or the more compact Naskh in dense tables.",
-      "affects": [
-        "every table in Urdu"
-      ],
-      "meanwhile": "Noto Nastaliq Urdu, as the guides require."
-    },
-    {
-      "what": "decision H19",
-      "owner": [
-        "clinical_lead",
-        "backend"
-      ],
-      "question": "Allergies: the patient record keeps free text, so it cannot tell \"no known allergies\" (asserted by a clinician) from \"not recorded\". Should it?",
-      "affects": [
-        "every screen with a patient banner"
-      ],
-      "meanwhile": "Show the recorded text as recorded; an empty value is \"not recorded\", never \"none\"."
-    },
-    {
-      "what": "decision H20",
-      "owner": [
-        "vendor",
-        "hospital"
-      ],
-      "question": "May unsaved form input be kept on the terminal (which fields, encrypted, for how long)?",
-      "affects": [
-        "every form"
-      ],
-      "meanwhile": "In memory only; never a second checker's password."
-    },
-    {
-      "what": "decision H22",
-      "owner": [
-        "hospital",
-        "vendor"
-      ],
-      "question": "Which documents may print on an unregistered terminal's default printer (sensitive A4 documents).",
-      "affects": [
-        "every screen that prints"
-      ],
-      "meanwhile": "As the printing guide says: the hint, then the default printer."
-    },
-    {
-      "what": "decision H24",
-      "owner": [
-        "vendor",
-        "clinical_lead"
-      ],
-      "question": "Who approves frontend performance targets, alert thresholds and escalation timers.",
-      "affects": [
-        "every screen"
-      ],
-      "meanwhile": "The server's own settings (e.g. critical_result_communicate_minutes)."
+    "GET /finance/cash-shifts/mine": {
+      "request": {
+        "path": "/api/v1/finance/cash-shifts/mine"
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": {
+            "shift_id": 1,
+            "user_id": 3,
+            "node": "MainReception",
+            "terminal_id": null,
+            "opening_float": 0,
+            "expected_cash": 1000,
+            "declared_cash": null,
+            "status": "Open",
+            "opened_at": "2026-10-24T18:46:18.384118+00:00",
+            "closed_at": null,
+            "business_date": "2026-10-24",
+            "cashier_name": "Receptionist",
+            "declared_variance": null,
+            "by_type": [
+              {
+                "txn_type": "Sale",
+                "count": 1,
+                "total": 1000
+              }
+            ],
+            "non_cash": [],
+            "cash_drop": null
+          },
+          "meta": {
+            "server_time": "2026-10-24T18:46:18.738132+00:00"
+          },
+          "request_id": "097c3bb071834c53b6d6b143a18491fb"
+        }
+      }
     }
-  ],
-  "omitted_sections": [],
-  "next": "Request omitted sections separately with max_chars=200000; for an oversized endpoints/schemas section use get_endpoint / get_schema for each operation/type.",
+  },
   "schemas": {
     "AdmissionDetailOut": {
       "properties": {
@@ -3522,6 +3926,264 @@
       "title": "AuthorStampOut",
       "description": "The author stamp of a clinical entry (MSDS IMS 147), as the author's staff record stood when they signed it\n(SQL hms_author_stamp / hms_employee_stamp, migration 0013 [STP]). Show it under the entry on screen and print\n`text` under it on paper."
     },
+    "CashDropOut": {
+      "properties": {
+        "cash_drop_id": {
+          "type": "integer",
+          "title": "Cash Drop Id"
+        },
+        "shift_id": {
+          "type": "integer",
+          "title": "Shift Id"
+        },
+        "verified_by": {
+          "type": "integer",
+          "title": "Verified By"
+        },
+        "expected_cash": {
+          "type": "number",
+          "title": "Expected Cash"
+        },
+        "counted_cash": {
+          "type": "number",
+          "title": "Counted Cash"
+        },
+        "variance": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Variance"
+        },
+        "is_dual_control_required": {
+          "type": "boolean",
+          "title": "Is Dual Control Required"
+        },
+        "second_approver_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Second Approver Id"
+        },
+        "second_approved_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Second Approved At"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "AwaitingSecondApproval",
+            "Approved",
+            "Rejected"
+          ],
+          "title": "Status"
+        },
+        "note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Note"
+        },
+        "verified_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Verified At"
+        },
+        "row_version": {
+          "type": "integer",
+          "title": "Row Version"
+        }
+      },
+      "type": "object",
+      "required": [
+        "cash_drop_id",
+        "shift_id",
+        "verified_by",
+        "expected_cash",
+        "counted_cash",
+        "variance",
+        "is_dual_control_required",
+        "second_approver_id",
+        "second_approved_at",
+        "status",
+        "note",
+        "verified_at",
+        "row_version"
+      ],
+      "title": "CashDropOut"
+    },
+    "CashShiftSummaryOut": {
+      "properties": {
+        "shift_id": {
+          "type": "integer",
+          "title": "Shift Id"
+        },
+        "user_id": {
+          "type": "integer",
+          "title": "User Id"
+        },
+        "node": {
+          "type": "string",
+          "enum": [
+            "MainReception",
+            "PharmacyCounter",
+            "LabReception",
+            "IPDBilling",
+            "EmergencyCounter",
+            "CashierDesk"
+          ],
+          "title": "Node",
+          "description": "The cash counter"
+        },
+        "terminal_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Terminal Id"
+        },
+        "opening_float": {
+          "type": "number",
+          "title": "Opening Float",
+          "description": "The cash the drawer started with, issued from the main vault: the drawer's first entry (OpeningFloat)"
+        },
+        "expected_cash": {
+          "type": "number",
+          "title": "Expected Cash",
+          "description": "What the drawer should hold now: the opening float plus every cash movement of the shift (by_type). Count all of it at the close. 0 once the verified cash drop has taken it to the vault (cash_drop.expected_cash keeps the amount)"
+        },
+        "declared_cash": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Declared Cash",
+          "description": "What the cashier counted in the whole drawer at the close, the float included (null while open)"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "Open",
+            "PendingCollection",
+            "Verified"
+          ],
+          "title": "Status"
+        },
+        "opened_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Opened At"
+        },
+        "closed_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Closed At"
+        },
+        "business_date": {
+          "type": "string",
+          "format": "date",
+          "title": "Business Date"
+        },
+        "cashier_name": {
+          "type": "string",
+          "title": "Cashier Name"
+        },
+        "declared_variance": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Declared Variance",
+          "description": "declared_cash minus what the drawer held at the close, its float included (null until the shift is closed)"
+        },
+        "by_type": {
+          "items": {
+            "$ref": "#/components/schemas/ShiftTotalOut"
+          },
+          "type": "array",
+          "title": "By Type"
+        },
+        "non_cash": {
+          "items": {
+            "$ref": "#/components/schemas/NonCashTotalOut"
+          },
+          "type": "array",
+          "title": "Non Cash"
+        },
+        "cash_drop": {
+          "anyOf": [
+            {
+              "$ref": "#/components/schemas/CashDropOut"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "type": "object",
+      "required": [
+        "shift_id",
+        "user_id",
+        "node",
+        "terminal_id",
+        "opening_float",
+        "expected_cash",
+        "declared_cash",
+        "status",
+        "opened_at",
+        "closed_at",
+        "business_date",
+        "cashier_name",
+        "declared_variance",
+        "by_type",
+        "non_cash",
+        "cash_drop"
+      ],
+      "title": "CashShiftSummaryOut",
+      "description": "A shift with the expected cash by transaction type, non-cash collections and its cash drop."
+    },
     "ClearIn": {
       "properties": {
         "note": {
@@ -3687,6 +4349,93 @@
         "complete"
       ],
       "title": "DischargeStatusOut"
+    },
+    "DischargeStatusViewOut": {
+      "properties": {
+        "stages": {
+          "items": {
+            "$ref": "#/components/schemas/DischargeStageOut"
+          },
+          "type": "array",
+          "title": "Stages"
+        },
+        "blocked_on": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "ClinicalDischarge",
+                "PharmacyClearance",
+                "NursingMARVerification",
+                "BillingSettlement",
+                "OpsCleaning"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Blocked On",
+          "description": "The first pending stage (the one to clear next)"
+        },
+        "started": {
+          "type": "boolean",
+          "title": "Started"
+        },
+        "complete": {
+          "type": "boolean",
+          "title": "Complete"
+        },
+        "admission_id": {
+          "type": "integer",
+          "title": "Admission Id"
+        },
+        "admission_number": {
+          "type": "string",
+          "title": "Admission Number"
+        },
+        "patient_id": {
+          "type": "integer",
+          "title": "Patient Id"
+        },
+        "mrn": {
+          "type": "string",
+          "title": "Mrn"
+        },
+        "patient_name": {
+          "type": "string",
+          "title": "Patient Name"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "AdmissionPending",
+            "Waitlisted",
+            "BedReserved",
+            "CodeRedActive",
+            "Admitted",
+            "DischargeInProgress",
+            "Discharged",
+            "Cancelled"
+          ],
+          "title": "Status"
+        }
+      },
+      "type": "object",
+      "required": [
+        "stages",
+        "blocked_on",
+        "started",
+        "complete",
+        "admission_id",
+        "admission_number",
+        "patient_id",
+        "mrn",
+        "patient_name",
+        "status"
+      ],
+      "title": "DischargeStatusViewOut",
+      "description": "Identity and clearance progress for the staff clearing a stage, without the full clinical admission."
     },
     "DispensationOut": {
       "properties": {
@@ -4244,6 +4993,27 @@
       ],
       "title": "Envelope[AdmissionDetailOut]"
     },
+    "Envelope_DischargeStatusViewOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/DischargeStatusViewOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[DischargeStatusViewOut]"
+    },
     "Envelope_DispensationResultOut_": {
       "properties": {
         "data": {
@@ -4306,6 +5076,34 @@
         "request_id"
       ],
       "title": "Envelope[PrintOut[PharmacyReceiptFieldsOut]]"
+    },
+    "Envelope_Union_CashShiftSummaryOut__NoneType__": {
+      "properties": {
+        "data": {
+          "anyOf": [
+            {
+              "$ref": "#/components/schemas/CashShiftSummaryOut"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[Union[CashShiftSummaryOut, NoneType]]"
     },
     "Envelope_list_PrintOut_DispensingLabelFieldsOut___": {
       "properties": {
@@ -4729,6 +5527,37 @@
         "server_time"
       ],
       "title": "Meta"
+    },
+    "NonCashTotalOut": {
+      "properties": {
+        "method": {
+          "type": "string",
+          "enum": [
+            "Cash",
+            "Card",
+            "BankTransfer",
+            "PanelCredit",
+            "PayrollDeduction",
+            "Charity"
+          ],
+          "title": "Method"
+        },
+        "count": {
+          "type": "integer",
+          "title": "Count"
+        },
+        "total": {
+          "type": "number",
+          "title": "Total"
+        }
+      },
+      "type": "object",
+      "required": [
+        "method",
+        "count",
+        "total"
+      ],
+      "title": "NonCashTotalOut"
     },
     "PaymentOut": {
       "properties": {
@@ -6311,6 +7140,39 @@
       ],
       "title": "ReceiptItemOut"
     },
+    "ShiftTotalOut": {
+      "properties": {
+        "txn_type": {
+          "type": "string",
+          "enum": [
+            "OpeningFloat",
+            "Sale",
+            "ARCollection",
+            "Refund",
+            "WaiverDispensation",
+            "APPayout",
+            "Adjustment",
+            "CashDrop"
+          ],
+          "title": "Txn Type"
+        },
+        "count": {
+          "type": "integer",
+          "title": "Count"
+        },
+        "total": {
+          "type": "number",
+          "title": "Total"
+        }
+      },
+      "type": "object",
+      "required": [
+        "txn_type",
+        "count",
+        "total"
+      ],
+      "title": "ShiftTotalOut"
+    },
     "ValidationError": {
       "properties": {
         "loc": {
@@ -6350,67 +7212,6 @@
         "type"
       ],
       "title": "ValidationError"
-    }
-  },
-  "examples": {
-    "POST /admissions/{admission_id}/discharge/{stage}/clear": {
-      "request": {
-        "path": "/api/v1/admissions/1/discharge/PharmacyClearance/clear",
-        "body": {}
-      },
-      "response": {
-        "status": 200,
-        "body_preview": "{\"status\": 200, \"body\": {\"data\": {\"admission_id\": 1, \"admission_number\": \"ADM-2026-00001\", \"patient_id\": 1, \"mrn\": \"MRN-2026-000001\", \"patient_name\": \"Ali Khan\", \"gender\": \"male\", \"age_years\": 40, \"requested_ward_id\": 2, \"requested_ward_name\": \"General Ward\", \"ward_id\": 2, \"ward_name\": \"General Ward\", \"bed_id\": 2, \"bed_label\": \"GW-1\", \"primary_doctor_id\": 1, \"primary_doctor_name\": \"Dr Ahmed\", \"admission_type\": \"Standard\", \"status\": \"DischargeInProgress\", \"billing_category\": \"Cash\", \"panel_id\": null, \"is_billing_confirmed\": true, \"is_billing_deferred\": false, \"is_overflow\": false, \"overflow_reason\": null, \"eta_minutes\": null, \"source_ticket_id\": 1, \"admission_reason\": \"Fever and productive cough for 5 days, SpO2 91% on air\", \"provisional_diagnosis\": \"Community-acquired pneumonia\", \"initial_care_plan\": null, \"photo_document_id\": null, \"details_stamp\": {\"at\": \"2026-10-13T11:58:07.001267+00:00\", \"name\": \"Dr Ahmed\", \"text\": \"Dr Ahmed, Doctor, PMDC PMDC-37440, 13-Oct-2026 16:58\", \"user_id\": 1, \"designation\": \"Doctor\", \"employee_id\": 1, \"registration\": \"PMDC PMDC-37440\"}, \"admission_notes\": null, \"requested_at\": \"2026-10-13T11:58:07.001267+00:00\", \"reserved_at\": \"2026-10-13T11:58:07.060463+00:00\", \"admitted_at\": \"2026-10-13T11:58:07.060463+00:00\", \"discharge_initiated_at\": \"2026-10-13T11:58:07.424943+00:00\", \"discharged_at\": null, \"row_version\": 5, \"discharge\": {\"stages\": [{\"clearance_id\": 1, \"stage\": \"ClinicalDischarge\", \"sequence_no\": 1, \"status\": \"Cleared\", \"cleared_by\": 1, \"clea…"
-      }
-    },
-    "POST /prescriptions/{prescription_id}/dispense": {
-      "request": {
-        "path": "/api/v1/prescriptions/1/dispense",
-        "body": {
-          "items": [
-            {
-              "prescription_item_id": 1
-            },
-            {
-              "prescription_item_id": 2
-            }
-          ]
-        }
-      },
-      "response": {
-        "status": 201,
-        "body_preview": "{\"status\": 201, \"body\": {\"data\": {\"dispensation\": {\"dispensation_id\": 1, \"prescription_id\": 1, \"patient_id\": 1, \"admission_id\": 1, \"employee_id\": null, \"invoice_id\": 2, \"payment_mode\": \"IPDBill\", \"is_otc_sale\": false, \"walkin_customer_name\": null, \"walkin_customer_mobile\": null, \"charity_approval_id\": null, \"total_amount\": 2850.0, \"total_cost\": 1900.0, \"dispensed_by\": 9, \"checked_by\": null, \"dispensed_at\": \"2026-09-30T14:37:51.424130+00:00\", \"business_date\": \"2026-09-30\"}, \"lines\": [{\"prescription_item_id\": 1, \"drug_id\": 1, \"batch_id\": 1, \"unit_cost\": 100.0, \"retail_price\": 150.0, \"expiry_date\": \"2099-01-01\", \"take\": 4.0}, {\"prescription_item_id\": 2, \"drug_id\": 2, \"batch_id\": 2, \"unit_cost\": 100.0, \"retail_price\": 150.0, \"expiry_date\": \"2099-01-01\", \"take\": 15.0}], \"invoice\": {\"invoice_id\": 2, \"invoice_no\": \"INV-2026-0000002\", \"invoice_type\": \"IPD\", \"patient_id\": 1, \"admission_id\": 1, \"ticket_id\": null, \"panel_id\": null, \"employee_id\": null, \"walkin_customer_name\": null, \"walkin_customer_mobile\": null, \"gross_total\": 2850.0, \"discount_total\": 0.0, \"net_payable\": 2850.0, \"amount_paid\": 0.0, \"amount_refunded\": 0.0, \"waiver_amount\": 0.0, \"waiver_dispensed_amount\": 0.0, \"credit_amount\": 0.0, \"status\": \"Draft\", \"is_locked\": false, \"locked_reason\": null, \"finalized_at\": null, \"business_date\": \"2026-09-30\", \"created_at\": \"2026-09-30T14:37:51.283668+00:00\", \"row_version\": 3, \"lines\": [{\"invoice_item_id\": 2, \"line_type\": \"Drug\", \"description\": \"Ceftriaxone\", \"qty\": 4.0, \"unit_price\": …"
-      }
-    },
-    "GET /dispensations/{dispensation_id}/receipt-payload": {
-      "request": {
-        "path": "/api/v1/dispensations/1/receipt-payload"
-      },
-      "response": {
-        "status": 200,
-        "body_preview": "{\"status\": 200, \"body\": {\"data\": {\"document_type\": \"pharmacy_receipt\", \"printer_role\": \"receipt\", \"paper_width_mm\": 80, \"fields\": {\"dispensation\": {\"dispensation_id\": 1, \"prescription_id\": 1, \"patient_id\": 1, \"admission_id\": null, \"employee_id\": null, \"invoice_id\": 2, \"payment_mode\": \"Cash\", \"is_otc_sale\": false, \"walkin_customer_name\": null, \"walkin_customer_mobile\": null, \"charity_approval_id\": null, \"total_amount\": 140.0, \"total_cost\": 70.0, \"dispensed_by\": 7, \"checked_by\": null, \"dispensed_at\": \"2026-09-30T15:27:04.552558+00:00\", \"business_date\": \"2026-09-30\"}, \"items\": [{\"qty\": 2.0, \"retail_price\": 20.0, \"line_total\": 40.0, \"name\": \"Amoxicillin 500mg\", \"batch_no\": \"LATE\", \"expiry_date\": \"2099-01-01\"}, {\"qty\": 5.0, \"retail_price\": 20.0, \"line_total\": 100.0, \"name\": \"Amoxicillin 500mg\", \"batch_no\": \"EARLY\", \"expiry_date\": \"2098-01-01\"}], \"hospital_name\": \"Haspataal Hospital\"}, \"text\": \"               Haspataal Hospital\\n                PHARMACY RECEIPT\\n------------------------------------------------\\nNo.                                          D-1\\nDate                           30-Sep-2026 20:27\\nPayment                                     Cash\\n------------------------------------------------\\nAmoxicillin 500mg (B:LATE Exp:01/99)\\n  2.00 x 20.00                         Rs. 40.00\\nAm…\", \"barcode_svg\": \"<svg version=\\\"1.1\\\" xmlns=\\\"http://www.w3.org/2000/svg\\\" width=\\\"23.040mm\\\" height=\\\"18.411mm\\\">\\r\\n    <!--Autogenerated with python-barcode 0.16.1-->\\r\\n    <g id=\\\"b…"
-      }
-    },
-    "POST /prescriptions/{prescription_id}/items/{item_id}/stop": {
-      "request": {
-        "path": "/api/v1/prescriptions/1/items/1/stop",
-        "body": {
-          "reason": "rash"
-        }
-      },
-      "response": {
-        "status": 200,
-        "body_preview": "{\"status\": 200, \"body\": {\"data\": {\"prescription_id\": 1, \"prescription_number\": \"RX-2026-000001\", \"patient_id\": 1, \"prescriber_id\": 1, \"ticket_id\": 1, \"admission_id\": null, \"encounter_id\": null, \"source\": \"OPD\", \"destination\": \"HospitalPharmacy\", \"status\": \"FullyDispensed\", \"is_content_locked\": false, \"replaced_by_id\": null, \"notes\": null, \"cancelled_at\": null, \"cancel_reason\": null, \"external_printed_at\": null, \"order_mode\": \"Written\", \"received_by\": null, \"read_back\": false, \"countersigned_by\": null, \"countersigned_at\": null, \"countersign_alerted_at\": null, \"created_by\": 1, \"created_at\": \"2026-10-14T02:42:36.512575+00:00\", \"row_version\": 2, \"patient_name\": \"Ali Khan\", \"mrn\": \"MRN-2026-000001\", \"prescriber_name\": \"Dr Ahmed\", \"prescriber_stamp\": {\"at\": \"2026-10-14T02:42:36.512575+00:00\", \"name\": \"Dr Ahmed\", \"text\": \"Dr Ahmed, Doctor, PMDC PMDC-20014, 14-Oct-2026 07:42\", \"user_id\": 1, \"designation\": \"Doctor\", \"employee_id\": 1, \"registration\": \"PMDC PMDC-20014\"}, \"received_by_name\": null, \"items\": [{\"prescription_item_id\": 1, \"prescription_id\": 1, \"drug_id\": 1, \"is_external\": false, \"external_drug_name\": null, \"external_strength\": null, \"external_form\": null, \"qty_prescribed\": 12.0, \"qty_dispensed\": 0.0, \"dose_text\": \"500 mg\", \"route\": \"Oral\", \"frequency_code\": \"TDS\", \"interval_hours\": null, \"duration_days\": 4, \"instructions\": null, \"start_at\": null, \"end_at\": null, \"is_prn\": false, \"is_stat\": false, \"self_administration\": false, \"item_status\": \"Stopped\", \"stopped_at\": \"2026-10-…"
-      }
-    },
-    "GET /dispensations/{dispensation_id}/labels": {
-      "request": {
-        "path": "/api/v1/dispensations/1/labels"
-      },
-      "response": {
-        "status": 200,
-        "body_preview": "{\"status\": 200, \"body\": {\"data\": [{\"document_type\": \"dispensing_label\", \"printer_role\": \"label\", \"paper_width_mm\": 50, \"fields\": {\"hospital_name\": \"Haspataal Hospital\", \"dispensation_id\": 1, \"dispensation_item_id\": 1, \"dispensed_at\": \"2026-09-30T15:01:47.063106+00:00\", \"dispensed_by_name\": \"ue85df46134\", \"patient_name\": \"Ali Khan\", \"mrn\": \"MRN-2026-000001\", \"drug_name\": \"Potassium chloride 15%\", \"generic_name\": null, \"strength\": null, \"form\": \"Injection\", \"qty\": 4.0, \"unit\": \"unit\", \"dose_text\": \"10 mmol\", \"route\": \"IV\", \"frequency_code\": \"BD\", \"duration_days\": 2, \"instructions\": \"in 500 ml normal saline over 4 hours\", \"directions\": \"10 mmol IV twice a day for 2 days in 500 ml normal saline over 4 hours\", \"prescriber_name\": \"Dr Ahmed\", \"batch_no\": \"KCL-1\", \"expiry_date\": \"2099-01-01\", \"warnings\": [\"HIGH ALERT (concentrated electrolyte): second check before use\"]}, \"text\": \"Haspataal Hospital\\nAli Khan MRN-2026-000001\\n----------------------------------------\\nPotassium chloride 15%\\n10 mmol IV twice a day for 2 days in 500\\nml normal saline over 4 hours\\nQty 4.00 unit          B:KCL-1 Exp 01/99\\nDr. Dr Ahmed\\nDispensed 30-Sep-2026 20:01\\nHIGH ALERT (concentrated electrolyte):\\nsecond check before use\\n\", \"barcode_svg\": \"<svg version=\\\"1.1\\\" xmlns=\\\"http://www.w3.org/2000/svg\\\" width=\\\"23.040mm\\\" height=\\\"12.411mm\\\">\\r\\n    <!--Autogenerated with python-barcode 0.16.1-->\\r\\n    <g id=\\\"barcode_group\\\">\\r\\n        <rect width=\\\"100%\\\" height=\\\"100%\\\" style=\\\"fill:white\\\"/>\\r\\n …"
-      }
     }
   }
 }

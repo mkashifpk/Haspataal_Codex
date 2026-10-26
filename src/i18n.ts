@@ -9,6 +9,7 @@ export function setLanguage(value: string) {
   language = value;
 }
 const ur: Record<string, string> = {
+  "This PC is not set up for pharmacy cash. Ask IT to map it to the Pharmacy Counter.": "یہ کمپیوٹر فارمیسی نقد کے لیے مقرر نہیں۔ آئی ٹی سے اسے فارمیسی کاؤنٹر پر مقرر کرائیں۔",
   Zakat: "زکوٰۃ",
   SocialWelfare: "سماجی بہبود",
   "Open an existing prescription before requesting assistance.": "امداد سے پہلے اصل موجودہ نسخہ کھولیں۔",

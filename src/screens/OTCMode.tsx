@@ -1,4 +1,8 @@
 import { useEffect, useRef, useState } from "react";
+import {
+  pharmacyCashShift,
+  otherPharmacyCashCounter,
+} from "../pharmacy-workflow-policy";
 import { api, call, ApiError } from "../bridge";
 import {
   Empty,
@@ -74,7 +78,8 @@ export function OTCMode({
     [lookup, setLookup] = useState(""),
     [printBusy, setPrintBusy] = useState(false),
     [printNotice, setPrintNotice] = useState("");
-  const [requiredCashNode, setRequiredCashNode] = useState<string>();
+  const [requiredCashNode, setRequiredCashNode] =
+    useState<string>("PharmacyCounter");
   const [reviewAttempted, setReviewAttempted] = useState(false);
   const scanner = useRef<HTMLInputElement>(null),
     scanFlight = useRef(false),
@@ -142,17 +147,18 @@ export function OTCMode({
   const drawer = useLoad(async () => {
     if (!visible || !can("finance.shift.operate")) return null;
     const [shift, terminal] = await Promise.all([
-      api<Shift | null>("GET", "/finance/cash-shifts/mine"),
+      api<Shift | null>(
+        "GET",
+        "/finance/cash-shifts/mine?node=PharmacyCounter",
+      ),
       api<{ cash_node: string | null }>("GET", "/terminals/whoami"),
     ]);
     return { shift, terminal };
   }, [visible, can("finance.shift.operate"), revision]);
   const ownDrawer =
-    !!drawer.data?.shift &&
-    drawer.data.shift.user_id === user.user_id &&
-    drawer.data.shift.status === "Open" &&
-    !!drawer.data.terminal.cash_node &&
-    drawer.data.shift.node === drawer.data.terminal.cash_node;
+    !drawer.loading &&
+    !drawer.error &&
+    pharmacyCashShift(drawer.data?.shift, user.user_id);
   const cashCounterMismatch =
     !!requiredCashNode && drawer.data?.terminal.cash_node !== requiredCashNode;
   const receipt = useLoad(async () => {
@@ -283,8 +289,8 @@ export function OTCMode({
       if (method === "Cash" && (!ownDrawer || cashCounterMismatch))
         throw new Error(
           t(
-            "Open your own cash shift at this terminal before collecting cash.",
-            "نقد وصولی سے پہلے اسی ٹرمینل پر اپنی کیش شفٹ کھولیں۔",
+            "Open your own Pharmacy Counter cash shift before collecting cash.",
+            "نقد وصولی سے پہلے فارمیسی کاؤنٹر پر اپنی کیش شفٹ کھولیں۔",
           ),
         );
       const body = makeOtcSale(current, method, reference, name, mobile);
@@ -349,20 +355,17 @@ export function OTCMode({
         );
         if (review.body.method === "Cash") {
           const [shift, terminal] = await Promise.all([
-            api<Shift | null>("GET", "/finance/cash-shifts/mine"),
+            api<Shift | null>(
+              "GET",
+              "/finance/cash-shifts/mine?node=PharmacyCounter",
+            ),
             api<{ cash_node: string | null }>("GET", "/terminals/whoami"),
           ]);
-          if (
-            !shift ||
-            shift.user_id !== user.user_id ||
-            shift.status !== "Open" ||
-            !terminal.cash_node ||
-            shift.node !== terminal.cash_node
-          )
+          if (!pharmacyCashShift(shift, user.user_id))
             throw new Error(
               t(
-                "Open your own cash shift at this terminal before collecting cash.",
-                "نقد وصولی سے پہلے اسی ٹرمینل پر اپنی کیش شفٹ کھولیں۔",
+                "Open your own Pharmacy Counter cash shift before collecting cash.",
+                "نقد وصولی سے پہلے فارمیسی کاؤنٹر پر اپنی کیش شفٹ کھولیں۔",
               ),
             );
         }
@@ -478,12 +481,25 @@ export function OTCMode({
           {t("This terminal is mapped to:", "یہ ٹرمینل مقرر ہے:")}{" "}
           <bdi>{drawer.data?.terminal.cash_node || "—"}</bdi>.{" "}
           {t(
-            "Cash is unavailable here until IT resolves the counter mapping or the backend requirement. Card is still available.",
-            "آئی ٹی کاؤنٹر نقشہ یا بیک اینڈ شرط درست کرے تب نقد دستیاب ہوگا۔ کارڈ دستیاب ہے۔",
+            "This PC is not set up for pharmacy cash. Ask IT to map it to the Pharmacy Counter. Card remains available.",
+            "یہ کمپیوٹر فارمیسی نقد کے لیے مقرر نہیں۔ آئی ٹی سے فارمیسی کاؤنٹر مقرر کرائیں۔ کارڈ دستیاب ہے۔",
           )}
         </p>
       )}
       {notice && <p role="status">{notice}</p>}
+      {otherPharmacyCashCounter(write.error) && (
+        <p className="notice">
+          {t(
+            "Your drawer is open at another counter:",
+            "آپ کی دراز دوسرے کاؤنٹر پر کھلی ہے:",
+          )}{" "}
+          <bdi>{otherPharmacyCashCounter(write.error)}</bdi>.{" "}
+          {t(
+            "Pharmacy cash requires your own Pharmacy Counter shift.",
+            "فارمیسی نقد کے لیے فارمیسی کاؤنٹر پر اپنی شفٹ لازم ہے۔",
+          )}
+        </p>
+      )}
       {writable && (
         <>
           <section className="card">
@@ -497,12 +513,12 @@ export function OTCMode({
             <p>
               {ownDrawer
                 ? t(
-                    "Your cash shift is open at this terminal.",
-                    "اس ٹرمینل پر آپ کی کیش شفٹ کھلی ہے۔",
+                    "Your own Pharmacy Counter cash shift is open.",
+                    "فارمیسی کاؤنٹر پر آپ کی اپنی کیش شفٹ کھلی ہے۔",
                   )
                 : t(
-                    "Cash needs your own open shift at this terminal. Card does not require a cash shift.",
-                    "نقد کے لیے اسی ٹرمینل پر اپنی کھلی شفٹ لازم۔ کارڈ کو نقد شفٹ درکار نہیں۔",
+                    "Cash needs your own open Pharmacy Counter shift. Card does not require a cash shift.",
+                    "نقد کے لیے فارمیسی کاؤنٹر پر اپنی کھلی شفٹ لازم۔ کارڈ کو نقد شفٹ درکار نہیں۔",
                   )}
               {ownDrawer &&
                 ` #${drawer.data!.shift!.shift_id} · ${drawer.data!.shift!.node}`}
@@ -812,7 +828,9 @@ export function OTCMode({
                   value={method}
                   onChange={(e) => setMethod(e.target.value as "Cash" | "Card")}
                 >
-                  <option value="Cash">{tr("Cash")}</option>
+                  <option value="Cash" disabled={!ownDrawer}>
+                    {tr("Cash")}
+                  </option>
                   <option value="Card">{tr("Card")}</option>
                 </select>
               </Field>
@@ -839,7 +857,7 @@ export function OTCMode({
               disabled={
                 !live ||
                 !stockReady ||
-                (method === "Cash" && cashCounterMismatch)
+                (method === "Cash" && (!ownDrawer || cashCounterMismatch))
               }
               onClick={prepare}
             >
@@ -1014,7 +1032,8 @@ export function OTCMode({
             data-help="otc.confirm"
             disabled={
               write.blocked ||
-              (review.body.method === "Cash" && cashCounterMismatch)
+              (review.body.method === "Cash" &&
+                (!ownDrawer || cashCounterMismatch))
             }
             onClick={confirm}
           >
