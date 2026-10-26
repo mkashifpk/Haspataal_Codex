@@ -1,6 +1,6 @@
 # Haspataal checkpoint — 26 October 2026
 
-Codex/functions, Asia/Karachi. User requested ONE next screen after verifier. Clean baseline `24d9e1f`; implemented Phase3 position41 **critical_results_doctor**. Source commit will be the commit containing this checkpoint; following docs-only commit records exact source/proposal. No next screen started. No running commands, uncertain writes or active test sessions. Prior/development checkpoint archived in `docs/HANDOFF_CRITICAL_DOCTOR_DEVELOPMENT_2026-10-26.md`.
+Codex/functions, Asia/Karachi. User requested ONE next screen after verifier. Clean baseline `24d9e1f`; implemented Phase3 position41 **critical_results_doctor**. Source **817fcb6**, tested renderer **index-DMFfAUPU.js**; following docs-only commit records confirmed proposal164. No next screen started. No running commands, uncertain writes or active test sessions. Prior/development checkpoint archived in `docs/HANDOFF_CRITICAL_DOCTOR_DEVELOPMENT_2026-10-26.md`.
 
 ## Delivered / files
 
@@ -30,9 +30,9 @@ Pending acceptance: actual invalid treating-eligibility fixture(no shared staff 
 
 ## Progress / next3 / Git
 
-New Doctor proposal still pending source commit/submission: save exact payload/key, propose_progress and verify progress_proposals BEFORE final handoff. No previous Doctor claims. Do not resubmit unchanged accepted160–163. Prior verifier audit `docs/LAB_VERIFIER_AUDIT_2026-10-26.md` preserves earlier evidence limits.
+**Proposal164 confirmed pending via progress_proposals: awaiting human review on /docs -> My progress.** Build817fcb6 / index-DMFfAUPU.js; exact payload `docs/critical-doctor-proposal-817fcb6.json`, request_id `codex-critical-doctor-live-817fcb6-20261026-v1`, receipt `docs/critical-doctor-proposal-receipt-2026-10-26.json`.10tested endpoints/event/service-policy/states/permissions/writes/handbook items only. Rules277851e2fd/d194e400fe withheld for physical sound/actual invalid-treating-eligibility fixture; full-plan and human items withheld. No previous Doctor claims. Do not resubmit unchanged accepted160–163. Prior verifier audit `docs/LAB_VERIFIER_AUDIT_2026-10-26.md` preserves earlier evidence limits.
 
-Next3: (1) commit source/test/evidence/checkpoint, submit/verify tested Doctor proposal and record receipt in docs-only commit; (2) human tests Doctor screen with NEW labelled synthetic upstream results and truthful action, report/alert/alarm/F1/Urdu/zoom/finality; saved final IDs5/6/7 may be inspected with open-only off, no new fictional care/communications; (3) next authorisation: query roadmap, expected position42lab_send_outs, fresh bundle first. Check27–29 answers and retest when Fixed/deployed. No other implementation in progress. All uncommitted changes belong to this screen/docs; unrelated work untouched.
+Next3: (1) source817fcb6 and confirmed proposal164 complete; following docs-only commit saves payload/receipt/checkpoint, expected clean tree, no command or implementation in progress; (2) human tests Doctor screen with NEW labelled synthetic upstream results and truthful action, report/alert/alarm/F1/Urdu/zoom/finality; saved final IDs5/6/7 may be inspected with open-only off, no new fictional care/communications; (3) next authorisation: query roadmap, expected position42lab_send_outs, fresh bundle first. Check27–29 answers and retest when Fixed/deployed. No other implementation in progress. After final docs-only commit all changes are committed; unrelated work untouched.
 
 ## Preservation / environment
 

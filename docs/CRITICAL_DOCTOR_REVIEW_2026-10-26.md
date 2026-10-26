@@ -1,6 +1,6 @@
 # Doctor — Critical results to acknowledge
 
-Phase3 position41, Codex26October2026, clean baseline `24d9e1f`. Source commit and proposal recorded in `handoff.md` after submission. Implementation and agent tests are complete for this step; named human workspace acceptance is pending.
+Phase3 position41, Codex26October2026, clean baseline `24d9e1f`. Source **817fcb6**, renderer **index-DMFfAUPU.js**, proposal **164** confirmed pending via progress_proposals: awaiting human review on /docs -> My progress. Exact payload/receipt in docs. Implementation and agent tests are complete for this step; named human workspace acceptance is pending.
 
 ## Purpose and implementation
 
