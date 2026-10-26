@@ -1,6 +1,10 @@
 # Zakat / Charity Override — implementation checkpoint
 
-Status: implemented, awaiting real DEV verification. This is not a completed screen or Pharmacy acceptance claim.
+Status: real DEV automated verification passed 26 October 2026, run DEMO-CHARITY-1793006419214, renderer index-CroqvzrG.js. Human acceptance remains pending. See charity-evidence-2026-10-26.json. RX12/13 fully dispensed virtually (D9/D10); unusedRX14 Cancelled. Approvals6/7 Approved,8 Rejected,9 Cancelled. No pending test approval or uncertain write; all isolated accounts signed out and preferences restored.
+
+Fixed a live-discovered frontend defect: while sending, show a pending message; only show unknown/retry after the request stops without a definite result. This is covered by the actual lost-reply run. Queued and counter co-sign lost201/double-click/replay tests pass; changed original password refused locally, plaintext redacted; actual STEP_UP_REQUIRED and permission denial pass. Independent officer UI decisions, exact assistance-to-Dispense identity/fund handoff and wrong-fund refusal pass. Real socket approval event and reconnect list/detail refresh, bounded/no-match/stale-list states, F1 field/dialog/focus preservation, both languages/themes at250% and native zoom bounds/reset pass. Actual EN/UR handbook screenshots captured and visually inspected. ACCOUNT_LOCKED remains unit-only; no shared account deliberately locked. Named human/translation/editor/physical acceptance remains pending.
+
+Earlier interrupted run DEMO-CHARITY-1793006207568 was reconciled before rerun: actual approval5 Cancelled and RX9/10/11 Cancelled with zero dispensing. The sections below preserve earlier implementation context; maintenance blocker26 is now Fixed and retested OFF. Mandatory full build still needs Lab-only/Bench screenshots, not Charity media.
 
 The screen opens from Pharmacy → Zakat / charity override, or from an existing prescription in Dispense → Request Zakat / charity assistance. It supports Zakat and Social Welfare, a required reason, queued approval or an independent officer's counter co-sign. It reads current decisions, refreshes on approval events and reconnect, and hands matching approved assistance to a separate Dispense review. It never selects a supply quantity automatically or treats approval as cash movement.
 

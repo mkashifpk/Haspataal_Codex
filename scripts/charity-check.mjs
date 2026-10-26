@@ -814,7 +814,7 @@ try {
   save();
   if (j.passed)
     fs.writeFileSync(
-      "docs/charity-evidence-2026-10-25.json",
+      "docs/charity-evidence-2026-10-26.json",
       JSON.stringify(
         {
           date: j.finished,

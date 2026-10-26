@@ -809,7 +809,14 @@ export function CharityOverride({
               {write.remaining}
             </p>
           )}
-          {write.attempt ? (
+          {write.busy ? (
+            <p role="status">
+              {t(
+                "Sending assistance request. Please wait for the server's answer.",
+                "امداد کی درخواست بھیجی جا رہی ہے۔ سرور کے جواب کا انتظار کریں۔",
+              )}
+            </p>
+          ) : write.attempt ? (
             <section className="notice" role="alert">
               <p>
                 {t(
