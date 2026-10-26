@@ -1,0 +1,48 @@
+# Samples sent to partner laboratories — implementation review
+
+Codex,26October2026. Phase3 position42 `lab_send_outs`, clean baseline `438acfe`. Source/build/proposal references are recorded in `handoff.md`. This is agent implementation/testing evidence, not named human workspace acceptance.
+
+## Purpose and delivered workflow
+
+At the laboratory handover, the technician groups actual collected send-out samples for one valid partner, dispatches and prints the courier manifest, tracks the server MOU deadline, then records the real partner report or rejection for independent verification and replacement collection. Existing project components, patient identity/reviewed-write/printing patterns and bilingual layout are reused. No billing, local deadline, automatic courier booking, fabricated results, external messages or unsupported edit/delete is added.
+
+- `src/screens/LabSendOuts.tsx`, `src/lab-sendout-policy.ts`: actual pending samples with usual-partner default, deliberate destination override warning, real partner/service/active/MOU status, courier/note validation and frozen barcode/patient/MRN/test review. Fresh actor/permission/service/partner-version/current-sample preflight, single flight, idempotent original-key recovery. A changed selection cannot silently substitute another sample.
+- Actual manifest register/detail, outstanding/partner/bounded-limit filters and local find/known-ID read, server due_at/counts and every sample’s actual reporting/entry time/reference/rejection. Dispatch has no dedicated live event: own writes/actual reconnect/explicit Refresh update; no polling or invented event.
+- Exact sample/manifest/scanner identity, patient-specific metric grid/reference/critical preview, required real partner reference/reporting time with hospital timezone conversion, optional interpretation. First result is state-guarded, never replayed; actual scanner-history reconciliation after lost reply. Result entry is PendingVerification, independent publication separate.
+- RejectedByPartner with factual note, original rejected history and server-generated replacement barcode; separate collection/dispatch of replacement. Rejection replay is original-key/body only. Unknown outcomes lock dialog/Escape/navigation; reconciliation renders clinical projections, never the invoice included in rejection responses.
+- `electron/sendout-print.cjs` and main native action: exact current manifest/payload/sample/actor/view checks, safe escaped A4 template, server hospital/PHC/issue line, partner/patient/barcode/test and blank handover/courier signature lines. Separate mapped-document printing and real PDF generation; failures do not repeat business writes. Urdu-first bundled Noto font, RTL and mixed-direction identities; empty header facts are omitted, never invented.
+- Scoped App handbook/permission/runtime service navigation, exact generated TypeScript/full bundle, English/Urdu screen/control/task/workspace guide and detailed FAQs, actual screenshots, help inventory/checker/negative checks. Shared F1 and native100–250%zoom preserved. No Review code entered or human review signed.
+
+## Verification / actual owned records
+
+Final **143/143testsPASS**. Mandatory **npm run buildPASS**: TypeScript and help coverage42screens/809controls/306groups/40FAQseeds/30workspaceguides. Final renderer **index-YlbJFsHF.js**, CSSindex-CHhcN2ui.css. Native/script syntax and Git diff checksPASS; existing bundle-size warning. A print-header QA assertion was corrected to distinguish a present issue line from an empty one; the full suite then passed.
+
+Real guarded run **DEMO-SENDOUT-1793036523613**, original journal `artifacts/lab-sendout-check.json`, PASS17:45:10UTC. Never overwrite/restart/replay terminal business writes. Existing synthetic patient5/ticket5 ownership/current state verified before reuse. Actual configured VITDtest5/partner1 read from DEV; no master/partner/MOU/terminal/service changed.
+
+- NEW requisition7/invoice26 virtualCard/sample14 `LB-2026-0000014`; requisition8/invoice27 virtualCard/sample15 `LB-2026-0000015`. Software-only collected identities, no physical specimens.
+- NEW manifest1 **SOM-2026-00001**, actual server due time. Final returned1/rejected1/outstanding0. Initial missing destination refused; real usual partner/default/MOU/context checked; lost201/doubleclick same-key/body replayONEmanifest. A dispatched sample refuses a second dispatch with actualLAB_SAMPLE_STATE_INVALID.
+- Real print payload/native A4 EN/URPDF generation. Physical printer failure instrumented; no second dispatch. Actual signatures remain blank; no physical handover claimed.
+- Required partner metadata/actual metric grid; concurrent actual result13 invalidated stale reviewed result BEFOREPOST. Sample15 partner rejection lost201 replayONEeffect, server actual replacement16 **LB-2026-0000016**; original manifest retains rejection/result metadata/counts.
+- Separate replacement collection and UI dispatch manifest2 **SOM-2026-00002**, final returned1/outstanding0. Initial partner result14 lost201/doubleclickONEPOST, NO retry; exact scanner-state/history/reference/value review releases without resubmission. Both results13/14 independently **Published** by verifier fixture; no actual medical test, care, money, specimen, transport or outside contact.
+- Completed-history/local no-match/known-ID reads, failed detail hides stale identities/retry; F1 field/dialog draft/focus and actual ENUR/both themes250 layouts. Cashier scoped page/native dispatch/print denied. All5isolated profiles restored preferences/signed out; no uncertain writes.
+
+Business suite used **index-CovRe-3_.js**. Final **index-YlbJFsHF.js** adds translated priority/state labels. Final read-only history/F1/media/ENUR/both themes250/nativezoom100–250bounds/resetPASS on exact terminal records, ZERO business writes, profile restored/signed out. Native Urdu font/header refinements separately checked with real PDFs through `scripts/lab-sendout-print-check.mjs`; zero business writes, profile restored/signed out. No full business-suite rerun on a later renderer implied.
+
+Evidence: `docs/sendout-live-evidence-2026-10-26.json`, `docs/sendout-readonly-evidence-2026-10-26.json`, `docs/sendout-final-print-evidence-2026-10-26.json`; scripts `lab-sendout-check.mjs`, `lab-sendout-readonly-check.mjs`, `lab-sendout-print-check.mjs`. Exact original keys/bodies are in ignored journals/transports, not credentials. Actual final UI screenshots inspected and bundled.
+
+PDF skill used for read-only print QA: both final PDFs are1pageA4(595.92×842.88points), rendered with Poppler and visually inspected after final native header/Urdu font changes; no clipping/overlap/missing signature lines. Samples: [English PDF](sendout-manifest-en.pdf), [Urdu PDF](sendout-manifest-ur.pdf), rendered pages `sendout-manifest-{en,ur}.png`. These are explicitly software-test examples, not live courier documents.
+
+## MCP / backend / limits
+
+Build2026-10-26T01:17:08.510356+00:00; contract90f7a429e5aa519d440f; knowledgef2f42e3079bc34a3; rubric1f3d8a4d9746; implementation1/developer mkashif. Startup overview/progress/proposals/feedback/issues/guide/roadmap, full bundle(no omissions), quality/design/workspace outline, exact endpoints/generated types/request validation and diagnostic workflow/recipe read.164accepted for selected items at startup; no signed human workspace review returned.
+
+No new backend defect reproduced.27/28/29 remainNew/no response at startup: label GET mutation/docs, receptionist publication audience, verifier context/recovery. No duplicate report.26Fixed/maintenance off previously verified;20–25Fixed deployed. Previous23Pharmacy clearance/lost-answer and positive PharmacyCounterCash remain separate pending tests; never remap terminal4 or borrow a shift.
+
+Still pending: named human fresh-data/roleFAQ/Urdu/editor/busiest-hour/device/physical paper/signatures acceptance, actual expired-MOU/refusal and shared service lifecycle mutations, fullest malformed/reference/reagent refusal matrix. Policy unit cases test inactive/expired/non-Lab partners and full/open_work/records/hidden/setup/unknown; actual valid full view tested. No shared setup mutated to force failures. Human-owned H08/H09/H10 decisions remain open. Full testplan and compulsory human items remain unproposed; screen/workspace/phase acceptance is not complete.
+
+## Manual testing
+
+1. Lab Technician → **Samples sent to partner laboratories**. Turn **Outstanding manifests only** off; open actual manifest IDs1/2 to inspect their final history/counts/report times and print the SAME manifest. Do not re-dispatch completed samples or invent another report. Saved software sample PDF links above show expected A4 layout.
+2. Use NEW explicitly synthetic send-out orders: complete payment/collection in their proper workflows, select actual pending barcodes, verify valid usual partner/MOU/destination, courier/note, review and confirm once. Check manifest number, actual due time, paper/PDF and courier signature spaces on your real printer.
+3. Record a truthful labelled partner-report simulation with actual metric/ref/time, or partner rejection. Verify independent verification and actual replacement barcode; replacement collection/dispatch remain separate. Test missing fields, cancellation/draft/F1/focus, English/Urdu/both themes100–250%zoom and lost-reply recovery as documented. Do not perform real care/transport/external notification for a test patient.
+4. Human alone starts/signs DEV portal review and enters its Review code. Agent proposals award no points by themselves. Expected next screen is position43 `diagnostic_services_list`; query fresh roadmap/bundle before starting.

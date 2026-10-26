@@ -197,6 +197,7 @@ export function checkHelp({
       "CharityOverride",
       "LabOnlyWalkIn",
       "LabBench",
+      "LabSendOuts",
       "LabVerification",
       "CriticalResultsBench",
       "CriticalResultsDoctor",

@@ -29,6 +29,7 @@ import { Consultation } from "./screens/Consultation";
 import { EPrescription } from "./screens/EPrescription";
 import { LabOrdersResults } from "./screens/LabOrdersResults";
 import { LabOnlyWalkIn } from './screens/LabOnlyWalkIn';
+import { LabSendOuts } from './screens/LabSendOuts';
 import { LabBench } from './screens/LabBench';
 import { LabVerification } from './screens/LabVerification';
 import { CriticalResultsDoctor, DoctorCriticalAlert } from './screens/CriticalResultsDoctor';
@@ -74,6 +75,7 @@ const labels: Record<string, [string, string, string]> = {
   my_cash_shift: ["My cash shift", "میری کیش شفٹ", "₨"],
   lab_only_walkin: ['Lab-only walk-in','صرف لیب کے لیے آمد','⚗'],
   lab_verification: ['Verification queue','تصدیق کی قطار','✓'],
+  lab_send_outs: ['Samples sent to partner laboratories','شراکت دار لیب کو بھیجے گئے نمونے','↗'],
   lab_bench: ['Scanner-first lab bench','اسکینر سے لیب بنچ','⚗'],
   critical_results_doctor: ['Critical results to acknowledge','تسلیم کرنے والے اہم نتائج','!'],
   critical_results_verifier: ['Critical results to tell','فوری بتانے والے اہم نتائج','!'],
@@ -109,6 +111,7 @@ const frontDeskScreens = new Set([
   'lab_only_walkin',
   'lab_verification',
   'lab_bench',
+  'lab_send_outs',
   "charity_override",
   "otc",
   "order_queries",
@@ -730,6 +733,7 @@ export function App() {
     "charity_override",
     'lab_only_walkin',
     'lab_bench',
+    'lab_send_outs',
     ...(user?.permissions.includes('diagnostics.critical.view') ? ['critical_results_bench','critical_results_verifier','critical_results_doctor'] : []),
     ...(user?.permissions.some(p => ['lab.result.verify', 'lab.result.view'].includes(p)) ? ['lab_verification'] : []),
     ...(user?.permissions.includes("clinical.encounter.view") || user?.permissions.includes("clinical.encounter.create") ? ["consultation"] : []),
@@ -772,7 +776,7 @@ export function App() {
           w.screens.some((s) => s.id === id),
         )))) &&
       est?.views.screens.find((v) => v.screen_id === id)?.view !== "hidden" &&
-      (!["rx_queue","dispense","order_queries","otc","charity_override","lab_only_walkin","lab_bench","lab_verification","critical_results_bench","critical_results_verifier","critical_results_doctor"].includes(id) || ["full", "open_work", "records"].includes(est?.views.screens.find(v => v.screen_id === id)?.view || "")),
+      (!["rx_queue","dispense","order_queries","otc","charity_override","lab_only_walkin","lab_bench","lab_send_outs","lab_verification","critical_results_bench","critical_results_verifier","critical_results_doctor"].includes(id) || ["full", "open_work", "records"].includes(est?.views.screens.find(v => v.screen_id === id)?.view || "")),
   );
   const view = est?.views.workspaces.find(
     (v) => v.workspace === workspace,
@@ -1131,6 +1135,7 @@ export function App() {
                 <Registration user={user} revision={revision} />
               )}
               {screen === 'lab_only_walkin' && est && <LabOnlyWalkIn key={user.user_id} user={user} connected={connected} stream={stream} establishment={est} timeZone={meta?.hospital_timezone} currency={meta?.currency_code} onCashShift={nav.includes('my_cash_shift')?()=>{navigate('my_cash_shift')}:undefined}/>}
+              {screen === 'lab_send_outs' && est && <LabSendOuts key={user.user_id} user={user} connected={connected} stream={stream} establishment={est} timeZone={meta?.hospital_timezone}/>}
               {screen === 'lab_bench' && est && <LabBench key={user.user_id} user={user} connected={connected} stream={stream} establishment={est} timeZone={meta?.hospital_timezone}/>}
               {screen === 'lab_verification' && est && <LabVerification key={user.user_id} user={user} connected={connected} stream={stream} establishment={est} timeZone={meta?.hospital_timezone}/>}
               {screen === 'critical_results_verifier' && est && <CriticalResultsBench screenId="critical_results_verifier" key={user.user_id} user={user} connected={connected} stream={stream} establishment={est} timeZone={meta?.hospital_timezone}/>}

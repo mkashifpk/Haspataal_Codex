@@ -9,6 +9,14 @@ export function setLanguage(value: string) {
   language = value;
 }
 const ur: Record<string, string> = {
+ "Choose an active laboratory partner with a valid MOU.":"فعال لیب شریک اور درست معاہدہ چنیں۔",
+ "Select current pending samples for this dispatch.":"اس روانگی کے موجودہ منتظر نمونے چنیں۔",
+ "Courier is limited to200characters and note to500characters.":"لے جانے والا200اورنوٹ500حروف تک۔",
+ "Sample and manifest identity differ. Refresh before proceeding.":"نمونہ اور فہرست شناخت مختلف۔ پہلے تازہ کریں۔",
+ "This partner sample is no longer awaiting a result or rejection. Refresh its current state.":"شریک نمونہ نتیجہ/مسترد منتظر نہیں۔ حالت تازہ کریں۔",
+ "Interpretation is limited to4000characters.":"تشریح4000حروف تک۔",
+ "Choose a manifest limit from1to500.":"فہرست کی حد1تا500چنیں۔",
+
  "This result is already acknowledged and final. Read its recorded action; do not submit again.":"یہ نتیجہ تسلیم شدہ و حتمی ہے۔ درج کارروائی پڑھیں؛ دوبارہ نہ بھیجیں۔",
  "A current server version is required. Refresh this result.":"تازہ سرور نسخہ لازم۔ یہ نتیجہ تازہ کریں۔",
  "Describe the actual action taken (3–2000 characters).":"اصل کی گئی کارروائی3تا2000حروف میں لکھیں۔",

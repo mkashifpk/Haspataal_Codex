@@ -1028,6 +1028,21 @@ ipcMain.handle("terminal", async (event, action, args = {}) => {
       }
       return {ok:true,data:printed};
     }
+    if (action === "print-sendout") {
+      if(!Number.isSafeInteger(args.sendOutId)||args.sendOutId<1)throw new Error('Invalid manifest ID');
+      const actor=auth?.user.user_id, workspace=windows.get(win.id);
+      const [record,payload,est]=await Promise.all([api('GET','/lab/send-outs/'+args.sendOutId,undefined,workspace),api('GET','/lab/send-outs/'+args.sendOutId+'/print-payload',undefined,workspace),api('GET','/establishment',undefined,workspace)]);
+      if(!record.ok)return record;if(!payload.ok)return payload;if(!est.ok)return est;
+      if(!actor||actor!==auth?.user.user_id||workspace!==windows.get(win.id))throw new Error('Session changed before manifest printing');
+      if(!['full','open_work','records'].includes(est.data.views.screens.find(x=>x.screen_id==='lab_send_outs')?.view))throw new Error('The send-out records view is unavailable');
+      const f=require('./sendout-print.cjs').assertSendOut(payload.data,args.sendOutId);
+      if(record.data.send_out_id!==f.send_out_id||record.data.manifest_number!==f.manifest_number||record.data.items.length!==f.items.length||f.items.some(i=>!record.data.items.some(r=>r.sample_id===i.sample_id&&r.barcode===i.barcode&&r.mrn===i.mrn)))throw new Error('Manifest print identity changed');
+      const terminal=await api('GET','/terminals/whoami');if(!terminal.ok)return terminal;
+      if(actor!==auth?.user.user_id)throw new Error('Session changed before manifest printing');
+      const printed=await require('./sendout-print.cjs').printSendOut(payload.data,terminal.data,{owner:win,pdf:!!args.pdf,language:prefs.language});
+      if(printed.bytes){const target=await dialog.showSaveDialog(win,{defaultPath:'Manifest-'+f.manifest_number+'.pdf',filters:[{name:'PDF',extensions:['pdf']}]});if(!target.canceled)fs.writeFileSync(target.filePath,printed.bytes);return{ok:true,data:{saved:!target.canceled}};}
+      return {ok:true,data:printed};
+    }
     if (action === "print-diagnostic") {
       if (!Number.isSafeInteger(args.id) || args.id<=0 || !["lab","imaging"].includes(args.kind)) throw new Error("Invalid diagnostic report");
       const requestUser=auth?.user.user_id;
