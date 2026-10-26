@@ -198,6 +198,7 @@ export function checkHelp({
       "LabOnlyWalkIn",
       "LabBench",
       "LabVerification",
+      "CriticalResultsBench",
     ].map((n) => `src/screens/${n}.tsx`),
   ];
   const used = new Set(),

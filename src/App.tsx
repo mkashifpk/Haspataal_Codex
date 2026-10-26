@@ -31,6 +31,7 @@ import { LabOrdersResults } from "./screens/LabOrdersResults";
 import { LabOnlyWalkIn } from './screens/LabOnlyWalkIn';
 import { LabBench } from './screens/LabBench';
 import { LabVerification } from './screens/LabVerification';
+import { CriticalResultsBench } from './screens/CriticalResultsBench';
 import { ExternalReferral } from "./screens/ExternalReferral";
 import { ReferralRegister } from "./screens/ReferralRegister";
 import { PatientEducation } from "./screens/PatientEducation";
@@ -73,6 +74,7 @@ const labels: Record<string, [string, string, string]> = {
   lab_only_walkin: ['Lab-only walk-in','صرف لیب کے لیے آمد','⚗'],
   lab_verification: ['Verification queue','تصدیق کی قطار','✓'],
   lab_bench: ['Scanner-first lab bench','اسکینر سے لیب بنچ','⚗'],
+  critical_results_bench: ['Critical results to tell','فوری بتانے والے اہم نتائج','!'],
   queue_management: ["Queue management", "قطاروں کا انتظام", "≡"],
   refund_waiver_credit: [
     "Refund / waiver / credit",
@@ -98,6 +100,7 @@ const labels: Record<string, [string, string, string]> = {
   settings: ["Settings", "ترتیبات", "⚙"],
 };
 const frontDeskScreens = new Set([
+  'critical_results_bench',
   'lab_only_walkin',
   'lab_verification',
   'lab_bench',
@@ -722,6 +725,7 @@ export function App() {
     "charity_override",
     'lab_only_walkin',
     'lab_bench',
+    ...(user?.permissions.includes('diagnostics.critical.view') ? ['critical_results_bench'] : []),
     ...(user?.permissions.some(p => ['lab.result.verify', 'lab.result.view'].includes(p)) ? ['lab_verification'] : []),
     ...(user?.permissions.includes("clinical.encounter.view") || user?.permissions.includes("clinical.encounter.create") ? ["consultation"] : []),
     ...(user?.permissions.includes("prescription.view") || user?.permissions.includes("prescription.create") ? ["eprescription"] : []),
@@ -763,7 +767,7 @@ export function App() {
           w.screens.some((s) => s.id === id),
         )))) &&
       est?.views.screens.find((v) => v.screen_id === id)?.view !== "hidden" &&
-      (!["rx_queue","dispense","order_queries","otc","charity_override","lab_only_walkin","lab_bench","lab_verification"].includes(id) || ["full", "open_work", "records"].includes(est?.views.screens.find(v => v.screen_id === id)?.view || "")),
+      (!["rx_queue","dispense","order_queries","otc","charity_override","lab_only_walkin","lab_bench","lab_verification","critical_results_bench"].includes(id) || ["full", "open_work", "records"].includes(est?.views.screens.find(v => v.screen_id === id)?.view || "")),
   );
   const view = est?.views.workspaces.find(
     (v) => v.workspace === workspace,
@@ -1122,6 +1126,7 @@ export function App() {
               {screen === 'lab_only_walkin' && est && <LabOnlyWalkIn key={user.user_id} user={user} connected={connected} stream={stream} establishment={est} timeZone={meta?.hospital_timezone} currency={meta?.currency_code} onCashShift={nav.includes('my_cash_shift')?()=>{navigate('my_cash_shift')}:undefined}/>}
               {screen === 'lab_bench' && est && <LabBench key={user.user_id} user={user} connected={connected} stream={stream} establishment={est} timeZone={meta?.hospital_timezone}/>}
               {screen === 'lab_verification' && est && <LabVerification key={user.user_id} user={user} connected={connected} stream={stream} establishment={est} timeZone={meta?.hospital_timezone}/>}
+              {screen === 'critical_results_bench' && est && <CriticalResultsBench key={user.user_id} user={user} connected={connected} stream={stream} establishment={est} timeZone={meta?.hospital_timezone}/>}
               {screen === "patient_documents" && <PatientDocuments user={user} revision={revision} />}
               {screen === "rx_queue" && <PrescriptionQueue key={user.user_id} permissions={user.permissions} connected={connected} stream={stream} timeZone={meta?.hospital_timezone} view={est?.views.screens.find(v => v.screen_id === "rx_queue")?.view || "hidden"} onDispense={nav.includes("dispense")?id=>{if(navigate("dispense"))setPharmacySelection({userId:user.user_id,prescriptionId:id})}:undefined} />}
               {screen === "dispense" && est && <Dispense onCashShift={nav.includes("my_cash_shift")?()=>{navigate("my_cash_shift")}:undefined} initialAssistance={pharmacySelection?.userId===user.user_id?pharmacySelection.assistance:undefined} onCharity={nav.includes("charity_override")?id=>{if(navigate("charity_override"))setCharitySelection({userId:user.user_id,prescriptionId:id})}:undefined} key={user.user_id} user={user} connected={connected} stream={stream} establishment={est} initialId={pharmacySelection?.userId===user.user_id?pharmacySelection.prescriptionId:undefined} onQueue={nav.includes("rx_queue")?()=>{navigate("rx_queue")}:undefined} onQuery={nav.includes("order_queries")?(id,itemId)=>{if(navigate("order_queries"))setQuerySelection({userId:user.user_id,prescriptionId:id,itemId})}:undefined} />}

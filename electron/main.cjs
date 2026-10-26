@@ -8,6 +8,7 @@ const {
   session,
   protocol,
   net,
+  shell,
 } = require("electron");
 const fs = require("node:fs");
 // Replaced with a literal by the distributable build. Source Electron runs are DEV.
@@ -929,6 +930,23 @@ ipcMain.handle("terminal", async (event, action, args = {}) => {
         return { ok: true, data: { saved: !target.canceled, type } };
       }
       return { ok: true, data: { type, base64: r.bytes.toString("base64") } };
+    }
+    if (action === "critical-result-alarm") {
+      const actor = auth?.user.user_id;
+      if (!actor || windows.get(win.id) !== 'lab_tech' || !auth.user.permissions.includes('diagnostics.critical.view')) throw new Error('Critical alarm requires the authorised laboratory workspace');
+      if (!Number.isSafeInteger(args.criticalResultId) || args.criticalResultId <= 0) throw new Error('Invalid critical result');
+      const [record, facility] = await Promise.all([
+        api('GET', `/critical-results/${args.criticalResultId}`, undefined, windows.get(win.id)),
+        api('GET', '/establishment', undefined, windows.get(win.id)),
+      ]);
+      if (!record.ok) return record;
+      if (!facility.ok) return facility;
+      if (actor !== auth?.user.user_id || windows.get(win.id) !== 'lab_tech') throw new Error('The session changed before the alarm');
+      const view = facility.data.views.screens.find(s => s.screen_id === 'critical_results_bench')?.view;
+      if (!['full','open_work'].includes(view)) throw new Error('The laboratory critical-result work view is unavailable');
+      const played = require('./critical-alarm.cjs').criticalAlarmRecord(record.data, args.criticalResultId);
+      if (played) shell.beep();
+      return {ok:true,data:{played}};
     }
     if (action === "print-lab-label") {
       if(!Number.isSafeInteger(args.sampleId)||args.sampleId<=0)throw new Error('Invalid lab sample');

@@ -10,6 +10,55 @@ export type HelpPage = {
   faqUr: [string, string][];
 };
 export const help: Record<string, HelpPage> = {
+ critical_results_bench: {
+  title:'Critical results to tell',titleUr:'فوری بتانے والے اہم نتائج',
+  purpose:'The lab technician opens this screen when a released critical value or priority disease needs urgent communication: tell the responsible clinician now, record each completed communication, and track the separate doctor acknowledgement and health-authority duty.',
+  purposeUr:'لیب ٹیکنیشن اہم نتیجہ یا ترجیحی بیماری آنے پر یہ صفحہ کھول کر ذمہ دار معالج کو فوراً بتاتا، ہر مکمل اطلاع درج کرتا، اور معالج کی تسلیم و ادارۂ صحت کی الگ ذمہ داری دیکھتا ہے۔',
+  steps:[
+   'Lab Technician → Critical results to tell. Check Live, then attend to Urgent communication worklist: only CriticalToCommunicate and PriorityDiseaseToNotify for Lab are shown. Open its actual result; this does not communicate or acknowledge anything.',
+   'Critical laboratory log defaults to Lab and Not yet acknowledged only. Open and Communicated remain until doctor acknowledgement. Use status, dates, My patients only and1–1000limit, then Apply log filters. My patients is the requesting doctor/consultant, not lab ownership. Turn open-only off for acknowledged history; a full limit requires narrower filters. Find in returned critical results is local only.',
+   'Open critical result from a returned row, or enter an actual Known critical result ID. Verify number, name/MRN, finding, requesting doctor, ward/bed and released author/time. Red OVERDUE and the exact communication deadline/escalation come from the server. Never invent a deadline, doctor or record ID.',
+   'Tell the actual responsible clinician by the hospital urgent procedure NOW. Record a completed communication: choose Telephone, In person, Written or Electronic; select the actual recipient role and name/designation2–200characters, optional note up to1000characters. This app records the event; it does not make the call or send the external message.',
+   'For Telephone or In person, the recipient must read the result back. Tick the read-back statement truthfully and I already told this recipient only after the communication happened. Changing means clears these checks. Review communication record validates input, then Confirm completed communication submits once after fresh context checks. Cancel before confirming keeps the draft.',
+   'Priority disease with Health authority notification still required needs a separate actual HealthAuthority communication, alongside responsible-clinician communication. Follow hospital reporting procedure and record who was told. Check authority_informed_at and authority_pending as the server returns them; telling the patient or authority does not imply doctor acknowledgement.',
+   'Communication history shows every recipient, role, method, actual read-back, note, recorded author and time. Doctor acknowledgement, clinician action and escalation remain read-only. Acknowledged is not a button the technician may press here. Existing history is not editable/deletable.',
+   'Lost replies preserve the original communication key/body and lock the draft/navigation. Retry original request explicitly replays the same action inside24hours; Read current result rereads actual history. Never create another communication or repeat intake/payment because the answer was lost. Review actual IDs/history before release; outside retention ask IT. Definite validation refusals remain visible.',
+   'critical_result.updated and reconnect reread list/worklist/current detail without polling. A new Lab Opened event requests a native alarm for the exact still-open result. Attend now; Play alarm for this open result is an explicit audible reminder. Dismiss hides only the local reminder, not communication or clinical acknowledgement. Sound failure remains visible and needs device review.',
+   'Records mode hides pending work and new communication but keeps permitted log/detail history. Retiring completes existing work. Offline writes are blocked. Changing result or workspace asks before discarding a draft. F1 from controls/dialogs preserves draft/focus; English/Urdu and themes use shared100–250%zoom. Named human fresh-data, Urdu/FAQ/editor and audible-device acceptance remain pending.'
+  ],
+  stepsUr:[
+   'لیب ٹیکنیشن سے فوری بتانے والے اہم نتائج۔ لائیو چیک، پھر صرف لیب کی اہم اطلاع یا ترجیحی بیماری کا فوری کام کھولیں۔ نتیجہ پڑھنے سے اطلاع یا تسلیم درج نہیں ہوتی۔',
+   'رجسٹر ابتدا میں لیب اور معالج کی تسلیم کے منتظر دکھاتا، کھلا و اطلاع دیا دونوں۔ حالت، تاریخ، میرے مریض اور1تا1000حد کے بعد چھانٹی لگائیں۔ میرے مریض سے ٹیسٹ مانگنے والا معالج مراد، لیب ملکیت نہیں۔ تسلیم شدہ کو کھلے کی شرط ہٹائیں؛ حد پوری تو تلاش محدود۔ موصولہ میں تلاش صرف مقامی ہے۔',
+   'اصل لوٹی سطر کھولیں یا معلوم اصل اہم نمبر دیں۔ نام/ایم آر این، نتیجہ، ذمہ دار معالج، وارڈ/بستر، جاری کرنے والا اور وقت چیک۔ سرخ تاخیر، مقرر وقت اور اگلی اطلاع سرور سے، فرض نہیں۔',
+   'ہسپتال کے فوری طریقے سے اصل ذمہ دار معالج کو ابھی بتائیں۔ مکمل اطلاع میں اصل فون، روبرو، تحریری یا برقی طریقہ، کردار، نام/عہدہ2تا200حروف اور اختیاری1000حروف نوٹ۔ ایپ ریکارڈ بناتی ہے، کال یا بیرونی پیغام نہیں بھیجتی۔',
+   'فون/روبرو میں وصول کنندہ نتیجہ دہرائے۔ اصل دہرانے اور بتا چکا ہوں صرف وقوع کے بعد نشان دیں۔ طریقہ بدلنے سے نشان صاف۔ جائزہ پھر تازہ سیاق کے بعد ایک تصدیق؛ پہلے بند سے مسودہ رہے۔',
+   'ترجیحی بیماری میں ادارے کو اطلاع باقی ہو تو ذمہ دار معالج کے ساتھ الگ اصل ادارۂ صحت اطلاع بھی دیں اور درج کریں۔ ہسپتال طریقہ اپنائیں۔ سرور کا اصل ادارہ وقت و بقایا دیکھیں؛ مریض/ادارے کو بتانا معالج تسلیم نہیں۔',
+   'تاریخ میں ہر اصل وصول کنندہ، کردار، طریقہ، دہرانا، نوٹ، درج کرنے والا و وقت۔ معالج کی تسلیم، کارروائی اور اگلی اطلاع صرف پڑھیں؛ ٹیکنیشن یہاں تسلیم نہیں کر سکتا۔ تاریخ ترمیم/حذف نہیں۔',
+   'گم جواب پر اصل اطلاع کی کلید/مواد اور مسودہ/جگہ مقفل۔24گھنٹے اصل کوشش وہی عمل؛ موجودہ نتیجہ اصل تاریخ پڑھتا۔ جواب غائب ہونے پر نئی اطلاع یا رجسٹریشن/ادائیگی نہ دہرائیں۔ اصل نمبر و تاریخ چیک، مدت بعد آئی ٹی۔ واضح انکار نظر آتا ہے۔',
+   'اصل اہم نتیجہ واقعہ و رابطہ بحالی سے فہرست/کام/تفصیل تازہ، پولنگ نہیں۔ نیا کھلا لیب واقعہ عین اب کھلے ریکارڈ کا نظام الارم مانگتا۔ فوراً توجہ؛ الارم بٹن واضح آواز۔ یاددہانی چھپانا اطلاع یا معالج تسلیم نہیں۔ آواز کی ناکامی نظر آتی اور آلے پر انسانی جانچ لازم۔',
+   'ریکارڈ میں باقی کام و نئی اطلاع بند مگر مجاز تاریخ رہے۔ ریٹائرنگ میں موجودہ کام مکمل۔ آف لائن ارسال نہیں۔ نتیجہ/کام بدلنے سے پہلے مسودہ چھوڑنے کا سوال۔ خانے/مکالمے میں ایف ون سے فوکس و مسودہ رہے؛ اردو، انگریزی، تھیمز اور100تا250زوم۔ انسانی تازہ ریکارڈ، ترجمہ، کردار، ادارتی اور آواز جانچ باقی۔'
+  ],
+  faq:[
+   ['Does opening or saving notify the doctor?', 'Opening only reads. Tell the actual clinician first through the hospital procedure, then record the completed communication. Saving never makes a call or counts as doctor acknowledgement.'],
+   ['What must be read back?', 'For telephone or in-person communication, the actual recipient repeats the finding/result back. Mark the checkbox only afterward. Missing read-back refuses saving; changing method clears the check.'],
+   ['How do I notify a health authority?', 'Use hospital external-reporting procedure for the priority disease, then record a separate HealthAuthority communication with the actual recipient name/designation. Verify the actual returned authority state; clinician communication remains separate.'],
+   ['Why is Communicated still in my open list?', 'Open-only means not yet acknowledged. The responsible doctor separately acknowledges with action taken; the technician cannot do that here. Review actual status and times.'],
+   ['What if nobody answers?', 'Follow the hospital on-call/escalation procedure now. Do not record a completed call or read-back that did not occur. Server due time, overdue status and escalation level are shown without a local replacement timer.'],
+   ['What if the answer disappears after I confirm?', 'Keep the exact original communication. Read current history or explicitly retry the original key/body within24hours. Never send a replacement with a new key just because the answer was lost.'],
+   ['Does dismissing the alarm close the result?', 'No. It hides the local reminder only. Native sound is requested on actual Lab Opened events; a sound error remains visible. Human device testing must confirm audibility.'],
+   ['How do I test help and Urdu?', 'Use F1 from recipient, read-back and confirmation controls, close Help and check focus/draft. Test both themes and shared100–250%zoom. Urdu wording is a draft until reviewed by the designated native/clinical owner.']
+  ],
+  faqUr:[
+   ['کیا کھولنے یا محفوظ کرنے سے ڈاکٹر کو اطلاع ہوتی ہے؟','کھولنا صرف پڑھتا ہے۔ پہلے اصل معالج کو ہسپتال طریقے سے بتائیں، پھر مکمل اطلاع درج کریں۔ محفوظ کرنا کال یا معالج کی تسلیم نہیں۔'],
+   ['دہرا کر تصدیق کیسے؟','فون/روبرو میں اصل وصول کنندہ نتیجہ دہرائے؛ بعد میں نشان دیں۔ بغیر دہرانا محفوظ سے انکار؛ طریقہ بدلنے سے نشان صاف۔'],
+   ['ادارۂ صحت کو اطلاع کیسے؟','ترجیحی بیماری کی اصل بیرونی اطلاع ہسپتال طریقے سے دیں، پھر الگ ادارۂ صحت اطلاع اصل نام/عہدہ کے ساتھ درج۔ سرور کی اصل حالت دیکھیں؛ معالج کی اطلاع الگ۔'],
+   ['اطلاع دیا نتیجہ کھلی فہرست میں کیوں؟','کھلا مطلب ابھی معالج نے تسلیم نہیں کیا۔ ذمہ دار معالج الگ کارروائی کے ساتھ تسلیم کرے؛ ٹیکنیشن یہاں نہیں۔ اصل حالت و اوقات دیکھیں۔'],
+   ['کوئی جواب نہ دے تو؟','ابھی ہسپتال کے ڈیوٹی/اگلی سطح طریقے پر عمل کریں۔ نہ ہونے والی مکمل کال یا دہرانا درج نہ کریں۔ مقرر وقت، تاخیر اور اگلی سطح سرور سے، مقامی مدت نہیں۔'],
+   ['تصدیق کے بعد جواب غائب ہو تو؟','عین اصل اطلاع رکھیں۔ موجودہ تاریخ پڑھیں یا24گھنٹے وہی اصل کلید/مواد کوشش۔ غائب جواب پر نئی کلید والا متبادل نہ بھیجیں۔'],
+   ['الارم بند کرنے سے نتیجہ بند ہوتا ہے؟','نہیں، صرف مقامی یاددہانی چھپتی۔ اصل کھلے لیب واقعے پر آواز، خطا نظر آتی۔ انسانی آلے کی جانچ سے سنائی دینا ثابت ہو۔'],
+   ['مدد اور اردو کیسے جانچیں؟','وصول کنندہ، دہرانا اور تصدیق پر ایف ون؛ بند کرکے فوکس و مسودہ چیک۔ دونوں تھیم و100تا250زوم۔ اردو مقرر مقامی/طبی مالک کے جائزے تک مسودہ۔']
+  ]
+ },
  lab_verification: {
   title: 'Verification queue',
   titleUr: 'تصدیق کی قطار',
