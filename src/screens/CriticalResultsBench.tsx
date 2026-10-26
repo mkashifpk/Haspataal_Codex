@@ -13,7 +13,7 @@ import { bilingual as t } from "../i18n";
 import { formatHospitalTime } from "../hospital-time";
 import type { ClinicalUser } from "../clinical-context";
 import type { EstablishmentOut } from "../generated/facility_profile";
-import * as critical from "../generated/critical_results_bench";
+import * as critical from "../generated/critical_results_verifier";
 import {
   benchCriticalWork,
   communicationBody,
@@ -61,12 +61,14 @@ type Review = {
   body: critical.CommunicationIn;
 };
 export function CriticalResultsBench({
+  screenId = "critical_results_bench",
   user,
   connected,
   stream,
   establishment,
   timeZone,
 }: {
+  screenId?: "critical_results_bench" | "critical_results_verifier";
   user: ClinicalUser;
   connected: boolean;
   stream: string;
@@ -75,7 +77,7 @@ export function CriticalResultsBench({
 }) {
   const view =
     establishment.views.screens.find(
-      (s) => s.screen_id === "critical_results_bench",
+      (s) => s.screen_id === screenId,
     )?.view || "hidden";
   const access = criticalAccess(user.permissions, view),
     live = connected && stream === "Live";
@@ -153,7 +155,7 @@ export function CriticalResultsBench({
     !work.loading && !work.error ? benchCriticalWork(work.data || []) : [];
   const write = useClinicalWrite(
     user,
-    `critical-bench:${id}`,
+    `${screenId}:${id}`,
     async (result) => {
       const saved = result as critical.CriticalResultDetailOut;
       setReview(undefined);
@@ -295,7 +297,7 @@ export function CriticalResultsBench({
           !criticalAccess(
             me.permissions,
             est.views.screens.find(
-              (s) => s.screen_id === "critical_results_bench",
+              (s) => s.screen_id === screenId,
             )?.view || "hidden",
           ).communicate ||
           fresh.source !== "Lab" ||
@@ -330,7 +332,7 @@ export function CriticalResultsBench({
   return (
     <section
       className="critical-bench-screen"
-      data-help-screen="critical_results_bench"
+      data-help-screen={screenId}
       data-write-pending={blocked}
       data-unsaved={dirty && !blocked}
     >

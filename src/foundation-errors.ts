@@ -117,6 +117,14 @@ export const foundationErrors: Record<string, Bilingual> = {
     "This service is named by the server but cannot be enabled in this release. Keep its present state and contact the backend/vendor team with the visible reference. No local mock service can make it available.",
     "سرور میں خدمت کا نام ہے مگر اس اجرا میں فعال نہیں ہو سکتی۔ حالت برقرار رکھیں اور حوالہ بیک اینڈ/وینڈر کو دیں۔ مقامی فرضی خدمت اسے دستیاب نہیں بناتی۔",
   ],
+  critical_result: [
+    "Open is a released critical result waiting for responsible-clinician communication. Record each actual completed conversation; Communicated still awaits the physician's separate acknowledgement and action taken. Acknowledged is the physician's final state, not a laboratory button. Priority disease health-authority notification is a separate duty: check authority_pending. Follow hospital urgent escalation procedures if nobody answers; never invent a communication, read-back or acknowledgement.",
+    "کھلا جاری اہم نتیجہ ہے جس کی ذمہ دار معالج کو اطلاع باقی۔ ہر اصل مکمل گفتگو درج کریں؛ اطلاع دیا میں معالج کی الگ تسلیم اور کارروائی باقی۔ تسلیم شدہ معالج کی آخری حالت، لیب کا بٹن نہیں۔ ترجیحی بیماری کی ادارۂ صحت اطلاع الگ، بقایا دیکھیں۔ جواب نہ آئے تو ہسپتال فوری اگلی سطح طریقہ؛ اطلاع، دہرانا یا تسلیم فرض نہ کریں۔",
+  ],
+  CRITICAL_RESULT_READ_BACK_REQUIRED: [
+    "Telephone or in-person communication requires the actual recipient to repeat the result back. Do that first, then tick read-back and the completed-communication statement, review and confirm once. The refusal saved no communication. Do not choose Written/Electronic merely to bypass the real means. Changing the recipient or means clears prior assertions; a lost reply requires original-key recovery, not a new record.",
+    "فون یا روبرو میں اصل وصول کنندہ نتیجہ دہرائے۔ پہلے یہ عمل، پھر دہرانا اور مکمل اطلاع نشان، جائزہ اور ایک تصدیق۔ انکار پر اطلاع محفوظ نہیں۔ اصل طریقہ چھوڑ کر تحریری/برقی سے شرط نہ ٹالیں۔ وصول کنندہ/طریقہ بدلنے سے نشان صاف؛ گم جواب اصل کلید سے بحال، نیا ریکارڈ نہیں۔",
+  ],
   MSDS_CATEGORY_REASON_REQUIRED: [
     "The entered category differs from the bed-count suggestion. Check the category on the actual PHC licence and complete Reason if category differs from bed suggestion, then preview again. The licence decides; do not alter bed counts to silence the warning.",
     "درج زمرہ بیڈ کی تجویز سے مختلف ہے۔ اصل پی ایچ سی لائسنس چیک کرکے اختلاف کی وجہ لکھیں، پھر نیا پیش منظر لیں۔ لائسنس فیصلہ کرتا ہے؛ تنبیہ ختم کرنے کو بیڈ کی تعداد نہ بدلیں۔",

@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createRequire} from 'node:module';
 import {communicationBody,criticalAccess,criticalFilters,criticalSnapshot,benchCriticalWork} from '../src/critical-communication-policy.ts';
-const {criticalAlarmRecord}=createRequire(import.meta.url)('../electron/critical-alarm.cjs');
+const {criticalAlarmRecord,criticalAlarmScreen}=createRequire(import.meta.url)('../electron/critical-alarm.cjs');
 test('communication requires actual recipient, a completed call and read-back for Telephone/InPerson',()=>{
  for(const means of ['Telephone','InPerson'])assert.throws(()=>communicationBody(means,'RequestingDoctor','DEMO clinician',false,'',true),/read the result back/);
  assert.throws(()=>communicationBody('Written','HealthAuthority','DEMO authority',false,'',false),/Tell the recipient first/);
@@ -40,4 +40,10 @@ test('alarm is allowed only for the exact current open Lab record, never a handl
  for(const status of ['Communicated','Acknowledged'])assert.equal(criticalAlarmRecord({critical_result_id:2,source:'Lab',status},2),false);
  assert.throws(()=>criticalAlarmRecord({critical_result_id:2,source:'Lab',status:'Open'},3));
  assert.throws(()=>criticalAlarmRecord({critical_result_id:2,source:'Imaging',status:'Open'},2));
+});
+
+test('native alarm uses the exact laboratory workspace service screen, denies unrelated workspaces',()=>{
+ assert.equal(criticalAlarmScreen('lab_tech'),'critical_results_bench');
+ assert.equal(criticalAlarmScreen('lab_verifier'),'critical_results_verifier');
+ for(const workspace of ['doctor','radiology','pharmacy','',undefined,'toString','__proto__'])assert.equal(criticalAlarmScreen(workspace),undefined);
 });

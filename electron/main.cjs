@@ -933,7 +933,9 @@ ipcMain.handle("terminal", async (event, action, args = {}) => {
     }
     if (action === "critical-result-alarm") {
       const actor = auth?.user.user_id;
-      if (!actor || windows.get(win.id) !== 'lab_tech' || !auth.user.permissions.includes('diagnostics.critical.view')) throw new Error('Critical alarm requires the authorised laboratory workspace');
+      const workspace = windows.get(win.id);
+      const screenId = require('./critical-alarm.cjs').criticalAlarmScreen(workspace);
+      if (!actor || !screenId || !auth.user.permissions.includes('diagnostics.critical.view')) throw new Error('Critical alarm requires the authorised laboratory workspace');
       if (!Number.isSafeInteger(args.criticalResultId) || args.criticalResultId <= 0) throw new Error('Invalid critical result');
       const [record, facility] = await Promise.all([
         api('GET', `/critical-results/${args.criticalResultId}`, undefined, windows.get(win.id)),
@@ -941,8 +943,8 @@ ipcMain.handle("terminal", async (event, action, args = {}) => {
       ]);
       if (!record.ok) return record;
       if (!facility.ok) return facility;
-      if (actor !== auth?.user.user_id || windows.get(win.id) !== 'lab_tech') throw new Error('The session changed before the alarm');
-      const view = facility.data.views.screens.find(s => s.screen_id === 'critical_results_bench')?.view;
+      if (actor !== auth?.user.user_id || windows.get(win.id) !== workspace) throw new Error('The session changed before the alarm');
+      const view = facility.data.views.screens.find(s => s.screen_id === screenId)?.view;
       if (!['full','open_work'].includes(view)) throw new Error('The laboratory critical-result work view is unavailable');
       const played = require('./critical-alarm.cjs').criticalAlarmRecord(record.data, args.criticalResultId);
       if (played) shell.beep();
