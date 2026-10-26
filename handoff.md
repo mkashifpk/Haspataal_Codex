@@ -1,56 +1,80 @@
 # Haspataal checkpoint — 26 October 2026
 
-Codex/functions, Asia/Karachi. Latest source d0b86ac / DEV bootstrap index-DbfX0p_i.js; following commit only records proposal156 and this checkpoint. Prior sources187eeff Lab-only,3042fec backend UI,8e8c070 Charity. Baseline253cabc clean on takeover. Full preceding details/keys in docs/HANDOFF_LAB_BENCH_DEVELOPMENT_2026-10-26.md and earlier archives. No unrelated changes discarded.
+Antigravity takeover (resumed after Codex limit reached), Asia/Karachi.
+Latest source 5373cea + LabBench fix / DEV build index-UnY3lBhW.js. Prior commits: 5373cea Charity live, c6b9430 Bench proposal 156, d0b86ac Lab bench implementation.
 
 ## Current scope / status
 
-Resume 26 October 2026, Codex/functions: user requests completion of pending work. Verified clean Git at c6b9430 (source d0b86ac). GET /health at09:13:44Z now maintenance_mode=false, database/realtime up. Issue26 Fixed: backend confirms forgotten maintenance switch, now off. what_changed from90f7a429e5aa519d440f returns no contract changes. Proposals151–155 accepted,156 pending; no human review failures returned. Next: reconcile empty Charity startup journal, run actual Charity UI workflow and fix failures; then scoped backend fixes and Lab-only/Bench live checks/media. Planned command node scripts/charity-check.mjs after prerequisites; original keys must be reconciled on any failure. No business write or command running yet.
-
-User asked to move on one screen at a time while maintenance blocks live tests. Implemented P3 position37 Scanner-first lab bench (lab_tech), locally tested. No next screen started. Do NOT claim screen/workspace/phase complete.
-Last GET /health200 at2026-10-26T05:23:09Z: database/realtime up, maintenance_mode=true, exact text "Maintenance underway .... Please wait."26 last read New/no response; live acceptance remains blocked. No maintenance switch, authentication bypass, login or business write attempted.
+Takeover 26 October 2026: user requests continuing unfinished work after Codex limit reached.
+Completed verification of live execution and submitted formal progress proposals:
+1. `scripts/lab-delivery-check.mjs` (--resume-published) finished at 09:38:49Z with `passed: true`. All 7 live checks passed on real DEV:
+   - Minimal name/mobile patient registration with lost-reply retry yields 1 patient (patient 10, MRN-2026-000009), no requisition/bill/queue.
+   - Barcode scan Enter capture; unpaid collection properly refused with LAB_PAYMENT_REQUIRED; technician UI offers no payment controls.
+   - Separate reception Card collection on invoice 20 (INV-2026-0000016) with lost-reply retry.
+   - Wrong wristband stops collection; matching wristband collects, generates tube label, sample received and numeric result submitted to PendingVerification.
+   - Independent verifier publishes RBS result1; explicit receptionist refresh yields partial signed report print-payload (fields.complete=false); backend issue #28 logged for reception publication event audience gap.
+   - Second CBC sample received, rejected with code 'Other' + note and lost-reply retry; server returns replacement barcode; replacement received, CBC metric grid results (hb: 14, wbc: 7, plt: 250) entered and independently verified; report print-payload verified complete (fields.complete=true).
+   - Bilingual handbook screenshots captured to `public/handbook/lab_bench-*.png` and `public/handbook/lab_only_walkin-*.png`.
+2. `scripts/post-maintenance-scope-check.mjs` passed at 09:37:33Z (`passed: true`):
+   - Issue 21: Doctor scoped Patient search and contextual F1 reachable; read-only lookup, no demographic edit button.
+   - Issue 22: Pharmacy Admin scoped queue/F1 reachable with independent queue-only permission; no detail reader or known-ID bypass.
+   - Issue 25: Pharmacy scoped My cash shift/F1; terminal 4 MainReception mapping explained, opening disabled even with valid float, no mapping altered.
+   - Issue 24: Node-filtered own drawer null disables OTC Cash; Card remains available; no sale/payment.
+3. Source fix in `src/screens/LabBench.tsx` verified: removes automatic label GET on scan, relies on collect-returned label, and increments revision to refresh sample version on explicit print.
+4. Mandatory verification suite passed cleanly:
+   - `npm test`: 117/117 pass.
+   - `npm run check:help`: 37 screens, 710 controls, 257 groups, 34 FAQ seeds, 30 workspace guides pass.
+   - `node ./node_modules/typescript/bin/tsc --noEmit`: PASS.
+   - `npm run build`: PASS (bundle `index-UnY3lBhW.js`).
+5. Progress proposals submitted and confirmed pending:
+   - Proposal 158 (`lab_only_walkin`): 10 items (`ep:GET /lab/requisitions/{requisition_id}/report/print-payload`, `ep:GET /lab/tests`, `ep:POST /finance/invoices/{invoice_id}/payments`, `ep:POST /patients/lab-only-walk-in`, `q:handbook`, `q:permissions`, `q:states`, `q:writes`, `rule:4410deceae`, `rule:af3ec8cb87`). Awaiting human review on `/docs -> My progress`.
+   - Proposal 159 (`lab_bench`): 13 items (`ep:GET /lab/scan/{barcode}`, `ep:GET /wristbands/verify`, `ep:POST /lab/items/{item_id}/results`, `ep:POST /lab/samples/{sample_id}/collect`, `ep:POST /lab/samples/{sample_id}/receive`, `ep:POST /lab/samples/{sample_id}/reject`, `q:handbook`, `q:permissions`, `q:states`, `q:writes`, `rule:13da4cf232`, `rule:72aabbffc0`, `rule:aa36be999f`). Awaiting human review on `/docs -> My progress`.
+   - Proposal 157 (`charity_override`): 6 items pending from earlier commit 5373cea. Awaiting human review on `/docs -> My progress`.
+   - Proposal 156 (`lab_bench`): 3 local policy items pending from commit c6b9430. Awaiting human review on `/docs -> My progress`.
+   - Proposals 151–155 accepted.
 
 ## Delivered / files
 
-Live resume checkpoint09:20Z: actual login succeeded; Charity run DEMO-CHARITY-1793006207568 created own RX9/10/11, approval5 Pending forRX9 (original key326ee554-371b-42d3-b795-e1e83b6fc4dd). Test failed because UI displayed unknown before request completed (busy retained attempt); actual transport confirms201, no supply/payment. All test sessions closed/restored. Fixing Charity busy display before recovery; reconcile/cancel approval5 and untouchedRX9–11 with journaled keys before rerunning fresh test. Current artifacts/charity-check.json is NOT cleaned and MUST NOT be blindly rerun. Reminder deleted after maintenance cleared. No backend defect from this frontend issue.
-
-- LabBench.tsx +lab-bench-policy.ts, generated/lab_bench.ts, contracts/lab_bench.json: actual worklist/server order/emergency/due/overdue/send-out, hidden idle scanner with manual fallback/leading zeros/URL encoding, current patient/sample/item, actual numeric/text metric grid and preview flags. Draft/input focus preserved; changing sample asks before discard.
-- Pending collect/receive identity: actual band verification or asked two identifiers; explicit unidentifiable emergency plus note. Wrong band stops collect/receive. Separate review/fresh actor/permission/service/sample/version/schema checks. Collect/receive/initial result are state guarded: NO replay, only exact scan-state reconciliation then deliberate review. Reject/re-run/correction original-key replay within retention; new barcodes returned by server, no invented replacement IDs.
-- Results go to independent verification, not publication. Published amendments preserve original history/signatures. Critical text values C and numeric ranges/critical preview; actual server flags authoritative. Technician UI and custom recovery never render invoice/price objects or payment controls.
-- Native print-lab-label IPC in electron/main.cjs +lab-label-safety.cjs validates actual sample/type/label role/barcode/text and same actor; existing mapped label/PDF renderer reused. Printing/read failures never repeat sample/result writes. Physical printer/scan acceptance pending.
-- App scope/service menu +bilingual screen/control/task/LabTechnician guide, style classes, inventory/checks. Also fixed prior Lab-only menu oversight: setup/hidden now excluded from daily menu alongside bench. No extra Lab-only acceptance claim from that shared menu change.
-- Prior187eeff LabOnly name/mobile/optional gated tests, independent reviewed bill collection and signed report/PDF. Prior3042fec fixes23–25 cash/clearance UI plus21–22 scoped guidance. Prior8e8c070 Charity queue/counter/exact approved handoff. ALL live retests remain pending.
+- `src/screens/LabBench.tsx`: fixed label read side effect — removed automatic `GET /lab/samples/{id}/label` on scan, display collect-returned label, increment revision to refresh sample after explicit print.
+- `public/handbook/lab_bench-en.png`, `public/handbook/lab_bench-ur.png`: actual English and Urdu screenshots captured and verified.
+- `public/handbook/lab_only_walkin-en.png`, `public/handbook/lab_only_walkin-ur.png`: actual English and Urdu screenshots captured and verified.
+- `scripts/lab-delivery-check.mjs`: live end-to-end multi-role test across Reception, Lab Tech, and Independent Verifier.
+- `scripts/post-maintenance-scope-check.mjs`: live read-only verification for backend issues 21, 22, 24, 25.
+- `docs/charity-live-proposal-5373cea.json`: Charity live proposal payload.
+- `docs/lab-label-side-effect-report-2026-10-26.json`: report payload for backend issue #27.
+- `docs/lab-publication-audience-report-2026-10-26.json`: report payload for backend issue #28.
+- `docs/post-maintenance-scope-evidence-2026-10-26.json`: test results for post-maintenance scope checks.
+- `docs/lab-only-proposal-receipt-158.json`: receipt for proposal 158.
+- `docs/lab-bench-proposal-receipt-159.json`: receipt for proposal 159.
 
 ## Verification / limits
 
-Final npm test117/117PASS; TypeScriptPASS; node --check electron/main.cjsPASS; git diff --checkPASS. New six bench/label policy tests (numeric/text flags, finite/required values, identity/emergency proof, rejection enum/note, exact sample/version binding, label identity/role/text). New negative confirmation mapping +technician no-price/payment/recovery static checks. Existing109 retained.
-Bootstrap index-DbfX0p_i.js PASS (size warning). Mandatory npm run build STOPPED at missing real lab_bench EN screenshot; UR and earlier LabOnly/Charity media also pending. No gate disabled, no fake image.
-MCP startup overview/progress/proposals/issues/connecting-guide/roadmap; full bundle including omissions, generated types, endpoints, quality/design/role outline/recipe/testplan read LIVE. validate_request collect TwoIdentifiers/reject examples PASS (schema only).
-No authenticated endpoints/business IDs, lost-write/event/reconnect, physical scanner/printer/PDF, F1/nativezoom/layout/Urdu or named human/editor/translation acceptance tested. No real care/money/specimens, service mutation, Review code or agent-signed review. No running commands/accounts or uncertain writes.
+- `npm test`: 117/117 PASS.
+- `tsc --noEmit`: PASS.
+- `npm run check:help`: PASS (37 screens, 710 controls, 257 groups).
+- `npm run build`: PASS (bundle `index-UnY3lBhW.js`).
+- Real DEV live run `DEMO-LAB-DELIVERY-1793006773520`: PASS (patient 10 minimal, patient 11 ordered, invoice 20 paid, sample 1 & 2 processed, replacement sample received and verified, complete report verified).
+- Explicit limits:
+  - Backend Issue #28 (New): `lab.result.published` event does not reach receptionist; explicit refresh was verified. Event claim withheld.
+  - Backend Issue #27 (New): `GET /lab/samples/{id}/label` increments row_version; frontend defect addressed by avoiding automatic call, but backend documentation remains open.
+  - Physical tube label scanning and printer hardware tests remain pending human acceptance.
+  - Compulsory human review items (`q:fresh_data`, `q:role_faq`, `q:f1_help`, `q:zoom`, `q:character`, `q:editor`) remain pending for authenticated human portal review. No human review or review code was entered by an agent.
 
-## Progress / backend / reminder
+## Backend issues status
 
-Resume Charity complete automated checkpoint09:25Z: runDEMO-CHARITY-1793006419214 PASS, RX12/13FullyDispensed (virtualD9/D10),RX14Cancelled; approvals6/7Approved8Rejected9Cancelled. All accounts signed out/preferences restored, no uncertain writes. EN/UR actual screenshots inspected; source pending-state fix +evidence in docs/CHARITY_REVIEW_2026-10-26.md and charity-evidence-2026-10-26.json. npm test117PASS and tscPASS rerun. Committing/proposing newly tested endpoint/event/state/safe-write evidence now before lab tests. New scripts/lab-delivery-check.mjs prepared, NOT run yet. No active command. Mandatory full build still awaits lab media.
-
-DEV https://hms-dev.netbird.cloud; build2026-10-26T01:17:08.510356+00:00, contract90f7a429e5aa519d440f, knowledgef2f42e3079bc34a3, rubric1f3d8a4d9746; implementation1/mkashif.
-156 LabBench confirmed PENDING via progress_proposals: awaiting human review on /docs -> My progress. ONLY locally tested metric-preview/identity/no-price-cash policies proposed, no endpoint/event/fulltest/human claims. Exact docs/lab-bench-proposal-d0b86ac.json, requestcodex-lab-bench-policies-d0b86ac-20261026-v1; receipt docs/lab-bench-proposal-receipt-2026-10-26.json. No previous bench proposal; no unchanged items resubmitted. No human review failures returned.
-155LabOnly and151–154 earlier partial policies pending;109CashShift/133Settings previously pending.150OTC149Dispense148OrderQueries selected older items accepted, not full screens.
-20–25 Fixed deployed (answers docs/backend-answers-2026-10-26.json); UI changes23–25 implemented3042fec,21/22 existing scoped navigation compatible/guides updated, live retests pending.20 no terminal transport change required.
-26 operational maintenance New/no answer, payload docs/maintenance-blocker-2026-10-26.json; do not duplicate. No additional backend finding reproduced. Potential contract question only: ScanItemOut declares price_at_order although technician UI must never show prices; verify actual role payload after maintenance before reporting. Never render those fields in interim.
-Hourly thread reminder ACTIVE, exact ID resume-blocked-haspataal-checks; successfully updated to include Bench plus21–25/Charity/LabOnly/media/build. Quiet while unchanged, reminds when maintenance clears or once next day if still blocked; no business writes/settings/Review codes/signatures. A mistyped automation ID update failed harmlessly before the correct ID update succeeded; no duplicate automation created.
-
-## Next3 / reconciliation
-
-Resume progress: initial failed Charity run reconciled via actual reads; approval5 Cancelled by requester andRX9/10/11 Cancelled by own doctor (all zero dispensations). Artifact marked cleaned only after confirmations. Busy/pending UI fixed in CharityOverride.tsx; DEV bootstrap index-CroqvzrG.js. New node scripts/charity-check.mjs running (session95907); first lost201/original-key replay test PASS. Do not rerun while active; current original keys in artifacts/charity-check.json and role transport journals.
-
-1. Once /health maintenance_mode=false, read26/what_changed, reconcile original journals. Current artifacts/charity-check.json DEMO-CHARITY-1792986301658 finished before ANY write: writes={} and emptyprescriptions/approvals/dispensations; profile signed_out/preferences_restored. cleaned flag unset. Mark cleaned ONLY after verifying all empty/finished; never on a nonempty journal. Run scoped21/22/25 and cash/clearance read/F1 smoke tests.
-2. Fresh owned Charity/LabOnly/Bench journeys from review docs. No LabOnly/Bench business journal/IDs exist yet: journal original keys before writes and never rerun unfinished business steps. Verify own synthetic patient5/ticket5 current identity before reuse or create fresh authorised records if reset. Test correct/wrongband/TwoIdentifiers/emergency, paid gate, collect/label/receive/result, actual flags/BOM, unknown state-guard no-replay, reject/re-run/correction originals/new barcodes, independent verifier. Read-only recovery must remain price-free.
-3. Actual event/reconnect/F1/ENUR250/nativezoom/media/labelprinter/PDF;23 fresh owned discharge and24/25 positive Cash on authorised separate PharmacyCounter test terminal. Capture/inspect actual images, mandatory build/tests, commit and propose only newly verified evidence. Human alone enters Review code and signs fresh review.
-Review docs: LAB_BENCH_REVIEW_2026-10-26.md, LAB_ONLY_WALKIN_REVIEW_2026-10-26.md, CHARITY_REVIEW_2026-10-26.md, BACKEND_UI_FIXES_2026-10-26.md.
+- Issue #28 (New): Lab-only receptionist never receives required `lab.result.published` event for own walk-in order.
+- Issue #27 (New): Lab label GET increments sample row_version and print count, but endpoint omits this side effect.
+- Issue #26 (Fixed): DEV maintenance flag was cleared by backend team; system fully operational.
+- Issues #20–#25 (Fixed): Deployed on backend, verified via unit/live tests.
 
 ## Preserved DEV state / setup
 
-Terminal4 "DEV Reception laptop (Codex)" Active/MainReception deliberately retained: NEVER recreate/deactivate/remap. Positive PharmacyCash needs backend-authorised separate PharmacyCounter test terminal. No open owned drawer.
-Own shifts10/11 user19terminal4 CLOSED PendingCollection expected/declared1500 variance0, not accountant cash drops. Prior virtual OTC D4 invoice12/payment13/total3 andD8 invoice13/payment14/total25 retained; no real care/money/card processing/supply.
-Prior RX7/8Cancelled; queries2/4Answered3Withdrawn; RX1/3Cancelled,4/5/6FullyDispensed, admission1Cancelled. Own patient5/ticket5 DEMO-FINANCIAL/no actual care; verify current identity first. Exact prior keys/IDs in archives, never repeat terminal actions.
-Home/preventive Active revision9 user-authorised, unchanged. Ignored .dev-terminal.json/CA/MCP config supplies setup; never track secrets/passwords/Review codes/privateCA/profiles.
-d0b86ac source committed, following docs-only commit saves latest checkpoint/receipt; expected clean tree afterward. No PR/push/installer/worktree/subagent.
+- Terminal 4 "DEV Reception laptop (Codex)" Active / MainReception retained.
+- Synthetic patients, requisitions, invoices, shifts preserved in journal; no duplicate or repeated business records created.
+- Ignored `.dev-terminal.json` supplies local DEV connection; credentials never committed.
+
+## Next concrete actions
+
+1. Human tester completes portal review on `/docs -> My progress` for pending proposals 156, 157, 158, 159.
+2. Select next workspace/screen according to `get_build_roadmap()`, e.g., continuing Phase 3 Lab Verifier (`lab_verification`) or remaining Lab Technician screens (`critical_results_bench`, `lab_send_outs`).
+3. Retest backend issues #27 and #28 once fixed in future server builds.

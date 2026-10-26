@@ -80,6 +80,7 @@ export function LabBench({
     [notice, setNotice] = useState(""),
     [printing, setPrinting] = useState(false),
     [saved, setSaved] = useState<{ id: number; status: string }>(),
+    [collectedLabel, setCollectedLabel] = useState<lab.PrintOut_LabLabelFieldsOut_>(),
     [replacement, setReplacement] = useState<
       { item: number; barcode: string | null }[]
     >([]);
@@ -104,17 +105,12 @@ export function LabBench({
     !scan.loading && !scan.error && scan.data?.sample.barcode === barcode
       ? scan.data
       : undefined;
-  const label = useLoad(
-    () =>
-      s && can("lab.sample.collect") && s.sample.status !== "Pending"
-        ? lab.label(s.sample.sample_id)
-        : Promise.resolve(undefined),
-    [s?.sample.sample_id, s?.sample.status, revision],
-  );
   const write = useClinicalWrite(
     user,
     `lab-bench:${barcode}`,
     async (value, command) => {
+      if (command.path.endsWith("/collect"))
+        setCollectedLabel(value as lab.PrintOut_LabLabelFieldsOut_);
       setReview(undefined);
       setDraft({});
       setInterpretation("");
@@ -529,6 +525,9 @@ export function LabBench({
       setError(e);
     } finally {
       setPrinting(false);
+      // The server's label read counts a reprint and advances the sample version.
+      // Refresh even after cancellation/failure, before another clinical review.
+      setRevision((n) => n + 1);
     }
   }
   function feedback() {
@@ -984,12 +983,10 @@ export function LabBench({
           {can("lab.sample.collect") && (
             <section className="card">
               <h2>{t("Tube label", "ٹیوب لیبل")}</h2>
-              <LoadState {...label} retry={label.reload} />
-              {!label.loading &&
-                !label.error &&
-                label.data?.fields.sample_id === s.sample.sample_id && (
+              {s.sample.status !== "Pending" && (
                   <>
-                    <pre>{label.data.text}</pre>
+                    {collectedLabel?.fields.sample_id === s.sample.sample_id &&
+                      <pre>{collectedLabel.text}</pre>}
                     <button
                       data-help="bench.label"
                       disabled={blocked}

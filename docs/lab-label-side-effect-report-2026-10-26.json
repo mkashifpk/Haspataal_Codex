@@ -1,0 +1,15 @@
+{
+  "implementation_id": 1,
+  "kind": "Documentation",
+  "severity": "Medium",
+  "title": "Lab label GET increments sample row_version and print count, but endpoint omits this side effect",
+  "actual": "In fresh synthetic req1/sample2, collect returned a label. GET /lab/scan showed Collected label_print_count1 row_version3. The frontend read GET /lab/samples/2/label for preview; the next scan showed count2 row_version4 with unchanged clinical status. A receipt review correctly refused its stale snapshot before POST. get_endpoint describes only Re-print a sample barcode label and required permission; write_semantics null, no note that reads mutate the sample or need refresh.",
+  "expected": "Document that obtaining this label is a counted reprint with row_version side effects, including whether cancelled printing still counts; or provide a nonmutating preview if intended. Clients need to call it only on deliberate print/reprint and refresh the sample before a clinical action. We fixed our automatic-preview defect accordingly; no need to weaken concurrency or fabricate a version.",
+  "steps": "Fresh own synthetic Lab-only order paid by virtual Card. Collect sample2 with actual own patient band. GET scan LB-2026-0000002 -> count1/version3. GET samples/2/label ->200. GET scan -> count2/version4. No receive POST occurred. Read current get_endpoint label: no mutation warning.",
+  "evidence": "Real Electron transport artifact lab-delivery-tech-transport.json; initial collect request277f175d335e4619818b4517f96d5187. MCP reconciliation GET scan request7f1a723e8b2a42bcba1768856ba967de confirms sample2Collected count2 version4. Own runDEMO-LAB-DELIVERY-1793006773520, no actual specimen/care/money. Checked own/all-open reports, none open. Automatic label fetch removed and explicit print now refreshes sample; live retest continuing.",
+  "endpoint": "GET /lab/samples/{sample_id}/label",
+  "screen_id": "lab_bench",
+  "build": "5373cea plus bench follow-up / index-UnY3lBhW.js",
+  "agent": "Codex",
+  "request_id": "codex-lab-label-read-side-effect-20261026-v1"
+}

@@ -1,0 +1,15 @@
+{
+  "implementation_id": 1,
+  "kind": "ContractMismatch",
+  "severity": "Medium",
+  "title": "Lab-only receptionist never receives required lab.result.published event for own walk-in order",
+  "actual": "Fresh own Lab-only order req1/patient11 created by demo.reception, RBS result1 entered by demo.labtech then independently verified Published by demo.labverifier. Reception screen stays Live but keeps PendingVerification/LAB_REPORT_NOT_READY after publication. MCP sandbox_events reception from0 with topic lab.result.published returns no events cursor299; verifier from270 returns publication299. get_event audience says ordering doctor + lab verifiers, while get_screen_bundle lab_only_walkin explicitly requires this event to refresh signed report. A walk-in has no ordering doctor. Lab technician similarly sees neither pending298 nor published299 despite bench bundle event handling.",
+  "expected": "Deliver the required publication hint to authorised Lab-only reception readers/requester (and clarify technician subscription expectations), scoped to their permitted data. Do not require client polling or falsely report a signed report before an actual read. Our UI has the required handler and manual refresh; missing role event delivery blocks automatic report handover.",
+  "steps": "1. demo.reception creates own synthetic Lab-only CBC/RBS order req1 and pays invoice20 via software-only Card. 2. demo.labtech submits RBS result1. 3. independent demo.labverifier verifies result1. 4. Reception stays Live with old report-not-ready UI. 5. sandbox_events demo.reception topic lab.result.published since0 ->events[] cursor299; demo.labverifier since270 ->pending298 andpublished299.",
+  "evidence": "Publication299 at2026-10-26T09:34:07.037048Z, result1 req1; verifier actual response Published. Source LabOnlyWalkin.tsx handler includes lab.result.published and resync; Electron authenticates socket without restricting topics. Current get_event lab.result.published subscribed_by_screens includes lab_only_walkin but audience only ordering doctor+lab verifiers. No real clinical data/specimen/payment. Prior reports checked, only unrelated label documentation27 open.",
+  "endpoint": "POST /lab/results/{result_id}/verify",
+  "screen_id": "lab_only_walkin",
+  "build": "5373cea plus follow-up / index-UnY3lBhW.js",
+  "request_id": "codex-lab-walkin-publication-audience-20261026-v1",
+  "agent": "Codex"
+}
