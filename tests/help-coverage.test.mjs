@@ -8,13 +8,16 @@ test('Lab technician rendering and reconciliation do not expose invoice/price ob
 test('Lab walk-in confirmation cannot lose its bilingual control mapping',()=>{
  assert.throws(()=>checkHelp({media:false,read:file=>file==='src/screens/LabOnlyWalkIn.tsx'?read(file).replace('data-help="walkin.confirm"',''):read(file)}),/missing\/broken control help mapping/);
 });
+test('Lab verification confirmation cannot lose its bilingual control mapping',()=>{
+ assert.throws(()=>checkHelp({media:false,read:file=>file==='src/screens/LabVerification.tsx'?read(file).replace('data-help="verification.confirm"',''):read(file)}),/missing\/broken control help mapping/);
+});
 
 test("separately authored registration help must retain its Urdu title", () => {
   assert.throws(()=>checkHelp({media:false,read:file=>file === "src/registration-help.ts" ? read(file).replace(/titleUr:\s*"[^"]*",/, "") : read(file)}), /registration: missing titleUr/);
 });
 test("all delivered controls, tasks, role guides and FAQ seeds have bilingual help", () => {
   const result = checkHelp({ media: false });
-  assert.equal(result.screens, 37);
+  assert.equal(result.screens, 38);
   assert(result.controls > 90);
   assert.equal(result.workspaceGuides, 30);
 });
