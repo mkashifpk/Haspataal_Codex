@@ -1,6 +1,6 @@
 # Haspataal checkpoint — 27 October 2026
 
-Last updated: Codex/functions, Asia/Karachi. User requested Outsourced examinations only, Phase3position47 imaging_outsourced. Implementation and checks complete; source commit/proposal/verified receipt remain. Position48 imaging_repeats NOT started.
+Last updated: Codex/functions, Asia/Karachi. User requested Outsourced examinations only, Phase3position47 imaging_outsourced. Implementation and checks complete; source05b5d47 committed and proposal174 verified pending. No implementation work is currently in progress. Position48 imaging_repeats NOT started.
 
 ## Completed / verification
 
@@ -18,10 +18,10 @@ Original keys/bodies/results: ignored artifacts/imaging-outsourced-fixture.json 
 
 ## Next three steps / acceptance
 
-1. Finalchecks/media/evidence complete and images inspected. Commit source, submitONLYtestednewscreenitems withcommit and currentrubric. Saveexactpayload/requestbeforecall; verifyprogress_proposals, recordID here and finalGitstate. Do not duplicate unchanged accepted/pendingclaims.
+1. Proposal174 confirmed pending via progress_proposals: awaiting human review on /docs -> My progress.11testednewscreenitems, source05b5d477f526d4bba8de987637d18e6f241f0858/finalrendererBPSTRD98. Exact payload/verified receipt docs/imaging-outsourced-progress-{proposal,receipt}-2026-10-27.json. Fulltestplan/human/design/editor gates excluded; do not duplicate unchanged accepted/pending claims.
 2. Human follows new review: NEWsyntheticorder/partner -> MOU/identitychecked send -> matching externalreport -> criticalcommunication/doctorhandover, PDFs/printcancel/ENUR/F1/nativezoom. Onlyhuman entersReviewcode/signsportal. No signedhumanfresh-data/Urdu/rolejourney/physicalprinter/editor/busyhour acceptance or actualsharedservice-transition claimed; fulltestplan/human/design/editor gates unclaimed. Puregatepolicy/fullactualRBAC verified. Retest31whenPACSconfigured/read30answerwithcorrection.
 3. Nextsession AGENTS/handoff/Gitstatus/diff/log then requiredMCPstartup/roadmap. Position48imaging_repeats nextcandidate, currentbundle/quality/design/outline beforecoding. Existing home/preventive resetstate and H08/H09/H10 remain priorhumanchoices/acceptance work.
 
 ## Git / environment
 
-Baseline98cb2c4/source55b9c2a; all current uncommitted taskfiles ours, no unrelatededits overwritten. Sourcecommitpending. No running commands or uncertain writes. Connection from ignored .dev-terminal.json/CA/MCP configuration; nevercopycredentials/localprofiles/Reviewcode. npm_config_cache=D:\Projects\Haspataal_Codex\artifacts\npm-cache avoids lowCspace, directlocalVite/tsc/prettier used; no userfiles deleted. No Reviewcode entered, no PR/push/worktree/automation.
+Baseline98cb2c4/source55b9c2a; all current uncommitted taskfiles ours, no unrelatededits overwritten. Tested source05b5d477f526d4bba8de987637d18e6f241f0858; final documentation commit contains this checkpoint and proposal payload/verified receipt only. Working tree expected clean afterward; verify on takeover. No running commands or uncertain writes. Connection from ignored .dev-terminal.json/CA/MCP configuration; nevercopycredentials/localprofiles/Reviewcode. npm_config_cache=D:\Projects\Haspataal_Codex\artifacts\npm-cache avoids lowCspace, directlocalVite/tsc/prettier used; no userfiles deleted. No Reviewcode entered, no PR/push/worktree/automation.
