@@ -1071,8 +1071,15 @@ ipcMain.handle("terminal", async (event, action, args = {}) => {
       await viewer.loadURL(target.href);
       return{ok:true,data:{opened:true}};
     }
+    if (action === "service-setup-handbook") {
+      if (!auth || !["establishment.manage", "diagnostics.setup.manage"].every(p => auth.user.permissions.includes(p)))
+        throw new Error("Your current permissions do not allow this action. Refresh your workspace or contact the administrator.");
+      // Facility setup spans workspaces: omit X-Active-Workspace only for this
+      // authorised metadata read. Normal api calls keep their window's scope.
+      return await api("GET", "/meta/handbook", undefined, undefined);
+    }
     if (action === "clinical-pdf") {
-      if (typeof args.path !== "string" || !/^(?:\/(?:clinical-encounters|referrals)\/[1-9]\d*\/pdf|\/(?:lab\/requisitions|imaging\/orders)\/[1-9]\d*\/report\/pdf|\/preventive-programmes\/list\/pdf|\/home-visits\/notice\/pdf|\/diagnostics\/services\/pdf)$/.test(args.path)) throw new Error("Clinical download not permitted");
+      if (typeof args.path !== "string" || !/^(?:\/(?:clinical-encounters|referrals)\/[1-9]\d*\/pdf|\/(?:lab\/requisitions|imaging\/orders)\/[1-9]\d*\/report\/pdf|\/preventive-programmes\/list\/pdf|\/home-visits\/notice\/pdf|\/diagnostics\/(?:services|imaging-policy)\/pdf)$/.test(args.path)) throw new Error("Clinical download not permitted");
       const op=matchOperation("GET",args.path);
       if(!op || !auth || !permissionAllows(op,auth.user)) throw new Error("You do not have permission to download this document");
       if(Date.now()>auth.expires-60000)await refresh();
@@ -1095,7 +1102,7 @@ ipcMain.handle("terminal", async (event, action, args = {}) => {
         }
         return{ok:true,data:{opened:true}};
       }
-      const selected=await dialog.showSaveDialog(win,{defaultPath:args.path === '/diagnostics/services/pdf' ? 'Haspataal-diagnostic-services.pdf' : `Clinical-document-${args.path.split("/")[2]}.pdf`,filters:[{name:"PDF",extensions:["pdf"]}]});
+      const selected=await dialog.showSaveDialog(win,{defaultPath:args.path === '/diagnostics/services/pdf' ? 'Haspataal-diagnostic-services.pdf' : args.path === '/diagnostics/imaging-policy/pdf' ? 'Haspataal-imaging-policy.pdf' : `Clinical-document-${args.path.split("/")[2]}.pdf`,filters:[{name:"PDF",extensions:["pdf"]}]});
       if(!selected.canceled)fs.writeFileSync(selected.filePath,r.bytes);
       return {ok:true,data:{saved:!selected.canceled}};
     }

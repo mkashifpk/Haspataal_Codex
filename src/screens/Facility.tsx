@@ -17,10 +17,12 @@ export function Facility({
   revision,
   onChanged,
   storageScope,
+  onImagingSetup,
 }: {
   revision: number;
   onChanged: () => void;
   storageScope: string;
+  onImagingSetup?: () => void;
 }) {
   const storageKey = `haspataal.facility-apply:${storageScope}`;
   const [loadedAttempt] = useState(() => {
@@ -312,6 +314,7 @@ export function Facility({
       )}
       {r.data && (
         <>
+          {onImagingSetup && <button data-help="facility.imaging-setup" disabled={!!pending || busy} onClick={onImagingSetup}>{tr("Imaging turnaround, critical findings and policy")}</button>}
           {tab === "Staff & duties" &&
             r.data.staff.map((s) => (
               <article

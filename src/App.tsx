@@ -3,7 +3,7 @@ import { api, call, resetRequests } from "./bridge";
 import type { MeOut, LicenseStatusOut, HealthOut } from "./generated/login";
 import type { EstablishmentOut } from "./generated/facility_profile";
 import type { HandbookOut } from "./generated/help_center";
-import { Details, ErrorBox, Field, Modal } from "./components";
+import { Details, ErrorBox, Field, Modal, useLoad } from "./components";
 import { Connection } from "./screens/Connection";
 import { Login, ChangePassword } from "./screens/Login";
 import { Settings, TerminalIdentity } from "./screens/Settings";
@@ -30,6 +30,7 @@ import { EPrescription } from "./screens/EPrescription";
 import { LabOrdersResults } from "./screens/LabOrdersResults";
 import { LabOnlyWalkIn } from './screens/LabOnlyWalkIn';
 import { LabSendOuts } from './screens/LabSendOuts';
+import { ImagingQualitySetup } from './screens/ImagingQualitySetup';
 import { DiagnosticServicesList } from './screens/DiagnosticServicesList';
 import { LabBench } from './screens/LabBench';
 import { LabVerification } from './screens/LabVerification';
@@ -76,6 +77,7 @@ const labels: Record<string, [string, string, string]> = {
   my_cash_shift: ["My cash shift", "میری کیش شفٹ", "₨"],
   lab_only_walkin: ['Lab-only walk-in','صرف لیب کے لیے آمد','⚗'],
   lab_verification: ['Verification queue','تصدیق کی قطار','✓'],
+  imaging_quality_setup: ['Imaging turnaround, critical findings and policy','عکس نگاری کی مدت، اہم نتائج اور پالیسی','⚙'],
   diagnostic_services_list: ['Diagnostic services list','تشخیصی خدمات کی فہرست','▤'],
   lab_send_outs: ['Samples sent to partner laboratories','شراکت دار لیب کو بھیجے گئے نمونے','↗'],
   lab_bench: ['Scanner-first lab bench','اسکینر سے لیب بنچ','⚗'],
@@ -107,6 +109,7 @@ const labels: Record<string, [string, string, string]> = {
   settings: ["Settings", "ترتیبات", "⚙"],
 };
 const frontDeskScreens = new Set([
+  'imaging_quality_setup',
   'diagnostic_services_list',
   'critical_results_doctor',
   'critical_results_bench',
@@ -585,9 +588,17 @@ export function App() {
       setLogoutBusy(false);
     }
   }
-  function navigate(next: string) {
+  const [imagingSetupEntry, setImagingSetupEntry] = useState(false);
+  const facilitySetupScope = !!user && user.permissions.includes('establishment.manage') && user.permissions.includes('diagnostics.setup.manage') && (screen === 'facility_profile' || (screen === 'imaging_quality_setup' && imagingSetupEntry));
+  const facilitySetupHandbook = useLoad(() => facilitySetupScope && user ? call<HandbookOut>('service-setup-handbook').then(data=>({userId:user.user_id, data})) : Promise.resolve(undefined), [facilitySetupScope,user?.user_id,revision]);
+  const facilitySetupPage = !facilitySetupHandbook.loading && !facilitySetupHandbook.error && facilitySetupHandbook.data?.userId === user?.user_id ? [...(facilitySetupHandbook.data?.data.shared_screens||[]),...(facilitySetupHandbook.data?.data.workspaces.flatMap(w=>w.screens)||[])].find(s=>s.id==='imaging_quality_setup') : undefined;
+  const facilitySetupOutline = outline && facilitySetupPage ? {...outline, shared_screens:[...outline.shared_screens.filter(s=>s.id!=='imaging_quality_setup'),facilitySetupPage]} : outline;
+
+  function navigate(next: string, fromFacility = false) {
     if (sessionRecovery) return false;
+    if(next === "imaging_quality_setup" && est?.views.screens.find(s=>s.screen_id===next)?.view === "setup" && !(fromFacility && screen === "facility_profile" && user?.permissions.includes("establishment.manage"))) return false;
     if (frontDeskScreens.has(next) && !workspace) return false;
+    const routeOutline = next === "imaging_quality_setup" && fromFacility && facilitySetupPage ? facilitySetupOutline : outline;
     const required: Record<string, string[]> = {
       rx_queue: ["pharmacy.queue.view", "prescription.view"],
       dispense: ["pharmacy.dispense", "prescription.view", "ipd.discharge.clear_pharmacy"],
@@ -605,7 +616,7 @@ export function App() {
     };
     if (
       (frontDeskScreens.has(next) &&
-        !outline?.shared_screens.some(s => s.id === next) && !outline?.workspaces.some((w) =>
+        !routeOutline?.shared_screens.some(s => s.id === next) && !routeOutline?.workspaces.some((w) =>
           w.screens.some((s) => s.id === next),
         )) ||
       est?.views.screens.some(
@@ -636,6 +647,7 @@ export function App() {
       !window.confirm("Leave this screen and discard unsaved input?")
     )
       return false;
+    setImagingSetupEntry(next === "imaging_quality_setup" && fromFacility);
     setScreen(next);
     setError(undefined);
     setNotice("");
@@ -737,6 +749,7 @@ export function App() {
     'lab_only_walkin',
     'lab_bench',
     'lab_send_outs',
+    'imaging_quality_setup',
     ...(user?.permissions.some(p => ['diagnostics.quality.view','lab.requisition.create','imaging.order.create','lab.requisition.view'].includes(p)) ? ['diagnostic_services_list'] : []),
     ...(user?.permissions.includes('diagnostics.critical.view') ? ['critical_results_bench','critical_results_verifier','critical_results_doctor'] : []),
     ...(user?.permissions.some(p => ['lab.result.verify', 'lab.result.view'].includes(p)) ? ['lab_verification'] : []),
@@ -780,6 +793,7 @@ export function App() {
           w.screens.some((s) => s.id === id),
         )))) &&
       est?.views.screens.find((v) => v.screen_id === id)?.view !== "hidden" &&
+      (id !== "imaging_quality_setup" || ["full","open_work","records"].includes(est?.views.screens.find(v=>v.screen_id===id)?.view || "")) &&
       (!["rx_queue","dispense","order_queries","otc","charity_override","lab_only_walkin","lab_bench","lab_send_outs","lab_verification","critical_results_bench","critical_results_verifier","critical_results_doctor"].includes(id) || ["full", "open_work", "records"].includes(est?.views.screens.find(v => v.screen_id === id)?.view || "")),
   );
   const view = est?.views.workspaces.find(
@@ -1139,6 +1153,7 @@ export function App() {
                 <Registration user={user} revision={revision} />
               )}
               {screen === 'lab_only_walkin' && est && <LabOnlyWalkIn key={user.user_id} user={user} connected={connected} stream={stream} establishment={est} timeZone={meta?.hospital_timezone} currency={meta?.currency_code} onCashShift={nav.includes('my_cash_shift')?()=>{navigate('my_cash_shift')}:undefined}/>}
+              {screen === 'imaging_quality_setup' && est && <ImagingQualitySetup key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} fromFacility={imagingSetupEntry}/>}
               {screen === 'diagnostic_services_list' && <DiagnosticServicesList key={user.user_id} user={user} connected={connected} stream={stream}/>}
               {screen === 'lab_send_outs' && est && <LabSendOuts key={user.user_id} user={user} connected={connected} stream={stream} establishment={est} timeZone={meta?.hospital_timezone}/>}
               {screen === 'lab_bench' && est && <LabBench key={user.user_id} user={user} connected={connected} stream={stream} establishment={est} timeZone={meta?.hospital_timezone}/>}
@@ -1225,9 +1240,12 @@ export function App() {
                   timeZone={meta?.hospital_timezone}
                 />
               )}
+              {screen === "facility_profile" && facilitySetupScope && facilitySetupHandbook.loading && <p role="status">{t('Checking permitted service setup pages…','مجاز خدمت ترتیب صفحات چیک ہو رہے ہیں…')}</p>}
+              {screen === "facility_profile" && facilitySetupScope && facilitySetupHandbook.error && <><ErrorBox error={facilitySetupHandbook.error}/><button data-help="facility.imaging-access" onClick={facilitySetupHandbook.reload}>{t('Retry setup access','ترتیب رسائی پھر چیک')}</button></>}
               {screen === "facility_profile" && (
                 <Facility
                   revision={revision}
+                  onImagingSetup={user.permissions.includes("diagnostics.setup.manage") && ["setup","full","open_work","records"].includes(est?.views.screens.find(s=>s.screen_id==="imaging_quality_setup")?.view||"") && !!facilitySetupPage ? ()=>{navigate("imaging_quality_setup",true)} : undefined}
                   onChanged={refreshData}
                   storageScope={`${server.fingerprint}:${user.user_id}`}
                 />
@@ -1247,7 +1265,7 @@ export function App() {
         <Help
           screen={screen}
           initialPage={helpPage}
-          outline={outline}
+          outline={screen === "imaging_quality_setup" && imagingSetupEntry ? facilitySetupOutline : outline}
           language={prefs.language}
           onClose={() => {
             setHelpOpen(false);

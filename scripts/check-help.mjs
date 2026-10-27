@@ -199,6 +199,7 @@ export function checkHelp({
       "LabBench",
       "LabSendOuts",
       "DiagnosticServicesList",
+      "ImagingQualitySetup",
       "LabVerification",
       "CriticalResultsBench",
       "CriticalResultsDoctor",

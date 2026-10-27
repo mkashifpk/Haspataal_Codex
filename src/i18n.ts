@@ -9,6 +9,11 @@ export function setLanguage(value: string) {
   language = value;
 }
 const ur: Record<string, string> = {
+ "Imaging turnaround, critical findings and policy":"عکس نگاری کی مدت، اہم نتائج اور پالیسی",
+ "Enter whole minutes from 1 to 43200 in every target.":"ہر ہدف میں1تا43200صحیح منٹ دیں۔",
+ "Emergency targets cannot exceed the corresponding routine targets.":"ہنگامی ہدف متعلقہ معمول ہدف سے زیادہ نہیں ہو سکتا۔",
+ "Enter a finding name of 3–200 characters, description up to 500 and a whole sort order from 0 to 10000.":"نتیجے کا نام3تا200، تفصیل500تک اور صحیح ترتیب0تا10000دیں۔",
+ "Choose a supported imaging modality or Any modality.":"مجاز عکس طریقہ یا کوئی بھی طریقہ چنیں۔",
  "The server did not return a PDF":"سرور نے پی ڈی ایف نہیں بھیجی۔",
  "The PDF preview could not open. Save the document and open it in your PDF reader.":"پی ڈی ایف پیش منظر نہیں کھل سکا۔ دستاویز محفوظ کرکے اپنے پی ڈی ایف ریڈر میں کھولیں۔",
  "You do not have permission to download this document":"اس دستاویز کو ڈاؤن لوڈ کرنے کی اجازت نہیں۔",
