@@ -1,3 +1,5 @@
+> Current follow-up (27 October): deferred positive Pharmacy clearance/lost-answer and Cash/OTC/mapped drawer tests now pass; see [Phase3 remaining review](PHASE3_REMAINING_REVIEW_2026-10-27.md). Earlier statements below preserve historical test limits. Full acceptance still requires the remaining checks and signed human reviews.
+
 # Frontend follow-up for backend reports 20–25
 
 Implemented on 26 October. These are code and local policy checks; live DEV workflow acceptance remains pending maintenance report26.

@@ -1,3 +1,5 @@
+> Current follow-up (27 October): deferred positive Pharmacy clearance/lost-answer and Cash/OTC/mapped drawer tests now pass; see [Phase3 remaining review](PHASE3_REMAINING_REVIEW_2026-10-27.md). Earlier statements below preserve historical test limits. Full acceptance still requires the remaining checks and signed human reviews.
+
 # Phase3 screen2 — Dispense
 
 At the Pharmacy Counter the pharmacist verifies the patient, medicines and payment, obtains the required independent high-alert check, supplies the chosen quantities once and retrieves the receipt/labels. The server selects FEFO batches and final amounts. Partial supply preserves the remainder. Printing is independent of stock/payment.

@@ -1,3 +1,5 @@
+> Current follow-up (27 October): deferred positive Pharmacy clearance/lost-answer and Cash/OTC/mapped drawer tests now pass; see [Phase3 remaining review](PHASE3_REMAINING_REVIEW_2026-10-27.md). Earlier statements below preserve historical test limits. Full acceptance still requires the remaining checks and signed human reviews.
+
 # OTC Mode — Phase 3 screen 4
 
 Codex, 25 October 2026. Implementation and agent DEV evidence; **Card journey verified, Cash acceptance blocked by backend24/25**. No complete screen/Pharmacy/Phase3 or signed human acceptance claim. Final commit/build/proposal are in root handoff.md.
