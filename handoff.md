@@ -1,6 +1,6 @@
 # Haspataal checkpoint — 27 October 2026
 
-Last updated by Codex/functions (Asia/Karachi). Current request: build ONLY Repeated images register, Phase3 position48 imaging_repeats. Implementation is done. All checks and final asset-copy build are complete. Source0df3e35 committed and proposal175 verified pending. No implementation work is currently in progress. No Phase4 implementation started.
+Last updated by Codex/functions (Asia/Karachi). Current request: build ONLY Repeated images register, Phase3 position48 imaging_repeats. Implementation is done. All checks and final asset-copy build are complete. Source0df3e35 committed; latest MCP status check confirms proposals172–175 ACCEPTED. No implementation work is currently in progress. No Phase4 implementation started.
 
 ## Completed and checks
 
@@ -12,7 +12,7 @@ Core/full-role renderer9hzAhJja PASS all live write/refusal/lost201/concurrency/
 
 ## Backend and original writes
 
-DEV https://hms-dev.netbird.cloud; developer mkashif/implementation1. Server build2026-10-27T06:11:24.313207+00:00, contract8ad8456c41b87dd0031e, knowledge506a43401a2cda4a, rubricf18448c114ef unchanged. Required startup progress/proposals/issues/overview/connecting guide/roadmap and screen/quality/design/handbook/endpoint/types/testplan read. No signed human review failures; shared human review in progress (do not touch). Pending174/173/172/166/133/109 unchanged; accepted Lab169–171 unchanged.
+DEV https://hms-dev.netbird.cloud; developer mkashif/implementation1. Server build2026-10-27T06:11:24.313207+00:00, contract8ad8456c41b87dd0031e, knowledge506a43401a2cda4a, rubricf18448c114ef unchanged. Required startup progress/proposals/issues/overview/connecting guide/roadmap and screen/quality/design/handbook/endpoint/types/testplan read. No signed human review failures; shared human review in progress (do not touch). Latest status check:172–175 ACCEPTED, Lab169–171 accepted; pending166/133/109. No signed human reviews returned; shared review still in progress.
 
 Reported #32 New (Low Documentation): actual Ordered repeat refuses409 IMAGING_ORDER_STATE_INVALID, omitted from MCP endpoint/bundle/test-plan errors. Product guard and UI handling are correct; no screen blocker. Original request_id f976b580c544424bb91d59d7d2528b27. Exact payload/confirmed receipt docs/imaging-repeats-stage-error-{issue,receipt}-2026-10-27.json. Latest issue read:30/31/32 New/no answer.30 original employee/doctor distinction overstated, documented doctor_id IS employee ID and picker works (frontend tracker correction; MCP cannot amend).31 optional DEV PACS configuration blocks earlier positive study-link acceptance, not repeats.23 Fixed Pharmacy-status UI exists; fresh positive clearance/PharmacyCounterCash checks remain deferred.27–29 Fixed/deployed/previously retested.
 
@@ -24,10 +24,14 @@ Original keys/bodies/results are in ignored artifacts/imaging-repeats-check.json
 
 ## Next three actions and acceptance
 
-1. Proposal175 confirmed pending via progress_proposals: awaiting human review on /docs -> My progress. Nine tested new-screen items, source0df3e35d584d548902c34688a28ed9eb9d654a9b/finalrendererCdA5t8jf. Exact payload/verified receipt docs/imaging-repeats-progress-{proposal,receipt}-2026-10-27.json. Full-plan/human/design/editor gates excluded; do not duplicate unchanged accepted/pending work.
+1. Latest MCP status query (27Oct2026, Codex/functions): proposals172–175 are ACCEPTED.175 covers nine tested repeat-register items on source0df3e35/finalCdA5t8jf; original saved receipt remains historical submission evidence. Do not re-propose unchanged work. Diagnostic services list proposal166 remains pending on /docs -> My progress (133/109 are earlier non-Phase3 proposals).
 2. Human follows the review using NEW synthetic upstream data through the app, then role/Urdu/F1/theme/nativezoom and past-event audit checks. Only human enters Review code/signs portal. No signed human fresh-data/translation/role/editor/busy-hour or shared DEV service transition claimed; full-plan/human/design/editor gates unclaimed. Unit gate policies/current full/RBAC verified. Retest affected issues only after backend answers/build deployment.
 3. Position48 is LAST Phase3 catalogue screen. Next catalogue work is Phase4 Inpatient journey, position49 duty_roster, then roll_call50/pending_admissions51. NOT started; get its current bundle/quality/design/outline/dependencies before new implementation. Phase3 full acceptance still pending earlier PACS31, deferred Pharmacy checks and human reviews. Existing home/preventive reset state and H08/H09/H10 remain earlier acceptance/owner choices.
 
 ## Git and environment
 
 Clean baseline9071241/source05b5d47 verified at takeover; all task changes ours, no unrelated edits overwritten. Tested source0df3e35d584d548902c34688a28ed9eb9d654a9b; final documentation commit contains this checkpoint and proposal payload/verified receipt only. Working tree expected clean afterward; verify on takeover. No running commands or uncertain business writes. Authorized connection comes from ignored .dev-terminal.json, CA/MCP config; never copy credentials/local profiles/Review codes into Git. npm_config_cache=D:\Projects\Haspataal_Codex\artifacts\npm-cache avoids low C space; local Vite/tsc/prettier used. No user files deleted, no PR/push/worktree/automation.
+
+## Phase3 status query checkpoint
+
+User asks whether Phase3 is complete; no implementation was resumed. MCP confirms last-screen proposals172–175 accepted, but no signed workspace human reviews, screens_complete0 globally, and Phase3 formal acceptance is NOT complete. Remaining: Diagnostics-services proposal166 review; named fresh-data/role/F1/Urdu/zoom acceptance and editor gates; positive optional PACS31 test; prior fresh Pharmacy clearance/PharmacyCounterCash checks.32 remains New low documentation only (correct backend stage guard), not a functional blocker;30/31 New/no answer,23 Fixed deployed. No backend writes, new tests, application changes or Phase4 work performed by this status query. Prior166test/build results were NOT rerun. Git clean at42f0f73 on entry; this follow-up commit changes only the shared checkpoint. No running commands/uncertain writes.
