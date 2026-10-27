@@ -9,6 +9,15 @@ export function setLanguage(value: string) {
   language = value;
 }
 const ur: Record<string, string> = {
+ "Choose an active imaging partner with a valid MOU.":"درست معاہدے والا فعال عکس شریک چنیں۔",
+ "Check the patient, order and partner agreement before sending.":"بھیجنے سے پہلے مریض، آرڈر اور شریک معاہدہ چیک کریں۔",
+ "The outsourcing note is limited to 500 characters.":"حوالے کا نوٹ500حروف تک ہے۔",
+ "Match the partner report to this patient and order, and verify the reporter name and registration first.":"پہلے شریک رپورٹ کا مریض و آرڈر، مصنف کا نام اور رجسٹریشن چیک کریں۔",
+ "Enter the partner report (3–20000 characters).":"شریک رپورٹ3تا20000حروف میں دیں۔",
+ "Enter the partner radiologist name and registration (3–200 characters).":"شریک ریڈیالوجسٹ نام و رجسٹریشن3تا200حروف دیں۔",
+ "The critical finding note is limited to 1000 characters.":"اہم نتیجے کا نوٹ1000حروف تک ہے۔",
+ "Choose an actual critical finding from the list.":"فہرست سے اصل اہم نتیجہ چنیں۔",
+
  "Imaging worklist":"عکس نگاری کی فہرست",
  "This order no longer allows that action. Refresh and review it again.":"آرڈر اب یہ عمل نہیں مانتا۔ تازہ کرکے پھر جائزہ لیں۔",
  "Enter a report of at least 3 characters.":"رپورٹ کم از کم3حروف میں لکھیں۔",

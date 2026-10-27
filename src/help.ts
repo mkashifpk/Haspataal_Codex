@@ -10,6 +10,102 @@ export type HelpPage = {
   faqUr: [string, string][];
 };
 export const help: Record<string, HelpPage> = {
+ imaging_outsourced: {
+  title: "Outsourced examinations",
+  titleUr: "بیرونی مرکز کے معائنے",
+  purpose: "During the radiology shift, the radiographer or radiologist sends an examination the hospital cannot perform to an agreed partner, then matches and records that partner's final report so the responsible doctor can act on the real result.",
+  purposeUr: "ریڈیالوجی شفٹ میں ریڈیوگرافر یا ریڈیالوجسٹ ہسپتال میں نہ ہونے والا معائنہ معاہدہ شدہ شریک کو سپرد، پھر اصل شریک رپورٹ مریض سے ملا کر حتمی درج کرتا تاکہ ذمہ دار معالج اصل نتیجے پر عمل کرے۔ اردو مقامی طبی جائزے تک مسودہ ہے۔",
+  steps: [
+    "Radiology → Outsourced examinations. Verify Live and current service view. The worklist keeps server order and deadlines; Modality filters on the server, Show work and Find in returned examinations filter locally. Open an actual row or Read imaging order with its known positive ID for history. No guessing IDs or matching names to select an order.",
+    "Check name/MRN and age or date of birth, accession/order, modality/body part/side, indication, transport/escort and actual patient flags. Missing or merged context blocks writes: ask reception to reconcile the original order. Deceased patients receive no new referral; existing report documentation needs responsible-clinician review.",
+    "For Ordered/Scheduled only, choose Send to partner centre. Select an actual Imaging/Both partner, reading PHC/PNRA/accreditation, MOU reference/period and turnaround. Inactive or mou_expired partners cannot be selected. Missing facts say Not recorded. Optional note up to500characters. Match the patient/order/agreement and tick the check only after doing so.",
+    "Review partner action freezes the exact body/patient/order/partner. Confirm partner action rereads fresh permissions, service, order, patient and MOU before sending once. Back to draft keeps input; close before confirming discards it without a write. Confirmed Outsourced is a server record, not a transport booking or external telephone call. Read server due_at, never calculate it yourself.",
+    "Open the Outsourced order and choose Enter partner report. Match the actual source report to this patient/order. Enter actual partner radiologist name and registration3–200characters and report text3–20000characters. Optional Partner reported time uses the displayed hospital timezone; empty lets the server use now. Do not substitute the data-entry user for the partner radiologist.",
+    "Select an actual active modality-compatible critical finding and/or factual critical note up to1000characters if appropriate. Confirming a critical report opens the critical log. Tell the responsible doctor NOW and record the completed communication in Critical results to tell; saving a report never makes the call or acknowledges the finding.",
+    "Tick the source-matching statement only after checking the report/reporter. Every field change clears that assertion. Review and confirm final report once: it is immutable, with external reporter/time visible and real doctor handover. This screen offers no report edit/delete. The current order/patient/context changing requires a fresh review.",
+    "After a successful server-signed report payload, Save partner report PDF renders it, Save original report PDF saves server bytes and Print partner report uses the document printer. Print cancellation/errors never repeat referral/report. The print controls stay disabled without the signed payload. No ZIP or invented signature.",
+    "Lost answers freeze the original action/key/body and navigation. Retry original request explicitly sends the identical key/body inside24hours; Read current result rereads the original order before release. Outside retention ask IT, never create a replacement. A confirmed write is not repeated because a later read/print failed. Manual Refresh examinations and partners and reconnect refresh current reads; no unsupported polling/live report subscription is promised. F1 from controls/dialogs preserves draft/focus, shared zoom100–250%, English/Urdu and themes remain available; named human translation/role/device/editor acceptance is pending."
+  ],
+  stepsUr: [
+    "ریڈیالوجی سے بیرونی مرکز کے معائنے۔ لائیو اور خدمت چیک۔ اصل فہرست/مقرر وقت سرور؛ قسم سرور چھانٹی، کام اور تلاش مقامی۔ اصل سطر یا معلوم مثبت نمبر سے آرڈر تاریخ کھولیں؛ نمبر فرض یا نام ملا کر آرڈر نہیں۔",
+    "نام/ایم آر این اور عمر/پیدائش، ایکسیشن/آرڈر، قسم/جگہ/سمت، وجہ، آمد/ساتھ عملہ و اصل نشان چیک۔ شناخت ضم/غائب پر ارسال بند؛ استقبالیہ اصل آرڈر ملائے۔ وفات پر نیا حوالہ نہیں؛ سابق رپورٹ دستاویز معالج کے جائزے سے۔",
+    "صرف آرڈر/وقت مقرر میں شریک مرکز کو بھیجیں۔ اصل عکس/دونوں شریک؛ پی ایچ سی/پی این آر اے، منظوری، معاہدہ/مدت و گھنٹے پڑھیں۔ غیر فعال/سرور ختم معاہدہ نہیں چن سکتے۔ غائب درج نہیں۔ اختیاری500حروف نوٹ؛ مریض/آرڈر/معاہدہ اصل جانچ کے بعد نشان۔",
+    "جائزہ عین مواد/مریض/آرڈر/شریک منجمد۔ تصدیق سے پہلے تازہ اجازت، خدمت، آرڈر، مریض اور معاہدہ پھر ایک ارسال۔ واپس سے معلومات رہیں، پہلے بند سے بغیر ارسال ختم۔ سپرد سرور ریکارڈ، آمدورفت بکنگ یا کال نہیں۔ مقرر وقت اصل سرور، اپنا حساب نہیں۔",
+    "سپرد آرڈر میں شریک کی رپورٹ درج۔ اصل رپورٹ کا مریض/آرڈر ملائیں۔ اصل شریک ریڈیالوجسٹ نام و رجسٹریشن3تا200، رپورٹ3تا20000حروف۔ اختیاری وقت دکھائے ہسپتال علاقے میں؛ خالی پر سرور اب۔ مصنف کے بدلے داخلی صارف نہیں۔",
+    "اصل فعال متعلقہ قسم کا اہم نتیجہ یا1000حروف اصل نوٹ چنیں۔ اہم رپورٹ تصدیق پر رجسٹر کھلتا۔ ذمہ دار ڈاکٹر کو ابھی بتائیں اور اہم نتائج میں مکمل اطلاع الگ درج۔ رپورٹ محفوظ کال یا نتیجے کی تسلیم نہیں۔",
+    "اصل رپورٹ/مصنف چیک کرکے ملانے کا نشان۔ خانہ بدلے تو صاف۔ جائزہ اور ایک حتمی تصدیق، پھر ناقابل ترمیم رپورٹ، بیرونی مصنف/وقت اور اصل ڈاکٹر حوالگی۔ ترمیم/حذف نہیں۔ آرڈر/مریض/سیاق بدلے تو تازہ جائزہ۔",
+    "سرور دستخط شدہ رپورٹ جواب پر شریک پی ڈی ایف بنے، اصل پی ڈی ایف سرور سے محفوظ، پرنٹ دستاویز پرنٹر۔ منسوخی/خرابی حوالہ یا رپورٹ نہ دہرائے۔ دستخط جواب بغیر بٹن بند؛ زیپ یا فرضی مہر نہیں۔",
+    "گم جواب پر اصل عمل/کلید/مواد و جگہ مقفل۔24گھنٹے عین اصل کوشش یا اصل آرڈر پڑھ کر چیک۔ مدت بعد آئی ٹی، متبادل نہیں۔ بعد کی پڑھائی/پرنٹ خرابی تصدیق شدہ عمل نہیں دہراتی۔ دستی تازہ و رابطہ بحالی اصل پڑھتے؛ غیر موجود واقعے یا پولنگ کا وعدہ نہیں۔ ایف ون خانے/مکالمے سے فوکس/مسودہ رکھے،100تا250زوم، اردو/انگریزی/تھیم؛ انسانی زبان/کردار/آلہ/مدیر قبولیت باقی۔"
+  ],
+  faq: [
+    [
+      "Who uses this screen, and may a radiographer enter the external report?",
+      "Radiographers and radiologists with imaging.order.update use the permitted Radiology screen. An external report records the partner radiologist's actual name/registration; it is a different contract from signing the hospital's internal radiology report."
+    ],
+    [
+      "Why is a partner unavailable?",
+      "Inactive, wrong-service or server-expired MOU partners cannot receive new examinations. Check PHC/PNRA/MOU/period and ask diagnostic administration to correct it. A change during review refuses before submission; DIAGNOSTIC_PARTNER_INVALID also remains a visible server refusal."
+    ],
+    [
+      "Where is a report-pending examination?",
+      "Refresh and choose At partner — report pending among the returned work. Use the original known order ID to read history if it is absent. Never invent a replacement referral or guess an ID; report a reproducible missing worklist case to support."
+    ],
+    [
+      "Does sending arrange transport or notify the centre?",
+      "No. This records the selected order as Outsourced. Arrange actual transport, escort and centre communication through hospital procedure. The displayed turnaround/deadline is the server's value, not a local calculation."
+    ],
+    [
+      "Which reporter and time should I enter?",
+      "Copy the actual partner radiologist's name and registration and report text after matching the patient/order. Optional time is the source report time in the hospital timezone; empty uses server now. Never invent a registration or use the terminal timezone silently."
+    ],
+    [
+      "What happens for a critical finding?",
+      "Pick the actual compatible finding and/or describe the fact. Confirmed report opens the critical log and doctor handover. Tell the responsible doctor immediately and record completed communications separately; report saving/printing is not a call or acknowledgement."
+    ],
+    [
+      "Can I edit or resend after a lost answer?",
+      "Final reports have no edit/delete. Keep the original key/body, inspect the original order or explicitly retry the same action within24hours. Never make a replacement with a new key because the answer is missing; confirmed actions stay saved after print/read errors."
+    ],
+    [
+      "How do I test help, print and Urdu?",
+      "F1 from partner/report/confirmation fields must preserve focus/draft. Test both themes and shared keyboard/Settings100–250zoom, actual signed PDF and printer cancellation. A failed print never repeats clinical work. Urdu and complete human role/device/editor journeys remain pending review."
+    ]
+  ],
+  faqUr: [
+    [
+      "صفحہ کون استعمال کرے، ریڈیوگرافر بیرونی رپورٹ درج کرے؟",
+      "مجاز ریڈیوگرافر/ریڈیالوجسٹ عکس اپ ڈیٹ اجازت سے۔ اصل شریک ریڈیالوجسٹ نام/رجسٹریشن درج، ہسپتال داخلی رپورٹ دستخط سے الگ معاہدہ۔"
+    ],
+    [
+      "شریک دستیاب کیوں نہیں؟",
+      "غیر فعال، غلط خدمت یا سرور ختم معاہدہ کو نئے معائنے نہیں۔ پی ایچ سی/پی این آر اے/مدت چیک، منتظم درست کرے۔ جائزے میں تبدیلی ارسال سے پہلے انکار؛ اصل سرور انکار بھی واضح۔"
+    ],
+    [
+      "شریک کی منتظر رپورٹ کہاں؟",
+      "تازہ کے بعد موصولہ کام میں شریک کے پاس چنیں۔ غائب تاریخ اصل معلوم آرڈر سے پڑھیں۔ متبادل حوالہ یا فرضی نمبر نہیں؛ ثابت فہرست مسئلہ معاونت کو دیں۔"
+    ],
+    [
+      "بھیجنے سے آمدورفت یا مرکز کو اطلاع؟",
+      "نہیں، منتخب آرڈر سپرد درج۔ اصل سواری، ساتھ عملہ و مرکز رابطہ ہسپتال طریقے سے۔ مقرر وقت/مدت سرور کا، مقامی حساب نہیں۔"
+    ],
+    [
+      "مصنف اور وقت کون سا؟",
+      "اصل شریک ریڈیالوجسٹ نام/رجسٹریشن اور متن مریض/آرڈر ملا کر۔ اختیاری اصل رپورٹ وقت ہسپتال علاقے میں؛ خالی سرور اب۔ رجسٹریشن یا کمپیوٹر وقت فرض نہیں۔"
+    ],
+    [
+      "اہم نتیجے پر کیا؟",
+      "اصل متعلقہ اہم نتیجہ یا حقیقی تفصیل۔ تصدیق رپورٹ سے اہم رجسٹر و ڈاکٹر حوالگی۔ ذمہ دار ڈاکٹر کو فوراً بتائیں اور مکمل اطلاع الگ درج؛ محفوظ/پرنٹ کال یا تسلیم نہیں۔"
+    ],
+    [
+      "گم جواب پر ترمیم یا پھر ارسال؟",
+      "حتمی رپورٹ ترمیم/حذف نہیں۔ اصل کلید/مواد رکھیں، اصل آرڈر پڑھیں یا24گھنٹے وہی کوشش۔ غائب جواب پر نئی کلید متبادل نہیں؛ پرنٹ/پڑھنے کی خرابی محفوظ عمل نہیں لوٹاتی۔"
+    ],
+    [
+      "مدد، پرنٹ اور اردو کیسے جانچیں؟",
+      "شریک/رپورٹ/تصدیق پر ایف ون سے فوکس و مسودہ رہے۔ دونوں تھیم،100تا250مشترک زوم، اصل دستخط پی ڈی ایف و پرنٹر منسوخی؛ طبی ارسال نہ دہرے۔ اردو و مکمل انسانی کردار/آلہ/مدیر جائزہ باقی۔"
+    ]
+  ]
+},
  radiology_worklist:{
   title: "Imaging worklist",
   titleUr: "عکس نگاری کی فہرست",

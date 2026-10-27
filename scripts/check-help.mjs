@@ -201,6 +201,7 @@ export function checkHelp({
       "DiagnosticServicesList",
       "ImagingQualitySetup",
       "RadiologyWorklist",
+      "ImagingOutsourced",
       "LabVerification",
       "CriticalResultsBench",
       "CriticalResultsDoctor",

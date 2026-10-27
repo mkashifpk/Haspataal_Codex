@@ -33,6 +33,7 @@ import { LabSendOuts } from './screens/LabSendOuts';
 import { ImagingQualitySetup } from './screens/ImagingQualitySetup';
 import { DiagnosticServicesList } from './screens/DiagnosticServicesList';
 import { LabBench } from './screens/LabBench';
+import { ImagingOutsourced } from './screens/ImagingOutsourced';
 import { RadiologyWorklist } from './screens/RadiologyWorklist';
 import { LabVerification } from './screens/LabVerification';
 import { CriticalResultsDoctor, DoctorCriticalAlert } from './screens/CriticalResultsDoctor';
@@ -55,6 +56,7 @@ import { createMetadataFlight } from "./metadata-flight";
 import { createBootstrapSeed } from "./bootstrap-seed";
 type WorkspaceSnapshot = {establishment:EstablishmentOut;settings:any;me:MeOut;permittedWorkspaces:MeOut["workspaces"]};
 const labels: Record<string, [string, string, string]> = {
+  imaging_outsourced: ["Outsourced examinations","بیرونی مرکز کے معائنے","↗"],
   radiology_worklist: ["Imaging worklist", "عکس نگاری کی فہرست", "▤"],
   charity_override: ["Zakat / charity override", "زکوٰۃ / فلاحی امداد", "₨"],
   otc: ["OTC mode", "بغیر نسخہ فروخت", "Rx"],
@@ -112,6 +114,7 @@ const labels: Record<string, [string, string, string]> = {
   settings: ["Settings", "ترتیبات", "⚙"],
 };
 const frontDeskScreens = new Set([
+  'imaging_outsourced',
   'radiology_worklist',
   'imaging_quality_setup',
   'diagnostic_services_list',
@@ -756,6 +759,7 @@ export function App() {
     'lab_bench',
     'lab_send_outs',
     'imaging_quality_setup',
+    'imaging_outsourced',
     'radiology_worklist',
     ...(user?.permissions.some(p => ['diagnostics.quality.view','lab.requisition.create','imaging.order.create','lab.requisition.view'].includes(p)) ? ['diagnostic_services_list'] : []),
     ...(user?.permissions.includes('diagnostics.critical.view') ? ['critical_results_bench','critical_results_verifier','critical_results_doctor','critical_results_radiology'] : []),
@@ -801,7 +805,7 @@ export function App() {
         )))) &&
       est?.views.screens.find((v) => v.screen_id === id)?.view !== "hidden" &&
       (id !== "imaging_quality_setup" || ["full","open_work","records"].includes(est?.views.screens.find(v=>v.screen_id===id)?.view || "")) &&
-      (!["critical_results_radiology","radiology_worklist","rx_queue","dispense","order_queries","otc","charity_override","lab_only_walkin","lab_bench","lab_send_outs","lab_verification","critical_results_bench","critical_results_verifier","critical_results_doctor"].includes(id) || ["full", "open_work", "records"].includes(est?.views.screens.find(v => v.screen_id === id)?.view || "")),
+      (!["imaging_outsourced","critical_results_radiology","radiology_worklist","rx_queue","dispense","order_queries","otc","charity_override","lab_only_walkin","lab_bench","lab_send_outs","lab_verification","critical_results_bench","critical_results_verifier","critical_results_doctor"].includes(id) || ["full", "open_work", "records"].includes(est?.views.screens.find(v => v.screen_id === id)?.view || "")),
   );
   const view = est?.views.workspaces.find(
     (v) => v.workspace === workspace,
@@ -1163,6 +1167,7 @@ export function App() {
               {screen === 'imaging_quality_setup' && est && <ImagingQualitySetup key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} fromFacility={imagingSetupEntry}/>}
               {screen === 'diagnostic_services_list' && <DiagnosticServicesList key={user.user_id} user={user} connected={connected} stream={stream}/>}
               {screen === 'lab_send_outs' && est && <LabSendOuts key={user.user_id} user={user} connected={connected} stream={stream} establishment={est} timeZone={meta?.hospital_timezone}/>}
+              {screen === 'imaging_outsourced' && est && <ImagingOutsourced key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone}/>}
               {screen === 'radiology_worklist' && est && <RadiologyWorklist key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone}/>}
               {screen === 'lab_bench' && est && <LabBench key={user.user_id} user={user} connected={connected} stream={stream} establishment={est} timeZone={meta?.hospital_timezone}/>}
               {screen === 'lab_verification' && est && <LabVerification key={user.user_id} user={user} connected={connected} stream={stream} establishment={est} timeZone={meta?.hospital_timezone}/>}

@@ -137,8 +137,8 @@ export const foundationErrors: Record<string, Bilingual> = {
     "اہم نتیجہ حتمی یا یہ تبدیلی مجاز نہیں۔ عین تفصیل تازہ کرکے اصل تسلیم مصنف/وقت/کارروائی دیکھیں۔ پرانا جائزہ بند؛ حتمی کی ترمیم/حذف/دوبارہ تسلیم نہیں۔ گم جواب میں صرف پڑھ کر چیک، نہ دوبارہ ارسال نہ قطار غائب سے کامیابی۔",
   ],
   DIAGNOSTIC_PARTNER_INVALID: [
-    "This partner is not active for the service or the server says its MOU expired. Refresh the actual partner list, check name/service/MOU period/PHC details and choose a valid laboratory. Ask Lab Admin to correct the agreement/setup. Never extend the period locally, invent an ID, or claim that a refused dispatch saved.",
-    "شریک خدمت کے لیے فعال نہیں یا سرور کے مطابق معاہدہ ختم۔ اصل فہرست تازہ کرکے نام/خدمت/معاہدہ/پی ایچ سی دیکھیں، مجاز لیب چنیں۔ لیب ایڈمن سے ترتیب درست۔ مقامی مدت توسیع، فرضی نمبر یا انکار پر محفوظ دعویٰ نہیں۔",
+    "This partner is not active for the service or the server says its MOU expired. Refresh the actual partner list, check name/service/MOU period/PHC details and choose a valid partner for this service. Ask diagnostic administration to correct the agreement/setup. Never extend the period locally, invent an ID, or claim that a refused dispatch saved.",
+    "شریک خدمت کے لیے فعال نہیں یا سرور کے مطابق معاہدہ ختم۔ اصل فہرست تازہ کرکے نام/خدمت/معاہدہ/پی ایچ سی دیکھیں، اس خدمت کا مجاز شریک چنیں۔ تشخیصی منتظم سے ترتیب درست۔ مقامی مدت توسیع، فرضی نمبر یا انکار پر محفوظ دعویٰ نہیں۔",
   ],
   CRITICAL_RESULT_READ_BACK_REQUIRED: [
     "Telephone or in-person communication requires the actual recipient to repeat the result back. Do that first, then tick read-back and the completed-communication statement, review and confirm once. The refusal saved no communication. Do not choose Written/Electronic merely to bypass the real means. Changing the recipient or means clears prior assertions; a lost reply requires original-key recovery, not a new record.",

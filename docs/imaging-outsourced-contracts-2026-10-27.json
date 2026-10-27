@@ -1,0 +1,4677 @@
+{
+  "endpoints": [
+    {
+      "method": "GET",
+      "path": "/api/v1/diagnostic-partners",
+      "summary": "Partner laboratories and imaging centres",
+      "tags": [
+        "Diagnostic services"
+      ],
+      "permissions": [
+        "diagnostics.setup.manage",
+        "diagnostics.quality.view",
+        "lab.sendout.manage",
+        "imaging.order.update",
+        "lab.test.manage"
+      ],
+      "permissions_mode": "any",
+      "idempotency_key": false,
+      "description": "The partners the hospital sends tests and examinations to under an MOU (MSDS AAC 6, 14): the PHC registration, the\naccreditation or PNRA licence, the MOU and its period, the turnaround agreed. `mou_expired`: nothing more is sent.\n\n**Required permission:** `diagnostics.setup.manage OR diagnostics.quality.view OR lab.sendout.manage OR imaging.order.update OR lab.test.manage`\n\n**Required permission:** `diagnostics.setup.manage OR diagnostics.quality.view OR lab.sendout.manage OR imaging.order.update OR lab.test.manage`",
+      "roles_allowed": [
+        "clinic_director",
+        "hospital_admin",
+        "hospital_director",
+        "lab_admin",
+        "lab_technician",
+        "lab_verifier",
+        "owner",
+        "quality_officer",
+        "radiographer",
+        "radiologist"
+      ],
+      "parameters": [
+        {
+          "name": "services",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "enum": [
+                  "Lab",
+                  "Imaging"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Services"
+          }
+        },
+        {
+          "name": "active_only",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "type": "boolean",
+            "default": true,
+            "title": "Active Only"
+          }
+        }
+      ],
+      "request_body": null,
+      "request_content_type": null,
+      "response_schema": {
+        "title": "Envelope[list[PartnerOut]]",
+        "properties": {
+          "data": {
+            "items": {
+              "title": "PartnerOut",
+              "properties": {
+                "partner_id": {
+                  "type": "integer",
+                  "title": "Partner Id"
+                },
+                "name": {
+                  "type": "string",
+                  "title": "Name"
+                },
+                "services": {
+                  "type": "string",
+                  "enum": [
+                    "Lab",
+                    "Imaging",
+                    "Both"
+                  ],
+                  "title": "Services"
+                },
+                "phc_registration": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Phc Registration"
+                },
+                "accreditation": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Accreditation"
+                },
+                "pnra_licence": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Pnra Licence"
+                },
+                "mou_reference": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Mou Reference"
+                },
+                "mou_valid_from": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "format": "date"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Mou Valid From"
+                },
+                "mou_valid_until": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "format": "date"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Mou Valid Until"
+                },
+                "turnaround_hours": {
+                  "anyOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Turnaround Hours"
+                },
+                "quality_note": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Quality Note"
+                },
+                "contact": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Contact"
+                },
+                "address": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Address"
+                },
+                "is_active": {
+                  "type": "boolean",
+                  "title": "Is Active"
+                },
+                "row_version": {
+                  "type": "integer",
+                  "title": "Row Version"
+                },
+                "mou_expired": {
+                  "type": "boolean",
+                  "title": "Mou Expired",
+                  "description": "Nothing is sent to a partner whose MOU has expired"
+                },
+                "tests_sent_out": {
+                  "type": "integer",
+                  "title": "Tests Sent Out",
+                  "description": "Active lab tests sent to this partner by default"
+                }
+              },
+              "type": "object",
+              "required": [
+                "partner_id",
+                "name",
+                "services",
+                "phc_registration",
+                "accreditation",
+                "pnra_licence",
+                "mou_reference",
+                "mou_valid_from",
+                "mou_valid_until",
+                "turnaround_hours",
+                "quality_note",
+                "contact",
+                "address",
+                "is_active",
+                "row_version",
+                "mou_expired",
+                "tests_sent_out"
+              ]
+            },
+            "type": "array",
+            "title": "Data"
+          },
+          "meta": {
+            "title": "Meta",
+            "properties": {
+              "server_time": {
+                "type": "string",
+                "title": "Server Time",
+                "description": "Server clock (UTC). Use it to detect terminal clock skew."
+              },
+              "page": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Page"
+              },
+              "page_size": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Page Size"
+              },
+              "total_count": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Total Count"
+              },
+              "next_cursor": {
+                "title": "Next Cursor"
+              }
+            },
+            "type": "object",
+            "required": [
+              "server_time"
+            ]
+          },
+          "request_id": {
+            "type": "string",
+            "title": "Request Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data",
+          "meta",
+          "request_id"
+        ]
+      },
+      "recorded_example": {
+        "request": {
+          "path": "/api/v1/diagnostic-partners",
+          "query": {
+            "services": "Lab"
+          }
+        },
+        "response": {
+          "status": 200,
+          "body": {
+            "data": [
+              {
+                "partner_id": 1,
+                "name": "City Reference Laboratory",
+                "services": "Lab",
+                "phc_registration": "PHC-R-123",
+                "accreditation": "PNAC ISO 15189",
+                "pnra_licence": null,
+                "mou_reference": "MOU-1",
+                "mou_valid_from": "2026-09-01",
+                "mou_valid_until": "2027-07-28",
+                "turnaround_hours": 48,
+                "quality_note": null,
+                "contact": null,
+                "address": null,
+                "is_active": true,
+                "row_version": 3,
+                "mou_expired": false,
+                "tests_sent_out": 1
+              }
+            ],
+            "meta": {
+              "server_time": "2026-09-30T20:02:52.680109+00:00"
+            },
+            "request_id": "59c031ca9932490794cc0f09ba7a33fe"
+          }
+        }
+      },
+      "errors": [],
+      "errors_seen_in_tests": [],
+      "used_by_screens": [
+        "diagnostics_quality",
+        "imaging_outsourced",
+        "radiology_quality",
+        "lab_send_outs",
+        "diagnostic_partners",
+        "lab_quality",
+        "owner_diagnostics"
+      ],
+      "used_by_workflows": [
+        "diagnostic-services"
+      ],
+      "typescript_example": "// Partner laboratories and imaging centres  (permissions: diagnostics.setup.manage, diagnostics.quality.view, lab.sendout.manage, imaging.order.update, lab.test.manage)\nexport const listPartners = () =>\n  api(\"GET\", `/diagnostic-partners`, undefined);   // api(): see get_guide('envelope-and-errors')",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "diagnostics.setup.manage",
+          "diagnostics.quality.view",
+          "lab.sendout.manage",
+          "imaging.order.update",
+          "lab.test.manage"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of diagnostics.setup.manage or diagnostics.quality.view or lab.sendout.manage or imaging.order.update or lab.test.manage",
+        "roles_allowed": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "lab_admin",
+          "lab_technician",
+          "lab_verifier",
+          "owner",
+          "quality_officer",
+          "radiographer",
+          "radiologist"
+        ]
+      },
+      "write_semantics": null,
+      "emits_events": [],
+      "list": {
+        "returns": "list",
+        "paging": [],
+        "search": [],
+        "filters": [
+          {
+            "name": "services",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "Lab",
+              "Imaging"
+            ]
+          },
+          {
+            "name": "active_only",
+            "required": false,
+            "type": "boolean",
+            "default": true
+          }
+        ],
+        "note": null
+      },
+      "cross_field_rules": {},
+      "errors_detail": []
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/imaging/orders/{order_id}/outsource",
+      "summary": "Send an examination to a partner centre",
+      "tags": [
+        "Diagnostic services"
+      ],
+      "permissions": [
+        "imaging.order.update"
+      ],
+      "permissions_mode": "all",
+      "idempotency_key": true,
+      "description": "An examination the hospital cannot do (MSDS AAC 14): an ordered or scheduled order goes to an active imaging partner\nunder a valid MOU (`DIAGNOSTIC_PARTNER_INVALID`); it waits for the partner's report, due within the MOU's\nturnaround.\n\n**Required permission:** `imaging.order.update`\n\n**Required permission:** `imaging.order.update`",
+      "roles_allowed": [
+        "radiographer",
+        "radiologist"
+      ],
+      "parameters": [
+        {
+          "name": "order_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Order Id"
+          }
+        },
+        {
+          "name": "Idempotency-Key",
+          "in": "header",
+          "required": false,
+          "description": "Unique per logical action; retries return the first result",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Unique per logical action; retries return the first result",
+            "title": "Idempotency-Key"
+          }
+        }
+      ],
+      "request_body": {
+        "title": "OutsourceIn",
+        "properties": {
+          "partner_id": {
+            "type": "integer",
+            "title": "Partner Id",
+            "description": "An active imaging partner under a valid MOU (GET /diagnostic-partners?services=Imaging)"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          }
+        },
+        "type": "object",
+        "required": [
+          "partner_id"
+        ]
+      },
+      "request_content_type": "application/json",
+      "response_schema": {
+        "title": "Envelope[ImagingOrderOut]",
+        "properties": {
+          "data": {
+            "title": "ImagingOrderOut",
+            "properties": {
+              "imaging_order_id": {
+                "type": "integer",
+                "title": "Imaging Order Id"
+              },
+              "order_number": {
+                "type": "string",
+                "title": "Order Number"
+              },
+              "accession_number": {
+                "type": "string",
+                "title": "Accession Number",
+                "description": "DICOM AccessionNumber (typed on the modality console)"
+              },
+              "patient_id": {
+                "type": "integer",
+                "title": "Patient Id"
+              },
+              "ticket_id": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Ticket Id"
+              },
+              "admission_id": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Admission Id"
+              },
+              "requester_doctor_id": {
+                "type": "integer",
+                "title": "Requester Doctor Id"
+              },
+              "modality": {
+                "type": "string",
+                "enum": [
+                  "XRay",
+                  "MRI",
+                  "CT",
+                  "Ultrasound",
+                  "Doppler",
+                  "Mammography",
+                  "Fluoroscopy",
+                  "Other"
+                ],
+                "title": "Modality"
+              },
+              "body_part": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Body Part"
+              },
+              "clinical_indication": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Clinical Indication"
+              },
+              "service_id": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Service Id"
+              },
+              "price_at_order": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Price At Order"
+              },
+              "priority": {
+                "type": "string",
+                "enum": [
+                  "Routine",
+                  "Urgent",
+                  "STAT"
+                ],
+                "title": "Priority"
+              },
+              "laterality": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "Left",
+                      "Right",
+                      "Bilateral",
+                      "NotApplicable"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Laterality"
+              },
+              "transport": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "Walking",
+                      "Wheelchair",
+                      "Trolley",
+                      "Bed",
+                      "Portable"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Transport"
+              },
+              "escort": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "None",
+                      "Nurse",
+                      "Doctor"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Escort"
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "Ordered",
+                  "Scheduled",
+                  "InProgress",
+                  "Completed",
+                  "Outsourced",
+                  "Reported",
+                  "Cancelled"
+                ],
+                "title": "Status"
+              },
+              "identity_check": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "WristbandScan",
+                      "TwoIdentifiers",
+                      "EmergencyOverride"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Identity Check",
+                "description": "How the patient was identified before the examination"
+              },
+              "identity_note": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Identity Note"
+              },
+              "site_confirmed": {
+                "type": "boolean",
+                "title": "Site Confirmed"
+              },
+              "pregnancy_status": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "NotPregnant",
+                      "Pregnant",
+                      "Unknown",
+                      "NotApplicable"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Pregnancy Status"
+              },
+              "pregnancy_note": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Pregnancy Note"
+              },
+              "checked_by": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Checked By"
+              },
+              "started_at": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Started At"
+              },
+              "contrast": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Contrast"
+              },
+              "contrast_doctor_id": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Contrast Doctor Id"
+              },
+              "completed_at": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Completed At"
+              },
+              "orthanc_study_id": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Orthanc Study Id"
+              },
+              "study_instance_uid": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Study Instance Uid"
+              },
+              "partner_id": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Partner Id",
+                "description": "Outsourced: the partner centre (MSDS AAC 14)"
+              },
+              "outsourced_at": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Outsourced At"
+              },
+              "external_reporter": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "External Reporter"
+              },
+              "report_text": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Report Text"
+              },
+              "reported_by": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Reported By"
+              },
+              "reported_at": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Reported At"
+              },
+              "critical_finding_id": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Critical Finding Id"
+              },
+              "critical_finding_note": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Critical Finding Note"
+              },
+              "cancel_reason": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Cancel Reason"
+              },
+              "ordered_by": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Ordered By"
+              },
+              "ordered_at": {
+                "type": "string",
+                "format": "date-time",
+                "title": "Ordered At"
+              },
+              "perform_alerted_at": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Perform Alerted At"
+              },
+              "report_alerted_at": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Report Alerted At"
+              },
+              "row_version": {
+                "type": "integer",
+                "title": "Row Version"
+              }
+            },
+            "type": "object",
+            "required": [
+              "imaging_order_id",
+              "order_number",
+              "accession_number",
+              "patient_id",
+              "ticket_id",
+              "admission_id",
+              "requester_doctor_id",
+              "modality",
+              "body_part",
+              "clinical_indication",
+              "service_id",
+              "price_at_order",
+              "priority",
+              "laterality",
+              "transport",
+              "escort",
+              "status",
+              "identity_check",
+              "identity_note",
+              "site_confirmed",
+              "pregnancy_status",
+              "pregnancy_note",
+              "checked_by",
+              "started_at",
+              "contrast",
+              "contrast_doctor_id",
+              "completed_at",
+              "orthanc_study_id",
+              "study_instance_uid",
+              "partner_id",
+              "outsourced_at",
+              "external_reporter",
+              "report_text",
+              "reported_by",
+              "reported_at",
+              "critical_finding_id",
+              "critical_finding_note",
+              "cancel_reason",
+              "ordered_by",
+              "ordered_at",
+              "perform_alerted_at",
+              "report_alerted_at",
+              "row_version"
+            ]
+          },
+          "meta": {
+            "title": "Meta",
+            "properties": {
+              "server_time": {
+                "type": "string",
+                "title": "Server Time",
+                "description": "Server clock (UTC). Use it to detect terminal clock skew."
+              },
+              "page": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Page"
+              },
+              "page_size": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Page Size"
+              },
+              "total_count": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Total Count"
+              },
+              "next_cursor": {
+                "title": "Next Cursor"
+              }
+            },
+            "type": "object",
+            "required": [
+              "server_time"
+            ]
+          },
+          "request_id": {
+            "type": "string",
+            "title": "Request Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data",
+          "meta",
+          "request_id"
+        ]
+      },
+      "recorded_example": {
+        "request": {
+          "path": "/api/v1/imaging/orders/2/outsource",
+          "body": {
+            "partner_id": 1
+          }
+        },
+        "response": {
+          "status": 200,
+          "body": {
+            "data": {
+              "imaging_order_id": 2,
+              "order_number": "IMG-2026-00002",
+              "accession_number": "A5B8499796D7B",
+              "patient_id": 2,
+              "ticket_id": 2,
+              "admission_id": null,
+              "requester_doctor_id": 1,
+              "modality": "MRI",
+              "body_part": "Brain",
+              "clinical_indication": null,
+              "service_id": null,
+              "price_at_order": null,
+              "priority": "Routine",
+              "laterality": null,
+              "transport": null,
+              "escort": null,
+              "status": "Outsourced",
+              "identity_check": null,
+              "identity_note": null,
+              "site_confirmed": false,
+              "pregnancy_status": null,
+              "pregnancy_note": null,
+              "checked_by": null,
+              "started_at": null,
+              "contrast": null,
+              "contrast_doctor_id": null,
+              "completed_at": null,
+              "orthanc_study_id": null,
+              "study_instance_uid": null,
+              "partner_id": 1,
+              "outsourced_at": "2026-09-30T20:03:02.223822+00:00",
+              "external_reporter": null,
+              "report_text": null,
+              "reported_by": null,
+              "reported_at": null,
+              "critical_finding_id": null,
+              "critical_finding_note": null,
+              "cancel_reason": null,
+              "ordered_by": 1,
+              "ordered_at": "2026-09-30T20:03:02.193522+00:00",
+              "perform_alerted_at": null,
+              "report_alerted_at": null,
+              "row_version": 2
+            },
+            "meta": {
+              "server_time": "2026-09-30T20:03:02.228295+00:00"
+            },
+            "request_id": "8e4638e74e0e4f2f9cd75635ca1a21c8"
+          }
+        },
+        "errors_seen": [
+          "DIAGNOSTIC_PARTNER_INVALID"
+        ],
+        "events_emitted": []
+      },
+      "errors": [
+        {
+          "code": "DIAGNOSTIC_PARTNER_INVALID",
+          "http_status": 409,
+          "message": "The partner is not active for this service, or its MOU has expired.",
+          "retryable": false,
+          "category": "business",
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+        }
+      ],
+      "errors_seen_in_tests": [
+        "DIAGNOSTIC_PARTNER_INVALID"
+      ],
+      "used_by_screens": [
+        "imaging_outsourced"
+      ],
+      "used_by_workflows": [
+        "diagnostic-services"
+      ],
+      "typescript_example": "// Send an examination to a partner centre  (permissions: imaging.order.update)\nexport const outsource = (order_id, body) =>\n  api(\"POST\", `/imaging/orders/${order_id}/outsource`, body, { idempotent: true });   // api(): see get_guide('envelope-and-errors')",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "imaging.order.update"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of imaging.order.update",
+        "roles_allowed": [
+          "radiographer",
+          "radiologist"
+        ]
+      },
+      "write_semantics": {
+        "protection": "idempotency_key",
+        "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+        "reconcile_with": "GET /imaging/orders/{order_id}",
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": "imaging_order"
+      },
+      "emits_events": [],
+      "list": null,
+      "cross_field_rules": {},
+      "errors_detail": [
+        {
+          "code": "DIAGNOSTIC_PARTNER_INVALID",
+          "http_status": 409,
+          "message": "The partner is not active for this service, or its MOU has expired.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "POST /api/v1/lab/send-outs"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/imaging/orders/{order_id}/external-report",
+      "summary": "Enter the partner centre's report",
+      "tags": [
+        "Diagnostic services"
+      ],
+      "permissions": [
+        "imaging.order.update"
+      ],
+      "permissions_mode": "all",
+      "idempotency_key": true,
+      "description": "The report of an outsourced examination, with the partner's radiologist named (`external_reporter`). It is final\nlike the hospital's own; a critical finding opens the critical results log (MSDS AAC 12, 14).\n\n**Required permission:** `imaging.order.update`\n\n**Required permission:** `imaging.order.update`",
+      "roles_allowed": [
+        "radiographer",
+        "radiologist"
+      ],
+      "parameters": [
+        {
+          "name": "order_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Order Id"
+          }
+        },
+        {
+          "name": "Idempotency-Key",
+          "in": "header",
+          "required": false,
+          "description": "Unique per logical action; retries return the first result",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Unique per logical action; retries return the first result",
+            "title": "Idempotency-Key"
+          }
+        }
+      ],
+      "request_body": {
+        "title": "ExternalReportIn",
+        "properties": {
+          "report_text": {
+            "type": "string",
+            "maxLength": 20000,
+            "minLength": 3,
+            "title": "Report Text"
+          },
+          "external_reporter": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 3,
+            "title": "External Reporter",
+            "description": "The partner's radiologist: name and registration"
+          },
+          "reported_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reported At",
+            "description": "When the partner reported it (default: now)"
+          },
+          "critical_finding_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Critical Finding Id"
+          },
+          "critical_finding_note": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 1000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Critical Finding Note"
+          }
+        },
+        "type": "object",
+        "required": [
+          "report_text",
+          "external_reporter"
+        ]
+      },
+      "request_content_type": "application/json",
+      "response_schema": {
+        "title": "Envelope[ImagingOrderOut]",
+        "properties": {
+          "data": {
+            "title": "ImagingOrderOut",
+            "properties": {
+              "imaging_order_id": {
+                "type": "integer",
+                "title": "Imaging Order Id"
+              },
+              "order_number": {
+                "type": "string",
+                "title": "Order Number"
+              },
+              "accession_number": {
+                "type": "string",
+                "title": "Accession Number",
+                "description": "DICOM AccessionNumber (typed on the modality console)"
+              },
+              "patient_id": {
+                "type": "integer",
+                "title": "Patient Id"
+              },
+              "ticket_id": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Ticket Id"
+              },
+              "admission_id": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Admission Id"
+              },
+              "requester_doctor_id": {
+                "type": "integer",
+                "title": "Requester Doctor Id"
+              },
+              "modality": {
+                "type": "string",
+                "enum": [
+                  "XRay",
+                  "MRI",
+                  "CT",
+                  "Ultrasound",
+                  "Doppler",
+                  "Mammography",
+                  "Fluoroscopy",
+                  "Other"
+                ],
+                "title": "Modality"
+              },
+              "body_part": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Body Part"
+              },
+              "clinical_indication": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Clinical Indication"
+              },
+              "service_id": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Service Id"
+              },
+              "price_at_order": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Price At Order"
+              },
+              "priority": {
+                "type": "string",
+                "enum": [
+                  "Routine",
+                  "Urgent",
+                  "STAT"
+                ],
+                "title": "Priority"
+              },
+              "laterality": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "Left",
+                      "Right",
+                      "Bilateral",
+                      "NotApplicable"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Laterality"
+              },
+              "transport": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "Walking",
+                      "Wheelchair",
+                      "Trolley",
+                      "Bed",
+                      "Portable"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Transport"
+              },
+              "escort": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "None",
+                      "Nurse",
+                      "Doctor"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Escort"
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "Ordered",
+                  "Scheduled",
+                  "InProgress",
+                  "Completed",
+                  "Outsourced",
+                  "Reported",
+                  "Cancelled"
+                ],
+                "title": "Status"
+              },
+              "identity_check": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "WristbandScan",
+                      "TwoIdentifiers",
+                      "EmergencyOverride"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Identity Check",
+                "description": "How the patient was identified before the examination"
+              },
+              "identity_note": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Identity Note"
+              },
+              "site_confirmed": {
+                "type": "boolean",
+                "title": "Site Confirmed"
+              },
+              "pregnancy_status": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "NotPregnant",
+                      "Pregnant",
+                      "Unknown",
+                      "NotApplicable"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Pregnancy Status"
+              },
+              "pregnancy_note": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Pregnancy Note"
+              },
+              "checked_by": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Checked By"
+              },
+              "started_at": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Started At"
+              },
+              "contrast": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Contrast"
+              },
+              "contrast_doctor_id": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Contrast Doctor Id"
+              },
+              "completed_at": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Completed At"
+              },
+              "orthanc_study_id": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Orthanc Study Id"
+              },
+              "study_instance_uid": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Study Instance Uid"
+              },
+              "partner_id": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Partner Id",
+                "description": "Outsourced: the partner centre (MSDS AAC 14)"
+              },
+              "outsourced_at": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Outsourced At"
+              },
+              "external_reporter": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "External Reporter"
+              },
+              "report_text": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Report Text"
+              },
+              "reported_by": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Reported By"
+              },
+              "reported_at": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Reported At"
+              },
+              "critical_finding_id": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Critical Finding Id"
+              },
+              "critical_finding_note": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Critical Finding Note"
+              },
+              "cancel_reason": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Cancel Reason"
+              },
+              "ordered_by": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Ordered By"
+              },
+              "ordered_at": {
+                "type": "string",
+                "format": "date-time",
+                "title": "Ordered At"
+              },
+              "perform_alerted_at": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Perform Alerted At"
+              },
+              "report_alerted_at": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Report Alerted At"
+              },
+              "row_version": {
+                "type": "integer",
+                "title": "Row Version"
+              }
+            },
+            "type": "object",
+            "required": [
+              "imaging_order_id",
+              "order_number",
+              "accession_number",
+              "patient_id",
+              "ticket_id",
+              "admission_id",
+              "requester_doctor_id",
+              "modality",
+              "body_part",
+              "clinical_indication",
+              "service_id",
+              "price_at_order",
+              "priority",
+              "laterality",
+              "transport",
+              "escort",
+              "status",
+              "identity_check",
+              "identity_note",
+              "site_confirmed",
+              "pregnancy_status",
+              "pregnancy_note",
+              "checked_by",
+              "started_at",
+              "contrast",
+              "contrast_doctor_id",
+              "completed_at",
+              "orthanc_study_id",
+              "study_instance_uid",
+              "partner_id",
+              "outsourced_at",
+              "external_reporter",
+              "report_text",
+              "reported_by",
+              "reported_at",
+              "critical_finding_id",
+              "critical_finding_note",
+              "cancel_reason",
+              "ordered_by",
+              "ordered_at",
+              "perform_alerted_at",
+              "report_alerted_at",
+              "row_version"
+            ]
+          },
+          "meta": {
+            "title": "Meta",
+            "properties": {
+              "server_time": {
+                "type": "string",
+                "title": "Server Time",
+                "description": "Server clock (UTC). Use it to detect terminal clock skew."
+              },
+              "page": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Page"
+              },
+              "page_size": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Page Size"
+              },
+              "total_count": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Total Count"
+              },
+              "next_cursor": {
+                "title": "Next Cursor"
+              }
+            },
+            "type": "object",
+            "required": [
+              "server_time"
+            ]
+          },
+          "request_id": {
+            "type": "string",
+            "title": "Request Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data",
+          "meta",
+          "request_id"
+        ]
+      },
+      "recorded_example": {
+        "request": {
+          "path": "/api/v1/imaging/orders/2/external-report",
+          "body": {
+            "report_text": "Normal study.",
+            "external_reporter": "Dr Nadeem, PMDC 12345-P"
+          }
+        },
+        "response": {
+          "status": 200,
+          "body": {
+            "data": {
+              "imaging_order_id": 2,
+              "order_number": "IMG-2026-00002",
+              "accession_number": "A5B8499796D7B",
+              "patient_id": 2,
+              "ticket_id": 2,
+              "admission_id": null,
+              "requester_doctor_id": 1,
+              "modality": "MRI",
+              "body_part": "Brain",
+              "clinical_indication": null,
+              "service_id": null,
+              "price_at_order": null,
+              "priority": "Routine",
+              "laterality": null,
+              "transport": null,
+              "escort": null,
+              "status": "Reported",
+              "identity_check": null,
+              "identity_note": null,
+              "site_confirmed": false,
+              "pregnancy_status": null,
+              "pregnancy_note": null,
+              "checked_by": null,
+              "started_at": null,
+              "contrast": null,
+              "contrast_doctor_id": null,
+              "completed_at": null,
+              "orthanc_study_id": null,
+              "study_instance_uid": null,
+              "partner_id": 1,
+              "outsourced_at": "2026-09-30T20:03:02.223822+00:00",
+              "external_reporter": "Dr Nadeem, PMDC 12345-P",
+              "report_text": "Normal study.",
+              "reported_by": 7,
+              "reported_at": "2026-09-30T20:03:02.240788+00:00",
+              "critical_finding_id": null,
+              "critical_finding_note": null,
+              "cancel_reason": null,
+              "ordered_by": 1,
+              "ordered_at": "2026-09-30T20:03:02.193522+00:00",
+              "perform_alerted_at": null,
+              "report_alerted_at": null,
+              "row_version": 3
+            },
+            "meta": {
+              "server_time": "2026-09-30T20:03:02.247214+00:00"
+            },
+            "request_id": "e60ab34eb32740558d2b5fb1ca3a6f88"
+          }
+        },
+        "errors_seen": [
+          "VALIDATION_ERROR"
+        ],
+        "events_emitted": [
+          "imaging.report.ready"
+        ]
+      },
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "category": "request",
+          "ui_action": "Show field errors from details.fields / the message."
+        }
+      ],
+      "errors_seen_in_tests": [
+        "VALIDATION_ERROR"
+      ],
+      "used_by_screens": [
+        "imaging_outsourced"
+      ],
+      "used_by_workflows": [
+        "diagnostic-services"
+      ],
+      "typescript_example": "// Enter the partner centre's report  (permissions: imaging.order.update)\nexport const externalReport = (order_id, body) =>\n  api(\"POST\", `/imaging/orders/${order_id}/external-report`, body, { idempotent: true });   // api(): see get_guide('envelope-and-errors')",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "imaging.order.update"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of imaging.order.update",
+        "roles_allowed": [
+          "radiographer",
+          "radiologist"
+        ]
+      },
+      "write_semantics": {
+        "protection": "idempotency_key",
+        "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+        "reconcile_with": "GET /imaging/orders/{order_id}",
+        "emits_events": [
+          "imaging.report.ready"
+        ],
+        "prints": false,
+        "related_state_machine": "imaging_order"
+      },
+      "emits_events": [
+        "imaging.report.ready"
+      ],
+      "list": null,
+      "cross_field_rules": {},
+      "errors_detail": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/imaging/worklist",
+      "summary": "Radiographer worklist (STAT first, then by due time)",
+      "tags": [
+        "Imaging / PACS"
+      ],
+      "permissions": [
+        "imaging.order.update"
+      ],
+      "permissions_mode": "all",
+      "idempotency_key": false,
+      "description": "**Required permission:** `imaging.order.update`\n\n**Required permission:** `imaging.order.update`",
+      "roles_allowed": [
+        "radiographer",
+        "radiologist"
+      ],
+      "parameters": [
+        {
+          "name": "status",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "enum": [
+                  "Ordered",
+                  "Scheduled",
+                  "InProgress",
+                  "Completed"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          }
+        },
+        {
+          "name": "modality",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "enum": [
+                  "XRay",
+                  "MRI",
+                  "CT",
+                  "Ultrasound",
+                  "Doppler",
+                  "Mammography",
+                  "Fluoroscopy",
+                  "Other"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Modality"
+          }
+        }
+      ],
+      "request_body": null,
+      "request_content_type": null,
+      "response_schema": {
+        "title": "Envelope[list[ImagingWorklistItemOut]]",
+        "properties": {
+          "data": {
+            "items": {
+              "title": "ImagingWorklistItemOut",
+              "properties": {
+                "imaging_order_id": {
+                  "type": "integer",
+                  "title": "Imaging Order Id"
+                },
+                "order_number": {
+                  "type": "string",
+                  "title": "Order Number"
+                },
+                "accession_number": {
+                  "type": "string",
+                  "title": "Accession Number"
+                },
+                "modality": {
+                  "type": "string",
+                  "enum": [
+                    "XRay",
+                    "MRI",
+                    "CT",
+                    "Ultrasound",
+                    "Doppler",
+                    "Mammography",
+                    "Fluoroscopy",
+                    "Other"
+                  ],
+                  "title": "Modality"
+                },
+                "body_part": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Body Part"
+                },
+                "laterality": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "Left",
+                        "Right",
+                        "Bilateral",
+                        "NotApplicable"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Laterality"
+                },
+                "priority": {
+                  "type": "string",
+                  "enum": [
+                    "Routine",
+                    "Urgent",
+                    "STAT"
+                  ],
+                  "title": "Priority"
+                },
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "Ordered",
+                    "Scheduled",
+                    "InProgress",
+                    "Completed",
+                    "Outsourced",
+                    "Reported",
+                    "Cancelled"
+                  ],
+                  "title": "Status"
+                },
+                "ordered_at": {
+                  "type": "string",
+                  "format": "date-time",
+                  "title": "Ordered At"
+                },
+                "transport": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "Walking",
+                        "Wheelchair",
+                        "Trolley",
+                        "Bed",
+                        "Portable"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Transport"
+                },
+                "escort": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "None",
+                        "Nurse",
+                        "Doctor"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Escort"
+                },
+                "contrast_given": {
+                  "type": "boolean",
+                  "title": "Contrast Given"
+                },
+                "has_study": {
+                  "type": "boolean",
+                  "title": "Has Study"
+                },
+                "patient_name": {
+                  "type": "string",
+                  "title": "Patient Name"
+                },
+                "mrn": {
+                  "type": "string",
+                  "title": "Mrn"
+                },
+                "gender": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "male",
+                        "female",
+                        "other",
+                        "unknown"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Gender"
+                },
+                "age_years": {
+                  "anyOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Age Years"
+                },
+                "doctor_name": {
+                  "type": "string",
+                  "title": "Doctor Name"
+                },
+                "is_emergency": {
+                  "type": "boolean",
+                  "title": "Is Emergency"
+                },
+                "is_inpatient": {
+                  "type": "boolean",
+                  "title": "Is Inpatient"
+                },
+                "pregnancy_check_needed": {
+                  "type": "boolean",
+                  "title": "Pregnancy Check Needed",
+                  "description": "Ask about pregnancy before the examination (MSDS AAC 13 f)"
+                },
+                "due_at": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Due At",
+                  "description": "The examination (or, once done or outsourced, the report) is due"
+                },
+                "is_overdue": {
+                  "type": "boolean",
+                  "title": "Is Overdue"
+                }
+              },
+              "type": "object",
+              "required": [
+                "imaging_order_id",
+                "order_number",
+                "accession_number",
+                "modality",
+                "body_part",
+                "laterality",
+                "priority",
+                "status",
+                "ordered_at",
+                "transport",
+                "escort",
+                "contrast_given",
+                "has_study",
+                "patient_name",
+                "mrn",
+                "gender",
+                "age_years",
+                "doctor_name",
+                "is_emergency",
+                "is_inpatient",
+                "pregnancy_check_needed",
+                "due_at",
+                "is_overdue"
+              ]
+            },
+            "type": "array",
+            "title": "Data"
+          },
+          "meta": {
+            "title": "Meta",
+            "properties": {
+              "server_time": {
+                "type": "string",
+                "title": "Server Time",
+                "description": "Server clock (UTC). Use it to detect terminal clock skew."
+              },
+              "page": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Page"
+              },
+              "page_size": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Page Size"
+              },
+              "total_count": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Total Count"
+              },
+              "next_cursor": {
+                "title": "Next Cursor"
+              }
+            },
+            "type": "object",
+            "required": [
+              "server_time"
+            ]
+          },
+          "request_id": {
+            "type": "string",
+            "title": "Request Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data",
+          "meta",
+          "request_id"
+        ]
+      },
+      "recorded_example": {
+        "request": {
+          "path": "/api/v1/imaging/worklist"
+        },
+        "response": {
+          "status": 200,
+          "body": {
+            "data": [
+              {
+                "imaging_order_id": 1,
+                "order_number": "IMG-2026-00001",
+                "accession_number": "AFDBBCF719E79",
+                "modality": "XRay",
+                "body_part": "Wrist",
+                "laterality": "Left",
+                "priority": "Urgent",
+                "status": "Ordered",
+                "ordered_at": "2026-09-30T20:03:01.784224+00:00",
+                "transport": null,
+                "escort": null,
+                "contrast_given": false,
+                "has_study": false,
+                "patient_name": "Sana Bibi",
+                "mrn": "MRN-2026-000002",
+                "gender": "female",
+                "age_years": 30,
+                "doctor_name": "Dr Ahmed",
+                "is_emergency": true,
+                "is_inpatient": false,
+                "pregnancy_check_needed": true,
+                "due_at": "2026-09-30T20:33:01.784224+00:00",
+                "is_overdue": false
+              }
+            ],
+            "meta": {
+              "server_time": "2026-09-30T20:03:01.835695+00:00"
+            },
+            "request_id": "f70f1280c3b7434dbb8132a1ad55a00c"
+          }
+        }
+      },
+      "errors": [],
+      "errors_seen_in_tests": [],
+      "used_by_screens": [
+        "radiology_worklist",
+        "imaging_outsourced"
+      ],
+      "used_by_workflows": [
+        "laboratory-and-radiology"
+      ],
+      "typescript_example": "// Radiographer worklist (STAT first, then by due time)  (permissions: imaging.order.update)\nexport const worklistImaging = () =>\n  api(\"GET\", `/imaging/worklist`, undefined);   // api(): see get_guide('envelope-and-errors')",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "imaging.order.update"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of imaging.order.update",
+        "roles_allowed": [
+          "radiographer",
+          "radiologist"
+        ]
+      },
+      "write_semantics": null,
+      "emits_events": [],
+      "list": {
+        "returns": "list",
+        "paging": [],
+        "search": [],
+        "filters": [
+          {
+            "name": "status",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "Ordered",
+              "Scheduled",
+              "InProgress",
+              "Completed"
+            ]
+          },
+          {
+            "name": "modality",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "XRay",
+              "MRI",
+              "CT",
+              "Ultrasound",
+              "Doppler",
+              "Mammography",
+              "Fluoroscopy",
+              "Other"
+            ]
+          }
+        ],
+        "note": null
+      },
+      "cross_field_rules": {},
+      "errors_detail": []
+    }
+  ],
+  "support": {
+    "order": {
+      "method": "GET",
+      "path": "/api/v1/imaging/orders/{order_id}",
+      "summary": "Imaging order with viewer URL",
+      "tags": [
+        "Imaging / PACS"
+      ],
+      "permissions": [
+        "imaging.order.view"
+      ],
+      "permissions_mode": "all",
+      "idempotency_key": false,
+      "description": "**Required permission:** `imaging.order.view`\n\n**Required permission:** `imaging.order.view`",
+      "roles_allowed": [
+        "anaesthetist",
+        "clinical_specialist",
+        "doctor",
+        "radiographer",
+        "radiologist",
+        "surgeon"
+      ],
+      "parameters": [
+        {
+          "name": "order_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Order Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "request_content_type": null,
+      "response_schema": {
+        "title": "Envelope[ImagingOrderDetailOut]",
+        "properties": {
+          "data": {
+            "title": "ImagingOrderDetailOut",
+            "properties": {
+              "imaging_order_id": {
+                "type": "integer",
+                "title": "Imaging Order Id"
+              },
+              "order_number": {
+                "type": "string",
+                "title": "Order Number"
+              },
+              "accession_number": {
+                "type": "string",
+                "title": "Accession Number",
+                "description": "DICOM AccessionNumber (typed on the modality console)"
+              },
+              "patient_id": {
+                "type": "integer",
+                "title": "Patient Id"
+              },
+              "ticket_id": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Ticket Id"
+              },
+              "admission_id": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Admission Id"
+              },
+              "requester_doctor_id": {
+                "type": "integer",
+                "title": "Requester Doctor Id"
+              },
+              "modality": {
+                "type": "string",
+                "enum": [
+                  "XRay",
+                  "MRI",
+                  "CT",
+                  "Ultrasound",
+                  "Doppler",
+                  "Mammography",
+                  "Fluoroscopy",
+                  "Other"
+                ],
+                "title": "Modality"
+              },
+              "body_part": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Body Part"
+              },
+              "clinical_indication": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Clinical Indication"
+              },
+              "service_id": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Service Id"
+              },
+              "price_at_order": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Price At Order"
+              },
+              "priority": {
+                "type": "string",
+                "enum": [
+                  "Routine",
+                  "Urgent",
+                  "STAT"
+                ],
+                "title": "Priority"
+              },
+              "laterality": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "Left",
+                      "Right",
+                      "Bilateral",
+                      "NotApplicable"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Laterality"
+              },
+              "transport": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "Walking",
+                      "Wheelchair",
+                      "Trolley",
+                      "Bed",
+                      "Portable"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Transport"
+              },
+              "escort": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "None",
+                      "Nurse",
+                      "Doctor"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Escort"
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "Ordered",
+                  "Scheduled",
+                  "InProgress",
+                  "Completed",
+                  "Outsourced",
+                  "Reported",
+                  "Cancelled"
+                ],
+                "title": "Status"
+              },
+              "identity_check": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "WristbandScan",
+                      "TwoIdentifiers",
+                      "EmergencyOverride"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Identity Check",
+                "description": "How the patient was identified before the examination"
+              },
+              "identity_note": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Identity Note"
+              },
+              "site_confirmed": {
+                "type": "boolean",
+                "title": "Site Confirmed"
+              },
+              "pregnancy_status": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "NotPregnant",
+                      "Pregnant",
+                      "Unknown",
+                      "NotApplicable"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Pregnancy Status"
+              },
+              "pregnancy_note": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Pregnancy Note"
+              },
+              "checked_by": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Checked By"
+              },
+              "started_at": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Started At"
+              },
+              "contrast": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Contrast"
+              },
+              "contrast_doctor_id": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Contrast Doctor Id"
+              },
+              "completed_at": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Completed At"
+              },
+              "orthanc_study_id": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Orthanc Study Id"
+              },
+              "study_instance_uid": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Study Instance Uid"
+              },
+              "partner_id": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Partner Id",
+                "description": "Outsourced: the partner centre (MSDS AAC 14)"
+              },
+              "outsourced_at": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Outsourced At"
+              },
+              "external_reporter": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "External Reporter"
+              },
+              "report_text": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Report Text"
+              },
+              "reported_by": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Reported By"
+              },
+              "reported_at": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Reported At"
+              },
+              "critical_finding_id": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Critical Finding Id"
+              },
+              "critical_finding_note": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Critical Finding Note"
+              },
+              "cancel_reason": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Cancel Reason"
+              },
+              "ordered_by": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Ordered By"
+              },
+              "ordered_at": {
+                "type": "string",
+                "format": "date-time",
+                "title": "Ordered At"
+              },
+              "perform_alerted_at": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Perform Alerted At"
+              },
+              "report_alerted_at": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Report Alerted At"
+              },
+              "row_version": {
+                "type": "integer",
+                "title": "Row Version"
+              },
+              "viewer_url": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Viewer Url",
+                "description": "Web viewer link for the EMR (null until a study is linked)"
+              },
+              "doctor_name": {
+                "type": "string",
+                "title": "Doctor Name"
+              },
+              "patient_name": {
+                "type": "string",
+                "title": "Patient Name"
+              },
+              "mrn": {
+                "type": "string",
+                "title": "Mrn"
+              },
+              "gender": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "male",
+                      "female",
+                      "other",
+                      "unknown"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Gender"
+              },
+              "age_years": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Age Years"
+              },
+              "reported_by_name": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Reported By Name"
+              },
+              "reported_stamp": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/AuthorStampOut"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "Who reported the study (MSDS 147); null until reported"
+              },
+              "checked_by_name": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Checked By Name"
+              },
+              "contrast_doctor_name": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Contrast Doctor Name"
+              },
+              "partner_name": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Partner Name"
+              },
+              "critical_finding_name": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Critical Finding Name"
+              },
+              "critical_result_id": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Critical Result Id",
+                "description": "The critical results log entry of a critical finding"
+              },
+              "perform_due_at": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Perform Due At",
+                "description": "When the examination is due (MSDS AAC 11)"
+              },
+              "report_due_at": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Report Due At",
+                "description": "When the report is due"
+              },
+              "pregnancy_check_needed": {
+                "type": "boolean",
+                "title": "Pregnancy Check Needed",
+                "description": "A woman of child-bearing age before ionising radiation"
+              }
+            },
+            "type": "object",
+            "required": [
+              "imaging_order_id",
+              "order_number",
+              "accession_number",
+              "patient_id",
+              "ticket_id",
+              "admission_id",
+              "requester_doctor_id",
+              "modality",
+              "body_part",
+              "clinical_indication",
+              "service_id",
+              "price_at_order",
+              "priority",
+              "laterality",
+              "transport",
+              "escort",
+              "status",
+              "identity_check",
+              "identity_note",
+              "site_confirmed",
+              "pregnancy_status",
+              "pregnancy_note",
+              "checked_by",
+              "started_at",
+              "contrast",
+              "contrast_doctor_id",
+              "completed_at",
+              "orthanc_study_id",
+              "study_instance_uid",
+              "partner_id",
+              "outsourced_at",
+              "external_reporter",
+              "report_text",
+              "reported_by",
+              "reported_at",
+              "critical_finding_id",
+              "critical_finding_note",
+              "cancel_reason",
+              "ordered_by",
+              "ordered_at",
+              "perform_alerted_at",
+              "report_alerted_at",
+              "row_version",
+              "viewer_url",
+              "doctor_name",
+              "patient_name",
+              "mrn",
+              "gender",
+              "age_years",
+              "reported_by_name",
+              "reported_stamp",
+              "checked_by_name",
+              "contrast_doctor_name",
+              "partner_name",
+              "critical_finding_name",
+              "critical_result_id",
+              "perform_due_at",
+              "report_due_at",
+              "pregnancy_check_needed"
+            ]
+          },
+          "meta": {
+            "title": "Meta",
+            "properties": {
+              "server_time": {
+                "type": "string",
+                "title": "Server Time",
+                "description": "Server clock (UTC). Use it to detect terminal clock skew."
+              },
+              "page": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Page"
+              },
+              "page_size": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Page Size"
+              },
+              "total_count": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Total Count"
+              },
+              "next_cursor": {
+                "title": "Next Cursor"
+              }
+            },
+            "type": "object",
+            "required": [
+              "server_time"
+            ]
+          },
+          "request_id": {
+            "type": "string",
+            "title": "Request Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data",
+          "meta",
+          "request_id"
+        ]
+      },
+      "recorded_example": {
+        "request": {
+          "path": "/api/v1/imaging/orders/1"
+        },
+        "response": {
+          "status": 200,
+          "body": {
+            "data": {
+              "imaging_order_id": 1,
+              "order_number": "IMG-2026-00001",
+              "accession_number": "AEF50A7A1CEF9",
+              "patient_id": 1,
+              "ticket_id": 1,
+              "admission_id": null,
+              "requester_doctor_id": 1,
+              "modality": "XRay",
+              "body_part": "Chest PA",
+              "clinical_indication": "Cough for 3 weeks",
+              "service_id": 2,
+              "price_at_order": 1500,
+              "priority": "Routine",
+              "laterality": null,
+              "transport": null,
+              "escort": null,
+              "status": "Reported",
+              "identity_check": "TwoIdentifiers",
+              "identity_note": null,
+              "site_confirmed": true,
+              "pregnancy_status": null,
+              "pregnancy_note": null,
+              "checked_by": 7,
+              "started_at": "2026-09-30T19:59:54.751251+00:00",
+              "contrast": null,
+              "contrast_doctor_id": null,
+              "completed_at": "2026-09-30T19:59:54.767417+00:00",
+              "orthanc_study_id": "s-1",
+              "study_instance_uid": "1.2",
+              "partner_id": null,
+              "outsourced_at": null,
+              "external_reporter": null,
+              "report_text": "No active lung lesion.",
+              "reported_by": 6,
+              "reported_at": "2026-09-30T19:59:54.781647+00:00",
+              "critical_finding_id": null,
+              "critical_finding_note": null,
+              "cancel_reason": null,
+              "ordered_by": 1,
+              "ordered_at": "2026-09-30T19:59:54.677771+00:00",
+              "perform_alerted_at": null,
+              "report_alerted_at": null,
+              "row_version": 4,
+              "patient_name": "Ali Khan",
+              "mrn": "MRN-2026-000001",
+              "gender": "male",
+              "age_years": 40,
+              "doctor_name": "Dr Ahmed",
+              "reported_by_name": "Dr Hamza Radiologist",
+              "reported_stamp": {
+                "at": "2026-09-30T19:59:54.781647+00:00",
+                "name": "Dr Hamza Radiologist",
+                "text": "Dr Hamza Radiologist, Doctor, PMDC PMDC-51447, 01-Oct-2026 00:59",
+                "user_id": 6,
+                "designation": "Doctor",
+                "employee_id": 6,
+                "registration": "PMDC PMDC-51447"
+              },
+              "checked_by_name": "u98c91315b4",
+              "contrast_doctor_name": null,
+              "partner_name": null,
+              "critical_finding_name": null,
+              "critical_result_id": null,
+              "perform_due_at": "2026-09-30T23:59:54.677771+00:00",
+              "report_due_at": "2026-10-01T19:59:54.767417+00:00",
+              "pregnancy_check_needed": false,
+              "viewer_url": null
+            },
+            "meta": {
+              "server_time": "2026-09-30T19:59:54.805684+00:00"
+            },
+            "request_id": "d9339d088ba24e2ea18fff49bd978ed1"
+          }
+        }
+      },
+      "errors": [],
+      "errors_seen_in_tests": [],
+      "used_by_screens": [
+        "lab_orders_results",
+        "radiology_worklist"
+      ],
+      "used_by_workflows": [
+        "laboratory-and-radiology"
+      ],
+      "typescript_example": "// Imaging order with viewer URL  (permissions: imaging.order.view)\nexport const getOrder = (order_id) =>\n  api(\"GET\", `/imaging/orders/${order_id}`, undefined);   // api(): see get_guide('envelope-and-errors')",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "imaging.order.view"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of imaging.order.view",
+        "roles_allowed": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "radiographer",
+          "radiologist",
+          "surgeon"
+        ]
+      },
+      "write_semantics": null,
+      "emits_events": [],
+      "list": {
+        "returns": "object",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      },
+      "cross_field_rules": {},
+      "errors_detail": []
+    },
+    "patient": {
+      "method": "GET",
+      "path": "/api/v1/patients/{patient_id}",
+      "summary": "Patient profile (+ outstanding banner, merged profiles)",
+      "tags": [
+        "Patients"
+      ],
+      "permissions": [
+        "patient.view"
+      ],
+      "permissions_mode": "all",
+      "idempotency_key": false,
+      "description": "**Required permission:** `patient.view`\n\n**Required permission:** `patient.view`",
+      "roles_allowed": [
+        "accountant",
+        "admissions_officer",
+        "anaesthetist",
+        "billing_admin",
+        "cashier",
+        "clinic_director",
+        "clinical_specialist",
+        "doctor",
+        "head_nurse",
+        "hospital_admin",
+        "hospital_director",
+        "ipc_nurse",
+        "lab_technician",
+        "lab_verifier",
+        "ot_admin",
+        "ot_nurse",
+        "owner",
+        "pharmacist",
+        "quality_officer",
+        "radiographer",
+        "radiologist",
+        "receptionist",
+        "surgeon",
+        "triage_nurse",
+        "ward_nurse",
+        "zakat_officer"
+      ],
+      "parameters": [
+        {
+          "name": "patient_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Patient Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "request_content_type": null,
+      "response_schema": {
+        "title": "Envelope[PatientDetailOut]",
+        "properties": {
+          "data": {
+            "title": "PatientDetailOut",
+            "properties": {
+              "patient_id": {
+                "type": "integer",
+                "title": "Patient Id"
+              },
+              "photo_document_id": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Photo Document Id",
+                "description": "The newest Patient Photo of the merge chain, for the identity check; null when none was taken (it is optional). GET /patient-documents/{document_id}/download"
+              },
+              "mrn": {
+                "type": "string",
+                "title": "Mrn"
+              },
+              "registration_type": {
+                "type": "string",
+                "enum": [
+                  "Regular",
+                  "LabOnly",
+                  "TraumaTemp",
+                  "Merged"
+                ],
+                "title": "Registration Type"
+              },
+              "full_name": {
+                "type": "string",
+                "title": "Full Name"
+              },
+              "father_or_husband_name": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Father Or Husband Name"
+              },
+              "gender": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "male",
+                      "female",
+                      "other",
+                      "unknown"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Gender"
+              },
+              "dob": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Dob"
+              },
+              "age_years": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Age Years"
+              },
+              "age_recorded_on": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Age Recorded On",
+                "description": "When age_years was recorded (the age grows from that date)"
+              },
+              "mobile": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Mobile"
+              },
+              "cnic": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Cnic"
+              },
+              "upmrn": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Upmrn",
+                "description": "The Universal Patient Medical Record Number when one was recorded (optional)"
+              },
+              "address": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Address"
+              },
+              "emergency_contact_name": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Emergency Contact Name"
+              },
+              "emergency_contact_phone": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Emergency Contact Phone"
+              },
+              "blood_group": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "A+",
+                      "A-",
+                      "B+",
+                      "B-",
+                      "AB+",
+                      "AB-",
+                      "O+",
+                      "O-",
+                      "Unknown"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Blood Group"
+              },
+              "allergies": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Allergies"
+              },
+              "billing_category": {
+                "type": "string",
+                "enum": [
+                  "Cash",
+                  "Panel"
+                ],
+                "title": "Billing Category"
+              },
+              "panel_id": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Panel Id"
+              },
+              "panel_name": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Panel Name"
+              },
+              "panel_member_no": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Panel Member No"
+              },
+              "temp_identifier": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Temp Identifier",
+                "description": "Unknown-trauma label, e.g. \"Unknown Male 3\""
+              },
+              "merged_into_id": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Merged Into Id"
+              },
+              "linked_employee_id": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Linked Employee Id"
+              },
+              "is_deceased": {
+                "type": "boolean",
+                "title": "Is Deceased"
+              },
+              "death_id": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Death Id",
+                "description": "The death record (GET /deaths/{death_id}) when the death is recorded"
+              },
+              "death_at": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Death At"
+              },
+              "mlc_numbers": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array",
+                "title": "Mlc Numbers",
+                "description": "Medico-legal case numbers of this person: show a MEDICO-LEGAL banner when not empty (MSDS 154: the record is clearly so marked)"
+              },
+              "created_at": {
+                "type": "string",
+                "format": "date-time",
+                "title": "Created At"
+              },
+              "row_version": {
+                "type": "integer",
+                "title": "Row Version"
+              },
+              "outstanding": {
+                "$ref": "#/components/schemas/OutstandingBannerOut"
+              },
+              "master_patient_id": {
+                "type": "integer",
+                "title": "Master Patient Id",
+                "description": "The record every merged profile points to"
+              },
+              "merged_profiles": {
+                "items": {
+                  "$ref": "#/components/schemas/MergedProfileOut"
+                },
+                "type": "array",
+                "title": "Merged Profiles"
+              }
+            },
+            "type": "object",
+            "required": [
+              "patient_id",
+              "photo_document_id",
+              "mrn",
+              "registration_type",
+              "full_name",
+              "father_or_husband_name",
+              "gender",
+              "dob",
+              "age_years",
+              "age_recorded_on",
+              "mobile",
+              "cnic",
+              "upmrn",
+              "address",
+              "emergency_contact_name",
+              "emergency_contact_phone",
+              "blood_group",
+              "allergies",
+              "billing_category",
+              "panel_id",
+              "panel_name",
+              "panel_member_no",
+              "temp_identifier",
+              "merged_into_id",
+              "linked_employee_id",
+              "is_deceased",
+              "death_id",
+              "death_at",
+              "mlc_numbers",
+              "created_at",
+              "row_version",
+              "outstanding",
+              "master_patient_id",
+              "merged_profiles"
+            ]
+          },
+          "meta": {
+            "title": "Meta",
+            "properties": {
+              "server_time": {
+                "type": "string",
+                "title": "Server Time",
+                "description": "Server clock (UTC). Use it to detect terminal clock skew."
+              },
+              "page": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Page"
+              },
+              "page_size": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Page Size"
+              },
+              "total_count": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Total Count"
+              },
+              "next_cursor": {
+                "title": "Next Cursor"
+              }
+            },
+            "type": "object",
+            "required": [
+              "server_time"
+            ]
+          },
+          "request_id": {
+            "type": "string",
+            "title": "Request Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data",
+          "meta",
+          "request_id"
+        ]
+      },
+      "recorded_example": {
+        "request": {
+          "path": "/api/v1/patients/1"
+        },
+        "response": {
+          "status": 200,
+          "body": {
+            "data": {
+              "patient_id": 1,
+              "mrn": "MRN-2026-000001",
+              "registration_type": "Regular",
+              "full_name": "Ali Khan",
+              "father_or_husband_name": null,
+              "gender": "male",
+              "dob": null,
+              "age_years": 40,
+              "age_recorded_on": "2026-10-24",
+              "mobile": "03009882208",
+              "cnic": null,
+              "upmrn": null,
+              "address": null,
+              "emergency_contact_name": null,
+              "emergency_contact_phone": null,
+              "blood_group": null,
+              "allergies": null,
+              "billing_category": "Cash",
+              "panel_id": null,
+              "panel_name": null,
+              "panel_member_no": null,
+              "temp_identifier": null,
+              "merged_into_id": null,
+              "linked_employee_id": null,
+              "is_deceased": true,
+              "created_at": "2026-10-23T19:42:10.690475+00:00",
+              "row_version": 2,
+              "death_id": 2,
+              "death_at": "2026-10-23T19:32:11.183396+00:00",
+              "photo_document_id": null,
+              "mlc_numbers": [],
+              "outstanding": {
+                "has_outstanding_ar": false,
+                "outstanding_ar_balance": 0,
+                "ar_block_applies": false,
+                "banner_text": null
+              },
+              "master_patient_id": 1,
+              "merged_profiles": []
+            },
+            "meta": {
+              "server_time": "2026-10-23T19:42:11.271680+00:00"
+            },
+            "request_id": "6fb937ed7bb54db281df58c0d5d19b66"
+          }
+        }
+      },
+      "errors": [],
+      "errors_seen_in_tests": [],
+      "used_by_screens": [
+        "patient_search"
+      ],
+      "used_by_workflows": [
+        "deaths-and-medico-legal-cases",
+        "opd-reception"
+      ],
+      "typescript_example": "// Patient profile (+ outstanding banner, merged profiles)  (permissions: patient.view)\nexport const getPatient = (patient_id) =>\n  api(\"GET\", `/patients/${patient_id}`, undefined);   // api(): see get_guide('envelope-and-errors')",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "patient.view"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of patient.view",
+        "roles_allowed": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier",
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "ipc_nurse",
+          "lab_technician",
+          "lab_verifier",
+          "ot_admin",
+          "ot_nurse",
+          "owner",
+          "pharmacist",
+          "quality_officer",
+          "radiographer",
+          "radiologist",
+          "receptionist",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse",
+          "zakat_officer"
+        ]
+      },
+      "write_semantics": null,
+      "emits_events": [],
+      "list": {
+        "returns": "object",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      },
+      "cross_field_rules": {},
+      "errors_detail": []
+    },
+    "findings": {
+      "method": "GET",
+      "path": "/api/v1/critical-imaging-findings",
+      "summary": "The critical imaging findings list",
+      "tags": [
+        "Diagnostic services"
+      ],
+      "permissions": [
+        "imaging.report.enter",
+        "diagnostics.setup.manage",
+        "diagnostics.critical.view"
+      ],
+      "permissions_mode": "any",
+      "idempotency_key": false,
+      "description": "The findings a radiologist reports to the doctor at once (MSDS AAC 12 i): pick one in the report.\n\n**Required permission:** `imaging.report.enter OR diagnostics.setup.manage OR diagnostics.critical.view`\n\n**Required permission:** `imaging.report.enter OR diagnostics.setup.manage OR diagnostics.critical.view`",
+      "roles_allowed": [
+        "anaesthetist",
+        "clinic_director",
+        "clinical_specialist",
+        "doctor",
+        "head_nurse",
+        "hospital_admin",
+        "hospital_director",
+        "lab_admin",
+        "lab_technician",
+        "lab_verifier",
+        "owner",
+        "quality_officer",
+        "radiographer",
+        "radiologist",
+        "surgeon",
+        "triage_nurse",
+        "ward_nurse"
+      ],
+      "parameters": [
+        {
+          "name": "active_only",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "type": "boolean",
+            "default": true,
+            "title": "Active Only"
+          }
+        }
+      ],
+      "request_body": null,
+      "request_content_type": null,
+      "response_schema": {
+        "title": "Envelope[list[CriticalFindingOut]]",
+        "properties": {
+          "data": {
+            "items": {
+              "title": "CriticalFindingOut",
+              "properties": {
+                "finding_id": {
+                  "type": "integer",
+                  "title": "Finding Id"
+                },
+                "name": {
+                  "type": "string",
+                  "title": "Name"
+                },
+                "modality": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "XRay",
+                        "MRI",
+                        "CT",
+                        "Ultrasound",
+                        "Doppler",
+                        "Mammography",
+                        "Fluoroscopy",
+                        "Other"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Modality",
+                  "description": "Null: any modality"
+                },
+                "description": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Description"
+                },
+                "sort_order": {
+                  "type": "integer",
+                  "title": "Sort Order"
+                },
+                "is_active": {
+                  "type": "boolean",
+                  "title": "Is Active"
+                },
+                "row_version": {
+                  "type": "integer",
+                  "title": "Row Version"
+                }
+              },
+              "type": "object",
+              "required": [
+                "finding_id",
+                "name",
+                "modality",
+                "description",
+                "sort_order",
+                "is_active",
+                "row_version"
+              ]
+            },
+            "type": "array",
+            "title": "Data"
+          },
+          "meta": {
+            "title": "Meta",
+            "properties": {
+              "server_time": {
+                "type": "string",
+                "title": "Server Time",
+                "description": "Server clock (UTC). Use it to detect terminal clock skew."
+              },
+              "page": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Page"
+              },
+              "page_size": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Page Size"
+              },
+              "total_count": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Total Count"
+              },
+              "next_cursor": {
+                "title": "Next Cursor"
+              }
+            },
+            "type": "object",
+            "required": [
+              "server_time"
+            ]
+          },
+          "request_id": {
+            "type": "string",
+            "title": "Request Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data",
+          "meta",
+          "request_id"
+        ]
+      },
+      "recorded_example": {
+        "request": {
+          "path": "/api/v1/critical-imaging-findings"
+        },
+        "response": {
+          "status": 200,
+          "body": {
+            "data": [
+              {
+                "finding_id": 1,
+                "name": "Tension or large pneumothorax",
+                "modality": null,
+                "description": "Chest film or CT: needs decompression now",
+                "sort_order": 10,
+                "is_active": true,
+                "row_version": 1
+              },
+              {
+                "finding_id": 2,
+                "name": "Free intraperitoneal air",
+                "modality": null,
+                "description": "Pneumoperitoneum without a recent operation: a perforated viscus",
+                "sort_order": 20,
+                "is_active": true,
+                "row_version": 1
+              },
+              {
+                "finding_id": 3,
+                "name": "Intracranial haemorrhage",
+                "modality": "CT",
+                "description": "Any new extradural, subdural, subarachnoid or intracerebral bleed",
+                "sort_order": 30,
+                "is_active": true,
+                "row_version": 1
+              }
+            ],
+            "meta": {
+              "server_time": "2026-09-30T20:03:01.968312+00:00"
+            },
+            "request_id": "f31771b72ce44a06adb1175a824f1513"
+          }
+        }
+      },
+      "errors": [],
+      "errors_seen_in_tests": [],
+      "used_by_screens": [
+        "radiology_worklist",
+        "imaging_quality_setup"
+      ],
+      "used_by_workflows": [
+        "diagnostic-services"
+      ],
+      "typescript_example": "// The critical imaging findings list  (permissions: imaging.report.enter, diagnostics.setup.manage, diagnostics.critical.view)\nexport const listFindings = () =>\n  api(\"GET\", `/critical-imaging-findings`, undefined);   // api(): see get_guide('envelope-and-errors')",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "imaging.report.enter",
+          "diagnostics.setup.manage",
+          "diagnostics.critical.view"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of imaging.report.enter or diagnostics.setup.manage or diagnostics.critical.view",
+        "roles_allowed": [
+          "anaesthetist",
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "lab_admin",
+          "lab_technician",
+          "lab_verifier",
+          "owner",
+          "quality_officer",
+          "radiographer",
+          "radiologist",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ]
+      },
+      "write_semantics": null,
+      "emits_events": [],
+      "list": {
+        "returns": "list",
+        "paging": [],
+        "search": [],
+        "filters": [
+          {
+            "name": "active_only",
+            "required": false,
+            "type": "boolean",
+            "default": true
+          }
+        ],
+        "note": null
+      },
+      "cross_field_rules": {},
+      "errors_detail": []
+    }
+  },
+  "test_plan": {
+    "screen": "imaging_outsourced",
+    "title": "Outsourced examinations",
+    "cases": [
+      {
+        "id": "case:GET /diagnostic-partners",
+        "call": "GET /api/v1/diagnostic-partners",
+        "summary": "Partner laboratories and imaging centres",
+        "happy_path": {
+          "as_one_of": [
+            "clinic_director",
+            "hospital_admin",
+            "hospital_director",
+            "lab_admin",
+            "lab_technician",
+            "lab_verifier",
+            "owner",
+            "quality_officer",
+            "radiographer",
+            "radiologist"
+          ],
+          "example": {
+            "request": {
+              "path": "/api/v1/diagnostic-partners",
+              "query": {
+                "services": "Lab"
+              }
+            },
+            "response": {
+              "status": 200,
+              "body": {
+                "data": [
+                  {
+                    "partner_id": 1,
+                    "name": "City Reference Laboratory",
+                    "services": "Lab",
+                    "phc_registration": "PHC-R-123",
+                    "accreditation": "PNAC ISO 15189",
+                    "pnra_licence": null,
+                    "mou_reference": "MOU-1",
+                    "mou_valid_from": "2026-09-01",
+                    "mou_valid_until": "2027-07-28",
+                    "turnaround_hours": 48,
+                    "quality_note": null,
+                    "contact": null,
+                    "address": null,
+                    "is_active": true,
+                    "row_version": 3,
+                    "mou_expired": false,
+                    "tests_sent_out": 1
+                  }
+                ],
+                "meta": {
+                  "server_time": "2026-09-30T20:02:52.680109+00:00"
+                },
+                "request_id": "59c031ca9932490794cc0f09ba7a33fe"
+              }
+            }
+          }
+        },
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": []
+      },
+      {
+        "id": "case:POST /imaging/orders/{order_id}/outsource",
+        "call": "POST /api/v1/imaging/orders/{order_id}/outsource",
+        "summary": "Send an examination to a partner centre",
+        "happy_path": {
+          "as_one_of": [
+            "radiographer",
+            "radiologist"
+          ],
+          "example": {
+            "request": {
+              "path": "/api/v1/imaging/orders/2/outsource",
+              "body": {
+                "partner_id": 1
+              }
+            },
+            "response": {
+              "status": 200,
+              "body": {
+                "data": {
+                  "imaging_order_id": 2,
+                  "order_number": "IMG-2026-00002",
+                  "accession_number": "A5B8499796D7B",
+                  "patient_id": 2,
+                  "ticket_id": 2,
+                  "admission_id": null,
+                  "requester_doctor_id": 1,
+                  "modality": "MRI",
+                  "body_part": "Brain",
+                  "clinical_indication": null,
+                  "service_id": null,
+                  "price_at_order": null,
+                  "priority": "Routine",
+                  "laterality": null,
+                  "transport": null,
+                  "escort": null,
+                  "status": "Outsourced",
+                  "identity_check": null,
+                  "identity_note": null,
+                  "site_confirmed": false,
+                  "pregnancy_status": null,
+                  "pregnancy_note": null,
+                  "checked_by": null,
+                  "started_at": null,
+                  "contrast": null,
+                  "contrast_doctor_id": null,
+                  "completed_at": null,
+                  "orthanc_study_id": null,
+                  "study_instance_uid": null,
+                  "partner_id": 1,
+                  "outsourced_at": "2026-09-30T20:03:02.223822+00:00",
+                  "external_reporter": null,
+                  "report_text": null,
+                  "reported_by": null,
+                  "reported_at": null,
+                  "critical_finding_id": null,
+                  "critical_finding_note": null,
+                  "cancel_reason": null,
+                  "ordered_by": 1,
+                  "ordered_at": "2026-09-30T20:03:02.193522+00:00",
+                  "perform_alerted_at": null,
+                  "report_alerted_at": null,
+                  "row_version": 2
+                },
+                "meta": {
+                  "server_time": "2026-09-30T20:03:02.228295+00:00"
+                },
+                "request_id": "8e4638e74e0e4f2f9cd75635ca1a21c8"
+              }
+            },
+            "errors_seen": [
+              "DIAGNOSTIC_PARTNER_INVALID"
+            ],
+            "events_emitted": []
+          }
+        },
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "DIAGNOSTIC_PARTNER_INVALID"
+        ],
+        "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+      },
+      {
+        "id": "case:POST /imaging/orders/{order_id}/external-report",
+        "call": "POST /api/v1/imaging/orders/{order_id}/external-report",
+        "summary": "Enter the partner centre's report",
+        "happy_path": {
+          "as_one_of": [
+            "radiographer",
+            "radiologist"
+          ],
+          "example": {
+            "request": {
+              "path": "/api/v1/imaging/orders/2/external-report",
+              "body": {
+                "report_text": "Normal study.",
+                "external_reporter": "Dr Nadeem, PMDC 12345-P"
+              }
+            },
+            "response": {
+              "status": 200,
+              "body": {
+                "data": {
+                  "imaging_order_id": 2,
+                  "order_number": "IMG-2026-00002",
+                  "accession_number": "A5B8499796D7B",
+                  "patient_id": 2,
+                  "ticket_id": 2,
+                  "admission_id": null,
+                  "requester_doctor_id": 1,
+                  "modality": "MRI",
+                  "body_part": "Brain",
+                  "clinical_indication": null,
+                  "service_id": null,
+                  "price_at_order": null,
+                  "priority": "Routine",
+                  "laterality": null,
+                  "transport": null,
+                  "escort": null,
+                  "status": "Reported",
+                  "identity_check": null,
+                  "identity_note": null,
+                  "site_confirmed": false,
+                  "pregnancy_status": null,
+                  "pregnancy_note": null,
+                  "checked_by": null,
+                  "started_at": null,
+                  "contrast": null,
+                  "contrast_doctor_id": null,
+                  "completed_at": null,
+                  "orthanc_study_id": null,
+                  "study_instance_uid": null,
+                  "partner_id": 1,
+                  "outsourced_at": "2026-09-30T20:03:02.223822+00:00",
+                  "external_reporter": "Dr Nadeem, PMDC 12345-P",
+                  "report_text": "Normal study.",
+                  "reported_by": 7,
+                  "reported_at": "2026-09-30T20:03:02.240788+00:00",
+                  "critical_finding_id": null,
+                  "critical_finding_note": null,
+                  "cancel_reason": null,
+                  "ordered_by": 1,
+                  "ordered_at": "2026-09-30T20:03:02.193522+00:00",
+                  "perform_alerted_at": null,
+                  "report_alerted_at": null,
+                  "row_version": 3
+                },
+                "meta": {
+                  "server_time": "2026-09-30T20:03:02.247214+00:00"
+                },
+                "request_id": "e60ab34eb32740558d2b5fb1ca3a6f88"
+              }
+            },
+            "errors_seen": [
+              "VALIDATION_ERROR"
+            ],
+            "events_emitted": [
+              "imaging.report.ready"
+            ]
+          }
+        },
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "VALIDATION_ERROR"
+        ],
+        "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+      },
+      {
+        "id": "case:GET /imaging/worklist",
+        "call": "GET /api/v1/imaging/worklist",
+        "summary": "Radiographer worklist (STAT first, then by due time)",
+        "happy_path": {
+          "as_one_of": [
+            "radiographer",
+            "radiologist"
+          ],
+          "example": {
+            "request": {
+              "path": "/api/v1/imaging/worklist"
+            },
+            "response": {
+              "status": 200,
+              "body": {
+                "data": [
+                  {
+                    "imaging_order_id": 1,
+                    "order_number": "IMG-2026-00001",
+                    "accession_number": "AFDBBCF719E79",
+                    "modality": "XRay",
+                    "body_part": "Wrist",
+                    "laterality": "Left",
+                    "priority": "Urgent",
+                    "status": "Ordered",
+                    "ordered_at": "2026-09-30T20:03:01.784224+00:00",
+                    "transport": null,
+                    "escort": null,
+                    "contrast_given": false,
+                    "has_study": false,
+                    "patient_name": "Sana Bibi",
+                    "mrn": "MRN-2026-000002",
+                    "gender": "female",
+                    "age_years": 30,
+                    "doctor_name": "Dr Ahmed",
+                    "is_emergency": true,
+                    "is_inpatient": false,
+                    "pregnancy_check_needed": true,
+                    "due_at": "2026-09-30T20:33:01.784224+00:00",
+                    "is_overdue": false
+                  }
+                ],
+                "meta": {
+                  "server_time": "2026-09-30T20:03:01.835695+00:00"
+                },
+                "request_id": "f70f1280c3b7434dbb8132a1ad55a00c"
+              }
+            }
+          }
+        },
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": []
+      }
+    ],
+    "service_cases": [
+      {
+        "view": "full",
+        "set_up": "GET /establishment answers views.screens[screen_id=imaging_outsourced].view = full (imaging or outsourced_diagnostics): stub that answer, or have the DEV server's admin move the service on Facility settings",
+        "expect": "Show it; every action the user's permissions allow."
+      },
+      {
+        "view": "open_work",
+        "set_up": "GET /establishment answers views.screens[screen_id=imaging_outsourced].view = open_work (imaging or outsourced_diagnostics): stub that answer, or have the DEV server's admin move the service on Facility settings",
+        "expect": "The service is Retiring: show it with the banner 'No new <new_work> from now on' and its open work; hide the actions that start new work of it (x-capability-gates; continues_while_retiring ones stay); keep every other action (completing, transferring, settling, correcting)."
+      },
+      {
+        "view": "records",
+        "set_up": "GET /establishment answers views.screens[screen_id=imaging_outsourced].view = records (imaging or outsourced_diagnostics): stub that answer, or have the DEV server's admin move the service on Facility settings",
+        "expect": "The service is Retired (or Preparing after it ran): show it as records only, under a 'Records' marker: lists, details, prints and the corrections the server still accepts; no action that starts new work."
+      },
+      {
+        "view": "hidden",
+        "set_up": "GET /establishment answers views.screens[screen_id=imaging_outsourced].view = hidden (imaging or outsourced_diagnostics): stub that answer, or have the DEV server's admin move the service on Facility settings",
+        "expect": "Not in any menu: the service has never run here, so the screen has nothing to show."
+      }
+    ],
+    "delivery_gate": {
+      "required": true,
+      "status": "required",
+      "progress_reporting": {
+        "required": true,
+        "submit": "propose_progress",
+        "verify": "progress_proposals",
+        "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+      },
+      "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+      "compulsory": [
+        {
+          "id": "q:f1_help",
+          "label": "F1 contextual help",
+          "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+          "points": 2
+        },
+        {
+          "id": "q:role_faq",
+          "label": "Complete role-specific FAQs",
+          "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+          "points": 3
+        },
+        {
+          "id": "q:zoom",
+          "label": "Keyboard zoom: 100-250% only",
+          "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+          "points": 2
+        },
+        {
+          "id": "q:fresh_data",
+          "label": "Human review with newly created data",
+          "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+          "points": 4
+        }
+      ],
+      "zoom": {
+        "min_pct": 100,
+        "max_pct": 250,
+        "reset_pct": 100,
+        "keys": [
+          "Ctrl + or Ctrl = (zoom in)",
+          "Ctrl - (zoom out)",
+          "Ctrl 0 (reset to 100 %)",
+          "Command on macOS"
+        ],
+        "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+      },
+      "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+      "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+    },
+    "handbook_page": "screens/imaging_outsourced",
+    "workspace_guide": "get_handbook_outline('radiology')",
+    "realtime": [],
+    "acceptance_rules": [
+      "Partners: GET /diagnostic-partners?services=Imaging (mou_expired partners are refused: DIAGNOSTIC_PARTNER_INVALID). An Ordered or Scheduled order becomes Outsourced; due_at is the MOU's turnaround.",
+      "The partner's report: report_text and external_reporter (the partner's radiologist, name and registration); a critical finding opens the critical results log as for our own reports.",
+      "Exists for the service imaging or outsourced_diagnostics (work): show it as GET /establishment views.screens says for screen_id imaging_outsourced (full; open_work: without its new work, with the banner \"No new ... from now on\"; records: history and corrections only; setup: only from Facility settings; hidden: in no menu), after login and again on establishment.changed. Never decide it from the profile's category."
+    ],
+    "demo_accounts": "demo_accounts() lists a login per role; sandbox_call runs each case on the DEV server"
+  }
+}
