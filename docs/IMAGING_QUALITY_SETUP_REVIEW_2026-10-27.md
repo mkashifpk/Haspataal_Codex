@@ -1,6 +1,6 @@
 # Imaging turnaround, critical findings and policy
 
-Codex/functions,27October2026. Phase3 position44, baseline `7694311`. Source commit/proposals recorded in `handoff.md`. This is agent implementation/testing evidence, not signed human acceptance.
+Codex/functions,27October2026. Phase3 position44, baseline `7694311`. Source **0ccf9bc3993d2050122bcb787e0b1206a3e179e2**, final rendererindex-CTxWXe_-.js. Proposals **167**(Imaging13tested items) and **168**(changed Facility handbook/permission items) submitted and verified Pending: **awaiting human review on /docs -> My progress**. Exact payloads/verified receipts saved alongside this review. This is agent implementation/testing evidence, not signed human acceptance.
 
 ## Staff purpose and implementation
 
