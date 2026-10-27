@@ -34,6 +34,7 @@ import { ImagingQualitySetup } from './screens/ImagingQualitySetup';
 import { DiagnosticServicesList } from './screens/DiagnosticServicesList';
 import { LabBench } from './screens/LabBench';
 import { ImagingRepeats } from './screens/ImagingRepeats';
+import { DutyRoster } from './screens/DutyRoster';
 import { ImagingOutsourced } from './screens/ImagingOutsourced';
 import { RadiologyWorklist } from './screens/RadiologyWorklist';
 import { LabVerification } from './screens/LabVerification';
@@ -57,6 +58,7 @@ import { createMetadataFlight } from "./metadata-flight";
 import { createBootstrapSeed } from "./bootstrap-seed";
 type WorkspaceSnapshot = {establishment:EstablishmentOut;settings:any;me:MeOut;permittedWorkspaces:MeOut["workspaces"]};
 const labels: Record<string, [string, string, string]> = {
+  duty_roster: ["Nursing duty roster", "نرسنگ ڈیوٹی روسٹر", "▦"],
   imaging_repeats: ["Repeated images register","دوبارہ عکس کا رجسٹر","▤"],
   imaging_outsourced: ["Outsourced examinations","بیرونی مرکز کے معائنے","↗"],
   radiology_worklist: ["Imaging worklist", "عکس نگاری کی فہرست", "▤"],
@@ -116,6 +118,7 @@ const labels: Record<string, [string, string, string]> = {
   settings: ["Settings", "ترتیبات", "⚙"],
 };
 const frontDeskScreens = new Set([
+  'duty_roster',
   'imaging_repeats',
   'imaging_outsourced',
   'radiology_worklist',
@@ -762,6 +765,7 @@ export function App() {
     'lab_bench',
     'lab_send_outs',
     'imaging_quality_setup',
+    'duty_roster',
     'imaging_repeats',
     'imaging_outsourced',
     'radiology_worklist',
@@ -1171,6 +1175,7 @@ export function App() {
               {screen === 'imaging_quality_setup' && est && <ImagingQualitySetup key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} fromFacility={imagingSetupEntry}/>}
               {screen === 'diagnostic_services_list' && <DiagnosticServicesList key={user.user_id} user={user} connected={connected} stream={stream}/>}
               {screen === 'lab_send_outs' && est && <LabSendOuts key={user.user_id} user={user} connected={connected} stream={stream} establishment={est} timeZone={meta?.hospital_timezone}/>}
+              {screen === 'duty_roster' && <DutyRoster key={user.user_id} user={user} connected={connected} stream={stream} timeZone={meta?.hospital_timezone}/>}
               {screen === 'imaging_repeats' && est && <ImagingRepeats key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone}/>}
               {screen === 'imaging_outsourced' && est && <ImagingOutsourced key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone}/>}
               {screen === 'radiology_worklist' && est && <RadiologyWorklist key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone}/>}

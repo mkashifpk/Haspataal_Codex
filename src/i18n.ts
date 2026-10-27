@@ -9,6 +9,18 @@ export function setLanguage(value: string) {
   language = value;
 }
 const ur: Record<string, string> = {
+ "Choose a valid duty date.":"ڈیوٹی کی درست تاریخ چنیں۔",
+ "Choose staff from the current permitted list.":"موجودہ مجاز فہرست سے عملہ چنیں۔",
+ "Past duties require HR roster management.":"گزشتہ ڈیوٹی کے لیے ایچ آر روسٹر کی اجازت لازم ہے۔",
+ "This employee is on approved leave that day.":"یہ ملازم اس دن منظور شدہ رخصت پر ہے۔",
+ "Choose an active shift pattern.":"فعال شفٹ چنیں۔",
+ "Choose a valid duty area.":"ڈیوٹی کی درست جگہ چنیں۔",
+ "Choose the ward for this duty.":"اس ڈیوٹی کا وارڈ چنیں۔",
+ "Choose beds from this ward only.":"صرف اسی وارڈ سے بستر چنیں۔",
+ "Zone is limited to 100 characters and notes to 500.":"زون100اور نوٹ500حروف تک ہے۔",
+ "Reload the original active duty before changing it.":"بدلنے سے پہلے اصل فعال ڈیوٹی تازہ کریں۔",
+ "Change a field before reviewing.":"جائزے سے پہلے کوئی خانہ بدلیں۔",
+ "Use a valid period up to 62 days and a later target; rotation is 0 to 30.":"62دن تک درست مدت اور بعد کا ہدف چنیں؛ گردش0تا30ہے۔",
  "Match the patient and order and confirm that the repeated exposure already occurred.":"مریض و آرڈر ملائیں اور تصدیق کریں کہ دوبارہ ایکسپوژر پہلے ہو چکا۔",
  "Choose the actual reason for the repeated exposure.":"دوبارہ ایکسپوژر کی اصل وجہ چنیں۔",
  "Enter a whole number of repeated exposures from 1 to 20.":"دوبارہ ایکسپوژر1تا20مکمل عدد میں دیں۔",

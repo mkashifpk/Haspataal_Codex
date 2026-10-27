@@ -10,6 +10,106 @@ export type HelpPage = {
   faqUr: [string, string][];
 };
 export const help: Record<string, HelpPage> = {
+ duty_roster: {
+  title: "Nursing duty roster",
+  titleUr: "نرسنگ ڈیوٹی روسٹر",
+  purpose: "The Head Nurse plans a full week of nursing duties, wards and beds; reviews rest coverage and coordinates agreed or requested swaps with preserved history and safe live updates.",
+  purposeUr: "ہیڈ نرس پورے ہفتے کی نرسنگ ڈیوٹیاں، وارڈ/بستر، آرام کی جانچ و رضامند تبادلے اصل تاریخ اور محفوظ فعال معلومات کے ساتھ سنبھالتی ہے۔ اردو مقامی جائزے تک مسودہ ہے۔",
+  steps: [
+    "Open Head Nurse → Nursing duty roster. Open week uses any date in that week; the server decides its start day. Previous or future weeks, ward/department filters and Show cancelled duties change only the read scope. Refresh rereads actual data. Night duties belong to their start date; the hospital time zone, not the laptop date, controls past-day rules.",
+    "Find in permitted staff searches the returned scope. Select a person then Add in a shift/day cell, or drag the staff button onto that cell. Add duty is the keyboard/touch alternative. Approved leave is unavailable; fixed weekly off is grey but may explicitly become working. Public holidays and Sunday are planning columns; they do not close the hospital.",
+    "Add duty to draft: choose actual staff, start date and active shift, duty area and required ward, optional department/zone, on-call and factual notes. Choose only this ward's actual bed labels; changing ward/area clears beds. The nurse sees assigned beds on My beds this shift. Add to duty batch does not save. Remove unsent entry only removes a draft row.",
+    "Review duty batch freezes all entries; check people/dates/shift/beds then tick the review statement and Confirm roster action. The batch is atomic. ROSTER_ON_LEAVE, OUT_OF_SCOPE, INACTIVE or CONFLICT points to details.entry_index: correct that unsent entry; no partial success is invented. Overnight shifts can conflict with the next morning. The server is authoritative.",
+    "Edit duty opens the original ID/version. Review duty changes sends only changed fields plus expected_version. The employee cannot be replaced by editing. Cancel duty requires a reason; it never deletes history. Past duties are read-only without HR roster-management permission. A changed version blocks the stale review: close, refresh, compare and reapply intentionally.",
+    "Repeat last week pre-fills last week's period and this week's target. Adjust source/target dates if needed; target must follow source. It copies ALL manageable active duties in the chosen ward/department scope, not selected staff only. Rotate pattern by days 1 (Repeat, moving everyone's days on) rotates rest/Sunday duties. Review the scope, confirm once, then read both Created duties and Skipped entries and reasons; a skipped row was not created.",
+    "Week check shows the server's required rest allowance, duty/rest/leave dates and extra duty days. No rest day is amber; Not rostered is grey with text. Counts per date and shift remain under the grid so a thin Sunday is visible. This page never computes payroll or replaces attendance.",
+    "Swaps → Open swaps shows requests awaiting action. Accepted means both colleagues agreed. Approve swap rechecks availability and replaces the duties, retaining original history and swap IDs. Reject swap requires a reason visible to both. You cannot decide a swap you are part of; an independent eligible manager must decide. Other statuses are read-only.",
+    "Record agreed swap is for in-person agreements: select the actual original duty, a different permitted colleague of the same category, optional return duty and reason. Confirm both agreed and you are neither colleague. Review and confirm immediately approves and changes the duties; it is not an online invitation. A cover has no return duty. Never invent another employee's agreement.",
+    "roster.changed and roster.swap.updated silently refresh actual lists/week checks; reconnect resync does likewise, preserving unsent batch/forms. Failed reads hide stale action data. No polling. A lost create/copy/record/reject answer freezes original key/body; explicit identical Retry original request only within24hours. Edit/cancel/approve never replay automatically. Read original roster result checks exact original ID including cancelled rows; swap recovery reads all actual statuses for the original swap ID. Absence or a matching name proves nothing. Outside retention or a missing record ask IT before a replacement. For an unknown batch, copy or recorded swap, reading a list cannot unlock a replacement request: keep the original key until confirmed, or ask IT after retention. For edit, cancel and swap decisions, the exact original ID must be found before returning to the planner.",
+    "F1 and visible Help explain the current control and restore focus without discarding input; Close on an unsent form asks before discarding. English/Urdu, both themes and native Ctrl+=/-/0 share Settings zoom100–250%. No official roster PDF endpoint is provided: print the handbook through Help. Named human fresh-data/Urdu/role/editor review is still required; scheduling does not record presence or patient care."
+  ],
+  stepsUr: [
+    "ہیڈ نرس سے نرسنگ ڈیوٹی روسٹر۔ ہفتہ کھولیں میں اس ہفتے کی تاریخ؛ ابتدا سرور طے کرتا ہے۔ ہفتہ، وارڈ/شعبہ اور منسوخ دکھائیں صرف مطالعہ بدلتے ہیں۔ تازہ اصل معلومات لاتا ہے۔ رات کی ڈیوٹی آغاز کی تاریخ؛ گزشتہ دن کا فیصلہ ہسپتال کے وقت سے ہے۔",
+    "مجاز عملے میں تلاش موصولہ فہرست تک۔ فرد چن کر شفٹ/دن میں شامل یا فرد کا بٹن کھینچیں۔ ڈیوٹی شامل کی بورڈ/ٹچ طریقہ ہے۔ منظور رخصت پر ڈیوٹی نہیں؛ سرمئی مقرر چھٹی پر واضح ڈیوٹی ممکن۔ سرکاری چھٹی و اتوار عام خانے، ادارہ بند نہیں۔",
+    "مسودے میں اصل عملہ، آغاز، فعال شفٹ، جگہ و لازم وارڈ، اختیاری شعبہ/زون، آن کال و نوٹ چنیں۔ اسی وارڈ کے اصل بستر؛ جگہ/وارڈ بدلنے سے بستر صاف۔ نرس کو اپنی شفٹ میں بستر نظر آئیں گے۔ مسودے میں شامل محفوظ نہیں کرتا۔ غیر ارسال ہٹائیں صرف مسودہ نکالتا ہے۔",
+    "مسودے کا جائزہ تمام اندراج منجمد کرتا؛ فرد/تاریخ/شفٹ/بستر دیکھ کر نشان و تصدیق۔ مسودہ ایک ساتھ محفوظ یا کوئی نہیں۔ رخصت، دائرہ، غیر فعال یا ٹکراؤ میں entry_index والا مسودہ درست کریں؛ جزوی کامیابی فرض نہیں۔ رات کی شفٹ اگلی صبح سے ٹکرا سکتی۔ سرور حتمی ہے۔",
+    "ڈیوٹی بدلیں اصل نمبر/نسخہ کھولتا۔ جائزہ صرف بدلے خانے اور expected_version بھیجتا۔ ترمیم سے ملازم بدل نہیں سکتا۔ منسوخ میں وجہ لازم؛ تاریخ حذف نہیں۔ گزشتہ ڈیوٹی ایچ آر کی اجازت بغیر صرف مطالعہ۔ بدلا نسخہ پرانا جائزہ روکے؛ بند، تازہ، موازنہ پھر واضح ترمیم۔",
+    "پچھلا ہفتہ دہرائیں اصل پچھلا ہفتہ و ہدف یہ ہفتہ بھرتا۔ اصل/ہدف درست کریں؛ ہدف بعد میں۔ منتخب وارڈ/شعبے کی تمام مجاز فعال ڈیوٹیاں نقل، صرف منتخب فرد نہیں۔ گردش1 سے آرام/اتوار کی باری بدلتی۔ دائرہ و تصدیق کے بعد بننے اور چھوڑے اندراج/وجوہ دونوں دیکھیں؛ چھوڑا اندراج نہیں بنا۔",
+    "ہفتے کی جانچ سرور کا آرام، ڈیوٹی/آرام/رخصت و اضافی دن دکھاتی۔ آرام نہیں زرد، درج نہیں سرمئی اور عبارت۔ تاریخ/شفٹ کی گنتی جدول کے نیچے، اتوار کی کمی دکھے۔ صفحہ تنخواہ یا حاضری نہیں بناتا۔",
+    "تبادلے میں جاری درخواستیں۔ Accepted یعنی دونوں راضی۔ منظور دستیابی چیک کرکے اصل تاریخ و تبادلہ نمبر رکھتے ہوئے نئی ڈیوٹیاں بناتا۔ نامنظور کی وجہ دونوں کو دکھتی۔ اپنا تبادلہ خود فیصلہ نہیں؛ دوسرا مجاز منتظم۔ باقی حالتیں صرف پڑھیں۔",
+    "متفقہ تبادلہ بالمشافہ رضامندی کے لیے: اصل ڈیوٹی، اسی قسم کا الگ مجاز ساتھی، اختیاری بدلے کی ڈیوٹی و وجہ۔ دونوں کی رضامندی اور اپنا شامل نہ ہونا چیک۔ جائزہ/تصدیق فوراً منظور و ڈیوٹیاں بدلتا، آن لائن دعوت نہیں۔ صرف متبادل میں بدلے کی ڈیوٹی نہیں۔ دوسرے کی رضامندی فرض نہ کریں۔",
+    "روسٹر و تبادلہ واقعات اصل فہرست/جانچ تازہ، دوبارہ رابطہ بھی؛ مسودہ محفوظ۔ ناکام مطالعہ پر پرانا عمل چھپے، پولنگ نہیں۔ گم تخلیق/نقل/درج/نامنظور میں اصل کلید/مواد مقفل؛24گھنٹے میں صرف عین اصل کوشش۔ ترمیم/منسوخ/منظور خود نہیں دہراتے۔ اصل نتیجہ منسوخ سمیت عین نمبر، تبادلے میں تمام اصل حالتوں سے عین نمبر پڑھتا۔ غائب یا یکساں نام ثبوت نہیں۔ مدت/ریکارڈ غائب پر پہلے آئی ٹی۔ نامعلوم مسودہ، نقل یا درج تبادلے میں فہرست پڑھنے سے متبادل ارسال نہیں کھلتا؛ تصدیق تک اصل کلید، مدت بعد آئی ٹی۔ ترمیم، منسوخ یا فیصلے میں منصوبے پر واپسی سے پہلے عین اصل نمبر ملنا لازم ہے۔",
+    "ایف ون و مدد موجودہ خانے کی رہنمائی اور فوکس/مسودہ رکھیں؛ غیر ارسال بند سے پہلے پوچھیں۔ انگریزی/اردو، دونوں تھیم و کی بورڈ/ترتیب زوم100تا250۔ سرکاری روسٹر پی ڈی ایف راستہ نہیں؛ مدد سے رہنمائی پرنٹ۔ نامزد انسانی نئے ریکارڈ، اردو، کردار/تدوین جائزہ لازم؛ ڈیوٹی حاضری یا نگہداشت نہیں۔"
+  ],
+  faq: [
+    [
+      "How do I schedule without dragging?",
+      "Use Add duty, or select a staff button and Add in the day/shift cell. Review the form, add it to the unsent batch, then review and confirm the batch once."
+    ],
+    [
+      "Why is a day grey?",
+      "Approved leave blocks scheduling. A fixed default weekly off is a rest-day hint, not a ban; an explicit duty makes it working. Sundays and public holidays remain schedulable."
+    ],
+    [
+      "Did some entries save when one failed?",
+      "POST /rosters is all-or-nothing. Inspect the numbered entry from details.entry_index, correct the unsent batch and review it again. Copy is different: its actual skipped list names rows not created."
+    ],
+    [
+      "How are nights, rest and pay handled?",
+      "Night duty belongs to its start date and may overlap next morning. Week check supplies actual rest and extra duty days. The roster screen computes no pay and marks no attendance."
+    ],
+    [
+      "How do I change or remove a duty?",
+      "Edit uses the original row_version and only changed fields. Cancel requires a reason and keeps history. Do not delete or replace the employee through an edit; refresh stale versions before a new review."
+    ],
+    [
+      "What exactly does Repeat last week copy?",
+      "Every manageable active duty in the chosen source/ward/department scope, not the selected staff button alone. Rotation1 advances patterns/rest days within the period. Inspect every server-created or skipped result."
+    ],
+    [
+      "How do agreed and requested swaps differ?",
+      "Accepted requests wait for an independent manager to approve or reject. Record agreed swap immediately approves an agreement made in person. Select actual duties and a same-category colleague; never decide your own swap."
+    ],
+    [
+      "What if a response is lost or a row disappears?",
+      "Keep the original request. Only an idempotent action offers identical-key retry within24hours. Other actions require exact-ID rereads; swap recovery checks decided statuses too. Missing rows and matching names never mean success; ask IT when unresolved."
+    ]
+  ],
+  faqUr: [
+    [
+      "کھینچے بغیر ڈیوٹی کیسے؟",
+      "ڈیوٹی شامل یا فرد چن کر دن/شفٹ میں شامل۔ فارم سے مسودہ پھر پورے مسودے کا جائزہ و ایک تصدیق۔"
+    ],
+    [
+      "دن سرمئی کیوں؟",
+      "منظور رخصت پر ڈیوٹی ممنوع۔ مقرر چھٹی آرام کا اشارہ، واضح ڈیوٹی سے کام کا دن۔ اتوار/سرکاری چھٹی پر بھی ڈیوٹی ممکن۔"
+    ],
+    [
+      "ایک خراب اندراج میں کچھ محفوظ ہوئے؟",
+      "ڈیوٹی مسودہ سب یا کوئی نہیں۔ entry_index کا نمبر چیک، مسودہ درست و جائزہ۔ نقل الگ ہے: اصل skipped فہرست نہ بننے والے دکھاتی۔"
+    ],
+    [
+      "رات، آرام اور تنخواہ؟",
+      "رات کی ڈیوٹی ابتدا کی تاریخ، اگلی صبح سے ٹکراؤ ممکن۔ جانچ اصل آرام و اضافی دن دیتی۔ روسٹر تنخواہ یا حاضری نہیں بناتا۔"
+    ],
+    [
+      "ڈیوٹی بدلیں یا ہٹائیں کیسے؟",
+      "ترمیم اصل نسخہ و بدلے خانے۔ منسوخ میں وجہ، تاریخ محفوظ۔ حذف یا ترمیم سے ملازم بدلنا نہیں؛ پرانا نسخہ تازہ و نیا جائزہ۔"
+    ],
+    [
+      "پچھلا ہفتہ کیا نقل کرتا؟",
+      "اصل مدت/وارڈ/شعبے کی ہر مجاز فعال ڈیوٹی، صرف منتخب فرد نہیں۔ گردش1 باری/آرام آگے۔ سرور کے بننے یا چھوڑے سب نتائج دیکھیں۔"
+    ],
+    [
+      "متفقہ اور درخواست کے تبادلے میں فرق؟",
+      "Accepted درخواست آزاد منتظم کے فیصلے کی منتظر۔ بالمشافہ متفقہ درج فوراً منظور۔ اصل ڈیوٹی/اسی قسم کا ساتھی، اپنا فیصلہ خود نہیں۔"
+    ],
+    [
+      "جواب یا سطر غائب ہو تو؟",
+      "اصل درخواست رکھیں۔ صرف محفوظ کلید والا عمل24گھنٹے عین کوشش۔ باقی عین نمبر دوبارہ پڑھیں؛ تبادلہ حتمی حالتیں بھی۔ غائب سطر یا نام کامیابی نہیں؛ نامعلوم پر آئی ٹی۔"
+    ]
+  ]
+},
  imaging_repeats: {
   title: "Repeated images register",
   titleUr: "دوبارہ عکس کا رجسٹر",

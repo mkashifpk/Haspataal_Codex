@@ -3,6 +3,9 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import { checkHelp } from "../scripts/check-help.mjs";
 const read = (file) => fs.readFileSync(file, "utf8");
+test('Duty Roster cannot ship an unmapped scheduling confirmation',()=>{
+ assert.throws(()=>checkHelp({media:false,read:file=>file==='src/screens/DutyRoster.tsx'?read(file).replace('data-help="roster.confirm"',''):read(file)}),/missing\/broken control help mapping/);
+});
 
 test('Imaging worklist cannot ship an unmapped clinical confirmation',()=>{
  assert.throws(()=>checkHelp({media:false,read:file=>file==='src/screens/RadiologyWorklist.tsx'?read(file).replace('data-help="radiology.confirm"',''):read(file)}),/missing\/broken control help mapping/);
@@ -26,7 +29,7 @@ test("separately authored registration help must retain its Urdu title", () => {
 });
 test("all delivered controls, tasks, role guides and FAQ seeds have bilingual help", () => {
   const result = checkHelp({ media: false });
-  assert.equal(result.screens, 48);
+  assert.equal(result.screens, 49);
   assert(result.controls > 90);
   assert.equal(result.workspaceGuides, 30);
 });
