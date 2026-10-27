@@ -1,6 +1,6 @@
 # Haspataal checkpoint — 27 October 2026
 
-Last updated: Codex/functions, Asia/Karachi. User requested the next SINGLE screen. Phase3 position45 radiology_worklist implemented and tested; commit/proposal submission is the only current work. Next screen46 critical_results_radiology NOT started.
+Last updated: Codex/functions, Asia/Karachi. User requested the next SINGLE screen. Phase3 position45 radiology_worklist implemented and tested; no implementation work is currently in progress. Next screen46 critical_results_radiology NOT started.
 
 ## Completed / verification
 
@@ -18,10 +18,10 @@ Owned runDEMO-RADIOLOGY-1793095684419: patient3/MRN000003, Card1500 invoice3/pay
 
 ## Next three steps
 
-1. Finish source commit and submit ONLY tested radiology_worklist items with that commit, excluding link endpoint/combined link rule/full test and human gates. Save payload before call, verify receipt; update this checkpoint with ID and final Git state. Do not duplicate accepted/pending work.
+1. Proposal172 confirmed pending via progress_proposals: awaiting human review on /docs -> My progress. Source b142b407269fc19adeadc3fe40e4ffebfafde591; payload and verified receipt saved in docs/radiology-progress-*-2026-10-27.json. Only18 tested items proposed; link/combined contrast-link, emergency-overdue and combined communication rules/full test/human gates excluded. Do not re-propose unchanged work.
 2. Human tests review document with NEW synthetic orders; only human enters Review code and signs portal review. Retest31 when real synthetic PACS configured; read30 answer with documented correction in mind.
 3. Next session read AGENTS/handoff, Git status/diff/log; required MCP startup/roadmap. Before next screen46 critical_results_radiology read current bundle/quality/design/outline.
 
 ## Git / setup / pending
 
-Baseline8703fe3; all current uncommitted Imaging changes belong to this task, no other-agent edits. Source commit pending immediately. No running commands/uncertain writes. All profiles restored/preferences/logged out. No Review code entered. No push/PR/worktree/automation. Evidence scripts have terminal journals: do not blindly rerun business writes. Connection from ignored .dev-terminal.json, CA/MCP configuration; never copy credentials, local profiles or Review codes into Git.
+Baseline8703fe3; tested source b142b407269fc19adeadc3fe40e4ffebfafde591. Final documentation commit contains this checkpoint and proposal payload/receipt only. Working tree expected clean after that commit; verify on takeover. No other-agent edits overwritten. No running commands/uncertain writes. All profiles restored/preferences/logged out. No Review code entered. No push/PR/worktree/automation. Evidence scripts have terminal journals: do not blindly rerun business writes. Connection from ignored .dev-terminal.json, CA/MCP configuration; never copy credentials, local profiles or Review codes into Git.
