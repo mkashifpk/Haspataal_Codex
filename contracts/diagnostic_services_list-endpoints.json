@@ -1,0 +1,457 @@
+{
+  "pdf": {
+    "method": "GET",
+    "path": "/api/v1/diagnostics/services/pdf",
+    "summary": "The list of diagnostic services to display (PDF)",
+    "tags": [
+      "Diagnostic services"
+    ],
+    "permissions": [
+      "diagnostics.quality.view",
+      "lab.requisition.create",
+      "imaging.order.create",
+      "lab.requisition.view"
+    ],
+    "permissions_mode": "any",
+    "idempotency_key": false,
+    "description": "For the reception, the laboratory and radiology (MSDS AAC 1, 6, 8, 14): the tests done here (and round the clock),\nthose sent to partner laboratories, the imaging done here, the centres the hospital refers to.\n\n**Required permission:** `diagnostics.quality.view OR lab.requisition.create OR imaging.order.create OR lab.requisition.view`\n\n**Required permission:** `diagnostics.quality.view OR lab.requisition.create OR imaging.order.create OR lab.requisition.view`",
+    "roles_allowed": [
+      "anaesthetist",
+      "clinic_director",
+      "clinical_specialist",
+      "doctor",
+      "hospital_admin",
+      "hospital_director",
+      "lab_admin",
+      "lab_technician",
+      "lab_verifier",
+      "owner",
+      "quality_officer",
+      "radiologist",
+      "receptionist",
+      "surgeon"
+    ],
+    "parameters": [],
+    "request_body": null,
+    "request_content_type": null,
+    "response_schema": "not JSON (a file download): see the description",
+    "recorded_example": {
+      "request": {
+        "path": "/api/v1/diagnostics/services/pdf",
+        "query": {
+          "date_from": "2026-09-30",
+          "date_to": "2026-10-02"
+        }
+      },
+      "response": {
+        "status": 200,
+        "content_type": "application/pdf",
+        "bytes": 2816
+      }
+    },
+    "errors": [],
+    "errors_seen_in_tests": [],
+    "used_by_screens": [
+      "diagnostic_services_list",
+      "diagnostics_quality",
+      "radiology_quality",
+      "lab_quality",
+      "owner_diagnostics"
+    ],
+    "used_by_workflows": [
+      "diagnostic-services"
+    ],
+    "typescript_example": "// The list of diagnostic services to display (PDF)  (permissions: diagnostics.quality.view, lab.requisition.create, imaging.order.create, lab.requisition.view)\nexport const servicesList = () =>\n  api(\"GET\", `/diagnostics/services/pdf`, undefined);   // api(): see get_guide('envelope-and-errors')",
+    "access": {
+      "authentication": "user",
+      "permissions": [
+        "diagnostics.quality.view",
+        "lab.requisition.create",
+        "imaging.order.create",
+        "lab.requisition.view"
+      ],
+      "permissions_mode": "any",
+      "who": "holders of diagnostics.quality.view or lab.requisition.create or imaging.order.create or lab.requisition.view",
+      "roles_allowed": [
+        "anaesthetist",
+        "clinic_director",
+        "clinical_specialist",
+        "doctor",
+        "hospital_admin",
+        "hospital_director",
+        "lab_admin",
+        "lab_technician",
+        "lab_verifier",
+        "owner",
+        "quality_officer",
+        "radiologist",
+        "receptionist",
+        "surgeon"
+      ]
+    },
+    "write_semantics": null,
+    "emits_events": [],
+    "list": {
+      "returns": "file",
+      "paging": [],
+      "search": [],
+      "filters": [],
+      "note": null
+    },
+    "cross_field_rules": {},
+    "errors_detail": []
+  },
+  "tests": {
+    "method": "GET",
+    "path": "/api/v1/lab/tests",
+    "summary": "Active lab test catalogue (for the ordering picker)",
+    "tags": [
+      "Laboratory"
+    ],
+    "permissions": [
+      "lab.requisition.create",
+      "lab.test.manage",
+      "lab.requisition.view"
+    ],
+    "permissions_mode": "any",
+    "idempotency_key": false,
+    "description": "Price is included only for users who can order or manage tests (lab technicians do not see prices).\n\n**Required permission:** `lab.requisition.create OR lab.test.manage OR lab.requisition.view`\n\n**Required permission:** `lab.requisition.create OR lab.test.manage OR lab.requisition.view`",
+    "roles_allowed": [
+      "anaesthetist",
+      "clinical_specialist",
+      "doctor",
+      "lab_admin",
+      "lab_technician",
+      "lab_verifier",
+      "receptionist",
+      "surgeon"
+    ],
+    "parameters": [
+      {
+        "name": "q",
+        "in": "query",
+        "required": false,
+        "description": "",
+        "schema": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Q"
+        }
+      }
+    ],
+    "request_body": null,
+    "request_content_type": null,
+    "response_schema": {
+      "title": "Envelope[list[LabTestListItemOut]]",
+      "properties": {
+        "data": {
+          "items": {
+            "title": "LabTestListItemOut",
+            "properties": {
+              "test_id": {
+                "type": "integer",
+                "title": "Test Id"
+              },
+              "code": {
+                "type": "string",
+                "title": "Code"
+              },
+              "name": {
+                "type": "string",
+                "title": "Name"
+              },
+              "section": {
+                "type": "string",
+                "title": "Section"
+              },
+              "sample_type": {
+                "type": "string",
+                "title": "Sample Type"
+              },
+              "price": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Price"
+              },
+              "turnaround_minutes": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Turnaround Minutes"
+              },
+              "emergency_turnaround_minutes": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Emergency Turnaround Minutes"
+              },
+              "availability": {
+                "type": "string",
+                "enum": [
+                  "InHouse",
+                  "SendOut"
+                ],
+                "title": "Availability"
+              },
+              "send_out_partner_id": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Send Out Partner Id"
+              },
+              "send_out_partner_name": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Send Out Partner Name",
+                "description": "SendOut: tell the patient the test goes to this laboratory"
+              },
+              "available_24h": {
+                "type": "boolean",
+                "title": "Available 24H"
+              },
+              "notifiable_disease": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Notifiable Disease"
+              },
+              "is_active": {
+                "type": "boolean",
+                "title": "Is Active"
+              },
+              "row_version": {
+                "type": "integer",
+                "title": "Row Version"
+              },
+              "metric_schema": {
+                "items": {
+                  "$ref": "#/components/schemas/MetricDefOut"
+                },
+                "type": "array",
+                "title": "Metric Schema"
+              }
+            },
+            "type": "object",
+            "required": [
+              "test_id",
+              "code",
+              "name",
+              "section",
+              "sample_type",
+              "turnaround_minutes",
+              "emergency_turnaround_minutes",
+              "availability",
+              "send_out_partner_id",
+              "send_out_partner_name",
+              "available_24h",
+              "notifiable_disease",
+              "is_active",
+              "row_version",
+              "metric_schema"
+            ],
+            "description": "The ordering picker. `price` is present only for users who order or manage tests (technicians never see it)."
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "title": "Meta",
+          "properties": {
+            "server_time": {
+              "type": "string",
+              "title": "Server Time",
+              "description": "Server clock (UTC). Use it to detect terminal clock skew."
+            },
+            "page": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Page"
+            },
+            "page_size": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Page Size"
+            },
+            "total_count": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Total Count"
+            },
+            "next_cursor": {
+              "title": "Next Cursor"
+            }
+          },
+          "type": "object",
+          "required": [
+            "server_time"
+          ]
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ]
+    },
+    "recorded_example": {
+      "request": {
+        "path": "/api/v1/lab/tests",
+        "query": {
+          "q": "Vitamin"
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": [
+            {
+              "test_id": 3,
+              "code": "VITD",
+              "name": "Vitamin D",
+              "section": "Biochemistry",
+              "sample_type": "Blood",
+              "price": 3500,
+              "turnaround_minutes": null,
+              "emergency_turnaround_minutes": null,
+              "availability": "SendOut",
+              "send_out_partner_id": 1,
+              "send_out_partner_name": "City Reference Laboratory",
+              "available_24h": false,
+              "notifiable_disease": null,
+              "is_active": true,
+              "row_version": 1,
+              "metric_schema": [
+                {
+                  "key": "vitd",
+                  "ref": {
+                    "default": [
+                      30,
+                      100
+                    ]
+                  },
+                  "type": "number",
+                  "unit": "ng/mL",
+                  "label": "25-OH vitamin D",
+                  "required": true
+                }
+              ]
+            }
+          ],
+          "meta": {
+            "server_time": "2026-09-30T20:02:52.094403+00:00"
+          },
+          "request_id": "38924faef3f943f7b883e6717d06e91e"
+        }
+      }
+    },
+    "errors": [],
+    "errors_seen_in_tests": [],
+    "used_by_screens": [
+      "lab_only_walkin",
+      "lab_orders_results",
+      "lab_admin"
+    ],
+    "used_by_workflows": [],
+    "typescript_example": "// Active lab test catalogue (for the ordering picker)  (permissions: lab.requisition.create, lab.test.manage, lab.requisition.view)\nexport const listTests = () =>\n  api(\"GET\", `/lab/tests`, undefined);   // api(): see get_guide('envelope-and-errors')",
+    "access": {
+      "authentication": "user",
+      "permissions": [
+        "lab.requisition.create",
+        "lab.test.manage",
+        "lab.requisition.view"
+      ],
+      "permissions_mode": "any",
+      "who": "holders of lab.requisition.create or lab.test.manage or lab.requisition.view",
+      "roles_allowed": [
+        "anaesthetist",
+        "clinical_specialist",
+        "doctor",
+        "lab_admin",
+        "lab_technician",
+        "lab_verifier",
+        "receptionist",
+        "surgeon"
+      ]
+    },
+    "write_semantics": null,
+    "emits_events": [],
+    "list": {
+      "returns": "list",
+      "paging": [],
+      "search": [
+        {
+          "name": "q",
+          "required": false,
+          "type": "string",
+          "min_length": 1
+        }
+      ],
+      "filters": [],
+      "note": null
+    },
+    "cross_field_rules": {},
+    "errors_detail": []
+  }
+}

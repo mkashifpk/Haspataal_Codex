@@ -198,6 +198,7 @@ export function checkHelp({
       "LabOnlyWalkIn",
       "LabBench",
       "LabSendOuts",
+      "DiagnosticServicesList",
       "LabVerification",
       "CriticalResultsBench",
       "CriticalResultsDoctor",

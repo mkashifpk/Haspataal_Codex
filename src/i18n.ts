@@ -9,6 +9,11 @@ export function setLanguage(value: string) {
   language = value;
 }
 const ur: Record<string, string> = {
+ "The server did not return a PDF":"سرور نے پی ڈی ایف نہیں بھیجی۔",
+ "The PDF preview could not open. Save the document and open it in your PDF reader.":"پی ڈی ایف پیش منظر نہیں کھل سکا۔ دستاویز محفوظ کرکے اپنے پی ڈی ایف ریڈر میں کھولیں۔",
+ "You do not have permission to download this document":"اس دستاویز کو ڈاؤن لوڈ کرنے کی اجازت نہیں۔",
+ "The session changed during download":"ڈاؤن لوڈ کے دوران نشست بدل گئی۔",
+ "Request failed":"درخواست ناکام ہوئی۔",
  "Choose an active laboratory partner with a valid MOU.":"فعال لیب شریک اور درست معاہدہ چنیں۔",
  "Select current pending samples for this dispatch.":"اس روانگی کے موجودہ منتظر نمونے چنیں۔",
  "Courier is limited to200characters and note to500characters.":"لے جانے والا200اورنوٹ500حروف تک۔",

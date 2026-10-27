@@ -30,6 +30,7 @@ import { EPrescription } from "./screens/EPrescription";
 import { LabOrdersResults } from "./screens/LabOrdersResults";
 import { LabOnlyWalkIn } from './screens/LabOnlyWalkIn';
 import { LabSendOuts } from './screens/LabSendOuts';
+import { DiagnosticServicesList } from './screens/DiagnosticServicesList';
 import { LabBench } from './screens/LabBench';
 import { LabVerification } from './screens/LabVerification';
 import { CriticalResultsDoctor, DoctorCriticalAlert } from './screens/CriticalResultsDoctor';
@@ -75,6 +76,7 @@ const labels: Record<string, [string, string, string]> = {
   my_cash_shift: ["My cash shift", "میری کیش شفٹ", "₨"],
   lab_only_walkin: ['Lab-only walk-in','صرف لیب کے لیے آمد','⚗'],
   lab_verification: ['Verification queue','تصدیق کی قطار','✓'],
+  diagnostic_services_list: ['Diagnostic services list','تشخیصی خدمات کی فہرست','▤'],
   lab_send_outs: ['Samples sent to partner laboratories','شراکت دار لیب کو بھیجے گئے نمونے','↗'],
   lab_bench: ['Scanner-first lab bench','اسکینر سے لیب بنچ','⚗'],
   critical_results_doctor: ['Critical results to acknowledge','تسلیم کرنے والے اہم نتائج','!'],
@@ -105,6 +107,7 @@ const labels: Record<string, [string, string, string]> = {
   settings: ["Settings", "ترتیبات", "⚙"],
 };
 const frontDeskScreens = new Set([
+  'diagnostic_services_list',
   'critical_results_doctor',
   'critical_results_bench',
   'critical_results_verifier',
@@ -734,6 +737,7 @@ export function App() {
     'lab_only_walkin',
     'lab_bench',
     'lab_send_outs',
+    ...(user?.permissions.some(p => ['diagnostics.quality.view','lab.requisition.create','imaging.order.create','lab.requisition.view'].includes(p)) ? ['diagnostic_services_list'] : []),
     ...(user?.permissions.includes('diagnostics.critical.view') ? ['critical_results_bench','critical_results_verifier','critical_results_doctor'] : []),
     ...(user?.permissions.some(p => ['lab.result.verify', 'lab.result.view'].includes(p)) ? ['lab_verification'] : []),
     ...(user?.permissions.includes("clinical.encounter.view") || user?.permissions.includes("clinical.encounter.create") ? ["consultation"] : []),
@@ -1135,6 +1139,7 @@ export function App() {
                 <Registration user={user} revision={revision} />
               )}
               {screen === 'lab_only_walkin' && est && <LabOnlyWalkIn key={user.user_id} user={user} connected={connected} stream={stream} establishment={est} timeZone={meta?.hospital_timezone} currency={meta?.currency_code} onCashShift={nav.includes('my_cash_shift')?()=>{navigate('my_cash_shift')}:undefined}/>}
+              {screen === 'diagnostic_services_list' && <DiagnosticServicesList key={user.user_id} user={user} connected={connected} stream={stream}/>}
               {screen === 'lab_send_outs' && est && <LabSendOuts key={user.user_id} user={user} connected={connected} stream={stream} establishment={est} timeZone={meta?.hospital_timezone}/>}
               {screen === 'lab_bench' && est && <LabBench key={user.user_id} user={user} connected={connected} stream={stream} establishment={est} timeZone={meta?.hospital_timezone}/>}
               {screen === 'lab_verification' && est && <LabVerification key={user.user_id} user={user} connected={connected} stream={stream} establishment={est} timeZone={meta?.hospital_timezone}/>}

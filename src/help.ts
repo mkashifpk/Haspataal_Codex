@@ -10,6 +10,45 @@ export type HelpPage = {
   faqUr: [string, string][];
 };
 export const help: Record<string, HelpPage> = {
+ diagnostic_services_list: {
+  title:'Diagnostic services list',titleUr:'تشخیصی خدمات کی فہرست',
+  purpose:'At reception, staff explain where a test is performed and obtain the current official list to display for patients. Success is a readable current PDF and the actual send-out partner explained, without making an order or payment.',
+  purposeUr:'استقبالیہ پر عملہ بتاتا ہے ٹیسٹ کہاں ہوتا ہے اور مریضوں کے لیے موجودہ سرکاری فہرست لیتا ہے۔ کامیابی واضح موجودہ پی ڈی ایف اور اصل بیرونی شریک کی وضاحت ہے؛ آرڈر یا رقم نہیں۔',
+  steps:[
+   'Reception → Diagnostic services list. Check hospital and connection. Access follows your permitted workspace handbook and actual permissions; PDF and lab catalogue have separate permissions. This screen selects no patient or visit.',
+   'Preview official PDF fetches a new server document into a separate protected viewer. Inspect in-house/round-the-clock tests, send-outs, imaging and referral centres. Close that viewer to return. The server PDF is authoritative; the app does not rewrite or translate it.',
+   'Save PDF to print fetches a fresh original PDF and opens the native save dialog. Choose a location or cancel; wait for saved/cancelled/error. Open the saved file in your PDF reader, choose a printer, check paper and print quality, then replace old notices at reception, the lab and radiology. A saved message does not certify physical printing.',
+   'Explain a laboratory test reads the actual catalogue only with its separate permission. Find test or partner filters returned name/code/section/partner locally. Where performed selects All laboratory tests, In-house or Sent to partner. Show all laboratory tests clears both filters. They change neither the PDF nor a record.',
+   'Tell the patient explicitly when the test is sent out and name the recorded partner. Missing partner: ask Lab Admin, never invent a destination or say it is in-house. Round the clock shows the actual flag; No means confirm working hours with the department, not that it is closed. Use the PDF for imaging and referral centres.',
+   'Refresh laboratory list rereads while keeping search. After any catalogue or partner change, obtain and print a NEW official PDF and replace old display copies. No catalogue-change event exists for this screen; there is no polling. Actual reconnect rereads permitted test data; each document action always fetches fresh bytes.',
+   'Loading or failure hides old rows; Retry only reads. No matches: clear filters. Actual empty catalogue: ask Lab Admin and use the PDF for the full scope. Disconnection hides old rows and blocks fresh reads/documents. Retry documents after connection returns; cancelled save writes no file. If the viewer fails, save and open in your PDF reader. Permission refusal needs authorised access, session expiry needs sign-in. No order/payment is repeated for print recovery.',
+   'F1 from a field or button opens this page, preserves filters and restores focus when Help closes. Shared keyboard/Settings zoom stays100–250%, reset100%; English/Urdu and both themes use the same data. Urdu is draft pending named review. Human fresh upstream data, role FAQ/editor, device and signed portal review remain pending.'
+  ],
+  stepsUr:[
+   'استقبالیہ → تشخیصی خدمات کی فہرست۔ ہسپتال و رابطہ چیک۔ مجاز جگہ رہنما اور اصل اجازت؛ پی ڈی ایف و لیب الگ اجازت۔ یہاں مریض یا وزٹ نہیں چنتے۔',
+   'سرکاری پی ڈی ایف کا پیش منظر نئی اصل سرور فائل الگ محفوظ ویور میں۔ اندرونی/چوبیس گھنٹے، بیرونی، عکس اور حوالہ مراکز دیکھیں۔ واپس کے لیے ویور بند۔ سرور اصل؛ ایپ ترمیم یا ترجمہ نہیں کرتی۔',
+   'پرنٹ کے لیے پی ڈی ایف محفوظ کریں نئی فائل اور اصل مکالمہ۔ جگہ چنیں یا منسوخ؛ نتیجہ کا انتظار۔ ریڈر میں کھول، پرنٹر/کاغذ/معیار چیک، استقبالیہ/لیب/عکس کے نوٹس بدلیں۔ محفوظ اطلاع اصل پرنٹ کا ثبوت نہیں۔',
+   'لیبارٹری ٹیسٹ کی وضاحت الگ اجازت سے اصل فہرست۔ ٹیسٹ یا شریک تلاش نام/کوڈ/شعبہ/شریک میں مقامی۔ کہاں انجام ہوتا ہے تمام، اندرونی یا شریک چنتا۔ تمام لیب ٹیسٹ دکھائیں دونوں شرائط صاف۔ اصل فائل یا ریکارڈ نہیں بدلتے۔',
+   'بیرونی ٹیسٹ مریض کو واضح، درج شریک کا نام بتائیں۔ نام نہیں تو ایڈمن؛ فرضی منزل یا اندرونی نہیں۔ چوبیس گھنٹے اصل نشان؛ نہیں یعنی شعبے سے اوقات چیک، بند نہیں۔ عکس و حوالہ پی ڈی ایف میں۔',
+   'لیب فہرست تازہ کریں تلاش رکھتے دوبارہ پڑھتا۔ فہرست یا شریک تبدیلی کے بعد نئی اصل پی ڈی ایف، پرنٹ اور پرانی نقول بدلیں۔ الگ تبدیلی اطلاع یا پولنگ نہیں۔ رابطہ بحالی فہرست تازہ؛ ہر دستاویز نئی فائل۔',
+   'پڑھائی/خرابی میں پرانا پوشیدہ؛ دوبارہ کوشش صرف پڑھتا۔ تلاش خالی تو شرائط صاف؛ اصل فہرست خالی تو ایڈمن اور مکمل خدمات پی ڈی ایف۔ رابطہ بند پر پرانا پوشیدہ و نئے عمل بند۔ بحالی پر صرف فائل دہرائیں؛ محفوظ منسوخی فائل نہیں۔ ویور خراب تو محفوظ و ریڈر۔ اجازت یا داخلہ اصل حل؛ پرنٹ کے لیے آرڈر/رقم نہیں دہرائیں۔',
+   'خانے/بٹن سے ایف ون درست صفحہ، شرائط محفوظ، بند سے فوکس واپس۔ کی بورڈ/ترتیب زوم100تا250، بحال100؛ دونوں زبان و تھیم ایک معلومات۔ اردو مسودہ۔ نئی اصل معلومات، کردار رہنما، مدیر، آلہ اور دستخط انسانی جائزہ باقی۔'
+  ],
+  faq:[
+   ['How do I replace the services notice?','Save a fresh official PDF, open it in your PDF reader, print/check paper and replace old copies at reception, the lab and radiology. Repeat after catalogue or partner changes. Screen filters never change the PDF.'],
+   ['How do I explain a sent-out test?','Find and verify the actual test/code. Sent to partner shows the recorded laboratory: tell the patient that name. Missing name needs Lab Admin. Imaging and referral centres are in the official PDF, not the lab-only search.'],
+   ['Why is the lab table unavailable while PDF access works?','The PDF accepts any one of its read/order permissions. The separate test catalogue has narrower permissions. Use the PDF and request legitimate access; never borrow another account.'],
+   ['Does printing book a test or take payment?','No. Filters are local and preview/save only read a document. Use the proper patient/order/payment screens separately. Printer or download failure never needs another registration, order or payment.'],
+   ['How do I recover from a failed document or blank list?','Clear filters and refresh when connected. Actual empty catalogue needs Lab Admin. Retry the document only; save instead if preview is unavailable. Cancel saves nothing. Sign in again or obtain authorised access if required. Check your physical printer separately.']
+  ],
+  faqUr:[
+   ['خدمات نوٹس کیسے بدلیں؟','نئی اصل پی ڈی ایف محفوظ، ریڈر سے پرنٹ/کاغذ چیک، استقبالیہ/لیب/عکس کی پرانی نقل بدلیں۔ فہرست یا شریک بدلنے پر پھر۔ تلاش اصل پی ڈی ایف نہیں بدلتی۔'],
+   ['بیرونی ٹیسٹ کیسے سمجھائیں؟','اصل ٹیسٹ/کوڈ چیک۔ شریک کو بھیجا جاتا ہے میں درج نام بتائیں۔ نام نہیں تو ایڈمن۔ عکس و حوالہ اصل پی ڈی ایف میں، لیب تلاش میں نہیں۔'],
+   ['پی ڈی ایف ہے مگر جدول کیوں نہیں؟','اصل فائل اپنی چار میں ایک اجازت، الگ ٹیسٹ فہرست محدود اجازت۔ پی ڈی ایف استعمال اور جائز رسائی مانگیں؛ دوسرا اکاؤنٹ نہیں۔'],
+   ['کیا پرنٹ ٹیسٹ بک یا رقم لیتا ہے؟','نہیں۔ تلاش مقامی اور پیش منظر/محفوظ صرف فائل پڑھتے۔ مریض/آرڈر/رقم الگ صفحات۔ پرنٹر/فائل خطا پر رجسٹریشن، آرڈر یا رقم نہیں دہرائیں۔'],
+   ['فائل خطا یا خالی فہرست کا حل؟','شرائط صاف اور رابطہ پر تازہ۔ اصل فہرست خالی تو ایڈمن۔ صرف دستاویز پھر؛ ویور نہ ہو تو محفوظ۔ منسوخی کچھ نہیں۔ اجازت یا داخلہ حل جہاں لازم۔ اصل پرنٹر الگ چیک۔']
+  ]
+ },
  lab_send_outs: {
   title:'Samples sent to partner laboratories',titleUr:'شراکت دار لیب کو بھیجے گئے نمونے',
   purpose:'At the laboratory handover, the technician groups actual collected send-out samples for one valid partner, dispatches and prints the courier manifest, tracks the MOU deadline, then records each actual partner report or rejection for independent verification and replacement collection.',
