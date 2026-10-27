@@ -1,6 +1,8 @@
-# Haspataal checkpoint — 26 October 2026
+# Haspataal checkpoint — 27 October 2026
 
-Codex/functions, Asia/Karachi. User requested next SINGLE Phase3 screen with all MCP features. Implemented position42 **lab_send_outs** from clean baseline `438acfe`. Source commit is the commit containing this checkpoint; following docs-only commit records exact source/proposal. No next screen started. No running commands, uncertain writes or active test sessions. Prior/development checkpoint archived in `docs/HANDOFF_LAB_SENDOUT_DEVELOPMENT_2026-10-26.md`.
+Resume checkpoint (Codex/functions): user asks to finish interrupted Lab Send-outs work. Verified source commit `fdccc7d9ad41ff2c44f549725ef73fbd407bba35` exists and working tree was clean. MCP confirms implementation1/mkashif, unchanged server/contract/rubric. Submitted and verified proposal **165**,15 tested items, **awaiting human review on /docs -> My progress**. Exact payload/request_id and verified receipt saved in `docs/lab-sendout-progress-{payload,receipt}-2026-10-27.json`. Issues27–29 remain New/no answer, last checked27October. No code changes, business writes or tests replayed during takeover; historical test dates/results below remain explicit. No implementation work, unknown writes, running commands or sessions remain; human acceptance and expanded refusal coverage below remain pending.
+
+Codex/functions, Asia/Karachi. User requested next SINGLE Phase3 screen with all MCP features. Implemented position42 **lab_send_outs** from clean baseline `438acfe`, committed as `fdccc7d`. This following docs-only checkpoint records exact source/proposal. No next screen started. No running commands, uncertain writes or active test sessions. Prior/development checkpoint archived in `docs/HANDOFF_LAB_SENDOUT_DEVELOPMENT_2026-10-26.md`.
 
 ## Delivered
 
@@ -30,9 +32,9 @@ Remaining: named human fresh-data/roleFAQ/Urdu/editor/busy-hour/device/physical 
 
 ## Progress / next3 / Git
 
-New Send-outs proposal pending source commit/submission. Save exact payload/request_id, propose only tested items then verify progress_proposals BEFORE final handoff. No prior claims for this screen. Do not resubmit unchanged accepted160–164. Earlier verifier audit evidence limits remain in `docs/LAB_VERIFIER_AUDIT_2026-10-26.md`.
+Send-outs proposal **165** submitted and verified Pending, source `fdccc7d`, renderer `index-YlbJFsHF.js`: **awaiting human review on /docs -> My progress**.15 tested items only; exact payload/request_id and receipt in docs as above. No duplicate prior Send-outs claims. Do not resubmit165 or unchanged accepted160–164. Existing unrelated109/133 remain pending; no signed human review returned, shared review in progress. Earlier verifier audit evidence limits remain in `docs/LAB_VERIFIER_AUDIT_2026-10-26.md`.
 
-Next3: (1) commit source/test/evidence/checkpoint, submit/verify new proposal, save receipt in docs-only commit; (2) human follows manual fresh synthetic send-out/courier print/result/rejection/replacement/verifier/F1/Urdu/zoom checklist and portal review; saved terminal manifests1/2 are history only, not new operations; (3) next authorisation query roadmap, expected43diagnostic_services_list, fresh bundle first. Check27–29answers/retest whenFixed/deployed. No other work in progress. Current uncommitted changes all belong to this screen/docs; unrelated work untouched.
+Next3: (1) human follows `docs/LAB_SENDOUT_REVIEW_2026-10-26.md` with NEW synthetic data and real printer; saved terminal manifests1/2 are history/reprint only, not new operations; (2) human completes/signs portal review and considers proposal165, retaining actual expired-MOU/lifecycle/full refusal matrix limits; (3) on next-screen authorisation query roadmap, expected43diagnostic_services_list, fresh bundle first. Check27–29 answers/retest whenFixed/deployed. No other work in progress. Takeover changes are documentation/payload/receipt only, saved in the commit containing this checkpoint; unrelated work untouched. Final Git status must be clean.
 
 ## Preservation / setup
 

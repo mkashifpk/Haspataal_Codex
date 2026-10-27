@@ -1,6 +1,6 @@
 # Samples sent to partner laboratories — implementation review
 
-Codex,26October2026. Phase3 position42 `lab_send_outs`, clean baseline `438acfe`. Source/build/proposal references are recorded in `handoff.md`. This is agent implementation/testing evidence, not named human workspace acceptance.
+Codex,26October2026; checkpoint completed27October2026. Phase3 position42 `lab_send_outs`, baseline `438acfe`, source `fdccc7d9ad41ff2c44f549725ef73fbd407bba35`, final renderer `index-YlbJFsHF.js`. Proposal **165** submitted and verified for15 tested items: **awaiting human review on /docs -> My progress**. Exact payload and receipt in `docs/lab-sendout-progress-{payload,receipt}-2026-10-27.json`. Takeover verified Git/MCP/evidence; no code changes, tests or business writes replayed. This is agent implementation/testing evidence, not named human workspace acceptance.
 
 ## Purpose and delivered workflow
 
