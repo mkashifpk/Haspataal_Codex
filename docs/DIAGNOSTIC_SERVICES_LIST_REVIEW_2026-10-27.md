@@ -1,6 +1,6 @@
 # Diagnostic services list — implementation review
 
-Codex/functions,27October2026. Phase3 position43, Reception. Baseline `250478b`; source commit and proposal recorded in `handoff.md`. This is agent evidence, not named human acceptance.
+Codex/functions,27October2026. Phase3 position43, Reception. Baseline `250478b`; source `5241b4195025163e654e65f6f97be63afe4007a3`, renderer `index-DE73MAgP.js`. Proposal **166** submitted and verified Pending for five tested items: **awaiting human review on /docs -> My progress**. Exact payload/receipt in `docs/diagnostic-services-progress-{payload,receipt}-2026-10-27.json`. This is agent evidence, not named human acceptance.
 
 ## Purpose and implementation
 
