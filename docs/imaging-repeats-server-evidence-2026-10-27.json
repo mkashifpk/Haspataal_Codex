@@ -1,0 +1,127 @@
+{
+  "date": "2026-10-27",
+  "screen": "imaging_repeats",
+  "implementation_id": 1,
+  "server_build": "2026-10-27T06:11:24.313207+00:00",
+  "contract": "8ad8456c41b87dd0031e",
+  "rubric": "f18448c114ef",
+  "denied": {
+    "read": {
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/imaging/repeats",
+        "as_user": "demo.cashier",
+        "query": {
+          "date_from": "2026-10-27",
+          "date_to": "2026-10-27"
+        },
+        "body": null,
+        "idempotency_key": null
+      },
+      "status": 403,
+      "ms": 737,
+      "request_id": "e8eeb1097b304b2f93ba2e95598f0b61",
+      "body": {
+        "error": {
+          "code": "FORBIDDEN",
+          "message": "Missing permission: imaging.order.update, diagnostics.quality.view",
+          "details": {
+            "required": [
+              "imaging.order.update",
+              "diagnostics.quality.view"
+            ],
+            "any_of": true
+          },
+          "retryable": false,
+          "retry_after_seconds": null
+        },
+        "request_id": "e8eeb1097b304b2f93ba2e95598f0b61"
+      },
+      "explain": {
+        "http_status": 403,
+        "retryable": false,
+        "ui_action": "Explain and hide the action (check x-permissions)."
+      }
+    },
+    "write": {
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/imaging/orders/1/repeats",
+        "as_user": "demo.cashier",
+        "query": null,
+        "body": {
+          "reason": "Positioning",
+          "exposures": 1,
+          "note": "SYNTHETIC permission refusal only, no real exposure"
+        },
+        "idempotency_key": "repeat-cashier-refusal-20261027-v1"
+      },
+      "status": 403,
+      "ms": 581,
+      "request_id": "e0df3ccbc5eb4d5f879bfc1c0946f75d",
+      "body": {
+        "error": {
+          "code": "FORBIDDEN",
+          "message": "Missing permission: imaging.order.update",
+          "details": {
+            "required": [
+              "imaging.order.update"
+            ],
+            "any_of": false
+          },
+          "retryable": false,
+          "retry_after_seconds": null
+        },
+        "request_id": "e0df3ccbc5eb4d5f879bfc1c0946f75d"
+      },
+      "explain": {
+        "http_status": 403,
+        "retryable": false,
+        "ui_action": "Explain and hide the action (check x-permissions)."
+      }
+    }
+  },
+  "backend_issue": {
+    "issue": {
+      "id": 32,
+      "developer_id": 1,
+      "implementation_id": 1,
+      "request_id": "imaging-repeats-stage-error-docs-20261027-v1",
+      "source": "mcp",
+      "kind": "Documentation",
+      "severity": "Low",
+      "title": "Repeats MCP endpoint omits its actual 409 IMAGING_ORDER_STATE_INVALID refusal",
+      "actual": "On a fresh owned synthetic Ordered XRay order11, POST /imaging/orders/11/repeats with reason Positioning/exposures1 correctly refuses409 IMAGING_ORDER_STATE_INVALID, message 'Repeats are recorded for an examination that was performed'. Current get_endpoint/get_screen_bundle/screen_test_plan only list VALIDATION_ERROR422 for this endpoint and omit the stage refusal. The backend stage guard itself is correct; this is a knowledge/error/test-plan completeness issue, not a clinical product defect.",
+      "expected": "Document this endpoint's IMAGING_ORDER_STATE_INVALID409 in its MCP errors/detail and test plan, including rereading the original order and reviewing its stage before another action. Screen rule explicitly permits only InProgress/Completed/Reported. The frontend already guards those stages and displays actual server refusals; implementation is not blocked.",
+      "steps": "Read current get_endpoint POST /imaging/orders/{order_id}/repeats and imaging_repeats bundle/test plan. As demo.doctor create a clearly synthetic XRay on an owned paid/unlocked synthetic ticket. Before starting it (Ordered), as demo.radiographer POST its repeats route with reason Positioning, exposures1 and a synthetic note, original idempotency key. Verify409/code/message and no repeat effect. Do not replay our completed source or create a real exposure.",
+      "evidence": "DEV server_build2026-10-27T06:11:24.313207+00:00 / contract8ad8456c41b87dd0031e. Actual request_id f976b580c544424bb91d59d7d2528b27, HTTP409 IMAGING_ORDER_STATE_INVALID, source11 was Ordered. Owned run DEMO-IMAGING-REPEATS-1793115108665. Original request/refusal and later successful eligible-stage tests saved in ignored artifacts/imaging-repeats-check.json. No actual patient care, exposure, money or records fabricated; no existing matching issue found.",
+      "endpoint": "POST /imaging/orders/{order_id}/repeats",
+      "screen_id": "imaging_repeats",
+      "workflow": "MSDS AAC13j, imaging_repeats rule:d0d6bf1ddc",
+      "build": "Repeated images register DEV index-9hzAhJja.js / baseline9071241",
+      "backend_version": "1.0.0",
+      "reported_by": "Codex",
+      "status": "New",
+      "response": "",
+      "triaged_by": "",
+      "duplicate_of": null,
+      "fixed_in": "",
+      "created_at": "2026-10-27T15:36:59+00:00",
+      "updated_at": "2026-10-27T15:36:59+00:00",
+      "username": "mkashif",
+      "developer_name": "Muhammad Kashif",
+      "implementation_name": "Codex",
+      "open": true
+    },
+    "endpoint_known": true,
+    "screen_known": true,
+    "next": "my_backend_issues shows the backend team's status and answer. Meanwhile follow the documented workaround if the playbook has one, or leave the affected control disabled with a message."
+  },
+  "limits": [
+    "All examinations/repeats explicitly synthetic software records, no real exposure/care/money",
+    "No repeat realtime event, official register PDF or local repeat-rate calculation invented",
+    "Source-order read alone never proves audit saved; original key retry and actual register inspection only",
+    "No shared DEV service-state changes; pure policies/current metadata/RBAC verified",
+    "No signed human fresh-data/Urdu/role journey/editor/busy-hour acceptance"
+  ]
+}

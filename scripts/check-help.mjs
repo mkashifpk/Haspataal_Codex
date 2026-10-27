@@ -202,6 +202,7 @@ export function checkHelp({
       "ImagingQualitySetup",
       "RadiologyWorklist",
       "ImagingOutsourced",
+      "ImagingRepeats",
       "LabVerification",
       "CriticalResultsBench",
       "CriticalResultsDoctor",

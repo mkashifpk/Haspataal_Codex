@@ -26,7 +26,7 @@ test("separately authored registration help must retain its Urdu title", () => {
 });
 test("all delivered controls, tasks, role guides and FAQ seeds have bilingual help", () => {
   const result = checkHelp({ media: false });
-  assert.equal(result.screens, 47);
+  assert.equal(result.screens, 48);
   assert(result.controls > 90);
   assert.equal(result.workspaceGuides, 30);
 });
@@ -118,3 +118,5 @@ test('Doctor acknowledgement cannot ship without its confirmation help',()=>{
 test('Send-out confirmation and rejection recovery cannot lose their control help',()=>{assert.throws(()=>checkHelp({media:false,read:file=>file==='src/screens/LabSendOuts.tsx'?read(file).replace('data-help="sendout.confirm"',''):read(file)}),/missing\/broken control help mapping/);});
 
 test('Outsourced imaging cannot ship an unmapped final confirmation',()=>{assert.throws(()=>checkHelp({media:false,read:file=>file==='src/screens/ImagingOutsourced.tsx'?read(file).replace('data-help="outsourced.confirm"',''):read(file)}),/missing\/broken control help mapping/);});
+
+test('Repeat register cannot ship an unmapped clinical confirmation',()=>{assert.throws(()=>checkHelp({media:false,read:file=>file==='src/screens/ImagingRepeats.tsx'?read(file).replace('data-help="repeats.confirm"',''):read(file)}),/missing\/broken control help mapping/);});

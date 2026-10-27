@@ -9,6 +9,14 @@ export function setLanguage(value: string) {
   language = value;
 }
 const ur: Record<string, string> = {
+ "Match the patient and order and confirm that the repeated exposure already occurred.":"مریض و آرڈر ملائیں اور تصدیق کریں کہ دوبارہ ایکسپوژر پہلے ہو چکا۔",
+ "Choose the actual reason for the repeated exposure.":"دوبارہ ایکسپوژر کی اصل وجہ چنیں۔",
+ "Enter a whole number of repeated exposures from 1 to 20.":"دوبارہ ایکسپوژر1تا20مکمل عدد میں دیں۔",
+ "The repeat note is limited to 500 characters.":"دوبارہ عکس نوٹ500حروف تک ہے۔",
+ "Other requires a note explaining the repeated exposure.":"دیگر میں دوبارہ ایکسپوژر کی وضاحت کا نوٹ لازم ہے۔",
+ "Choose valid start and end dates for the register.":"رجسٹر کے لیے درست ابتدا و اختتام تاریخ چنیں۔",
+ "The register start date must not follow the end date.":"رجسٹر ابتدا کی تاریخ اختتام کے بعد نہ ہو۔",
+
  "Choose an active imaging partner with a valid MOU.":"درست معاہدے والا فعال عکس شریک چنیں۔",
  "Check the patient, order and partner agreement before sending.":"بھیجنے سے پہلے مریض، آرڈر اور شریک معاہدہ چیک کریں۔",
  "The outsourcing note is limited to 500 characters.":"حوالے کا نوٹ500حروف تک ہے۔",

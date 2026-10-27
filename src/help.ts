@@ -10,6 +10,102 @@ export type HelpPage = {
   faqUr: [string, string][];
 };
 export const help: Record<string, HelpPage> = {
+ imaging_repeats: {
+  title: "Repeated images register",
+  titleUr: "دوبارہ عکس کا رجسٹر",
+  purpose: "During a radiology shift, the radiographer or radiologist records each exposure that was actually repeated for a quality reason against the correct patient and examination; the saved register preserves the reason, count, author and time for review, without performing another exposure.",
+  purposeUr: "ریڈیالوجی شفٹ میں ریڈیوگرافر یا ریڈیالوجسٹ معیار کی وجہ سے واقعی دوبارہ ہو چکا ایکسپوژر درست مریض و معائنے پر درج کرتا؛ رجسٹر اصل وجہ، تعداد، مصنف و وقت رکھتا، نیا ایکسپوژر نہیں کرتا۔ اردو مقامی طبی جائزے تک مسودہ ہے۔",
+  steps: [
+    "Radiology → Repeated images register. Check Live and service view. Initial dates use the authenticated server clock in hospital timezone. Set valid From date and To date and optional Modality, then Apply register filters. Applied period shows the actual query; editing alone does not change it. Find in returned repeat records searches locally without changing clinical data.",
+    "Read each actual register row: repeat ID, order, patient/name/MRN, modality/body part, reason, repeated exposures, note, recorded author and time. No edit/delete is offered. Open source examination by its row, eligible in-progress/completed work button, or actual Known imaging order ID. Reported examinations need known-ID/history lookup, not a fabricated worklist row.",
+    "Before recording, match name/MRN plus age/DOB, accession/order, modality/site/side and responsible doctor. Review recorded allergies/blood group/MLC/temporary identity/deceased/dues flags. A missing or merged identity blocks writes until reception reconciles the original order with the master patient. A historical audit is not a new examination.",
+    "Only In progress, Completed or Reported can record a repeat with imaging-update permission, current identity and Live connection. Choose Record an already repeated exposure. This records what already happened; never use it as an instruction to expose a patient again or a replacement for a clinical report, order or payment.",
+    "Choose the factual Reason for repeat: Positioning, Patient motion, Exposure factors, Artefact, Equipment fault, Processing error, Wrong patient or site, or Other. Give a whole number1–20 Repeated exposures. A factual Repeat note up to500characters is mandatory for Other. Wrong patient/site requires the hospital safety/incident procedure separately; this page does not file an incident or correct identity.",
+    "Tick the matching/past-exposure statement only after verifying the actual source/patient/event. Changing any field clears the check. Review repeat record validates and freezes the exact patient/order/body. F1 from fields/dialogs preserves draft/focus. Back to draft retains input; Close before submission discards only the draft, without a write.",
+    "Confirm repeat record refreshes actor, permission, service, source order/version/stage and patient/master before one idempotent POST. Changed context refuses before transport; close, refresh and review. The saved actual repeat ID/author/time is the success evidence. A subsequent read failure never repeats the confirmed audit entry; the record may fall outside currently applied filters.",
+    "A lost answer freezes the original request/key/body and navigation. Prefer explicit Retry original request inside24hours with the identical key/body. Read current result rereads the ORIGINAL order, which alone is not proof a repeat saved. Read original order repeat history reads actual original-order register rows using authenticated server dates, independent of the current filters. A matching reason/count or missing row proves neither success nor failure. Outside retention ask IT before a replacement; never infer success or blindly create a new key.",
+    "Refresh repeat register and reconnect reread actual current data without polling. No repeat event or official register PDF is supplied by this screen's contract; print the help if needed and use authorized quality reporting when available. Repeat-rate statistics belong on Diagnostic services quality; no local rate is invented. Records mode is history only. Check both themes/English/Urdu and shared keyboard/Settings100–250zoom. Named human fresh-data, translation/role/editor acceptance remains pending."
+  ],
+  stepsUr: [
+    "ریڈیالوجی سے دوبارہ عکس کا رجسٹر۔ لائیو و خدمت چیک۔ ابتدا کی تاریخ سرور گھڑی/ہسپتال علاقے سے۔ درست ابتدا/اختتام و اختیاری قسم، پھر چھانٹی لگائیں۔ لاگو مدت اصل تلاش؛ صرف خانہ بدلنے سے نہیں۔ موصولہ میں تلاش مقامی، طبی ریکارڈ نہیں بدلتا۔",
+    "اصل سطر میں دوبارہ عکس نمبر، آرڈر، مریض/ایم آر این، قسم/جگہ، وجہ، تعداد، نوٹ، مصنف و وقت۔ ترمیم/حذف نہیں۔ سطر، مجاز جاری/مکمل کام یا معلوم اصل آرڈر نمبر سے معائنہ کھولیں۔ رپورٹ شدہ کے لیے تاریخ/معلوم نمبر، فرضی کھلی سطر نہیں۔",
+    "درج سے پہلے نام/ایم آر این اور عمر/پیدائش، ایکسیشن/آرڈر، قسم/جگہ/سمت و معالج ملائیں۔ اصل الرجی/خون/میڈیکو لیگل/عارضی شناخت/وفات/بقایا نشان۔ ضم/غائب شناخت پر استقبالیہ اصل آرڈر مرکزی مریض سے ملائے۔ سابق آڈٹ نیا معائنہ نہیں۔",
+    "صرف جاری، مکمل یا رپورٹ شدہ پر عکس اپ ڈیٹ، درست شناخت و لائیو میں ہو چکا دوبارہ ایکسپوژر درج۔ یہ صرف سابق عمل ہے، نیا عکس دینے کی ہدایت یا طبی رپورٹ/آرڈر/ادائیگی کا متبادل نہیں۔",
+    "اصل وجہ: جگہ بندی، مریض حرکت، ایکسپوژر عوامل، غیر مطلوب نشان، آلہ/پراسیسنگ خرابی، غلط مریض/جگہ یا دیگر۔ تعداد1تا20مکمل عدد۔500حروف کا اصل نوٹ، دیگر میں لازم۔ غلط مریض/جگہ کا حفاظت/واقعہ طریقہ الگ؛ یہاں واقعہ رپورٹ یا شناخت تصحیح نہیں۔",
+    "اصل مریض/آرڈر/واقعہ چیک کے بعد نشان؛ خانہ بدلے تو صاف۔ جائزہ عین مریض/آرڈر/مواد منجمد۔ ایف ون سے فوکس و مسودہ محفوظ۔ واپس سے معلومات رہیں، پہلے بند سے صرف مسودہ بغیر ارسال ختم۔",
+    "تصدیق میں صارف، اجازت، خدمت، اصل آرڈر/نسخہ/مرحلہ و مرکزی مریض تازہ پھر ایک اصل کلید ارسال۔ بدلنے پر پہلے انکار، بند/تازہ/نیا جائزہ۔ اصل لوٹا نمبر/مصنف/وقت کامیابی۔ بعد کی خطا اندراج نہیں دہراتی؛ موجودہ چھانٹی سے باہر ہو سکتا ہے۔",
+    "گم جواب پر اصل کلید/مواد و جگہ مقفل۔24گھنٹے عین اصل کوشش بہتر۔ موجودہ نتیجہ اصل آرڈر پڑھتا، اکیلا آڈٹ محفوظ کا ثبوت نہیں۔ اصل آرڈر دوبارہ عکس تاریخ اصل سرور دنوں کا رجسٹر، موجودہ چھانٹی سے الگ۔ یکساں وجہ/تعداد یا غائب سطر کامیابی/ناکامی ثبوت نہیں۔ مدت بعد متبادل سے پہلے آئی ٹی؛ نئی کلید خود نہیں۔",
+    "دستی تازہ و رابطہ بحالی اصل ریکارڈ، پولنگ نہیں۔ معاہدے میں دوبارہ عکس واقعہ یا سرکاری پی ڈی ایف نہیں؛ مدد پرنٹ، مجاز معیار رپورٹ بعد۔ شرح تشخیصی معیار میں، مقامی شرح نہیں۔ ریکارڈ صرف تاریخ۔ تھیم/اردو/انگریزی و100تا250مشترک زوم چیک؛ انسانی تازہ ریکارڈ/زبان/کردار/مدیر قبولیت باقی۔"
+  ],
+  faq: [
+    [
+      "Does recording repeat expose the patient again?",
+      "No. It only records an exposure that already happened as a quality audit. No new order, examination, clinical report or payment is performed. Verify identity and the past event before checking the assertion."
+    ],
+    [
+      "Which examinations allow a repeat entry?",
+      "In progress, Completed or Reported with imaging-update permission/current work view. Ordered, Scheduled, Outsourced and Cancelled are not eligible. Use the real known order ID for reported history; never guess from patient name."
+    ],
+    [
+      "What are the reasons and exposure limits?",
+      "Choose the actual listed quality reason and whole1–20 repeated exposures. Other requires a nonblank factual note up to500characters. Do not split entries to bypass a bound. Wrong patient/site also needs the hospital safety/incident workflow, not a fabricated incident submission here."
+    ],
+    [
+      "Can I amend or delete an entry?",
+      "This contract supplies append-only recording and a register, no edit/delete. Check all source facts before confirmation; for a factual mistake follow the hospital diagnostic-quality procedure and do not invent an undo or duplicate correction."
+    ],
+    [
+      "What if the answer is lost?",
+      "Keep the exact original key/body. Explicit same-key retry inside24hours returns the original result. Original-order reads alone do not prove an audit entry; inspect actual register IDs/author/time too. Row absence or equal reason/count is not proof, and outside retention IT must reconcile before any replacement."
+    ],
+    [
+      "Why can I not see a saved row?",
+      "Check Applied period and modality, clear local search, refresh, and inspect the returned repeat ID. Do not create a replacement because filters hide a row. The count is the repeated exposures, not a calculated repeat rate."
+    ],
+    [
+      "How is the register kept up to date, and can I print it?",
+      "Use Refresh repeat register or reconnect. This bundle has no repeat-specific realtime event and no official register PDF endpoint. The handbook can be printed; diagnostic-quality statistics/reporting is separate. Never calculate a local rate from incomplete filtered records."
+    ],
+    [
+      "How should both radiology roles test help and Urdu?",
+      "As radiographer and radiologist, use F1 from count/note/confirmation, return with draft/focus intact, and test both themes with shared native/Settings100–250zoom. Use NEW explicitly synthetic upstream records for the human journey. Urdu and named human/editor acceptance remain pending."
+    ]
+  ],
+  faqUr: [
+    [
+      "کیا اندراج دوبارہ عکس لیتا ہے؟",
+      "نہیں، صرف واقعی ہو چکا ایکسپوژر معیار آڈٹ۔ نیا آرڈر، معائنہ، طبی رپورٹ یا ادائیگی نہیں۔ نشان سے پہلے شناخت و سابق واقعہ چیک۔"
+    ],
+    [
+      "کن معائنوں پر اندراج؟",
+      "جاری، مکمل یا رپورٹ شدہ، عکس اپ ڈیٹ اور مجاز کام منظر۔ آرڈر، وقت مقرر، سپرد یا منسوخ مجاز نہیں۔ رپورٹ شدہ کا اصل معلوم نمبر، نام سے فرض نہیں۔"
+    ],
+    [
+      "وجوہات اور تعداد کی حد؟",
+      "اصل فہرست کی وجہ اور1تا20مکمل دوبارہ ایکسپوژر۔ دیگر میں500حروف تک غیر خالی اصل نوٹ۔ حد ٹالنے کو ریکارڈ تقسیم نہیں۔ غلط مریض/جگہ کا حفاظت/واقعہ عمل الگ، یہاں فرضی ارسال نہیں۔"
+    ],
+    [
+      "اندراج ترمیم یا حذف؟",
+      "معاہدہ صرف ناقابل ترمیم اندراج و رجسٹر دیتا۔ تصدیق سے پہلے اصل حقائق؛ غلطی پر ہسپتال تشخیصی معیار طریقہ، فرضی واپسی/نقل تصحیح نہیں۔"
+    ],
+    [
+      "جواب گم ہو تو؟",
+      "عین اصل کلید/مواد۔24گھنٹے وہی کوشش اصل جواب لاتی۔ آرڈر اکیلا آڈٹ محفوظ کا ثبوت نہیں؛ اصل رجسٹر نمبر/مصنف/وقت دیکھیں۔ غائب یا یکساں وجہ/تعداد ثبوت نہیں؛ مدت بعد نئے سے پہلے آئی ٹی۔"
+    ],
+    [
+      "محفوظ سطر کیوں نظر نہیں؟",
+      "لاگو مدت/قسم دیکھیں، مقامی تلاش صاف، تازہ، اصل لوٹا نمبر پڑھیں۔ چھانٹی سے غائب پر متبادل نہیں۔ تعداد دوبارہ ایکسپوژر ہے، شرح نہیں۔"
+    ],
+    [
+      "رجسٹر تازہ اور پرنٹ کیسے؟",
+      "دستی تازہ یا رابطہ بحالی۔ معاہدے میں مخصوص واقعہ یا سرکاری پی ڈی ایف نہیں۔ مدد پرنٹ؛ معیار اعداد/رپورٹ الگ۔ نامکمل چھانٹی سے مقامی شرح نہیں۔"
+    ],
+    [
+      "دونوں کردار مدد/اردو کیسے جانچیں؟",
+      "ریڈیوگرافر اور ریڈیالوجسٹ سے تعداد/نوٹ/تصدیق پر ایف ون، واپس فوکس/مسودہ محفوظ۔ دونوں تھیم و100تا250اصل مشترک زوم۔ انسانی جائزے میں نئے واضح مصنوعی ریکارڈ۔ اردو و مقرر انسانی/مدیر قبولیت باقی۔"
+    ]
+  ]
+},
  imaging_outsourced: {
   title: "Outsourced examinations",
   titleUr: "بیرونی مرکز کے معائنے",
