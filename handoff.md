@@ -1,6 +1,6 @@
 # Haspataal checkpoint — 27 October 2026
 
-Last updated by Codex/functions (Asia/Karachi). Current request: build ONLY Repeated images register, Phase3 position48 imaging_repeats. Implementation is done. All checks and final asset-copy build are complete; source commit and tested progress proposal/receipt remain. No Phase4 implementation started.
+Last updated by Codex/functions (Asia/Karachi). Current request: build ONLY Repeated images register, Phase3 position48 imaging_repeats. Implementation is done. All checks and final asset-copy build are complete. Source0df3e35 committed and proposal175 verified pending. No implementation work is currently in progress. No Phase4 implementation started.
 
 ## Completed and checks
 
@@ -24,10 +24,10 @@ Original keys/bodies/results are in ignored artifacts/imaging-repeats-check.json
 
 ## Next three actions and acceptance
 
-1. Final checks/evidence/clean media and visual inspection are complete. Commit source. Submit ONLY tested new screen items with commit/current rubric; save exact payload/request before call, verify progress_proposals receipt and record its ID here. Never duplicate unchanged accepted/pending claims.
+1. Proposal175 confirmed pending via progress_proposals: awaiting human review on /docs -> My progress. Nine tested new-screen items, source0df3e35d584d548902c34688a28ed9eb9d654a9b/finalrendererCdA5t8jf. Exact payload/verified receipt docs/imaging-repeats-progress-{proposal,receipt}-2026-10-27.json. Full-plan/human/design/editor gates excluded; do not duplicate unchanged accepted/pending work.
 2. Human follows the review using NEW synthetic upstream data through the app, then role/Urdu/F1/theme/nativezoom and past-event audit checks. Only human enters Review code/signs portal. No signed human fresh-data/translation/role/editor/busy-hour or shared DEV service transition claimed; full-plan/human/design/editor gates unclaimed. Unit gate policies/current full/RBAC verified. Retest affected issues only after backend answers/build deployment.
 3. Position48 is LAST Phase3 catalogue screen. Next catalogue work is Phase4 Inpatient journey, position49 duty_roster, then roll_call50/pending_admissions51. NOT started; get its current bundle/quality/design/outline/dependencies before new implementation. Phase3 full acceptance still pending earlier PACS31, deferred Pharmacy checks and human reviews. Existing home/preventive reset state and H08/H09/H10 remain earlier acceptance/owner choices.
 
 ## Git and environment
 
-Clean baseline9071241/source05b5d47 verified at takeover; all task changes ours, no unrelated edits overwritten. Source commit pending. No running commands or uncertain business writes. Authorized connection comes from ignored .dev-terminal.json, CA/MCP config; never copy credentials/local profiles/Review codes into Git. npm_config_cache=D:\Projects\Haspataal_Codex\artifacts\npm-cache avoids low C space; local Vite/tsc/prettier used. No user files deleted, no PR/push/worktree/automation.
+Clean baseline9071241/source05b5d47 verified at takeover; all task changes ours, no unrelated edits overwritten. Tested source0df3e35d584d548902c34688a28ed9eb9d654a9b; final documentation commit contains this checkpoint and proposal payload/verified receipt only. Working tree expected clean afterward; verify on takeover. No running commands or uncertain business writes. Authorized connection comes from ignored .dev-terminal.json, CA/MCP config; never copy credentials/local profiles/Review codes into Git. npm_config_cache=D:\Projects\Haspataal_Codex\artifacts\npm-cache avoids low C space; local Vite/tsc/prettier used. No user files deleted, no PR/push/worktree/automation.
