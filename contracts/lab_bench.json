@@ -1,7 +1,7 @@
 {
   "screen_id": "lab_bench",
-  "contract_fingerprint": "90f7a429e5aa519d440f",
-  "knowledge_revision": "f2f42e3079bc34a3",
+  "contract_fingerprint": "8ad8456c41b87dd0031e",
+  "knowledge_revision": "506a43401a2cda4a",
   "delivery_gate": {
     "required": true,
     "status": "required",
@@ -55,7 +55,7 @@
   },
   "ui_quality": {
     "source": "frontend-docs/guides/16-ui-quality.md",
-    "standard_revision": "c81852646942368c",
+    "standard_revision": "94b18e703d2ab96f",
     "context": {
       "workspace": "lab_tech",
       "purpose": "Scan a sample barcode → metric grid with this patient's reference ranges → submit.",
@@ -167,7 +167,7 @@
           "instruction": "- [ ] Every applicable task and mandatory quality check must pass. A blocker, missing FAQ, broken F1, out-of-bounds\n  zoom or untested fresh-data lifecycle keeps the screen/workspace pending. Partial item acceptance remains possible.\n- [ ] The named human signs the review for this build (its *Sign* step: every question answered or decided by the\n  server, the declaration that the writes with the code are theirs, not their agent's), clears the code from the app,\n  accepts only tested proposal items or reports them manually, and returns failures: the agent reads the signed\n  review's failures and notes (`progress_proposals` → `human_reviews`). Agents cannot start, fill or sign a review, nor\n  approve their own claims. Backend inspection can confirm or withdraw accepted claims; verified points are a subset of\n  completion, never an additional award.\n- [ ] Retest affected tasks after fixes or backend changes; stale evidence does not establish the new build's behavior."
         }
       ],
-      "workspace_checklist": "- [ ] **Create:** for tests ordered in this review: collect the sample (identify the patient), receive it, enter the\n  result, a send-out manifest, the communication of a critical result. Where the blood center runs: a donor, the\n  collection of an accepted donation, its results and its components.\n- [ ] **Read:** the worklist and the sample's barcode label; the donation labels and the quarantine.\n- [ ] **Update / correct:** amend a published result (it goes back to verification); correct a donor's particulars with\n  the reason.\n- [ ] **Cancel / delete:** reject an unusable sample; re-run a failed test (new barcode, not billed again); discard a\n  component in quarantine with the reason.\n- [ ] **Refused:** a second registration of the same donor (`BLOOD_DONOR_EXISTS`); plasma prepared more than 8 hours\n  after the venepuncture (`BLOOD_PROCESSING_TIME_EXCEEDED`).\n- [ ] **Hand over:** the result reaches the verifier, then the doctor; a donation's results reach the designated\n  person for the clearance.",
+      "workspace_checklist": "- [ ] **Create:** for tests ordered in this review: collect the sample (identify the patient), receive it, enter the\n  result, a send-out manifest, the communication of a critical result. Where the blood center runs: a donor, the\n  collection of an accepted donation, its results and its components.\n- [ ] **Read:** the worklist (it refreshes when another bench submits a result) and the sample's barcode label (a\n  reprint adds one to `label_print_count` and leaves `row_version` as it was); the donation labels and the quarantine.\n- [ ] **Update / correct:** amend a published result (it goes back to verification); correct a donor's particulars with\n  the reason.\n- [ ] **Cancel / delete:** reject an unusable sample; re-run a failed test (new barcode, not billed again); discard a\n  component in quarantine with the reason.\n- [ ] **Refused:** a second registration of the same donor (`BLOOD_DONOR_EXISTS`); plasma prepared more than 8 hours\n  after the venepuncture (`BLOOD_PROCESSING_TIME_EXCEEDED`).\n- [ ] **Hand over:** the result reaches the verifier, then the doctor; a donation's results reach the designated\n  person for the clearance.",
       "operations": {
         "create": [
           {
@@ -274,6 +274,16 @@
         "cites": []
       },
       {
+        "id": "rule:301c60be3b",
+        "text": "GET /lab/samples/{sample_id}/label is a print, never a preview: call it only when the user prints or reprints. Each call counts as one more label (label_print_count) whether or not the printer printed it; it never changes the sample (row_version stays), so nothing needs reloading before the next action.",
+        "cites": []
+      },
+      {
+        "id": "rule:940f5347cc",
+        "text": "Events: lab.result.pending_verification reaches every bench (lab.result.enter) when any technician submits a result: refresh the worklist. lab.result.published belongs to the verifiers and the doctor, not the bench.",
+        "cites": []
+      },
+      {
         "id": "rule:999c093136",
         "text": "Exists for the service laboratory (work): show it as GET /establishment views.screens says for screen_id lab_bench (full; open_work: without its new work, with the banner \"No new ... from now on\"; records: history and corrections only; setup: only from Facility settings; hidden: in no menu), after login and again on establishment.changed. Never decide it from the profile's category.",
         "cites": []
@@ -308,7 +318,7 @@
     "workspace": "lab_tech",
     "phase": "P3",
     "position": 37,
-    "points": 79,
+    "points": 83,
     "capabilities": [
       "realtime",
       "idempotent_writes",
@@ -395,7 +405,7 @@
     "note": "`forward`: a dependency on a later phase; use the demo data or a scenario (sandbox_scenario) until that screen exists. `ordering: false`: a hand-off or a hint, not a reason to wait."
   },
   "definition_of_done": {
-    "points": 79,
+    "points": 83,
     "items": [
       {
         "id": "ep:GET /lab/worklist",
@@ -407,7 +417,7 @@
         "id": "ep:POST /lab/samples/{sample_id}/collect",
         "label": "POST /lab/samples/{sample_id}/collect",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:GET /lab/samples/{sample_id}/label",
@@ -419,19 +429,19 @@
         "id": "ep:GET /lab/scan/{barcode}",
         "label": "GET /lab/scan/{barcode}",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:POST /lab/samples/{sample_id}/receive",
         "label": "POST /lab/samples/{sample_id}/receive",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:POST /lab/items/{item_id}/results",
         "label": "POST /lab/items/{item_id}/results",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:POST /lab/items/{item_id}/rerun",
@@ -449,13 +459,13 @@
         "id": "ep:POST /lab/samples/{sample_id}/reject",
         "label": "POST /lab/samples/{sample_id}/reject",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:GET /wristbands/verify",
         "label": "GET /wristbands/verify",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ev:lab.result.pending_verification",
@@ -473,25 +483,25 @@
         "id": "rule:13da4cf232",
         "label": "Keep focus in a hidden scanner input; Enter triggers GET /lab/scan/{barcode}.",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:47b9cfc9c3",
         "label": "Collect: identify the patient first (body of POST /lab/samples/{id}/collect): scan the wristband (wristband_code; PATIENT_IDENTITY_MISMATCH = another patient's band: STOP), or ask two identifiers (identity_check TwoIdentifiers); an emergency patient who cannot be identified yet: EmergencyOverride with identity_note. Label the tube at the bedside (MSDS AAC 3).",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:72aabbffc0",
         "label": "Receiving a sample still Pending (taken at the lab counter now) needs the same identity body.",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:47ba14e48b",
         "label": "Flag values live (red/amber) against metric_grid[].reference_range and critical before submitting; a text metric with critical.values (e.g. Positive for a priority disease) is critical too (flag C).",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:a3b82d112e",
@@ -503,11 +513,23 @@
         "id": "rule:aa36be999f",
         "label": "Reject an unusable sample (POST /lab/samples/{id}/reject: Haemolysed, Clotted, InsufficientVolume, WrongContainer, Unlabelled, Mislabelled, Leaked, DelayedTransport, Contaminated, Other + note): the test goes back to collection with a new barcode and the doctor is told.",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:3113af03f2",
         "label": "Lab technicians never see prices or take cash; LAB_PAYMENT_REQUIRED means the patient must pay at the counter.",
+        "points": 2,
+        "claimed": true
+      },
+      {
+        "id": "rule:301c60be3b",
+        "label": "GET /lab/samples/{sample_id}/label is a print, never a preview: call it only when the user prints or reprints. Each call counts as one more label (label_print_count) whether or not the printer printed it; it never changes the sample (row_version stays), so nothing needs reloading before the next action.",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "rule:940f5347cc",
+        "label": "Events: lab.result.pending_verification reaches every bench (lab.result.enter) when any technician submits a result: refresh the worklist. lab.result.published belongs to the verifiers and the doctor, not the bench.",
         "points": 2,
         "claimed": false
       },
@@ -521,19 +543,19 @@
         "id": "q:states",
         "label": "Loading, empty and error states",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:permissions",
         "label": "Actions by permission",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:writes",
         "label": "Safe writes",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:tested",
@@ -545,7 +567,7 @@
         "id": "q:handbook",
         "label": "Handbook page",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:f1_help",
@@ -898,7 +920,22 @@
       },
       "service_gates": [],
       "idempotency_key": false,
-      "errors": [],
+      "errors": [
+        {
+          "code": "NOT_FOUND",
+          "http_status": 404,
+          "message": "The requested resource was not found.",
+          "retryable": false,
+          "ui_action": "Say 'not found'; refresh the list.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "resource"
+          ],
+          "details_from": "PUT /api/v1/admin/printers/{printer_id}"
+        }
+      ],
       "parameters": [
         {
           "name": "sample_id",
@@ -1982,7 +2019,7 @@
     {
       "call": "POST /lab/items/{item_id}/results",
       "emits": "lab.result.pending_verification",
-      "audience": "permission lab.result.verify",
+      "audience": "permission lab.result.verify or lab.result.enter",
       "reaches_screens": [
         "lab_verification"
       ]
@@ -1990,7 +2027,7 @@
     {
       "call": "POST /lab/items/{item_id}/corrections",
       "emits": "lab.result.pending_verification",
-      "audience": "permission lab.result.verify",
+      "audience": "permission lab.result.verify or lab.result.enter",
       "reaches_screens": [
         "lab_verification"
       ]
@@ -2030,147 +2067,6 @@
     }
   ],
   "patient_context": null,
-  "states": [
-    {
-      "state": "loading",
-      "why": "every read"
-    },
-    {
-      "state": "error",
-      "why": "every call (show error.code's message)"
-    },
-    {
-      "state": "empty",
-      "why": "a list can be empty: say why and what to do next"
-    },
-    {
-      "state": "forbidden",
-      "why": "actions hidden or disabled by permission (GET /auth/me)"
-    },
-    {
-      "state": "stale / reconnecting",
-      "why": "realtime: show Live / Reconnecting, reload after a truncated replay"
-    },
-    {
-      "state": "submitting / outcome unknown",
-      "why": "a write in flight, or its answer lost: see each write's on_lost_answer"
-    },
-    {
-      "state": "print failed",
-      "why": "printing is separate from the write: reprint, never redo it"
-    }
-  ],
-  "scanner": [
-    {
-      "endpoint": "POST /lab/samples/{sample_id}/collect",
-      "input": "body /wristband_code",
-      "what": "What the scanner read from the wristband (the MRN, or HMS:PT:<mrn>)"
-    },
-    {
-      "endpoint": "GET /lab/scan/{barcode}",
-      "input": "path",
-      "what": "a scanned code"
-    },
-    {
-      "endpoint": "POST /lab/samples/{sample_id}/receive",
-      "input": "body /wristband_code",
-      "what": "What the scanner read from the wristband (the MRN, or HMS:PT:<mrn>)"
-    },
-    {
-      "endpoint": "GET /wristbands/verify",
-      "input": "query code",
-      "what": "code"
-    }
-  ],
-  "copy": {
-    "workspace": {
-      "en": "Lab Technician",
-      "ur": "لیب ٹیکنیشن"
-    },
-    "error_messages": {
-      "LAB_ITEM_STATE_INVALID": "Invalid lab test state change.",
-      "LAB_METRICS_INVALID": "Metric values do not match the test's metric schema.",
-      "LAB_PAYMENT_REQUIRED": "The lab bill must be paid before sample collection.",
-      "LAB_REAGENT_BOM_MISSING": "This test has no reagent bill-of-materials configured.",
-      "LAB_SAMPLE_STATE_INVALID": "The sample cannot do that in its present state.",
-      "PATIENT_IDENTITY_MISMATCH": "The wristband scanned is not this patient's: stop and check who the patient is.",
-      "PATIENT_IDENTITY_REQUIRED": "Identify the patient first: scan the wristband, or confirm two identifiers (name and MRN or date of birth).",
-      "VALIDATION_ERROR": "The request is invalid."
-    },
-    "wording_quoted_in_rules": [
-      "No new ... from now on"
-    ],
-    "note": "Server-owned strings only: the error messages (English), the workspace labels (English and Urdu) and the wording the rules quote. The UI's own copy and its Urdu are yours (decision H08)."
-  },
-  "same_component_as": [],
-  "roles": {
-    "full": [
-      "lab_technician"
-    ],
-    "partial": [
-      "owner",
-      "hospital_admin",
-      "hospital_director",
-      "clinic_director",
-      "billing_admin",
-      "accountant",
-      "cashier",
-      "receptionist",
-      "admissions_officer",
-      "triage_nurse",
-      "doctor",
-      "clinical_specialist",
-      "surgeon",
-      "ot_admin",
-      "anaesthetist",
-      "ot_nurse",
-      "ward_nurse",
-      "head_nurse",
-      "pharmacist",
-      "lab_verifier",
-      "lab_admin",
-      "radiographer",
-      "radiologist",
-      "zakat_officer",
-      "quality_officer",
-      "ipc_nurse"
-    ],
-    "page_for": [
-      "lab_technician"
-    ],
-    "note": "page_for: the roles whose GET /meta/handbook lists this screen (its menu entry and F1 page; for a user with that one role, every service Active). A partial role outside page_for only makes some of these calls from screens of its own: never offer it this screen. Build the menu from the logged-in user's GET /meta/handbook."
-  },
-  "workflows": [
-    {
-      "slug": "blood-transfusion",
-      "title": "Blood transfusion",
-      "recipe": "get_workflow_recipe('blood-transfusion')"
-    },
-    {
-      "slug": "diagnostic-services",
-      "title": "Diagnostic services quality (MSDS)",
-      "recipe": "get_workflow_recipe('diagnostic-services')"
-    },
-    {
-      "slug": "inpatient-and-discharge",
-      "title": "Admission, beds, nursing & discharge",
-      "recipe": "get_workflow_recipe('inpatient-and-discharge')"
-    },
-    {
-      "slug": "laboratory-and-radiology",
-      "title": "Laboratory & radiology",
-      "recipe": "get_workflow_recipe('laboratory-and-radiology')"
-    },
-    {
-      "slug": "medication-safety",
-      "title": "Medication safety (MSDS)",
-      "recipe": "get_workflow_recipe('medication-safety')"
-    }
-  ],
-  "scenarios": [],
-  "unknowns": [],
-  "omitted_sections": [],
-  "next": "Request omitted sections separately with max_chars=200000; for an oversized endpoints/schemas section use get_endpoint / get_schema for each operation/type.",
   "value_lists": [
     {
       "values": [
@@ -2523,6 +2419,117 @@
       }
     }
   ],
+  "states": [
+    {
+      "state": "loading",
+      "why": "every read"
+    },
+    {
+      "state": "error",
+      "why": "every call (show error.code's message)"
+    },
+    {
+      "state": "empty",
+      "why": "a list can be empty: say why and what to do next"
+    },
+    {
+      "state": "forbidden",
+      "why": "actions hidden or disabled by permission (GET /auth/me)"
+    },
+    {
+      "state": "stale / reconnecting",
+      "why": "realtime: show Live / Reconnecting, reload after a truncated replay"
+    },
+    {
+      "state": "submitting / outcome unknown",
+      "why": "a write in flight, or its answer lost: see each write's on_lost_answer"
+    },
+    {
+      "state": "print failed",
+      "why": "printing is separate from the write: reprint, never redo it"
+    }
+  ],
+  "scanner": [
+    {
+      "endpoint": "POST /lab/samples/{sample_id}/collect",
+      "input": "body /wristband_code",
+      "what": "What the scanner read from the wristband (the MRN, or HMS:PT:<mrn>)"
+    },
+    {
+      "endpoint": "GET /lab/scan/{barcode}",
+      "input": "path",
+      "what": "a scanned code"
+    },
+    {
+      "endpoint": "POST /lab/samples/{sample_id}/receive",
+      "input": "body /wristband_code",
+      "what": "What the scanner read from the wristband (the MRN, or HMS:PT:<mrn>)"
+    },
+    {
+      "endpoint": "GET /wristbands/verify",
+      "input": "query code",
+      "what": "code"
+    }
+  ],
+  "copy": {
+    "workspace": {
+      "en": "Lab Technician",
+      "ur": "لیب ٹیکنیشن"
+    },
+    "error_messages": {
+      "LAB_ITEM_STATE_INVALID": "Invalid lab test state change.",
+      "LAB_METRICS_INVALID": "Metric values do not match the test's metric schema.",
+      "LAB_PAYMENT_REQUIRED": "The lab bill must be paid before sample collection.",
+      "LAB_REAGENT_BOM_MISSING": "This test has no reagent bill-of-materials configured.",
+      "LAB_SAMPLE_STATE_INVALID": "The sample cannot do that in its present state.",
+      "NOT_FOUND": "The requested resource was not found.",
+      "PATIENT_IDENTITY_MISMATCH": "The wristband scanned is not this patient's: stop and check who the patient is.",
+      "PATIENT_IDENTITY_REQUIRED": "Identify the patient first: scan the wristband, or confirm two identifiers (name and MRN or date of birth).",
+      "VALIDATION_ERROR": "The request is invalid."
+    },
+    "wording_quoted_in_rules": [
+      "No new ... from now on"
+    ],
+    "note": "Server-owned strings only: the error messages (English), the workspace labels (English and Urdu) and the wording the rules quote. The UI's own copy and its Urdu are yours (decision H08)."
+  },
+  "same_component_as": [],
+  "roles": {
+    "full": [
+      "lab_technician"
+    ],
+    "partial": [
+      "owner",
+      "hospital_admin",
+      "hospital_director",
+      "clinic_director",
+      "billing_admin",
+      "accountant",
+      "cashier",
+      "receptionist",
+      "admissions_officer",
+      "triage_nurse",
+      "doctor",
+      "clinical_specialist",
+      "surgeon",
+      "ot_admin",
+      "anaesthetist",
+      "ot_nurse",
+      "ward_nurse",
+      "head_nurse",
+      "pharmacist",
+      "lab_verifier",
+      "lab_admin",
+      "radiographer",
+      "radiologist",
+      "zakat_officer",
+      "quality_officer",
+      "ipc_nurse"
+    ],
+    "page_for": [
+      "lab_technician"
+    ],
+    "note": "page_for: the roles whose GET /meta/handbook lists this screen (its menu entry and F1 page; for a user with that one role, every service Active). A partial role outside page_for only makes some of these calls from screens of its own: never offer it this screen. Build the menu from the logged-in user's GET /meta/handbook."
+  },
   "test_plan": {
     "screen": "lab_bench",
     "title": "Scanner-first lab bench",
@@ -2590,7 +2597,9 @@
           ],
           "expect": "403 FORBIDDEN"
         },
-        "errors_to_handle": [],
+        "errors_to_handle": [
+          "NOT_FOUND"
+        ],
         "as_one_of": [
           "head_nurse",
           "lab_technician",
@@ -2867,6 +2876,8 @@
       "Worklist: is_emergency first, due_at and is_overdue (red): the turnaround clock starts at the sample's receipt (MSDS AAC 4). is_send_out: the sample goes to a partner laboratory (screen lab_send_outs).",
       "Reject an unusable sample (POST /lab/samples/{id}/reject: Haemolysed, Clotted, InsufficientVolume, WrongContainer, Unlabelled, Mislabelled, Leaked, DelayedTransport, Contaminated, Other + note): the test goes back to collection with a new barcode and the doctor is told.",
       "Lab technicians never see prices or take cash; LAB_PAYMENT_REQUIRED means the patient must pay at the counter.",
+      "GET /lab/samples/{sample_id}/label is a print, never a preview: call it only when the user prints or reprints. Each call counts as one more label (label_print_count) whether or not the printer printed it; it never changes the sample (row_version stays), so nothing needs reloading before the next action.",
+      "Events: lab.result.pending_verification reaches every bench (lab.result.enter) when any technician submits a result: refresh the worklist. lab.result.published belongs to the verifiers and the doctor, not the bench.",
       "Exists for the service laboratory (work): show it as GET /establishment views.screens says for screen_id lab_bench (full; open_work: without its new work, with the banner \"No new ... from now on\"; records: history and corrections only; setup: only from Facility settings; hidden: in no menu), after login and again on establishment.changed. Never decide it from the profile's category."
     ],
     "demo_accounts": "demo_accounts() lists a login per role; sandbox_call runs each case on the DEV server"
@@ -3000,6 +3011,8 @@
       "Worklist: is_emergency first, due_at and is_overdue (red): the turnaround clock starts at the sample's receipt (MSDS AAC 4). is_send_out: the sample goes to a partner laboratory (screen lab_send_outs).",
       "Reject an unusable sample (POST /lab/samples/{id}/reject: Haemolysed, Clotted, InsufficientVolume, WrongContainer, Unlabelled, Mislabelled, Leaked, DelayedTransport, Contaminated, Other + note): the test goes back to collection with a new barcode and the doctor is told.",
       "Lab technicians never see prices or take cash; LAB_PAYMENT_REQUIRED means the patient must pay at the counter.",
+      "GET /lab/samples/{sample_id}/label is a print, never a preview: call it only when the user prints or reprints. Each call counts as one more label (label_print_count) whether or not the printer printed it; it never changes the sample (row_version stays), so nothing needs reloading before the next action.",
+      "Events: lab.result.pending_verification reaches every bench (lab.result.enter) when any technician submits a result: refresh the worklist. lab.result.published belongs to the verifiers and the doctor, not the bench.",
       "Exists for the service laboratory (work): show it as GET /establishment views.screens says for screen_id lab_bench (full; open_work: without its new work, with the banner \"No new ... from now on\"; records: history and corrections only; setup: only from Facility settings; hidden: in no menu), after login and again on establishment.changed. Never decide it from the profile's category."
     ],
     "updates_by_itself_on": [
@@ -3031,6 +3044,11 @@
         "code": "LAB_SAMPLE_STATE_INVALID",
         "message": "The sample cannot do that in its present state.",
         "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      },
+      {
+        "code": "NOT_FOUND",
+        "message": "The requested resource was not found.",
+        "ui_action": "Say 'not found'; refresh the list."
       },
       {
         "code": "PATIENT_IDENTITY_MISMATCH",
@@ -3106,6 +3124,34 @@
     ],
     "workspace_guide": "get_handbook_outline('lab_tech')"
   },
+  "workflows": [
+    {
+      "slug": "blood-transfusion",
+      "title": "Blood transfusion",
+      "recipe": "get_workflow_recipe('blood-transfusion')"
+    },
+    {
+      "slug": "diagnostic-services",
+      "title": "Diagnostic services quality (MSDS)",
+      "recipe": "get_workflow_recipe('diagnostic-services')"
+    },
+    {
+      "slug": "inpatient-and-discharge",
+      "title": "Admission, beds, nursing & discharge",
+      "recipe": "get_workflow_recipe('inpatient-and-discharge')"
+    },
+    {
+      "slug": "laboratory-and-radiology",
+      "title": "Laboratory & radiology",
+      "recipe": "get_workflow_recipe('laboratory-and-radiology')"
+    },
+    {
+      "slug": "medication-safety",
+      "title": "Medication safety (MSDS)",
+      "recipe": "get_workflow_recipe('medication-safety')"
+    }
+  ],
+  "scenarios": [],
   "decisions": [
     {
       "id": "H02",
@@ -3538,6 +3584,154 @@
       }
     }
   },
+  "unknowns": [
+    {
+      "what": "decision H02",
+      "owner": [
+        "vendor"
+      ],
+      "question": "Digits in the Urdu UI and printouts: Latin 0-9 or Extended Arabic-Indic ۰-۹.",
+      "affects": [
+        "every screen in Urdu"
+      ],
+      "meanwhile": "Latin digits; identifiers, doses and money stay left to right."
+    },
+    {
+      "what": "decision H03",
+      "owner": [
+        "vendor",
+        "clinical_lead"
+      ],
+      "question": "How dates and times are shown on screen, and a 12- or 24-hour clock.",
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "The server's print format (e.g. 27-Sep-2026) and the hospital time zone."
+    },
+    {
+      "what": "decision H04",
+      "owner": [
+        "vendor"
+      ],
+      "question": "Money on screen: decimals shown, and digit grouping (1,234,567 or 12,34,567).",
+      "affects": [
+        "every screen with money"
+      ],
+      "meanwhile": "The amounts as the API sends them, with the currency setting."
+    },
+    {
+      "what": "decision H08",
+      "owner": [
+        "vendor",
+        "translator",
+        "clinical_lead"
+      ],
+      "question": "Who writes and signs off the Urdu text of the UI, above all clinical and consent wording.",
+      "affects": [
+        "every screen in Urdu"
+      ],
+      "meanwhile": "Urdu you add is a draft: mark it so (the interview bank's pattern: a draft until a native speaker reviews it)."
+    },
+    {
+      "what": "decision H09",
+      "owner": [
+        "vendor",
+        "frontend_lead"
+      ],
+      "question": "One design system shared by every frontend team (who authors and approves it), or each team's own.",
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "Each team designs within the backend's constraints: themes Light and DarkHighContrast, zoom 100-250 %, Noto Nastaliq Urdu, status shown as text and icon, never colour alone. Follow the vendor's design principles (frontend guide 18, get_design_principles)."
+    },
+    {
+      "what": "decision H10",
+      "owner": [
+        "clinical_lead",
+        "vendor"
+      ],
+      "question": "How each realtime event is shown (interrupt, attention, inform, silent), alert sounds and which terminals play them. Only Code Red (interrupt), the licence and maintenance banners and the logout on session.revoked are prescribed (the event catalogue's `presentation`).",
+      "affects": [
+        "every screen with realtime events"
+      ],
+      "meanwhile": "Code Red interrupts; every other event updates the screen and, at most, a dismissible notice. `priority` is the delivery urgency, not a presentation rule."
+    },
+    {
+      "what": "decision H12",
+      "owner": [
+        "vendor",
+        "backend"
+      ],
+      "question": "Which workspaces run on web, Android and iOS, which cannot read a MAC address, discover the server by UDP or print silently; or are cash and printing Windows-only.",
+      "affects": [
+        "my_cash_shift",
+        "registration",
+        "every screen that prints"
+      ],
+      "meanwhile": "The guides describe the Windows (Electron) terminal; tell your developer when a screen needs a capability your platform lacks."
+    },
+    {
+      "what": "decision H18",
+      "owner": [
+        "vendor",
+        "frontend_lead"
+      ],
+      "question": "Noto Nastaliq Urdu everywhere, or the more compact Naskh in dense tables.",
+      "affects": [
+        "every table in Urdu"
+      ],
+      "meanwhile": "Noto Nastaliq Urdu, as the guides require."
+    },
+    {
+      "what": "decision H19",
+      "owner": [
+        "clinical_lead",
+        "backend"
+      ],
+      "question": "Allergies: the patient record keeps free text, so it cannot tell \"no known allergies\" (asserted by a clinician) from \"not recorded\". Should it?",
+      "affects": [
+        "every screen with a patient banner"
+      ],
+      "meanwhile": "Show the recorded text as recorded; an empty value is \"not recorded\", never \"none\"."
+    },
+    {
+      "what": "decision H20",
+      "owner": [
+        "vendor",
+        "hospital"
+      ],
+      "question": "May unsaved form input be kept on the terminal (which fields, encrypted, for how long)?",
+      "affects": [
+        "every form"
+      ],
+      "meanwhile": "In memory only; never a second checker's password."
+    },
+    {
+      "what": "decision H22",
+      "owner": [
+        "hospital",
+        "vendor"
+      ],
+      "question": "Which documents may print on an unregistered terminal's default printer (sensitive A4 documents).",
+      "affects": [
+        "every screen that prints"
+      ],
+      "meanwhile": "As the printing guide says: the hint, then the default printer."
+    },
+    {
+      "what": "decision H24",
+      "owner": [
+        "vendor",
+        "clinical_lead"
+      ],
+      "question": "Who approves frontend performance targets, alert thresholds and escalation timers.",
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "The server's own settings (e.g. critical_result_communicate_minutes)."
+    }
+  ],
+  "omitted_sections": [],
   "schemas": {
     "AuthorStampOut": {
       "properties": {
@@ -4672,7 +4866,8 @@
         },
         "label_print_count": {
           "type": "integer",
-          "title": "Label Print Count"
+          "title": "Label Print Count",
+          "description": "Labels printed for this sample: at its collection and by each GET /lab/samples/{sample_id}/label since (a call counts whether or not the printer printed); printing never changes row_version"
         },
         "row_version": {
           "type": "integer",

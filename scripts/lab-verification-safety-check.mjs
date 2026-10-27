@@ -47,7 +47,7 @@ try{
  const cbc=results.find(x=>x.code==='CBC'),rbs=results.find(x=>x.code==='RBS');
  const row=code=>p.locator('.queue-section tbody tr').filter({hasText:code});
  await row('CBC').getByRole('button',{name:'Verify',exact:true}).click();
- let modal=p.getByRole('dialog');await expect(modal).toContainText('Entry time is not a due time');
+ let modal=p.getByRole('dialog');await expect(modal).toContainText('Server deadline');
  // A concurrent actual decision removes only our owned CBC result.
  await fixture(v,'concurrent-reject',`/lab/results/${cbc.result_id}/verify`,{decision:'Rejected',note:j.run+' independent concurrent test decision, no actual specimen'});
  const before=(await posts(v,`/lab/results/${cbc.result_id}/verify`)).length;
@@ -65,14 +65,16 @@ try{
  await modal.getByRole('button',{name:'Close',exact:true}).last().click();
  await row('RBS').getByRole('button',{name:'Verify',exact:true}).click();modal=p.getByRole('dialog');
  await expect(modal).toContainText('Server deadline');
- const delay=modal.getByLabel('Turnaround Delay Reason (optional, MSDS AAC 4)',{exact:true});await delay.fill(j.run+' optional software reason');
- await help(v,delay,'Verification queue');
+ const pending=await v.native('api',{method:'GET',path:'/lab/verification-queue'});
+ const ownRow=pending.find(x=>x.result_id===rbs.result_id);assert(ownRow?.requisition_id===j.order.requisition.requisition_id);
+ const delay=modal.getByLabel('Turnaround Delay Reason (optional, MSDS AAC 4)',{exact:true});
+ if(ownRow.is_overdue){await delay.fill(j.run+' optional software reason');await help(v,delay,'Verification queue');}else await expect(delay).toHaveCount(0);
  const path=`/lab/results/${rbs.result_id}/verify`;
  j.writes.publish={path,result_id:rbs.result_id,state:'awaiting-ui'};save();
  const count=(await posts(v,path)).length;
  await v.fault({failPath:'/api/v1'+path,failMethod:'POST',once:true});
  await modal.getByRole('button',{name:'Confirm & publish',exact:true}).evaluate(b=>{b.click();b.click();});
- await expect(modal).toContainText('The result is unknown');
+ await expect(modal).toContainText('Answer lost.');
  const sent=(await posts(v,path)).slice(count);assert.equal(sent.length,1);assert.equal(sent[0].status,200);assert.equal(sent[0].result.data.status,'Published');
  j.writes.publish={...sent[0],state:'confirmed-server-reply-lost'};save();
  await expect(modal.getByRole('button',{name:'Confirm & publish',exact:true})).toBeDisabled();
@@ -82,7 +84,7 @@ try{
  await expect(modal.getByRole('button',{name:'Retry original request',exact:true})).toHaveCount(0);
  await modal.getByRole('button',{name:'Read current result',exact:true}).click();
  await expect(modal).toContainText('Published');
- await modal.getByRole('button',{name:'Result reviewed; return to draft',exact:true}).click();await expect(modal).toHaveCount(0);
+ await modal.getByRole('button',{name:'Decision reviewed; return to queue',exact:true}).click();await expect(modal).toHaveCount(0);
  assert.equal((await posts(v,path)).length,count+1);
  j.writes.publish.state='confirmed-and-reconciled-no-replay';save();
  pass('Lost publication reply/double-click produces one decision; original dialog/Escape/navigation locked; exact requisition state read and deliberate release without replay');

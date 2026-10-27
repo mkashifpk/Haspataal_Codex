@@ -3,11 +3,23 @@ import assert from "node:assert/strict";
 import {
   sortVerificationQueue,
   canVerifyResult,
-  isResultOverdue,
   validateVerification,
   verificationWritable,
   verificationSnapshot,
+  verificationRecovery,
 } from "../src/lab-verification-policy.ts";
+
+test('lost decisions use frozen order/patient/result/item IDs, never queue absence or names',()=>{
+ const item={requisition_id:20,patient_id:30,result_id:40,lab_requisition_item_id:50};
+ const result={result_id:40,lab_requisition_item_id:50,status:'Published',verified_stamp:{user_id:22}};
+ const order={requisition_id:20,patient_id:30,results:[result]};
+ assert.equal(verificationRecovery(item,order).decided,true);
+ assert.equal(verificationRecovery(item,{...order,results:[{...result,status:'Rejected'}]}).decided,true);
+ assert.equal(verificationRecovery(item,{...order,results:[{...result,status:'PendingVerification'}]}).pending,true);
+ for(const changed of [{...order,requisition_id:21},{...order,patient_id:31},{...order,results:[]},{...order,results:[{...result,result_id:41}]},{...order,results:[{...result,lab_requisition_item_id:51}]}]){
+   const r=verificationRecovery(item,changed);assert.equal(r.result,undefined);assert.equal(r.decided,false);assert.equal(r.pending,false);
+ }
+});
 
 test("sortVerificationQueue prioritizes critical values first, then STAT, then FIFO by entered_at", () => {
   const items = [
@@ -46,14 +58,6 @@ test("canVerifyResult enforces separation of duties (LAB_VERIFIER_MUST_DIFFER)",
   // Duplicate/changed display names never establish identity.
   assert.equal(canVerifyResult(technician, {entered_by:22, entered_by_name:"Lab Tech Zain"}).allowed,true);
   assert.equal(canVerifyResult(technician, {entered_by_name:" lab tech zain "}).allowed,true);
-});
-
-test("isResultOverdue correctly identifies results past due time", () => {
-  const now = "2026-10-26T12:00:00Z";
-  assert.equal(isResultOverdue("2026-10-26T11:59:00Z", now), true);
-  assert.equal(isResultOverdue("2026-10-26T12:01:00Z", now), false);
-  assert.equal(isResultOverdue(null, now), false);
-  assert.equal(isResultOverdue(undefined, now), false);
 });
 
 test("validateVerification enforces mandatory note on rejection and bounds", () => {
@@ -129,5 +133,5 @@ test("verificationWritable governs permissions and service lifecycle views", () 
 test("verification review binds exact patient/result/measurements and refuses concurrent changed context",()=>{
  const a={result_id:1,lab_requisition_item_id:9,mrn:"DEMO-1",patient_name:"Synthetic",code:"RBS",test_name:"RBS",metrics_jsonb:{glucose:100},flags_jsonb:{glucose:"N"},has_critical_value:false,interpretation:null,entered_at:"2026-10-26T10:00:00Z",entered_by_name:"Staff",is_correction:false,priority:"Routine"};
  assert.equal(verificationSnapshot(a),verificationSnapshot(structuredClone(a)));
- for(const change of [{result_id:2},{mrn:"DEMO-2"},{metrics_jsonb:{glucose:900}},{flags_jsonb:{glucose:"CH"}},{is_correction:true}])assert.notEqual(verificationSnapshot(a),verificationSnapshot({...a,...change}));
+ for(const change of [{requisition_id:90},{requisition_number:"LR-OTHER"},{patient_id:91},{barcode:"OTHER"},{entered_by:92},{due_at:"2026-11-01T00:00:00Z"},{is_overdue:true},{result_id:2},{mrn:"DEMO-2"},{metrics_jsonb:{glucose:900}},{flags_jsonb:{glucose:"CH"}},{is_correction:true}])assert.notEqual(verificationSnapshot(a),verificationSnapshot({...a,...change}));
 });

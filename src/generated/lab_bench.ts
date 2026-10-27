@@ -99,6 +99,7 @@ export interface LabSampleOut {
   rejection_reason: string | null;
   rejected_by: number | null;
   rejected_at: string | null;
+  /** Labels printed for this sample: at its collection and by each GET /lab/samples/{sample_id}/label since (a call counts whether or not the printer printed); printing never changes row_version */
   label_print_count: number;
   row_version: number;
 }

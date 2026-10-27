@@ -13,11 +13,23 @@ export interface VerificationItemOut {
   has_critical_value: boolean;
   interpretation: string | null;
   entered_at: string;
+  /** The user who entered the result: compare it with the signed-in user's user_id (never the names); the same person may not verify it (LAB_VERIFIER_MUST_DIFFER) */
+  entered_by: number;
   entered_by_name: string;
   is_correction: boolean;
+  /** Its requisition: GET /lab/requisitions/{requisition_id} has the whole order, and after a lost verify answer tells whether this result was published or rejected */
+  requisition_id: number;
+  requisition_number: string;
+  patient_id: number;
   patient_name: string;
   mrn: string;
   priority: "Routine" | "Urgent" | "STAT";
+  /** The sample's barcode */
+  barcode: string | null;
+  /** When the test was due: the turnaround clock from the sample's receipt (MSDS AAC 4); null when the sample has no receipt or collection time */
+  due_at: string | null;
+  /** due_at has passed (the server's clock): ask for the optional delay_reason before verifying. Never true for a correction (is_correction) */
+  is_overdue: boolean;
 }
 
 export interface VerifyIn {

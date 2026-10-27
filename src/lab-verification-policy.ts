@@ -1,4 +1,11 @@
-import type { VerificationItemOut, VerifyIn } from "./generated/lab_verification";
+import type { LabRequisitionDetailOut, VerificationItemOut, VerifyIn } from "./generated/lab_verification";
+
+export function verificationRecovery(item: VerificationItemOut | null, order?: LabRequisitionDetailOut) {
+  const result = item && order?.requisition_id === item.requisition_id && order.patient_id === item.patient_id
+    ? order.results.find(r => r.result_id === item.result_id && r.lab_requisition_item_id === item.lab_requisition_item_id) : undefined;
+  return {result, decided: result?.status === "Published" || result?.status === "Rejected",
+    pending: result?.status === "PendingVerification"};
+}
 
 export function sortVerificationQueue<
   T extends { has_critical_value?: boolean; priority?: string; entered_at?: string }
@@ -31,8 +38,8 @@ export function canVerifyResult(
   item: { entered_by_name?: string; entered_by?: number }
 ): { allowed: boolean; reason?: string } {
   if (!user) return { allowed: false, reason: "Login required" };
-  // Display names are neither unique nor stable. When the queue lacks a stable
-  // author ID the server remains authoritative for LAB_VERIFIER_MUST_DIFFER.
+  // Display names are neither unique nor stable. Compare the queue author ID;
+  // the server remains authoritative for LAB_VERIFIER_MUST_DIFFER.
   const actor = user.user_id ?? user.id;
   if (actor != null && item.entered_by != null && actor === item.entered_by) {
     return {
@@ -41,13 +48,6 @@ export function canVerifyResult(
     };
   }
   return { allowed: true };
-}
-
-export function isResultOverdue(dueAt?: string | null, now: Date | string = new Date()): boolean {
-  if (!dueAt) return false;
-  const due = new Date(dueAt).getTime();
-  const current = typeof now === "string" ? new Date(now).getTime() : now.getTime();
-  return !isNaN(due) && current > due;
 }
 
 export function validateVerification(
@@ -129,5 +129,6 @@ export function verificationSnapshot(item: VerificationItemOut): string {
   return JSON.stringify([item.result_id, item.lab_requisition_item_id, item.mrn,
     item.patient_name, item.code, item.test_name, item.metrics_jsonb, item.flags_jsonb,
     item.interpretation, item.entered_at, item.entered_by_name, item.priority,
-    item.has_critical_value, item.is_correction]);
+    item.has_critical_value, item.is_correction, item.requisition_id, item.requisition_number,
+    item.patient_id, item.barcode, item.entered_by, item.due_at, item.is_overdue]);
 }

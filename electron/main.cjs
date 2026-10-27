@@ -220,6 +220,9 @@ function apiPath(p) {
     throw new Error("Invalid API path");
   return p.startsWith("/health") ? p : "/api/v1" + p;
 }
+function isCountedLabLabel(method, path) {
+  return method === "GET" && /^\/lab\/samples\/[1-9]\d*\/label(?:\?|$)/.test(path);
+}
 async function raw(method, p, body, workspace, key, binary = false) {
   if (!server?.current) throw new Error("Connect to the hospital server first");
   const originalServer = server;
@@ -256,7 +259,7 @@ async function raw(method, p, body, workspace, key, binary = false) {
       scheduleRecovery();
       throw e;
     }
-    if (method === "GET") {
+    if (method === "GET" && !isCountedLabLabel(method, p)) {
       try {
         return await send();
       } catch (readError) {
@@ -384,7 +387,7 @@ async function api(method, p, body, workspace, key, retried = false) {
           "The account session changed while reading this result. Reload the current view.",
       },
     };
-  if (!retried && r.status === 401 && r.body?.error?.code === "TOKEN_EXPIRED") {
+  if (!retried && !isCountedLabLabel(method, p) && r.status === 401 && r.body?.error?.code === "TOKEN_EXPIRED") {
     await refresh();
     return api(method, p, body, workspace, key, true);
   }
@@ -962,11 +965,13 @@ ipcMain.handle("terminal", async (event, action, args = {}) => {
       const actor=auth?.user.user_id;
       const payload=await api('GET',`/lab/samples/${args.sampleId}/label`,undefined,windows.get(win.id));if(!payload.ok)return payload;
       require('./lab-label-safety.cjs').assertLabLabel(payload.data,args.sampleId);
-      const terminal=await api('GET','/terminals/whoami');if(!terminal.ok)return terminal;
+      try {
+      const terminal=await api('GET','/terminals/whoami');if(!terminal.ok)return {ok:true,data:{label:payload.data,printError:terminal.error?.message || 'Cannot read the terminal printer mapping'}};
       if(!actor||actor!==auth?.user.user_id)throw new Error('The session changed before label printing');
       const printed=await require('./opd-print.cjs').printSlip(payload.data,terminal.data,{owner:win,pdf:!!args.pdf});
-      if(printed.bytes){const target=await dialog.showSaveDialog(win,{defaultPath:`Lab-sample-${args.sampleId}.pdf`,filters:[{name:'PDF',extensions:['pdf']}]});if(!target.canceled)fs.writeFileSync(target.filePath,printed.bytes);return {ok:true,data:{saved:!target.canceled}};}
-      return {ok:true,data:printed};
+      if(printed.bytes){const target=await dialog.showSaveDialog(win,{defaultPath:`Lab-sample-${args.sampleId}.pdf`,filters:[{name:'PDF',extensions:['pdf']}]});if(!target.canceled)fs.writeFileSync(target.filePath,printed.bytes);return {ok:true,data:{saved:!target.canceled,label:payload.data}};}
+      return {ok:true,data:{...printed,label:payload.data}};
+      } catch (error) { return {ok:true,data:{label:payload.data,printError:error.message}}; }
     }
     if (action === "print-pharmacy") {
       if (!Number.isSafeInteger(args.dispensationId) || args.dispensationId <= 0) throw new Error("Invalid dispensation");
@@ -1040,8 +1045,8 @@ ipcMain.handle("terminal", async (event, action, args = {}) => {
       const terminal=await api('GET','/terminals/whoami');if(!terminal.ok)return terminal;
       if(actor!==auth?.user.user_id)throw new Error('Session changed before manifest printing');
       const printed=await require('./sendout-print.cjs').printSendOut(payload.data,terminal.data,{owner:win,pdf:!!args.pdf,language:prefs.language});
-      if(printed.bytes){const target=await dialog.showSaveDialog(win,{defaultPath:'Manifest-'+f.manifest_number+'.pdf',filters:[{name:'PDF',extensions:['pdf']}]});if(!target.canceled)fs.writeFileSync(target.filePath,printed.bytes);return{ok:true,data:{saved:!target.canceled}};}
-      return {ok:true,data:printed};
+      if(printed.bytes){const target=await dialog.showSaveDialog(win,{defaultPath:'Manifest-'+f.manifest_number+'.pdf',filters:[{name:'PDF',extensions:['pdf']}]});if(!target.canceled)fs.writeFileSync(target.filePath,printed.bytes);return{ok:true,data:{saved:!target.canceled,label:payload.data}};}
+      return {ok:true,data:{...printed,label:payload.data}};
     }
     if (action === "print-diagnostic") {
       if (!Number.isSafeInteger(args.id) || args.id<=0 || !["lab","imaging"].includes(args.kind)) throw new Error("Invalid diagnostic report");

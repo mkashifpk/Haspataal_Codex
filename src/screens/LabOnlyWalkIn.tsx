@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { api, call } from "../bridge";
+import { walkinPublicationMatches } from "../lab-event-policy";
 import {
   Details,
   Empty,
@@ -207,13 +208,27 @@ export function LabOnlyWalkIn({
       patientMatches &&
       !!req &&
       labInvoiceCollectible(bill, req.invoice?.invoice_id || 0, req.patient_id);
+  const displayed = useRef({ patientId, reqId });
+  displayed.current = { patientId, reqId };
   useEffect(
     () =>
       window.terminal.subscribe((e) => {
+        // Reception publication payload is only an identity-scoped refresh hint.
+        if (e.type === "event" && e.event_type === "lab.result.published") {
+          const shown = displayed.current;
+          if (walkinPublicationMatches(shown, e.payload || {}) && Number.isSafeInteger(e.payload?.requisition_id) && e.payload.requisition_id > 0) {
+            // Even a same-patient doctor's order must not change this Reception view.
+            void api<lab.LabRequisitionDetailOut>("GET", `/lab/requisitions/${e.payload.requisition_id}`).then(order => {
+              const current = displayed.current;
+              if (current.patientId === shown.patientId && current.reqId === shown.reqId &&
+                  order.is_lab_only_walkin && walkinPublicationMatches(shown, order)) setRevision(n => n + 1);
+            }).catch(setError);
+          }
+          return;
+        }
         if (
           e.type === "event" &&
           [
-            "lab.result.published",
             "patient.merged",
             "death.recorded",
             "patient.death.recorded",

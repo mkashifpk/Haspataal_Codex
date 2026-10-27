@@ -1,0 +1,2751 @@
+{
+  "server": "2026-10-27T06:11:24.313207+00:00",
+  "contract": "8ad8456c41b87dd0031e",
+  "issues": [
+    27,
+    28,
+    29
+  ],
+  "endpoints": [
+    {
+      "method": "GET",
+      "path": "/api/v1/lab/samples/{sample_id}/label",
+      "summary": "Re-print a sample barcode label",
+      "tags": [
+        "Laboratory"
+      ],
+      "permissions": [
+        "lab.sample.collect"
+      ],
+      "permissions_mode": "all",
+      "idempotency_key": false,
+      "description": "Call it only to print (a printer jam, a smudged label), never for a preview: every call is one more label\nprinted, whether or not the printer printed it. It counts in the sample's `label_print_count` (`GET /lab/scan`;\nthe collection printed the first) and is recorded in the PHI access log, as the label carries the patient's name\nand MRN. It never changes the sample: `row_version` stays, so nothing needs reloading before the next action.\n`NOT_FOUND`.\n\n**Required permission:** `lab.sample.collect`\n\n**Required permission:** `lab.sample.collect`",
+      "roles_allowed": [
+        "head_nurse",
+        "lab_technician",
+        "triage_nurse",
+        "ward_nurse"
+      ],
+      "parameters": [
+        {
+          "name": "sample_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Sample Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "request_content_type": null,
+      "response_schema": {
+        "title": "Envelope[PrintOut[LabLabelFieldsOut]]",
+        "properties": {
+          "data": {
+            "title": "PrintOut[LabLabelFieldsOut]",
+            "properties": {
+              "document_type": {
+                "type": "string",
+                "enum": [
+                  "autopsy_order",
+                  "bed_labels",
+                  "blood_component_label",
+                  "blood_donation_labels",
+                  "clinical_note",
+                  "complaint_letter",
+                  "complaints_notice",
+                  "consent_form",
+                  "cost_estimate",
+                  "cssd_labels",
+                  "death_certificate",
+                  "discharge_summary",
+                  "dispensing_label",
+                  "dose_label",
+                  "id_card",
+                  "imaging_report",
+                  "lab_label",
+                  "lab_report",
+                  "mlc_intimation",
+                  "opd_slip",
+                  "pharmacy_receipt",
+                  "prescription",
+                  "referral_slip",
+                  "send_out_manifest",
+                  "surgical_record",
+                  "triage_algorithm",
+                  "wristband"
+                ],
+                "title": "Document Type"
+              },
+              "printer_role": {
+                "type": "string",
+                "enum": [
+                  "receipt",
+                  "label",
+                  "document",
+                  "card"
+                ],
+                "title": "Printer Role",
+                "description": "Which printer of the terminal to use (GET /api/v1/terminals/whoami)"
+              },
+              "paper_width_mm": {
+                "type": "integer",
+                "title": "Paper Width Mm"
+              },
+              "fields": {
+                "$ref": "#/components/schemas/LabLabelFieldsOut",
+                "description": "The document's data, for frontends that render their own layout"
+              },
+              "text": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Text",
+                "description": "Pre-formatted monospace text (48 columns) for ESC/POS printers, as is"
+              },
+              "barcode_svg": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Barcode Svg"
+              },
+              "qr_svg": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Qr Svg"
+              },
+              "pdf_url": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Pdf Url"
+              }
+            },
+            "type": "object",
+            "required": [
+              "document_type",
+              "printer_role",
+              "paper_width_mm",
+              "fields",
+              "text",
+              "barcode_svg",
+              "qr_svg",
+              "pdf_url"
+            ]
+          },
+          "meta": {
+            "title": "Meta",
+            "properties": {
+              "server_time": {
+                "type": "string",
+                "title": "Server Time",
+                "description": "Server clock (UTC). Use it to detect terminal clock skew."
+              },
+              "page": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Page"
+              },
+              "page_size": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Page Size"
+              },
+              "total_count": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Total Count"
+              },
+              "next_cursor": {
+                "title": "Next Cursor"
+              }
+            },
+            "type": "object",
+            "required": [
+              "server_time"
+            ]
+          },
+          "request_id": {
+            "type": "string",
+            "title": "Request Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data",
+          "meta",
+          "request_id"
+        ]
+      },
+      "recorded_example": {
+        "request": {
+          "path": "/api/v1/lab/samples/1/label"
+        },
+        "response": {
+          "status": 200,
+          "body": {
+            "data": {
+              "document_type": "lab_label",
+              "printer_role": "label",
+              "paper_width_mm": 50,
+              "fields": {
+                "sample_id": 1,
+                "barcode": "LB-2026-0000001",
+                "sample_type": "Blood",
+                "collected_at": "2026-09-27T17:39:01.803133+00:00",
+                "code": "CBC",
+                "test_name": "Complete Blood Count",
+                "full_name": "Ali Khan",
+                "mrn": "MRN-2026-000001",
+                "gender": "male",
+                "age_years": 40,
+                "priority": "STAT"
+              },
+              "text": "Ali Khan\nMRN-2026-000001 male 40y\nCBC Blood STAT\n",
+              "barcode_svg": "<svg version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" width=\"56.920mm\" height=\"14.411mm\">\r\n    <!--Autogenerated with python-barcode 0.16.1-->\r\n    <g id=\"barcode_group\">\r\n        <rect width=\"100%\" height=\"100%\" style=\"fill:white\"/>\r\n        <rect x=\"2.000mm\" y=\"1.000mm\" width=\"0.560mm\" height=\"8.000mm\" style=\"fill:black;\"/>\r\n        <rect x=\"2.840mm\" y=\"1.000mm\" width=\"0.280mm\" height=\"8.000mm\" …",
+              "qr_svg": null,
+              "pdf_url": null
+            },
+            "meta": {
+              "server_time": "2026-09-27T17:39:01.825131+00:00"
+            },
+            "request_id": "539b5928b34e45ea93c20fbd3b023562"
+          }
+        }
+      },
+      "errors": [
+        {
+          "code": "NOT_FOUND",
+          "http_status": 404,
+          "message": "The requested resource was not found.",
+          "retryable": false,
+          "category": "request",
+          "ui_action": "Say 'not found'; refresh the list."
+        }
+      ],
+      "errors_seen_in_tests": [],
+      "used_by_screens": [
+        "lab_bench"
+      ],
+      "used_by_workflows": [
+        "laboratory-and-radiology"
+      ],
+      "typescript_example": "// Re-print a sample barcode label  (permissions: lab.sample.collect)\nexport const label = (sample_id) =>\n  api(\"GET\", `/lab/samples/${sample_id}/label`, undefined);   // api(): see get_guide('envelope-and-errors')",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "lab.sample.collect"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of lab.sample.collect",
+        "roles_allowed": [
+          "head_nurse",
+          "lab_technician",
+          "triage_nurse",
+          "ward_nurse"
+        ]
+      },
+      "write_semantics": null,
+      "emits_events": [],
+      "list": {
+        "returns": "object",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      },
+      "cross_field_rules": {},
+      "errors_detail": [
+        {
+          "code": "NOT_FOUND",
+          "http_status": 404,
+          "message": "The requested resource was not found.",
+          "retryable": false,
+          "ui_action": "Say 'not found'; refresh the list.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "resource"
+          ],
+          "details_from": "PUT /api/v1/admin/printers/{printer_id}"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/lab/scan/{barcode}",
+      "summary": "Scanner lookup → metric grid with this patient's reference ranges",
+      "tags": [
+        "Laboratory"
+      ],
+      "permissions": [
+        "lab.sample.receive",
+        "lab.result.enter"
+      ],
+      "permissions_mode": "any",
+      "idempotency_key": false,
+      "description": "A USB scanner 'types' the barcode followed by Enter. Render `metric_grid` as the input form:\ncompare each value with `reference_range` / `critical` live (red = out of range).\n\n**Required permission:** `lab.sample.receive OR lab.result.enter`\n\n**Required permission:** `lab.sample.receive OR lab.result.enter`",
+      "roles_allowed": [
+        "lab_technician"
+      ],
+      "parameters": [
+        {
+          "name": "barcode",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "string",
+            "title": "Barcode"
+          }
+        }
+      ],
+      "request_body": null,
+      "request_content_type": null,
+      "response_schema": {
+        "title": "Envelope[LabScanOut]",
+        "properties": {
+          "data": {
+            "title": "LabScanOut",
+            "properties": {
+              "sample": {
+                "$ref": "#/components/schemas/LabSampleOut"
+              },
+              "item": {
+                "$ref": "#/components/schemas/ScanItemOut"
+              },
+              "metric_grid": {
+                "items": {
+                  "$ref": "#/components/schemas/MetricGridOut"
+                },
+                "type": "array",
+                "title": "Metric Grid"
+              },
+              "patient": {
+                "$ref": "#/components/schemas/ScanPatientOut"
+              },
+              "requisition": {
+                "$ref": "#/components/schemas/ScanRequisitionOut"
+              },
+              "previous_results": {
+                "items": {
+                  "$ref": "#/components/schemas/RequisitionResultOut"
+                },
+                "type": "array",
+                "title": "Previous Results"
+              }
+            },
+            "type": "object",
+            "required": [
+              "sample",
+              "item",
+              "metric_grid",
+              "patient",
+              "requisition",
+              "previous_results"
+            ],
+            "description": "What the result entry screen needs after scanning a sample barcode."
+          },
+          "meta": {
+            "title": "Meta",
+            "properties": {
+              "server_time": {
+                "type": "string",
+                "title": "Server Time",
+                "description": "Server clock (UTC). Use it to detect terminal clock skew."
+              },
+              "page": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Page"
+              },
+              "page_size": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Page Size"
+              },
+              "total_count": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Total Count"
+              },
+              "next_cursor": {
+                "title": "Next Cursor"
+              }
+            },
+            "type": "object",
+            "required": [
+              "server_time"
+            ]
+          },
+          "request_id": {
+            "type": "string",
+            "title": "Request Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data",
+          "meta",
+          "request_id"
+        ]
+      },
+      "recorded_example": {
+        "request": {
+          "path": "/api/v1/lab/scan/LB-2026-0000001"
+        },
+        "response": {
+          "status": 200,
+          "body": {
+            "data": {
+              "sample": {
+                "sample_id": 1,
+                "requisition_id": 1,
+                "lab_requisition_item_id": 1,
+                "barcode": "LB-2026-0000001",
+                "sample_type": "Blood",
+                "status": "Collected",
+                "collected_by": 7,
+                "collected_at": "2026-09-30T20:10:45.832633+00:00",
+                "identity_check": "TwoIdentifiers",
+                "identity_note": null,
+                "received_by": null,
+                "received_at": null,
+                "send_out_id": null,
+                "rejection_code": null,
+                "rejection_reason": null,
+                "rejected_by": null,
+                "rejected_at": null,
+                "label_print_count": 2,
+                "row_version": 4
+              },
+              "item": {
+                "lab_requisition_item_id": 1,
+                "requisition_id": 1,
+                "test_id": 1,
+                "price_at_order": 800,
+                "status": "SampleCollected",
+                "rerun_of_item_id": null,
+                "rerun_reason": null,
+                "is_billable": true,
+                "created_at": "2026-09-30T20:10:45.772565+00:00",
+                "delay_reason": null,
+                "overdue_alerted_at": null,
+                "row_version": 2,
+                "code": "CBC",
+                "test_name": "Complete Blood Count",
+                "sample_type": "Blood"
+              },
+              "metric_grid": [
+                {
+                  "key": "hb",
+                  "ref": {
+                    "male": [
+                      13.5,
+                      17.5
+                    ],
+                    "female": [
+                      12,
+                      15.5
+                    ],
+                    "default": [
+                      12,
+                      17.5
+                    ]
+                  },
+                  "type": "number",
+                  "unit": "g/dL",
+                  "label": "Hemoglobin",
+                  "critical": {
+                    "low": 7,
+                    "high": 20
+                  },
+                  "required": true,
+                  "reference_range": [
+                    13.5,
+                    17.5
+                  ]
+                },
+                {
+                  "key": "wbc",
+                  "ref": {
+                    "default": [
+                      4,
+                      11
+                    ]
+                  },
+                  "type": "number",
+                  "unit": "10^9/L",
+                  "label": "WBC",
+                  "required": true,
+                  "reference_range": [
+                    4,
+                    11
+                  ],
+                  "critical": null
+                },
+                {
+                  "key": "comment",
+                  "type": "text",
+                  "label": "Comment",
+                  "required": false,
+                  "reference_range": null,
+                  "critical": null
+                }
+              ],
+              "patient": {
+                "patient_id": 1,
+                "patient_name": "Ali Khan",
+                "mrn": "MRN-2026-000001",
+                "gender": "male",
+                "age_years": 40
+              },
+              "requisition": {
+                "requisition_id": 1,
+                "requisition_number": "LR-2026-000001",
+                "priority": "STAT",
+                "clinical_notes": null
+              },
+              "previous_results": []
+            },
+            "meta": {
+              "server_time": "2026-09-30T20:10:45.869017+00:00"
+            },
+            "request_id": "b8e63c0a30ef431f94e8f8c86e3f7cc7"
+          }
+        }
+      },
+      "errors": [],
+      "errors_seen_in_tests": [],
+      "used_by_screens": [
+        "lab_bench"
+      ],
+      "used_by_workflows": [
+        "laboratory-and-radiology"
+      ],
+      "typescript_example": "// Scanner lookup → metric grid with this patient's reference ranges  (permissions: lab.sample.receive, lab.result.enter)\nexport const scanLab = (barcode) =>\n  api(\"GET\", `/lab/scan/${barcode}`, undefined);   // api(): see get_guide('envelope-and-errors')",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "lab.sample.receive",
+          "lab.result.enter"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of lab.sample.receive or lab.result.enter",
+        "roles_allowed": [
+          "lab_technician"
+        ]
+      },
+      "write_semantics": null,
+      "emits_events": [],
+      "list": {
+        "returns": "object",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      },
+      "cross_field_rules": {},
+      "errors_detail": []
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/lab/samples/{sample_id}/collect",
+      "summary": "Collect a sample → returns the barcode label print payload",
+      "tags": [
+        "Laboratory"
+      ],
+      "permissions": [
+        "lab.sample.collect"
+      ],
+      "permissions_mode": "all",
+      "idempotency_key": false,
+      "description": "OPD / walk-in samples require the lab bill to be paid first (`LAB_PAYMENT_REQUIRED`) unless the\nhospital disabled `lab_require_payment_before_sample`. IPD and Emergency are exempt.\n\nThe patient is identified as the sample is taken (MSDS AAC 3): scan the wristband (`wristband_code`;\n`PATIENT_IDENTITY_MISMATCH` when it is another patient's), or ask two identifiers (`identity_check`\nTwoIdentifiers: the name and the date of birth or MRN), or for an emergency patient who cannot be identified yet\n`EmergencyOverride` with a note. Nothing given: `PATIENT_IDENTITY_REQUIRED`. Label the tube at the patient's side.\nThe sample cannot do that in its present state: `LAB_SAMPLE_STATE_INVALID`.\n\n**Required permission:** `lab.sample.collect`\n\n**Required permission:** `lab.sample.collect`",
+      "roles_allowed": [
+        "head_nurse",
+        "lab_technician",
+        "triage_nurse",
+        "ward_nurse"
+      ],
+      "parameters": [
+        {
+          "name": "sample_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Sample Id"
+          }
+        }
+      ],
+      "request_body": {
+        "title": "IdentityIn",
+        "properties": {
+          "wristband_code": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 80
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Wristband Code",
+            "description": "What the scanner read from the wristband (the MRN, or HMS:PT:<mrn>)"
+          },
+          "identity_check": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "WristbandScan",
+                  "TwoIdentifiers",
+                  "EmergencyOverride"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Identity Check",
+            "description": "Without a scan: TwoIdentifiers (name and date of birth or MRN asked), or EmergencyOverride (an emergency patient who cannot be identified yet; identity_note required)"
+          },
+          "identity_note": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 300
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Identity Note"
+          }
+        },
+        "type": "object",
+        "description": "How the patient is identified before a sample is taken or an examination starts (MSDS AAC 3, 10, 30)."
+      },
+      "request_content_type": "application/json",
+      "response_schema": {
+        "title": "Envelope[PrintOut[LabLabelFieldsOut]]",
+        "properties": {
+          "data": {
+            "title": "PrintOut[LabLabelFieldsOut]",
+            "properties": {
+              "document_type": {
+                "type": "string",
+                "enum": [
+                  "autopsy_order",
+                  "bed_labels",
+                  "blood_component_label",
+                  "blood_donation_labels",
+                  "clinical_note",
+                  "complaint_letter",
+                  "complaints_notice",
+                  "consent_form",
+                  "cost_estimate",
+                  "cssd_labels",
+                  "death_certificate",
+                  "discharge_summary",
+                  "dispensing_label",
+                  "dose_label",
+                  "id_card",
+                  "imaging_report",
+                  "lab_label",
+                  "lab_report",
+                  "mlc_intimation",
+                  "opd_slip",
+                  "pharmacy_receipt",
+                  "prescription",
+                  "referral_slip",
+                  "send_out_manifest",
+                  "surgical_record",
+                  "triage_algorithm",
+                  "wristband"
+                ],
+                "title": "Document Type"
+              },
+              "printer_role": {
+                "type": "string",
+                "enum": [
+                  "receipt",
+                  "label",
+                  "document",
+                  "card"
+                ],
+                "title": "Printer Role",
+                "description": "Which printer of the terminal to use (GET /api/v1/terminals/whoami)"
+              },
+              "paper_width_mm": {
+                "type": "integer",
+                "title": "Paper Width Mm"
+              },
+              "fields": {
+                "$ref": "#/components/schemas/LabLabelFieldsOut",
+                "description": "The document's data, for frontends that render their own layout"
+              },
+              "text": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Text",
+                "description": "Pre-formatted monospace text (48 columns) for ESC/POS printers, as is"
+              },
+              "barcode_svg": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Barcode Svg"
+              },
+              "qr_svg": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Qr Svg"
+              },
+              "pdf_url": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Pdf Url"
+              }
+            },
+            "type": "object",
+            "required": [
+              "document_type",
+              "printer_role",
+              "paper_width_mm",
+              "fields",
+              "text",
+              "barcode_svg",
+              "qr_svg",
+              "pdf_url"
+            ]
+          },
+          "meta": {
+            "title": "Meta",
+            "properties": {
+              "server_time": {
+                "type": "string",
+                "title": "Server Time",
+                "description": "Server clock (UTC). Use it to detect terminal clock skew."
+              },
+              "page": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Page"
+              },
+              "page_size": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Page Size"
+              },
+              "total_count": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Total Count"
+              },
+              "next_cursor": {
+                "title": "Next Cursor"
+              }
+            },
+            "type": "object",
+            "required": [
+              "server_time"
+            ]
+          },
+          "request_id": {
+            "type": "string",
+            "title": "Request Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data",
+          "meta",
+          "request_id"
+        ]
+      },
+      "recorded_example": {
+        "request": {
+          "path": "/api/v1/lab/samples/1/collect"
+        },
+        "response": {
+          "status": 200,
+          "body": {
+            "data": {
+              "document_type": "lab_label",
+              "printer_role": "label",
+              "paper_width_mm": 50,
+              "fields": {
+                "sample_id": 1,
+                "barcode": "LB-2026-0000001",
+                "sample_type": "Blood",
+                "collected_at": "2026-09-27T17:39:01.803133+00:00",
+                "code": "CBC",
+                "test_name": "Complete Blood Count",
+                "full_name": "Ali Khan",
+                "mrn": "MRN-2026-000001",
+                "gender": "male",
+                "age_years": 40,
+                "priority": "STAT"
+              },
+              "text": "Ali Khan\nMRN-2026-000001 male 40y\nCBC Blood STAT\n",
+              "barcode_svg": "<svg version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" width=\"56.920mm\" height=\"14.411mm\">\r\n    <!--Autogenerated with python-barcode 0.16.1-->\r\n    <g id=\"barcode_group\">\r\n        <rect width=\"100%\" height=\"100%\" style=\"fill:white\"/>\r\n        <rect x=\"2.000mm\" y=\"1.000mm\" width=\"0.560mm\" height=\"8.000mm\" style=\"fill:black;\"/>\r\n        <rect x=\"2.840mm\" y=\"1.000mm\" width=\"0.280mm\" height=\"8.000mm\" …",
+              "qr_svg": null,
+              "pdf_url": null
+            },
+            "meta": {
+              "server_time": "2026-09-27T17:39:01.817211+00:00"
+            },
+            "request_id": "8558460d3bba42b185510852718487da"
+          }
+        },
+        "errors_seen": [
+          "LAB_PAYMENT_REQUIRED",
+          "PATIENT_IDENTITY_MISMATCH",
+          "PATIENT_IDENTITY_REQUIRED"
+        ],
+        "events_emitted": []
+      },
+      "errors": [
+        {
+          "code": "LAB_PAYMENT_REQUIRED",
+          "http_status": 409,
+          "message": "The lab bill must be paid before sample collection.",
+          "retryable": false,
+          "category": "business",
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+        },
+        {
+          "code": "LAB_SAMPLE_STATE_INVALID",
+          "http_status": 409,
+          "message": "The sample cannot do that in its present state.",
+          "retryable": false,
+          "category": "business",
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+        },
+        {
+          "code": "PATIENT_IDENTITY_MISMATCH",
+          "http_status": 409,
+          "message": "The wristband scanned is not this patient's: stop and check who the patient is.",
+          "retryable": false,
+          "category": "business",
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+        },
+        {
+          "code": "PATIENT_IDENTITY_REQUIRED",
+          "http_status": 422,
+          "message": "Identify the patient first: scan the wristband, or confirm two identifiers (name and MRN or date of birth).",
+          "retryable": false,
+          "category": "business",
+          "ui_action": "Show field errors from details.fields / the message."
+        }
+      ],
+      "errors_seen_in_tests": [
+        "LAB_PAYMENT_REQUIRED",
+        "PATIENT_IDENTITY_MISMATCH",
+        "PATIENT_IDENTITY_REQUIRED"
+      ],
+      "used_by_screens": [
+        "lab_bench"
+      ],
+      "used_by_workflows": [
+        "diagnostic-services",
+        "inpatient-and-discharge",
+        "laboratory-and-radiology"
+      ],
+      "typescript_example": "// Collect a sample → returns the barcode label print payload  (permissions: lab.sample.collect)\nexport const collectLabSamples = (sample_id, body) =>\n  api(\"POST\", `/lab/samples/${sample_id}/collect`, body);   // api(): see get_guide('envelope-and-errors')",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "lab.sample.collect"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of lab.sample.collect",
+        "roles_allowed": [
+          "head_nurse",
+          "lab_technician",
+          "triage_nurse",
+          "ward_nurse"
+        ]
+      },
+      "write_semantics": {
+        "protection": "state_guard",
+        "on_lost_answer": "A repeat is refused with LAB_SAMPLE_STATE_INVALID: the sample is collected already. The first call may have succeeded; this error does not replay its result. Never retry automatically; re-read the record, then offer the action again only if it is still needed.",
+        "reconcile_with": null,
+        "refused_with": "LAB_SAMPLE_STATE_INVALID",
+        "emits_events": [],
+        "prints": true,
+        "related_state_machine": null
+      },
+      "emits_events": [],
+      "list": null,
+      "cross_field_rules": {},
+      "errors_detail": [
+        {
+          "code": "LAB_PAYMENT_REQUIRED",
+          "http_status": 409,
+          "message": "The lab bill must be paid before sample collection.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "POST /api/v1/lab/samples/{sample_id}/collect"
+        },
+        {
+          "code": "LAB_SAMPLE_STATE_INVALID",
+          "http_status": 409,
+          "message": "The sample cannot do that in its present state.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "POST /api/v1/lab/samples/{sample_id}/reject"
+        },
+        {
+          "code": "PATIENT_IDENTITY_MISMATCH",
+          "http_status": 409,
+          "message": "The wristband scanned is not this patient's: stop and check who the patient is.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "POST /api/v1/mar/{mar_id}/chart"
+        },
+        {
+          "code": "PATIENT_IDENTITY_REQUIRED",
+          "http_status": 422,
+          "message": "Identify the patient first: scan the wristband, or confirm two identifiers (name and MRN or date of birth).",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "POST /api/v1/mar/{mar_id}/chart"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/lab/samples/{sample_id}/receive",
+      "summary": "Mark the sample received in the lab (item → Processing)",
+      "tags": [
+        "Laboratory"
+      ],
+      "permissions": [
+        "lab.sample.receive"
+      ],
+      "permissions_mode": "all",
+      "idempotency_key": false,
+      "description": "Starts the turnaround clock (MSDS AAC 4: `due_at` of the worklist). A sample still Pending is taken at the lab\ncounter now: identify the patient as for collection (the body; `PATIENT_IDENTITY_REQUIRED` without it).\nThe sample cannot do that in its present state: `LAB_SAMPLE_STATE_INVALID`.\n\n**Required permission:** `lab.sample.receive`\n\n**Required permission:** `lab.sample.receive`",
+      "roles_allowed": [
+        "lab_technician"
+      ],
+      "parameters": [
+        {
+          "name": "sample_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Sample Id"
+          }
+        }
+      ],
+      "request_body": {
+        "anyOf": [
+          {
+            "title": "IdentityIn",
+            "properties": {
+              "wristband_code": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "maxLength": 80
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Wristband Code",
+                "description": "What the scanner read from the wristband (the MRN, or HMS:PT:<mrn>)"
+              },
+              "identity_check": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "WristbandScan",
+                      "TwoIdentifiers",
+                      "EmergencyOverride"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Identity Check",
+                "description": "Without a scan: TwoIdentifiers (name and date of birth or MRN asked), or EmergencyOverride (an emergency patient who cannot be identified yet; identity_note required)"
+              },
+              "identity_note": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "maxLength": 300
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Identity Note"
+              }
+            },
+            "type": "object",
+            "description": "How the patient is identified before a sample is taken or an examination starts (MSDS AAC 3, 10, 30)."
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "title": "Body"
+      },
+      "request_content_type": "application/json",
+      "response_schema": {
+        "title": "Envelope[LabSampleOut]",
+        "properties": {
+          "data": {
+            "title": "LabSampleOut",
+            "properties": {
+              "sample_id": {
+                "type": "integer",
+                "title": "Sample Id"
+              },
+              "requisition_id": {
+                "type": "integer",
+                "title": "Requisition Id"
+              },
+              "lab_requisition_item_id": {
+                "type": "integer",
+                "title": "Lab Requisition Item Id"
+              },
+              "barcode": {
+                "type": "string",
+                "title": "Barcode"
+              },
+              "sample_type": {
+                "type": "string",
+                "title": "Sample Type"
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "Pending",
+                  "Collected",
+                  "Received",
+                  "Dispatched",
+                  "Rejected",
+                  "Consumed"
+                ],
+                "title": "Status"
+              },
+              "collected_by": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Collected By"
+              },
+              "collected_at": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Collected At"
+              },
+              "received_by": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Received By"
+              },
+              "received_at": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Received At"
+              },
+              "identity_check": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "WristbandScan",
+                      "TwoIdentifiers",
+                      "EmergencyOverride",
+                      "SameSpecimen"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Identity Check",
+                "description": "How the patient was identified when the sample was taken"
+              },
+              "identity_note": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Identity Note"
+              },
+              "send_out_id": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Send Out Id"
+              },
+              "rejection_code": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "Haemolysed",
+                      "Clotted",
+                      "InsufficientVolume",
+                      "WrongContainer",
+                      "Unlabelled",
+                      "Mislabelled",
+                      "Leaked",
+                      "DelayedTransport",
+                      "Contaminated",
+                      "RejectedByPartner",
+                      "OrderCancelled",
+                      "Other"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Rejection Code"
+              },
+              "rejection_reason": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Rejection Reason"
+              },
+              "rejected_by": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Rejected By"
+              },
+              "rejected_at": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Rejected At"
+              },
+              "label_print_count": {
+                "type": "integer",
+                "title": "Label Print Count",
+                "description": "Labels printed for this sample: at its collection and by each GET /lab/samples/{sample_id}/label since (a call counts whether or not the printer printed); printing never changes row_version"
+              },
+              "row_version": {
+                "type": "integer",
+                "title": "Row Version"
+              }
+            },
+            "type": "object",
+            "required": [
+              "sample_id",
+              "requisition_id",
+              "lab_requisition_item_id",
+              "barcode",
+              "sample_type",
+              "status",
+              "collected_by",
+              "collected_at",
+              "received_by",
+              "received_at",
+              "identity_check",
+              "identity_note",
+              "send_out_id",
+              "rejection_code",
+              "rejection_reason",
+              "rejected_by",
+              "rejected_at",
+              "label_print_count",
+              "row_version"
+            ]
+          },
+          "meta": {
+            "title": "Meta",
+            "properties": {
+              "server_time": {
+                "type": "string",
+                "title": "Server Time",
+                "description": "Server clock (UTC). Use it to detect terminal clock skew."
+              },
+              "page": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Page"
+              },
+              "page_size": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Page Size"
+              },
+              "total_count": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Total Count"
+              },
+              "next_cursor": {
+                "title": "Next Cursor"
+              }
+            },
+            "type": "object",
+            "required": [
+              "server_time"
+            ]
+          },
+          "request_id": {
+            "type": "string",
+            "title": "Request Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data",
+          "meta",
+          "request_id"
+        ]
+      },
+      "recorded_example": {
+        "request": {
+          "path": "/api/v1/lab/samples/1/receive"
+        },
+        "response": {
+          "status": 200,
+          "body": {
+            "data": {
+              "sample_id": 1,
+              "requisition_id": 1,
+              "lab_requisition_item_id": 1,
+              "barcode": "LB-2026-0000001",
+              "sample_type": "Blood",
+              "status": "Received",
+              "collected_by": 7,
+              "collected_at": "2026-09-30T20:02:52.454010+00:00",
+              "identity_check": "WristbandScan",
+              "identity_note": null,
+              "received_by": 7,
+              "received_at": "2026-09-30T20:02:52.566618+00:00",
+              "send_out_id": null,
+              "rejection_code": null,
+              "rejection_reason": null,
+              "rejected_by": null,
+              "rejected_at": null,
+              "label_print_count": 1,
+              "row_version": 4
+            },
+            "meta": {
+              "server_time": "2026-09-30T20:02:52.572378+00:00"
+            },
+            "request_id": "5f777501bb0c4d54b30217685f096cfb"
+          }
+        },
+        "events_emitted": []
+      },
+      "errors": [
+        {
+          "code": "LAB_SAMPLE_STATE_INVALID",
+          "http_status": 409,
+          "message": "The sample cannot do that in its present state.",
+          "retryable": false,
+          "category": "business",
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+        },
+        {
+          "code": "PATIENT_IDENTITY_REQUIRED",
+          "http_status": 422,
+          "message": "Identify the patient first: scan the wristband, or confirm two identifiers (name and MRN or date of birth).",
+          "retryable": false,
+          "category": "business",
+          "ui_action": "Show field errors from details.fields / the message."
+        }
+      ],
+      "errors_seen_in_tests": [],
+      "used_by_screens": [
+        "lab_bench"
+      ],
+      "used_by_workflows": [
+        "diagnostic-services",
+        "laboratory-and-radiology"
+      ],
+      "typescript_example": "// Mark the sample received in the lab (item → Processing)  (permissions: lab.sample.receive)\nexport const receiveLabSamples = (sample_id, body) =>\n  api(\"POST\", `/lab/samples/${sample_id}/receive`, body);   // api(): see get_guide('envelope-and-errors')",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "lab.sample.receive"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of lab.sample.receive",
+        "roles_allowed": [
+          "lab_technician"
+        ]
+      },
+      "write_semantics": {
+        "protection": "state_guard",
+        "on_lost_answer": "A repeat is refused with LAB_SAMPLE_STATE_INVALID: the sample is received already. The first call may have succeeded; this error does not replay its result. Never retry automatically; re-read the record, then offer the action again only if it is still needed.",
+        "reconcile_with": null,
+        "refused_with": "LAB_SAMPLE_STATE_INVALID",
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      },
+      "emits_events": [],
+      "list": null,
+      "cross_field_rules": {},
+      "errors_detail": [
+        {
+          "code": "LAB_SAMPLE_STATE_INVALID",
+          "http_status": 409,
+          "message": "The sample cannot do that in its present state.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "POST /api/v1/lab/samples/{sample_id}/reject"
+        },
+        {
+          "code": "PATIENT_IDENTITY_REQUIRED",
+          "http_status": 422,
+          "message": "Identify the patient first: scan the wristband, or confirm two identifiers (name and MRN or date of birth).",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "POST /api/v1/mar/{mar_id}/chart"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/lab/verification-queue",
+      "summary": "Results awaiting verification (critical & STAT first)",
+      "tags": [
+        "Laboratory"
+      ],
+      "permissions": [
+        "lab.result.verify"
+      ],
+      "permissions_mode": "all",
+      "idempotency_key": false,
+      "description": "Each row carries its context, so the screen needs no other read and never matches names: `requisition_id` and\n`requisition_number`, `patient_id`, the sample's `barcode`, `entered_by` (the user who entered it: compare with the\nsigned-in user's id, `LAB_VERIFIER_MUST_DIFFER`), and `due_at` with `is_overdue` (ask for the optional\n`delay_reason` before verifying, MSDS AAC 4). A row leaves the queue once decided: its absence never says whether\nthe result was published or rejected (read its requisition instead).\n\n**Required permission:** `lab.result.verify`\n\n**Required permission:** `lab.result.verify`",
+      "roles_allowed": [
+        "lab_verifier"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "request_content_type": null,
+      "response_schema": {
+        "title": "Envelope[list[VerificationItemOut]]",
+        "properties": {
+          "data": {
+            "items": {
+              "title": "VerificationItemOut",
+              "properties": {
+                "result_id": {
+                  "type": "integer",
+                  "title": "Result Id"
+                },
+                "lab_requisition_item_id": {
+                  "type": "integer",
+                  "title": "Lab Requisition Item Id"
+                },
+                "code": {
+                  "type": "string",
+                  "title": "Code"
+                },
+                "test_name": {
+                  "type": "string",
+                  "title": "Test Name"
+                },
+                "metrics_jsonb": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Metrics Jsonb"
+                },
+                "flags_jsonb": {
+                  "additionalProperties": {
+                    "type": "string",
+                    "enum": [
+                      "N",
+                      "L",
+                      "H",
+                      "CL",
+                      "CH",
+                      "C"
+                    ]
+                  },
+                  "type": "object",
+                  "title": "Flags Jsonb"
+                },
+                "has_critical_value": {
+                  "type": "boolean",
+                  "title": "Has Critical Value"
+                },
+                "interpretation": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Interpretation"
+                },
+                "entered_at": {
+                  "type": "string",
+                  "format": "date-time",
+                  "title": "Entered At"
+                },
+                "entered_by": {
+                  "type": "integer",
+                  "title": "Entered By",
+                  "description": "The user who entered the result: compare it with the signed-in user's user_id (never the names); the same person may not verify it (LAB_VERIFIER_MUST_DIFFER)"
+                },
+                "entered_by_name": {
+                  "type": "string",
+                  "title": "Entered By Name"
+                },
+                "is_correction": {
+                  "type": "boolean",
+                  "title": "Is Correction"
+                },
+                "requisition_id": {
+                  "type": "integer",
+                  "title": "Requisition Id",
+                  "description": "Its requisition: GET /lab/requisitions/{requisition_id} has the whole order, and after a lost verify answer tells whether this result was published or rejected"
+                },
+                "requisition_number": {
+                  "type": "string",
+                  "title": "Requisition Number"
+                },
+                "patient_id": {
+                  "type": "integer",
+                  "title": "Patient Id"
+                },
+                "patient_name": {
+                  "type": "string",
+                  "title": "Patient Name"
+                },
+                "mrn": {
+                  "type": "string",
+                  "title": "Mrn"
+                },
+                "priority": {
+                  "type": "string",
+                  "enum": [
+                    "Routine",
+                    "Urgent",
+                    "STAT"
+                  ],
+                  "title": "Priority"
+                },
+                "barcode": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Barcode",
+                  "description": "The sample's barcode"
+                },
+                "due_at": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Due At",
+                  "description": "When the test was due: the turnaround clock from the sample's receipt (MSDS AAC 4); null when the sample has no receipt or collection time"
+                },
+                "is_overdue": {
+                  "type": "boolean",
+                  "title": "Is Overdue",
+                  "description": "due_at has passed (the server's clock): ask for the optional delay_reason before verifying. Never true for a correction (is_correction)"
+                }
+              },
+              "type": "object",
+              "required": [
+                "result_id",
+                "lab_requisition_item_id",
+                "code",
+                "test_name",
+                "metrics_jsonb",
+                "flags_jsonb",
+                "has_critical_value",
+                "interpretation",
+                "entered_at",
+                "entered_by",
+                "entered_by_name",
+                "is_correction",
+                "requisition_id",
+                "requisition_number",
+                "patient_id",
+                "patient_name",
+                "mrn",
+                "priority",
+                "barcode",
+                "due_at",
+                "is_overdue"
+              ],
+              "description": "A result waiting for the verifier (critical values first, then STAT)."
+            },
+            "type": "array",
+            "title": "Data"
+          },
+          "meta": {
+            "title": "Meta",
+            "properties": {
+              "server_time": {
+                "type": "string",
+                "title": "Server Time",
+                "description": "Server clock (UTC). Use it to detect terminal clock skew."
+              },
+              "page": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Page"
+              },
+              "page_size": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Page Size"
+              },
+              "total_count": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Total Count"
+              },
+              "next_cursor": {
+                "title": "Next Cursor"
+              }
+            },
+            "type": "object",
+            "required": [
+              "server_time"
+            ]
+          },
+          "request_id": {
+            "type": "string",
+            "title": "Request Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data",
+          "meta",
+          "request_id"
+        ]
+      },
+      "recorded_example": {
+        "request": {
+          "path": "/api/v1/lab/verification-queue"
+        },
+        "response": {
+          "status": 200,
+          "body": {
+            "data": [
+              {
+                "result_id": 1,
+                "lab_requisition_item_id": 1,
+                "code": "CBC",
+                "test_name": "Complete Blood Count",
+                "metrics_jsonb": {
+                  "hb": 6.5,
+                  "wbc": 12.2
+                },
+                "flags_jsonb": {
+                  "hb": "CL",
+                  "wbc": "H"
+                },
+                "has_critical_value": true,
+                "interpretation": "Severe anemia",
+                "entered_at": "2026-10-26T15:20:13.948146+00:00",
+                "entered_by": 7,
+                "entered_by_name": "uc1d45b0c0f",
+                "is_correction": false,
+                "requisition_id": 1,
+                "requisition_number": "LR-2026-000001",
+                "patient_id": 1,
+                "patient_name": "Ali Khan",
+                "mrn": "MRN-2026-000001",
+                "priority": "STAT",
+                "barcode": "LB-2026-0000001",
+                "due_at": "2026-10-26T16:20:13.841004+00:00",
+                "is_overdue": false
+              }
+            ],
+            "meta": {
+              "server_time": "2026-10-26T15:20:14.035581+00:00"
+            },
+            "request_id": "b1f82cfeaa60455f92ab7e870a422bf2"
+          }
+        }
+      },
+      "errors": [
+        {
+          "code": "LAB_VERIFIER_MUST_DIFFER",
+          "http_status": 403,
+          "message": "The technician who entered a result cannot verify it.",
+          "retryable": false,
+          "category": "business",
+          "ui_action": "Explain and hide the action (check x-permissions)."
+        }
+      ],
+      "errors_seen_in_tests": [],
+      "used_by_screens": [
+        "lab_verification"
+      ],
+      "used_by_workflows": [
+        "laboratory-and-radiology"
+      ],
+      "typescript_example": "// Results awaiting verification (critical & STAT first)  (permissions: lab.result.verify)\nexport const verificationQueue = () =>\n  api(\"GET\", `/lab/verification-queue`, undefined);   // api(): see get_guide('envelope-and-errors')",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "lab.result.verify"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of lab.result.verify",
+        "roles_allowed": [
+          "lab_verifier"
+        ]
+      },
+      "write_semantics": null,
+      "emits_events": [],
+      "list": {
+        "returns": "list",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      },
+      "cross_field_rules": {},
+      "errors_detail": [
+        {
+          "code": "LAB_VERIFIER_MUST_DIFFER",
+          "http_status": 403,
+          "message": "The technician who entered a result cannot verify it.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "POST /api/v1/lab/results/{result_id}/verify"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/lab/results/{result_id}/verify",
+      "summary": "Verify (publish + notify doctor) or reject back to the bench",
+      "tags": [
+        "Laboratory"
+      ],
+      "permissions": [
+        "lab.result.verify"
+      ],
+      "permissions_mode": "all",
+      "idempotency_key": false,
+      "description": "After a lost answer, never repeat the decision by itself: read `GET /lab/requisitions/{requisition_id}` (the\nqueue row's `requisition_id`) and find this `result_id` in its `results`. `Published` (with `verified_stamp`) or\n`Rejected`: decided; still `PendingVerification`: not decided, offer it again.\nVerified publishes the result: `lab.result.published` goes to the ordering doctor and the verifiers; a lab-only\nwalk-in has no ordering doctor, so it goes to the reception desk that registers walk-ins (the users holding both\n`patient.create` and `lab.requisition.create`), who hand its report over.\nThe technician who entered a result cannot verify it (`LAB_VERIFIER_MUST_DIFFER`). Verifying a critical result\n(`has_critical_value`) opens it in the critical results log (`GET /critical-results`): tell the doctor now and\nrecord it there (MSDS AAC 5). `delay_reason`: why a late result was late (MSDS AAC 4). A result already verified or\nrejected: `LAB_RESULT_STATE_INVALID`.\n\n**Required permission:** `lab.result.verify`\n\n**Required permission:** `lab.result.verify`",
+      "roles_allowed": [
+        "lab_verifier"
+      ],
+      "parameters": [
+        {
+          "name": "result_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Result Id"
+          }
+        }
+      ],
+      "request_body": {
+        "title": "VerifyIn",
+        "properties": {
+          "decision": {
+            "type": "string",
+            "enum": [
+              "Verified",
+              "Rejected"
+            ],
+            "title": "Decision"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 1000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note",
+            "description": "Mandatory when rejecting"
+          },
+          "delay_reason": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Delay Reason",
+            "description": "A result published after its due time (`due_at`): why it was late (the turnaround report, MSDS AAC 4)"
+          }
+        },
+        "type": "object",
+        "required": [
+          "decision"
+        ]
+      },
+      "request_content_type": "application/json",
+      "response_schema": {
+        "title": "Envelope[LabResultOut]",
+        "properties": {
+          "data": {
+            "title": "LabResultOut",
+            "properties": {
+              "result_id": {
+                "type": "integer",
+                "title": "Result Id"
+              },
+              "lab_requisition_item_id": {
+                "type": "integer",
+                "title": "Lab Requisition Item Id"
+              },
+              "sample_id": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Sample Id"
+              },
+              "metrics_jsonb": {
+                "additionalProperties": true,
+                "type": "object",
+                "title": "Metrics Jsonb"
+              },
+              "flags_jsonb": {
+                "additionalProperties": {
+                  "type": "string",
+                  "enum": [
+                    "N",
+                    "L",
+                    "H",
+                    "CL",
+                    "CH",
+                    "C"
+                  ]
+                },
+                "type": "object",
+                "title": "Flags Jsonb"
+              },
+              "has_critical_value": {
+                "type": "boolean",
+                "title": "Has Critical Value"
+              },
+              "interpretation": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Interpretation"
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "PendingVerification",
+                  "Published",
+                  "Rejected",
+                  "Superseded"
+                ],
+                "title": "Status"
+              },
+              "entered_by": {
+                "type": "integer",
+                "title": "Entered By"
+              },
+              "entered_at": {
+                "type": "string",
+                "format": "date-time",
+                "title": "Entered At"
+              },
+              "published_at": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Published At"
+              },
+              "provisionally_released_at": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Provisionally Released At",
+                "description": "Set when an unverified critical value was shown to the ordering doctor: show 'Pending verification'"
+              },
+              "is_correction": {
+                "type": "boolean",
+                "title": "Is Correction"
+              },
+              "corrects_result_id": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Corrects Result Id"
+              },
+              "correction_reason": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Correction Reason"
+              },
+              "partner_id": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Partner Id",
+                "description": "Sent out: the partner laboratory that performed it"
+              },
+              "partner_report_ref": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Partner Report Ref"
+              },
+              "partner_reported_at": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Partner Reported At"
+              },
+              "row_version": {
+                "type": "integer",
+                "title": "Row Version"
+              }
+            },
+            "type": "object",
+            "required": [
+              "result_id",
+              "lab_requisition_item_id",
+              "sample_id",
+              "metrics_jsonb",
+              "flags_jsonb",
+              "has_critical_value",
+              "interpretation",
+              "status",
+              "entered_by",
+              "entered_at",
+              "published_at",
+              "provisionally_released_at",
+              "is_correction",
+              "corrects_result_id",
+              "correction_reason",
+              "partner_id",
+              "partner_report_ref",
+              "partner_reported_at",
+              "row_version"
+            ]
+          },
+          "meta": {
+            "title": "Meta",
+            "properties": {
+              "server_time": {
+                "type": "string",
+                "title": "Server Time",
+                "description": "Server clock (UTC). Use it to detect terminal clock skew."
+              },
+              "page": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Page"
+              },
+              "page_size": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Page Size"
+              },
+              "total_count": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Total Count"
+              },
+              "next_cursor": {
+                "title": "Next Cursor"
+              }
+            },
+            "type": "object",
+            "required": [
+              "server_time"
+            ]
+          },
+          "request_id": {
+            "type": "string",
+            "title": "Request Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data",
+          "meta",
+          "request_id"
+        ]
+      },
+      "recorded_example": {
+        "request": {
+          "path": "/api/v1/lab/results/1/verify",
+          "body": {
+            "decision": "Verified"
+          }
+        },
+        "response": {
+          "status": 200,
+          "body": {
+            "data": {
+              "result_id": 1,
+              "lab_requisition_item_id": 1,
+              "sample_id": 1,
+              "metrics_jsonb": {
+                "hb": 11.2,
+                "wbc": 7.4,
+                "comment": "Mild anaemia"
+              },
+              "flags_jsonb": {
+                "hb": "L",
+                "wbc": "N"
+              },
+              "has_critical_value": false,
+              "interpretation": null,
+              "status": "Published",
+              "entered_by": 7,
+              "entered_at": "2026-10-16T09:29:48.110932+00:00",
+              "published_at": "2026-10-16T09:29:48.133822+00:00",
+              "provisionally_released_at": null,
+              "is_correction": false,
+              "corrects_result_id": null,
+              "correction_reason": null,
+              "partner_id": null,
+              "partner_report_ref": null,
+              "partner_reported_at": null,
+              "row_version": 2
+            },
+            "meta": {
+              "server_time": "2026-10-16T09:29:48.149800+00:00"
+            },
+            "request_id": "57bdfc6b731047ecb47c3992b4a0fda0"
+          }
+        },
+        "errors_seen": [
+          "FORBIDDEN",
+          "LAB_RESULT_STATE_INVALID",
+          "LAB_VERIFIER_MUST_DIFFER",
+          "VALIDATION_ERROR"
+        ],
+        "events_emitted": [
+          "critical_result.updated",
+          "lab.result.provisional_withdrawn",
+          "lab.result.published",
+          "notification.created"
+        ]
+      },
+      "errors": [
+        {
+          "code": "FORBIDDEN",
+          "http_status": 403,
+          "message": "You do not have permission to do this.",
+          "retryable": false,
+          "category": "auth",
+          "ui_action": "Explain and hide the action (check x-permissions)."
+        },
+        {
+          "code": "LAB_RESULT_STATE_INVALID",
+          "http_status": 409,
+          "message": "Invalid lab result state change.",
+          "retryable": false,
+          "category": "business",
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+        },
+        {
+          "code": "LAB_VERIFIER_MUST_DIFFER",
+          "http_status": 403,
+          "message": "The technician who entered a result cannot verify it.",
+          "retryable": false,
+          "category": "business",
+          "ui_action": "Explain and hide the action (check x-permissions)."
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "category": "request",
+          "ui_action": "Show field errors from details.fields / the message."
+        }
+      ],
+      "errors_seen_in_tests": [
+        "FORBIDDEN",
+        "LAB_RESULT_STATE_INVALID",
+        "LAB_VERIFIER_MUST_DIFFER",
+        "VALIDATION_ERROR"
+      ],
+      "used_by_screens": [
+        "lab_verification"
+      ],
+      "used_by_workflows": [
+        "diagnostic-services",
+        "laboratory-and-radiology"
+      ],
+      "typescript_example": "// Verify (publish + notify doctor) or reject back to the bench  (permissions: lab.result.verify)\nexport const verifyLabResults = (result_id, body) =>\n  api(\"POST\", `/lab/results/${result_id}/verify`, body);   // api(): see get_guide('envelope-and-errors')",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "lab.result.verify"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of lab.result.verify",
+        "roles_allowed": [
+          "lab_verifier"
+        ]
+      },
+      "write_semantics": {
+        "protection": "state_guard",
+        "on_lost_answer": "A repeat is refused with LAB_RESULT_STATE_INVALID: the result is decided already. The first call may have succeeded; this error does not replay its result. Never retry automatically; re-read the record, then offer the action again only if it is still needed.",
+        "reconcile_with": "GET /lab/requisitions/{requisition_id}",
+        "refused_with": "LAB_RESULT_STATE_INVALID",
+        "emits_events": [
+          "critical_result.updated",
+          "lab.result.provisional_withdrawn",
+          "lab.result.published",
+          "notification.created"
+        ],
+        "prints": false,
+        "related_state_machine": null
+      },
+      "emits_events": [
+        "critical_result.updated",
+        "lab.result.provisional_withdrawn",
+        "lab.result.published",
+        "notification.created"
+      ],
+      "list": null,
+      "cross_field_rules": {
+        "VerifyIn": [
+          "A note is required when rejecting a result"
+        ]
+      },
+      "errors_detail": [
+        {
+          "code": "FORBIDDEN",
+          "http_status": 403,
+          "message": "You do not have permission to do this.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "any_of",
+            "required"
+          ],
+          "details_from": "POST /api/v1/admin/departments"
+        },
+        {
+          "code": "LAB_RESULT_STATE_INVALID",
+          "http_status": 409,
+          "message": "Invalid lab result state change.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "POST /api/v1/lab/results/{result_id}/verify"
+        },
+        {
+          "code": "LAB_VERIFIER_MUST_DIFFER",
+          "http_status": 403,
+          "message": "The technician who entered a result cannot verify it.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "POST /api/v1/lab/results/{result_id}/verify"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ]
+    }
+  ],
+  "events": [
+    {
+      "event_type": "lab.result.published",
+      "description": "A verified result is now visible to the ordering doctor; for a lab-only walk-in (no ordering doctor) the reception desk may hand its report over.",
+      "audience": "ordering doctor + lab verifiers; a lab-only walk-in's: also the users holding both patient.create and lab.requisition.create (the desk that registers walk-ins)",
+      "payload_fields": {
+        "result_id": "int",
+        "requisition_id": "int",
+        "patient_id": "int",
+        "patient_name": "str",
+        "test_name": "str",
+        "has_critical_value": "bool"
+      },
+      "priority": "high",
+      "workflow": "§4.1 step 5 (after §4.5 verification)",
+      "presentation": null,
+      "subscribed_by_screens": [
+        "lab_only_walkin",
+        "consultation",
+        "lab_orders_results"
+      ],
+      "protocol": "WS /ws/v1/events: send {type:'auth', access_token, resume_from, topics}; get_guide('realtime')",
+      "emitted_by_operations": [
+        "POST /lab/results/{result_id}/verify"
+      ],
+      "emitted_in_code": [
+        "migrations:hms_lab_result_after"
+      ],
+      "rereads_by_id": [
+        "GET /lab/patients/{patient_id}/results",
+        "GET /lab/requisitions/{requisition_id}",
+        "GET /lab/requisitions/{requisition_id}/report/pdf",
+        "GET /lab/requisitions/{requisition_id}/report/print-payload",
+        "GET /patients/{patient_id}/clinical-encounters",
+        "GET /patients/{patient_id}/documents",
+        "GET /patients/{patient_id}/master-summary"
+      ],
+      "rereads_by_id_means": "the subscribing screens' reads of one record whose id the payload carries",
+      "note": "emitted_by_operations: seen in the tests; emitted_in_code: every place that emits it (worker jobs and database triggers included). Treat the payload as a hint and re-read what it names."
+    },
+    {
+      "event_type": "lab.result.pending_verification",
+      "description": "A technician submitted a result: the verifier queue, and every bench's worklist (the test left Processing).",
+      "audience": "permission lab.result.verify or lab.result.enter",
+      "payload_fields": {
+        "result_id": "int",
+        "requisition_id": "int",
+        "lab_requisition_item_id": "int",
+        "test_name": "str",
+        "has_critical_value": "bool"
+      },
+      "priority": "normal",
+      "workflow": "§4.5",
+      "presentation": null,
+      "subscribed_by_screens": [
+        "lab_bench",
+        "lab_verification"
+      ],
+      "protocol": "WS /ws/v1/events: send {type:'auth', access_token, resume_from, topics}; get_guide('realtime')",
+      "emitted_by_operations": [
+        "POST /lab/items/{item_id}/corrections",
+        "POST /lab/items/{item_id}/results"
+      ],
+      "emitted_in_code": [
+        "migrations:hms_lab_result_after"
+      ],
+      "rereads_by_id": [
+        "GET /lab/requisitions/{requisition_id}",
+        "GET /lab/requisitions/{requisition_id}/report/pdf",
+        "GET /lab/requisitions/{requisition_id}/report/print-payload"
+      ],
+      "rereads_by_id_means": "the subscribing screens' reads of one record whose id the payload carries",
+      "note": "emitted_by_operations: seen in the tests; emitted_in_code: every place that emits it (worker jobs and database triggers included). Treat the payload as a hint and re-read what it names."
+    }
+  ],
+  "test_plans": {
+    "lab_bench": {
+      "cases": [
+        {
+          "id": "case:GET /lab/worklist",
+          "call": "GET /api/v1/lab/worklist",
+          "errors": []
+        },
+        {
+          "id": "case:POST /lab/samples/{sample_id}/collect",
+          "call": "POST /api/v1/lab/samples/{sample_id}/collect",
+          "errors": [
+            "LAB_PAYMENT_REQUIRED",
+            "LAB_SAMPLE_STATE_INVALID",
+            "PATIENT_IDENTITY_MISMATCH",
+            "PATIENT_IDENTITY_REQUIRED"
+          ]
+        },
+        {
+          "id": "case:GET /lab/samples/{sample_id}/label",
+          "call": "GET /api/v1/lab/samples/{sample_id}/label",
+          "errors": [
+            "NOT_FOUND"
+          ]
+        },
+        {
+          "id": "case:GET /lab/scan/{barcode}",
+          "call": "GET /api/v1/lab/scan/{barcode}",
+          "errors": []
+        },
+        {
+          "id": "case:POST /lab/samples/{sample_id}/receive",
+          "call": "POST /api/v1/lab/samples/{sample_id}/receive",
+          "errors": [
+            "LAB_SAMPLE_STATE_INVALID",
+            "PATIENT_IDENTITY_REQUIRED"
+          ]
+        },
+        {
+          "id": "case:POST /lab/items/{item_id}/results",
+          "call": "POST /api/v1/lab/items/{item_id}/results",
+          "errors": [
+            "LAB_METRICS_INVALID",
+            "LAB_REAGENT_BOM_MISSING",
+            "VALIDATION_ERROR"
+          ]
+        },
+        {
+          "id": "case:POST /lab/items/{item_id}/rerun",
+          "call": "POST /api/v1/lab/items/{item_id}/rerun",
+          "errors": [
+            "LAB_ITEM_STATE_INVALID"
+          ]
+        },
+        {
+          "id": "case:POST /lab/items/{item_id}/corrections",
+          "call": "POST /api/v1/lab/items/{item_id}/corrections",
+          "errors": []
+        },
+        {
+          "id": "case:POST /lab/samples/{sample_id}/reject",
+          "call": "POST /api/v1/lab/samples/{sample_id}/reject",
+          "errors": [
+            "LAB_SAMPLE_STATE_INVALID",
+            "VALIDATION_ERROR"
+          ]
+        },
+        {
+          "id": "case:GET /wristbands/verify",
+          "call": "GET /api/v1/wristbands/verify",
+          "errors": []
+        }
+      ],
+      "service_cases": [
+        {
+          "view": "full",
+          "set_up": "GET /establishment answers views.screens[screen_id=lab_bench].view = full (laboratory): stub that answer, or have the DEV server's admin move the service on Facility settings",
+          "expect": "Show it; every action the user's permissions allow."
+        },
+        {
+          "view": "open_work",
+          "set_up": "GET /establishment answers views.screens[screen_id=lab_bench].view = open_work (laboratory): stub that answer, or have the DEV server's admin move the service on Facility settings",
+          "expect": "The service is Retiring: show it with the banner 'No new <new_work> from now on' and its open work; hide the actions that start new work of it (x-capability-gates; continues_while_retiring ones stay); keep every other action (completing, transferring, settling, correcting)."
+        },
+        {
+          "view": "records",
+          "set_up": "GET /establishment answers views.screens[screen_id=lab_bench].view = records (laboratory): stub that answer, or have the DEV server's admin move the service on Facility settings",
+          "expect": "The service is Retired (or Preparing after it ran): show it as records only, under a 'Records' marker: lists, details, prints and the corrections the server still accepts; no action that starts new work."
+        },
+        {
+          "view": "hidden",
+          "set_up": "GET /establishment answers views.screens[screen_id=lab_bench].view = hidden (laboratory): stub that answer, or have the DEV server's admin move the service on Facility settings",
+          "expect": "Not in any menu: the service has never run here, so the screen has nothing to show."
+        }
+      ],
+      "acceptance_rules": [
+        "Keep focus in a hidden scanner input; Enter triggers GET /lab/scan/{barcode}.",
+        "Collect: identify the patient first (body of POST /lab/samples/{id}/collect): scan the wristband (wristband_code; PATIENT_IDENTITY_MISMATCH = another patient's band: STOP), or ask two identifiers (identity_check TwoIdentifiers); an emergency patient who cannot be identified yet: EmergencyOverride with identity_note. Label the tube at the bedside (MSDS AAC 3).",
+        "Receiving a sample still Pending (taken at the lab counter now) needs the same identity body.",
+        "Flag values live (red/amber) against metric_grid[].reference_range and critical before submitting; a text metric with critical.values (e.g. Positive for a priority disease) is critical too (flag C).",
+        "Worklist: is_emergency first, due_at and is_overdue (red): the turnaround clock starts at the sample's receipt (MSDS AAC 4). is_send_out: the sample goes to a partner laboratory (screen lab_send_outs).",
+        "Reject an unusable sample (POST /lab/samples/{id}/reject: Haemolysed, Clotted, InsufficientVolume, WrongContainer, Unlabelled, Mislabelled, Leaked, DelayedTransport, Contaminated, Other + note): the test goes back to collection with a new barcode and the doctor is told.",
+        "Lab technicians never see prices or take cash; LAB_PAYMENT_REQUIRED means the patient must pay at the counter.",
+        "GET /lab/samples/{sample_id}/label is a print, never a preview: call it only when the user prints or reprints. Each call counts as one more label (label_print_count) whether or not the printer printed it; it never changes the sample (row_version stays), so nothing needs reloading before the next action.",
+        "Events: lab.result.pending_verification reaches every bench (lab.result.enter) when any technician submits a result: refresh the worklist. lab.result.published belongs to the verifiers and the doctor, not the bench.",
+        "Exists for the service laboratory (work): show it as GET /establishment views.screens says for screen_id lab_bench (full; open_work: without its new work, with the banner \"No new ... from now on\"; records: history and corrections only; setup: only from Facility settings; hidden: in no menu), after login and again on establishment.changed. Never decide it from the profile's category."
+      ],
+      "realtime": [
+        {
+          "event": "lab.result.pending_verification",
+          "check": "the screen refreshes without polling"
+        },
+        {
+          "event": "critical_result.updated",
+          "check": "the screen refreshes without polling"
+        }
+      ]
+    },
+    "lab_only_walkin": {
+      "cases": [
+        {
+          "id": "case:POST /patients/lab-only-walk-in",
+          "call": "POST /api/v1/patients/lab-only-walk-in",
+          "errors": [
+            "CAPABILITY_INACTIVE"
+          ]
+        },
+        {
+          "id": "case:GET /lab/tests",
+          "call": "GET /api/v1/lab/tests",
+          "errors": []
+        },
+        {
+          "id": "case:POST /finance/invoices/{invoice_id}/payments",
+          "call": "POST /api/v1/finance/invoices/{invoice_id}/payments",
+          "errors": [
+            "SHIFT_NOT_OPEN"
+          ]
+        },
+        {
+          "id": "case:GET /lab/requisitions",
+          "call": "GET /api/v1/lab/requisitions",
+          "errors": []
+        },
+        {
+          "id": "case:GET /lab/requisitions/{requisition_id}/report/print-payload",
+          "call": "GET /api/v1/lab/requisitions/{requisition_id}/report/print-payload",
+          "errors": [
+            "LAB_REPORT_NOT_READY"
+          ]
+        },
+        {
+          "id": "case:GET /lab/requisitions/{requisition_id}/report/pdf",
+          "call": "GET /api/v1/lab/requisitions/{requisition_id}/report/pdf",
+          "errors": []
+        }
+      ],
+      "service_cases": [
+        {
+          "view": "full",
+          "set_up": "GET /establishment answers views.screens[screen_id=lab_only_walkin].view = full (laboratory or outsourced_diagnostics): stub that answer, or have the DEV server's admin move the service on Facility settings",
+          "expect": "Show it; every action the user's permissions allow."
+        },
+        {
+          "view": "open_work",
+          "set_up": "GET /establishment answers views.screens[screen_id=lab_only_walkin].view = open_work (laboratory or outsourced_diagnostics): stub that answer, or have the DEV server's admin move the service on Facility settings",
+          "expect": "The service is Retiring: show it with the banner 'No new <new_work> from now on' and its open work; hide the actions that start new work of it (x-capability-gates; continues_while_retiring ones stay); keep every other action (completing, transferring, settling, correcting)."
+        },
+        {
+          "view": "records",
+          "set_up": "GET /establishment answers views.screens[screen_id=lab_only_walkin].view = records (laboratory or outsourced_diagnostics): stub that answer, or have the DEV server's admin move the service on Facility settings",
+          "expect": "The service is Retired (or Preparing after it ran): show it as records only, under a 'Records' marker: lists, details, prints and the corrections the server still accepts; no action that starts new work."
+        },
+        {
+          "view": "hidden",
+          "set_up": "GET /establishment answers views.screens[screen_id=lab_only_walkin].view = hidden (laboratory or outsourced_diagnostics): stub that answer, or have the DEV server's admin move the service on Facility settings",
+          "expect": "Not in any menu: the service has never run here, so the screen has nothing to show."
+        },
+        {
+          "call": "POST /api/v1/patients/lab-only-walk-in",
+          "set_up": "outsourced_diagnostics not Active in GET /establishment",
+          "expect": "the choice for a send-out test (availability SendOut) is hidden or disabled; the rest of the action stays"
+        },
+        {
+          "call": "POST /api/v1/patients/lab-only-walk-in",
+          "set_up": "laboratory not Active in GET /establishment",
+          "expect": "the choice for an in-house test (availability InHouse) is hidden or disabled; the rest of the action stays"
+        }
+      ],
+      "acceptance_rules": [
+        "Only full_name and mobile are required.",
+        "Collect the lab bill at reception/cashier; lab staff never take cash.",
+        "Report collection: find the patient's requisitions (GET /lab/requisitions?patient_id=…) and print the signed report (A4); LAB_REPORT_NOT_READY = nothing verified yet, complete false = some tests are still running.",
+        "lab.result.published reaches the walk-in desk (users holding patient.create and lab.requisition.create) for lab-only walk-ins only: when its patient_id or requisition_id is the one on screen, read GET /lab/requisitions?patient_id=… again and offer the report. It is a hint, never the result: the report is ready only when its print-payload read answers. Show no value from the event.",
+        "Exists for the service laboratory or outsourced_diagnostics (work): show it as GET /establishment views.screens says for screen_id lab_only_walkin (full; open_work: without its new work, with the banner \"No new ... from now on\"; records: history and corrections only; setup: only from Facility settings; hidden: in no menu), after login and again on establishment.changed. Never decide it from the profile's category.",
+        "POST /patients/lab-only-walk-in starts new outsourced_diagnostics work for a send-out test (availability SendOut): offer that choice only while outsourced_diagnostics is Active (GET /establishment active); the rest of the action stays.",
+        "POST /patients/lab-only-walk-in starts new laboratory work for an in-house test (availability InHouse): offer that choice only while laboratory is Active (GET /establishment active); the rest of the action stays."
+      ],
+      "realtime": [
+        {
+          "event": "lab.result.published",
+          "check": "the screen refreshes without polling"
+        }
+      ]
+    },
+    "lab_verification": {
+      "cases": [
+        {
+          "id": "case:GET /lab/verification-queue",
+          "call": "GET /api/v1/lab/verification-queue",
+          "errors": [
+            "LAB_VERIFIER_MUST_DIFFER"
+          ]
+        },
+        {
+          "id": "case:POST /lab/results/{result_id}/verify",
+          "call": "POST /api/v1/lab/results/{result_id}/verify",
+          "errors": [
+            "FORBIDDEN",
+            "LAB_RESULT_STATE_INVALID",
+            "LAB_VERIFIER_MUST_DIFFER",
+            "VALIDATION_ERROR"
+          ]
+        },
+        {
+          "id": "case:GET /lab/requisitions/{requisition_id}",
+          "call": "GET /api/v1/lab/requisitions/{requisition_id}",
+          "errors": []
+        },
+        {
+          "id": "case:GET /lab/requisitions/{requisition_id}/report/print-payload",
+          "call": "GET /api/v1/lab/requisitions/{requisition_id}/report/print-payload",
+          "errors": [
+            "LAB_REPORT_NOT_READY"
+          ]
+        },
+        {
+          "id": "case:GET /lab/requisitions/{requisition_id}/report/pdf",
+          "call": "GET /api/v1/lab/requisitions/{requisition_id}/report/pdf",
+          "errors": []
+        }
+      ],
+      "service_cases": [
+        {
+          "view": "full",
+          "set_up": "GET /establishment answers views.screens[screen_id=lab_verification].view = full (laboratory or blood_center): stub that answer, or have the DEV server's admin move the service on Facility settings",
+          "expect": "Show it; every action the user's permissions allow."
+        },
+        {
+          "view": "open_work",
+          "set_up": "GET /establishment answers views.screens[screen_id=lab_verification].view = open_work (laboratory or blood_center): stub that answer, or have the DEV server's admin move the service on Facility settings",
+          "expect": "The service is Retiring: show it with the banner 'No new <new_work> from now on' and its open work; hide the actions that start new work of it (x-capability-gates; continues_while_retiring ones stay); keep every other action (completing, transferring, settling, correcting)."
+        },
+        {
+          "view": "records",
+          "set_up": "GET /establishment answers views.screens[screen_id=lab_verification].view = records (laboratory or blood_center): stub that answer, or have the DEV server's admin move the service on Facility settings",
+          "expect": "The service is Retired (or Preparing after it ran): show it as records only, under a 'Records' marker: lists, details, prints and the corrections the server still accepts; no action that starts new work."
+        },
+        {
+          "view": "hidden",
+          "set_up": "GET /establishment answers views.screens[screen_id=lab_verification].view = hidden (laboratory or blood_center): stub that answer, or have the DEV server's admin move the service on Facility settings",
+          "expect": "Not in any menu: the service has never run here, so the screen has nothing to show."
+        }
+      ],
+      "acceptance_rules": [
+        "You cannot verify results you entered (LAB_VERIFIER_MUST_DIFFER).",
+        "Rejection requires a note.",
+        "Verify critical values first: after lab_critical_release_minutes the ordering doctor sees them marked Pending verification.",
+        "Verifying a critical result opens it in the critical results log: tell the doctor NOW and record it (screen critical_results_verifier).",
+        "A result past its due time: ask for delay_reason (optional) before verifying (MSDS AAC 4).",
+        "Verifying signs the result with your stamp (verified_stamp), printed on the lab report under the technician's (performed_stamp).",
+        "Each queue row carries its context: open its order with requisition_id (never by the patient's name), compare entered_by with the signed-in user's user_id to warn before LAB_VERIFIER_MUST_DIFFER, and ask for the delay reason when is_overdue (due_at, the server's clock); never derive a deadline from entered_at.",
+        "After a lost verify answer, never repeat it by itself: read GET /lab/requisitions/{requisition_id} and find the result_id. Published or Rejected: decided; PendingVerification: offer it again. A row gone from the queue says neither.",
+        "Exists for the service laboratory or blood_center (work): show it as GET /establishment views.screens says for screen_id lab_verification (full; open_work: without its new work, with the banner \"No new ... from now on\"; records: history and corrections only; setup: only from Facility settings; hidden: in no menu), after login and again on establishment.changed. Never decide it from the profile's category."
+      ],
+      "realtime": [
+        {
+          "event": "lab.result.pending_verification",
+          "check": "the screen refreshes without polling"
+        },
+        {
+          "event": "lab.result.critical_pending",
+          "check": "the screen refreshes without polling"
+        }
+      ]
+    }
+  }
+}

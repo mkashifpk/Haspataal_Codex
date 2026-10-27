@@ -79,12 +79,15 @@ export function LabBench({
     [error, setError] = useState<unknown>(),
     [notice, setNotice] = useState(""),
     [printing, setPrinting] = useState(false),
+    [labelPrintFailed, setLabelPrintFailed] = useState(false),
     [saved, setSaved] = useState<{ id: number; status: string }>(),
     [collectedLabel, setCollectedLabel] = useState<lab.PrintOut_LabLabelFieldsOut_>(),
     [replacement, setReplacement] = useState<
       { item: number; barcode: string | null }[]
     >([]);
   const capture = useRef<HTMLInputElement>(null);
+  const labelFlight = useRef(false);
+  const [worklistRevision, setWorklistRevision] = useState(0);
   const list = useLoad(
     () =>
       visible &&
@@ -92,7 +95,7 @@ export function LabBench({
       ["lab.sample.collect", "lab.sample.receive", "lab.result.enter"].some(can)
         ? lab.worklistLab(status ? { status: status as "Ordered" } : undefined)
         : Promise.resolve([]),
-    [visible, view, status, revision],
+    [visible, view, status, revision, worklistRevision],
   );
   const scan = useLoad(
     () =>
@@ -183,30 +186,18 @@ export function LabBench({
     reconciled = !!observed && !!s && sameBenchSample(observed, s);
   const emergencyOrder =
     !!s && ["Urgent", "STAT"].includes(s.requisition.priority);
-  useEffect(
-    () =>
-      window.terminal.subscribe((e) => {
-        if (
-          e.type === "event" &&
-          [
-            "lab.result.pending_verification",
-            "critical_result.updated",
-            "lab.result.published",
-            "notification.created",
-          ].includes(e.event_type)
-        ) {
-          setRevision((n) => n + 1);
-          setBandCheck(undefined);
-          setBandKey("");
-        }
-        if (e.type === "stream" && e.status === "Live" && e.resync) {
-          setRevision((n) => n + 1);
-          setBandCheck(undefined);
-          setBandKey("");
-        }
-      }),
-    [],
-  );
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const refreshWorklist = () => {
+      clearTimeout(timer);
+      timer = setTimeout(() => setWorklistRevision(n => n + 1), 250);
+    };
+    const unsubscribe = window.terminal.subscribe(e => {
+      if (e.type === "event" && ["lab.result.pending_verification", "critical_result.updated", "notification.created"].includes(e.event_type)) refreshWorklist();
+      if (e.type === "stream" && e.status === "Live" && e.resync) refreshWorklist();
+    });
+    return () => { unsubscribe(); clearTimeout(timer); };
+  }, []);
   useEffect(() => {
     if (needFocus && !scan.loading && !review && !write.blocked && !printing) {
       capture.current?.focus();
@@ -500,7 +491,9 @@ export function LabBench({
     );
   }
   async function printLabel(pdf: boolean) {
-    if (!s || blocked || !can("lab.sample.collect")) return;
+    if (!s || blocked || labelFlight.current || !can("lab.sample.collect")) return;
+    labelFlight.current = true;
+    setLabelPrintFailed(false);
     setPrinting(true);
     setError(undefined);
     try {
@@ -508,6 +501,8 @@ export function LabBench({
         sampleId: s.sample.sample_id,
         pdf,
       });
+      if (r.label) setCollectedLabel(r.label);
+      if (r.printError) { setError(new Error(r.printError)); setNotice(""); setLabelPrintFailed(true); return; }
       setNotice(
         r.saved
           ? t("Label PDF saved.", "لیبل پی ڈی ایف محفوظ۔")
@@ -525,8 +520,8 @@ export function LabBench({
       setError(e);
     } finally {
       setPrinting(false);
-      // The server's label read counts a reprint and advances the sample version.
-      // Refresh even after cancellation/failure, before another clinical review.
+      labelFlight.current = false;
+      // Read the server count after intentional print; printing does not change row_version.
       setRevision((n) => n + 1);
     }
   }
@@ -652,6 +647,7 @@ export function LabBench({
             : t("Laboratory bench", "لیب بنچ")}
       </p>
       <ErrorBox error={error} />
+      {labelPrintFailed && <p role="status">{t("Label counted by server; printing failed. Check the tube before deliberately reprinting.", "سرور نے لیبل شمار کیا؛ پرنٹ ناکام۔ دوبارہ پرنٹ سے پہلے ٹیوب چیک کریں۔")}</p>}
       {notice && <p role="status">{notice}</p>}
       {!review && feedback()}
       <input

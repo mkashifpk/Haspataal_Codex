@@ -1,7 +1,7 @@
 {
   "screen_id": "lab_verification",
-  "contract_fingerprint": "90f7a429e5aa519d440f",
-  "knowledge_revision": "f2f42e3079bc34a3",
+  "contract_fingerprint": "8ad8456c41b87dd0031e",
+  "knowledge_revision": "506a43401a2cda4a",
   "delivery_gate": {
     "required": true,
     "status": "required",
@@ -55,7 +55,7 @@
   },
   "ui_quality": {
     "source": "frontend-docs/guides/16-ui-quality.md",
-    "standard_revision": "c81852646942368c",
+    "standard_revision": "94b18e703d2ab96f",
     "context": {
       "workspace": "lab_verifier",
       "purpose": "Approve (publish) or reject results; critical values first.",
@@ -168,7 +168,7 @@
           "instruction": "- [ ] Every applicable task and mandatory quality check must pass. A blocker, missing FAQ, broken F1, out-of-bounds\n  zoom or untested fresh-data lifecycle keeps the screen/workspace pending. Partial item acceptance remains possible.\n- [ ] The named human signs the review for this build (its *Sign* step: every question answered or decided by the\n  server, the declaration that the writes with the code are theirs, not their agent's), clears the code from the app,\n  accepts only tested proposal items or reports them manually, and returns failures: the agent reads the signed\n  review's failures and notes (`progress_proposals` → `human_reviews`). Agents cannot start, fill or sign a review, nor\n  approve their own claims. Backend inspection can confirm or withdraw accepted claims; verified points are a subset of\n  completion, never an additional award.\n- [ ] Retest affected tasks after fixes or backend changes; stale evidence does not establish the new build's behavior."
         }
       ],
-      "workspace_checklist": "- [ ] **Create:** the communication of a critical result found in this review. Where the blood center runs: the\n  clearance of a tested donation and the release of a component with a second person checking the label.\n- [ ] **Read:** results entered in this review by the technician; the released unit in the blood bank.\n- [ ] **Update / correct:** reject a result back to the bench.\n- [ ] **Cancel / delete:** none of your own: a verified result is corrected by an amendment.\n- [ ] **Refused** (with an account holding both the technician and the verifier role): verifying a result it entered\n  itself when the hospital requires a second person; releasing a component with your own credentials as the checker\n  (`DUAL_CONTROL_SAME_PERSON`); clearing a donation before every test (`BLOOD_DONATION_TESTS_INCOMPLETE`).\n- [ ] **Hand over:** the verified result reaches the doctor (`lab.result.published`); a released component reaches the\n  blood bank's stock (`blood_center.component.released`).",
+      "workspace_checklist": "- [ ] **Create:** the communication of a critical result found in this review. Where the blood center runs: the\n  clearance of a tested donation and the release of a component with a second person checking the label.\n- [ ] **Read:** results entered in this review by the technician, each with its order, who entered it and, for a late\n  one, the request for the delay reason; the released unit in the blood bank.\n- [ ] **Update / correct:** reject a result back to the bench.\n- [ ] **Cancel / delete:** none of your own: a verified result is corrected by an amendment.\n- [ ] **Refused** (with an account holding both the technician and the verifier role): verifying a result it entered\n  itself when the hospital requires a second person; releasing a component with your own credentials as the checker\n  (`DUAL_CONTROL_SAME_PERSON`); clearing a donation before every test (`BLOOD_DONATION_TESTS_INCOMPLETE`).\n- [ ] **Hand over:** the verified result reaches the doctor (`lab.result.published`), and a lab-only walk-in's reaches\n  the reception desk; a released component reaches the blood bank's stock (`blood_center.component.released`).",
       "operations": {
         "create": [],
         "update_or_correct": [],
@@ -240,6 +240,16 @@
         "cites": []
       },
       {
+        "id": "rule:85a0437486",
+        "text": "Each queue row carries its context: open its order with requisition_id (never by the patient's name), compare entered_by with the signed-in user's user_id to warn before LAB_VERIFIER_MUST_DIFFER, and ask for the delay reason when is_overdue (due_at, the server's clock); never derive a deadline from entered_at.",
+        "cites": []
+      },
+      {
+        "id": "rule:9e2429c57a",
+        "text": "After a lost verify answer, never repeat it by itself: read GET /lab/requisitions/{requisition_id} and find the result_id. Published or Rejected: decided; PendingVerification: offer it again. A row gone from the queue says neither.",
+        "cites": []
+      },
+      {
         "id": "rule:3c80ba972e",
         "text": "Exists for the service laboratory or blood_center (work): show it as GET /establishment views.screens says for screen_id lab_verification (full; open_work: without its new work, with the banner \"No new ... from now on\"; records: history and corrections only; setup: only from Facility settings; hidden: in no menu), after login and again on establishment.changed. Never decide it from the profile's category.",
         "cites": []
@@ -247,7 +257,8 @@
     ],
     "related_workflows": [
       "diagnostic-services",
-      "laboratory-and-radiology"
+      "laboratory-and-radiology",
+      "opd-reception"
     ],
     "service": {
       "services": [
@@ -272,7 +283,7 @@
     "workspace": "lab_verifier",
     "phase": "P3",
     "position": 38,
-    "points": 62,
+    "points": 66,
     "capabilities": [
       "realtime",
       "patient_context",
@@ -391,37 +402,37 @@
     "note": "`forward`: a dependency on a later phase; use the demo data or a scenario (sandbox_scenario) until that screen exists. `ordering: false`: a hand-off or a hint, not a reason to wait."
   },
   "definition_of_done": {
-    "points": 62,
+    "points": 66,
     "items": [
       {
         "id": "ep:GET /lab/verification-queue",
         "label": "GET /lab/verification-queue",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:POST /lab/results/{result_id}/verify",
         "label": "POST /lab/results/{result_id}/verify",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:GET /lab/requisitions/{requisition_id}",
         "label": "GET /lab/requisitions/{requisition_id}",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:GET /lab/requisitions/{requisition_id}/report/print-payload",
         "label": "GET /lab/requisitions/{requisition_id}/report/print-payload",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:GET /lab/requisitions/{requisition_id}/report/pdf",
         "label": "GET /lab/requisitions/{requisition_id}/report/pdf",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ev:lab.result.pending_verification",
@@ -439,35 +450,47 @@
         "id": "rule:c64bc79560",
         "label": "You cannot verify results you entered (LAB_VERIFIER_MUST_DIFFER).",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:189b883e3f",
         "label": "Rejection requires a note.",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:c8ca84baa6",
         "label": "Verify critical values first: after lab_critical_release_minutes the ordering doctor sees them marked Pending verification.",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:5a3a67bb88",
         "label": "Verifying a critical result opens it in the critical results log: tell the doctor NOW and record it (screen critical_results_verifier).",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:0cbab5b12c",
         "label": "A result past its due time: ask for delay_reason (optional) before verifying (MSDS AAC 4).",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:f8ca0be691",
         "label": "Verifying signs the result with your stamp (verified_stamp), printed on the lab report under the technician's (performed_stamp).",
+        "points": 2,
+        "claimed": true
+      },
+      {
+        "id": "rule:85a0437486",
+        "label": "Each queue row carries its context: open its order with requisition_id (never by the patient's name), compare entered_by with the signed-in user's user_id to warn before LAB_VERIFIER_MUST_DIFFER, and ask for the delay reason when is_overdue (due_at, the server's clock); never derive a deadline from entered_at.",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "rule:9e2429c57a",
+        "label": "After a lost verify answer, never repeat it by itself: read GET /lab/requisitions/{requisition_id} and find the result_id. Published or Rejected: decided; PendingVerification: offer it again. A row gone from the queue says neither.",
         "points": 2,
         "claimed": false
       },
@@ -475,25 +498,25 @@
         "id": "rule:3c80ba972e",
         "label": "Exists for the service laboratory or blood_center (work): show it as GET /establishment views.screens says for screen_id lab_verification (full; open_work: without its new work, with the banner \"No new ... from now on\"; records: history and corrections only; setup: only from Facility settings; hidden: in no menu), after login and again on establishment.changed. Never decide it from the profile's category.",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:states",
         "label": "Loading, empty and error states",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:permissions",
         "label": "Actions by permission",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:writes",
         "label": "Safe writes",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:tested",
@@ -505,7 +528,7 @@
         "id": "q:handbook",
         "label": "Handbook page",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:f1_help",
@@ -563,7 +586,20 @@
       },
       "service_gates": [],
       "idempotency_key": false,
-      "errors": [],
+      "errors": [
+        {
+          "code": "LAB_VERIFIER_MUST_DIFFER",
+          "http_status": 403,
+          "message": "The technician who entered a result cannot verify it.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "POST /api/v1/lab/results/{result_id}/verify"
+        }
+      ],
       "parameters": [],
       "request_body": null,
       "responses": {
@@ -742,7 +778,7 @@
       "write": {
         "protection": "state_guard",
         "on_lost_answer": "A repeat is refused with LAB_RESULT_STATE_INVALID: the result is decided already. The first call may have succeeded; this error does not replay its result. Never retry automatically; re-read the record, then offer the action again only if it is still needed.",
-        "reconcile_with": null,
+        "reconcile_with": "GET /lab/requisitions/{requisition_id}",
         "refused_with": "LAB_RESULT_STATE_INVALID",
         "emits_events": [
           "critical_result.updated",
@@ -1103,7 +1139,7 @@
     {
       "call": "POST /lab/results/{result_id}/verify",
       "emits": "lab.result.published",
-      "audience": "ordering doctor + lab verifiers",
+      "audience": "ordering doctor + lab verifiers; a lab-only walk-in's: also the users holding both patient.create and lab.requisition.create (the desk that registers walk-ins)",
       "reaches_screens": [
         "lab_only_walkin",
         "consultation",
@@ -1534,7 +1570,8 @@
       "VALIDATION_ERROR": "The request is invalid."
     },
     "wording_quoted_in_rules": [
-      "No new ... from now on"
+      "No new ... from now on",
+      "s name), compare entered_by with the signed-in user"
     ],
     "note": "Server-owned strings only: the error messages (English), the workspace labels (English and Urdu) and the wording the rules quote. The UI's own copy and its Urdu are yours (decision H08)."
   },
@@ -1560,174 +1597,6 @@
     ],
     "note": "page_for: the roles whose GET /meta/handbook lists this screen (its menu entry and F1 page; for a user with that one role, every service Active). A partial role outside page_for only makes some of these calls from screens of its own: never offer it this screen. Build the menu from the logged-in user's GET /meta/handbook."
   },
-  "workflows": [
-    {
-      "slug": "diagnostic-services",
-      "title": "Diagnostic services quality (MSDS)",
-      "recipe": "get_workflow_recipe('diagnostic-services')"
-    },
-    {
-      "slug": "laboratory-and-radiology",
-      "title": "Laboratory & radiology",
-      "recipe": "get_workflow_recipe('laboratory-and-radiology')"
-    }
-  ],
-  "scenarios": [],
-  "unknowns": [
-    {
-      "what": "decision H02",
-      "owner": [
-        "vendor"
-      ],
-      "question": "Digits in the Urdu UI and printouts: Latin 0-9 or Extended Arabic-Indic ۰-۹.",
-      "affects": [
-        "every screen in Urdu"
-      ],
-      "meanwhile": "Latin digits; identifiers, doses and money stay left to right."
-    },
-    {
-      "what": "decision H03",
-      "owner": [
-        "vendor",
-        "clinical_lead"
-      ],
-      "question": "How dates and times are shown on screen, and a 12- or 24-hour clock.",
-      "affects": [
-        "every screen"
-      ],
-      "meanwhile": "The server's print format (e.g. 27-Sep-2026) and the hospital time zone."
-    },
-    {
-      "what": "decision H04",
-      "owner": [
-        "vendor"
-      ],
-      "question": "Money on screen: decimals shown, and digit grouping (1,234,567 or 12,34,567).",
-      "affects": [
-        "every screen with money"
-      ],
-      "meanwhile": "The amounts as the API sends them, with the currency setting."
-    },
-    {
-      "what": "decision H08",
-      "owner": [
-        "vendor",
-        "translator",
-        "clinical_lead"
-      ],
-      "question": "Who writes and signs off the Urdu text of the UI, above all clinical and consent wording.",
-      "affects": [
-        "every screen in Urdu"
-      ],
-      "meanwhile": "Urdu you add is a draft: mark it so (the interview bank's pattern: a draft until a native speaker reviews it)."
-    },
-    {
-      "what": "decision H09",
-      "owner": [
-        "vendor",
-        "frontend_lead"
-      ],
-      "question": "One design system shared by every frontend team (who authors and approves it), or each team's own.",
-      "affects": [
-        "every screen"
-      ],
-      "meanwhile": "Each team designs within the backend's constraints: themes Light and DarkHighContrast, zoom 100-250 %, Noto Nastaliq Urdu, status shown as text and icon, never colour alone. Follow the vendor's design principles (frontend guide 18, get_design_principles)."
-    },
-    {
-      "what": "decision H10",
-      "owner": [
-        "clinical_lead",
-        "vendor"
-      ],
-      "question": "How each realtime event is shown (interrupt, attention, inform, silent), alert sounds and which terminals play them. Only Code Red (interrupt), the licence and maintenance banners and the logout on session.revoked are prescribed (the event catalogue's `presentation`).",
-      "affects": [
-        "every screen with realtime events"
-      ],
-      "meanwhile": "Code Red interrupts; every other event updates the screen and, at most, a dismissible notice. `priority` is the delivery urgency, not a presentation rule."
-    },
-    {
-      "what": "decision H12",
-      "owner": [
-        "vendor",
-        "backend"
-      ],
-      "question": "Which workspaces run on web, Android and iOS, which cannot read a MAC address, discover the server by UDP or print silently; or are cash and printing Windows-only.",
-      "affects": [
-        "my_cash_shift",
-        "registration",
-        "every screen that prints"
-      ],
-      "meanwhile": "The guides describe the Windows (Electron) terminal; tell your developer when a screen needs a capability your platform lacks."
-    },
-    {
-      "what": "decision H18",
-      "owner": [
-        "vendor",
-        "frontend_lead"
-      ],
-      "question": "Noto Nastaliq Urdu everywhere, or the more compact Naskh in dense tables.",
-      "affects": [
-        "every table in Urdu"
-      ],
-      "meanwhile": "Noto Nastaliq Urdu, as the guides require."
-    },
-    {
-      "what": "decision H19",
-      "owner": [
-        "clinical_lead",
-        "backend"
-      ],
-      "question": "Allergies: the patient record keeps free text, so it cannot tell \"no known allergies\" (asserted by a clinician) from \"not recorded\". Should it?",
-      "affects": [
-        "every screen with a patient banner"
-      ],
-      "meanwhile": "Show the recorded text as recorded; an empty value is \"not recorded\", never \"none\"."
-    },
-    {
-      "what": "decision H20",
-      "owner": [
-        "vendor",
-        "hospital"
-      ],
-      "question": "May unsaved form input be kept on the terminal (which fields, encrypted, for how long)?",
-      "affects": [
-        "every form"
-      ],
-      "meanwhile": "In memory only; never a second checker's password."
-    },
-    {
-      "what": "decision H22",
-      "owner": [
-        "hospital",
-        "vendor"
-      ],
-      "question": "Which documents may print on an unregistered terminal's default printer (sensitive A4 documents).",
-      "affects": [
-        "every screen that prints"
-      ],
-      "meanwhile": "As the printing guide says: the hint, then the default printer."
-    },
-    {
-      "what": "decision H24",
-      "owner": [
-        "vendor",
-        "clinical_lead"
-      ],
-      "question": "Who approves frontend performance targets, alert thresholds and escalation timers.",
-      "affects": [
-        "every screen"
-      ],
-      "meanwhile": "The server's own settings (e.g. critical_result_communicate_minutes)."
-    }
-  ],
-  "omitted_sections": [
-    "test_plan",
-    "handbook",
-    "decisions",
-    "examples",
-    "schemas"
-  ],
-  "next": "Request omitted sections separately with max_chars=200000; for an oversized endpoints/schemas section use get_endpoint / get_schema for each operation/type.",
   "test_plan": {
     "screen": "lab_verification",
     "title": "Verification queue",
@@ -1746,7 +1615,9 @@
           ],
           "expect": "403 FORBIDDEN"
         },
-        "errors_to_handle": [],
+        "errors_to_handle": [
+          "LAB_VERIFIER_MUST_DIFFER"
+        ],
         "as_one_of": [
           "lab_verifier"
         ]
@@ -1957,6 +1828,8 @@
       "Verifying a critical result opens it in the critical results log: tell the doctor NOW and record it (screen critical_results_verifier).",
       "A result past its due time: ask for delay_reason (optional) before verifying (MSDS AAC 4).",
       "Verifying signs the result with your stamp (verified_stamp), printed on the lab report under the technician's (performed_stamp).",
+      "Each queue row carries its context: open its order with requisition_id (never by the patient's name), compare entered_by with the signed-in user's user_id to warn before LAB_VERIFIER_MUST_DIFFER, and ask for the delay reason when is_overdue (due_at, the server's clock); never derive a deadline from entered_at.",
+      "After a lost verify answer, never repeat it by itself: read GET /lab/requisitions/{requisition_id} and find the result_id. Published or Rejected: decided; PendingVerification: offer it again. A row gone from the queue says neither.",
       "Exists for the service laboratory or blood_center (work): show it as GET /establishment views.screens says for screen_id lab_verification (full; open_work: without its new work, with the banner \"No new ... from now on\"; records: history and corrections only; setup: only from Facility settings; hidden: in no menu), after login and again on establishment.changed. Never decide it from the profile's category."
     ],
     "demo_accounts": "demo_accounts() lists a login per role; sandbox_call runs each case on the DEV server"
@@ -2033,6 +1906,8 @@
       "Verifying a critical result opens it in the critical results log: tell the doctor NOW and record it (screen critical_results_verifier).",
       "A result past its due time: ask for delay_reason (optional) before verifying (MSDS AAC 4).",
       "Verifying signs the result with your stamp (verified_stamp), printed on the lab report under the technician's (performed_stamp).",
+      "Each queue row carries its context: open its order with requisition_id (never by the patient's name), compare entered_by with the signed-in user's user_id to warn before LAB_VERIFIER_MUST_DIFFER, and ask for the delay reason when is_overdue (due_at, the server's clock); never derive a deadline from entered_at.",
+      "After a lost verify answer, never repeat it by itself: read GET /lab/requisitions/{requisition_id} and find the result_id. Published or Rejected: decided; PendingVerification: offer it again. A row gone from the queue says neither.",
       "Exists for the service laboratory or blood_center (work): show it as GET /establishment views.screens says for screen_id lab_verification (full; open_work: without its new work, with the banner \"No new ... from now on\"; records: history and corrections only; setup: only from Facility settings; hidden: in no menu), after login and again on establishment.changed. Never decide it from the profile's category."
     ],
     "updates_by_itself_on": [
@@ -2124,6 +1999,24 @@
     ],
     "workspace_guide": "get_handbook_outline('lab_verifier')"
   },
+  "workflows": [
+    {
+      "slug": "diagnostic-services",
+      "title": "Diagnostic services quality (MSDS)",
+      "recipe": "get_workflow_recipe('diagnostic-services')"
+    },
+    {
+      "slug": "laboratory-and-radiology",
+      "title": "Laboratory & radiology",
+      "recipe": "get_workflow_recipe('laboratory-and-radiology')"
+    },
+    {
+      "slug": "opd-reception",
+      "title": "OPD reception, queues & re-routing",
+      "recipe": "get_workflow_recipe('opd-reception')"
+    }
+  ],
+  "scenarios": [],
   "decisions": [
     {
       "id": "H02",
@@ -2295,18 +2188,25 @@
               },
               "has_critical_value": true,
               "interpretation": "Severe anemia",
-              "entered_at": "2026-09-27T17:39:01.847139+00:00",
-              "entered_by_name": "uf90c88252a",
+              "entered_at": "2026-10-26T15:20:13.948146+00:00",
+              "entered_by": 7,
+              "entered_by_name": "uc1d45b0c0f",
               "is_correction": false,
+              "requisition_id": 1,
+              "requisition_number": "LR-2026-000001",
+              "patient_id": 1,
               "patient_name": "Ali Khan",
               "mrn": "MRN-2026-000001",
-              "priority": "STAT"
+              "priority": "STAT",
+              "barcode": "LB-2026-0000001",
+              "due_at": "2026-10-26T16:20:13.841004+00:00",
+              "is_overdue": false
             }
           ],
           "meta": {
-            "server_time": "2026-09-27T17:39:01.892716+00:00"
+            "server_time": "2026-10-26T15:20:14.035581+00:00"
           },
-          "request_id": "ff56b33249164ababdd26574fb6d1ec0"
+          "request_id": "b1f82cfeaa60455f92ab7e870a422bf2"
         }
       }
     },
@@ -3936,6 +3836,11 @@
           "format": "date-time",
           "title": "Entered At"
         },
+        "entered_by": {
+          "type": "integer",
+          "title": "Entered By",
+          "description": "The user who entered the result: compare it with the signed-in user's user_id (never the names); the same person may not verify it (LAB_VERIFIER_MUST_DIFFER)"
+        },
         "entered_by_name": {
           "type": "string",
           "title": "Entered By Name"
@@ -3943,6 +3848,19 @@
         "is_correction": {
           "type": "boolean",
           "title": "Is Correction"
+        },
+        "requisition_id": {
+          "type": "integer",
+          "title": "Requisition Id",
+          "description": "Its requisition: GET /lab/requisitions/{requisition_id} has the whole order, and after a lost verify answer tells whether this result was published or rejected"
+        },
+        "requisition_number": {
+          "type": "string",
+          "title": "Requisition Number"
+        },
+        "patient_id": {
+          "type": "integer",
+          "title": "Patient Id"
         },
         "patient_name": {
           "type": "string",
@@ -3960,6 +3878,36 @@
             "STAT"
           ],
           "title": "Priority"
+        },
+        "barcode": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Barcode",
+          "description": "The sample's barcode"
+        },
+        "due_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Due At",
+          "description": "When the test was due: the turnaround clock from the sample's receipt (MSDS AAC 4); null when the sample has no receipt or collection time"
+        },
+        "is_overdue": {
+          "type": "boolean",
+          "title": "Is Overdue",
+          "description": "due_at has passed (the server's clock): ask for the optional delay_reason before verifying. Never true for a correction (is_correction)"
         }
       },
       "type": "object",
@@ -3973,11 +3921,18 @@
         "has_critical_value",
         "interpretation",
         "entered_at",
+        "entered_by",
         "entered_by_name",
         "is_correction",
+        "requisition_id",
+        "requisition_number",
+        "patient_id",
         "patient_name",
         "mrn",
-        "priority"
+        "priority",
+        "barcode",
+        "due_at",
+        "is_overdue"
       ],
       "title": "VerificationItemOut",
       "description": "A result waiting for the verifier (critical values first, then STAT)."
@@ -4025,5 +3980,152 @@
       ],
       "title": "VerifyIn"
     }
-  }
+  },
+  "unknowns": [
+    {
+      "what": "decision H02",
+      "owner": [
+        "vendor"
+      ],
+      "question": "Digits in the Urdu UI and printouts: Latin 0-9 or Extended Arabic-Indic ۰-۹.",
+      "affects": [
+        "every screen in Urdu"
+      ],
+      "meanwhile": "Latin digits; identifiers, doses and money stay left to right."
+    },
+    {
+      "what": "decision H03",
+      "owner": [
+        "vendor",
+        "clinical_lead"
+      ],
+      "question": "How dates and times are shown on screen, and a 12- or 24-hour clock.",
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "The server's print format (e.g. 27-Sep-2026) and the hospital time zone."
+    },
+    {
+      "what": "decision H04",
+      "owner": [
+        "vendor"
+      ],
+      "question": "Money on screen: decimals shown, and digit grouping (1,234,567 or 12,34,567).",
+      "affects": [
+        "every screen with money"
+      ],
+      "meanwhile": "The amounts as the API sends them, with the currency setting."
+    },
+    {
+      "what": "decision H08",
+      "owner": [
+        "vendor",
+        "translator",
+        "clinical_lead"
+      ],
+      "question": "Who writes and signs off the Urdu text of the UI, above all clinical and consent wording.",
+      "affects": [
+        "every screen in Urdu"
+      ],
+      "meanwhile": "Urdu you add is a draft: mark it so (the interview bank's pattern: a draft until a native speaker reviews it)."
+    },
+    {
+      "what": "decision H09",
+      "owner": [
+        "vendor",
+        "frontend_lead"
+      ],
+      "question": "One design system shared by every frontend team (who authors and approves it), or each team's own.",
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "Each team designs within the backend's constraints: themes Light and DarkHighContrast, zoom 100-250 %, Noto Nastaliq Urdu, status shown as text and icon, never colour alone. Follow the vendor's design principles (frontend guide 18, get_design_principles)."
+    },
+    {
+      "what": "decision H10",
+      "owner": [
+        "clinical_lead",
+        "vendor"
+      ],
+      "question": "How each realtime event is shown (interrupt, attention, inform, silent), alert sounds and which terminals play them. Only Code Red (interrupt), the licence and maintenance banners and the logout on session.revoked are prescribed (the event catalogue's `presentation`).",
+      "affects": [
+        "every screen with realtime events"
+      ],
+      "meanwhile": "Code Red interrupts; every other event updates the screen and, at most, a dismissible notice. `priority` is the delivery urgency, not a presentation rule."
+    },
+    {
+      "what": "decision H12",
+      "owner": [
+        "vendor",
+        "backend"
+      ],
+      "question": "Which workspaces run on web, Android and iOS, which cannot read a MAC address, discover the server by UDP or print silently; or are cash and printing Windows-only.",
+      "affects": [
+        "my_cash_shift",
+        "registration",
+        "every screen that prints"
+      ],
+      "meanwhile": "The guides describe the Windows (Electron) terminal; tell your developer when a screen needs a capability your platform lacks."
+    },
+    {
+      "what": "decision H18",
+      "owner": [
+        "vendor",
+        "frontend_lead"
+      ],
+      "question": "Noto Nastaliq Urdu everywhere, or the more compact Naskh in dense tables.",
+      "affects": [
+        "every table in Urdu"
+      ],
+      "meanwhile": "Noto Nastaliq Urdu, as the guides require."
+    },
+    {
+      "what": "decision H19",
+      "owner": [
+        "clinical_lead",
+        "backend"
+      ],
+      "question": "Allergies: the patient record keeps free text, so it cannot tell \"no known allergies\" (asserted by a clinician) from \"not recorded\". Should it?",
+      "affects": [
+        "every screen with a patient banner"
+      ],
+      "meanwhile": "Show the recorded text as recorded; an empty value is \"not recorded\", never \"none\"."
+    },
+    {
+      "what": "decision H20",
+      "owner": [
+        "vendor",
+        "hospital"
+      ],
+      "question": "May unsaved form input be kept on the terminal (which fields, encrypted, for how long)?",
+      "affects": [
+        "every form"
+      ],
+      "meanwhile": "In memory only; never a second checker's password."
+    },
+    {
+      "what": "decision H22",
+      "owner": [
+        "hospital",
+        "vendor"
+      ],
+      "question": "Which documents may print on an unregistered terminal's default printer (sensitive A4 documents).",
+      "affects": [
+        "every screen that prints"
+      ],
+      "meanwhile": "As the printing guide says: the hint, then the default printer."
+    },
+    {
+      "what": "decision H24",
+      "owner": [
+        "vendor",
+        "clinical_lead"
+      ],
+      "question": "Who approves frontend performance targets, alert thresholds and escalation timers.",
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "The server's own settings (e.g. critical_result_communicate_minutes)."
+    }
+  ]
 }

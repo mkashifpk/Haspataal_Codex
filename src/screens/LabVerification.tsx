@@ -10,18 +10,18 @@ import {
   Modal,
   useLoad,
 } from "../components";
-import { ClinicalWriteFeedback, useClinicalWrite } from "../clinical-write";
+import { useClinicalWrite } from "../clinical-write";
 import type { ClinicalUser } from "../clinical-context";
 import type { EstablishmentOut } from "../generated/facility_profile";
 import { formatHospitalTime } from "../hospital-time";
 import * as lab from "../generated/lab_verification";
 import {
   canVerifyResult,
-  isResultOverdue,
   sortVerificationQueue,
   validateVerification,
   verificationWritable,
   verificationSnapshot,
+  verificationRecovery,
 } from "../lab-verification-policy";
 
 export type VerificationUser = {
@@ -188,16 +188,10 @@ export function LabVerification({
   const boundRequisition = !reqDetail.loading && !reqDetail.error &&
     reqDetail.data?.requisition_id === inspectReqId ? reqDetail.data : null;
   const signedReport = !reportPayload.loading && !reportPayload.error && reportPayload.data;
-  function matchedResult(item: lab.VerificationItemOut) {
-    return boundRequisition?.mrn === item.mrn ? boundRequisition.results.find(r =>
-      r.result_id === item.result_id && r.lab_requisition_item_id === item.lab_requisition_item_id) : undefined;
-  }
-  function dueAt(item: lab.VerificationItemOut) {
-    return matchedResult(item) ? boundRequisition?.items.find(x =>
-      x.lab_requisition_item_id === item.lab_requisition_item_id)?.due_at : undefined;
-  }
+  function dueAt(item: lab.VerificationItemOut) { return item.due_at; }
   function mayDecide(item: lab.VerificationItemOut) {
-    return canVerifyResult(user, {entered_by: matchedResult(item)?.performed_stamp.user_id ?? undefined});
+    const check = canVerifyResult(user, item);
+    return check.allowed ? check : {allowed:false, reason:t("You entered this result. Ask an independent verifier (LAB_VERIFIER_MUST_DIFFER).", "یہ نتیجہ آپ نے درج کیا۔ آزاد ویریفائر سے کہیں (LAB_VERIFIER_MUST_DIFFER)۔")};
   }
   async function preflight(item: lab.VerificationItemOut) {
     const [me, est, pending] = await Promise.all([
@@ -210,10 +204,30 @@ export function LabVerification({
       throw Error(t("The result, permission or service changed. Close and review the current queue again.",
         "نتیجہ، اجازت یا خدمت بدل گئی۔ بند کرکے تازہ قطار کا پھر جائزہ لیں۔"));
     }
-    if (!mayDecide(item).allowed) throw Error(t("An independent verifier must decide this result.", "آزاد ویریفائر اس نتیجے کا فیصلہ کرے۔"));
+    if (!canVerifyResult(me, current).allowed) throw Error(t("An independent verifier must decide this result.", "آزاد ویریفائر اس نتیجے کا فیصلہ کرے۔"));
   }
   function recoveryPath(item: lab.VerificationItemOut) {
-    return matchedResult(item) ? `/lab/requisitions/${boundRequisition!.requisition_id}` : "/lab/verification-queue";
+    return `/lab/requisitions/${item.requisition_id}`;
+  }
+  function recovery() {
+    const item = activeItemRef.current;
+    const observed = write.observed as lab.LabRequisitionDetailOut | undefined;
+    const {result, decided, pending} = verificationRecovery(item, observed);
+    return <>
+      <ErrorBox error={write.error} verbatim />
+      {write.notice && <p role="status">{write.notice}</p>}
+      {write.attempt && !write.busy && <section className="notice" role="alert">
+        <p>{t("Answer lost. Do not repeat the decision. Read this order and find the original result; a missing queue row is not success.", "جواب گم ہے۔ فیصلہ دوبارہ نہ بھیجیں۔ اسی آرڈر میں اصل نتیجہ پڑھیں؛ قطار سے غائب ہونا کامیابی نہیں۔")}</p>
+        <button data-help="clinical.recovery" onClick={() => void write.inspect()}>{t("Read current result", "موجودہ نتیجہ پڑھیں")}</button>
+        {write.checked && <>
+          {result ? <><p role="status">{t("Result", "نتیجہ")} #{result.result_id}: {tr(result.status)}</p><Details value={result} /></>
+            : <p>{t("The original result was not found. Keep this decision locked and ask IT.", "اصل نتیجہ نہیں ملا۔ فیصلہ مقفل رکھیں اور آئی ٹی سے کہیں۔")}</p>}
+          {(decided || pending) && <button data-help="clinical.recovery" onClick={() => {
+            write.release(); setVerifyDialog(null); setRejectDialog(null); activeItemRef.current = null; setRevision(n => n + 1);
+          }}>{decided ? t("Decision reviewed; return to queue", "فیصلہ دیکھا؛ قطار پر واپس") : t("Still pending; return to queue for a new review", "ابھی منتظر؛ نئے جائزے کے لیے قطار پر واپس")}</button>}
+        </>}
+      </section>}
+    </>;
   }
 
   function handleOpenVerify(item: lab.VerificationItemOut) {
@@ -239,8 +253,8 @@ export function LabVerification({
 
   function submitVerify() {
     if (!verifyDialog || write.blocked || !live) return;
-    // The queue omits due_at. Ask for an optional reason without inventing a deadline.
-    const check = validateVerification("Verified", "", true, delayReason);
+    // Only the server decides whether the result is overdue.
+    const check = validateVerification("Verified", "", verifyDialog.is_overdue, delayReason);
     if (!check.valid) {
       setActionError(check.error ?? "Invalid input");
       return;
@@ -333,7 +347,7 @@ export function LabVerification({
         </aside>
       )}
 
-      {!verifyDialog && !rejectDialog && <ClinicalWriteFeedback write={write} onReviewed={() => setRevision(n => n + 1)} />}
+      {!verifyDialog && !rejectDialog && recovery()}
       {!live && <p role="status">{t("Restore the live connection before deciding a result.", "نتیجہ فیصلہ کرنے سے پہلے لائیو رابطہ بحال کریں۔")}</p>}
       <div className="actions">
         <button data-help="verification.requisition" disabled={write.blocked || !recordsVisible}
@@ -415,7 +429,7 @@ export function LabVerification({
                   {filteredQueue.map((item) => {
                     const isSelected = selected?.result_id === item.result_id;
                     const canVerify = mayDecide(item);
-                    const isLate = isResultOverdue(dueAt(item));
+                    const isLate = item.is_overdue;
 
                     return (
                       <tr
@@ -449,6 +463,7 @@ export function LabVerification({
                         <td>
                           <strong>{item.patient_name}</strong>
                           <div className="text-muted">{item.mrn}</div>
+                          <div>{item.requisition_number} · {item.barcode || t("No barcode", "بارکوڈ نہیں")}</div>
                         </td>
                         <td>
                           <strong>{item.code}</strong>
@@ -472,7 +487,7 @@ export function LabVerification({
                           </div>
                         </td>
                         <td>{item.entered_by_name}</td>
-                        <td><bdi>{time(item.entered_at)}</bdi></td>
+                        <td><bdi>{time(item.entered_at)}</bdi><div>{t("Due", "مقرر وقت")}: {item.due_at ? time(item.due_at) : t("Deadline unknown", "مقرر وقت نامعلوم")}</div></td>
                         <td>
                           <div className="action-buttons">
                             <button
@@ -537,8 +552,8 @@ export function LabVerification({
                 data-help="verification.requisition"
                 onClick={() => {
                   setShowReqModal(true);
-                  setInspectReqInput("");
-                  setInspectReqId(null);
+                  setInspectReqInput(String(selected.requisition_id));
+                  setInspectReqId(selected.requisition_id);
                 }}
               >
                 {t("Requisition detail", "درخواست تفصیل")}
@@ -549,8 +564,8 @@ export function LabVerification({
                 data-help="verification.report"
                 onClick={() => {
                   setShowReportModal(true);
-                  setReportReqInput("");
-                  setReportReqId(null);
+                  setReportReqInput(String(selected.requisition_id));
+                  setReportReqId(selected.requisition_id);
                 }}
               >
                 {t("Signed report preview", "دستخط شدہ رپورٹ کا جائزہ")}
@@ -676,9 +691,8 @@ export function LabVerification({
 
             <p>{dueAt(verifyDialog)
               ? t("Server deadline", "سرور مقرر وقت") + ": " + time(dueAt(verifyDialog)!)
-              : t("The queue does not provide the deadline. Entry time is not a due time; record a reason only if delayed.",
-                  "قطار میں مقرر وقت نہیں۔ درج وقت آخری وقت نہیں؛ تاخیر ہو تو وجہ لکھیں۔")}</p>
-            {(
+              : t("Deadline unknown. Entry time is not a deadline.", "مقرر وقت نامعلوم۔ درج وقت آخری وقت نہیں۔")}</p>
+            {verifyDialog.is_overdue && (
               <Field label={t("Turnaround Delay Reason (optional, MSDS AAC 4)", "تاخیر کی وجہ (اختیاری، ایم ایس ڈی ایس)")}>
                 <input
                   type="text"
@@ -691,7 +705,7 @@ export function LabVerification({
               </Field>
             )}
 
-            <ClinicalWriteFeedback write={write} onReviewed={() => {setVerifyDialog(null);setRevision(n => n + 1);}} />
+            {recovery()}
             {write.attempt && !write.busy && <p>{t(
               "A missing queue row does not prove publication. Inspect the matching requisition and result status before another decision. Never replay verification.",
               "قطار میں سطر نہ ہونا اشاعت کا ثبوت نہیں۔ دوسرے فیصلے سے پہلے متعلقہ درخواست و نتیجے کی حالت دیکھیں۔ تصدیق دوبارہ ارسال نہ کریں۔")}</p>}
@@ -747,7 +761,7 @@ export function LabVerification({
               />
             </Field>
 
-            <ClinicalWriteFeedback write={write} onReviewed={() => {setRejectDialog(null);setRevision(n => n + 1);}} />
+            {recovery()}
 
             <div className="dialog-actions">
               <button
