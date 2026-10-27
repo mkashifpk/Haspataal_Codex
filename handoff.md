@@ -1,6 +1,6 @@
 # Haspataal checkpoint — 27 October 2026
 
-Last updated: Codex/functions, Asia/Karachi. User requested next SINGLE screen according to MCP and backend reporting. Phase3 position46 critical_results_radiology implemented/tested. Current remaining work is source commit, tested progress proposal and verified receipt; next position47 imaging_outsourced NOT started.
+Last updated: Codex/functions, Asia/Karachi. User requested next SINGLE screen according to MCP and backend reporting. Phase3 position46 critical_results_radiology implemented/tested. No implementation work is currently in progress. Tested source55b9c2a committed; proposal173 verified pending. Next position47 imaging_outsourced NOT started.
 
 ## Completed / checks
 
@@ -18,10 +18,10 @@ NEW owned runDEMO-CRITICAL-IMAGING-1793107470407: orders6/7Ultrasound -> critica
 
 ## Next three actions
 
-1. Commit source and submit ONLY tested NEW screen items with that commit; save exact payload/request before call, verify progress_proposals receipt. Exclude untested combined authority/full-plan/human gates. Update this checkpoint with proposal ID/commit and final Git state; never duplicate accepted/pending unchanged claims.
+1. Proposal173 verified pending via progress_proposals: awaiting human review on /docs -> My progress.13testednewscreenitems, source55b9c2aa6cdd7b752ca900ca4b37c2004a5c74a0/finalrendererZLL5yE0R. Exact payload and receipt saved docs/critical-radiology-progress-{proposal,receipt}-2026-10-27.json. Combinedauthority/full-plan/human gates excluded. Never duplicate unchanged accepted/pending claims.
 2. Human follows new review's synthetic reporting -> communication/read-back -> doctorAck and alarm/Urdu/F1/zoom journey; only human enters Review code and signs portal review. Retest optional PACS31 when configured; read30answer with correction.
 3. Next session read AGENTS/handoff, inspect Git status/diff/log, startup MCP tools/roadmap. Position47 imaging_outsourced is next candidate; read its current bundle/quality/design/outline first. Other radiology repeat/quality screens later. Prior home/preventive reset state and H08/H09/H10 remain acceptance/owner decisions.
 
 ## Git / environment
 
-Clean baseline f72cd34 (previous tested source b142b40); all current changes ours, no user/other-agent edits overwritten. Source commit pending immediately. No running commands/uncertain writes. Initial bootstrap npx failed C-cache ENOSPC, first UI loaded OLD renderer and failed BEFORE ANY businesswrite. Finished zero-write diagnostic archived; guarded restart after verified direct local Vite rebuild. Final npm cache uses D:\Projects\Haspataal_Codex\artifacts\npm-cache (C low space/D19GB free). No user files deleted. All tests restored preferences/logout. No Review code entered, no push/PR/worktree/automation. Authorized ignored .dev-terminal.json/CA/MCP config supplies connection; never copy credentials/local profiles/Review codes into Git.
+Clean baseline f72cd34 (previous tested source b142b40); all current changes ours, no user/other-agent edits overwritten. Tested source55b9c2aa6cdd7b752ca900ca4b37c2004a5c74a0. Final documentation commit contains checkpoint and proposal payload/verified receipt only; working tree expected clean afterward, verify on takeover. No running commands/uncertain writes. Initial bootstrap npx failed C-cache ENOSPC, first UI loaded OLD renderer and failed BEFORE ANY businesswrite. Finished zero-write diagnostic archived; guarded restart after verified direct local Vite rebuild. Final npm cache uses D:\Projects\Haspataal_Codex\artifacts\npm-cache (C low space/D19GB free). No user files deleted. All tests restored preferences/logout. No Review code entered, no push/PR/worktree/automation. Authorized ignored .dev-terminal.json/CA/MCP config supplies connection; never copy credentials/local profiles/Review codes into Git.
