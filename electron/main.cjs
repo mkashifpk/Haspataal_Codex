@@ -948,7 +948,7 @@ ipcMain.handle("terminal", async (event, action, args = {}) => {
       if (!facility.ok) return facility;
       if (actor !== auth?.user.user_id || windows.get(win.id) !== workspace) throw new Error('The session changed before the alarm');
       const view = facility.data.views.screens.find(s => s.screen_id === screenId)?.view;
-      if (!['full','open_work'].includes(view)) throw new Error('The laboratory critical-result work view is unavailable');
+      if (!['full','open_work'].includes(view)) throw new Error('The critical-result work view is unavailable');
       const doctor = screenId === 'critical_results_doctor';
       if (doctor) {
         const mine = await api('GET', '/critical-results?mine=true&open_only=true&limit=1000&patient_id='+record.data.patient_id, undefined, workspace);
@@ -956,7 +956,7 @@ ipcMain.handle("terminal", async (event, action, args = {}) => {
         if (actor !== auth?.user.user_id || windows.get(win.id) !== workspace) throw new Error('The session changed before the alarm');
         if (!mine.data.some(r => r.critical_result_id === args.criticalResultId)) return {ok:true,data:{played:false}};
       }
-      const played = require('./critical-alarm.cjs').criticalAlarmRecord(record.data, args.criticalResultId, doctor ? ['Lab','Imaging'] : ['Lab']);
+      const played = require('./critical-alarm.cjs').criticalAlarmRecord(record.data, args.criticalResultId, require('./critical-alarm.cjs').criticalAlarmSources(screenId));
       if (played) shell.beep();
       return {ok:true,data:{played}};
     }

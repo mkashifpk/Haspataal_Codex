@@ -13,7 +13,7 @@ import { bilingual as t } from "../i18n";
 import { formatHospitalTime } from "../hospital-time";
 import type { ClinicalUser } from "../clinical-context";
 import type { EstablishmentOut } from "../generated/facility_profile";
-import * as critical from "../generated/critical_results_verifier";
+import * as critical from "../generated/critical_results_radiology";
 import {
   benchCriticalWork,
   communicationBody,
@@ -21,6 +21,7 @@ import {
   criticalAccess,
   criticalFilters,
   criticalSnapshot,
+  criticalSource,
   recipientRoles,
   requiresReadBack,
 } from "../critical-communication-policy";
@@ -68,13 +69,15 @@ export function CriticalResultsBench({
   establishment,
   timeZone,
 }: {
-  screenId?: "critical_results_bench" | "critical_results_verifier";
+  screenId?: "critical_results_bench" | "critical_results_verifier" | "critical_results_radiology";
   user: ClinicalUser;
   connected: boolean;
   stream: string;
   establishment: EstablishmentOut;
   timeZone?: string;
 }) {
+  const source = criticalSource(screenId);
+  const imaging = source === "Imaging";
   const view =
     establishment.views.screens.find(
       (s) => s.screen_id === screenId,
@@ -92,7 +95,7 @@ export function CriticalResultsBench({
     [find, setFind] = useState("");
   const [filters, setFilters] = useState<
     Parameters<typeof critical.listCritical>[0]
-  >({ source: "Lab", open_only: true, limit: 200 });
+  >({ source, open_only: true, limit: 200 });
   const [id, setId] = useState(0),
     [lookup, setLookup] = useState(""),
     [error, setError] = useState<unknown>();
@@ -114,20 +117,20 @@ export function CriticalResultsBench({
       access.read
         ? critical.listCritical({
             ...filters,
-            source: "Lab",
+            source,
             ...(view === "records"
               ? { open_only: false, status: undefined }
               : {}),
           })
         : Promise.resolve([]),
-    [access.read, view, filters, revision],
+    [access.read, view, filters, revision, source],
   );
   const work = useLoad(
     () =>
       access.work
-        ? critical.diagnosticsWorklist({ area: "Lab", mine: false })
+        ? critical.diagnosticsWorklist({ area: source, mine: false })
         : Promise.resolve([]),
-    [access.work, revision],
+    [access.work, revision, source],
   );
   const detail = useLoad(
     () =>
@@ -138,21 +141,21 @@ export function CriticalResultsBench({
     !detail.loading &&
     !detail.error &&
     detail.data?.critical_result_id === id &&
-    detail.data.source === "Lab"
+    detail.data.source === source
       ? detail.data
       : undefined;
   const rows =
     !list.loading && !list.error
       ? (list.data || []).filter(
           (r) =>
-            r.source === "Lab" &&
+            r.source === source &&
             `${r.critical_number} ${r.patient_name} ${r.mrn} ${r.test_name} ${r.finding}`
               .toLowerCase()
               .includes(find.trim().toLowerCase()),
         )
       : [];
   const tasks =
-    !work.loading && !work.error ? benchCriticalWork(work.data || []) : [];
+    !work.loading && !work.error ? benchCriticalWork(work.data || [], source) : [];
   const write = useClinicalWrite(
     user,
     `${screenId}:${id}`,
@@ -197,7 +200,7 @@ export function CriticalResultsBench({
             );
           if (
             access.work &&
-            e.payload?.source === "Lab" &&
+            e.payload?.source === source &&
             e.payload?.change === "Opened" &&
             Number.isSafeInteger(e.payload?.critical_result_id)
           ) {
@@ -210,7 +213,7 @@ export function CriticalResultsBench({
           setDetailRevision((n) => n + 1);
         }
       }),
-    [access.work],
+    [access.work, source],
   );
   useEffect(() => {
     if (!dirty && !blocked) return;
@@ -300,7 +303,7 @@ export function CriticalResultsBench({
               (s) => s.screen_id === screenId,
             )?.view || "hidden",
           ).communicate ||
-          fresh.source !== "Lab" ||
+          fresh.source !== source ||
           criticalSnapshot(fresh) !== criticalSnapshot(frozen.record)
         )
           throw Error(
@@ -324,8 +327,8 @@ export function CriticalResultsBench({
     return (
       <Empty>
         {t(
-          "This laboratory screen is unavailable or you lack critical-result viewing permission.",
-          "یہ لیب صفحہ دستیاب نہیں یا اہم نتائج پڑھنے کی اجازت نہیں۔",
+          "This diagnostic screen is unavailable or you lack critical-result viewing permission.",
+          "یہ تشخیصی صفحہ دستیاب نہیں یا اہم نتائج پڑھنے کی اجازت نہیں۔",
         )}
       </Empty>
     );
@@ -359,12 +362,12 @@ export function CriticalResultsBench({
       </header>
       <p role="status">
         {connected ? stream : t("Offline", "آف لائن")} ·{" "}
-        {t("Laboratory", "لیبارٹری")}
+        {imaging ? t("Radiology", "ریڈیالوجی") : t("Laboratory", "لیبارٹری")}
         {view === "open_work"
           ? " · " +
             t(
-              "No new laboratory work; complete existing communications.",
-              "نیا لیب کام نہیں؛ موجودہ اطلاعات مکمل کریں۔",
+              imaging ? "No new imaging work; complete existing communications." : "No new laboratory work; complete existing communications.",
+              imaging ? "نیا عکس کا کام نہیں؛ موجودہ اطلاعات مکمل کریں۔" : "نیا لیب کام نہیں؛ موجودہ اطلاعات مکمل کریں۔",
             )
           : view === "records"
             ? " · " +
@@ -386,8 +389,8 @@ export function CriticalResultsBench({
         <aside className="bench-critical" role="alert">
           <strong>
             {t(
-              "A new critical laboratory result opened. Tell the responsible clinician now and record the communication.",
-              "نیا اہم لیب نتیجہ آیا۔ ذمہ دار معالج کو فوراً بتا کر اطلاع درج کریں۔",
+              imaging ? "A new critical imaging result opened. Tell the responsible clinician now and record the communication." : "A new critical laboratory result opened. Tell the responsible clinician now and record the communication.",
+              imaging ? "نیا اہم عکس کا نتیجہ آیا۔ ذمہ دار معالج کو فوراً بتا کر اطلاع درج کریں۔" : "نیا اہم لیب نتیجہ آیا۔ ذمہ دار معالج کو فوراً بتا کر اطلاع درج کریں۔",
             )}
           </strong>
           <button
@@ -472,8 +475,8 @@ export function CriticalResultsBench({
                 ) : (
                   <p>
                     {t(
-                      "The server supplied no related critical-result ID. Ask laboratory support; do not guess one.",
-                      "سرور نے متعلقہ اہم نتیجے کا نمبر نہیں دیا۔ لیب معاونت سے کہیں؛ نمبر فرض نہ کریں۔",
+                      "The server supplied no related critical-result ID. Ask diagnostic support; do not guess one.",
+                      "سرور نے متعلقہ اہم نتیجے کا نمبر نہیں دیا۔ تشخیصی معاونت سے کہیں؛ نمبر فرض نہ کریں۔",
                     )}
                   </p>
                 )}
@@ -482,14 +485,14 @@ export function CriticalResultsBench({
           </section>
         )}
         <section className="card critical-log">
-          <h2>{t("Critical laboratory log", "اہم لیب نتائج کا رجسٹر")}</h2>
+          <h2>{imaging ? t("Critical imaging log", "اہم عکس نتائج کا رجسٹر") : t("Critical laboratory log", "اہم لیب نتائج کا رجسٹر")}</h2>
           <form
             onSubmit={(e) => {
               e.preventDefault();
               setError(undefined);
               try {
                 setFilters({
-                  source: "Lab",
+                  source,
                   open_only: onlyOpen,
                   status:
                     (status as "Open" | "Communicated" | "Acknowledged") ||
@@ -677,11 +680,11 @@ export function CriticalResultsBench({
           {!detail.loading &&
             !detail.error &&
             detail.data &&
-            detail.data.source !== "Lab" && (
+            detail.data.source !== source && (
               <p className="error" role="alert">
                 {t(
-                  "This is not a laboratory result. Use the authorised imaging workflow.",
-                  "یہ لیب نتیجہ نہیں۔ مجاز عکس کا طریقۂ کار استعمال کریں۔",
+                  imaging ? "This is not an imaging result. Use the authorised laboratory workflow." : "This is not a laboratory result. Use the authorised imaging workflow.",
+                  imaging ? "یہ عکس نتیجہ نہیں۔ مجاز لیب کا طریقۂ کار استعمال کریں۔" : "یہ لیب نتیجہ نہیں۔ مجاز عکس کا طریقۂ کار استعمال کریں۔",
                 )}
               </p>
             )}

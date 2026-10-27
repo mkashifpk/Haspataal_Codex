@@ -84,6 +84,7 @@ const labels: Record<string, [string, string, string]> = {
   lab_send_outs: ['Samples sent to partner laboratories','شراکت دار لیب کو بھیجے گئے نمونے','↗'],
   lab_bench: ['Scanner-first lab bench','اسکینر سے لیب بنچ','⚗'],
   critical_results_doctor: ['Critical results to acknowledge','تسلیم کرنے والے اہم نتائج','!'],
+  critical_results_radiology: ["Critical results to tell","فوری بتانے والے اہم نتائج","!"],
   critical_results_verifier: ['Critical results to tell','فوری بتانے والے اہم نتائج','!'],
   critical_results_bench: ['Critical results to tell','فوری بتانے والے اہم نتائج','!'],
   queue_management: ["Queue management", "قطاروں کا انتظام", "≡"],
@@ -115,6 +116,7 @@ const frontDeskScreens = new Set([
   'imaging_quality_setup',
   'diagnostic_services_list',
   'critical_results_doctor',
+  'critical_results_radiology',
   'critical_results_bench',
   'critical_results_verifier',
   'lab_only_walkin',
@@ -756,7 +758,7 @@ export function App() {
     'imaging_quality_setup',
     'radiology_worklist',
     ...(user?.permissions.some(p => ['diagnostics.quality.view','lab.requisition.create','imaging.order.create','lab.requisition.view'].includes(p)) ? ['diagnostic_services_list'] : []),
-    ...(user?.permissions.includes('diagnostics.critical.view') ? ['critical_results_bench','critical_results_verifier','critical_results_doctor'] : []),
+    ...(user?.permissions.includes('diagnostics.critical.view') ? ['critical_results_bench','critical_results_verifier','critical_results_doctor','critical_results_radiology'] : []),
     ...(user?.permissions.some(p => ['lab.result.verify', 'lab.result.view'].includes(p)) ? ['lab_verification'] : []),
     ...(user?.permissions.includes("clinical.encounter.view") || user?.permissions.includes("clinical.encounter.create") ? ["consultation"] : []),
     ...(user?.permissions.includes("prescription.view") || user?.permissions.includes("prescription.create") ? ["eprescription"] : []),
@@ -799,7 +801,7 @@ export function App() {
         )))) &&
       est?.views.screens.find((v) => v.screen_id === id)?.view !== "hidden" &&
       (id !== "imaging_quality_setup" || ["full","open_work","records"].includes(est?.views.screens.find(v=>v.screen_id===id)?.view || "")) &&
-      (!["radiology_worklist","rx_queue","dispense","order_queries","otc","charity_override","lab_only_walkin","lab_bench","lab_send_outs","lab_verification","critical_results_bench","critical_results_verifier","critical_results_doctor"].includes(id) || ["full", "open_work", "records"].includes(est?.views.screens.find(v => v.screen_id === id)?.view || "")),
+      (!["critical_results_radiology","radiology_worklist","rx_queue","dispense","order_queries","otc","charity_override","lab_only_walkin","lab_bench","lab_send_outs","lab_verification","critical_results_bench","critical_results_verifier","critical_results_doctor"].includes(id) || ["full", "open_work", "records"].includes(est?.views.screens.find(v => v.screen_id === id)?.view || "")),
   );
   const view = est?.views.workspaces.find(
     (v) => v.workspace === workspace,
@@ -1164,6 +1166,7 @@ export function App() {
               {screen === 'radiology_worklist' && est && <RadiologyWorklist key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone}/>}
               {screen === 'lab_bench' && est && <LabBench key={user.user_id} user={user} connected={connected} stream={stream} establishment={est} timeZone={meta?.hospital_timezone}/>}
               {screen === 'lab_verification' && est && <LabVerification key={user.user_id} user={user} connected={connected} stream={stream} establishment={est} timeZone={meta?.hospital_timezone}/>}
+              {screen === 'critical_results_radiology' && est && <CriticalResultsBench screenId="critical_results_radiology" key={user.user_id} user={user} connected={connected} stream={stream} establishment={est} timeZone={meta?.hospital_timezone}/>}
               {screen === 'critical_results_verifier' && est && <CriticalResultsBench screenId="critical_results_verifier" key={user.user_id} user={user} connected={connected} stream={stream} establishment={est} timeZone={meta?.hospital_timezone}/>}
               {screen === 'critical_results_bench' && est && <CriticalResultsBench key={user.user_id} user={user} connected={connected} stream={stream} establishment={est} timeZone={meta?.hospital_timezone}/>}
               {screen === "patient_documents" && <PatientDocuments user={user} revision={revision} />}

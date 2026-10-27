@@ -20,6 +20,8 @@ export const recipientRoles = [
 ] as const;
 export const requiresReadBack = (means: string) =>
   means === "Telephone" || means === "InPerson";
+export const criticalSource = (screenId: string): "Lab" | "Imaging" =>
+  screenId === "critical_results_radiology" ? "Imaging" : "Lab";
 export function communicationBody(
   means: string,
   role: string,
@@ -72,6 +74,8 @@ export function criticalSnapshot(r: CriticalResultDetailOut): string {
     r.critical_result_id,
     r.source,
     r.result_id,
+    r.imaging_order_id,
+    r.requisition_id,
     r.patient_id,
     r.mrn,
     r.test_name,
@@ -84,10 +88,10 @@ export function criticalSnapshot(r: CriticalResultDetailOut): string {
     r.communications.map((c) => c.communication_id),
   ]);
 }
-export const benchCriticalWork = (rows: DiagnosticsWorklistItemOut[]) =>
+export const benchCriticalWork = (rows: DiagnosticsWorklistItemOut[], source: "Lab" | "Imaging" = "Lab") =>
   rows.filter(
     (r) =>
-      r.area === "Lab" &&
+      r.area === source &&
       ["CriticalToCommunicate", "PriorityDiseaseToNotify"].includes(r.kind),
   );
 export function criticalFilters(limit: string, from: string, to: string) {

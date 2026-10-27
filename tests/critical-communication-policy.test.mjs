@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createRequire} from 'node:module';
-import {communicationBody,criticalAccess,criticalFilters,criticalSnapshot,benchCriticalWork} from '../src/critical-communication-policy.ts';
-const {criticalAlarmRecord,criticalAlarmScreen}=createRequire(import.meta.url)('../electron/critical-alarm.cjs');
+import {communicationBody,criticalAccess,criticalFilters,criticalSnapshot,benchCriticalWork,criticalSource} from '../src/critical-communication-policy.ts';
+const {criticalAlarmRecord,criticalAlarmScreen,criticalAlarmSources}=createRequire(import.meta.url)('../electron/critical-alarm.cjs');
 test('communication requires actual recipient, a completed call and read-back for Telephone/InPerson',()=>{
  for(const means of ['Telephone','InPerson'])assert.throws(()=>communicationBody(means,'RequestingDoctor','DEMO clinician',false,'',true),/read the result back/);
  assert.throws(()=>communicationBody('Written','HealthAuthority','DEMO authority',false,'',false),/Tell the recipient first/);
@@ -46,5 +46,20 @@ test('native alarm uses the exact laboratory workspace service screen, denies un
  assert.equal(criticalAlarmScreen('lab_tech'),'critical_results_bench');
  assert.equal(criticalAlarmScreen('lab_verifier'),'critical_results_verifier');
  assert.equal(criticalAlarmScreen('doctor'),'critical_results_doctor');assert.equal(criticalAlarmScreen('anaesthesia'),'critical_results_doctor');
- for(const workspace of ['radiology','pharmacy','',undefined,'toString','__proto__'])assert.equal(criticalAlarmScreen(workspace),undefined);
+ for(const workspace of ['pharmacy','',undefined,'toString','__proto__'])assert.equal(criticalAlarmScreen(workspace),undefined);
+});
+
+
+test('Radiology critical work and alarm stay bound to Imaging, with exact imaging-order identity',()=>{
+ assert.equal(criticalSource('critical_results_radiology'),'Imaging');
+ assert.equal(criticalSource('critical_results_verifier'),'Lab');
+ const rows=[{area:'Imaging',kind:'CriticalToCommunicate'},{area:'Lab',kind:'CriticalToCommunicate'},{area:'Imaging',kind:'ImagingReportOverdue'},{area:'Imaging',kind:'PriorityDiseaseToNotify'}];
+ assert.deepEqual(benchCriticalWork(rows,'Imaging'),[rows[0],rows[3]]);
+ assert.equal(criticalAlarmScreen('radiology'),'critical_results_radiology');
+ assert.deepEqual(criticalAlarmSources('critical_results_radiology'),['Imaging']);
+ assert(criticalAlarmRecord({critical_result_id:5,source:'Imaging',status:'Open'},5,criticalAlarmSources('critical_results_radiology')));
+ assert.throws(()=>criticalAlarmRecord({critical_result_id:5,source:'Lab',status:'Open'},5,criticalAlarmSources('critical_results_radiology')));
+ assert.equal(criticalAlarmRecord({critical_result_id:5,source:'Imaging',status:'Communicated'},5,['Imaging']),false);
+ const r={critical_result_id:5,source:'Imaging',imaging_order_id:8,patient_id:3,row_version:1,communications:[]};
+ assert.notEqual(criticalSnapshot(r),criticalSnapshot({...r,imaging_order_id:9}));
 });
