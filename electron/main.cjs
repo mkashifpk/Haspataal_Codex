@@ -1107,7 +1107,7 @@ ipcMain.handle("terminal", async (event, action, args = {}) => {
         }
         return{ok:true,data:{opened:true}};
       }
-      const selected=await dialog.showSaveDialog(win,{defaultPath:args.path === '/diagnostics/services/pdf' ? 'Haspataal-diagnostic-services.pdf' : args.path === '/diagnostics/imaging-policy/pdf' ? 'Haspataal-imaging-policy.pdf' : `Clinical-document-${args.path.split("/")[2]}.pdf`,filters:[{name:"PDF",extensions:["pdf"]}]});
+      const selected=await dialog.showSaveDialog(win,{defaultPath:args.path === '/diagnostics/services/pdf' ? 'Haspataal-diagnostic-services.pdf' : args.path === '/diagnostics/imaging-policy/pdf' ? 'Haspataal-imaging-policy.pdf' : `Clinical-document-${args.path.split("/")[args.path.startsWith("/imaging/orders/") ? 3 : 2]}.pdf`,filters:[{name:"PDF",extensions:["pdf"]}]});
       if(!selected.canceled)fs.writeFileSync(selected.filePath,r.bytes);
       return {ok:true,data:{saved:!selected.canceled}};
     }

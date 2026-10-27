@@ -10,6 +10,116 @@ export type HelpPage = {
   faqUr: [string, string][];
 };
 export const help: Record<string, HelpPage> = {
+ radiology_worklist:{
+  title: "Imaging worklist",
+  titleUr: "عکس نگاری کی فہرست",
+  purpose: "During a busy radiology shift, the radiographer takes an actual order through identification, safety checks, examination and study linking; the authorised radiologist signs the final report, and the clinical team receives the real findings with the reporter’s stamp.",
+  purposeUr: "مصروف ریڈیالوجی شفٹ میں ریڈیوگرافر اصل آرڈر سے شناخت، حفاظت، معائنہ و مطالعہ جوڑتا؛ مجاز ریڈیالوجسٹ حتمی رپورٹ مہر کرتا اور طبی ٹیم اصل نتائج لیتی ہے۔ اردو مقامی جائزے تک مسودہ ہے۔",
+  steps: [
+    "Radiology → Imaging worklist. Radiographers process examinations; only permitted PMDC-registered radiologists with RadiologyReporting sign reports. Verify patient name/MRN, age/date of birth, flags, order, accession, site and side before acting. The accession is the exact number to enter on the modality console. No new patient, order or payment is created here.",
+    "Examinations to perform retains the server's emergency/due-time order. Examination status and Modality filter on the server; Find in this worklist searches only returned rows. Open examination loads the actual order and authoritative patient master. Refresh imaging rereads without saving; failed reads hide old data. Records mode hides the worklist/actions; Known imaging order ID reads permitted history. A merged identity must be reconciled with reception, never retargeted silently.",
+    "Schedule examination is a separate reviewed stage. Start examination asks for identity: scan Patient wristband barcode then Verify this patient wristband (Enter works), or ask name and MRN/date of birth and tick the two-identifier statement. Wrong band means STOP. Emergency exception is offered only for an actual emergency row and requires a factual note. Tick site/side only after checking against the order. When pregnancy question is required, ask and record status; Pregnant needs the decision and responsible clinician.",
+    "Complete examination asks whether contrast was given. If given, record actual agent/dose/route and the actual PMDC doctor present from Find the doctor present → Find doctor. Select the actual staff result, whose employee ID is the documented doctor ID; the server checks clinical eligibility. Never invent a doctor or an exposure. Cancel order requires the reason and is offered only at server-permitted stages; in-progress cancellation is unavailable.",
+    "Link PACS study uses Find by this accession with an empty body, or actual Orthanc study ID/DICOM UID from PACS. Never type example identifiers. Linking while InProgress completes the examination; confirm no contrast was given, otherwise record completion/contrast/doctor FIRST. Linking an unstarted order leaves safety checks and status outstanding. No configured PACS/viewer is a visible limitation; only an actual viewer URL opens on deliberate choice.",
+    "Enter final report is available after completion with imaging.report.enter. Enter3–20000characters and optionally select an active modality-compatible critical finding and/or a factual critical note (<=1000). The server checks PMDC/privilege. Review imaging action freezes patient/order/version/proposed values; Confirm imaging action rechecks actual actor, service, patient and order. A changed snapshot refuses before POST. A confirmed report is FINAL with its reporter stamp, no edit/delete.",
+    "A critical finding requires phoning the responsible doctor NOW using the real urgent process, then recording the communication in Critical results (Radiology). Saving a report neither makes a call nor records a communication. That separate screen is a later implementation; do not claim handover completed here. Final report output shows actual report/stamp. Print final report uses document printer; Save report PDF renders the signed payload; Preview/Save server PDF obtains original bytes. Failure never repeats the report or examination.",
+    "A lost reply locks the exact draft/dialog/navigation. All three writes are idempotent: explicitly Retry original request with identical key/body within24hours, or Read current result for the original order. Inspect actual stage/identity/report/stamp, then Result reviewed releases to current data without claiming success. Never create a replacement key after unknown outcome. Reconnect/events refresh lists without polling and preserve an open frozen draft. F1 returns focus/draft; EN/UR, both themes and shared100–250%zoom apply. Named human role/translation/device/late-data acceptance remains pending; only the human enters a Review code."
+  ],
+  stepsUr: [
+    "ریڈیالوجی سے عکس نگاری کی فہرست کھولیں۔ ریڈیوگرافر معائنے کرتے؛ مجاز پی ایم ڈی سی ریڈیالوجسٹ رپورٹ حتمی کرتا ہے۔ نام، ایم آر این، عمر/تاریخ پیدائش، انتباہ، آرڈر، ایکسیشن، جگہ و سمت چیک کریں۔ مشین پر یہی اصل ایکسیشن لکھیں۔ یہاں نیا مریض، آرڈر یا رقم نہیں بنتی۔",
+    "فہرست سرور کی ہنگامی/مقرر وقت ترتیب رکھتی ہے۔ حالت و طریقہ سرور شرط، مقامی تلاش صرف موصولہ سطروں میں۔ معائنہ کھولیں اصل آرڈر و مرکزی مریض پڑھتا۔ تازہ صرف پڑھتا، خطا پر پرانا مواد پوشیدہ۔ ریکارڈ میں فہرست/عمل نہیں، اصل آرڈر نمبر سے مجاز تاریخ۔ ضم شناخت استقبالیہ سے ملائیں، خاموشی سے مریض نہیں بدلتے۔",
+    "وقت مقرر الگ جائزہ شدہ مرحلہ۔ شروع میں پٹی اسکین کرکے اسی مریض کی پٹی چیک کریں، انٹر بھی کام کرتا؛ یا نام اور ایم آر این/تاریخ پیدائش پوچھ کر نشان دیں۔ غلط پٹی پر رکیں۔ اصل ہنگامی سطر پر نوٹ کے ساتھ استثنا۔ آرڈر سے جگہ/سمت ملانے کے بعد تصدیق دیں۔ حمل سوال لازم ہو تو پوچھ کر حالت، حاملہ پر فیصلہ و معالج درج کریں۔",
+    "مکمل کرتے وقت کانٹراسٹ دیا یا نہیں خود چنیں۔ دیا ہو تو اصل دوا، مقدار، راستہ اور واقعی موجود پی ایم ڈی سی ڈاکٹر کو تلاش سے چنیں۔ معاہدے میں ڈاکٹر نمبر اصل ملازم نمبر ہے؛ سرور طبی اہلیت چیک کرتا۔ فرضی ڈاکٹر یا ایکسپوژر نہیں۔ منسوخی وجہ اور صرف مجاز مرحلے؛ شروع معائنہ منسوخ نہیں۔",
+    "پیکس جوڑیں میں یہی ایکسیشن سرور تلاش کرے یا پیکس کا اصل آرتھینک/ڈائکوم نمبر لیں؛ مثال کے نمبر نہیں۔ جاری معائنہ سے ربط اسے مکمل کرتا؛ کانٹراسٹ نہیں دیا کی تصدیق، ورنہ پہلے مکمل میں دوا/ڈاکٹر درج کریں۔ غیر شروع آرڈر میں جانچ و حالت باقی۔ غائب پیکس/ویور واضح کمی؛ صرف اصل موجود ربط خود چن کر کھولیں۔",
+    "مکمل کے بعد رپورٹ اجازت سے حتمی متن3تا20000حروف۔ اختیاری فعال موزوں اہم نتیجہ یا1000حروف تک اصل نوٹ۔ سرور پی ایم ڈی سی/استحقاق چیک کرتا۔ جائزہ میں مریض، آرڈر، نسخہ اور قدر منجمد؛ تصدیق سے پہلے صارف، خدمت، مریض و آرڈر پھر پڑھتے۔ بدلا نسخہ ارسال سے پہلے رکتا۔ رپورٹ حتمی اور مصنف مہر، ترمیم/حذف نہیں۔",
+    "اہم نتیجہ پر اصل فوری طریقے سے ذمہ دار ڈاکٹر کو ابھی فون، پھر ریڈیالوجی اہم نتائج میں اصل اطلاع درج کریں۔ رپورٹ کال یا اطلاع نہیں کرتی۔ الگ صفحہ بعد کا کام؛ یہاں حوالگی مکمل فرض نہ کریں۔ رپورٹ و مہر اصل۔ دستاویز پرنٹر یا پی ڈی ایف، سرور اصل فائل پیش منظر/محفوظ الگ۔ خطا معائنہ یا رپورٹ نہیں دہراتی۔",
+    "جواب گم ہو تو اصل مسودہ، مکالمہ و جگہ مقفل۔ تینوں عمل محفوظ شناخت سے24گھنٹے صرف وہی اصل کلید/مواد کی واضح کوشش؛ یا اصل آرڈر کا موجودہ نتیجہ پڑھیں۔ حالت، شناخت، رپورٹ و مہر دیکھ کر جائزہ شدہ واپسی، کامیابی فرض نہیں۔ نامعلوم پر نئی کلید نہیں۔ واقعات/بحالی پر بغیر پولنگ فہرست تازہ، منجمد مسودہ محفوظ۔ ایف ون، اردو/انگریزی، دونوں تھیم اور100تا250زوم۔ انسانی کردار، ترجمہ، آلہ جانچ باقی؛ جائزہ کوڈ صرف انسان لکھے۔"
+  ],
+  faq: [
+    [
+      "What does a radiographer do here?",
+      "Open a real worklist order; verify identity, site/side and required pregnancy question; separately schedule/start/complete, record actual contrast/doctor, link the actual study and print an existing signed report. Report entry is hidden without imaging.report.enter; being a radiographer never grants reporting privilege."
+    ],
+    [
+      "What does the radiologist check before signing?",
+      "Check patient/MRN/accession/site, clinical indication, completed stage, actual images through an available viewer and the final text. Confirm only factual findings; the server requires PMDC registration and RadiologyReporting. Signing is final, with your stamp. There is no supported edit/delete after publication."
+    ],
+    [
+      "What if the wristband belongs to someone else or the patient is unidentified?",
+      "Stop on a mismatch; do not override it with a guessed ID. Recheck the actual patient and order. TwoIdentifiers requires asking/matching name plus MRN/date of birth. EmergencyOverride needs the server's actual emergency flag and a factual identity note, never a routine shortcut."
+    ],
+    [
+      "How do pregnancy and contrast checks work?",
+      "Use pregnancy_check_needed from the server, not guessed age arithmetic. Ask and record status; Pregnant needs the decision and who made it. Completion with contrast records actual agent/dose/route and the actual doctor from staff search. The contract uses employee_id as doctor_id; the server checks PMDC eligibility, never infer it from a name/title."
+    ],
+    [
+      "Can linking a study bypass safety checks or create a report?",
+      "No. An unstarted order keeps its stage after linking. A link during InProgress completes it; confirm no contrast, otherwise record completion/contrast/doctor first. Auto-find uses this exact accession. Manual identifiers must be actual PACS identifiers. A null viewer URL remains visibly unavailable, no invented link."
+    ],
+    [
+      "How do I communicate a critical imaging finding?",
+      "After factual critical finding selection/note and confirmed reporting, phone the responsible doctor immediately using the hospital urgent procedure. Keep the actual critical record/order ID and record communication in the separate Critical results (Radiology) workflow when available. A banner, saved report or print is not communication or acknowledgement."
+    ],
+    [
+      "What happens to a lost save or concurrent update?",
+      "The reviewed order/patient snapshot and original key/body stay frozen. Same-key explicit retry only inside24hours, or read this exact order and inspect actual state/report/stamp. Never automatically repeat or invent replacement keys. A fresh preflight detects prior changes but cannot make simultaneous unversioned status changes atomic; the server remains authoritative."
+    ],
+    [
+      "How do retired services, records and historical orders work?",
+      "Use server establishment views. Retiring completes existing work, Records shows permitted known orders/reports with no worklist or new progress actions. Preparing/Hidden is not a daily route. Final Reported and Cancelled orders are immutable here; historic IDs come from the actual record, not guessed ranges."
+    ],
+    [
+      "What do Print, Save report PDF and server PDF do?",
+      "They reread the actual signed payload/original file for the selected order. Print uses document printer; Save report PDF renders the real signed payload; server PDF preserves backend bytes. Cancellation/failure does not repeat a stage or report. No ZIP. Check name/MRN/accession/stamp on real paper before acceptance."
+    ],
+    [
+      "What should be reviewed by a human?",
+      "Create new synthetic upstream orders and exercise allowed stages/refusals/cancellation, real study linking, contrast/doctor, final and critical reports and downstream doctor handover. Test F1 draft/focus, all role FAQs, Urdu line breaks, both themes100–250%, actual scanner/printer and network recovery. Only the human starts/records/signs a portal review and enters its Review code."
+    ]
+  ],
+  faqUr: [
+    [
+      "ریڈیوگرافر یہاں کیا کرتا ہے؟",
+      "اصل فہرست آرڈر کھول کر شناخت، جگہ/سمت، لازم حمل سوال، الگ وقت/شروع/مکمل، اصل کانٹراسٹ/ڈاکٹر، مطالعہ جوڑ اور سابق دستخط شدہ رپورٹ پرنٹ۔ رپورٹ اجازت کے بغیر متن درج نہیں؛ کردار نام سے استحقاق نہیں۔"
+    ],
+    [
+      "ریڈیالوجسٹ مہر سے پہلے کیا دیکھے؟",
+      "مریض، ایم آر این، ایکسیشن، جگہ، طبی وجہ، مکمل حالت، دستیاب ویور کے اصل عکس اور حتمی متن۔ صرف اصل نتائج۔ سرور پی ایم ڈی سی اور رپورٹنگ استحقاق لازم مانگتا۔ مہر کے ساتھ حتمی، بعد ترمیم/حذف نہیں۔"
+    ],
+    [
+      "پٹی کسی اور کی ہو یا شناخت نہ ہو تو؟",
+      "غلط پٹی پر رکیں، فرضی نمبر سے نہیں بدلتے۔ اصل مریض/آرڈر چیک۔ دو شناخت میں نام اور ایم آر این/تاریخ پوچھ کر ملائیں۔ ہنگامی استثنا اصل سرور ہنگامی نشان و اصل نوٹ کے ساتھ، معمول کا مختصر راستہ نہیں۔"
+    ],
+    [
+      "حمل اور کانٹراسٹ جانچ کیسے؟",
+      "سرور کا حمل سوال نشان لیں، عمر سے خود حساب نہیں۔ پوچھ کر حالت، حاملہ پر فیصلہ/معالج۔ کانٹراسٹ پر اصل دوا، مقدار، راستہ اور واقعی موجود ڈاکٹر تلاش سے چنیں۔ معاہدے میں ڈاکٹر نمبر ملازم نمبر ہے؛ سرور اہلیت چیک کرتا، نام یا عہدے سے فرض نہیں۔"
+    ],
+    [
+      "مطالعہ جوڑنا جانچ یا رپورٹ کا بدل ہے؟",
+      "نہیں۔ غیر شروع کی حالت باقی۔ جاری سے ربط مکمل کرتا؛ کانٹراسٹ نہیں کی تصدیق، ورنہ پہلے مکمل/کانٹراسٹ/ڈاکٹر۔ خود تلاش یہی ایکسیشن، دستی نمبر اصل پیکس سے۔ خالی ویور ربط واضح غائب، فرضی ربط نہیں۔"
+    ],
+    [
+      "اہم نتیجہ کیسے پہنچاؤں؟",
+      "اصل اہم انتخاب/نوٹ و تصدیق شدہ رپورٹ کے بعد ذمہ دار ڈاکٹر کو اصل فوری طریقے سے ابھی فون۔ اصل اہم ریکارڈ/آرڈر رکھیں اور دستیاب الگ ریڈیالوجی اہم نتائج میں اطلاع درج۔ بینر، رپورٹ یا پرنٹ اطلاع یا تسلیم نہیں۔"
+    ],
+    [
+      "جواب گم یا بیک وقت تبدیلی ہو تو؟",
+      "اصل آرڈر/مریض جائزہ، کلید/مواد منجمد۔24گھنٹے صرف واضح اصل کوشش یا عین آرڈر پڑھ کر حالت، رپورٹ و مہر۔ خودکار دوبارہ یا نئی کلید نہیں۔ تازہ جانچ پہلے کی تبدیلی روکتی مگر عین بیک وقت غیر نسخہ مراحل کو جوہری قفل نہیں بناتی؛ سرور فیصلہ کرتا۔"
+    ],
+    [
+      "ریٹائر خدمت یا پرانے آرڈر؟",
+      "سرور منظر لیں۔ ریٹائرنگ موجودہ کام، ریکارڈ میں مجاز اصل نمبر/رپورٹ، فہرست یا نیا مرحلہ نہیں۔ تیاری/پوشیدہ روزانہ راستہ نہیں۔ شائع/منسوخ یہاں ناقابل ترمیم۔ اصل ریکارڈ نمبر لیں، فرضی حد نہیں۔"
+    ],
+    [
+      "پرنٹ اور پی ڈی ایف کیا کرتے؟",
+      "اصل منتخب دستخط شدہ رپورٹ/سرور فائل پھر پڑھتے۔ دستاویز پرنٹر، اصل مواد سے پی ڈی ایف یا سرور اصل بائٹس الگ۔ منسوخی/خرابی مرحلہ یا رپورٹ نہیں دہراتی۔ زپ نہیں۔ کاغذ پر نام، ایم آر این، ایکسیشن و مہر چیک کریں۔"
+    ],
+    [
+      "انسان کیا جانچے؟",
+      "نئے فرضی اصل آرڈر سے مراحل، انکار، منسوخی، اصل مطالعہ، کانٹراسٹ/ڈاکٹر، حتمی/اہم رپورٹ و معالج حوالگی۔ ایف ون مسودہ/فوکس، تمام کردار سوالات، اردو، دونوں تھیم100تا250، اصل اسکینر/پرنٹر و رابطہ خطا۔ پورٹل جائزہ، کوڈ و دستخط صرف انسان۔"
+    ]
+  ]
+},
  imaging_quality_setup:{
   title:'Imaging turnaround, critical findings and policy',titleUr:'عکس نگاری کی مدت، اہم نتائج اور پالیسی',
   purpose:'The radiology lead maintains documented response targets and critical findings before staff use them; authorised radiographers read the same setup and obtain the official policy. Done means the exact intended configuration is confirmed on the server, then printed and approved by the responsible human.',

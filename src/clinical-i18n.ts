@@ -1,5 +1,6 @@
 // Draft clinical interface vocabulary; native Urdu/clinical review remains pending.
 export const clinicalUr:Record<string,string>={
+ Scheduled:"وقت مقرر",InProgress:"جاری",Outsourced:"بیرونی مرکز کو",NotPregnant:"حاملہ نہیں",Pregnant:"حاملہ",Unknown:"نامعلوم",WristbandScan:"پٹی اسکین",TwoIdentifiers:"دو شناخت",EmergencyOverride:"ہنگامی شناخت استثنا",
  Immunization:'حفاظتی ٹیکے',FamilyPlanning:'خاندانی منصوبہ بندی',Tuberculosis:'تپ دق',Malaria:'ملیریا',Dengue:'ڈینگی',
  OPD:'بیرونی مریض',FollowUp:'فالو اپ',ER:'ہنگامی شعبہ',IPD:'داخل مریض',CodeRed:'کوڈ ریڈ',Procedure:'طریقہ کار',Standard:'معمول کا داخلہ',Planned:'طے شدہ داخلہ',Local:'مقامی',Sedation:'سکون آور',Regional:'علاقائی',General:'مکمل',
  ManagedAtHome:'گھر پر نگہداشت',AskedToAttend:'ہسپتال آنے کو کہا',Referred:'حوالہ دیا',VerbalObtained:'زبانی رضامندی حاصل',Declined:'معائنہ مسترد',NotExamined:'معائنہ نہیں کیا',

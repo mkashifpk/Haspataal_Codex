@@ -1,0 +1,16 @@
+{
+  "implementation_id": 1,
+  "agent": "Codex/functions",
+  "build": "8703fe3 + radiology_worklist working tree",
+  "request_id": "radiology-contrast-doctor-lookup-20261027",
+  "kind": "MissingWorkflow",
+  "severity": "Medium",
+  "screen_id": "radiology_worklist",
+  "endpoint": "POST /imaging/orders/{order_id}/status",
+  "title": "Radiographer cannot look up the clinical doctor ID required to record contrast safely",
+  "expected": "Provide a permitted read-only picker/lookup of actual doctors (clinical doctor_id, display name, PMDC registration/eligibility) to imaging.order.update users, or document an existing suitable endpoint in radiology_worklist's bundle. Completed with contrast requires contrast_doctor_id naming the PMDC doctor physically present (MSDS AAC10/13). Never infer clinical doctor_id from employee_id.",
+  "actual": "The status contract requires contrast_doctor_id, but the screen bundle has no doctor lookup. GET /staff/lookup returns employee_id/emp_number/name/designation/department only. GET /ot/privileges is unavailable to radiographers/radiologists by its own access list and is not a doctor directory. Finance service catalogue exposes doctor_id only for catalogued services and has no PMDC registration, not a complete clinical doctor picker. Searches doctor/doctors/physician/consultant/clinical privileges did not identify a suitable permitted lookup. Frontend can accept an actual known hospital-confirmed ID but cannot offer a reliable complete selection or convert staff IDs.",
+  "steps": "As demo.radiographer GET /staff/lookup?q=Ahmed&limit=5. Inspect returned fields and compare with ImagingStatusIn.contrast_doctor_id. Read radiology_worklist bundle endpoints and /ot/privileges access. Do not send a guessed contrast doctor ID.",
+  "evidence": "DEV build2026-10-27T06:11:24.313207+00:00 contract8ad8456c41b87dd0031e. sandbox_call GET /staff/lookup status200 request_id ade9ef17841946388a142f1e8e705846: staff employee_id10, no doctor_id/PMDC field. Schema lists employee_id,emp_number,full_name,designation,department_name only. No care/exposure/contrast write performed for this finding.",
+  "workflow": "radiology_worklist, MSDS AAC10/13, rule:05eb31e266"
+}

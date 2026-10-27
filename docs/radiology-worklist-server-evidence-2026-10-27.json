@@ -1,0 +1,403 @@
+{
+  "date": "2026-10-27",
+  "agent": "Codex/functions",
+  "baseline": "8703fe3",
+  "backend_build": "2026-10-27T06:11:24.313207+00:00",
+  "contract": "8ad8456c41b87dd0031e",
+  "rubric": "f18448c114ef",
+  "run": "DEMO-RADIOLOGY-1793095684419",
+  "records": {
+    "patient_id": 3,
+    "mrn": "MRN-2026-000003",
+    "ticket_id": 1,
+    "ticket_status": "Deferred after test cleanup",
+    "queue_id": 1,
+    "opd_card_payment_id": 3,
+    "opd_invoice_id": 3,
+    "opd_amount": 1500,
+    "orders": {
+      "primary": {
+        "id": 1,
+        "status": "Reported",
+        "critical_result_id": 1
+      },
+      "cancel": {
+        "id": 2,
+        "status": "Cancelled"
+      },
+      "contrast": {
+        "id": 3,
+        "status": "Reported",
+        "contrast_doctor_id": 10,
+        "critical_result_id": 2
+      },
+      "pacs": {
+        "id": 4,
+        "status": "Scheduled",
+        "row_version": 2
+      },
+      "event": {
+        "id": 5,
+        "status": "Ordered"
+      }
+    }
+  },
+  "sandbox_writes": {
+    "registration": {
+      "method": "POST",
+      "path": "/reception/registrations",
+      "idempotency_key": "e70e2745-8c27-4027-b001-793095709824",
+      "state": "confirmed",
+      "status": 201,
+      "request_id": "84a21618231d438ca219d446fb83e628"
+    },
+    "call": {
+      "method": "POST",
+      "path": "/opd-queues/1/call",
+      "state": "confirmed",
+      "status": 200,
+      "request_id": "6ac10b3dec684adc8d9d6dfef6595c60"
+    },
+    "primary": {
+      "method": "POST",
+      "path": "/imaging/orders",
+      "idempotency_key": "e70e2745-8c27-4027-b010-793095776834",
+      "state": "confirmed",
+      "status": 201,
+      "request_id": "5dbacd276dfa44b2a79924d67692f38b",
+      "imaging_order_id": 1
+    },
+    "cancel": {
+      "method": "POST",
+      "path": "/imaging/orders",
+      "idempotency_key": "e70e2745-8c27-4027-b011-793095777827",
+      "state": "confirmed",
+      "status": 201,
+      "request_id": "43f4c6dc9eb14409a8f209115352043a",
+      "imaging_order_id": 2
+    },
+    "contrast": {
+      "method": "POST",
+      "path": "/imaging/orders",
+      "idempotency_key": "e70e2745-8c27-4027-b012-793095778901",
+      "state": "confirmed",
+      "status": 201,
+      "request_id": "1acd55d1b227403caa9b9c717673d026",
+      "imaging_order_id": 3
+    },
+    "link": {
+      "method": "POST",
+      "path": "/imaging/orders",
+      "idempotency_key": "e70e2745-8c27-4027-b013-793095779954",
+      "state": "confirmed",
+      "status": 201,
+      "request_id": "128cc6d047ac48f4b41937acbfba938c",
+      "imaging_order_id": 4
+    },
+    "refuseIdentity": {
+      "method": "POST",
+      "path": "/imaging/orders/4/status",
+      "idempotency_key": "e70e2745-8c27-4027-b106-793096056296",
+      "state": "refused",
+      "status": 422,
+      "request_id": "d1ffdde2003546e3a48bdd262ed71600",
+      "error": {
+        "code": "PATIENT_IDENTITY_REQUIRED",
+        "message": "Scan the wristband (wristband_code), or confirm two identifiers (identity_check TwoIdentifiers)",
+        "details": {},
+        "retryable": false,
+        "retry_after_seconds": null
+      }
+    },
+    "refuseSite": {
+      "method": "POST",
+      "path": "/imaging/orders/4/status",
+      "idempotency_key": "e70e2745-8c27-4027-b107-793096059742",
+      "state": "refused",
+      "status": 422,
+      "request_id": "0553505c5feb4a5cabde13db20f2fead",
+      "error": {
+        "code": "IMAGING_SAFETY_CHECK_REQUIRED",
+        "message": "Confirm the site and side against the order (site_confirmed)",
+        "details": {},
+        "retryable": false,
+        "retry_after_seconds": null
+      }
+    },
+    "refusePregnancy": {
+      "method": "POST",
+      "path": "/imaging/orders/3/status",
+      "idempotency_key": "e70e2745-8c27-4027-b108-793096062451",
+      "state": "refused",
+      "status": 422,
+      "request_id": "0931b9e05f32497897abcc3189b7794c",
+      "error": {
+        "code": "IMAGING_SAFETY_CHECK_REQUIRED",
+        "message": "Ask whether the patient may be pregnant (pregnancy_status) before ionising radiation",
+        "details": {},
+        "retryable": false,
+        "retry_after_seconds": null
+      }
+    },
+    "liveOrder": {
+      "method": "POST",
+      "path": "/imaging/orders",
+      "idempotency_key": "e70e2745-8c27-4027-b021-793096940858",
+      "state": "confirmed",
+      "status": 201,
+      "request_id": "c27244dfef1144859832608849c46358",
+      "imaging_order_id": 5
+    },
+    "concurrentSchedule": {
+      "method": "POST",
+      "path": "/imaging/orders/4/status",
+      "idempotency_key": "e70e2745-8c27-4027-b022-793096976769",
+      "state": "confirmed",
+      "status": 200,
+      "request_id": "3e1a741ce2cd479aa8456a1440fc039d",
+      "imaging_order_id": 4
+    },
+    "eventReport": {
+      "method": "POST",
+      "path": "/imaging/orders/3/report",
+      "idempotency_key": "e70e2745-8c27-4027-b023-793097051563",
+      "state": "confirmed",
+      "status": 200,
+      "request_id": "9b846879e68b4f37b1d88c32cf4a94ee",
+      "imaging_order_id": 3
+    },
+    "deferFixture": {
+      "method": "POST",
+      "path": "/opd-tickets/1/defer",
+      "state": "confirmed",
+      "status": 200,
+      "request_id": "f7bc9d79ef2f4c8cb65d8d3f14af78cb"
+    }
+  },
+  "server_refusals": {
+    "noReport": {
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/imaging/orders/1/report/print-payload",
+        "as_user": "demo.radiographer",
+        "query": null,
+        "body": null,
+        "idempotency_key": null
+      },
+      "status": 409,
+      "ms": 637,
+      "request_id": "1fbda90151c34e6f8d24a18b72a08cb9",
+      "body": {
+        "error": {
+          "code": "IMAGING_REPORT_NOT_READY",
+          "message": "The study is not reported yet.",
+          "details": {
+            "status": "Ordered"
+          },
+          "retryable": false,
+          "retry_after_seconds": null
+        },
+        "request_id": "1fbda90151c34e6f8d24a18b72a08cb9"
+      },
+      "explain": {
+        "http_status": 409,
+        "retryable": false,
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      }
+    },
+    "cashier": {
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/imaging/worklist",
+        "as_user": "demo.cashier",
+        "query": null,
+        "body": null,
+        "idempotency_key": null
+      },
+      "status": 403,
+      "ms": 793,
+      "request_id": "0006107ee56d43289d72bb993b078fc9",
+      "body": {
+        "error": {
+          "code": "FORBIDDEN",
+          "message": "Missing permission: imaging.order.update",
+          "details": {
+            "required": [
+              "imaging.order.update"
+            ],
+            "any_of": false
+          },
+          "retryable": false,
+          "retry_after_seconds": null
+        },
+        "request_id": "0006107ee56d43289d72bb993b078fc9"
+      },
+      "explain": {
+        "http_status": 403,
+        "retryable": false,
+        "ui_action": "Explain and hide the action (check x-permissions)."
+      }
+    }
+  },
+  "events": {
+    "cursor_before": 129,
+    "radiographer": {
+      "as_user": "demo.radiographer",
+      "since_event_id": 129,
+      "events": [
+        {
+          "type": "event",
+          "event_id": 130,
+          "event_type": "imaging.order.created",
+          "priority": "normal",
+          "created_at": "2026-10-27T10:29:02.832417+00:00",
+          "replay": true,
+          "payload": {
+            "modality": "Ultrasound",
+            "priority": "Routine",
+            "imaging_order_id": 5
+          }
+        },
+        {
+          "type": "event",
+          "event_id": 131,
+          "event_type": "critical_result.updated",
+          "priority": "critical",
+          "created_at": "2026-10-27T10:30:54.700163+00:00",
+          "replay": true,
+          "payload": {
+            "change": "Opened",
+            "source": "Imaging",
+            "status": "Open",
+            "patient_id": 3,
+            "admission_id": null,
+            "critical_number": "CR-2026-00002",
+            "critical_result_id": 2
+          }
+        }
+      ],
+      "count": 2,
+      "cursor": 131,
+      "next": "pass cursor as since_event_id after your next sandbox_call to see what it caused"
+    },
+    "doctor": {
+      "as_user": "demo.doctor",
+      "since_event_id": 129,
+      "events": [
+        {
+          "type": "event",
+          "event_id": 131,
+          "event_type": "critical_result.updated",
+          "priority": "critical",
+          "created_at": "2026-10-27T10:30:54.700163+00:00",
+          "replay": true,
+          "payload": {
+            "change": "Opened",
+            "source": "Imaging",
+            "status": "Open",
+            "patient_id": 3,
+            "admission_id": null,
+            "critical_number": "CR-2026-00002",
+            "critical_result_id": 2
+          }
+        },
+        {
+          "type": "event",
+          "event_id": 133,
+          "event_type": "imaging.report.ready",
+          "priority": "critical",
+          "created_at": "2026-10-27T10:30:54.700163+00:00",
+          "replay": true,
+          "payload": {
+            "patient_id": 3,
+            "imaging_order_id": 3
+          }
+        }
+      ],
+      "count": 2,
+      "cursor": 133,
+      "next": "pass cursor as since_event_id after your next sandbox_call to see what it caused"
+    }
+  },
+  "pacs_reconciliation": {
+    "imaging_order_id": 4,
+    "order_number": "IMG-2026-00004",
+    "accession_number": "A9FE567BE538B",
+    "patient_id": 3,
+    "ticket_id": 1,
+    "admission_id": null,
+    "requester_doctor_id": 10,
+    "modality": "MRI",
+    "body_part": "Synthetic research-only test context",
+    "clinical_indication": "DEMO-RADIOLOGY-1793095684419 synthetic software test only; no actual imaging or care",
+    "service_id": null,
+    "price_at_order": null,
+    "priority": "Routine",
+    "laterality": "NotApplicable",
+    "transport": "Wheelchair",
+    "escort": "Nurse",
+    "status": "Ordered",
+    "identity_check": null,
+    "identity_note": null,
+    "site_confirmed": false,
+    "pregnancy_status": null,
+    "pregnancy_note": null,
+    "checked_by": null,
+    "started_at": null,
+    "contrast": null,
+    "contrast_doctor_id": null,
+    "completed_at": null,
+    "orthanc_study_id": null,
+    "study_instance_uid": null,
+    "partner_id": null,
+    "outsourced_at": null,
+    "external_reporter": null,
+    "report_text": null,
+    "reported_by": null,
+    "reported_at": null,
+    "critical_finding_id": null,
+    "critical_finding_note": null,
+    "cancel_reason": null,
+    "ordered_by": 11,
+    "ordered_at": "2026-10-27T10:09:41.710332+00:00",
+    "perform_alerted_at": null,
+    "report_alerted_at": null,
+    "row_version": 1,
+    "patient_name": "DEMO-RADIOLOGY-1793095684419",
+    "mrn": "MRN-2026-000003",
+    "gender": "female",
+    "age_years": 28,
+    "doctor_name": "Dr. Ahmed Khan",
+    "reported_by_name": null,
+    "reported_stamp": null,
+    "checked_by_name": null,
+    "contrast_doctor_name": null,
+    "partner_name": null,
+    "critical_finding_name": null,
+    "critical_result_id": null,
+    "perform_due_at": "2026-10-30T10:09:41.710332+00:00",
+    "report_due_at": null,
+    "pregnancy_check_needed": false,
+    "viewer_url": null
+  },
+  "backend_reports": [
+    {
+      "id": 31,
+      "status": "New",
+      "response": "",
+      "request_id": "radiology-dev-pacs-acceptance-20261027"
+    },
+    {
+      "id": 30,
+      "status": "New",
+      "response": "",
+      "request_id": "radiology-contrast-doctor-lookup-20261027"
+    }
+  ],
+  "limits": [
+    "Optional DEV PACS disabled, ORTHANC_UNAVAILABLE503; no fake UID/study/viewer. Positive link/viewer/auto-completion remains pending31; endpoint/link-dependent rule not proposed.",
+    "Report30 initial employee/doctor-ID distinction was too broad. Exact RegistrationIn contract identifies doctor IDs as employee IDs; actual staff picker and server accepted contrast doctor10 resolve frontend concern. Source correction documented; MCP has no report edit/comment/withdraw tool. Backend may clarify/close it.",
+    "No physical imaging, contrast, care, real money, external phone/clinical communication or paper print. Critical entries1/2 are clearly synthetic and remain Open; no communication fabricated.",
+    "Full named role/translation/editor/busy-hour/device and service transition acceptance pending. No Review code entered or human review started/signed. q:tested/f1_help/role_faq/zoom/fresh_data/character/editor not proposed."
+  ]
+}

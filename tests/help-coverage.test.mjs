@@ -4,6 +4,10 @@ import fs from "node:fs";
 import { checkHelp } from "../scripts/check-help.mjs";
 const read = (file) => fs.readFileSync(file, "utf8");
 
+test('Imaging worklist cannot ship an unmapped clinical confirmation',()=>{
+ assert.throws(()=>checkHelp({media:false,read:file=>file==='src/screens/RadiologyWorklist.tsx'?read(file).replace('data-help="radiology.confirm"',''):read(file)}),/missing\/broken control help mapping/);
+});
+
 test('Critical communication cannot ship an unmapped confirmation or a clinical acknowledgement action',()=>{
  assert.throws(()=>checkHelp({media:false,read:file=>file==='src/screens/CriticalResultsBench.tsx'?read(file).replace('data-help="critical.confirm"',''):read(file)}),/missing\/broken control help mapping/);
  const source=read('src/screens/CriticalResultsBench.tsx');assert(!source.includes('/acknowledge'));assert(!source.includes('/payments'));assert(!source.includes('price_at_order'));
@@ -22,7 +26,7 @@ test("separately authored registration help must retain its Urdu title", () => {
 });
 test("all delivered controls, tasks, role guides and FAQ seeds have bilingual help", () => {
   const result = checkHelp({ media: false });
-  assert.equal(result.screens, 44);
+  assert.equal(result.screens, 45);
   assert(result.controls > 90);
   assert.equal(result.workspaceGuides, 30);
 });

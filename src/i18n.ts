@@ -9,6 +9,21 @@ export function setLanguage(value: string) {
   language = value;
 }
 const ur: Record<string, string> = {
+ "Imaging worklist":"عکس نگاری کی فہرست",
+ "This order no longer allows that action. Refresh and review it again.":"آرڈر اب یہ عمل نہیں مانتا۔ تازہ کرکے پھر جائزہ لیں۔",
+ "Enter a report of at least 3 characters.":"رپورٹ کم از کم3حروف میں لکھیں۔",
+ "Check and confirm the site and side against the order.":"آرڈر سے جگہ اور سمت ملائیں اور تصدیق کریں۔",
+ "Ask and record pregnancy status before the examination.":"معائنہ سے پہلے حمل پوچھ کر حالت درج کریں۔",
+ "Record the pregnancy decision and who made it.":"حمل کا فیصلہ اور فیصلہ کرنے والا درج کریں۔",
+ "Record whether contrast was given.":"کانٹراسٹ دیا گیا یا نہیں درج کریں۔",
+ "Record the actual contrast agent, dose and route.":"اصل کانٹراسٹ دوا، مقدار اور راستہ درج کریں۔",
+ "Select the actual PMDC doctor physically present from the staff search.":"واقعی موجود پی ایم ڈی سی ڈاکٹر عملے کی تلاش سے چنیں۔",
+ "Explain why this examination is cancelled.":"معائنہ منسوخی کی وجہ لکھیں۔",
+ "Verify this patient’s wristband before starting.":"شروع سے پہلے اسی مریض کی پٹی چیک کریں۔",
+ "The critical finding is unavailable for this modality. Refresh the list.":"اس طریقے کا اہم نتیجہ دستیاب نہیں۔ فہرست تازہ کریں۔",
+ "Enter an actual study identifier from PACS or choose automatic accession lookup.":"اصل پیکس مطالعہ نمبر دیں یا خود ایکسیشن تلاش چنیں۔",
+ "Confirm that no contrast was given before completing by study link. If contrast was given, record completion with its doctor first.":"مطالعہ ربط سے مکمل کرنے سے پہلے کانٹراسٹ نہیں دیا کی تصدیق کریں؛ دیا ہو تو پہلے مکمل اور ڈاکٹر درج کریں۔",
+ "Identify the patient with the wristband or two asked and matched identifiers. Emergency override needs an actual emergency and a factual note.":"پٹی یا دو پوچھے و ملائے شناخت سے مریض چیک۔ ہنگامی استثنا کو اصل ہنگامی حالت و نوٹ لازم۔",
  "Imaging turnaround, critical findings and policy":"عکس نگاری کی مدت، اہم نتائج اور پالیسی",
  "Enter whole minutes from 1 to 43200 in every target.":"ہر ہدف میں1تا43200صحیح منٹ دیں۔",
  "Emergency targets cannot exceed the corresponding routine targets.":"ہنگامی ہدف متعلقہ معمول ہدف سے زیادہ نہیں ہو سکتا۔",

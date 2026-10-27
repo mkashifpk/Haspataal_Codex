@@ -1,0 +1,16 @@
+{
+  "implementation_id": 1,
+  "agent": "Codex/functions",
+  "build": "radiology_worklist index-CveNioXZ.js",
+  "request_id": "radiology-dev-pacs-acceptance-20261027",
+  "kind": "MissingWorkflow",
+  "severity": "Low",
+  "screen_id": "radiology_worklist",
+  "endpoint": "POST /imaging/orders/{order_id}/link-study",
+  "title": "DEV acceptance prerequisite: optional PACS is disabled, no real synthetic study available for link test",
+  "expected": "For positive DEV acceptance of radiology_worklist study linking and doctor viewer handover, provide/enable a synthetic-only Orthanc test fixture matching an owned order accession, or confirm this deployment intentionally has no PACS and the positive integration check is N/A until hospital configuration. Do not create a local fake study or guessed ID.",
+  "actual": "Auto-find for a fresh owned synthetic order answers503 ORTHANC_UNAVAILABLE, message PACS integration is disabled (ORTHANC_ENABLED=false). This is documented expected OPTIONAL-integration behaviour in integrations guide, not a claim of a backend product bug. UI preserves the order/draft and shows the exact refusal with safe original-order recovery; positive linking/viewer/auto-completion cannot be validated on this DEV deployment. The endpoint-specific errors list also omits this documented refusal.",
+  "steps": "Fresh synthetic own MRI imaging order4 (run DEMO-RADIOLOGY-1793095684419). demo.radiographer POST /imaging/orders/4/link-study body{} with original key334f920d-2e04-4692-a949-cacf7697f13e ONE time. Read GET /imaging/orders/4: Ordered version1, study IDs/viewer null. Do not repeat/link guessed recorded example IDs.",
+  "evidence": "Real Electron traced503 request_id895810da2dd9404ab561ab6a62ee308c. GET original order200 confirms stillOrdered v1/nullIDs. Guide integrations explicitly says ORTHANC_ENABLED off by default and this error expected. No exposure, contrast, external patient image, actual money or manual PACS configuration changed.",
+  "workflow": "radiology_worklist positive study-link acceptance; integrations guide optional PACS"
+}
