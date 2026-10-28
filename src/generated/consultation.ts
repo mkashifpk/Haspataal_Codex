@@ -3,11 +3,8 @@
 import { api } from "./api";
 
 const withQuery = (path: string, q?: Record<string, unknown>) => {
-  const s = new URLSearchParams(
-    Object.entries(q ?? {})
-      .filter(([, v]) => v !== undefined && v !== null)
-      .map(([k, v]) => [k, String(v)]),
-  ).toString();
+  const s = new URLSearchParams(Object.entries(q ?? {}).filter(([, v]) => v !== undefined && v !== null)
+    .map(([k, v]) => [k, String(v)])).toString();
   return s ? `${path}?${s}` : path;
 };
 
@@ -136,15 +133,7 @@ export interface EncounterDetailOut {
 
 export interface EncounterCorrectionOut {
   correction_id: number;
-  field:
-    | "chief_complaint"
-    | "history"
-    | "examination"
-    | "diagnosis"
-    | "clinical_note"
-    | "plan"
-    | "procedure"
-    | "general";
+  field: "chief_complaint" | "history" | "examination" | "diagnosis" | "clinical_note" | "plan" | "procedure" | "general";
   correction_text: string;
   correction_reason: string;
   corrected_by: number;
@@ -156,21 +145,7 @@ export interface EncounterCorrectionOut {
 export interface PatientDocumentOut {
   document_id: number;
   patient_id: number;
-  doc_type:
-    | "Photo"
-    | "CNIC"
-    | "PanelCard"
-    | "Consent"
-    | "ReferralLetter"
-    | "DeathCertificate"
-    | "AutopsyReport"
-    | "PostMortemReport"
-    | "MedicoLegalReport"
-    | "LabReport"
-    | "Imaging"
-    | "DischargeSummary"
-    | "Prescription"
-    | "Other";
+  doc_type: "Photo" | "CNIC" | "PanelCard" | "Consent" | "ReferralLetter" | "DeathCertificate" | "AutopsyReport" | "PostMortemReport" | "MedicoLegalReport" | "LabReport" | "Imaging" | "DischargeSummary" | "Prescription" | "Other";
   title: string | null;
   content_type: "application/pdf" | "image/jpeg" | "image/png";
   size_bytes: number;
@@ -268,15 +243,7 @@ export interface ProcedurePatch {
 }
 
 export interface EncounterCorrectionIn {
-  field?:
-    | "chief_complaint"
-    | "history"
-    | "examination"
-    | "diagnosis"
-    | "clinical_note"
-    | "plan"
-    | "procedure"
-    | "general";
+  field?: "chief_complaint" | "history" | "examination" | "diagnosis" | "clinical_note" | "plan" | "procedure" | "general";
   correction_text: string;
   correction_reason: string;
 }
@@ -309,15 +276,7 @@ export interface AdmissionSummaryOut {
   admission_id: number;
   admission_number: string;
   patient_id: number;
-  status:
-    | "AdmissionPending"
-    | "Waitlisted"
-    | "BedReserved"
-    | "CodeRedActive"
-    | "Admitted"
-    | "DischargeInProgress"
-    | "Discharged"
-    | "Cancelled";
+  status: "AdmissionPending" | "Waitlisted" | "BedReserved" | "CodeRedActive" | "Admitted" | "DischargeInProgress" | "Discharged" | "Cancelled";
   admission_type: "Standard" | "Emergency" | "CodeRed" | "Overflow" | "Planned";
   ward_name: string | null;
   bed_label: string | null;
@@ -331,13 +290,7 @@ export interface PrescriptionSummaryOut {
   patient_id: number;
   source: "OPD" | "IPD" | "CodeRed" | "ER";
   destination: "HospitalPharmacy" | "ExternalMarket";
-  status:
-    | "Active"
-    | "PartiallyDispensed"
-    | "FullyDispensed"
-    | "Cancelled"
-    | "Replaced"
-    | "ExternalPrinted";
+  status: "Active" | "PartiallyDispensed" | "FullyDispensed" | "Cancelled" | "Replaced" | "ExternalPrinted";
   created_at: string;
   prescriber_name: string;
 }
@@ -370,26 +323,8 @@ export interface OpdTicketDetailOut {
   department_name: string | null;
   service_id: number | null;
   source: "WalkIn" | "Emergency" | "CodeRed" | "Referred" | "ReturnVisit";
-  status:
-    | "Issued"
-    | "Waiting"
-    | "InConsultation"
-    | "Examined"
-    | "Completed"
-    | "Deferred"
-    | "Expired"
-    | "Forfeited"
-    | "Refunded"
-    | "Void"
-    | "Cancelled";
-  payment_status:
-    | "Unpaid"
-    | "PartiallyPaid"
-    | "Paid"
-    | "CreditAuthorized"
-    | "Waivered"
-    | "Refunded"
-    | "PanelBilled";
+  status: "Issued" | "Waiting" | "InConsultation" | "Examined" | "Completed" | "Deferred" | "Expired" | "Forfeited" | "Refunded" | "Void" | "Cancelled";
+  payment_status: "Unpaid" | "PartiallyPaid" | "Paid" | "CreditAuthorized" | "Waivered" | "Refunded" | "PanelBilled";
   approval_lock: "None" | "RefundPending" | "WaiverPending" | "CreditPending";
   gross_amount: number;
   discount_amount: number;
@@ -428,14 +363,7 @@ export interface OpdQueueEntryOut {
   token_no: number;
   token_date: string;
   priority: number;
-  status:
-    | "Active"
-    | "Suspended"
-    | "Deferred"
-    | "Rerouted"
-    | "Completed"
-    | "Cancelled"
-    | "Expired";
+  status: "Active" | "Suspended" | "Deferred" | "Rerouted" | "Completed" | "Cancelled" | "Expired";
   queued_at: string;
   called_at: string | null;
   rerouted_from_queue_id: number | null;
@@ -445,8 +373,7 @@ export interface OpdQueueEntryOut {
 export interface InvoiceDetailOut {
   invoice_id: number;
   invoice_no: string;
-  invoice_type:
-    "OPD" | "IPD" | "Pharmacy" | "Lab" | "Imaging" | "OT" | "OTC" | "Other";
+  invoice_type: "OPD" | "IPD" | "Pharmacy" | "Lab" | "Imaging" | "OT" | "OTC" | "Other";
   patient_id: number | null;
   admission_id: number | null;
   ticket_id: number | null;
@@ -463,15 +390,7 @@ export interface InvoiceDetailOut {
   waiver_amount: number;
   waiver_dispensed_amount: number;
   credit_amount: number;
-  status:
-    | "Draft"
-    | "Open"
-    | "PartiallyPaid"
-    | "Paid"
-    | "CreditAuthorized"
-    | "Waivered"
-    | "Refunded"
-    | "Cancelled";
+  status: "Draft" | "Open" | "PartiallyPaid" | "Paid" | "CreditAuthorized" | "Waivered" | "Refunded" | "Cancelled";
   /** Locked while an approval (waiver, credit, refund) is pending */
   is_locked: boolean;
   locked_reason: string | null;
@@ -485,16 +404,7 @@ export interface InvoiceDetailOut {
 
 export interface InvoiceLineOut {
   invoice_item_id: number;
-  line_type:
-    | "Consultation"
-    | "Service"
-    | "Drug"
-    | "LabTest"
-    | "Imaging"
-    | "OTProcedure"
-    | "OTConsumable"
-    | "RoomCharge"
-    | "Reversal";
+  line_type: "Consultation" | "Service" | "Drug" | "LabTest" | "Imaging" | "OTProcedure" | "OTConsumable" | "RoomCharge" | "Reversal";
   description: string;
   qty: number;
   unit_price: number;
@@ -509,17 +419,7 @@ export interface InvoiceLineOut {
 /** The pending approval that currently locks a subject (e.g. an OPD ticket). */
 export interface ApprovalSummaryOut {
   request_id: number;
-  approval_type:
-    | "Refund"
-    | "VIPWaiverPreConsult"
-    | "VIPWaiverPostConsult"
-    | "PatientCredit"
-    | "PharmacyCharityOverride"
-    | "LargeCashDrop"
-    | "WardIndent"
-    | "APPayment"
-    | "PolicyChange"
-    | "PrivilegedAccess";
+  approval_type: "Refund" | "VIPWaiverPreConsult" | "VIPWaiverPostConsult" | "PatientCredit" | "PharmacyCharityOverride" | "LargeCashDrop" | "WardIndent" | "APPayment" | "PolicyChange" | "PrivilegedAccess";
   status: "Pending" | "Approved" | "Rejected" | "Cancelled";
   requested_at: string;
   summary: string;
@@ -549,17 +449,7 @@ export interface WaiverRequestOut {
 /** An approval request (service.APPROVAL_COLS). */
 export interface ApprovalOut {
   request_id: number;
-  approval_type:
-    | "Refund"
-    | "VIPWaiverPreConsult"
-    | "VIPWaiverPostConsult"
-    | "PatientCredit"
-    | "PharmacyCharityOverride"
-    | "LargeCashDrop"
-    | "WardIndent"
-    | "APPayment"
-    | "PolicyChange"
-    | "PrivilegedAccess";
+  approval_type: "Refund" | "VIPWaiverPreConsult" | "VIPWaiverPostConsult" | "PatientCredit" | "PharmacyCharityOverride" | "LargeCashDrop" | "WardIndent" | "APPayment" | "PolicyChange" | "PrivilegedAccess";
   /** Who may decide: every holder of this permission sees the request */
   required_permission: string;
   requester_id: number;
@@ -627,15 +517,7 @@ export interface AdmissionDetailOut {
   primary_doctor_id: number | null;
   primary_doctor_name: string | null;
   admission_type: "Standard" | "Emergency" | "CodeRed" | "Overflow" | "Planned";
-  status:
-    | "AdmissionPending"
-    | "Waitlisted"
-    | "BedReserved"
-    | "CodeRedActive"
-    | "Admitted"
-    | "DischargeInProgress"
-    | "Discharged"
-    | "Cancelled";
+  status: "AdmissionPending" | "Waitlisted" | "BedReserved" | "CodeRedActive" | "Admitted" | "DischargeInProgress" | "Discharged" | "Cancelled";
   billing_category: "Cash" | "Panel";
   panel_id: number | null;
   is_billing_confirmed: boolean;
@@ -666,25 +548,14 @@ export interface AdmissionDetailOut {
 export interface DischargeStatusOut {
   stages: DischargeStageOut[];
   /** The first pending stage (the one to clear next) */
-  blocked_on:
-    | "ClinicalDischarge"
-    | "PharmacyClearance"
-    | "NursingMARVerification"
-    | "BillingSettlement"
-    | "OpsCleaning"
-    | null;
+  blocked_on: "ClinicalDischarge" | "PharmacyClearance" | "NursingMARVerification" | "BillingSettlement" | "OpsCleaning" | null;
   started: boolean;
   complete: boolean;
 }
 
 export interface DischargeStageOut {
   clearance_id: number;
-  stage:
-    | "ClinicalDischarge"
-    | "PharmacyClearance"
-    | "NursingMARVerification"
-    | "BillingSettlement"
-    | "OpsCleaning";
+  stage: "ClinicalDischarge" | "PharmacyClearance" | "NursingMARVerification" | "BillingSettlement" | "OpsCleaning";
   sequence_no: number;
   status: "Pending" | "Cleared" | "Cancelled";
   cleared_by: number | null;
@@ -697,49 +568,14 @@ export interface DischargeStageOut {
 export interface AdmissionInvoiceOut {
   invoice_id: number;
   invoice_no: string;
-  status:
-    | "Draft"
-    | "Open"
-    | "PartiallyPaid"
-    | "Paid"
-    | "CreditAuthorized"
-    | "Waivered"
-    | "Refunded"
-    | "Cancelled";
+  status: "Draft" | "Open" | "PartiallyPaid" | "Paid" | "CreditAuthorized" | "Waivered" | "Refunded" | "Cancelled";
   gross_total: number;
   net_payable: number | null;
   amount_paid: number;
 }
 
 export interface PrintOut_ClinicalNotePrintFieldsOut_ {
-  document_type:
-    | "autopsy_order"
-    | "bed_labels"
-    | "blood_component_label"
-    | "blood_donation_labels"
-    | "clinical_note"
-    | "complaint_letter"
-    | "complaints_notice"
-    | "consent_form"
-    | "cost_estimate"
-    | "cssd_labels"
-    | "death_certificate"
-    | "discharge_summary"
-    | "dispensing_label"
-    | "dose_label"
-    | "id_card"
-    | "imaging_report"
-    | "lab_label"
-    | "lab_report"
-    | "mlc_intimation"
-    | "opd_slip"
-    | "pharmacy_receipt"
-    | "prescription"
-    | "referral_slip"
-    | "send_out_manifest"
-    | "surgical_record"
-    | "triage_algorithm"
-    | "wristband";
+  document_type: "autopsy_order" | "bed_labels" | "blood_component_label" | "blood_donation_labels" | "clinical_note" | "complaint_letter" | "complaints_notice" | "consent_form" | "cost_estimate" | "cssd_labels" | "death_certificate" | "discharge_summary" | "dispensing_label" | "dose_label" | "id_card" | "imaging_report" | "lab_label" | "lab_report" | "mlc_intimation" | "opd_slip" | "pharmacy_receipt" | "prescription" | "referral_slip" | "send_out_manifest" | "surgical_record" | "triage_algorithm" | "wristband";
   /** Which printer of the terminal to use (GET /api/v1/terminals/whoami) */
   printer_role: "receipt" | "label" | "document" | "card";
   paper_width_mm: number;
@@ -862,203 +698,108 @@ export interface IcdReleaseOut {
   row_version: number;
 }
 
-/** One active staff member as a picker shows them (GET /staff/lookup): the facts on their badge, nothing else. */
+/** One active staff member as a picker shows them (GET /staff/lookup): the facts on their badge and the registration their stamp prints, nothing else. */
 export interface StaffLookupOut {
+  /** The id a form's staff field takes (contrast_doctor_id, employee_id, ...) */
   employee_id: number;
   emp_number: string;
   full_name: string;
   designation: string;
   department_name: string | null;
+  /** The council they are registered with (PMDC: a doctor or dentist; PNC: a nurse); null: none */
+  license_type: "PMDC" | "PNC" | "Other" | null;
+  /** As their stamp prints it, e.g. "PMDC 12345-P"; null: no number on file */
+  registration: string | null;
 }
 
 /** Notes of one OPD visit — GET /api/v1/opd-tickets/{ticket_id}/clinical-encounters (who may call: holders of clinical.encounter.view). */
 export function forTicket(ticket_id: number): Promise<EncounterOut[]> {
-  return api<EncounterOut[]>(
-    "GET",
-    `/opd-tickets/${ticket_id}/clinical-encounters`,
-    undefined,
-  );
+  return api<EncounterOut[]>("GET", `/opd-tickets/${ticket_id}/clinical-encounters`, undefined);
 }
 
 /** One note with its corrections — GET /api/v1/clinical-encounters/{encounter_id} (who may call: holders of clinical.encounter.view). */
-export function getClinicalEncounters(
-  encounter_id: number,
-): Promise<EncounterDetailOut> {
-  return api<EncounterDetailOut>(
-    "GET",
-    `/clinical-encounters/${encounter_id}`,
-    undefined,
-  );
+export function getClinicalEncounters(encounter_id: number): Promise<EncounterDetailOut> {
+  return api<EncounterDetailOut>("GET", `/clinical-encounters/${encounter_id}`, undefined);
 }
 
 /** List patient documents — GET /api/v1/patients/{patient_id}/documents (who may call: holders of patient.document.view). */
-export function listDocumentsPatients(
-  patient_id: number,
-): Promise<PatientDocumentOut[]> {
-  return api<PatientDocumentOut[]>(
-    "GET",
-    `/patients/${patient_id}/documents`,
-    undefined,
-  );
+export function listDocumentsPatients(patient_id: number): Promise<PatientDocumentOut[]> {
+  return api<PatientDocumentOut[]>("GET", `/patients/${patient_id}/documents`, undefined);
 }
 
 /** Download a patient document — GET /api/v1/patient-documents/{document_id}/download (who may call: holders of patient.document.view). */
-export function downloadDocumentPatientDocuments(
-  document_id: number,
-): Promise<unknown> {
-  return api<unknown>(
-    "GET",
-    `/patient-documents/${document_id}/download`,
-    undefined,
-  );
+export function downloadDocumentPatientDocuments(document_id: number): Promise<unknown> {
+  return api<unknown>("GET", `/patient-documents/${document_id}/download`, undefined);
 }
 
 /** Write a clinical note (draft or finalize=true) — POST /api/v1/clinical-encounters (who may call: holders of clinical.encounter.create). */
-export function createClinicalEncounters(
-  body: EncounterIn,
-): Promise<EncounterDetailOut> {
-  return api<EncounterDetailOut>("POST", `/clinical-encounters`, body, {
-    idempotent: true,
-  });
+export function createClinicalEncounters(body: EncounterIn): Promise<EncounterDetailOut> {
+  return api<EncounterDetailOut>("POST", `/clinical-encounters`, body, { idempotent: true });
 }
 
 /** Edit your DRAFT note — PATCH /api/v1/clinical-encounters/{encounter_id} (who may call: holders of clinical.encounter.create). */
-export function patch(
-  encounter_id: number,
-  body: EncounterPatch,
-): Promise<EncounterDetailOut> {
-  return api<EncounterDetailOut>(
-    "PATCH",
-    `/clinical-encounters/${encounter_id}`,
-    body,
-  );
+export function patch(encounter_id: number, body: EncounterPatch): Promise<EncounterDetailOut> {
+  return api<EncounterDetailOut>("PATCH", `/clinical-encounters/${encounter_id}`, body);
 }
 
 /** Commit the note (immutable afterwards) — POST /api/v1/clinical-encounters/{encounter_id}/finalize (who may call: holders of clinical.encounter.create). */
-export function finalizeClinicalEncounters(
-  encounter_id: number,
-): Promise<EncounterDetailOut> {
-  return api<EncounterDetailOut>(
-    "POST",
-    `/clinical-encounters/${encounter_id}/finalize`,
-    undefined,
-  );
+export function finalizeClinicalEncounters(encounter_id: number): Promise<EncounterDetailOut> {
+  return api<EncounterDetailOut>("POST", `/clinical-encounters/${encounter_id}/finalize`, undefined);
 }
 
 /** Append a visible correction entry — POST /api/v1/clinical-encounters/{encounter_id}/correction (who may call: holders of clinical.encounter.correct). */
-export function correction(
-  encounter_id: number,
-  body: EncounterCorrectionIn,
-): Promise<EncounterDetailOut> {
-  return api<EncounterDetailOut>(
-    "POST",
-    `/clinical-encounters/${encounter_id}/correction`,
-    body,
-    { idempotent: true },
-  );
+export function correction(encounter_id: number, body: EncounterCorrectionIn): Promise<EncounterDetailOut> {
+  return api<EncounterDetailOut>("POST", `/clinical-encounters/${encounter_id}/correction`, body, { idempotent: true });
 }
 
 /** Patient's notes (consolidated across merges) — GET /api/v1/patients/{patient_id}/clinical-encounters (who may call: holders of clinical.encounter.view). */
-export function forPatientPatientsClinicalEncounters(
-  patient_id: number,
-): Promise<EncounterOut[]> {
-  return api<EncounterOut[]>(
-    "GET",
-    `/patients/${patient_id}/clinical-encounters`,
-    undefined,
-  );
+export function forPatientPatientsClinicalEncounters(patient_id: number): Promise<EncounterOut[]> {
+  return api<EncounterOut[]>("GET", `/patients/${patient_id}/clinical-encounters`, undefined);
 }
 
 /** Consolidated clinical history (EMR overview) — GET /api/v1/patients/{patient_id}/master-summary (who may call: holders of patient.emr.view). */
 export function masterSummary(patient_id: number): Promise<MasterSummaryOut> {
-  return api<MasterSummaryOut>(
-    "GET",
-    `/patients/${patient_id}/master-summary`,
-    undefined,
-  );
+  return api<MasterSummaryOut>("GET", `/patients/${patient_id}/master-summary`, undefined);
 }
 
 /** Close an examined visit — POST /api/v1/opd-tickets/{ticket_id}/complete (who may call: holders of opd.ticket.complete or opd.queue.view). */
-export function completeOpdTickets(
-  ticket_id: number,
-): Promise<OpdTicketDetailOut> {
-  return api<OpdTicketDetailOut>(
-    "POST",
-    `/opd-tickets/${ticket_id}/complete`,
-    undefined,
-    { idempotent: true },
-  );
+export function completeOpdTickets(ticket_id: number): Promise<OpdTicketDetailOut> {
+  return api<OpdTicketDetailOut>("POST", `/opd-tickets/${ticket_id}/complete`, undefined, { idempotent: true });
 }
 
 /** Doctor: Convert to VIP Waiver (after committing notes) — POST /api/v1/opd-tickets/{ticket_id}/vip-waiver-post-consult (who may call: holders of opd.waiver.request_post_consult). */
-export function postconsultWaiver(
-  ticket_id: number,
-  body: PostConsultWaiverIn,
-): Promise<WaiverRequestOut> {
-  return api<WaiverRequestOut>(
-    "POST",
-    `/opd-tickets/${ticket_id}/vip-waiver-post-consult`,
-    body,
-    { idempotent: true },
-  );
+export function postconsultWaiver(ticket_id: number, body: PostConsultWaiverIn): Promise<WaiverRequestOut> {
+  return api<WaiverRequestOut>("POST", `/opd-tickets/${ticket_id}/vip-waiver-post-consult`, body, { idempotent: true });
 }
 
 /** Doctor: Admit Patient (→ Admission_Pending) — POST /api/v1/admissions (who may call: holders of ipd.admission.request). */
-export function requestAdmission(
-  body: AdmissionIn,
-): Promise<AdmissionDetailOut> {
-  return api<AdmissionDetailOut>("POST", `/admissions`, body, {
-    idempotent: true,
-  });
+export function requestAdmission(body: AdmissionIn): Promise<AdmissionDetailOut> {
+  return api<AdmissionDetailOut>("POST", `/admissions`, body, { idempotent: true });
 }
 
 /** Printable clinical note with the author's stamp — GET /api/v1/clinical-encounters/{encounter_id}/print-payload (who may call: holders of clinical.encounter.view). */
-export function printNote(
-  encounter_id: number,
-): Promise<PrintOut_ClinicalNotePrintFieldsOut_> {
-  return api<PrintOut_ClinicalNotePrintFieldsOut_>(
-    "GET",
-    `/clinical-encounters/${encounter_id}/print-payload`,
-    undefined,
-  );
+export function printNote(encounter_id: number): Promise<PrintOut_ClinicalNotePrintFieldsOut_> {
+  return api<PrintOut_ClinicalNotePrintFieldsOut_>("GET", `/clinical-encounters/${encounter_id}/print-payload`, undefined);
 }
 
 /** The finalized clinical note as a PDF — GET /api/v1/clinical-encounters/{encounter_id}/pdf (who may call: holders of clinical.encounter.view). */
 export function notePdf(encounter_id: number): Promise<unknown> {
-  return api<unknown>(
-    "GET",
-    `/clinical-encounters/${encounter_id}/pdf`,
-    undefined,
-  );
+  return api<unknown>("GET", `/clinical-encounters/${encounter_id}/pdf`, undefined);
 }
 
 /** ICD picker: search codes by code or words — GET /api/v1/icd/codes (who may call: any logged-in user). */
-export function searchIcdCodes(query: {
-  q: string;
-  system?: "ICD-11" | "ICD-10" | null;
-  limit?: number;
-}): Promise<IcdSearchOut> {
+export function searchIcdCodes(query: { q: string; system?: "ICD-11" | "ICD-10" | null; limit?: number }): Promise<IcdSearchOut> {
   return api<IcdSearchOut>("GET", withQuery(`/icd/codes`, query), undefined);
 }
 
 /** ICD picker: browse chapters, blocks, categories — GET /api/v1/icd/browse (who may call: any logged-in user). */
-export function browse(query?: {
-  parent?: string | null;
-  system?: "ICD-11" | "ICD-10" | null;
-}): Promise<IcdBrowseOut> {
+export function browse(query?: { parent?: string | null; system?: "ICD-11" | "ICD-10" | null }): Promise<IcdBrowseOut> {
   return api<IcdBrowseOut>("GET", withQuery(`/icd/browse`, query), undefined);
 }
 
 /** One ICD code with its place in the tree — GET /api/v1/icd/codes/{code} (who may call: any logged-in user). */
-export function detail(
-  code: string,
-  query?: { system?: "ICD-11" | "ICD-10" | null },
-): Promise<IcdDetailOut> {
-  return api<IcdDetailOut>(
-    "GET",
-    withQuery(`/icd/codes/${code}`, query),
-    undefined,
-  );
+export function detail(code: string, query?: { system?: "ICD-11" | "ICD-10" | null }): Promise<IcdDetailOut> {
+  return api<IcdDetailOut>("GET", withQuery(`/icd/codes/${code}`, query), undefined);
 }
 
 /** The ICD code lists loaded — GET /api/v1/icd/releases (who may call: any logged-in user). */
@@ -1067,14 +808,6 @@ export function releases(): Promise<IcdReleasesOut> {
 }
 
 /** Find a staff member for a form (badge facts only) — GET /api/v1/staff/lookup (who may call: any logged-in user). */
-export function lookupStaff(query: {
-  q: string;
-  department_id?: number | null;
-  limit?: number;
-}): Promise<StaffLookupOut[]> {
-  return api<StaffLookupOut[]>(
-    "GET",
-    withQuery(`/staff/lookup`, query),
-    undefined,
-  );
+export function lookupStaff(query: { q: string; department_id?: number | null; license_type?: "PMDC" | "PNC" | null; limit?: number }): Promise<StaffLookupOut[]> {
+  return api<StaffLookupOut[]>("GET", withQuery(`/staff/lookup`, query), undefined);
 }

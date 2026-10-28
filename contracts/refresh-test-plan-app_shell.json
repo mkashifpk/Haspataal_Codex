@@ -1,0 +1,1145 @@
+{
+  "screen": "app_shell",
+  "title": "App shell (every workspace)",
+  "cases": [
+    {
+      "id": "case:POST /auth/refresh",
+      "call": "POST /api/v1/auth/refresh",
+      "summary": "Rotate the refresh token and get a new access token",
+      "happy_path": {
+        "as_one_of": [
+          "any logged-in user"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/auth/refresh",
+            "body": {
+              "refresh_token": "<redacted recorded credential>"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "access_token": "<redacted recorded credential>",
+                "token_type": "bearer",
+                "expires_in": 1800,
+                "refresh_token": "<redacted recorded credential>",
+                "refresh_expires_in": 604800
+              },
+              "meta": {
+                "server_time": "2026-09-27T17:35:04.474222+00:00"
+              },
+              "request_id": "bd27c25b976f451cbbc942671f9240f2"
+            }
+          },
+          "errors_seen": [
+            "LICENSE_INVALID",
+            "REFRESH_TOKEN_REUSED",
+            "TOKEN_REVOKED"
+          ],
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "ACCOUNT_DISABLED",
+        "LICENSE_INVALID",
+        "REFRESH_TOKEN_REUSED",
+        "TOKEN_EXPIRED",
+        "TOKEN_REVOKED",
+        "UNAUTHENTICATED"
+      ]
+    },
+    {
+      "id": "case:POST /auth/logout",
+      "call": "POST /api/v1/auth/logout",
+      "summary": "End this session (or all sessions)",
+      "happy_path": {
+        "as_one_of": [
+          "any logged-in user"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/auth/logout",
+            "body": {}
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "revoked_refresh_tokens": 1
+              },
+              "meta": {
+                "server_time": "2026-09-27T17:35:18.234395+00:00"
+              },
+              "request_id": "62937ff57f14413eba9798490df7d929"
+            }
+          },
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": []
+    },
+    {
+      "id": "case:GET /meta/enums",
+      "call": "GET /api/v1/meta/enums",
+      "summary": "All enumerated values, introspected from database CHECK constraints",
+      "happy_path": {
+        "as_one_of": [
+          "any logged-in user"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/meta/enums"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "accounts_payable.source_type": [
+                  "VendorInvoice",
+                  "WorkOrder",
+                  "UtilityLog"
+                ],
+                "accounts_payable.status": [
+                  "PendingApproval",
+                  "Approved",
+                  "PartiallySettled"
+                ],
+                "accounts_payable_settlements.cash_source": [
+                  "Vault",
+                  "Shift"
+                ],
+                "accounts_payable_settlements.method": [
+                  "Cash",
+                  "BankTransfer",
+                  "Cheque"
+                ],
+                "accounts_receivable.ar_type": [
+                  "PatientCredit",
+                  "Panel"
+                ],
+                "accounts_receivable.status": [
+                  "Active",
+                  "PartiallySettled",
+                  "Settled"
+                ],
+                "admissions.admission_type": [
+                  "Standard",
+                  "Emergency",
+                  "CodeRed"
+                ],
+                "admissions.billing_category": [
+                  "Cash",
+                  "Panel"
+                ],
+                "admissions.status": [
+                  "AdmissionPending",
+                  "Waitlisted",
+                  "BedReserved"
+                ],
+                "approval_actions.action": [
+                  "Requested",
+                  "Approved",
+                  "Rejected"
+                ],
+                "approval_requests.approval_type": [
+                  "Refund",
+                  "VIPWaiverPreConsult",
+                  "VIPWaiverPostConsult"
+                ],
+                "approval_requests.status": [
+                  "Pending",
+                  "Approved",
+                  "Rejected"
+                ],
+                "assets.status": [
+                  "Active",
+                  "UnderRepair",
+                  "OutOfService"
+                ],
+                "attendance_daily_summaries.status": [
+                  "Present",
+                  "Late",
+                  "Absent"
+                ],
+                "attendance_logs.punch_type": [
+                  "In",
+                  "Out"
+                ],
+                "attendance_logs.source": [
+                  "Badge",
+                  "RollCall",
+                  "Manual"
+                ],
+                "background_jobs.status": [
+                  "Pending",
+                  "Running",
+                  "Completed"
+                ],
+                "badge_scans.outcome": [
+                  "AttendanceIn",
+                  "AttendanceOut",
+                  "BedCleaned"
+                ],
+                "badge_stations.action_type": [
+                  "AttendancePunch",
+                  "BedCleaned",
+                  "SecurityPass"
+                ],
+                "badge_stations.device_type": [
+                  "RFIDReader",
+                  "BarcodeScanner",
+                  "BiometricTerminal"
+                ],
+                "badge_stations.location_type": [
+                  "Bed",
+                  "Ward",
+                  "Gate"
+                ],
+                "bed_reservations.reservation_type": [
+                  "Standard",
+                  "Overflow",
+                  "CodeRed"
+                ],
+                "bed_reservations.status": [
+                  "Active",
+                  "Consumed",
+                  "Expired"
+                ],
+                "bed_status_log.source": [
+                  "User",
+                  "Badge",
+                  "System"
+                ],
+                "bed_waitlist.status": [
+                  "Active",
+                  "Fulfilled",
+                  "Cancelled"
+                ],
+                "beds.current_state": [
+                  "Available",
+                  "Reserved",
+                  "Occupied"
+                ],
+                "cash_drops.status": [
+                  "AwaitingSecondApproval",
+                  "Approved",
+                  "Rejected"
+                ],
+                "cash_shifts.node": [
+                  "MainReception",
+                  "PharmacyCounter",
+                  "LabReception"
+                ],
+                "cash_shifts.status": [
+                  "Open",
+                  "PendingCollection",
+                  "Verified"
+                ],
+                "charity_ledger.fund_type": [
+                  "Zakat",
+                  "SocialWelfare",
+                  "Donation"
+                ],
+                "clinical_encounter_corrections.field": [
+                  "chief_complaint",
+                  "history",
+                  "examination"
+                ],
+                "clinical_encounters.encounter_type": [
+                  "OPD",
+                  "IPD",
+                  "ER"
+                ],
+                "clinical_encounters.status": [
+                  "Draft",
+                  "Final",
+                  "Cancelled"
+                ],
+                "commission_ledger.payout_route": [
+                  "Payroll",
+                  "AccountsPayable"
+                ],
+                "commission_ledger.status": [
+                  "Accrued",
+                  "Payable",
+                  "Paid"
+                ],
+                "consultant_contracts.rule_type": [
+                  "FixedFee",
+                  "PercentGross",
+                  "PercentNet"
+                ],
+                "credit_requests.payment_method": [
+                  "Cash",
+                  "Card",
+                  "BankTransfer"
+                ],
+                "credit_requests.status": [
+                  "Pending",
+                  "Authorized",
+                  "Rejected"
+                ],
+                "discharge_clearances.stage": [
+                  "ClinicalDischarge",
+                  "PharmacyClearance",
+                  "NursingMARVerification"
+                ],
+                "discharge_clearances.status": [
+                  "Pending",
+                  "Cleared",
+                  "Cancelled"
+                ],
+                "discount_events.discount_type": [
+                  "RoleLimit",
+                  "Manual",
+                  "Panel"
+                ],
+                "dispensations.payment_mode": [
+                  "Cash",
+                  "Card",
+                  "PanelCredit"
+                ],
+                "drug_stock_movements.direction": [
+                  "In",
+                  "Out"
+                ],
+                "drug_stock_movements.reason": [
+                  "Receipt",
+                  "Dispense",
+                  "WardTransfer"
+                ],
+                "drugs.form": [
+                  "Tablet",
+                  "Capsule",
+                  "Syrup"
+                ],
+                "drugs.schedule": [
+                  "OTC",
+                  "ScheduleG",
+                  "ScheduleH"
+                ],
+                "duty_rosters.duty_area": [
+                  "Ward",
+                  "Department",
+                  "Emergency"
+                ],
+                "duty_rosters.status": [
+                  "Active",
+                  "Cancelled"
+                ],
+                "employee_documents.doc_type": [
+                  "CNIC",
+                  "Degree",
+                  "PMDC"
+                ],
+                "employee_internal_credits.source_type": [
+                  "PharmacyDispensation",
+                  "Invoice"
+                ],
+                "employee_internal_credits.status": [
+                  "PendingDeduction",
+                  "Deducted",
+                  "Cancelled"
+                ],
+                "employee_qualifications.qualification_type": [
+                  "Education",
+                  "Experience",
+                  "License"
+                ],
+                "employees.blood_group": [
+                  "A+",
+                  "A-",
+                  "B+"
+                ],
+                "employees.contract_type": [
+                  "Permanent",
+                  "Contract",
+                  "Visiting"
+                ],
+                "employees.employment_status": [
+                  "Draft",
+                  "Awaiting_IT_Provisioning",
+                  "Active"
+                ],
+                "employees.gender": [
+                  "male",
+                  "female",
+                  "other"
+                ],
+                "employees.license_type": [
+                  "PMDC",
+                  "PNC",
+                  "Other"
+                ],
+                "employees.staff_category": [
+                  "Clinical",
+                  "Nursing",
+                  "Administrative"
+                ],
+                "gl_accounts.type": [
+                  "Asset",
+                  "Liability",
+                  "Equity"
+                ],
+                "idempotency_keys.status": [
+                  "Pending",
+                  "Completed",
+                  "Failed"
+                ],
+                "imaging_orders.modality": [
+                  "XRay",
+                  "MRI",
+                  "CT"
+                ],
+                "imaging_orders.priority": [
+                  "Routine",
+                  "Urgent",
+                  "STAT"
+                ],
+                "imaging_orders.status": [
+                  "Ordered",
+                  "Scheduled",
+                  "InProgress"
+                ],
+                "invoice_items.line_type": [
+                  "Consultation",
+                  "Service",
+                  "Drug"
+                ],
+                "invoices.invoice_type": [
+                  "OPD",
+                  "IPD",
+                  "Pharmacy"
+                ],
+                "invoices.status": [
+                  "Draft",
+                  "Open",
+                  "PartiallyPaid"
+                ],
+                "lab_reagent_movements.direction": [
+                  "In",
+                  "Out"
+                ],
+                "lab_reagent_movements.reason": [
+                  "Receipt",
+                  "TestConsumption",
+                  "Rerun"
+                ],
+                "lab_requisition_items.status": [
+                  "Ordered",
+                  "SampleCollected",
+                  "Processing"
+                ],
+                "lab_requisitions.priority": [
+                  "Routine",
+                  "Urgent",
+                  "STAT"
+                ],
+                "lab_requisitions.requester_type": [
+                  "Doctor",
+                  "Receptionist",
+                  "LabAdmin"
+                ],
+                "lab_requisitions.status": [
+                  "Pending",
+                  "InProgress",
+                  "Completed"
+                ],
+                "lab_result_verifications.decision": [
+                  "Verified",
+                  "Rejected"
+                ],
+                "lab_results.status": [
+                  "PendingVerification",
+                  "Published",
+                  "Rejected"
+                ],
+                "lab_samples.status": [
+                  "Pending",
+                  "Collected",
+                  "Received"
+                ],
+                "leave_balances.leave_type": [
+                  "Annual",
+                  "Casual",
+                  "Sick"
+                ],
+                "leave_requests.leave_type": [
+                  "Annual",
+                  "Casual",
+                  "Sick"
+                ],
+                "leave_requests.status": [
+                  "Pending",
+                  "Approved",
+                  "Rejected"
+                ],
+                "mar_records.status": [
+                  "Scheduled",
+                  "Administered",
+                  "Held"
+                ],
+                "notifications.severity": [
+                  "info",
+                  "warning",
+                  "critical"
+                ],
+                "opd_queues.status": [
+                  "Active",
+                  "Suspended",
+                  "Deferred"
+                ],
+                "opd_tickets.approval_lock": [
+                  "None",
+                  "RefundPending",
+                  "WaiverPending"
+                ],
+                "opd_tickets.payment_status": [
+                  "Unpaid",
+                  "PartiallyPaid",
+                  "Paid"
+                ],
+                "opd_tickets.source": [
+                  "WalkIn",
+                  "Emergency",
+                  "CodeRed"
+                ],
+                "opd_tickets.status": [
+                  "Issued",
+                  "Waiting",
+                  "InConsultation"
+                ],
+                "operating_theaters.current_state": [
+                  "Available",
+                  "EmergencyHold",
+                  "InSurgery"
+                ],
+                "ot_bookings.booking_type": [
+                  "Scheduled",
+                  "Emergency",
+                  "CodeRed"
+                ],
+                "ot_bookings.status": [
+                  "Requested",
+                  "Scheduled",
+                  "InProgress"
+                ],
+                "ot_settlement_participants.role_in_ot": [
+                  "PrimarySurgeon",
+                  "AssistantSurgeon",
+                  "Anesthetist"
+                ],
+                "ot_settlement_participants.staff_type": [
+                  "Regular",
+                  "Visiting"
+                ],
+                "ot_settlements.status": [
+                  "Finalized",
+                  "Cancelled"
+                ],
+                "outbox_events.priority": [
+                  "normal",
+                  "high",
+                  "critical"
+                ],
+                "panels.panel_type": [
+                  "SehatSahulat",
+                  "Zakat",
+                  "GovernmentEmployee"
+                ],
+                "patient_documents.doc_type": [
+                  "CNIC",
+                  "PanelCard",
+                  "Consent"
+                ],
+                "patients.billing_category": [
+                  "Cash",
+                  "Panel"
+                ],
+                "patients.blood_group": [
+                  "A+",
+                  "A-",
+                  "B+"
+                ],
+                "patients.gender": [
+                  "male",
+                  "female",
+                  "other"
+                ],
+                "patients.registration_type": [
+                  "Regular",
+                  "LabOnly",
+                  "TraumaTemp"
+                ],
+                "payments.method": [
+                  "Cash",
+                  "Card",
+                  "BankTransfer"
+                ],
+                "payments.payment_type": [
+                  "Collection",
+                  "Refund",
+                  "WaiverDispensation"
+                ],
+                "payroll_item_lines.category": [
+                  "UnpaidAbsence",
+                  "InternalCredit",
+                  "Commission"
+                ],
+                "payroll_item_lines.line_kind": [
+                  "Addition",
+                  "Deduction"
+                ],
+                "payroll_runs.status": [
+                  "Generated",
+                  "Finalized",
+                  "Paid"
+                ],
+                "prescription_items.frequency_code": [
+                  "OD",
+                  "BD",
+                  "TDS"
+                ],
+                "prescription_items.item_status": [
+                  "Active",
+                  "Stopped",
+                  "Cancelled"
+                ],
+                "prescription_items.route": [
+                  "Oral",
+                  "IV",
+                  "IM"
+                ],
+                "prescriptions.destination": [
+                  "HospitalPharmacy",
+                  "ExternalMarket"
+                ],
+                "prescriptions.source": [
+                  "OPD",
+                  "IPD",
+                  "CodeRed"
+                ],
+                "prescriptions.status": [
+                  "Active",
+                  "PartiallyDispensed",
+                  "FullyDispensed"
+                ],
+                "printers.connection": [
+                  "USB",
+                  "Network",
+                  "Shared"
+                ],
+                "printers.printer_type": [
+                  "ThermalReceipt",
+                  "BarcodeLabel",
+                  "PVCCard"
+                ],
+                "refund_disbursements.status": [
+                  "Pending",
+                  "Dispensed",
+                  "Cancelled"
+                ],
+                "risk_event_log.detection": [
+                  "Transactional",
+                  "Sweep"
+                ],
+                "risk_event_log.review_status": [
+                  "Open",
+                  "UnderReview",
+                  "Resolved"
+                ],
+                "risk_event_log.severity": [
+                  "Low",
+                  "Medium",
+                  "High"
+                ],
+                "risk_rules.severity": [
+                  "Low",
+                  "Medium",
+                  "High"
+                ],
+                "service_catalog.category": [
+                  "OPD",
+                  "IPD",
+                  "OT"
+                ],
+                "shift_transactions.txn_type": [
+                  "Sale",
+                  "ARCollection",
+                  "Refund"
+                ],
+                "staff_badges.holder_type": [
+                  "Employee",
+                  "SupportStaff",
+                  "Sweeper"
+                ],
+                "staff_badges.technology": [
+                  "RFID",
+                  "Barcode",
+                  "Biometric"
+                ],
+                "terminals.cash_node": [
+                  "MainReception",
+                  "PharmacyCounter",
+                  "LabReception"
+                ],
+                "ticket_refund_requests.reason_code": [
+                  "DoctorUnavailable",
+                  "PatientRefusedTreatment",
+                  "EmergencyDeparture"
+                ],
+                "ticket_refund_requests.status": [
+                  "Pending",
+                  "Approved",
+                  "Rejected"
+                ],
+                "ticket_status_history.field": [
+                  "status",
+                  "payment_status",
+                  "approval_lock"
+                ],
+                "user_preferences.language": [
+                  "en",
+                  "ur"
+                ],
+                "user_preferences.theme": [
+                  "Light",
+                  "DarkHighContrast"
+                ],
+                "vendor_invoices.invoice_type": [
+                  "Purchase",
+                  "Return",
+                  "CreditNote"
+                ],
+                "vendor_invoices.module": [
+                  "Pharmacy",
+                  "Lab",
+                  "Ops"
+                ],
+                "vendor_invoices.status": [
+                  "Pending",
+                  "PartiallyPaid",
+                  "Paid"
+                ],
+                "vendors.vendor_type": [
+                  "PharmacySupplier",
+                  "ReagentSupplier",
+                  "EquipmentSupplier"
+                ],
+                "vip_waiver_requests.status": [
+                  "Pending",
+                  "Approved",
+                  "Rejected"
+                ],
+                "vip_waiver_requests.waiver_type": [
+                  "PreConsult",
+                  "PostConsult"
+                ],
+                "waiver_refund_orders.status": [
+                  "PendingDispensation",
+                  "Dispensed",
+                  "Cancelled"
+                ],
+                "ward_indents.status": [
+                  "Pending",
+                  "Approved",
+                  "PartiallyApproved"
+                ],
+                "ward_local_inventory_movements.direction": [
+                  "In",
+                  "Out"
+                ],
+                "ward_local_inventory_movements.reason": [
+                  "IndentReceipt",
+                  "Administration",
+                  "Adjustment"
+                ],
+                "wards.gender_restriction": [
+                  "male",
+                  "female",
+                  "any"
+                ],
+                "wards.ward_type": [
+                  "General",
+                  "Private",
+                  "SemiPrivate"
+                ],
+                "work_orders.category": [
+                  "Plumbing",
+                  "Electrical",
+                  "HVAC"
+                ],
+                "work_orders.priority": [
+                  "Low",
+                  "Normal",
+                  "High"
+                ],
+                "work_orders.status": [
+                  "Reported",
+                  "Assigned",
+                  "InProgress"
+                ],
+                "work_orders.wo_type": [
+                  "InternalAsset",
+                  "ExternalContractor",
+                  "Utility"
+                ],
+                "worker_heartbeat.status": [
+                  "Running",
+                  "Stopping",
+                  "Stopped"
+                ]
+              },
+              "meta": {
+                "server_time": "2026-09-27T17:40:43.999001+00:00"
+              },
+              "request_id": "1690a26931ce4904b332aef062623c32"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": []
+    },
+    {
+      "id": "case:GET /meta/settings",
+      "call": "GET /api/v1/meta/settings",
+      "summary": "Non-sensitive hospital settings for UI display",
+      "happy_path": {
+        "as_one_of": [
+          "any logged-in user"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/meta/settings"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "hospital_name": "Haspataal Hospital",
+                "hospital_address": "",
+                "hospital_phone": "",
+                "hospital_timezone": "Asia/Karachi",
+                "currency_code": "PKR",
+                "ticket_validity_hours": 72,
+                "lab_require_payment_before_sample": true,
+                "password_min_length": 10,
+                "maintenance_mode": false,
+                "reception_max_discount_pct": 10,
+                "opd_require_payment_before_queue": true,
+                "large_cash_settlement_threshold": 100000,
+                "solo_practice_mode": true
+              },
+              "meta": {
+                "server_time": "2026-10-18T11:25:32.718927+00:00"
+              },
+              "request_id": "251d05b446844fc0a49d301f183b0eb8"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": []
+    },
+    {
+      "id": "case:GET /meta/workspaces",
+      "call": "GET /api/v1/meta/workspaces",
+      "summary": "UI workspaces and the screens each should contain",
+      "happy_path": {
+        "as_one_of": [
+          "any logged-in user"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/meta/workspaces"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "code": "reception",
+                  "also_uses": [],
+                  "label": "Reception & Front Desk",
+                  "label_ur": "استقبالیہ",
+                  "description": "Registration, returning-patient lookup, OPD slips, queue management, refunds/waivers, counter cash.",
+                  "screens": [
+                    "Patient search (outstanding-dues banner)",
+                    "New registration + OPD slip",
+                    "Lab-only walk-in"
+                  ]
+                },
+                {
+                  "code": "doctor",
+                  "also_uses": [],
+                  "label": "Clinical OPD / IPD",
+                  "label_ur": "ڈاکٹر",
+                  "description": "Live queue, EMR notes, e-prescriptions with live stock, lab/imaging orders, admissions, re-route.",
+                  "screens": [
+                    "My live queue (WebSocket)",
+                    "Consultation (EMR + quick-action bar: Re-route, Admit, Convert to VIP Waiver)",
+                    "E-prescription builder (hospital vs external)"
+                  ]
+                },
+                {
+                  "code": "admissions",
+                  "also_uses": [],
+                  "label": "Admissions Desk",
+                  "label_ur": "داخلہ ڈیسک",
+                  "description": "Pending admissions, live bed matrix, bed allocation, waitlists, overflow.",
+                  "screens": [
+                    "Bed matrix",
+                    "Pending admissions",
+                    "Waitlist"
+                  ]
+                }
+              ],
+              "meta": {
+                "server_time": "2026-10-09T09:57:44.720355+00:00"
+              },
+              "request_id": "d89dc3a2955f4225be963fa5aa70bac7"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": []
+    },
+    {
+      "id": "case:GET /meta/error-codes",
+      "call": "GET /api/v1/meta/error-codes",
+      "summary": "Every error code the API can return",
+      "happy_path": {
+        "as_one_of": [
+          "any logged-in user"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/meta/error-codes"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "code": "ACCOUNT_DISABLED",
+                  "http_status": 403,
+                  "message": "This account is disabled.",
+                  "retryable": false,
+                  "category": "auth"
+                },
+                {
+                  "code": "ACCOUNT_LOCKED",
+                  "http_status": 423,
+                  "message": "Too many failed attempts; the account is temporarily locked.",
+                  "retryable": true,
+                  "category": "auth"
+                },
+                {
+                  "code": "ADMISSION_IMMUTABLE_FIELD",
+                  "http_status": 422,
+                  "message": "Admission patient/number cannot change.",
+                  "retryable": false,
+                  "category": "business"
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-27T17:40:44.022397+00:00"
+              },
+              "request_id": "c3924f56b840447f91b128b7828c2173"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": []
+    },
+    {
+      "id": "case:GET /meta/events",
+      "call": "GET /api/v1/meta/events",
+      "summary": "Realtime WebSocket event catalogue",
+      "happy_path": {
+        "as_one_of": [
+          "any logged-in user"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/meta/events"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "event_type": "opd.queue.updated",
+                  "description": "A queue entry was created, called in, deferred, re-routed, completed or cancelled. Doctor screens refresh their queue without polling.",
+                  "audience": "permission opd.queue.view + the assigned doctor",
+                  "payload_fields": {
+                    "queue_id": "int",
+                    "ticket_id": "int",
+                    "patient_id": "int",
+                    "patient_name": "str",
+                    "mrn": "str",
+                    "token_no": "int",
+                    "token_date": "date",
+                    "queue_group": "str doctor:<id>|department:<id>",
+                    "doctor_id": "int|null",
+                    "department_id": "int|null",
+                    "priority": "int",
+                    "status": "Active|Suspended|Deferred|Rerouted|Completed|Cancelled|Expired",
+                    "called_at": "datetime|null",
+                    "change": "insert|update",
+                    "rerouted_from_queue_id": "int|null"
+                  },
+                  "priority": "normal",
+                  "workflow": "§1.3, §1.4, §1.5",
+                  "presentation": null
+                },
+                {
+                  "event_type": "opd.ticket.status_changed",
+                  "description": "Ticket visit status, payment status or approval lock changed.",
+                  "audience": "permissions opd.queue.view / opd.ticket.view + assigned doctor",
+                  "payload_fields": {
+                    "ticket_id": "int",
+                    "ticket_number": "str",
+                    "patient_id": "int",
+                    "doctor_id": "int|null",
+                    "status": "str",
+                    "payment_status": "str",
+                    "approval_lock": "None|RefundPending|WaiverPending|CreditPending",
+                    "is_clinical_locked": "bool"
+                  },
+                  "priority": "normal",
+                  "workflow": "§1.5–§1.9",
+                  "presentation": null
+                },
+                {
+                  "event_type": "approval.requested",
+                  "description": "A privileged action is frozen awaiting approval (approval-ping pattern).",
+                  "audience": "holders of the request's required permission",
+                  "payload_fields": {
+                    "request_id": "int",
+                    "approval_type": "str",
+                    "summary": "str",
+                    "amount": "number|null",
+                    "patient_id": "int|null",
+                    "is_elevated": "bool",
+                    "subject_type": "str",
+                    "subject_id": "int"
+                  },
+                  "priority": "high",
+                  "workflow": "§13",
+                  "presentation": null
+                }
+              ],
+              "meta": {
+                "server_time": "2026-10-09T09:57:44.713651+00:00"
+              },
+              "request_id": "db8c160282bd4d9fb632e6dcf06c43ba"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": []
+    }
+  ],
+  "service_cases": [],
+  "delivery_gate": {
+    "required": true,
+    "status": "required",
+    "progress_reporting": {
+      "required": true,
+      "submit": "propose_progress",
+      "verify": "progress_proposals",
+      "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+    },
+    "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+    "compulsory": [
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+        "points": 2
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+        "points": 3
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+        "points": 2
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+        "points": 4
+      }
+    ],
+    "zoom": {
+      "min_pct": 100,
+      "max_pct": 250,
+      "reset_pct": 100,
+      "keys": [
+        "Ctrl + or Ctrl = (zoom in)",
+        "Ctrl - (zoom out)",
+        "Ctrl 0 (reset to 100 %)",
+        "Command on macOS"
+      ],
+      "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+    },
+    "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+    "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+  },
+  "handbook_page": "screens/app_shell",
+  "workspace_guide": "get_handbook_outline('*')",
+  "realtime": [
+    {
+      "event": "system.maintenance",
+      "check": "the screen refreshes without polling"
+    },
+    {
+      "event": "system.license",
+      "check": "the screen refreshes without polling"
+    }
+  ],
+  "acceptance_rules": [
+    "Refresh the access token shortly before expires_in with POST /auth/refresh (the refresh token rotates: keep the new one; reusing an old one revokes the whole session family).",
+    "Load the catalogues once after login and after an upgrade: dropdowns from GET /meta/enums, labels and policy switches from GET /meta/settings; never hard-code status values.",
+    "Log out with POST /auth/logout (all_sessions: true ends every session of the user, e.g. a lost laptop).",
+    "system.maintenance: show the message as a full-screen banner; non-admins get MAINTENANCE until it ends.",
+    "The maintenance screen shows the server's text word for word: IT writes it in the Control Center (e.g. 'Back at 02:30') and the IT manual promises every terminal shows it. Take it from the MAINTENANCE error's message, the system.maintenance event's message or GET /health maintenance_message; never replace it with a text of your own."
+  ],
+  "demo_accounts": "demo_accounts() lists a login per role; sandbox_call runs each case on the DEV server"
+}

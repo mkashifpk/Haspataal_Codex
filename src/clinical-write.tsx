@@ -82,6 +82,7 @@ export function useClinicalWrite(
       posted = true;
       const result = await api(a.body.method, a.body.path, a.body.body, {
         key: a.key,
+        reconcilePath: a.body.reconcilePath,
       });
       confirmed = true;
       hold(undefined);
@@ -108,6 +109,7 @@ export function useClinicalWrite(
     notice,
     observed,
     checked,
+    clearError: () => { if (!flight.current && !attemptRef.current) setError(undefined); },
     blocked: busy || !!attempt,
     start: (
       command: Omit<ClinicalCommand, "scope" | "actor">,

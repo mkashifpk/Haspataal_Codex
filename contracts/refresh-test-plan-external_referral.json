@@ -1,0 +1,555 @@
+{
+  "screen": "external_referral",
+  "title": "Refer out (external referral)",
+  "cases": [
+    {
+      "id": "case:POST /referrals",
+      "call": "POST /api/v1/referrals",
+      "summary": "Refer an outpatient or emergency patient to another facility",
+      "happy_path": {
+        "as_one_of": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "surgeon"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/referrals",
+            "body": {
+              "ticket_id": 1,
+              "encounter_id": 1,
+              "destination_contact_id": 3,
+              "destination_department": "Cardiology",
+              "transport": "WithStaff",
+              "escort_name": "Nurse Saima",
+              "care_during_transfer": "Oxygen 4 L/min, IV line",
+              "reason": "Chest pain with ST elevation",
+              "urgency": "Emergency",
+              "clinical_summary": "Central chest pain for 2 hours; ECG ST elevation V1-V4; provisional anterior MI",
+              "treatment_given": "Aspirin 300 mg chewed"
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "referral_id": 1,
+                "referral_number": "REF-2026-00001",
+                "patient_id": 1,
+                "mrn": "MRN-2026-000001",
+                "patient_name": "Ali Khan",
+                "father_or_husband_name": null,
+                "gender": "male",
+                "age_years": 40,
+                "address": null,
+                "mobile": "03007091288",
+                "ticket_id": 1,
+                "er_visit_id": null,
+                "encounter_id": 1,
+                "referred_by": 1,
+                "referred_by_name": "Dr Ahmed",
+                "referred_by_stamp": {
+                  "at": "2026-10-14T11:29:20.867797+00:00",
+                  "name": "Dr Ahmed",
+                  "text": "Dr Ahmed, Doctor, PMDC PMDC-29705, 14-Oct-2026 16:29",
+                  "user_id": 1,
+                  "designation": "Doctor",
+                  "employee_id": 1,
+                  "registration": "PMDC PMDC-29705"
+                },
+                "destination_contact_id": 3,
+                "destination_name": "Services Hospital",
+                "destination_department": "Cardiology",
+                "reason": "Chest pain with ST elevation",
+                "urgency": "Emergency",
+                "clinical_summary": "Central chest pain for 2 hours; ECG ST elevation V1-V4; provisional anterior MI",
+                "treatment_given": "Aspirin 300 mg chewed",
+                "at_patient_request": false,
+                "transport": "WithStaff",
+                "escort_name": "Nurse Saima",
+                "care_during_transfer": "Oxygen 4 L/min, IV line",
+                "status": "Issued",
+                "acknowledged_by_name": null,
+                "acknowledged_at": null,
+                "acknowledgement_note": null,
+                "cancel_reason": null,
+                "cancelled_at": null,
+                "created_at": "2026-10-14T11:29:20.867797+00:00",
+                "row_version": 1,
+                "acknowledgement_pending": true
+              },
+              "meta": {
+                "server_time": "2026-10-14T11:29:20.882681+00:00"
+              },
+              "request_id": "f324a2d2b958408d806ad017c783f75d"
+            }
+          },
+          "errors_seen": [
+            "FORBIDDEN",
+            "REFERRAL_AUTHOR_INVALID",
+            "VALIDATION_ERROR"
+          ],
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "billing_admin",
+          "cashier",
+          "clinic_director"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "FORBIDDEN",
+        "REFERENCE_NOT_FOUND",
+        "REFERRAL_AUTHOR_INVALID",
+        "VALIDATION_ERROR"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:GET /referrals/{referral_id}",
+      "call": "GET /api/v1/referrals/{referral_id}",
+      "summary": "One referral",
+      "happy_path": {
+        "as_one_of": [
+          "anaesthetist",
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer",
+          "receptionist",
+          "surgeon",
+          "triage_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/referrals/2"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "referral_id": 2,
+                "referral_number": "REF-2026-00002",
+                "patient_id": 1,
+                "mrn": "MRN-2026-000001",
+                "patient_name": "Ali Khan",
+                "father_or_husband_name": null,
+                "gender": "male",
+                "age_years": 40,
+                "address": null,
+                "mobile": "03007091288",
+                "ticket_id": 1,
+                "er_visit_id": null,
+                "encounter_id": null,
+                "referred_by": 1,
+                "referred_by_name": "Dr Ahmed",
+                "referred_by_stamp": {
+                  "at": "2026-10-14T11:29:20.988509+00:00",
+                  "name": "Dr Ahmed",
+                  "text": "Dr Ahmed, Doctor, PMDC PMDC-29705, 14-Oct-2026 16:29",
+                  "user_id": 1,
+                  "designation": "Doctor",
+                  "employee_id": 1,
+                  "registration": "PMDC PMDC-29705"
+                },
+                "destination_contact_id": null,
+                "destination_name": "Doctors Hospital",
+                "destination_department": null,
+                "reason": "Chest pain with ST elevation",
+                "urgency": "Emergency",
+                "clinical_summary": "Central chest pain for 2 hours; ECG ST elevation V1-V4; provisional anterior MI",
+                "treatment_given": "Aspirin 300 mg chewed",
+                "at_patient_request": true,
+                "transport": "Own",
+                "escort_name": null,
+                "care_during_transfer": null,
+                "status": "Cancelled",
+                "acknowledged_by_name": null,
+                "acknowledged_at": null,
+                "acknowledgement_note": null,
+                "cancel_reason": "The family decided to stay",
+                "cancelled_at": "2026-10-14T11:29:21.004108+00:00",
+                "created_at": "2026-10-14T11:29:20.988509+00:00",
+                "row_version": 2,
+                "acknowledgement_pending": false
+              },
+              "meta": {
+                "server_time": "2026-10-14T11:29:21.079892+00:00"
+              },
+              "request_id": "52c97c81e4cf43bcb0bdeb1e4cc142e9"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "billing_admin",
+          "cashier",
+          "cssd_technician"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": []
+    },
+    {
+      "id": "case:POST /referrals/{referral_id}/acknowledge",
+      "call": "POST /api/v1/referrals/{referral_id}/acknowledge",
+      "summary": "Record the receiving facility's acknowledgement",
+      "happy_path": {
+        "as_one_of": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "surgeon"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/referrals/1/acknowledge",
+            "body": {
+              "acknowledged_by_name": "Dr Kamran, ER registrar",
+              "note": "Taken to the cath lab"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "referral_id": 1,
+                "referral_number": "REF-2026-00001",
+                "patient_id": 1,
+                "mrn": "MRN-2026-000001",
+                "patient_name": "Ali Khan",
+                "father_or_husband_name": null,
+                "gender": "male",
+                "age_years": 40,
+                "address": null,
+                "mobile": "03007091288",
+                "ticket_id": 1,
+                "er_visit_id": null,
+                "encounter_id": 1,
+                "referred_by": 1,
+                "referred_by_name": "Dr Ahmed",
+                "referred_by_stamp": {
+                  "at": "2026-10-14T11:29:20.867797+00:00",
+                  "name": "Dr Ahmed",
+                  "text": "Dr Ahmed, Doctor, PMDC PMDC-29705, 14-Oct-2026 16:29",
+                  "user_id": 1,
+                  "designation": "Doctor",
+                  "employee_id": 1,
+                  "registration": "PMDC PMDC-29705"
+                },
+                "destination_contact_id": 3,
+                "destination_name": "Services Hospital",
+                "destination_department": "Cardiology",
+                "reason": "Chest pain with ST elevation",
+                "urgency": "Emergency",
+                "clinical_summary": "Central chest pain for 2 hours; ECG ST elevation V1-V4; provisional anterior MI",
+                "treatment_given": "Aspirin 300 mg chewed",
+                "at_patient_request": false,
+                "transport": "WithStaff",
+                "escort_name": "Nurse Saima",
+                "care_during_transfer": "Oxygen 4 L/min, IV line",
+                "status": "Acknowledged",
+                "acknowledged_by_name": "Dr Kamran, ER registrar",
+                "acknowledged_at": "2026-10-14T11:29:20.950368+00:00",
+                "acknowledgement_note": "Taken to the cath lab",
+                "cancel_reason": null,
+                "cancelled_at": null,
+                "created_at": "2026-10-14T11:29:20.867797+00:00",
+                "row_version": 2,
+                "acknowledgement_pending": false
+              },
+              "meta": {
+                "server_time": "2026-10-14T11:29:20.960620+00:00"
+              },
+              "request_id": "661095536c4a448c8b49aa049c03bdde"
+            }
+          },
+          "errors_seen": [
+            "VALIDATION_ERROR"
+          ],
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "billing_admin",
+          "cashier",
+          "clinic_director"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "REFERRAL_CLOSED",
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:POST /referrals/{referral_id}/cancel",
+      "call": "POST /api/v1/referrals/{referral_id}/cancel",
+      "summary": "Cancel a referral that did not happen",
+      "happy_path": {
+        "as_one_of": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "surgeon"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/referrals/2/cancel",
+            "body": {
+              "reason": "The family decided to stay"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "referral_id": 2,
+                "referral_number": "REF-2026-00002",
+                "patient_id": 1,
+                "mrn": "MRN-2026-000001",
+                "patient_name": "Ali Khan",
+                "father_or_husband_name": null,
+                "gender": "male",
+                "age_years": 40,
+                "address": null,
+                "mobile": "03007091288",
+                "ticket_id": 1,
+                "er_visit_id": null,
+                "encounter_id": null,
+                "referred_by": 1,
+                "referred_by_name": "Dr Ahmed",
+                "referred_by_stamp": {
+                  "at": "2026-10-14T11:29:20.988509+00:00",
+                  "name": "Dr Ahmed",
+                  "text": "Dr Ahmed, Doctor, PMDC PMDC-29705, 14-Oct-2026 16:29",
+                  "user_id": 1,
+                  "designation": "Doctor",
+                  "employee_id": 1,
+                  "registration": "PMDC PMDC-29705"
+                },
+                "destination_contact_id": null,
+                "destination_name": "Doctors Hospital",
+                "destination_department": null,
+                "reason": "Chest pain with ST elevation",
+                "urgency": "Emergency",
+                "clinical_summary": "Central chest pain for 2 hours; ECG ST elevation V1-V4; provisional anterior MI",
+                "treatment_given": "Aspirin 300 mg chewed",
+                "at_patient_request": true,
+                "transport": "Own",
+                "escort_name": null,
+                "care_during_transfer": null,
+                "status": "Cancelled",
+                "acknowledged_by_name": null,
+                "acknowledged_at": null,
+                "acknowledgement_note": null,
+                "cancel_reason": "The family decided to stay",
+                "cancelled_at": "2026-10-14T11:29:21.004108+00:00",
+                "created_at": "2026-10-14T11:29:20.988509+00:00",
+                "row_version": 2,
+                "acknowledgement_pending": false
+              },
+              "meta": {
+                "server_time": "2026-10-14T11:29:21.008560+00:00"
+              },
+              "request_id": "576b31028f244f2db1007bf328dd1b1b"
+            }
+          },
+          "errors_seen": [
+            "REFERRAL_CLOSED"
+          ],
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "billing_admin",
+          "cashier",
+          "clinic_director"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "REFERRAL_CLOSED"
+      ]
+    },
+    {
+      "id": "case:GET /referrals/{referral_id}/pdf",
+      "call": "GET /api/v1/referrals/{referral_id}/pdf",
+      "summary": "The referral letter (PDF)",
+      "happy_path": {
+        "as_one_of": [
+          "anaesthetist",
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer",
+          "receptionist",
+          "surgeon",
+          "triage_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/referrals/1/pdf"
+          },
+          "response": {
+            "status": 200,
+            "content_type": "application/pdf",
+            "bytes": 3053
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "billing_admin",
+          "cashier",
+          "cssd_technician"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": []
+    },
+    {
+      "id": "case:GET /mlc/contacts",
+      "call": "GET /api/v1/mlc/contacts",
+      "summary": "Police stations and MLR hospitals (contact list)",
+      "happy_path": {
+        "as_one_of": [
+          "anaesthetist",
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer",
+          "surgeon",
+          "triage_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/mlc/contacts"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "contact_id": 2,
+                  "contact_type": "MlrHospital",
+                  "name": "District Headquarters Hospital",
+                  "district": "Lahore",
+                  "phone": null,
+                  "alt_phone": null,
+                  "address": null,
+                  "notes": null,
+                  "is_active": true
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-28T21:43:04.413300+00:00"
+              },
+              "request_id": "070f596e36b34426ace5f31a7744b295"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "billing_admin",
+          "cashier",
+          "cssd_technician"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": []
+    }
+  ],
+  "service_cases": [],
+  "delivery_gate": {
+    "required": true,
+    "status": "required",
+    "progress_reporting": {
+      "required": true,
+      "submit": "propose_progress",
+      "verify": "progress_proposals",
+      "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+    },
+    "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+    "compulsory": [
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+        "points": 2
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+        "points": 3
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+        "points": 2
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+        "points": 4
+      }
+    ],
+    "zoom": {
+      "min_pct": 100,
+      "max_pct": 250,
+      "reset_pct": 100,
+      "keys": [
+        "Ctrl + or Ctrl = (zoom in)",
+        "Ctrl - (zoom out)",
+        "Ctrl 0 (reset to 100 %)",
+        "Command on macOS"
+      ],
+      "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+    },
+    "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+    "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+  },
+  "handbook_page": "screens/external_referral",
+  "workspace_guide": "get_handbook_outline('doctor')",
+  "realtime": [],
+  "acceptance_rules": [
+    "Open it from the consultation's quick-action bar ('Refer out') or the emergency visit; pre-fill the clinical summary from the note's complaint, findings and provisional diagnosis for the doctor to confirm.",
+    "The receiving facility: pick it from the contact list (GET /mlc/contacts, kinds ReferralHospital, TraumaCentre, BloodBank, MlrHospital) or type it when the patient chooses (tick 'at the patient's request').",
+    "Transport: Own / Ambulance / Rescue / With our staff. With our staff needs the escort's name and shows 'Acknowledgement pending' until the receiving facility's acknowledgement is recorded (who received the patient and when).",
+    "Print the letter (GET /referrals/{id}/pdf) for the patient; it stays in the record. Internal re-routing to another doctor of this establishment is not a referral (Re-route).",
+    "A referral that did not happen is cancelled with its reason; an acknowledged or cancelled one is closed (REFERRAL_CLOSED). The letter is never rewritten: cancel and write a new one."
+  ],
+  "demo_accounts": "demo_accounts() lists a login per role; sandbox_call runs each case on the DEV server"
+}

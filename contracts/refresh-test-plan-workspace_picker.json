@@ -1,0 +1,441 @@
+{
+  "screen": "workspace_picker",
+  "title": "Workspace launcher",
+  "cases": [
+    {
+      "id": "case:GET /auth/workspaces",
+      "call": "GET /api/v1/auth/workspaces",
+      "summary": "Workspaces the user may open (multi-role launch screen)",
+      "happy_path": {
+        "as_one_of": [
+          "any logged-in user"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/auth/workspaces"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "code": "finance_cashier",
+                  "label": "Cashier",
+                  "label_ur": "کیشیئر",
+                  "description": "Counter collections, dues settlement, cash-backs.",
+                  "roles": [
+                    "cashier"
+                  ]
+                },
+                {
+                  "code": "reception",
+                  "label": "Reception & Front Desk",
+                  "label_ur": "استقبالیہ",
+                  "description": "Registration, returning-patient lookup, OPD slips, queue management, refunds/waivers, counter cash.",
+                  "roles": [
+                    "receptionist"
+                  ]
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-27T17:34:33.812120+00:00"
+              },
+              "request_id": "12e7daf3ad4e499093a4589388b7f74f"
+            }
+          },
+          "errors_seen": [
+            "PASSWORD_CHANGE_REQUIRED",
+            "TOKEN_REVOKED"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "PASSWORD_CHANGE_REQUIRED",
+        "TOKEN_REVOKED"
+      ]
+    },
+    {
+      "id": "case:GET /auth/me",
+      "call": "GET /api/v1/auth/me",
+      "summary": "Current user, roles, permissions, workspaces, preferences",
+      "happy_path": {
+        "as_one_of": [
+          "any logged-in user"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/auth/me"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "user_id": 1,
+                "username": "udb40c85d5f",
+                "display_name": "udb40c85d5f",
+                "employee_id": 1,
+                "emp_number": "EMP-2026-0001",
+                "designation": "Officer",
+                "department": null,
+                "roles": [
+                  "receptionist"
+                ],
+                "permissions": [
+                  "complaint.register",
+                  "er.visit.register",
+                  "er.visit.view"
+                ],
+                "workspaces": [
+                  {
+                    "code": "reception",
+                    "label": "Reception & Front Desk",
+                    "label_ur": "استقبالیہ",
+                    "description": "Registration, returning-patient lookup, OPD slips, queue management, refunds/waivers, counter cash.",
+                    "roles": [
+                      "receptionist"
+                    ]
+                  }
+                ],
+                "must_change_password": false,
+                "preferences": {
+                  "theme": "Light",
+                  "language": "en",
+                  "ui_scale_pct": 100,
+                  "pdf_download": "Separate",
+                  "extra": {}
+                }
+              },
+              "meta": {
+                "server_time": "2026-10-16T09:28:52.603381+00:00"
+              },
+              "request_id": "ea933c20f8744299875eca398b1fdb42"
+            }
+          },
+          "errors_seen": [
+            "TOKEN_REVOKED",
+            "WORKSPACE_NOT_ALLOWED"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "TOKEN_REVOKED",
+        "WORKSPACE_NOT_ALLOWED"
+      ]
+    },
+    {
+      "id": "case:GET /establishment",
+      "call": "GET /api/v1/establishment",
+      "summary": "The establishment's profile and services, with the configuration revision",
+      "happy_path": {
+        "as_one_of": [
+          "any logged-in user"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/establishment"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "revision": 0,
+                "profile": null,
+                "active": [
+                  "dispensing",
+                  "outsourced_diagnostics",
+                  "laboratory"
+                ],
+                "rules_in_force": [
+                  {
+                    "code": "consultation_requires_vco",
+                    "description": "A clinic's outpatient or follow-up note records whether the patient gave verbal consent to the examination (VCO), declined it, or was not examined, before it is finalized (clinic manual, indicator 41).",
+                    "applies": false,
+                    "profiles": [
+                      "Clinic"
+                    ],
+                    "error_code": "EXAMINATION_CONSENT_REQUIRED",
+                    "operations": [
+                      "POST /clinical-encounters/{encounter_id}/finalize"
+                    ],
+                    "screens": [
+                      "consultation"
+                    ],
+                    "source": "clinical/service.py finalize; 0013, the clinical encounter guard"
+                  },
+                  {
+                    "code": "consultation_complete_record",
+                    "description": "A clinic's outpatient or follow-up note has the complaint or history, the examination (when the patient consented), the diagnosis and the plan before it is finalized (clinic manual, indicator 28).",
+                    "applies": false,
+                    "profiles": [
+                      "Clinic"
+                    ],
+                    "error_code": "CONSULTATION_INCOMPLETE",
+                    "operations": [
+                      "POST /clinical-encounters/{encounter_id}/finalize"
+                    ],
+                    "screens": [
+                      "consultation"
+                    ],
+                    "source": "clinical/service.py finalize; 0013, the clinical encounter guard"
+                  },
+                  {
+                    "code": "high_risk_pregnancy_nutrition",
+                    "description": "In a Category I hospital, a high-risk obstetric assessment includes the nutritional assessment.",
+                    "applies": false,
+                    "profiles": [
+                      "I"
+                    ],
+                    "error_code": "MATERNAL_NUTRITION_REQUIRED",
+                    "operations": [
+                      "POST /maternity/assessments"
+                    ],
+                    "screens": [
+                      "obstetric_assessment"
+                    ],
+                    "source": "maternity/service.py assess; 0013, the obstetric assessment guard"
+                  }
+                ],
+                "capabilities": [
+                  {
+                    "phc_declared": [],
+                    "declaration_note": "Running here but not in the services declared to the PHC: add it to the declaration (PUT /phc/services)",
+                    "capability": "dispensing",
+                    "label": "Pharmacy dispensing",
+                    "purpose": "Medicines dispensed from the facility's own stock (otherwise prescriptions are printed for the patient to buy outside).",
+                    "state": "Active",
+                    "state_since": "2026-10-17T02:32:44.107770+00:00",
+                    "changed_by_name": null,
+                    "requires": [],
+                    "hospital_only": false,
+                    "implemented": true,
+                    "new_work": "dispensings",
+                    "operations": [
+                      {
+                        "operation": "POST /prescriptions",
+                        "when": "for the hospital pharmacy (destination HospitalPharmacy)",
+                        "continues_while_retiring": false
+                      },
+                      {
+                        "operation": "POST /prescriptions/verbal",
+                        "when": "for the hospital pharmacy (destination HospitalPharmacy)",
+                        "continues_while_retiring": false
+                      },
+                      {
+                        "operation": "POST /prescriptions/{prescription_id}/dispense",
+                        "when": null,
+                        "continues_while_retiring": true
+                      }
+                    ],
+                    "outstanding": []
+                  },
+                  {
+                    "phc_declared": [],
+                    "declaration_note": "Running here but not in the services declared to the PHC: add it to the declaration (PUT /phc/services)",
+                    "capability": "outsourced_diagnostics",
+                    "label": "Tests sent to partner laboratories",
+                    "purpose": "Samples taken here and sent to a laboratory under an MOU (lab tests marked SendOut).",
+                    "state": "Active",
+                    "state_since": "2026-10-17T02:32:44.114876+00:00",
+                    "changed_by_name": null,
+                    "requires": [],
+                    "hospital_only": false,
+                    "implemented": true,
+                    "new_work": "orders for send-out tests",
+                    "operations": [
+                      {
+                        "operation": "POST /lab/requisitions",
+                        "when": "for a send-out test (availability SendOut)",
+                        "continues_while_retiring": false
+                      },
+                      {
+                        "operation": "POST /patients/lab-only-walk-in",
+                        "when": "for a send-out test (availability SendOut)",
+                        "continues_while_retiring": false
+                      }
+                    ],
+                    "outstanding": []
+                  },
+                  {
+                    "phc_declared": [],
+                    "declaration_note": "Running here but not in the services declared to the PHC: add it to the declaration (PUT /phc/services)",
+                    "capability": "laboratory",
+                    "label": "In-house laboratory",
+                    "purpose": "Tests done in the facility's own laboratory.",
+                    "state": "Active",
+                    "state_since": "2026-10-17T02:32:44.115519+00:00",
+                    "changed_by_name": null,
+                    "requires": [],
+                    "hospital_only": false,
+                    "implemented": true,
+                    "new_work": "orders for in-house tests",
+                    "operations": [
+                      {
+                        "operation": "POST /lab/requisitions",
+                        "when": "for an in-house test (availability InHouse)",
+                        "continues_while_retiring": false
+                      },
+                      {
+                        "operation": "POST /patients/lab-only-walk-in",
+                        "when": "for an in-house test (availability InHouse)",
+                        "continues_while_retiring": false
+                      }
+                    ],
+                    "outstanding": []
+                  }
+                ],
+                "views": {
+                  "workspaces": [
+                    {
+                      "workspace": "admissions",
+                      "services": [
+                        "inpatient"
+                      ],
+                      "view": "full"
+                    },
+                    {
+                      "workspace": "ward_nurse",
+                      "services": [
+                        "inpatient"
+                      ],
+                      "view": "full"
+                    },
+                    {
+                      "workspace": "triage",
+                      "services": [
+                        "emergency_department"
+                      ],
+                      "view": "full"
+                    }
+                  ],
+                  "screens": [
+                    {
+                      "screen_id": "lab_only_walkin",
+                      "workspace": "reception",
+                      "services": [
+                        "laboratory",
+                        "outsourced_diagnostics"
+                      ],
+                      "role": "work",
+                      "view": "full"
+                    },
+                    {
+                      "screen_id": "lab_orders_results",
+                      "workspace": "doctor",
+                      "services": [
+                        "laboratory",
+                        "outsourced_diagnostics",
+                        "imaging"
+                      ],
+                      "role": "work",
+                      "view": "full"
+                    },
+                    {
+                      "screen_id": "critical_results_doctor",
+                      "workspace": "doctor",
+                      "services": [
+                        "laboratory",
+                        "outsourced_diagnostics",
+                        "imaging"
+                      ],
+                      "role": "work",
+                      "view": "full"
+                    }
+                  ]
+                }
+              },
+              "meta": {
+                "server_time": "2026-10-17T02:34:09.036684+00:00"
+              },
+              "request_id": "8100a82786a54502ac2f2c72c0a842ae"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": []
+    }
+  ],
+  "service_cases": [],
+  "delivery_gate": {
+    "required": true,
+    "status": "required",
+    "progress_reporting": {
+      "required": true,
+      "submit": "propose_progress",
+      "verify": "progress_proposals",
+      "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+    },
+    "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+    "compulsory": [
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+        "points": 2
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+        "points": 3
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+        "points": 2
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+        "points": 4
+      }
+    ],
+    "zoom": {
+      "min_pct": 100,
+      "max_pct": 250,
+      "reset_pct": 100,
+      "keys": [
+        "Ctrl + or Ctrl = (zoom in)",
+        "Ctrl - (zoom out)",
+        "Ctrl 0 (reset to 100 %)",
+        "Command on macOS"
+      ],
+      "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+    },
+    "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+    "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+  },
+  "handbook_page": "screens/workspace_picker",
+  "workspace_guide": "get_handbook_outline('*')",
+  "realtime": [
+    {
+      "event": "establishment.changed",
+      "check": "the screen refreshes without polling"
+    },
+    {
+      "event": "session.revoked",
+      "check": "the screen refreshes without polling"
+    }
+  ],
+  "acceptance_rules": [
+    "If exactly one workspace: open it directly.",
+    "Allow opening several workspaces in separate windows at once.",
+    "Every request of a workspace window sends X-Active-Workspace: <its code> (one of GET /auth/workspaces; another answers WORKSPACE_NOT_ALLOWED): the audit trail records the window, and F1 help defaults to it. The launcher sends none. It never changes what the user may do.",
+    "Hide menu items whose x-permissions the user lacks (permissions are in /auth/me).",
+    "One build of the frontend serves every profile (Clinic, II C, II B, II A, I) and every change of it: nothing is downloaded or switched by a flag. Read GET /establishment after login and again on establishment.changed, then list each workspace as views.workspaces says (hidden: not listed; records: marked Records; open_work: with the banner) and each screen as views.screens says; a workspace or screen it does not list is core and always shown (to the users with its permissions). Inside a screen hide an operation of x-capability-gates (or only the choice its `when` names) while its service is not in `active` (the server refuses it anyway: CAPABILITY_INACTIVE). What is shown follows the services, never the profile's category: the category picks the inspection framework, the letterhead and the few rules a screen names (the clinic's complete consultation)."
+  ],
+  "demo_accounts": "demo_accounts() lists a login per role; sandbox_call runs each case on the DEV server"
+}

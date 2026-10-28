@@ -498,13 +498,18 @@ export interface ReceptionCashBackOut {
   amount: number;
 }
 
-/** One active staff member as a picker shows them (GET /staff/lookup): the facts on their badge, nothing else. */
+/** One active staff member as a picker shows them (GET /staff/lookup): the facts on their badge and the registration their stamp prints, nothing else. */
 export interface StaffLookupOut {
+  /** The id a form's staff field takes (contrast_doctor_id, employee_id, ...) */
   employee_id: number;
   emp_number: string;
   full_name: string;
   designation: string;
   department_name: string | null;
+  /** The council they are registered with (PMDC: a doctor or dentist; PNC: a nurse); null: none */
+  license_type: "PMDC" | "PNC" | "Other" | null;
+  /** As their stamp prints it, e.g. "PMDC 12345-P"; null: no number on file */
+  registration: string | null;
 }
 
 /** Upload a patient document (PDF/JPEG/PNG) — POST /api/v1/patients/{patient_id}/documents (who may call: holders of patient.document.upload). */
@@ -553,6 +558,6 @@ export function receptionDashboard(): Promise<ReceptionDashboardOut> {
 }
 
 /** Find a staff member for a form (badge facts only) — GET /api/v1/staff/lookup (who may call: any logged-in user). */
-export function lookupStaff(query: { q: string; department_id?: number | null; limit?: number }): Promise<StaffLookupOut[]> {
+export function lookupStaff(query: { q: string; department_id?: number | null; license_type?: "PMDC" | "PNC" | null; limit?: number }): Promise<StaffLookupOut[]> {
   return api<StaffLookupOut[]>("GET", withQuery(`/staff/lookup`, query), undefined);
 }

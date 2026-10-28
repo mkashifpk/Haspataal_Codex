@@ -1,0 +1,1803 @@
+{
+  "screen_id": "mar",
+  "contract_fingerprint": "58db76bf7d59ef6d9870",
+  "knowledge_revision": "51c8fe699d47d046",
+  "delivery_gate": {
+    "required": true,
+    "status": "required",
+    "progress_reporting": {
+      "required": true,
+      "submit": "propose_progress",
+      "verify": "progress_proposals",
+      "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+    },
+    "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+    "compulsory": [
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+        "points": 2
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+        "points": 3
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+        "points": 2
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+        "points": 4
+      }
+    ],
+    "zoom": {
+      "min_pct": 100,
+      "max_pct": 250,
+      "reset_pct": 100,
+      "keys": [
+        "Ctrl + or Ctrl = (zoom in)",
+        "Ctrl - (zoom out)",
+        "Ctrl 0 (reset to 100 %)",
+        "Command on macOS"
+      ],
+      "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+    },
+    "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+    "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+  },
+  "screen": {
+    "id": "mar",
+    "workspace": "ward_nurse",
+    "title": "Medication administration record",
+    "purpose": "Checklist of scheduled doses; chart Administered/Held/Refused/Missed after the checks; PRN doses; the prepared dose's label.",
+    "workflow": "§2.5; MSDS MOM 57, 62-69, AAC 30",
+    "rule_objects": [
+      {
+        "id": "rule:190376c5e2",
+        "text": "Clear the NursingMARVerification discharge stage from the ward once every due dose is charted and the patient's own medicines are handed back (OWN_MEDICINES_HELD lists them).",
+        "cites": []
+      },
+      {
+        "id": "rule:c825b58965",
+        "text": "'Give' walks the rights (MSDS 64-68): 1) scan the wristband into wristband_code (no scanner: ask the name and the date of birth or MRN, identity_check TwoIdentifiers; an unidentified emergency patient: EmergencyOverride with identity_note); PATIENT_IDENTITY_MISMATCH: STOP, another patient's band. 2) scan the medicine into drug_barcode (DRUG_MISMATCH: STOP) or read its label. 3) the dose, route and time as ordered; anything else (or more than the time window) needs variance_reason (ADMINISTRATION_VARIANCE_REASON_REQUIRED).",
+        "cites": [
+          "MSDS 64-68"
+        ]
+      },
+      {
+        "id": "rule:07752c5314",
+        "text": "A high-alert medicine (high_alert_category set: red badge; lasa_with: 'looks like …') needs a second nurse or doctor at the bedside: they check independently and type their username and password (second_checker_username/_password; HIGH_ALERT_CHECK_REQUIRED without). A nurse without a PNC registration cannot give doses (ADMINISTRATION_NOT_AUTHORIZED).",
+        "cites": []
+      },
+      {
+        "id": "rule:99b1fb8d14",
+        "text": "'Prepare' before drawing up an injection or infusion: POST /mar/{mar_id}/prepare (what it is diluted in) prints the label to stick on the syringe or bag before preparing the next one (MSDS 63).",
+        "cites": [
+          "MSDS 63"
+        ]
+      },
+      {
+        "id": "rule:65f0d27678",
+        "text": "self_administration lines: the patient takes it; chart it with self_administered true.",
+        "cites": []
+      },
+      {
+        "id": "rule:b912c9c4a2",
+        "text": "Anything other than Administered requires status_reason.",
+        "cites": []
+      },
+      {
+        "id": "rule:651e784c54",
+        "text": "Doses given from ward stock: pass ward_stock_batch_id + qty (BATCH_EXPIRED, BATCH_RECALLED: take another batch).",
+        "cites": []
+      },
+      {
+        "id": "rule:9748ab7d46",
+        "text": "Exists for the service inpatient (work): show it as GET /establishment views.screens says for screen_id mar (full; open_work: without its new work, with the banner \"No new ... from now on\"; records: history and corrections only; setup: only from Facility settings; hidden: in no menu), after login and again on establishment.changed. Never decide it from the profile's category.",
+        "cites": []
+      }
+    ],
+    "related_workflows": [
+      "clinical-and-prescriptions",
+      "inpatient-and-discharge",
+      "medication-safety"
+    ],
+    "service": {
+      "services": [
+        "inpatient"
+      ],
+      "role": "work",
+      "views": {
+        "full": "Show it; every action the user's permissions allow.",
+        "open_work": "The service is Retiring: show it with the banner 'No new <new_work> from now on' and its open work; hide the actions that start new work of it (x-capability-gates; continues_while_retiring ones stay); keep every other action (completing, transferring, settling, correcting).",
+        "records": "The service is Retired (or Preparing after it ran): show it as records only, under a 'Records' marker: lists, details, prints and the corrections the server still accepts; no action that starts new work.",
+        "setup": "Not in the daily menus: reach it from Facility settings (a preview's prerequisites link to it) to set the service up before switching it on.",
+        "hidden": "Not in any menu: the service has never run here, so the screen has nothing to show."
+      },
+      "how": "GET /establishment after login and on establishment.changed: views.screens gives this screen's view (one frontend build for every profile; never decide it from the profile's category)"
+    }
+  },
+  "rules_in_force": null,
+  "endpoints": [
+    {
+      "endpoint": "POST /admissions/{admission_id}/discharge/{stage}/clear",
+      "summary": "Clear a discharge stage (in order)",
+      "access": {
+        "authentication": "user",
+        "permissions": [],
+        "permissions_mode": "all",
+        "who": "the permission of the stage: ipd.discharge.clear_pharmacy, clear_nursing, clear_billing or clear_cleaning"
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "BILLING_DEFERRED",
+          "http_status": 409,
+          "message": "Confirm how this emergency admission is paid first.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "admission_id",
+            "next_step"
+          ],
+          "details_from": "POST /api/v1/admissions/{admission_id}/final-bill",
+          "next_step": "POST /admissions/1/confirm-billing"
+        },
+        {
+          "code": "DISCHARGE_NOT_ALLOWED",
+          "http_status": 409,
+          "message": "Discharge cannot proceed in the admission's current state.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "balance_due",
+            "invoice_id",
+            "status"
+          ],
+          "details_from": "POST /api/v1/admissions/{admission_id}/discharge/{stage}/clear"
+        },
+        {
+          "code": "DISCHARGE_STAGE_IMMUTABLE",
+          "http_status": 409,
+          "message": "A cleared discharge stage cannot change.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "cleared_at",
+            "stage"
+          ],
+          "details_from": "POST /api/v1/admissions/{admission_id}/discharge/{stage}/clear"
+        },
+        {
+          "code": "DISCHARGE_STAGE_OUT_OF_ORDER",
+          "http_status": 409,
+          "message": "Discharge stages must be cleared in order.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "blocked_on"
+          ],
+          "details_from": "POST /api/v1/admissions/{admission_id}/discharge/{stage}/clear"
+        },
+        {
+          "code": "OWN_MEDICINES_HELD",
+          "http_status": 409,
+          "message": "The patient's own medicines are still held: hand them back, or record their destruction, first (details lists them).",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "medicines"
+          ],
+          "details_from": "POST /api/v1/admissions/{admission_id}/discharge/{stage}/clear"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "admission_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Admission Id"
+          }
+        },
+        {
+          "name": "stage",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "enum": [
+              "PharmacyClearance",
+              "NursingMARVerification",
+              "BillingSettlement",
+              "OpsCleaning"
+            ],
+            "type": "string",
+            "title": "Stage"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ClearIn"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_AdmissionDetailOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "application/json",
+        "model": "ClearIn",
+        "fields": [
+          {
+            "pointer": "/note",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "max_length": 1000
+          }
+        ],
+        "cross_field_rules": {},
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "state_guard",
+        "on_lost_answer": "A repeat is refused with DISCHARGE_STAGE_IMMUTABLE: the stage is cleared already. The first call may have succeeded; this error does not replay its result. Never retry automatically; re-read the record, then offer the action again only if it is still needed.",
+        "reconcile_with": "GET /admissions/{admission_id}/discharge-status",
+        "refused_with": "DISCHARGE_STAGE_IMMUTABLE",
+        "emits_events": [
+          "admission.discharge.stage_changed"
+        ],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "GET /admissions/{admission_id}/mar",
+      "summary": "Medication Administration Record (checklist)",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "ipd.mar.view"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of ipd.mar.view",
+        "roles_allowed": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "surgeon",
+          "ward_nurse"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [],
+      "parameters": [
+        {
+          "name": "admission_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Admission Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_MarEntryOut__"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "POST /mar/{mar_id}/chart",
+      "summary": "Chart a scheduled dose (Administered / Held / Refused / Missed)",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "ipd.mar.administer"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of ipd.mar.administer",
+        "roles_allowed": [
+          "head_nurse",
+          "ward_nurse"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "ACCOUNT_LOCKED",
+          "http_status": 423,
+          "message": "Too many failed attempts; the account is temporarily locked.",
+          "retryable": true,
+          "ui_action": "Show a countdown from retry_after_seconds.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "retry_after_seconds"
+          ],
+          "details_from": "POST /api/v1/auth/login"
+        },
+        {
+          "code": "ADMINISTRATION_NOT_AUTHORIZED",
+          "http_status": 403,
+          "message": "Medicines are given (and double-checked) by a registered nurse or doctor, or by staff the hospital allows.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "POST /api/v1/mar/{mar_id}/chart"
+        },
+        {
+          "code": "ADMINISTRATION_VARIANCE_REASON_REQUIRED",
+          "http_status": 422,
+          "message": "Give the reason: the dose differs from the order (route or dose) or is given outside its time window.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "ordered_dose",
+            "ordered_route",
+            "outside_time_window",
+            "window_minutes"
+          ],
+          "details_from": "POST /api/v1/mar/{mar_id}/chart"
+        },
+        {
+          "code": "BATCH_EXPIRED",
+          "http_status": 409,
+          "message": "This batch has expired and cannot be issued.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "POST /api/v1/mar/{mar_id}/chart"
+        },
+        {
+          "code": "BATCH_RECALLED",
+          "http_status": 409,
+          "message": "This batch is recalled: it cannot be dispensed, sent to a ward, used in theatre or given.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "POST /api/v1/mar/{mar_id}/chart"
+        },
+        {
+          "code": "DRUG_MISMATCH",
+          "http_status": 409,
+          "message": "The scanned medicine is not the one ordered: stop and check the order.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "ordered",
+            "scanned"
+          ],
+          "details_from": "POST /api/v1/mar/{mar_id}/chart"
+        },
+        {
+          "code": "DUAL_CONTROL_SAME_PERSON",
+          "http_status": 403,
+          "message": "The second approver must be a different person.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "POST /api/v1/prescriptions/{prescription_id}/dispense"
+        },
+        {
+          "code": "HIGH_ALERT_CHECK_REQUIRED",
+          "http_status": 409,
+          "message": "A high-alert medicine needs a second person's check (their co-signature) before it is dispensed or given.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "prescription_item_id"
+          ],
+          "details_from": "POST /api/v1/prescriptions/{prescription_id}/dispense"
+        },
+        {
+          "code": "INSUFFICIENT_STOCK",
+          "http_status": 409,
+          "message": "Not enough stock available.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "constraint"
+          ],
+          "details_from": "POST /api/v1/mar/{mar_id}/chart"
+        },
+        {
+          "code": "MAR_STATE_INVALID",
+          "http_status": 409,
+          "message": "This MAR entry cannot change; add a correction entry.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "POST /api/v1/mar/{mar_id}/chart"
+        },
+        {
+          "code": "PATIENT_IDENTITY_MISMATCH",
+          "http_status": 409,
+          "message": "The wristband scanned is not this patient's: stop and check who the patient is.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "POST /api/v1/mar/{mar_id}/chart"
+        },
+        {
+          "code": "PATIENT_IDENTITY_REQUIRED",
+          "http_status": 422,
+          "message": "Identify the patient first: scan the wristband, or confirm two identifiers (name and MRN or date of birth).",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "POST /api/v1/mar/{mar_id}/chart"
+        },
+        {
+          "code": "SELF_ADMINISTRATION_INVALID",
+          "http_status": 422,
+          "message": "Self-administration is only for an inpatient's oral, inhaled or topical medicine that is not high-alert, when the doctor allowed it.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "POST /api/v1/prescriptions"
+        },
+        {
+          "code": "STEP_UP_REQUIRED",
+          "http_status": 403,
+          "message": "A second authorised person must co-sign this action.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "POST /api/v1/blood/requests/{request_id}/issue"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "mar_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Mar Id"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ChartIn"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_MarRecordOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "application/json",
+        "model": "ChartIn",
+        "fields": [
+          {
+            "pointer": "/wristband_code",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "max_length": 80,
+            "description": "What the scanner read from the wristband (the MRN, or HMS:PT:<mrn>)",
+            "scanner": true
+          },
+          {
+            "pointer": "/identity_check",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "enum": [
+              "WristbandScan",
+              "TwoIdentifiers",
+              "EmergencyOverride"
+            ],
+            "description": "Without a scan: TwoIdentifiers (name and date of birth or MRN asked), or EmergencyOverride (an emergency or Code Red admission; identity_note required)"
+          },
+          {
+            "pointer": "/identity_note",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "max_length": 300
+          },
+          {
+            "pointer": "/drug_barcode",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "max_length": 80,
+            "description": "What the scanner read from the medicine's pack",
+            "scanner": true
+          },
+          {
+            "pointer": "/second_checker_username",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "description": "High-alert medicine: the second nurse or doctor co-signs"
+          },
+          {
+            "pointer": "/second_checker_password",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "sensitive": "never log, store or keep it after the call"
+          },
+          {
+            "pointer": "/self_administered",
+            "type": "boolean",
+            "required": false,
+            "nullable": false,
+            "default": false,
+            "description": "The patient took it themselves (the doctor allowed it)"
+          },
+          {
+            "pointer": "/variance_reason",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "max_length": 500,
+            "description": "Required for another dose or route than ordered, or outside the time window"
+          },
+          {
+            "pointer": "/status",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "enum": [
+              "Administered",
+              "Held",
+              "Refused",
+              "Missed",
+              "Cancelled"
+            ]
+          },
+          {
+            "pointer": "/administered_at",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "format": "date-time"
+          },
+          {
+            "pointer": "/dose_given_text",
+            "type": "string",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "pointer": "/route_given",
+            "type": "string",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "pointer": "/status_reason",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "description": "Required unless Administered"
+          },
+          {
+            "pointer": "/ward_stock_batch_id",
+            "type": "integer",
+            "required": false,
+            "nullable": true,
+            "description": "Take the dose from ward-local stock (this batch)"
+          },
+          {
+            "pointer": "/ward_stock_qty",
+            "type": "one of",
+            "required": false,
+            "nullable": false
+          }
+        ],
+        "cross_field_rules": {
+          "ChartIn": [
+            "status_reason is required when the dose was not administered"
+          ]
+        },
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "state_guard",
+        "on_lost_answer": "A repeat is refused with MAR_STATE_INVALID: the scheduled dose has already been charted. The first call may have succeeded; this error does not replay its result. Never retry automatically; re-read the record, then offer the action again only if it is still needed.",
+        "reconcile_with": null,
+        "refused_with": "MAR_STATE_INVALID",
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "POST /admissions/{admission_id}/mar/prn",
+      "summary": "Chart a PRN / ad-hoc dose",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "ipd.mar.administer"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of ipd.mar.administer",
+        "roles_allowed": [
+          "head_nurse",
+          "ward_nurse"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": true,
+      "errors": [
+        {
+          "code": "ACCOUNT_LOCKED",
+          "http_status": 423,
+          "message": "Too many failed attempts; the account is temporarily locked.",
+          "retryable": true,
+          "ui_action": "Show a countdown from retry_after_seconds.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "retry_after_seconds"
+          ],
+          "details_from": "POST /api/v1/auth/login"
+        },
+        {
+          "code": "DUAL_CONTROL_SAME_PERSON",
+          "http_status": 403,
+          "message": "The second approver must be a different person.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "POST /api/v1/prescriptions/{prescription_id}/dispense"
+        },
+        {
+          "code": "STEP_UP_REQUIRED",
+          "http_status": 403,
+          "message": "A second authorised person must co-sign this action.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "POST /api/v1/blood/requests/{request_id}/issue"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "admission_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Admission Id"
+          }
+        },
+        {
+          "name": "Idempotency-Key",
+          "in": "header",
+          "required": false,
+          "description": "Unique per logical action; retries return the first result",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Unique per logical action; retries return the first result",
+            "title": "Idempotency-Key"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/PrnIn"
+            }
+          }
+        }
+      },
+      "responses": {
+        "201": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_MarRecordOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "application/json",
+        "model": "PrnIn",
+        "fields": [
+          {
+            "pointer": "/wristband_code",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "max_length": 80,
+            "description": "What the scanner read from the wristband (the MRN, or HMS:PT:<mrn>)",
+            "scanner": true
+          },
+          {
+            "pointer": "/identity_check",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "enum": [
+              "WristbandScan",
+              "TwoIdentifiers",
+              "EmergencyOverride"
+            ],
+            "description": "Without a scan: TwoIdentifiers (name and date of birth or MRN asked), or EmergencyOverride (an emergency or Code Red admission; identity_note required)"
+          },
+          {
+            "pointer": "/identity_note",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "max_length": 300
+          },
+          {
+            "pointer": "/drug_barcode",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "max_length": 80,
+            "description": "What the scanner read from the medicine's pack",
+            "scanner": true
+          },
+          {
+            "pointer": "/second_checker_username",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "description": "High-alert medicine: the second nurse or doctor co-signs"
+          },
+          {
+            "pointer": "/second_checker_password",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "sensitive": "never log, store or keep it after the call"
+          },
+          {
+            "pointer": "/self_administered",
+            "type": "boolean",
+            "required": false,
+            "nullable": false,
+            "default": false,
+            "description": "The patient took it themselves (the doctor allowed it)"
+          },
+          {
+            "pointer": "/variance_reason",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "max_length": 500,
+            "description": "Required for another dose or route than ordered, or outside the time window"
+          },
+          {
+            "pointer": "/prescription_item_id",
+            "type": "integer",
+            "required": true,
+            "nullable": false
+          },
+          {
+            "pointer": "/administered_at",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "format": "date-time"
+          },
+          {
+            "pointer": "/dose_given_text",
+            "type": "string",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "pointer": "/route_given",
+            "type": "string",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "pointer": "/status_reason",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "description": "Indication for the PRN dose"
+          }
+        ],
+        "cross_field_rules": {},
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "idempotency_key",
+        "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+        "reconcile_with": "GET /admissions/{admission_id}/mar",
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "POST /mar/{mar_id}/correction",
+      "summary": "Correction entry for a charted dose",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "ipd.mar.administer"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of ipd.mar.administer",
+        "roles_allowed": [
+          "head_nurse",
+          "ward_nurse"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": true,
+      "errors": [
+        {
+          "code": "NOT_FOUND",
+          "http_status": 404,
+          "message": "The requested resource was not found.",
+          "retryable": false,
+          "ui_action": "Say 'not found'; refresh the list.",
+          "source": [
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "resource"
+          ],
+          "details_from": "PUT /api/v1/admin/printers/{printer_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "mar_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Mar Id"
+          }
+        },
+        {
+          "name": "Idempotency-Key",
+          "in": "header",
+          "required": false,
+          "description": "Unique per logical action; retries return the first result",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Unique per logical action; retries return the first result",
+            "title": "Idempotency-Key"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/MarCorrectionIn"
+            }
+          }
+        }
+      },
+      "responses": {
+        "201": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_MarRecordOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "application/json",
+        "model": "MarCorrectionIn",
+        "fields": [
+          {
+            "pointer": "/status",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "enum": [
+              "Administered",
+              "Held",
+              "Refused",
+              "Missed",
+              "Cancelled"
+            ]
+          },
+          {
+            "pointer": "/administered_at",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "format": "date-time"
+          },
+          {
+            "pointer": "/dose_given_text",
+            "type": "string",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "pointer": "/route_given",
+            "type": "string",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "pointer": "/status_reason",
+            "type": "string",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "pointer": "/correction_reason",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "min_length": 3,
+            "max_length": 500
+          }
+        ],
+        "cross_field_rules": {},
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "idempotency_key",
+        "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+        "reconcile_with": null,
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "POST /admissions/{admission_id}/mar/generate",
+      "summary": "Generate scheduled doses from active IPD orders (idempotent)",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "ipd.mar.administer",
+          "prescription.create"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of ipd.mar.administer or prescription.create",
+        "roles_allowed": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "surgeon",
+          "ward_nurse"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [],
+      "parameters": [
+        {
+          "name": "admission_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Admission Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_MarGenerateOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": null,
+      "write": {
+        "protection": "repeat_effect",
+        "on_lost_answer": "Repeating this call has another effect: adds only the doses not on the chart yet. Never retry automatically; reconcile the result and require a deliberate new action if still needed.",
+        "reconcile_with": "GET /admissions/{admission_id}/mar",
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "GET /wards/{ward_id}/inventory",
+      "summary": "Ward-local stock",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "ward.inventory.view"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of ward.inventory.view",
+        "roles_allowed": [
+          "head_nurse",
+          "pharmacist",
+          "pharmacy_admin",
+          "ward_nurse"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "BATCH_EXPIRED",
+          "http_status": 409,
+          "message": "This batch has expired and cannot be issued.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "POST /api/v1/mar/{mar_id}/chart"
+        },
+        {
+          "code": "BATCH_RECALLED",
+          "http_status": 409,
+          "message": "This batch is recalled: it cannot be dispensed, sent to a ward, used in theatre or given.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "POST /api/v1/mar/{mar_id}/chart"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "ward_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Ward Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_WardStockOut__"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "POST /mar/{mar_id}/prepare",
+      "summary": "Prepare a dose and print its label",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "ipd.mar.administer"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of ipd.mar.administer",
+        "roles_allowed": [
+          "head_nurse",
+          "ward_nurse"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": true,
+      "errors": [
+        {
+          "code": "MAR_STATE_INVALID",
+          "http_status": 409,
+          "message": "This MAR entry cannot change; add a correction entry.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "POST /api/v1/mar/{mar_id}/chart"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "mar_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Mar Id"
+          }
+        },
+        {
+          "name": "Idempotency-Key",
+          "in": "header",
+          "required": false,
+          "description": "Unique per logical action; retries return the first result",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Unique per logical action; retries return the first result",
+            "title": "Idempotency-Key"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/DosePrepareIn"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_PrintOut_DoseLabelFieldsOut__"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "application/json",
+        "model": "DosePrepareIn",
+        "fields": [
+          {
+            "pointer": "/preparation",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "max_length": 300
+          }
+        ],
+        "cross_field_rules": {},
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "idempotency_key",
+        "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+        "reconcile_with": null,
+        "emits_events": [],
+        "prints": true,
+        "related_state_machine": null
+      },
+      "prints": {
+        "kind": "print_payload",
+        "document_types": [
+          "autopsy_order",
+          "bed_labels",
+          "blood_component_label",
+          "blood_donation_labels",
+          "clinical_note",
+          "complaint_letter",
+          "complaints_notice",
+          "consent_form",
+          "cost_estimate",
+          "cssd_labels",
+          "death_certificate",
+          "discharge_summary",
+          "dispensing_label",
+          "dose_label",
+          "id_card",
+          "imaging_report",
+          "lab_label",
+          "lab_report",
+          "mlc_intimation",
+          "opd_slip",
+          "pharmacy_receipt",
+          "prescription",
+          "referral_slip",
+          "send_out_manifest",
+          "surgical_record",
+          "triage_algorithm",
+          "wristband"
+        ],
+        "printer_role": "label",
+        "document_type": "dose_label",
+        "paper_width_mm": 50,
+        "server_renders": [
+          "text",
+          "barcode_svg"
+        ],
+        "rule": "Print `text` as is on receipt printers, `fields` in your own layout for A4, or download `pdf_url`; route by printer_role (GET /terminals/whoami). Right-to-left printouts are laid out by the terminal."
+      }
+    }
+  ],
+  "test_plan": {
+    "screen": "mar",
+    "title": "Medication administration record",
+    "cases": [
+      {
+        "id": "case:POST /admissions/{admission_id}/discharge/{stage}/clear",
+        "call": "POST /api/v1/admissions/{admission_id}/discharge/{stage}/clear",
+        "summary": "Clear a discharge stage (in order)",
+        "denied": {
+          "as_one_of": [],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "BILLING_DEFERRED",
+          "DISCHARGE_NOT_ALLOWED",
+          "DISCHARGE_STAGE_IMMUTABLE",
+          "DISCHARGE_STAGE_OUT_OF_ORDER",
+          "OWN_MEDICINES_HELD",
+          "VALIDATION_ERROR"
+        ],
+        "as_one_of": [
+          "any logged-in user"
+        ]
+      },
+      {
+        "id": "case:GET /admissions/{admission_id}/mar",
+        "call": "GET /api/v1/admissions/{admission_id}/mar",
+        "summary": "Medication Administration Record (checklist)",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "billing_admin",
+            "cashier",
+            "clinic_director"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [],
+        "as_one_of": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "surgeon",
+          "ward_nurse"
+        ]
+      },
+      {
+        "id": "case:POST /mar/{mar_id}/chart",
+        "call": "POST /api/v1/mar/{mar_id}/chart",
+        "summary": "Chart a scheduled dose (Administered / Held / Refused / Missed)",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "ACCOUNT_LOCKED",
+          "ADMINISTRATION_NOT_AUTHORIZED",
+          "ADMINISTRATION_VARIANCE_REASON_REQUIRED",
+          "BATCH_EXPIRED",
+          "BATCH_RECALLED",
+          "DRUG_MISMATCH",
+          "DUAL_CONTROL_SAME_PERSON",
+          "HIGH_ALERT_CHECK_REQUIRED",
+          "INSUFFICIENT_STOCK",
+          "MAR_STATE_INVALID",
+          "PATIENT_IDENTITY_MISMATCH",
+          "PATIENT_IDENTITY_REQUIRED",
+          "SELF_ADMINISTRATION_INVALID",
+          "STEP_UP_REQUIRED",
+          "VALIDATION_ERROR"
+        ],
+        "as_one_of": [
+          "head_nurse",
+          "ward_nurse"
+        ]
+      },
+      {
+        "id": "case:POST /admissions/{admission_id}/mar/prn",
+        "call": "POST /api/v1/admissions/{admission_id}/mar/prn",
+        "summary": "Chart a PRN / ad-hoc dose",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "ACCOUNT_LOCKED",
+          "DUAL_CONTROL_SAME_PERSON",
+          "STEP_UP_REQUIRED"
+        ],
+        "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)",
+        "as_one_of": [
+          "head_nurse",
+          "ward_nurse"
+        ]
+      },
+      {
+        "id": "case:POST /mar/{mar_id}/correction",
+        "call": "POST /api/v1/mar/{mar_id}/correction",
+        "summary": "Correction entry for a charted dose",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "NOT_FOUND"
+        ],
+        "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)",
+        "as_one_of": [
+          "head_nurse",
+          "ward_nurse"
+        ]
+      },
+      {
+        "id": "case:POST /admissions/{admission_id}/mar/generate",
+        "call": "POST /api/v1/admissions/{admission_id}/mar/generate",
+        "summary": "Generate scheduled doses from active IPD orders (idempotent)",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "billing_admin",
+            "cashier",
+            "clinic_director"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [],
+        "as_one_of": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "surgeon",
+          "ward_nurse"
+        ]
+      },
+      {
+        "id": "case:GET /wards/{ward_id}/inventory",
+        "call": "GET /api/v1/wards/{ward_id}/inventory",
+        "summary": "Ward-local stock",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "BATCH_EXPIRED",
+          "BATCH_RECALLED"
+        ],
+        "as_one_of": [
+          "head_nurse",
+          "pharmacist",
+          "pharmacy_admin",
+          "ward_nurse"
+        ]
+      },
+      {
+        "id": "case:POST /mar/{mar_id}/prepare",
+        "call": "POST /api/v1/mar/{mar_id}/prepare",
+        "summary": "Prepare a dose and print its label",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "MAR_STATE_INVALID"
+        ],
+        "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)",
+        "as_one_of": [
+          "head_nurse",
+          "ward_nurse"
+        ]
+      }
+    ],
+    "service_cases": [
+      {
+        "view": "full",
+        "set_up": "GET /establishment answers views.screens[screen_id=mar].view = full (inpatient): stub that answer, or have the DEV server's admin move the service on Facility settings",
+        "expect": "Show it; every action the user's permissions allow."
+      },
+      {
+        "view": "open_work",
+        "set_up": "GET /establishment answers views.screens[screen_id=mar].view = open_work (inpatient): stub that answer, or have the DEV server's admin move the service on Facility settings",
+        "expect": "The service is Retiring: show it with the banner 'No new <new_work> from now on' and its open work; hide the actions that start new work of it (x-capability-gates; continues_while_retiring ones stay); keep every other action (completing, transferring, settling, correcting)."
+      },
+      {
+        "view": "records",
+        "set_up": "GET /establishment answers views.screens[screen_id=mar].view = records (inpatient): stub that answer, or have the DEV server's admin move the service on Facility settings",
+        "expect": "The service is Retired (or Preparing after it ran): show it as records only, under a 'Records' marker: lists, details, prints and the corrections the server still accepts; no action that starts new work."
+      },
+      {
+        "view": "hidden",
+        "set_up": "GET /establishment answers views.screens[screen_id=mar].view = hidden (inpatient): stub that answer, or have the DEV server's admin move the service on Facility settings",
+        "expect": "Not in any menu: the service has never run here, so the screen has nothing to show."
+      }
+    ],
+    "delivery_gate": {
+      "required": true,
+      "status": "required",
+      "progress_reporting": {
+        "required": true,
+        "submit": "propose_progress",
+        "verify": "progress_proposals",
+        "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+      },
+      "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+      "compulsory": [
+        {
+          "id": "q:f1_help",
+          "label": "F1 contextual help",
+          "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+          "points": 2
+        },
+        {
+          "id": "q:role_faq",
+          "label": "Complete role-specific FAQs",
+          "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+          "points": 3
+        },
+        {
+          "id": "q:zoom",
+          "label": "Keyboard zoom: 100-250% only",
+          "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+          "points": 2
+        },
+        {
+          "id": "q:fresh_data",
+          "label": "Human review with newly created data",
+          "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+          "points": 4
+        }
+      ],
+      "zoom": {
+        "min_pct": 100,
+        "max_pct": 250,
+        "reset_pct": 100,
+        "keys": [
+          "Ctrl + or Ctrl = (zoom in)",
+          "Ctrl - (zoom out)",
+          "Ctrl 0 (reset to 100 %)",
+          "Command on macOS"
+        ],
+        "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+      },
+      "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+      "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+    },
+    "handbook_page": "screens/mar",
+    "workspace_guide": "get_handbook_outline('ward_nurse')",
+    "realtime": [
+      {
+        "event": "medication.due",
+        "check": "the screen refreshes without polling"
+      }
+    ],
+    "acceptance_rules": [
+      "Clear the NursingMARVerification discharge stage from the ward once every due dose is charted and the patient's own medicines are handed back (OWN_MEDICINES_HELD lists them).",
+      "'Give' walks the rights (MSDS 64-68): 1) scan the wristband into wristband_code (no scanner: ask the name and the date of birth or MRN, identity_check TwoIdentifiers; an unidentified emergency patient: EmergencyOverride with identity_note); PATIENT_IDENTITY_MISMATCH: STOP, another patient's band. 2) scan the medicine into drug_barcode (DRUG_MISMATCH: STOP) or read its label. 3) the dose, route and time as ordered; anything else (or more than the time window) needs variance_reason (ADMINISTRATION_VARIANCE_REASON_REQUIRED).",
+      "A high-alert medicine (high_alert_category set: red badge; lasa_with: 'looks like …') needs a second nurse or doctor at the bedside: they check independently and type their username and password (second_checker_username/_password; HIGH_ALERT_CHECK_REQUIRED without). A nurse without a PNC registration cannot give doses (ADMINISTRATION_NOT_AUTHORIZED).",
+      "'Prepare' before drawing up an injection or infusion: POST /mar/{mar_id}/prepare (what it is diluted in) prints the label to stick on the syringe or bag before preparing the next one (MSDS 63).",
+      "self_administration lines: the patient takes it; chart it with self_administered true.",
+      "Anything other than Administered requires status_reason.",
+      "Doses given from ward stock: pass ward_stock_batch_id + qty (BATCH_EXPIRED, BATCH_RECALLED: take another batch).",
+      "Exists for the service inpatient (work): show it as GET /establishment views.screens says for screen_id mar (full; open_work: without its new work, with the banner \"No new ... from now on\"; records: history and corrections only; setup: only from Facility settings; hidden: in no menu), after login and again on establishment.changed. Never decide it from the profile's category."
+    ],
+    "demo_accounts": "demo_accounts() lists a login per role; sandbox_call runs each case on the DEV server"
+  },
+  "unknowns": []
+}

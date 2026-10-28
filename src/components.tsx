@@ -1,4 +1,4 @@
-import { tr } from "./i18n";
+import { tr, bilingual as t } from "./i18n";
 import {
   useEffect,
   useRef,
@@ -9,6 +9,17 @@ import {
   type ReactElement,
 } from "react";
 import { ApiError } from "./bridge";
+import { foundationErrors } from "./foundation-errors";
+import refusalGuidance from "./refusal-guidance.json";
+import { isStateRefusal } from "./refusal-recovery";
+function recoverySummary(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(recoverySummary);
+  if (!value || typeof value !== "object") return value;
+  const record = value as Record<string, unknown>;
+  const keys = ["patient_name", "full_name", "mrn", "order_number", "admission_number", "status", "current_state", "stage", "cleared_by_name", "cleared_at", "blocked_on", "roster_id", "roster_date", "shift_name", "ward_name", "bed_ids", "entries", "stages"];
+  const selected = Object.fromEntries(keys.filter(k => k in record).map(k => [k, ["entries", "stages"].includes(k) ? recoverySummary(record[k]) : record[k]]));
+  return Object.keys(selected).length ? selected : value;
+}
 export function ErrorBox({ error, verbatim = false }: { error: unknown; verbatim?: boolean }) {
   if (!error) return null;
   const r = error instanceof ApiError ? error.response : undefined;
@@ -24,6 +35,20 @@ export function ErrorBox({ error, verbatim = false }: { error: unknown; verbatim
         </small>
       )}
       {r?.error?.details && <Details value={r.error.details} />}
+      {r?.error?.code && foundationErrors[r.error.code] && (
+        <p>{t(...foundationErrors[r.error.code])}</p>
+      )}
+      {r?.error?.code && !foundationErrors[r.error.code] && r.error.code in refusalGuidance && (
+        <p>{isStateRefusal(r.error.code)
+          ? t("The record's state changed. Keep your draft and compare the current server record before another reviewed action. This write will not retry automatically.", "ریکارڈ کی حالت بدلی۔ مسودہ رکھ کر نئے جائزے سے پہلے سرور کے تازہ ریکارڈ سے موازنہ کریں۔ خودکار ارسال نہیں ہوگا۔")
+          : t("The server refused this action. Keep your draft, check the code and details, and correct the cause before reviewing again. No write is retried automatically.", "سرور نے عمل روکا۔ مسودہ رکھیں، کوڈ و تفصیل دیکھ کر وجہ درست کریں، پھر جائزہ لیں۔ کوئی ارسال خودکار نہیں دہرایا جاتا۔")}</p>
+      )}
+      {r?.recovery && (
+        <section>
+          <strong>{t("Current server record", "سرور کا تازہ ریکارڈ")}</strong>
+          {r.recovery.error ? <p>{r.recovery.error}</p> : <Details value={recoverySummary(r.recovery.data)} />}
+        </section>
+      )}
     </div>
   );
 }

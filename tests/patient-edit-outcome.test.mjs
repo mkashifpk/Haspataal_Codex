@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import {stripTypeScriptTypes} from 'node:module';
 // Execute the production helper and ApiError; no copied implementation.
 const moduleUrl=source=>'data:text/javascript;base64,'+Buffer.from(stripTypeScriptTypes(source,{mode:'transform'})).toString('base64');
-const bridgeUrl=moduleUrl(fs.readFileSync(new URL('../src/bridge.ts',import.meta.url),'utf8'));
+const bridgeUrl=moduleUrl(fs.readFileSync(new URL('../src/bridge.ts',import.meta.url),'utf8').replace('"./refusal-recovery"',JSON.stringify(new URL('../src/refusal-recovery.ts',import.meta.url).href)));
 const bridge=await import(bridgeUrl);
 const helper=await import(moduleUrl(fs.readFileSync(new URL('../src/patient-errors.ts',import.meta.url),'utf8').replace('"./bridge"',JSON.stringify(bridgeUrl))));
 const refused=(code,status)=>new bridge.ApiError({ok:false,error:{code,message:'Localized or changed backend wording'},status});

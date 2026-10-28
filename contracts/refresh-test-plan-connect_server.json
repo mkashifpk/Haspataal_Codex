@@ -1,0 +1,160 @@
+{
+  "screen": "connect_server",
+  "title": "Connect to server (first run / server unreachable)",
+  "cases": [
+    {
+      "id": "case:GET /meta/server-info",
+      "call": "GET /api/v1/meta/server-info",
+      "summary": "How terminals reach and trust this server — works before login",
+      "happy_path": {
+        "as_one_of": [
+          "any logged-in user"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/meta/server-info"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "hospital_name": "Haspataal Hospital",
+                "server_name": "EnizLaptop",
+                "version": "1.0.0",
+                "build": "DEV",
+                "urls": [
+                  "http://EnizLaptop:8100",
+                  "http://EnizLaptop.Home:8100",
+                  "http://192.168.10.4:8100"
+                ],
+                "api_base": "/api/v1",
+                "ca_fingerprint_sha256": null,
+                "ca_path": "/ca.crt",
+                "discovery_port": null
+              },
+              "meta": {
+                "server_time": "2026-09-27T17:40:44.045857+00:00"
+              },
+              "request_id": "6943376dfe89455a9f9b95ca8ebec3f1"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": []
+    },
+    {
+      "id": "case:GET /terminals/whoami",
+      "call": "GET /api/v1/terminals/whoami",
+      "summary": "Identify this terminal (location + mapped printers) — works before login",
+      "happy_path": {
+        "as_one_of": [
+          "any logged-in user"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/terminals/whoami"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "registered": true,
+                "client_ip": "10.0.0.5",
+                "location_label": "Reception PC A",
+                "cash_node": "MainReception",
+                "mac": "3C:52:82:1A:2B:3C",
+                "ip": null,
+                "receipt_printer": "Reception receipt 1",
+                "receipt_printer_address": "192.168.1.40:9100",
+                "receipt_paper_mm": 80,
+                "label_printer": null,
+                "label_printer_address": null,
+                "document_printer": null,
+                "document_printer_address": null,
+                "card_printer": null,
+                "card_printer_address": null
+              },
+              "meta": {
+                "server_time": "2026-09-27T17:34:13.841843+00:00"
+              },
+              "request_id": "9fdf2872748040d48c0295bb7f87f80f"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": []
+    }
+  ],
+  "service_cases": [],
+  "delivery_gate": {
+    "required": true,
+    "status": "required",
+    "progress_reporting": {
+      "required": true,
+      "submit": "propose_progress",
+      "verify": "progress_proposals",
+      "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+    },
+    "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+    "compulsory": [
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+        "points": 2
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+        "points": 3
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+        "points": 2
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+        "points": 4
+      }
+    ],
+    "zoom": {
+      "min_pct": 100,
+      "max_pct": 250,
+      "reset_pct": 100,
+      "keys": [
+        "Ctrl + or Ctrl = (zoom in)",
+        "Ctrl - (zoom out)",
+        "Ctrl 0 (reset to 100 %)",
+        "Command on macOS"
+      ],
+      "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+    },
+    "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+    "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+  },
+  "handbook_page": "screens/connect_server",
+  "workspace_guide": "get_handbook_outline('*')",
+  "realtime": [],
+  "acceptance_rules": [
+    "Order: policy registry HKLM\\SOFTWARE\\Policies\\Haspataal\\Terminal > %ProgramData%\\Haspataal Terminal\\terminal.json > the saved choice > this screen.",
+    "This screen: broadcast a LAN discovery request (UDP 47632) and list the servers found; also allow typing an address (https://SERVER-NAME).",
+    "Before trusting a server the first time, show its CA fingerprint and require IT to confirm it matches the Control Center (skip the question only when a provisioned fingerprint matches).",
+    "Pin the hospital CA; never accept a server whose CA fingerprint differs from the trusted one (show 'This is not your hospital server').",
+    "After connecting, call GET /meta/server-info and store ALL urls as alternates; if the one in use fails during a shift, try the others before showing 'Server unreachable'.",
+    "While unreachable: keep the current screen and unsaved input, show a banner, retry with back-off (1, 2, 5, 10, 30 s), resume the WebSocket with resume_from when back."
+  ],
+  "demo_accounts": "demo_accounts() lists a login per role; sandbox_call runs each case on the DEV server"
+}

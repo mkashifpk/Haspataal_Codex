@@ -92,7 +92,6 @@ export type RadiologyDraft = {
   doctorId: string;
   linkMode: string;
   orthanc: string;
-  uid: string;
   report: string;
   finding: string;
   findingNote: string;
@@ -112,7 +111,6 @@ export const emptyRadiologyDraft = (): RadiologyDraft => ({
   doctorId: "",
   linkMode: "auto",
   orthanc: "",
-  uid: "",
   report: "",
   finding: "",
   findingNote: "",
@@ -141,16 +139,12 @@ export function radiologyBody(
         "Confirm that no contrast was given before completing by study link. If contrast was given, record completion with its doctor first.",
       );
     if (form.linkMode === "auto") return {};
-    const orthanc = form.orthanc.trim(),
-      uid = form.uid.trim();
-    if (!orthanc && !uid)
+    const orthanc = form.orthanc.trim();
+    if (!/^[0-9a-f]{8}(?:-[0-9a-f]{8}){4}$/.test(orthanc))
       throw Error(
-        "Enter an actual study identifier from PACS or choose automatic accession lookup.",
+        "Copy the actual Orthanc study ID from PACS: five groups of eight lower-case hexadecimal digits.",
       );
-    return {
-      ...(orthanc ? { orthanc_study_id: orthanc } : {}),
-      ...(uid ? { study_instance_uid: uid } : {}),
-    };
+    return { orthanc_study_id: orthanc };
   }
   if (action === "report") {
     const text = bounded(form.report, 20000, "Report");

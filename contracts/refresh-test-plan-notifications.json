@@ -1,0 +1,218 @@
+{
+  "screen": "notifications",
+  "title": "Notification bell",
+  "cases": [
+    {
+      "id": "case:GET /notifications",
+      "call": "GET /api/v1/notifications",
+      "summary": "My notifications (newest first)",
+      "happy_path": {
+        "as_one_of": [
+          "any logged-in user"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/notifications"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "notification_id": 2,
+                  "category": "leave",
+                  "severity": "info",
+                  "title": "Leave approved",
+                  "body": "Annual 2026-12-01–2026-12-02",
+                  "entity_type": "leave_request",
+                  "entity_id": "1",
+                  "action_url": null,
+                  "created_at": "2026-09-27T17:37:12.089577+00:00",
+                  "is_read": false
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-27T17:37:12.137784+00:00"
+              },
+              "request_id": "8894072ce5884a2489581d2c2cb9088a"
+            }
+          },
+          "errors_seen": [
+            "LICENSE_INVALID"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "LICENSE_INVALID"
+      ]
+    },
+    {
+      "id": "case:GET /notifications/unread-count",
+      "call": "GET /api/v1/notifications/unread-count",
+      "summary": "Badge count",
+      "happy_path": {
+        "as_one_of": [
+          "any logged-in user"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/notifications/unread-count"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "unread": 1
+              },
+              "meta": {
+                "server_time": "2026-09-27T17:37:12.142292+00:00"
+              },
+              "request_id": "c01f364da4f449f990354f9497fafa35"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": []
+    },
+    {
+      "id": "case:POST /notifications/{notification_id}/read",
+      "call": "POST /api/v1/notifications/{notification_id}/read",
+      "summary": "Mark one as read",
+      "happy_path": {
+        "as_one_of": [
+          "any logged-in user"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/notifications/2/read"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "notification_id": 2,
+                "is_read": true
+              },
+              "meta": {
+                "server_time": "2026-09-27T17:40:48.883952+00:00"
+              },
+              "request_id": "02008a91f45440e6a5a3d697357024f0"
+            }
+          },
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": []
+    },
+    {
+      "id": "case:POST /notifications/read-all",
+      "call": "POST /api/v1/notifications/read-all",
+      "summary": "Mark everything as read",
+      "happy_path": {
+        "as_one_of": [
+          "any logged-in user"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/notifications/read-all"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "marked": 1
+              },
+              "meta": {
+                "server_time": "2026-09-27T17:37:12.147088+00:00"
+              },
+              "request_id": "0310d31ff4a2449eb35bb4d8e2c1595c"
+            }
+          },
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": []
+    }
+  ],
+  "service_cases": [],
+  "delivery_gate": {
+    "required": true,
+    "status": "required",
+    "progress_reporting": {
+      "required": true,
+      "submit": "propose_progress",
+      "verify": "progress_proposals",
+      "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+    },
+    "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+    "compulsory": [
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+        "points": 2
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+        "points": 3
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+        "points": 2
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+        "points": 4
+      }
+    ],
+    "zoom": {
+      "min_pct": 100,
+      "max_pct": 250,
+      "reset_pct": 100,
+      "keys": [
+        "Ctrl + or Ctrl = (zoom in)",
+        "Ctrl - (zoom out)",
+        "Ctrl 0 (reset to 100 %)",
+        "Command on macOS"
+      ],
+      "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+    },
+    "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+    "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+  },
+  "handbook_page": "screens/notifications",
+  "workspace_guide": "get_handbook_outline('*')",
+  "realtime": [
+    {
+      "event": "notification.created",
+      "check": "the screen refreshes without polling"
+    }
+  ],
+  "acceptance_rules": [
+    "Refresh the badge on notification.created and after WebSocket reconnect.",
+    "Severity critical → toast that stays until dismissed."
+  ],
+  "demo_accounts": "demo_accounts() lists a login per role; sandbox_call runs each case on the DEV server"
+}

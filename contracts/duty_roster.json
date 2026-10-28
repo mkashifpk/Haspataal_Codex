@@ -1,7 +1,7 @@
 {
   "screen_id": "duty_roster",
-  "contract_fingerprint": "8ad8456c41b87dd0031e",
-  "knowledge_revision": "506a43401a2cda4a",
+  "contract_fingerprint": "58db76bf7d59ef6d9870",
+  "knowledge_revision": "51c8fe699d47d046",
   "delivery_gate": {
     "required": true,
     "status": "required",
@@ -55,7 +55,7 @@
   },
   "ui_quality": {
     "source": "frontend-docs/guides/16-ui-quality.md",
-    "standard_revision": "94b18e703d2ab96f",
+    "standard_revision": "5980e5c3b1817f4e",
     "context": {
       "workspace": "head_nurse",
       "purpose": "Plan duties by shift: nurses onto wards, zones and beds (drag & drop).",
@@ -1241,6 +1241,21 @@
           "details_from": "POST /api/v1/pharmacy/storage-checks"
         },
         {
+          "code": "ROSTER_DATE_CLOSED",
+          "http_status": 409,
+          "message": "Rosters of past days can only be changed by HR.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "entry_index",
+            "roster_date"
+          ],
+          "details_from": "POST /api/v1/rosters"
+        },
+        {
           "code": "ROSTER_ENTRY_CANCELLED",
           "http_status": 409,
           "message": "This duty was cancelled: create a new one.",
@@ -1427,6 +1442,21 @@
       "idempotency_key": false,
       "errors": [
         {
+          "code": "ROSTER_DATE_CLOSED",
+          "http_status": 409,
+          "message": "Rosters of past days can only be changed by HR.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "entry_index",
+            "roster_date"
+          ],
+          "details_from": "POST /api/v1/rosters"
+        },
+        {
           "code": "ROSTER_ENTRY_CANCELLED",
           "http_status": 409,
           "message": "This duty was cancelled: create a new one.",
@@ -1534,6 +1564,21 @@
       "service_gates": [],
       "idempotency_key": true,
       "errors": [
+        {
+          "code": "ROSTER_DATE_CLOSED",
+          "http_status": 409,
+          "message": "Rosters of past days can only be changed by HR.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "entry_index",
+            "roster_date"
+          ],
+          "details_from": "POST /api/v1/rosters"
+        },
         {
           "code": "VALIDATION_ERROR",
           "http_status": 422,
@@ -2091,6 +2136,20 @@
           "details_from": "POST /api/v1/self/roster/swaps"
         },
         {
+          "code": "SWAP_EXISTS",
+          "http_status": 409,
+          "message": "This duty is already in an open swap request.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "roster_id"
+          ],
+          "details_from": "POST /api/v1/self/roster/swaps"
+        },
+        {
           "code": "SWAP_SELF_APPROVAL",
           "http_status": 403,
           "message": "Neither of the two colleagues can approve their own duty swap.",
@@ -2227,6 +2286,37 @@
       "idempotency_key": false,
       "errors": [
         {
+          "code": "ROSTER_OUT_OF_SCOPE",
+          "http_status": 403,
+          "message": "You may not roster this employee (outside your staff scope).",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "employee_id",
+            "entry_index",
+            "staff_category"
+          ],
+          "details_from": "POST /api/v1/rosters"
+        },
+        {
+          "code": "SWAP_DUTY_STARTED",
+          "http_status": 409,
+          "message": "A duty is swapped before it starts.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "roster_date",
+            "roster_id"
+          ],
+          "details_from": "POST /api/v1/self/roster/swaps"
+        },
+        {
           "code": "SWAP_SELF_APPROVAL",
           "http_status": 403,
           "message": "Neither of the two colleagues can approve their own duty swap.",
@@ -2347,6 +2437,34 @@
       "service_gates": [],
       "idempotency_key": true,
       "errors": [
+        {
+          "code": "ROSTER_OUT_OF_SCOPE",
+          "http_status": 403,
+          "message": "You may not roster this employee (outside your staff scope).",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "employee_id",
+            "entry_index",
+            "staff_category"
+          ],
+          "details_from": "POST /api/v1/rosters"
+        },
+        {
+          "code": "SWAP_SELF_APPROVAL",
+          "http_status": 403,
+          "message": "Neither of the two colleagues can approve their own duty swap.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "POST /api/v1/rosters/swaps"
+        },
         {
           "code": "SWAP_TRANSITION_INVALID",
           "http_status": 409,
@@ -3195,6 +3313,7 @@
       "ROSTER_OUT_OF_SCOPE": "You may not roster this employee (outside your staff scope).",
       "SWAP_COLLEAGUE_INELIGIBLE": "Choose an active colleague of the same staff category.",
       "SWAP_DUTY_STARTED": "A duty is swapped before it starts.",
+      "SWAP_EXISTS": "This duty is already in an open swap request.",
       "SWAP_SELF_APPROVAL": "Neither of the two colleagues can approve their own duty swap.",
       "SWAP_TRANSITION_INVALID": "The duty swap cannot move to that state.",
       "VALIDATION_ERROR": "The request is invalid.",
@@ -3331,6 +3450,7 @@
         },
         "errors_to_handle": [
           "REFERENCE_NOT_FOUND",
+          "ROSTER_DATE_CLOSED",
           "ROSTER_ENTRY_CANCELLED",
           "VERSION_CONFLICT"
         ],
@@ -3356,6 +3476,7 @@
           "expect": "403 FORBIDDEN"
         },
         "errors_to_handle": [
+          "ROSTER_DATE_CLOSED",
           "ROSTER_ENTRY_CANCELLED"
         ],
         "as_one_of": [
@@ -3379,6 +3500,7 @@
           "expect": "403 FORBIDDEN"
         },
         "errors_to_handle": [
+          "ROSTER_DATE_CLOSED",
           "VALIDATION_ERROR"
         ],
         "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)",
@@ -3478,6 +3600,7 @@
           "ROSTER_OUT_OF_SCOPE",
           "SWAP_COLLEAGUE_INELIGIBLE",
           "SWAP_DUTY_STARTED",
+          "SWAP_EXISTS",
           "SWAP_SELF_APPROVAL"
         ],
         "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)",
@@ -3502,6 +3625,8 @@
           "expect": "403 FORBIDDEN"
         },
         "errors_to_handle": [
+          "ROSTER_OUT_OF_SCOPE",
+          "SWAP_DUTY_STARTED",
           "SWAP_SELF_APPROVAL"
         ],
         "as_one_of": [
@@ -3525,6 +3650,8 @@
           "expect": "403 FORBIDDEN"
         },
         "errors_to_handle": [
+          "ROSTER_OUT_OF_SCOPE",
+          "SWAP_SELF_APPROVAL",
           "SWAP_TRANSITION_INVALID"
         ],
         "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)",
@@ -3888,6 +4015,11 @@
       {
         "code": "SWAP_DUTY_STARTED",
         "message": "A duty is swapped before it starts.",
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      },
+      {
+        "code": "SWAP_EXISTS",
+        "message": "This duty is already in an open swap request.",
         "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
       },
       {

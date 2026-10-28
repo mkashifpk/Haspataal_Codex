@@ -1,3 +1,4 @@
+import { refusalReadPath } from "./refusal-recovery";
 export type Reply<T = unknown> = {
   ok: boolean;
   data: T;
@@ -6,12 +7,14 @@ export type Reply<T = unknown> = {
     message: string;
     details?: Record<string, unknown>;
     retry_after_seconds?: number;
+    retryable?: boolean;
   };
   request_id?: string;
   status?: number;
   local_rejection?: boolean;
   request_sent?: boolean;
   meta?: {server_time:string};
+  recovery?: { path: string; data?: unknown; error?: string };
 };
 declare global {
   interface Window {
@@ -58,7 +61,7 @@ export async function api<T = any>(
   method: string,
   path: string,
   body?: unknown,
-  options?: { idempotent?: boolean; key?: string },
+  options?: { idempotent?: boolean; key?: string; reconcilePath?: string },
 ): Promise<T> {
   if (body instanceof FormData) {
     const parts = [];
@@ -88,6 +91,16 @@ export async function api<T = any>(
     pending.delete(signature);
     return data;
   } catch (e) {
+    if (e instanceof ApiError && method !== "GET") {
+      const read = refusalReadPath(method, path, e.response.error?.code || "", options?.reconcilePath);
+      if (read) {
+        try {
+          e.response.recovery = { path: read, data: await call("api", { method: "GET", path: read }) };
+        } catch (readError) {
+          e.response.recovery = { path: read, error: readError instanceof Error ? readError.message : String(readError) };
+        }
+      }
+    }
     if (
       e instanceof ApiError &&
       e.response.status &&

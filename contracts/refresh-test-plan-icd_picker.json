@@ -1,0 +1,338 @@
+{
+  "screen": "icd_picker",
+  "title": "ICD code picker (component)",
+  "cases": [
+    {
+      "id": "case:GET /icd/codes",
+      "call": "GET /api/v1/icd/codes",
+      "summary": "ICD picker: search codes by code or words",
+      "happy_path": {
+        "as_one_of": [
+          "any logged-in user"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/icd/codes",
+            "query": {
+              "q": "pneumonia"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "code_system": "ICD-11",
+                "release_label": "2026-01",
+                "items": [
+                  {
+                    "code": "CA40",
+                    "kind": "category",
+                    "title": "Pneumonia",
+                    "uri": "http://id.who.int/icd/release/11/mms/142052508",
+                    "chapter": "12",
+                    "parent_code": "BlockL1-CA4",
+                    "depth": 2,
+                    "is_leaf": false,
+                    "is_residual": false,
+                    "parent_title": "Lung infections"
+                  },
+                  {
+                    "code": "CA40.20",
+                    "kind": "category",
+                    "title": "Pneumonia due to pneumocystis",
+                    "uri": "http://id.who.int/icd/release/11/mms/1229452918",
+                    "chapter": "12",
+                    "parent_code": "CA40.2",
+                    "depth": 4,
+                    "is_leaf": true,
+                    "is_residual": false,
+                    "parent_title": "Fungal pneumonia"
+                  },
+                  {
+                    "code": "CA40.10",
+                    "kind": "category",
+                    "title": "Pneumonia due to Adenovirus",
+                    "uri": "http://id.who.int/icd/release/11/mms/1912319301",
+                    "chapter": "12",
+                    "parent_code": "CA40.1",
+                    "depth": 4,
+                    "is_leaf": true,
+                    "is_residual": false,
+                    "parent_title": "Viral pneumonia"
+                  }
+                ]
+              },
+              "meta": {
+                "server_time": "2026-09-29T03:46:49.443872+00:00"
+              },
+              "request_id": "10800413b3f3436fa4e2fc04674bbe93"
+            }
+          },
+          "errors_seen": [
+            "ICD_SYSTEM_NOT_LOADED",
+            "VALIDATION_ERROR"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "ICD_SYSTEM_NOT_LOADED",
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /icd/browse",
+      "call": "GET /api/v1/icd/browse",
+      "summary": "ICD picker: browse chapters, blocks, categories",
+      "happy_path": {
+        "as_one_of": [
+          "any logged-in user"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/icd/browse"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "code_system": "ICD-11",
+                "release_label": "2026-01",
+                "parent": null,
+                "items": [
+                  {
+                    "code": "01",
+                    "kind": "chapter",
+                    "title": "Certain infectious or parasitic diseases",
+                    "uri": "http://id.who.int/icd/release/11/mms/1435254666",
+                    "chapter": "01",
+                    "parent_code": null,
+                    "depth": 0,
+                    "is_leaf": false,
+                    "is_residual": false
+                  },
+                  {
+                    "code": "02",
+                    "kind": "chapter",
+                    "title": "Neoplasms",
+                    "uri": "http://id.who.int/icd/release/11/mms/1630407678",
+                    "chapter": "02",
+                    "parent_code": null,
+                    "depth": 0,
+                    "is_leaf": false,
+                    "is_residual": false
+                  },
+                  {
+                    "code": "03",
+                    "kind": "chapter",
+                    "title": "Diseases of the blood or blood-forming organs",
+                    "uri": "http://id.who.int/icd/release/11/mms/1766440644",
+                    "chapter": "03",
+                    "parent_code": null,
+                    "depth": 0,
+                    "is_leaf": false,
+                    "is_residual": false
+                  }
+                ]
+              },
+              "meta": {
+                "server_time": "2026-09-29T03:46:49.483384+00:00"
+              },
+              "request_id": "68c2df8ee44340d29c4b73f89d76249e"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": []
+    },
+    {
+      "id": "case:GET /icd/codes/{code}",
+      "call": "GET /api/v1/icd/codes/{code}",
+      "summary": "One ICD code with its place in the tree",
+      "happy_path": {
+        "as_one_of": [
+          "any logged-in user"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/icd/codes/ca40.z"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "code": "CA40.Z",
+                "kind": "category",
+                "title": "Pneumonia, organism unspecified",
+                "uri": "http://id.who.int/icd/release/11/mms/142052508/unspecified",
+                "chapter": "12",
+                "parent_code": "CA40",
+                "depth": 3,
+                "is_leaf": true,
+                "is_residual": true,
+                "ancestors": [
+                  {
+                    "code": "12",
+                    "kind": "chapter",
+                    "title": "Diseases of the respiratory system",
+                    "uri": "http://id.who.int/icd/release/11/mms/197934298"
+                  },
+                  {
+                    "code": "BlockL1-CA4",
+                    "kind": "block",
+                    "title": "Lung infections",
+                    "uri": "http://id.who.int/icd/release/11/mms/915779102"
+                  },
+                  {
+                    "code": "CA40",
+                    "kind": "category",
+                    "title": "Pneumonia",
+                    "uri": "http://id.who.int/icd/release/11/mms/142052508"
+                  }
+                ],
+                "children": [],
+                "code_system": "ICD-11",
+                "release_label": "2026-01"
+              },
+              "meta": {
+                "server_time": "2026-09-29T03:46:49.498656+00:00"
+              },
+              "request_id": "65656096cdd249db821123957d9de9fe"
+            }
+          },
+          "errors_seen": [
+            "NOT_FOUND"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "NOT_FOUND"
+      ]
+    },
+    {
+      "id": "case:GET /icd/releases",
+      "call": "GET /api/v1/icd/releases",
+      "summary": "The ICD code lists loaded",
+      "happy_path": {
+        "as_one_of": [
+          "any logged-in user"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/icd/releases"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "coding_system": "ICD-11",
+                "releases": [
+                  {
+                    "release_id": 1,
+                    "code_system": "ICD-11",
+                    "release_label": "2026-01",
+                    "language": "en",
+                    "source": "Bundled",
+                    "source_file": "SimpleTabulation-ICD-11-MMS-en.zip",
+                    "source_sha256": "f1356588f40953a83e3af2b662deab47c5e269f944d1ea4ed0cfeb2007c7cd39",
+                    "licence_note": "WHO ICD-11 MMS 2026-01 (en). International Classification of Diseases, Eleventh Revision (ICD-11), World Health Organization (WHO) 2019 https://icd.who.int/browse11. Licensed under the Creative Commons Attribution-NoDerivatives 3.0 IGO licence (CC BY-ND 3.0 IGO).",
+                    "code_count": 18505,
+                    "is_active": true,
+                    "loaded_by": null,
+                    "loaded_by_name": null,
+                    "loaded_at": "2026-09-29T03:41:19.034744+00:00",
+                    "row_version": 2
+                  }
+                ],
+                "icd11_citation": "International Classification of Diseases, Eleventh Revision (ICD-11), World Health Organization (WHO) 2019 https://icd.who.int/browse11. Licensed under the Creative Commons Attribution-NoDerivatives 3.0 IGO licence (CC BY-ND 3.0 IGO)."
+              },
+              "meta": {
+                "server_time": "2026-09-29T03:46:49.427434+00:00"
+              },
+              "request_id": "a8f189dcef0743a3bae69666cb0aed9c"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": []
+    }
+  ],
+  "service_cases": [],
+  "delivery_gate": {
+    "required": true,
+    "status": "required",
+    "progress_reporting": {
+      "required": true,
+      "submit": "propose_progress",
+      "verify": "progress_proposals",
+      "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+    },
+    "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+    "compulsory": [
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+        "points": 2
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+        "points": 3
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+        "points": 2
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+        "points": 4
+      }
+    ],
+    "zoom": {
+      "min_pct": 100,
+      "max_pct": 250,
+      "reset_pct": 100,
+      "keys": [
+        "Ctrl + or Ctrl = (zoom in)",
+        "Ctrl - (zoom out)",
+        "Ctrl 0 (reset to 100 %)",
+        "Command on macOS"
+      ],
+      "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+    },
+    "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+    "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+  },
+  "handbook_page": "screens/icd_picker",
+  "workspace_guide": "get_handbook_outline('*')",
+  "realtime": [],
+  "acceptance_rules": [
+    "Search as the doctor types (from 2 characters, debounced): a code prefix (CA40) or words in any order (\"pneumonia bacterial\"); show code in bold, title, and parent_title in grey to tell similar titles apart.",
+    "Residual codes (is_residual: \"other specified\", \"unspecified\") after the specific ones: nudge toward the most specific code. 'Browse' walks chapters → blocks → codes (GET /icd/browse?parent=…); a code's place in the tree: GET /icd/codes/{code}.",
+    "The classification is GET /icd/releases → coding_system (ICD-11 unless the hospital switched to its licensed ICD-10); ICD_SYSTEM_NOT_LOADED: no list of that classification yet.",
+    "Show `icd11_citation` in small print at the picker's foot (the ICD-11 licence requires the attribution).",
+    "Store only the code; everywhere codes come back they come with `icd_terms` (code, title, WHO URI): show code + title, never a bare code."
+  ],
+  "demo_accounts": "demo_accounts() lists a login per role; sandbox_call runs each case on the DEV server"
+}

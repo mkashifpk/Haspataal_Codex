@@ -14,7 +14,7 @@ let previous;
 if(fs.existsSync(file)){
  previous=JSON.parse(fs.readFileSync(file));
  if(resumeContrast){assert(previous.finished&&previous.writes.cancel?.state==='confirmed'&&previous.writes.contrastStart?.state==='confirmed'&&!previous.writes.contrastComplete);}
- else if(resumeLink){assert(previous.finished&&previous.writes.complete?.state==='confirmed'&&previous.writes.autoLink?.status===503&&!previous.writes.cancel);}
+ else if(resumeLink){assert(previous.finished&&previous.writes.complete?.state==='confirmed'&&previous.writes.autoLink?.status===409 && previous.writes.autoLink?.error?.code==='PACS_NOT_CONFIGURED'&&!previous.writes.cancel);}
  else if(!process.argv.includes('--resume-before-ui-writes')||!previous.finished||Object.keys(previous.writes).length)throw Error('Existing UI journal: reconcile every prepared write before continuing. Never rerun clinical actions.');
  fs.copyFileSync(file,file.replace('.json','-diagnostic-'+Date.now()+'.json'));
 }

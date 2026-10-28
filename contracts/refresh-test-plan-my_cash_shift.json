@@ -1,0 +1,317 @@
+{
+  "screen": "my_cash_shift",
+  "title": "My cash shift",
+  "cases": [
+    {
+      "id": "case:POST /finance/cash-shifts/open",
+      "call": "POST /api/v1/finance/cash-shifts/open",
+      "summary": "Open my cash shift at a counter",
+      "happy_path": {
+        "as_one_of": [
+          "cashier",
+          "pharmacist",
+          "receptionist"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/finance/cash-shifts/open",
+            "body": {
+              "node": "MainReception"
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "shift_id": 1,
+                "user_id": 3,
+                "node": "MainReception",
+                "terminal_id": null,
+                "opening_float": 0,
+                "expected_cash": 0,
+                "declared_cash": null,
+                "status": "Open",
+                "opened_at": "2026-09-27T17:36:46.342193+00:00",
+                "closed_at": null,
+                "business_date": "2026-09-27"
+              },
+              "meta": {
+                "server_time": "2026-09-27T17:36:46.350899+00:00"
+              },
+              "request_id": "36d9acab56404aac834cbd5062666896"
+            }
+          },
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "clinic_director"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "SHIFT_ALREADY_OPEN"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:GET /finance/cash-shifts/mine",
+      "call": "GET /api/v1/finance/cash-shifts/mine",
+      "summary": "My open shift (if any)",
+      "happy_path": {
+        "as_one_of": [
+          "cashier",
+          "pharmacist",
+          "receptionist"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/finance/cash-shifts/mine"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "shift_id": 1,
+                "user_id": 3,
+                "node": "MainReception",
+                "terminal_id": null,
+                "opening_float": 0,
+                "expected_cash": 1000,
+                "declared_cash": null,
+                "status": "Open",
+                "opened_at": "2026-10-24T18:46:18.384118+00:00",
+                "closed_at": null,
+                "business_date": "2026-10-24",
+                "cashier_name": "Receptionist",
+                "declared_variance": null,
+                "by_type": [
+                  {
+                    "txn_type": "Sale",
+                    "count": 1,
+                    "total": 1000
+                  }
+                ],
+                "non_cash": [],
+                "cash_drop": null
+              },
+              "meta": {
+                "server_time": "2026-10-24T18:46:18.738132+00:00"
+              },
+              "request_id": "097c3bb071834c53b6d6b143a18491fb"
+            }
+          },
+          "errors_seen": [
+            "VALIDATION_ERROR"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "clinic_director"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /finance/cash-shifts/{shift_id}/transactions",
+      "call": "GET /api/v1/finance/cash-shifts/{shift_id}/transactions",
+      "summary": "Drawer ledger of a shift",
+      "happy_path": {
+        "as_one_of": [
+          "accountant",
+          "cashier",
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "pharmacist",
+          "receptionist"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/finance/cash-shifts/1/transactions"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "shift_txn_id": 1,
+                  "txn_type": "Sale",
+                  "amount": 1000,
+                  "payment_id": 1,
+                  "receipt_no": "RCT-2026-0000001",
+                  "invoice_id": 1,
+                  "ap_settlement_id": null,
+                  "note": null,
+                  "at": "2026-09-27T17:36:46.406822+00:00"
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-27T17:36:46.594910+00:00"
+              },
+              "request_id": "9f09245c08c8440e8311862b731d3b6b"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "clinical_specialist",
+          "cssd_technician"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": []
+    },
+    {
+      "id": "case:POST /finance/cash-shifts/{shift_id}/close",
+      "call": "POST /api/v1/finance/cash-shifts/{shift_id}/close",
+      "summary": "Close shift → PendingCollection",
+      "happy_path": {
+        "as_one_of": [
+          "cashier",
+          "pharmacist",
+          "receptionist"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/finance/cash-shifts/1/close",
+            "body": {
+              "declared_cash": 1000
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "shift_id": 1,
+                "user_id": 3,
+                "node": "MainReception",
+                "terminal_id": null,
+                "opening_float": 0,
+                "expected_cash": 1000,
+                "declared_cash": 1000,
+                "status": "PendingCollection",
+                "opened_at": "2026-10-24T18:46:40.653452+00:00",
+                "closed_at": "2026-10-24T18:46:40.987615+00:00",
+                "business_date": "2026-10-24",
+                "cashier_name": "Receptionist",
+                "declared_variance": 0,
+                "by_type": [
+                  {
+                    "txn_type": "Sale",
+                    "count": 1,
+                    "total": 1000
+                  }
+                ],
+                "non_cash": [],
+                "cash_drop": null
+              },
+              "meta": {
+                "server_time": "2026-10-24T18:46:40.993927+00:00"
+              },
+              "request_id": "a007287ac8344288bbcf9536b62b25c8"
+            }
+          },
+          "errors_seen": [
+            "SHIFT_NOT_OPEN"
+          ],
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "clinic_director"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "SHIFT_NOT_OPEN",
+        "SHIFT_NOT_OWNED"
+      ]
+    }
+  ],
+  "service_cases": [],
+  "delivery_gate": {
+    "required": true,
+    "status": "required",
+    "progress_reporting": {
+      "required": true,
+      "submit": "propose_progress",
+      "verify": "progress_proposals",
+      "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+    },
+    "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+    "compulsory": [
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+        "points": 2
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+        "points": 3
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+        "points": 2
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+        "points": 4
+      }
+    ],
+    "zoom": {
+      "min_pct": 100,
+      "max_pct": 250,
+      "reset_pct": 100,
+      "keys": [
+        "Ctrl + or Ctrl = (zoom in)",
+        "Ctrl - (zoom out)",
+        "Ctrl 0 (reset to 100 %)",
+        "Command on macOS"
+      ],
+      "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+    },
+    "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+    "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+  },
+  "handbook_page": "screens/my_cash_shift",
+  "workspace_guide": "get_handbook_outline('reception')",
+  "realtime": [],
+  "acceptance_rules": [
+    "Every cash action needs an open shift at this counter (node from GET /terminals/whoami cash_node).",
+    "Closing asks for the counted cash; the Accountant verifies it later.",
+    "The drawer is counted whole: expected_cash includes the opening float (1500 for a float of 1500 and no movement). Ask the cashier to count everything in the drawer, the float included, and show declared_variance after the close; never subtract the float or compute a balance yourself.",
+    "In the Pharmacy workspace the drawer must be the Pharmacy Counter's (node PharmacyCounter): the pharmacy's cash goes into no other. On a PC whose GET /terminals/whoami cash_node is not PharmacyCounter, say that this PC is not set up for pharmacy cash and IT must map it to the Pharmacy Counter; never let the user pick the counter."
+  ],
+  "demo_accounts": "demo_accounts() lists a login per role; sandbox_call runs each case on the DEV server"
+}

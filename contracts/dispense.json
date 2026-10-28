@@ -1,7 +1,7 @@
 {
   "screen_id": "dispense",
-  "contract_fingerprint": "90f7a429e5aa519d440f",
-  "knowledge_revision": "f2f42e3079bc34a3",
+  "contract_fingerprint": "58db76bf7d59ef6d9870",
+  "knowledge_revision": "51c8fe699d47d046",
   "delivery_gate": {
     "required": true,
     "status": "required",
@@ -55,7 +55,7 @@
   },
   "ui_quality": {
     "source": "frontend-docs/guides/16-ui-quality.md",
-    "standard_revision": "c81852646942368c",
+    "standard_revision": "5980e5c3b1817f4e",
     "context": {
       "workspace": "pharmacy",
       "purpose": "Dispense Now (partial allowed); server picks batches FEFO; take payment.",
@@ -372,13 +372,13 @@
         "id": "ep:GET /admissions/{admission_id}/discharge-status",
         "label": "GET /admissions/{admission_id}/discharge-status",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:POST /admissions/{admission_id}/discharge/{stage}/clear",
         "label": "POST /admissions/{admission_id}/discharge/{stage}/clear",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:POST /prescriptions/{prescription_id}/dispense",
@@ -408,7 +408,7 @@
         "id": "ep:GET /finance/cash-shifts/mine",
         "label": "GET /finance/cash-shifts/mine",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ev:pharmacy.stock.updated",
@@ -426,13 +426,13 @@
         "id": "rule:83ef3c740f",
         "label": "Clear the PharmacyClearance discharge stage once the patient's unused medicines are returned.",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:db207e0a97",
         "label": "Read discharge-status to confirm the patient identity and blocked_on PharmacyClearance before clearing. After a lost answer re-read the stage's status, cleared_by_name and cleared_at there; never retry automatically.",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:d7b04e73ec",
@@ -474,7 +474,7 @@
         "id": "rule:678173636d",
         "label": "Cash goes into the user's own open shift at the Pharmacy Counter only: before offering Cash, GET /finance/cash-shifts/mine?node=PharmacyCounter. Null: Cash unavailable until it is opened on My cash shift (Card still works). SHIFT_NOT_OPEN with details.open_shift: the user's drawer is open at another counter (details.open_shift.node), which pharmacy cash never goes into; say so, never borrow another person's shift.",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:11f96ec925",
@@ -715,10 +715,14 @@
           "retryable": false,
           "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
           "source": [
-            "documented"
+            "documented",
+            "seen_in_tests"
           ],
-          "details_fields": [],
-          "details_from": null
+          "details_fields": [
+            "cleared_at",
+            "stage"
+          ],
+          "details_from": "POST /api/v1/admissions/{admission_id}/discharge/{stage}/clear"
         },
         {
           "code": "DISCHARGE_STAGE_OUT_OF_ORDER",
@@ -953,6 +957,18 @@
             "constraint"
           ],
           "details_from": "POST /api/v1/mar/{mar_id}/chart"
+        },
+        {
+          "code": "OPD_PHARMACY_CREDIT_NOT_ALLOWED",
+          "http_status": 409,
+          "message": "OPD pharmacy sales are cash-and-carry unless a Zakat/charity override is approved.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": null
         },
         {
           "code": "PRESCRIPTION_NOT_DISPENSABLE",
@@ -1440,7 +1456,20 @@
       },
       "service_gates": [],
       "idempotency_key": false,
-      "errors": [],
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
       "parameters": [
         {
           "name": "node",
@@ -1631,123 +1660,6 @@
     ],
     "rule": "Every screen that acts on a patient keeps at least two identifiers (name and MRN, with age or date of birth) and the flags visible; bed and room are location, not identity."
   },
-  "states": [
-    {
-      "state": "loading",
-      "why": "every read"
-    },
-    {
-      "state": "error",
-      "why": "every call (show error.code's message)"
-    },
-    {
-      "state": "empty",
-      "why": "a list can be empty: say why and what to do next"
-    },
-    {
-      "state": "forbidden",
-      "why": "actions hidden or disabled by permission (GET /auth/me)"
-    },
-    {
-      "state": "stale / reconnecting",
-      "why": "realtime: show Live / Reconnecting, reload after a truncated replay"
-    },
-    {
-      "state": "submitting / outcome unknown",
-      "why": "a write in flight, or its answer lost: see each write's on_lost_answer"
-    },
-    {
-      "state": "print failed",
-      "why": "printing is separate from the write: reprint, never redo it"
-    }
-  ],
-  "scanner": [],
-  "copy": {
-    "workspace": {
-      "en": "Pharmacy Counter",
-      "ur": "فارمیسی"
-    },
-    "error_messages": {
-      "ACCOUNT_LOCKED": "Too many failed attempts; the account is temporarily locked.",
-      "BILLING_DEFERRED": "Confirm how this emergency admission is paid first.",
-      "CAPABILITY_INACTIVE": "This service is not active here, so no new work of it can start (Settings, facility; GET /establishment).",
-      "CHARITY_APPROVAL_REQUIRED": "A Zakat/charity officer must approve this override.",
-      "DISCHARGE_NOT_ALLOWED": "Discharge cannot proceed in the admission's current state.",
-      "DISCHARGE_STAGE_IMMUTABLE": "A cleared discharge stage cannot change.",
-      "DISCHARGE_STAGE_OUT_OF_ORDER": "Discharge stages must be cleared in order.",
-      "DUAL_CONTROL_SAME_PERSON": "The second approver must be a different person.",
-      "FORBIDDEN": "You do not have permission to do this.",
-      "HIGH_ALERT_CHECK_REQUIRED": "A high-alert medicine needs a second person's check (their co-signature) before it is dispensed or given.",
-      "INSUFFICIENT_STOCK": "Not enough stock available.",
-      "NOT_FOUND": "The requested resource was not found.",
-      "OWN_MEDICINES_HELD": "The patient's own medicines are still held: hand them back, or record their destruction, first (details lists them).",
-      "PRESCRIPTION_NOT_DISPENSABLE": "This prescription cannot be dispensed.",
-      "PRESCRIPTION_QUERY_OPEN": "The pharmacist's query on this order is not answered yet.",
-      "REFERENCE_NOT_FOUND": "A referenced record does not exist.",
-      "SHIFT_NOT_OPEN": "Open a cash shift before handling cash.",
-      "STEP_UP_REQUIRED": "A second authorised person must co-sign this action.",
-      "VALIDATION_ERROR": "The request is invalid."
-    },
-    "wording_quoted_in_rules": [
-      "No new ... from now on",
-      "looks like …",
-      "s drawer is open at another counter (details.open_shift.node), which pharmacy cash never goes into; say so, never borrow another person"
-    ],
-    "note": "Server-owned strings only: the error messages (English), the workspace labels (English and Urdu) and the wording the rules quote. The UI's own copy and its Urdu are yours (decision H08)."
-  },
-  "same_component_as": [],
-  "roles": {
-    "full": [],
-    "partial": [
-      "cashier",
-      "receptionist",
-      "admissions_officer",
-      "triage_nurse",
-      "doctor",
-      "clinical_specialist",
-      "surgeon",
-      "anaesthetist",
-      "ward_nurse",
-      "head_nurse",
-      "pharmacist",
-      "ops_admin"
-    ],
-    "page_for": [
-      "pharmacist"
-    ],
-    "note": "page_for: the roles whose GET /meta/handbook lists this screen (its menu entry and F1 page; for a user with that one role, every service Active). A partial role outside page_for only makes some of these calls from screens of its own: never offer it this screen. Build the menu from the logged-in user's GET /meta/handbook."
-  },
-  "workflows": [
-    {
-      "slug": "clinical-and-prescriptions",
-      "title": "Consultation, e-prescriptions & pharmacy dispensing",
-      "recipe": "get_workflow_recipe('clinical-and-prescriptions')"
-    },
-    {
-      "slug": "facility-profile-and-services",
-      "title": "Facility settings: the PHC profile and the clinical services",
-      "recipe": "get_workflow_recipe('facility-profile-and-services')"
-    },
-    {
-      "slug": "finance-and-owner",
-      "title": "Cash shifts, payables, receivables, owner dashboards & risk",
-      "recipe": "get_workflow_recipe('finance-and-owner')"
-    },
-    {
-      "slug": "inpatient-and-discharge",
-      "title": "Admission, beds, nursing & discharge",
-      "recipe": "get_workflow_recipe('inpatient-and-discharge')"
-    },
-    {
-      "slug": "medication-safety",
-      "title": "Medication safety (MSDS)",
-      "recipe": "get_workflow_recipe('medication-safety')"
-    }
-  ],
-  "scenarios": [],
-  "unknowns": [],
-  "omitted_sections": [],
-  "next": "Request omitted sections separately with max_chars=200000; for an oversized endpoints/schemas section use get_endpoint / get_schema for each operation/type.",
   "value_lists": [
     {
       "values": [
@@ -2467,6 +2379,93 @@
       }
     }
   ],
+  "states": [
+    {
+      "state": "loading",
+      "why": "every read"
+    },
+    {
+      "state": "error",
+      "why": "every call (show error.code's message)"
+    },
+    {
+      "state": "empty",
+      "why": "a list can be empty: say why and what to do next"
+    },
+    {
+      "state": "forbidden",
+      "why": "actions hidden or disabled by permission (GET /auth/me)"
+    },
+    {
+      "state": "stale / reconnecting",
+      "why": "realtime: show Live / Reconnecting, reload after a truncated replay"
+    },
+    {
+      "state": "submitting / outcome unknown",
+      "why": "a write in flight, or its answer lost: see each write's on_lost_answer"
+    },
+    {
+      "state": "print failed",
+      "why": "printing is separate from the write: reprint, never redo it"
+    }
+  ],
+  "scanner": [],
+  "copy": {
+    "workspace": {
+      "en": "Pharmacy Counter",
+      "ur": "فارمیسی"
+    },
+    "error_messages": {
+      "ACCOUNT_LOCKED": "Too many failed attempts; the account is temporarily locked.",
+      "BILLING_DEFERRED": "Confirm how this emergency admission is paid first.",
+      "CAPABILITY_INACTIVE": "This service is not active here, so no new work of it can start (Settings, facility; GET /establishment).",
+      "CHARITY_APPROVAL_REQUIRED": "A Zakat/charity officer must approve this override.",
+      "DISCHARGE_NOT_ALLOWED": "Discharge cannot proceed in the admission's current state.",
+      "DISCHARGE_STAGE_IMMUTABLE": "A cleared discharge stage cannot change.",
+      "DISCHARGE_STAGE_OUT_OF_ORDER": "Discharge stages must be cleared in order.",
+      "DUAL_CONTROL_SAME_PERSON": "The second approver must be a different person.",
+      "FORBIDDEN": "You do not have permission to do this.",
+      "HIGH_ALERT_CHECK_REQUIRED": "A high-alert medicine needs a second person's check (their co-signature) before it is dispensed or given.",
+      "INSUFFICIENT_STOCK": "Not enough stock available.",
+      "NOT_FOUND": "The requested resource was not found.",
+      "OPD_PHARMACY_CREDIT_NOT_ALLOWED": "OPD pharmacy sales are cash-and-carry unless a Zakat/charity override is approved.",
+      "OWN_MEDICINES_HELD": "The patient's own medicines are still held: hand them back, or record their destruction, first (details lists them).",
+      "PRESCRIPTION_NOT_DISPENSABLE": "This prescription cannot be dispensed.",
+      "PRESCRIPTION_QUERY_OPEN": "The pharmacist's query on this order is not answered yet.",
+      "REFERENCE_NOT_FOUND": "A referenced record does not exist.",
+      "SHIFT_NOT_OPEN": "Open a cash shift before handling cash.",
+      "STEP_UP_REQUIRED": "A second authorised person must co-sign this action.",
+      "VALIDATION_ERROR": "The request is invalid."
+    },
+    "wording_quoted_in_rules": [
+      "No new ... from now on",
+      "looks like …",
+      "s drawer is open at another counter (details.open_shift.node), which pharmacy cash never goes into; say so, never borrow another person"
+    ],
+    "note": "Server-owned strings only: the error messages (English), the workspace labels (English and Urdu) and the wording the rules quote. The UI's own copy and its Urdu are yours (decision H08)."
+  },
+  "same_component_as": [],
+  "roles": {
+    "full": [],
+    "partial": [
+      "cashier",
+      "receptionist",
+      "admissions_officer",
+      "triage_nurse",
+      "doctor",
+      "clinical_specialist",
+      "surgeon",
+      "anaesthetist",
+      "ward_nurse",
+      "head_nurse",
+      "pharmacist",
+      "ops_admin"
+    ],
+    "page_for": [
+      "pharmacist"
+    ],
+    "note": "page_for: the roles whose GET /meta/handbook lists this screen (its menu entry and F1 page; for a user with that one role, every service Active). A partial role outside page_for only makes some of these calls from screens of its own: never offer it this screen. Build the menu from the logged-in user's GET /meta/handbook."
+  },
   "test_plan": {
     "screen": "dispense",
     "title": "Dispense",
@@ -2513,6 +2512,7 @@
         "errors_to_handle": [
           "BILLING_DEFERRED",
           "DISCHARGE_NOT_ALLOWED",
+          "DISCHARGE_STAGE_IMMUTABLE",
           "DISCHARGE_STAGE_OUT_OF_ORDER",
           "OWN_MEDICINES_HELD",
           "VALIDATION_ERROR"
@@ -2542,6 +2542,7 @@
           "DUAL_CONTROL_SAME_PERSON",
           "HIGH_ALERT_CHECK_REQUIRED",
           "INSUFFICIENT_STOCK",
+          "OPD_PHARMACY_CREDIT_NOT_ALLOWED",
           "PRESCRIPTION_NOT_DISPENSABLE",
           "PRESCRIPTION_QUERY_OPEN",
           "REFERENCE_NOT_FOUND",
@@ -2627,7 +2628,9 @@
           ],
           "expect": "403 FORBIDDEN"
         },
-        "errors_to_handle": [],
+        "errors_to_handle": [
+          "VALIDATION_ERROR"
+        ],
         "as_one_of": [
           "cashier",
           "pharmacist",
@@ -2872,6 +2875,11 @@
         "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
       },
       {
+        "code": "DISCHARGE_STAGE_IMMUTABLE",
+        "message": "A cleared discharge stage cannot change.",
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      },
+      {
         "code": "DISCHARGE_STAGE_OUT_OF_ORDER",
         "message": "Discharge stages must be cleared in order.",
         "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
@@ -2900,6 +2908,11 @@
         "code": "NOT_FOUND",
         "message": "The requested resource was not found.",
         "ui_action": "Say 'not found'; refresh the list."
+      },
+      {
+        "code": "OPD_PHARMACY_CREDIT_NOT_ALLOWED",
+        "message": "OPD pharmacy sales are cash-and-carry unless a Zakat/charity override is approved.",
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
       },
       {
         "code": "OWN_MEDICINES_HELD",
@@ -2995,6 +3008,34 @@
     ],
     "workspace_guide": "get_handbook_outline('pharmacy')"
   },
+  "workflows": [
+    {
+      "slug": "clinical-and-prescriptions",
+      "title": "Consultation, e-prescriptions & pharmacy dispensing",
+      "recipe": "get_workflow_recipe('clinical-and-prescriptions')"
+    },
+    {
+      "slug": "facility-profile-and-services",
+      "title": "Facility settings: the PHC profile and the clinical services",
+      "recipe": "get_workflow_recipe('facility-profile-and-services')"
+    },
+    {
+      "slug": "finance-and-owner",
+      "title": "Cash shifts, payables, receivables, owner dashboards & risk",
+      "recipe": "get_workflow_recipe('finance-and-owner')"
+    },
+    {
+      "slug": "inpatient-and-discharge",
+      "title": "Admission, beds, nursing & discharge",
+      "recipe": "get_workflow_recipe('inpatient-and-discharge')"
+    },
+    {
+      "slug": "medication-safety",
+      "title": "Medication safety (MSDS)",
+      "recipe": "get_workflow_recipe('medication-safety')"
+    }
+  ],
+  "scenarios": [],
   "decisions": [
     {
       "id": "H02",
@@ -7213,5 +7254,179 @@
       ],
       "title": "ValidationError"
     }
-  }
+  },
+  "unknowns": [
+    {
+      "what": "decision H02",
+      "owner": [
+        "vendor"
+      ],
+      "question": "Digits in the Urdu UI and printouts: Latin 0-9 or Extended Arabic-Indic ۰-۹.",
+      "affects": [
+        "every screen in Urdu"
+      ],
+      "meanwhile": "Latin digits; identifiers, doses and money stay left to right."
+    },
+    {
+      "what": "decision H03",
+      "owner": [
+        "vendor",
+        "clinical_lead"
+      ],
+      "question": "How dates and times are shown on screen, and a 12- or 24-hour clock.",
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "The server's print format (e.g. 27-Sep-2026) and the hospital time zone."
+    },
+    {
+      "what": "decision H04",
+      "owner": [
+        "vendor"
+      ],
+      "question": "Money on screen: decimals shown, and digit grouping (1,234,567 or 12,34,567).",
+      "affects": [
+        "every screen with money"
+      ],
+      "meanwhile": "The amounts as the API sends them, with the currency setting."
+    },
+    {
+      "what": "decision H08",
+      "owner": [
+        "vendor",
+        "translator",
+        "clinical_lead"
+      ],
+      "question": "Who writes and signs off the Urdu text of the UI, above all clinical and consent wording.",
+      "affects": [
+        "every screen in Urdu"
+      ],
+      "meanwhile": "Urdu you add is a draft: mark it so (the interview bank's pattern: a draft until a native speaker reviews it)."
+    },
+    {
+      "what": "decision H09",
+      "owner": [
+        "vendor",
+        "frontend_lead"
+      ],
+      "question": "One design system shared by every frontend team (who authors and approves it), or each team's own.",
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "Each team designs within the backend's constraints: themes Light and DarkHighContrast, zoom 100-250 %, Noto Nastaliq Urdu, status shown as text and icon, never colour alone. Follow the vendor's design principles (frontend guide 18, get_design_principles)."
+    },
+    {
+      "what": "decision H10",
+      "owner": [
+        "clinical_lead",
+        "vendor"
+      ],
+      "question": "How each realtime event is shown (interrupt, attention, inform, silent), alert sounds and which terminals play them. Only Code Red (interrupt), the licence and maintenance banners and the logout on session.revoked are prescribed (the event catalogue's `presentation`).",
+      "affects": [
+        "every screen with realtime events"
+      ],
+      "meanwhile": "Code Red interrupts; every other event updates the screen and, at most, a dismissible notice. `priority` is the delivery urgency, not a presentation rule."
+    },
+    {
+      "what": "decision H11",
+      "owner": [
+        "clinical_lead",
+        "backend"
+      ],
+      "question": "May the second checker of a high-alert medicine use a badge and PIN instead of a username and password?",
+      "affects": [
+        "mar",
+        "dispense"
+      ],
+      "meanwhile": "Username and password, never stored by the app."
+    },
+    {
+      "what": "decision H12",
+      "owner": [
+        "vendor",
+        "backend"
+      ],
+      "question": "Which workspaces run on web, Android and iOS, which cannot read a MAC address, discover the server by UDP or print silently; or are cash and printing Windows-only.",
+      "affects": [
+        "my_cash_shift",
+        "registration",
+        "every screen that prints"
+      ],
+      "meanwhile": "The guides describe the Windows (Electron) terminal; tell your developer when a screen needs a capability your platform lacks."
+    },
+    {
+      "what": "decision H16",
+      "owner": [
+        "clinical_lead",
+        "backend"
+      ],
+      "question": "Tall-man names for look-alike medicines (a field on the drug master).",
+      "affects": [
+        "eprescription",
+        "dispense",
+        "mar"
+      ],
+      "meanwhile": "The look-alike pairs the API already returns."
+    },
+    {
+      "what": "decision H18",
+      "owner": [
+        "vendor",
+        "frontend_lead"
+      ],
+      "question": "Noto Nastaliq Urdu everywhere, or the more compact Naskh in dense tables.",
+      "affects": [
+        "every table in Urdu"
+      ],
+      "meanwhile": "Noto Nastaliq Urdu, as the guides require."
+    },
+    {
+      "what": "decision H19",
+      "owner": [
+        "clinical_lead",
+        "backend"
+      ],
+      "question": "Allergies: the patient record keeps free text, so it cannot tell \"no known allergies\" (asserted by a clinician) from \"not recorded\". Should it?",
+      "affects": [
+        "every screen with a patient banner"
+      ],
+      "meanwhile": "Show the recorded text as recorded; an empty value is \"not recorded\", never \"none\"."
+    },
+    {
+      "what": "decision H20",
+      "owner": [
+        "vendor",
+        "hospital"
+      ],
+      "question": "May unsaved form input be kept on the terminal (which fields, encrypted, for how long)?",
+      "affects": [
+        "every form"
+      ],
+      "meanwhile": "In memory only; never a second checker's password."
+    },
+    {
+      "what": "decision H22",
+      "owner": [
+        "hospital",
+        "vendor"
+      ],
+      "question": "Which documents may print on an unregistered terminal's default printer (sensitive A4 documents).",
+      "affects": [
+        "every screen that prints"
+      ],
+      "meanwhile": "As the printing guide says: the hint, then the default printer."
+    },
+    {
+      "what": "decision H24",
+      "owner": [
+        "vendor",
+        "clinical_lead"
+      ],
+      "question": "Who approves frontend performance targets, alert thresholds and escalation timers.",
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "The server's own settings (e.g. critical_result_communicate_minutes)."
+    }
+  ]
 }

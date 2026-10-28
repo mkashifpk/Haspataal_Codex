@@ -1,0 +1,2762 @@
+{
+  "screen": "it_console",
+  "title": "Super Admin (IT)",
+  "cases": [
+    {
+      "id": "case:GET /admin/users/{user_id}",
+      "call": "GET /api/v1/admin/users/{user_id}",
+      "summary": "User with roles, lockout and session info",
+      "happy_path": {
+        "as_one_of": [
+          "super_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/admin/users/2"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "user_id": 2,
+                "username": "u831ab89ca2",
+                "display_name": "u831ab89ca2",
+                "employee_id": 2,
+                "emp_number": "EMP-2026-0002",
+                "designation": "Officer",
+                "is_active": true,
+                "must_change_pw": false,
+                "is_service_account": false,
+                "created_at": "2026-09-27T17:34:28.918376+00:00",
+                "last_login_at": "2026-09-27T17:34:28.927930+00:00",
+                "last_login_ip": "10.0.0.5",
+                "failed_login_count": 0,
+                "locked_until": null,
+                "roles": [
+                  "receptionist"
+                ],
+                "active_sessions": 1
+              },
+              "meta": {
+                "server_time": "2026-09-27T17:34:28.953026+00:00"
+              },
+              "request_id": "d78a80a70ee34b65a39d51bac1d7104c"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": []
+    },
+    {
+      "id": "case:POST /admin/users/{user_id}/revoke-sessions",
+      "call": "POST /api/v1/admin/users/{user_id}/revoke-sessions",
+      "summary": "Log a user out everywhere",
+      "happy_path": {
+        "as_one_of": [
+          "super_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/admin/users/2/revoke-sessions"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "user_id": 2,
+                "revoked": true
+              },
+              "meta": {
+                "server_time": "2026-09-27T17:34:29.586189+00:00"
+              },
+              "request_id": "12870cedfbed4dcbabe38aa4e08b565b"
+            }
+          },
+          "events_emitted": [
+            "session.revoked"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": []
+    },
+    {
+      "id": "case:GET /admin/login-events",
+      "call": "GET /api/v1/admin/login-events",
+      "summary": "Login successes / failures (security review)",
+      "happy_path": {
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "super_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/admin/login-events",
+            "query": {
+              "failures_only": true
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "event_id": 3,
+                  "user_id": 2,
+                  "username": "u831ab89ca2",
+                  "ip": "10.0.0.5",
+                  "user_agent": "python-httpx/0.28.1",
+                  "is_success": false,
+                  "failure_reason": "bad_password",
+                  "at": "2026-09-27T17:34:29.615784+00:00"
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-27T17:34:29.643661+00:00"
+              },
+              "request_id": "11bbe09374914e8687e723d580740b10"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": []
+    },
+    {
+      "id": "case:GET /admin/departments",
+      "call": "GET /api/v1/admin/departments",
+      "summary": "Departments",
+      "happy_path": {
+        "as_one_of": [
+          "any logged-in user"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/admin/departments"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "department_id": 1,
+                  "code": "CARD",
+                  "name": "Cardiology & Vascular",
+                  "is_clinical": true,
+                  "is_active": true,
+                  "row_version": 2
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-27T17:34:24.417658+00:00"
+              },
+              "request_id": "0fb46c874eb4440b84f3f45f315569b9"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": []
+    },
+    {
+      "id": "case:PUT /admin/departments/{department_id}",
+      "call": "PUT /api/v1/admin/departments/{department_id}",
+      "summary": "Update a department",
+      "happy_path": {
+        "as_one_of": [
+          "super_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/admin/departments/1",
+            "body": {
+              "code": "card",
+              "name": "Cardiology & Vascular",
+              "is_clinical": true
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "department_id": 1,
+                "code": "CARD",
+                "name": "Cardiology & Vascular",
+                "is_clinical": true,
+                "is_active": true,
+                "row_version": 2
+              },
+              "meta": {
+                "server_time": "2026-09-27T17:34:24.410745+00:00"
+              },
+              "request_id": "227654f2d86d414e899db2b41fefce75"
+            }
+          },
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": []
+    },
+    {
+      "id": "case:PUT /admin/wards/{ward_id}",
+      "call": "PUT /api/v1/admin/wards/{ward_id}",
+      "summary": "Update a ward",
+      "happy_path": {
+        "as_one_of": [
+          "super_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/admin/wards/1",
+            "body": {
+              "code": "cw",
+              "name": "Cardiac Care",
+              "ward_type": "CCU",
+              "department_id": 1
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "ward_id": 1,
+                "code": "CW",
+                "name": "Cardiac Care",
+                "ward_type": "CCU",
+                "gender_restriction": "any",
+                "department_id": 1,
+                "room_charge_service_id": null,
+                "is_active": true,
+                "row_version": 2
+              },
+              "meta": {
+                "server_time": "2026-09-27T17:34:24.434690+00:00"
+              },
+              "request_id": "ee11808a4c9d4fd7a848da519dc46665"
+            }
+          },
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": []
+    },
+    {
+      "id": "case:PUT /admin/printers/{printer_id}",
+      "call": "PUT /api/v1/admin/printers/{printer_id}",
+      "summary": "Update a printer",
+      "happy_path": {
+        "as_one_of": [
+          "super_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/admin/printers/1",
+            "body": {
+              "name": "Reception receipt 1",
+              "printer_type": "ThermalReceipt",
+              "connection": "Network",
+              "address": "192.168.1.40:9100",
+              "paper_width_mm": 80
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "printer_id": 1,
+                "name": "Reception receipt 1",
+                "printer_type": "ThermalReceipt",
+                "connection": "Network",
+                "address": "192.168.1.40:9100",
+                "paper_width_mm": 80,
+                "driver": null,
+                "is_active": true,
+                "row_version": 2
+              },
+              "meta": {
+                "server_time": "2026-09-27T17:34:13.792266+00:00"
+              },
+              "request_id": "9a83a8ad6a334738b515c9ee0eba8a6f"
+            }
+          },
+          "errors_seen": [
+            "NOT_FOUND"
+          ],
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "NOT_FOUND"
+      ]
+    },
+    {
+      "id": "case:PUT /admin/terminals/{terminal_id}",
+      "call": "PUT /api/v1/admin/terminals/{terminal_id}",
+      "summary": "Update a terminal mapping",
+      "happy_path": {
+        "as_one_of": [
+          "super_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/admin/terminals/1",
+            "body": {
+              "mac": "3C:52:82:1A:2B:3C",
+              "location_label": "Reception PC A",
+              "receipt_printer_id": 1,
+              "cash_node": "MainReception"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "terminal_id": 1,
+                "mac": "3C:52:82:1A:2B:3C",
+                "ip": null,
+                "hostname": null,
+                "location_label": "Reception PC A",
+                "department_id": null,
+                "receipt_printer_id": 1,
+                "label_printer_id": null,
+                "document_printer_id": null,
+                "card_printer_id": null,
+                "cash_node": "MainReception",
+                "is_active": true,
+                "last_seen_at": null,
+                "row_version": 2
+              },
+              "meta": {
+                "server_time": "2026-09-27T17:34:13.826137+00:00"
+              },
+              "request_id": "5d01126fefe846e28d3244777692e233"
+            }
+          },
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": []
+    },
+    {
+      "id": "case:GET /meta/roles",
+      "call": "GET /api/v1/meta/roles",
+      "summary": "Roles with their default workspace and permissions",
+      "happy_path": {
+        "as_one_of": [
+          "any logged-in user"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/meta/roles"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "code": "accountant",
+                  "name": "Accountant",
+                  "description": "Cash drops, approvals, AP settlement, receivables",
+                  "workspace": "finance_accountant",
+                  "permissions": [
+                    "approval.ap.approve",
+                    "approval.refund.approve",
+                    "finance.ap.settle"
+                  ]
+                },
+                {
+                  "code": "admissions_officer",
+                  "name": "Admissions Officer",
+                  "description": "Bed allocation, waitlists, overflow",
+                  "workspace": "admissions",
+                  "permissions": [
+                    "finance.invoice.view",
+                    "ipd.admission.allocate",
+                    "ipd.admission.overflow"
+                  ]
+                },
+                {
+                  "code": "billing_admin",
+                  "name": "Billing Admin",
+                  "description": "Service prices, panels, discounts, contracts, waiver/credit approval",
+                  "workspace": "billing_admin",
+                  "permissions": [
+                    "approval.credit.approve",
+                    "approval.waiver.approve",
+                    "finance.ar.view"
+                  ]
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-27T17:40:44.017199+00:00"
+              },
+              "request_id": "4cae5224567e4024a40e8eafdf89fde1"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": []
+    },
+    {
+      "id": "case:GET /meta/permissions",
+      "call": "GET /api/v1/meta/permissions",
+      "summary": "Permission catalogue",
+      "happy_path": {
+        "as_one_of": [
+          "any logged-in user"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/meta/permissions"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "code": "admin.audit.view",
+                  "module": "admin",
+                  "description": "Read the audit trail",
+                  "is_sensitive": true
+                },
+                {
+                  "code": "admin.badge_station.manage",
+                  "module": "admin",
+                  "description": "Register badge stations (RFID readers, barcode scanners, biometric terminals)",
+                  "is_sensitive": false
+                },
+                {
+                  "code": "admin.department.manage",
+                  "module": "admin",
+                  "description": "Maintain departments",
+                  "is_sensitive": false
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-27T17:40:44.006731+00:00"
+              },
+              "request_id": "c7bd486641554ad092439523606a3635"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": []
+    },
+    {
+      "id": "case:GET /admin/provisioning-queue",
+      "call": "GET /api/v1/admin/provisioning-queue",
+      "summary": "Employees HR submitted, awaiting a login (pane 1)",
+      "happy_path": {
+        "as_one_of": [
+          "super_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/admin/provisioning-queue"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "employee_id": 4,
+                  "emp_number": "EMP-2026-0004",
+                  "full_name": "Sana Tariq",
+                  "designation": "Staff Nurse",
+                  "department_name": null,
+                  "staff_category": "Nursing",
+                  "is_clinical_staff": true,
+                  "contract_type": "Permanent",
+                  "submitted_at": "2026-09-27T17:36:57.846615+00:00"
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-27T17:36:57.865428+00:00"
+              },
+              "request_id": "1692764188294f048ab7a62d300720b5"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": []
+    },
+    {
+      "id": "case:POST /admin/users",
+      "call": "POST /api/v1/admin/users",
+      "summary": "Provision a login (temporary password shown ONCE)",
+      "happy_path": {
+        "as_one_of": [
+          "super_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/admin/users",
+            "body": {
+              "employee_id": 4,
+              "role_codes": [
+                "ward_nurse",
+                "head_nurse"
+              ]
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "user_id": 5,
+                "username": "sana.tariq",
+                "display_name": "Sana Tariq",
+                "roles": [
+                  "head_nurse",
+                  "ward_nurse"
+                ],
+                "temporary_password": "<redacted recorded credential>",
+                "must_change_password": true
+              },
+              "meta": {
+                "server_time": "2026-09-27T17:36:57.885745+00:00"
+              },
+              "request_id": "90030d93441246c99801923b1026d345"
+            }
+          },
+          "errors_seen": [
+            "EMPLOYEE_NOT_READY_FOR_PROVISIONING",
+            "FORBIDDEN",
+            "PRIVILEGED_ACCESS_APPROVAL_REQUIRED",
+            "ZERO_INTERFACE_STAFF_NO_LOGIN"
+          ],
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "EMPLOYEE_NOT_READY_FOR_PROVISIONING",
+        "FORBIDDEN",
+        "PRIVILEGED_ACCESS_APPROVAL_REQUIRED",
+        "REFERENCE_NOT_FOUND",
+        "ZERO_INTERFACE_STAFF_NO_LOGIN"
+      ]
+    },
+    {
+      "id": "case:GET /admin/users",
+      "call": "GET /api/v1/admin/users",
+      "summary": "Search users",
+      "happy_path": {
+        "as_one_of": [
+          "super_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/admin/users",
+            "query": {
+              "q": "u831ab89ca2"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "user_id": 2,
+                  "username": "u831ab89ca2",
+                  "display_name": "u831ab89ca2",
+                  "employee_id": 2,
+                  "is_active": true,
+                  "must_change_pw": false,
+                  "last_login_at": "2026-09-27T17:34:28.927930+00:00",
+                  "roles": [
+                    "receptionist"
+                  ]
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-27T17:34:28.946622+00:00"
+              },
+              "request_id": "615a3788ccf547c2b810b781910ec691"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": []
+    },
+    {
+      "id": "case:PUT /admin/users/{user_id}/roles",
+      "call": "PUT /api/v1/admin/users/{user_id}/roles",
+      "summary": "Replace a user's roles (effective on the next request)",
+      "happy_path": {
+        "as_one_of": [
+          "super_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/admin/users/2/roles",
+            "body": {
+              "role_codes": [
+                "receptionist",
+                "cashier"
+              ]
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "user_id": 2,
+                "username": "u2b2443ad57",
+                "display_name": "u2b2443ad57",
+                "employee_id": 2,
+                "emp_number": "EMP-2026-0002",
+                "designation": "Officer",
+                "is_active": true,
+                "must_change_pw": false,
+                "is_service_account": false,
+                "created_at": "2026-09-27T17:34:33.661258+00:00",
+                "last_login_at": "2026-09-27T17:34:33.674476+00:00",
+                "last_login_ip": "10.0.0.5",
+                "failed_login_count": 0,
+                "locked_until": null,
+                "roles": [
+                  "cashier",
+                  "receptionist"
+                ],
+                "active_sessions": 1
+              },
+              "meta": {
+                "server_time": "2026-09-27T17:34:33.701602+00:00"
+              },
+              "request_id": "36ef177e86e7427cb16c6d080ad53a7b"
+            }
+          },
+          "errors_seen": [
+            "DEMO_ACCOUNT_PROTECTED",
+            "FORBIDDEN",
+            "LAST_OWNER",
+            "PRIVILEGED_ACCESS_APPROVAL_REQUIRED",
+            "SELF_ROLE_CHANGE_FORBIDDEN"
+          ],
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "DEMO_ACCOUNT_PROTECTED",
+        "FORBIDDEN",
+        "LAST_OWNER",
+        "NOT_FOUND",
+        "PRIVILEGED_ACCESS_APPROVAL_REQUIRED",
+        "SELF_ROLE_CHANGE_FORBIDDEN",
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:POST /admin/users/{user_id}/reset-password",
+      "call": "POST /api/v1/admin/users/{user_id}/reset-password",
+      "summary": "Issue a new temporary password (all sessions end)",
+      "happy_path": {
+        "as_one_of": [
+          "super_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/admin/users/2/reset-password"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "user_id": 2,
+                "temporary_password": "<redacted recorded credential>",
+                "must_change_password": true
+              },
+              "meta": {
+                "server_time": "2026-09-27T17:34:33.725547+00:00"
+              },
+              "request_id": "175404cd75c64ff288b5a87f725b4a26"
+            }
+          },
+          "errors_seen": [
+            "DEMO_ACCOUNT_PROTECTED"
+          ],
+          "events_emitted": [
+            "session.revoked"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "DEMO_ACCOUNT_PROTECTED",
+        "NOT_FOUND"
+      ]
+    },
+    {
+      "id": "case:POST /admin/users/{user_id}/active",
+      "call": "POST /api/v1/admin/users/{user_id}/active",
+      "summary": "Deactivate (sessions revoked) / reactivate + unlock",
+      "happy_path": {
+        "as_one_of": [
+          "super_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/admin/users/2/active",
+            "body": {
+              "active": false,
+              "reason": "left"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "user_id": 2,
+                "username": "u2b2443ad57",
+                "display_name": "u2b2443ad57",
+                "employee_id": 2,
+                "emp_number": "EMP-2026-0002",
+                "designation": "Officer",
+                "is_active": false,
+                "must_change_pw": false,
+                "is_service_account": false,
+                "created_at": "2026-09-27T17:34:33.661258+00:00",
+                "last_login_at": "2026-09-27T17:34:33.753784+00:00",
+                "last_login_ip": "10.0.0.5",
+                "failed_login_count": 0,
+                "locked_until": null,
+                "roles": [
+                  "cashier",
+                  "receptionist"
+                ],
+                "active_sessions": 0
+              },
+              "meta": {
+                "server_time": "2026-09-27T17:34:33.820474+00:00"
+              },
+              "request_id": "b938cfd9c9354ad09edcb1c3619242bb"
+            }
+          },
+          "errors_seen": [
+            "DEMO_ACCOUNT_PROTECTED"
+          ],
+          "events_emitted": [
+            "session.revoked"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "DEMO_ACCOUNT_PROTECTED",
+        "NOT_FOUND",
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /admin/role-matrix",
+      "call": "GET /api/v1/admin/role-matrix",
+      "summary": "Roles × permissions (pane 2)",
+      "happy_path": {
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "super_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/admin/role-matrix"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "roles": [
+                  {
+                    "role_id": 5,
+                    "code": "accountant",
+                    "name": "Accountant",
+                    "workspace": "finance_accountant",
+                    "description": "Cash drops, approvals, AP settlement, receivables"
+                  },
+                  {
+                    "role_id": 8,
+                    "code": "admissions_officer",
+                    "name": "Admissions Officer",
+                    "workspace": "admissions",
+                    "description": "Bed allocation, waitlists, overflow"
+                  },
+                  {
+                    "role_id": 4,
+                    "code": "billing_admin",
+                    "name": "Billing Admin",
+                    "workspace": "billing_admin",
+                    "description": "Service prices, panels, discounts, contracts, waiver/credit approval"
+                  }
+                ],
+                "permissions": [
+                  {
+                    "code": "admin.audit.view",
+                    "module": "admin",
+                    "description": "Read the audit trail",
+                    "is_sensitive": true
+                  },
+                  {
+                    "code": "admin.badge_station.manage",
+                    "module": "admin",
+                    "description": "Register badge stations (RFID readers, barcode scanners, biometric terminals)",
+                    "is_sensitive": false
+                  },
+                  {
+                    "code": "admin.department.manage",
+                    "module": "admin",
+                    "description": "Maintain departments",
+                    "is_sensitive": false
+                  }
+                ],
+                "matrix": {
+                  "accountant": [
+                    "finance.cash_drop.verify",
+                    "finance.shift.view_all",
+                    "finance.ap.view"
+                  ],
+                  "admissions_officer": [
+                    "ipd.bed.view",
+                    "ipd.admission.view",
+                    "ipd.admission.allocate"
+                  ],
+                  "billing_admin": [
+                    "opd.ticket.ar_override",
+                    "finance.service_catalog.manage",
+                    "finance.panel.manage"
+                  ],
+                  "cashier": [
+                    "finance.shift.operate",
+                    "finance.payment.collect",
+                    "finance.ar.collect"
+                  ],
+                  "clinical_specialist": [
+                    "patient.search",
+                    "patient.view",
+                    "patient.mark_deceased"
+                  ],
+                  "doctor": [
+                    "opd.queue.doctor",
+                    "opd.queue.reroute",
+                    "opd.ticket.view"
+                  ],
+                  "employee_self": [
+                    "self.leave.request",
+                    "self.profile.view",
+                    "ops.workorder.report"
+                  ],
+                  "hr_admin": [
+                    "hr.employee.view",
+                    "hr.employee.create",
+                    "hr.employee.update"
+                  ],
+                  "head_nurse": [
+                    "patient.search",
+                    "patient.view",
+                    "patient.emr.view"
+                  ],
+                  "hospital_admin": [
+                    "patient.search",
+                    "patient.view",
+                    "opd.ticket.ar_override"
+                  ],
+                  "lab_admin": [
+                    "lab.test.manage",
+                    "lab.price.update",
+                    "lab.reagent.manage"
+                  ],
+                  "lab_technician": [
+                    "lab.requisition.view",
+                    "lab.sample.collect",
+                    "lab.sample.receive"
+                  ],
+                  "lab_verifier": [
+                    "lab.result.verify",
+                    "lab.result.view",
+                    "lab.requisition.view"
+                  ],
+                  "maintenance_admin": [
+                    "ops.workorder.report",
+                    "ops.workorder.manage",
+                    "ops.asset.view"
+                  ],
+                  "ot_admin": [
+                    "ot.booking.view",
+                    "ot.booking.manage",
+                    "ot.consumable.record"
+                  ],
+                  "ops_admin": [
+                    "ops.feed.view",
+                    "ops.utility.record",
+                    "ops.workorder.report"
+                  ],
+                  "owner": [
+                    "opd.ticket.ar_override",
+                    "finance.dashboard.owner",
+                    "risk.view"
+                  ],
+                  "pharmacist": [
+                    "pharmacy.queue.view",
+                    "pharmacy.dispense",
+                    "pharmacy.otc.sell"
+                  ],
+                  "pharmacy_admin": [
+                    "pharmacy.stock.view",
+                    "pharmacy.stock.receive",
+                    "pharmacy.stock.adjust"
+                  ],
+                  "radiographer": [
+                    "imaging.order.view",
+                    "imaging.order.update",
+                    "patient.search"
+                  ],
+                  "receptionist": [
+                    "opd.ticket.void",
+                    "patient.search",
+                    "patient.view"
+                  ],
+                  "super_admin": [
+                    "admin.user.provision",
+                    "admin.user.manage",
+                    "admin.role_matrix.update"
+                  ],
+                  "surgeon": [
+                    "patient.search",
+                    "patient.view",
+                    "patient.mark_deceased"
+                  ],
+                  "triage_nurse": [
+                    "ipd.admission.code_red",
+                    "ipd.admission.view",
+                    "ipd.bed.view"
+                  ],
+                  "ward_nurse": [
+                    "ipd.flowsheet.record",
+                    "ipd.flowsheet.view",
+                    "ipd.mar.administer"
+                  ],
+                  "zakat_officer": [
+                    "approval.charity.approve",
+                    "patient.search",
+                    "patient.view"
+                  ]
+                }
+              },
+              "meta": {
+                "server_time": "2026-09-27T17:37:26.425250+00:00"
+              },
+              "request_id": "21ebb212ab1743f6b78ca662865a5d44"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": []
+    },
+    {
+      "id": "case:PUT /admin/roles/{role_code}/permissions",
+      "call": "PUT /api/v1/admin/roles/{role_code}/permissions",
+      "summary": "Replace a role's permissions (pushed live to all sessions)",
+      "happy_path": {
+        "as_one_of": [
+          "super_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/admin/roles/ops_admin/permissions",
+            "body": {
+              "permission_codes": [
+                "ops.feed.view",
+                "ops.utility.record",
+                "ops.workorder.report"
+              ]
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                "ops.feed.view",
+                "ops.utility.record",
+                "ops.workorder.report"
+              ],
+              "meta": {
+                "server_time": "2026-09-27T17:37:26.454109+00:00"
+              },
+              "request_id": "0eb52660af5441e983a61e7bac4019c7"
+            }
+          },
+          "errors_seen": [
+            "PRIVILEGED_ACCESS_APPROVAL_REQUIRED",
+            "VALIDATION_ERROR"
+          ],
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "NOT_FOUND",
+        "PRIVILEGED_ACCESS_APPROVAL_REQUIRED",
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /admin/terminals",
+      "call": "GET /api/v1/admin/terminals",
+      "summary": "Terminal → location / printers / cash node mapping",
+      "happy_path": {
+        "as_one_of": [
+          "super_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/admin/terminals"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "terminal_id": 1,
+                  "mac": "3C:52:82:1A:2B:3C",
+                  "ip": null,
+                  "hostname": null,
+                  "location_label": "Reception PC A",
+                  "department_id": null,
+                  "receipt_printer_id": 1,
+                  "label_printer_id": null,
+                  "document_printer_id": null,
+                  "card_printer_id": null,
+                  "cash_node": "MainReception",
+                  "is_active": true,
+                  "last_seen_at": null,
+                  "row_version": 2,
+                  "department_name": null,
+                  "receipt_printer": "Reception receipt 1",
+                  "label_printer": null,
+                  "document_printer": null,
+                  "card_printer": null
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-27T17:34:13.834734+00:00"
+              },
+              "request_id": "f7f4c5a524e44d05b798a4e14e845e6b"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": []
+    },
+    {
+      "id": "case:POST /admin/terminals",
+      "call": "POST /api/v1/admin/terminals",
+      "summary": "Map a terminal (by MAC) to a location and its printers",
+      "happy_path": {
+        "as_one_of": [
+          "super_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/admin/terminals",
+            "body": {
+              "mac": "3c-52-82-1a-2b-3c",
+              "location_label": "Reception PC 1",
+              "receipt_printer_id": 1,
+              "cash_node": "MainReception"
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "terminal_id": 1,
+                "mac": "3C:52:82:1A:2B:3C",
+                "ip": null,
+                "hostname": null,
+                "location_label": "Reception PC 1",
+                "department_id": null,
+                "receipt_printer_id": 1,
+                "label_printer_id": null,
+                "document_printer_id": null,
+                "card_printer_id": null,
+                "cash_node": "MainReception",
+                "is_active": true,
+                "last_seen_at": null,
+                "row_version": 1
+              },
+              "meta": {
+                "server_time": "2026-09-27T17:34:13.817265+00:00"
+              },
+              "request_id": "447bc0aa4ea741fea45f356a1ba6b9e2"
+            }
+          },
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:GET /admin/printers",
+      "call": "GET /api/v1/admin/printers",
+      "summary": "Printers",
+      "happy_path": {
+        "as_one_of": [
+          "super_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/admin/printers"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "printer_id": 1,
+                  "name": "Reception receipt 1",
+                  "printer_type": "ThermalReceipt",
+                  "connection": "Network",
+                  "address": "192.168.1.40:9100",
+                  "paper_width_mm": 80,
+                  "driver": null,
+                  "is_active": true,
+                  "row_version": 2
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-27T17:34:13.799857+00:00"
+              },
+              "request_id": "fe3adba98ed444c4b28170c9f12404cd"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": []
+    },
+    {
+      "id": "case:POST /admin/printers",
+      "call": "POST /api/v1/admin/printers",
+      "summary": "Add a printer",
+      "happy_path": {
+        "as_one_of": [
+          "super_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/admin/printers",
+            "body": {
+              "name": "Reception receipt",
+              "printer_type": "ThermalReceipt",
+              "connection": "USB",
+              "paper_width_mm": 80
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "printer_id": 1,
+                "name": "Reception receipt",
+                "printer_type": "ThermalReceipt",
+                "connection": "USB",
+                "address": null,
+                "paper_width_mm": 80,
+                "driver": null,
+                "is_active": true,
+                "row_version": 1
+              },
+              "meta": {
+                "server_time": "2026-09-27T17:34:13.781652+00:00"
+              },
+              "request_id": "b0a8042337284172a4593a255cc91135"
+            }
+          },
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:GET /admin/badge-stations",
+      "call": "GET /api/v1/admin/badge-stations",
+      "summary": "Badge stations: RFID readers, barcode-scanner kiosks, biometric terminals (last seen)",
+      "happy_path": {
+        "as_one_of": [
+          "super_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/admin/badge-stations"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "station_id": "GATE-1",
+                  "label": "Main gate (north)",
+                  "device_type": "BarcodeScanner",
+                  "location_type": "Gate",
+                  "action_type": "SecurityPass",
+                  "ward_id": null,
+                  "ward_name": null,
+                  "bed_id": null,
+                  "bed_label": null,
+                  "is_active": true,
+                  "last_seen_at": null,
+                  "has_key": false
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-27T17:34:19.782645+00:00"
+              },
+              "request_id": "7111fdc720b945f598bf78118c02c8ca"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": []
+    },
+    {
+      "id": "case:PUT /admin/badge-stations/{station_id}",
+      "call": "PUT /api/v1/admin/badge-stations/{station_id}",
+      "summary": "Register / update a badge station",
+      "happy_path": {
+        "as_one_of": [
+          "super_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/admin/badge-stations/GATE-1",
+            "body": {
+              "station_id": "GATE-1",
+              "label": "Main gate",
+              "location_type": "Gate",
+              "action_type": "SecurityPass"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "station_id": "GATE-1",
+                "label": "Main gate",
+                "device_type": "RFIDReader",
+                "location_type": "Gate",
+                "action_type": "SecurityPass",
+                "ward_id": null,
+                "bed_id": null,
+                "is_active": true
+              },
+              "meta": {
+                "server_time": "2026-09-27T17:34:19.747781+00:00"
+              },
+              "request_id": "42aae1e66b344676987112f8163b4ab3"
+            }
+          },
+          "errors_seen": [
+            "VALIDATION_ERROR"
+          ],
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:POST /admin/badge-stations/{station_id}/rotate-key",
+      "call": "POST /api/v1/admin/badge-stations/{station_id}/rotate-key",
+      "summary": "Issue a new station key (shown ONCE)",
+      "happy_path": {
+        "as_one_of": [
+          "super_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/admin/badge-stations/GATE-1/rotate-key"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "station_id": "GATE-1",
+                "label": "Main gate (north)",
+                "api_key": "<redacted recorded credential>",
+                "header": "X-Station-Key"
+              },
+              "meta": {
+                "server_time": "2026-09-27T17:34:19.789031+00:00"
+              },
+              "request_id": "bf6694d4910b4f8d8ecbd493aa929cf5"
+            }
+          },
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": []
+    },
+    {
+      "id": "case:GET /admin/wards/{ward_id}/bed-labels",
+      "call": "GET /api/v1/admin/wards/{ward_id}/bed-labels",
+      "summary": "Bed QR stickers for ward-level bed-cleaning stations (label printer)",
+      "happy_path": {
+        "as_one_of": [
+          "super_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/admin/wards/1/bed-labels"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "document_type": "bed_labels",
+                "printer_role": "label",
+                "ward": {
+                  "ward_id": 1,
+                  "code": "W2",
+                  "name": "Ward 2"
+                },
+                "labels": [
+                  {
+                    "bed_id": 1,
+                    "label": "W2-1",
+                    "code": "HMS-BED-1",
+                    "qr_svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"76\" height=\"76\" class=\"segno\"><path transform=\"scale(4)\" class=\"qrline\" stroke=\"#000\" d=\"M2 2.5h7m1 0h1m1 0h1m1 0h1m1 0h1m-15 1h1m5 0h1m2 0h1m2 0h1m1 0h1m-15 1h1m1 0h3m1 0h1m2 0h1m1 0h1m-12 1h1m1 0h3m1 0h1m2 0h1m1 0h1m1 0h2m-15 1h1m1 0h3m1 0h1m3 0h1m3 0h1m-15 1h1m5 0h1m1 0h1m1 0h2m1 0h1m-14 1h7m1 0h2m1 0h1m-2 1h1m3 0h1m-15 1h1m3 0h2m2 0h7m-14 1h1m1 0h…"
+                  }
+                ]
+              },
+              "meta": {
+                "server_time": "2026-09-27T17:37:55.593281+00:00"
+              },
+              "request_id": "3177709c71a440ad82966bad31cafb38"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": []
+    },
+    {
+      "id": "case:GET /admin/server-health",
+      "call": "GET /api/v1/admin/server-health",
+      "summary": "CPU/RAM, DB pool, last backup, worker heartbeat (pane 4, read-only)",
+      "happy_path": {
+        "as_one_of": [
+          "super_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/admin/server-health"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "version": "1.0.0",
+                "uptime_seconds": 2,
+                "cpu_pct": 3.9,
+                "ram_pct": 65,
+                "ram_total_gb": 15.7,
+                "disk": {
+                  "path": "D:\\HMS\\.devdata\\test",
+                  "total_gb": 301,
+                  "free_gb": 27.2,
+                  "used_pct": 91
+                },
+                "db": {
+                  "db_bytes": 22034111,
+                  "version": "PostgreSQL 18.4 on x86_64-windows, compiled by msvc-19.44.35226, 64-bit",
+                  "connections": 3,
+                  "max_connections": 200,
+                  "db_mb": 21,
+                  "pool": {
+                    "size": 1,
+                    "idle": 0,
+                    "max": 6
+                  }
+                },
+                "realtime": {
+                  "connections": 0,
+                  "listener_connected": true,
+                  "last_event_id": 0
+                },
+                "workers": [],
+                "jobs": [],
+                "last_backup": null,
+                "maintenance_mode": false
+              },
+              "meta": {
+                "server_time": "2026-09-27T17:34:29.556214+00:00"
+              },
+              "request_id": "ef873f325dc64ef7ae3c374c202f9480"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": []
+    },
+    {
+      "id": "case:GET /admin/settings",
+      "call": "GET /api/v1/admin/settings",
+      "summary": "Hospital policy settings",
+      "happy_path": {
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "super_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/admin/settings"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "key": "appraisal_criteria",
+                  "value": [
+                    {
+                      "kind": "Administrative",
+                      "criterion": "Punctuality and attendance"
+                    },
+                    {
+                      "kind": "Administrative",
+                      "criterion": "Conduct and teamwork"
+                    },
+                    {
+                      "kind": "Administrative",
+                      "criterion": "Compliance with policies and procedures"
+                    }
+                  ],
+                  "description": "The criteria an appraisal rates from 1 to 5: the administrative factors and the actual performance (MSDS HRM 134)",
+                  "is_control": false,
+                  "updated_at": "2026-10-16T09:26:34.072900+00:00"
+                },
+                {
+                  "key": "appraisal_grace_days",
+                  "value": 30,
+                  "description": "An appraisal signed within this many days of its due date counts as on time (MSDS HRM 137)",
+                  "is_control": false,
+                  "updated_at": "2026-10-16T09:26:34.072900+00:00"
+                },
+                {
+                  "key": "appraisal_interval_months",
+                  "value": 12,
+                  "description": "The annual appraisal falls due this many months after the last one (MSDS HRM 137)",
+                  "is_control": false,
+                  "updated_at": "2026-10-16T09:26:34.072900+00:00"
+                }
+              ],
+              "meta": {
+                "server_time": "2026-10-16T09:27:21.491761+00:00"
+              },
+              "request_id": "e269b96e4014481aa98dd01b12759086"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": []
+    },
+    {
+      "id": "case:PUT /admin/settings/{key}",
+      "call": "PUT /api/v1/admin/settings/{key}",
+      "summary": "Change a policy setting (type-checked, audited)",
+      "happy_path": {
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "super_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/admin/settings/attendance_weekly_off_days",
+            "body": {
+              "value": [
+                5
+              ]
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "key": "attendance_weekly_off_days",
+                "value_jsonb": [
+                  5
+                ],
+                "description": "Default weekly days off of fixed-schedule staff (ISO weekdays: 1 = Monday … 7 = Sunday); a default shift assignment may name its own",
+                "updated_at": "2026-09-27T17:45:38.538943+00:00",
+                "row_version": 2
+              },
+              "meta": {
+                "server_time": "2026-09-27T17:45:38.543220+00:00"
+              },
+              "request_id": "512069c8d4aa4adcb818975b77add081"
+            }
+          },
+          "errors_seen": [
+            "FORBIDDEN",
+            "ICD_SYSTEM_NOT_LOADED",
+            "POLICY_CHANGE_APPROVAL_REQUIRED",
+            "VALIDATION_ERROR"
+          ],
+          "events_emitted": [
+            "risk.critical_event"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "FORBIDDEN",
+        "ICD_SYSTEM_NOT_LOADED",
+        "NOT_FOUND",
+        "POLICY_CHANGE_APPROVAL_REQUIRED",
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:PUT /admin/maintenance",
+      "call": "PUT /api/v1/admin/maintenance",
+      "summary": "Maintenance mode on/off (non-admins get 503 MAINTENANCE)",
+      "happy_path": {
+        "as_one_of": [
+          "super_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/admin/maintenance",
+            "body": {
+              "enabled": true,
+              "message": "Server upgrade"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "key": "maintenance_mode",
+                "value_jsonb": true,
+                "description": "When true the API rejects non-admin requests with 503 MAINTENANCE",
+                "updated_at": "2026-09-27T17:34:38.059251+00:00",
+                "row_version": 2
+              },
+              "meta": {
+                "server_time": "2026-09-27T17:34:38.086853+00:00"
+              },
+              "request_id": "afd1712aba3542ed8b5dae5ecbbc2c61"
+            }
+          },
+          "errors_seen": [
+            "FORBIDDEN"
+          ],
+          "events_emitted": [
+            "system.maintenance"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "FORBIDDEN"
+      ]
+    },
+    {
+      "id": "case:POST /admin/kill-switch",
+      "call": "POST /api/v1/admin/kill-switch",
+      "summary": "FORCE GLOBAL TOKEN EXPIRY — every session in the hospital ends (emergency)",
+      "happy_path": {
+        "as_one_of": [
+          "super_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/admin/kill-switch",
+            "body": {
+              "reason": "suspected breach",
+              "confirm": "FORCE GLOBAL LOGOUT"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "new_epoch": 2,
+                "effective_at": "2026-09-27T17:34:38.153240+00:00"
+              },
+              "meta": {
+                "server_time": "2026-09-27T17:34:38.154898+00:00"
+              },
+              "request_id": "31af4e60d9774f008fb4f6668b1879f2"
+            }
+          },
+          "errors_seen": [
+            "FORBIDDEN",
+            "VALIDATION_ERROR"
+          ],
+          "events_emitted": [
+            "session.revoked"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "FORBIDDEN",
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:POST /admin/departments",
+      "call": "POST /api/v1/admin/departments",
+      "summary": "Add a department",
+      "happy_path": {
+        "as_one_of": [
+          "super_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/admin/departments",
+            "body": {
+              "code": "card",
+              "name": "Cardiology",
+              "is_clinical": true
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "department_id": 1,
+                "code": "CARD",
+                "name": "Cardiology",
+                "is_clinical": true,
+                "is_active": true,
+                "row_version": 1
+              },
+              "meta": {
+                "server_time": "2026-09-27T17:34:24.401325+00:00"
+              },
+              "request_id": "aa93e9eaa3ef478d859d1125fe344ac7"
+            }
+          },
+          "errors_seen": [
+            "FORBIDDEN"
+          ],
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "FORBIDDEN"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:POST /admin/wards",
+      "call": "POST /api/v1/admin/wards",
+      "summary": "Add a ward",
+      "happy_path": {
+        "as_one_of": [
+          "super_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/admin/wards",
+            "body": {
+              "code": "cw",
+              "name": "Cardiac Ward",
+              "ward_type": "General",
+              "department_id": 1
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "ward_id": 1,
+                "code": "CW",
+                "name": "Cardiac Ward",
+                "ward_type": "General",
+                "gender_restriction": "any",
+                "department_id": 1,
+                "room_charge_service_id": null,
+                "is_active": true,
+                "row_version": 1
+              },
+              "meta": {
+                "server_time": "2026-09-27T17:34:24.425258+00:00"
+              },
+              "request_id": "104c52afb5d34c82bb850d84385da0b7"
+            }
+          },
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:POST /admin/wards/{ward_id}/beds",
+      "call": "POST /api/v1/admin/wards/{ward_id}/beds",
+      "summary": "Add beds to a ward (bulk)",
+      "happy_path": {
+        "as_one_of": [
+          "super_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/admin/wards/1/beds",
+            "body": {
+              "labels": [
+                " CW-1 ",
+                "CW-2"
+              ]
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": [
+                {
+                  "bed_id": 1,
+                  "ward_id": 1,
+                  "label": "CW-1",
+                  "current_state": "Available",
+                  "state_changed_at": "2026-09-27T17:34:24.438663+00:00",
+                  "is_overflow_allowed": false,
+                  "sort_order": 1,
+                  "is_active": true,
+                  "row_version": 1
+                },
+                {
+                  "bed_id": 2,
+                  "ward_id": 1,
+                  "label": "CW-2",
+                  "current_state": "Available",
+                  "state_changed_at": "2026-09-27T17:34:24.438663+00:00",
+                  "is_overflow_allowed": false,
+                  "sort_order": 2,
+                  "is_active": true,
+                  "row_version": 1
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-27T17:34:24.445755+00:00"
+              },
+              "request_id": "d290f3662af84485a040e2fbbc526fdc"
+            }
+          },
+          "errors_seen": [
+            "NOT_FOUND"
+          ],
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "NOT_FOUND"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:POST /ot/theaters",
+      "call": "POST /api/v1/ot/theaters",
+      "summary": "Provision an operating theater (Super Admin)",
+      "happy_path": {
+        "as_one_of": [
+          "super_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/ot/theaters",
+            "body": {
+              "code": "OT1",
+              "name": "Main OT 1"
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "ot_id": 1,
+                "code": "OT1",
+                "name": "Main OT 1",
+                "theater_type": "General",
+                "current_state": "Available",
+                "state_changed_at": "2026-09-27T17:42:31.889632+00:00",
+                "is_active": true,
+                "row_version": 1
+              },
+              "meta": {
+                "server_time": "2026-09-27T17:42:31.912132+00:00"
+              },
+              "request_id": "f20e89bfb3544f7fa1db4379312d7909"
+            }
+          },
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:GET /icd/releases",
+      "call": "GET /api/v1/icd/releases",
+      "summary": "The ICD code lists loaded",
+      "happy_path": {
+        "as_one_of": [
+          "any logged-in user"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/icd/releases"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "coding_system": "ICD-11",
+                "releases": [
+                  {
+                    "release_id": 1,
+                    "code_system": "ICD-11",
+                    "release_label": "2026-01",
+                    "language": "en",
+                    "source": "Bundled",
+                    "source_file": "SimpleTabulation-ICD-11-MMS-en.zip",
+                    "source_sha256": "f1356588f40953a83e3af2b662deab47c5e269f944d1ea4ed0cfeb2007c7cd39",
+                    "licence_note": "WHO ICD-11 MMS 2026-01 (en). International Classification of Diseases, Eleventh Revision (ICD-11), World Health Organization (WHO) 2019 https://icd.who.int/browse11. Licensed under the Creative Commons Attribution-NoDerivatives 3.0 IGO licence (CC BY-ND 3.0 IGO).",
+                    "code_count": 18505,
+                    "is_active": true,
+                    "loaded_by": null,
+                    "loaded_by_name": null,
+                    "loaded_at": "2026-09-29T03:41:19.034744+00:00",
+                    "row_version": 2
+                  }
+                ],
+                "icd11_citation": "International Classification of Diseases, Eleventh Revision (ICD-11), World Health Organization (WHO) 2019 https://icd.who.int/browse11. Licensed under the Creative Commons Attribution-NoDerivatives 3.0 IGO licence (CC BY-ND 3.0 IGO)."
+              },
+              "meta": {
+                "server_time": "2026-09-29T03:46:49.427434+00:00"
+              },
+              "request_id": "a8f189dcef0743a3bae69666cb0aed9c"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": []
+    },
+    {
+      "id": "case:POST /icd/releases",
+      "call": "POST /api/v1/icd/releases",
+      "summary": "Load an ICD code list (the hospital's licensed ICD-10, or a newer WHO ICD-11 release)",
+      "happy_path": {
+        "as_one_of": [
+          "quality_officer",
+          "super_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/icd/releases",
+            "multipart": {
+              "file": "<file>",
+              "code_system": "ICD-10",
+              "release_label": "2019",
+              "licence_note": "WHO internal-use licence 2026-117"
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "coding_system": "ICD-11",
+                "releases": [
+                  {
+                    "release_id": 1,
+                    "code_system": "ICD-11",
+                    "release_label": "2026-01",
+                    "language": "en",
+                    "source": "Bundled",
+                    "source_file": "SimpleTabulation-ICD-11-MMS-en.zip",
+                    "source_sha256": "f1356588f40953a83e3af2b662deab47c5e269f944d1ea4ed0cfeb2007c7cd39",
+                    "licence_note": "WHO ICD-11 MMS 2026-01 (en). International Classification of Diseases, Eleventh Revision (ICD-11), World Health Organization (WHO) 2019 https://icd.who.int/browse11. Licensed under the Creative Commons Attribution-NoDerivatives 3.0 IGO licence (CC BY-ND 3.0 IGO).",
+                    "code_count": 18505,
+                    "is_active": true,
+                    "loaded_by": null,
+                    "loaded_by_name": null,
+                    "loaded_at": "2026-09-29T03:41:19.034744+00:00",
+                    "row_version": 2
+                  },
+                  {
+                    "release_id": 2,
+                    "code_system": "ICD-10",
+                    "release_label": "2019",
+                    "language": "en",
+                    "source": "Imported",
+                    "source_file": "icd10-2019.xml",
+                    "source_sha256": "1b15322a1b95dcc66c4fa7e3d609fa19bc02990de4f9fb08755621cce49bebe5",
+                    "licence_note": "WHO internal-use licence 2026-117",
+                    "code_count": 3,
+                    "is_active": true,
+                    "loaded_by": 6,
+                    "loaded_by_name": "u165dbd48fe",
+                    "loaded_at": "2026-09-29T03:46:53.900134+00:00",
+                    "row_version": 2
+                  }
+                ],
+                "icd11_citation": "International Classification of Diseases, Eleventh Revision (ICD-11), World Health Organization (WHO) 2019 https://icd.who.int/browse11. Licensed under the Creative Commons Attribution-NoDerivatives 3.0 IGO licence (CC BY-ND 3.0 IGO).",
+                "loaded": {
+                  "release_id": 2,
+                  "code_system": "ICD-10",
+                  "release_label": "2019",
+                  "language": "en",
+                  "source": "Imported",
+                  "source_file": "icd10-2019.xml",
+                  "source_sha256": "1b15322a1b95dcc66c4fa7e3d609fa19bc02990de4f9fb08755621cce49bebe5",
+                  "licence_note": "WHO internal-use licence 2026-117",
+                  "code_count": 3,
+                  "is_active": true,
+                  "loaded_by": 6,
+                  "loaded_by_name": "u165dbd48fe",
+                  "loaded_at": "2026-09-29T03:46:53.900134+00:00",
+                  "row_version": 2
+                }
+              },
+              "meta": {
+                "server_time": "2026-09-29T03:46:53.917512+00:00"
+              },
+              "request_id": "f1b87c217c174479aaaa5212238ca096"
+            }
+          },
+          "errors_seen": [
+            "FORBIDDEN",
+            "ICD_IMPORT_INVALID",
+            "ICD_RELEASE_EXISTS",
+            "VALIDATION_ERROR"
+          ],
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "FORBIDDEN",
+        "ICD_IMPORT_INVALID",
+        "ICD_RELEASE_EXISTS",
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:POST /icd/releases/{release_id}/activate",
+      "call": "POST /api/v1/icd/releases/{release_id}/activate",
+      "summary": "Make a release the active list of its classification",
+      "happy_path": {
+        "as_one_of": [
+          "quality_officer",
+          "super_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/icd/releases/4/activate"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "coding_system": "ICD-10",
+                "releases": [
+                  {
+                    "release_id": 1,
+                    "code_system": "ICD-11",
+                    "release_label": "2026-01",
+                    "language": "en",
+                    "source": "Bundled",
+                    "source_file": "SimpleTabulation-ICD-11-MMS-en.zip",
+                    "source_sha256": "f1356588f40953a83e3af2b662deab47c5e269f944d1ea4ed0cfeb2007c7cd39",
+                    "licence_note": "WHO ICD-11 MMS 2026-01 (en). International Classification of Diseases, Eleventh Revision (ICD-11), World Health Organization (WHO) 2019 https://icd.who.int/browse11. Licensed under the Creative Commons Attribution-NoDerivatives 3.0 IGO licence (CC BY-ND 3.0 IGO).",
+                    "code_count": 18505,
+                    "is_active": true,
+                    "loaded_by": null,
+                    "loaded_by_name": null,
+                    "loaded_at": "2026-09-29T03:41:19.034744+00:00",
+                    "row_version": 2
+                  },
+                  {
+                    "release_id": 4,
+                    "code_system": "ICD-10",
+                    "release_label": "2019-rev1",
+                    "language": "en",
+                    "source": "Imported",
+                    "source_file": "fix.csv",
+                    "source_sha256": "2223dda3f7f00b18c43c98e4beed23fc9a24d9b9b686260c9ef97e2dc03942ef",
+                    "licence_note": "WHO internal-use licence 2026-117",
+                    "code_count": 2,
+                    "is_active": true,
+                    "loaded_by": 6,
+                    "loaded_by_name": "u165dbd48fe",
+                    "loaded_at": "2026-09-29T03:46:54.101786+00:00",
+                    "row_version": 2
+                  },
+                  {
+                    "release_id": 2,
+                    "code_system": "ICD-10",
+                    "release_label": "2019",
+                    "language": "en",
+                    "source": "Imported",
+                    "source_file": "icd10-2019.xml",
+                    "source_sha256": "1b15322a1b95dcc66c4fa7e3d609fa19bc02990de4f9fb08755621cce49bebe5",
+                    "licence_note": "WHO internal-use licence 2026-117",
+                    "code_count": 3,
+                    "is_active": false,
+                    "loaded_by": 6,
+                    "loaded_by_name": "u165dbd48fe",
+                    "loaded_at": "2026-09-29T03:46:53.900134+00:00",
+                    "row_version": 3
+                  }
+                ],
+                "icd11_citation": "International Classification of Diseases, Eleventh Revision (ICD-11), World Health Organization (WHO) 2019 https://icd.who.int/browse11. Licensed under the Creative Commons Attribution-NoDerivatives 3.0 IGO licence (CC BY-ND 3.0 IGO)."
+              },
+              "meta": {
+                "server_time": "2026-09-29T03:46:54.112758+00:00"
+              },
+              "request_id": "fddfa9c8ce344bf281c4b6e669aeb9d0"
+            }
+          },
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": []
+    },
+    {
+      "id": "case:GET /admin/first-owner",
+      "call": "GET /api/v1/admin/first-owner",
+      "summary": "Whether this installation still needs its first Owner",
+      "happy_path": {
+        "as_one_of": [
+          "super_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/admin/first-owner"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "needed": true,
+                "explanation": "Nobody can onboard staff yet: create the first Owner (POST /admin/first-owner). Allowed once."
+              },
+              "meta": {
+                "server_time": "2026-10-16T00:06:25.034940+00:00"
+              },
+              "request_id": "6ec4e09941724bb0838d2c8c2d4f8304"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": []
+    },
+    {
+      "id": "case:POST /admin/first-owner",
+      "call": "POST /api/v1/admin/first-owner",
+      "summary": "Create the installation's first Owner (once; temporary password shown ONCE)",
+      "happy_path": {
+        "as_one_of": [
+          "super_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/admin/first-owner",
+            "body": {
+              "full_name": "Dr. Ayesha Malik",
+              "cnic": "35202-7654321-2",
+              "mobile": "0300-7654321",
+              "gender": "female",
+              "roles": [
+                "hr_admin"
+              ]
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "user_id": 4,
+                "username": "dr.malik",
+                "display_name": "Dr. Ayesha Malik",
+                "roles": [
+                  "hr_admin",
+                  "owner"
+                ],
+                "temporary_password": "<redacted recorded credential>",
+                "must_change_password": true,
+                "employee_id": 4,
+                "emp_number": "EMP-2026-0003"
+              },
+              "meta": {
+                "server_time": "2026-10-16T00:06:25.121354+00:00"
+              },
+              "request_id": "fee49c05cb224f83b0c8024e334a18a7"
+            }
+          },
+          "errors_seen": [
+            "FIRST_OWNER_EXISTS",
+            "FORBIDDEN",
+            "VALIDATION_ERROR"
+          ],
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "FIRST_OWNER_EXISTS",
+        "FORBIDDEN",
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:POST /admin/change-requests",
+      "call": "POST /api/v1/admin/change-requests",
+      "summary": "Request a control-setting or privileged-access change (applied at once for an Owner)",
+      "happy_path": {
+        "as_one_of": [
+          "any logged-in user"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/admin/change-requests",
+            "body": {
+              "kind": "Setting",
+              "setting_key": "large_cash_settlement_threshold",
+              "requested_value": 5000,
+              "reason": "Dual control from 5,000"
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "change_request_id": 1,
+                "kind": "Setting",
+                "setting_key": "large_cash_settlement_threshold",
+                "target_user_id": null,
+                "target_role_code": null,
+                "requested_value": 5000,
+                "current_value": 100000,
+                "reason": "Dual control from 5,000",
+                "status": "Pending",
+                "approval_request_id": 1,
+                "requested_by": 1,
+                "requested_by_name": "ue6bcf3798b",
+                "requested_at": "2026-10-16T10:20:46.604135+00:00",
+                "decided_at": null
+              },
+              "meta": {
+                "server_time": "2026-10-16T10:20:46.624661+00:00"
+              },
+              "request_id": "569d0888ac75439c8053ad4c171ce27a"
+            }
+          },
+          "errors_seen": [
+            "DEMO_ACCOUNT_PROTECTED",
+            "REFERENCE_NOT_FOUND",
+            "VALIDATION_ERROR"
+          ],
+          "events_emitted": [
+            "approval.requested",
+            "notification.created"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "DEMO_ACCOUNT_PROTECTED",
+        "FORBIDDEN",
+        "LAST_OWNER",
+        "REFERENCE_NOT_FOUND",
+        "SELF_ROLE_CHANGE_FORBIDDEN",
+        "VALIDATION_ERROR"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:GET /admin/change-requests",
+      "call": "GET /api/v1/admin/change-requests",
+      "summary": "Control-setting and privileged-access change requests",
+      "happy_path": {
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "super_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/admin/change-requests",
+            "query": {
+              "status": "Applied"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "change_request_id": 2,
+                  "kind": "Setting",
+                  "setting_key": "reception_max_discount_pct",
+                  "target_user_id": null,
+                  "target_role_code": null,
+                  "requested_value": 15,
+                  "current_value": 10,
+                  "reason": "Changed directly by an Owner",
+                  "status": "Applied",
+                  "approval_request_id": null,
+                  "requested_by": 2,
+                  "requested_by_name": "u084089a54b",
+                  "requested_at": "2026-10-16T10:20:46.698067+00:00",
+                  "decided_at": "2026-10-16T10:20:46.698067+00:00"
+                },
+                {
+                  "change_request_id": 1,
+                  "kind": "Setting",
+                  "setting_key": "large_cash_settlement_threshold",
+                  "target_user_id": null,
+                  "target_role_code": null,
+                  "requested_value": 5000,
+                  "current_value": 100000,
+                  "reason": "Dual control from 5,000",
+                  "status": "Applied",
+                  "approval_request_id": 1,
+                  "requested_by": 1,
+                  "requested_by_name": "ue6bcf3798b",
+                  "requested_at": "2026-10-16T10:20:46.604135+00:00",
+                  "decided_at": "2026-10-16T10:20:46.638855+00:00"
+                }
+              ],
+              "meta": {
+                "server_time": "2026-10-16T10:20:46.717811+00:00"
+              },
+              "request_id": "550831b65df34c0a903159510bf15cb8"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": []
+    },
+    {
+      "id": "case:GET /admin/change-requests/{change_request_id}",
+      "call": "GET /api/v1/admin/change-requests/{change_request_id}",
+      "summary": "One control-setting or privileged-access change request",
+      "happy_path": {
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "super_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/admin/change-requests/1"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "change_request_id": 1,
+                "kind": "Setting",
+                "setting_key": "large_cash_settlement_threshold",
+                "target_user_id": null,
+                "target_role_code": null,
+                "requested_value": 5000,
+                "current_value": 100000,
+                "reason": "Dual control from 5,000",
+                "status": "Applied",
+                "approval_request_id": 1,
+                "requested_by": 1,
+                "requested_by_name": "ue6bcf3798b",
+                "requested_at": "2026-10-16T10:20:46.604135+00:00",
+                "decided_at": "2026-10-16T10:20:46.638855+00:00"
+              },
+              "meta": {
+                "server_time": "2026-10-16T10:20:46.679857+00:00"
+              },
+              "request_id": "f0d430c7d89b4cf28901eee3a7e09702"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "NOT_FOUND"
+      ]
+    }
+  ],
+  "service_cases": [],
+  "delivery_gate": {
+    "required": true,
+    "status": "required",
+    "progress_reporting": {
+      "required": true,
+      "submit": "propose_progress",
+      "verify": "progress_proposals",
+      "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+    },
+    "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+    "compulsory": [
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+        "points": 2
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+        "points": 3
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+        "points": 2
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+        "points": 4
+      }
+    ],
+    "zoom": {
+      "min_pct": 100,
+      "max_pct": 250,
+      "reset_pct": 100,
+      "keys": [
+        "Ctrl + or Ctrl = (zoom in)",
+        "Ctrl - (zoom out)",
+        "Ctrl 0 (reset to 100 %)",
+        "Command on macOS"
+      ],
+      "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+    },
+    "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+    "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+  },
+  "handbook_page": "screens/it_console",
+  "workspace_guide": "get_handbook_outline('super_admin')",
+  "realtime": [
+    {
+      "event": "hr.provisioning.requested",
+      "check": "the screen refreshes without polling"
+    }
+  ],
+  "acceptance_rules": [
+    "Go-live: while GET /admin/first-owner says needed, the console opens on 'Create the first Owner' (POST /admin/first-owner: name, CNIC, mobile, and the roles besides owner, usually hr_admin; in a small clinic also the owner's clinical role). It is offered once: FIRST_OWNER_EXISTS afterwards, and the step disappears. Print the temporary password slip for the Owner; tell them their personnel file still needs the CNIC copy.",
+    "Temporary passwords and station keys are shown ONCE — offer print/copy, never store them client-side.",
+    "No RFID hardware: register BarcodeScanner stations (a PC or tablet with a USB scanner or camera running the badge-station kiosk page); for ward cleaning kiosks print the bed QR stickers (bed-labels).",
+    "Kill switch: big red button, typed confirmation 'FORCE GLOBAL LOGOUT', clearly marked emergency-only.",
+    "ICD code lists: load the hospital's licensed WHO ICD-10 file here or in the Quality workspace (icd_code_lists); the WHO ICD-11 list ships with the server and updates with it.",
+    "Control settings (is_control) and privileged roles (owner, hospital admin, billing admin, accountant, the directors) are an Owner's: an Owner's own change applies at once; IT's goes to POST /admin/change-requests and waits for an Owner in the approvals queue (PolicyChange, PrivilegedAccess); show the request as pending, never as done. Nobody changes their own roles (SELF_ROLE_CHANGE_FORBIDDEN); the last Owner keeps the role (LAST_OWNER). Maintenance mode is IT's (admin.maintenance.manage).",
+    "Terminal cash_node: map every PC where the pharmacy takes cash (dispensing, OTC) to PharmacyCounter; the pharmacy's cash goes into no other counter's drawer. A PC shared by the reception and the pharmacy is mapped PharmacyCounter: the reception's cash may go into that drawer too."
+  ],
+  "demo_accounts": "demo_accounts() lists a login per role; sandbox_call runs each case on the DEV server"
+}

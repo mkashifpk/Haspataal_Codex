@@ -3,11 +3,8 @@
 import { api } from "./api";
 
 const withQuery = (path: string, q?: Record<string, unknown>) => {
-  const s = new URLSearchParams(
-    Object.entries(q ?? {})
-      .filter(([, v]) => v !== undefined && v !== null)
-      .map(([k, v]) => [k, String(v)]),
-  ).toString();
+  const s = new URLSearchParams(Object.entries(q ?? {}).filter(([, v]) => v !== undefined && v !== null)
+    .map(([k, v]) => [k, String(v)])).toString();
   return s ? `${path}?${s}` : path;
 };
 
@@ -15,18 +12,7 @@ const withQuery = (path: string, q?: Record<string, unknown>) => {
 export interface IncidentTypeOut {
   type_code: string;
   name: string;
-  area:
-    | "Clinical"
-    | "Medication"
-    | "Anaesthesia"
-    | "Surgery"
-    | "Diagnostics"
-    | "Transfusion"
-    | "Infection"
-    | "MotherAndBaby"
-    | "Behaviour"
-    | "Facility"
-    | "Occupational";
+  area: "Clinical" | "Medication" | "Anaesthesia" | "Surgery" | "Diagnostics" | "Transfusion" | "Infection" | "MotherAndBaby" | "Behaviour" | "Facility" | "Occupational";
   /** Always: a sentinel event whenever it happened; IfSevereHarm: only with severe harm or a death */
   sentinel: "Always" | "IfSevereHarm";
   description: string | null;
@@ -50,23 +36,10 @@ export interface IncidentIn {
   employee_id?: number | null;
   /** A theatre adverse event: the operation (with ot_phase) */
   booking_id?: number | null;
-  ot_phase?:
-    | "BeforeInduction"
-    | "Induction"
-    | "Maintenance"
-    | "Emergence"
-    | "Recovery"
-    | "AfterRecovery"
-    | null;
+  ot_phase?: "BeforeInduction" | "Induction" | "Maintenance" | "Emergence" | "Recovery" | "AfterRecovery" | null;
   /** A medication error or an adverse drug reaction: the medicine */
   drug_id?: number | null;
-  medication_stage?:
-    | "Prescribing"
-    | "Transcribing"
-    | "Dispensing"
-    | "Administration"
-    | "Monitoring"
-    | null;
+  medication_stage?: "Prescribing" | "Transcribing" | "Dispensing" | "Administration" | "Monitoring" | null;
   /** An unexpected death: the death record */
   death_id?: number | null;
   department_id?: number | null;
@@ -87,18 +60,7 @@ export interface IncidentDetailOut {
   incident_number: string;
   type_code: string;
   type_name: string;
-  area:
-    | "Clinical"
-    | "Medication"
-    | "Anaesthesia"
-    | "Surgery"
-    | "Diagnostics"
-    | "Transfusion"
-    | "Infection"
-    | "MotherAndBaby"
-    | "Behaviour"
-    | "Facility"
-    | "Occupational";
+  area: "Clinical" | "Medication" | "Anaesthesia" | "Surgery" | "Diagnostics" | "Transfusion" | "Infection" | "MotherAndBaby" | "Behaviour" | "Facility" | "Occupational";
   kind: "Incident" | "NearMiss";
   harm: "NoHarm" | "Mild" | "Moderate" | "Severe" | "Death";
   is_sentinel: boolean;
@@ -121,23 +83,10 @@ export interface IncidentDetailOut {
   booking_id: number | null;
   booking_number: string | null;
   procedure_name: string | null;
-  ot_phase:
-    | "BeforeInduction"
-    | "Induction"
-    | "Maintenance"
-    | "Emergence"
-    | "Recovery"
-    | "AfterRecovery"
-    | null;
+  ot_phase: "BeforeInduction" | "Induction" | "Maintenance" | "Emergence" | "Recovery" | "AfterRecovery" | null;
   drug_id: number | null;
   drug_name: string | null;
-  medication_stage:
-    | "Prescribing"
-    | "Transcribing"
-    | "Dispensing"
-    | "Administration"
-    | "Monitoring"
-    | null;
+  medication_stage: "Prescribing" | "Transcribing" | "Dispensing" | "Administration" | "Monitoring" | null;
   /** The medicine is on the high-alert list (MSDS CQI 102 iv) */
   high_alert: boolean;
   death_id: number | null;
@@ -207,16 +156,7 @@ export interface QualityActionOut {
   action_id: number;
   action_number: string;
   /** What found the need: a medical record review, an incident, a complaint, an infection control audit, a committee meeting, a mock drill, a mock PHC interview, a QA round, a patient's feedback */
-  source:
-    | "RecordReview"
-    | "Incident"
-    | "Complaint"
-    | "InfectionAudit"
-    | "Meeting"
-    | "Drill"
-    | "MockInterview"
-    | "QaRound"
-    | "PatientFeedback";
+  source: "RecordReview" | "Incident" | "Complaint" | "InfectionAudit" | "Meeting" | "Drill" | "MockInterview" | "QaRound" | "PatientFeedback";
   cycle_id: number | null;
   cycle_number: string | null;
   incident_id: number | null;
@@ -266,18 +206,7 @@ export interface IncidentOut {
   incident_number: string;
   type_code: string;
   type_name: string;
-  area:
-    | "Clinical"
-    | "Medication"
-    | "Anaesthesia"
-    | "Surgery"
-    | "Diagnostics"
-    | "Transfusion"
-    | "Infection"
-    | "MotherAndBaby"
-    | "Behaviour"
-    | "Facility"
-    | "Occupational";
+  area: "Clinical" | "Medication" | "Anaesthesia" | "Surgery" | "Diagnostics" | "Transfusion" | "Infection" | "MotherAndBaby" | "Behaviour" | "Facility" | "Occupational";
   kind: "Incident" | "NearMiss";
   harm: "NoHarm" | "Mild" | "Moderate" | "Severe" | "Death";
   is_sentinel: boolean;
@@ -300,23 +229,10 @@ export interface IncidentOut {
   booking_id: number | null;
   booking_number: string | null;
   procedure_name: string | null;
-  ot_phase:
-    | "BeforeInduction"
-    | "Induction"
-    | "Maintenance"
-    | "Emergence"
-    | "Recovery"
-    | "AfterRecovery"
-    | null;
+  ot_phase: "BeforeInduction" | "Induction" | "Maintenance" | "Emergence" | "Recovery" | "AfterRecovery" | null;
   drug_id: number | null;
   drug_name: string | null;
-  medication_stage:
-    | "Prescribing"
-    | "Transcribing"
-    | "Dispensing"
-    | "Administration"
-    | "Monitoring"
-    | null;
+  medication_stage: "Prescribing" | "Transcribing" | "Dispensing" | "Administration" | "Monitoring" | null;
   /** The medicine is on the high-alert list (MSDS CQI 102 iv) */
   high_alert: boolean;
   death_id: number | null;
@@ -357,75 +273,32 @@ export interface IncidentOut {
   analysis_overdue: boolean;
 }
 
-/** One active staff member as a picker shows them (GET /staff/lookup): the facts on their badge, nothing else. */
+/** One active staff member as a picker shows them (GET /staff/lookup): the facts on their badge and the registration their stamp prints, nothing else. */
 export interface StaffLookupOut {
+  /** The id a form's staff field takes (contrast_doctor_id, employee_id, ...) */
   employee_id: number;
   emp_number: string;
   full_name: string;
   designation: string;
   department_name: string | null;
+  /** The council they are registered with (PMDC: a doctor or dentist; PNC: a nurse); null: none */
+  license_type: "PMDC" | "PNC" | "Other" | null;
+  /** As their stamp prints it, e.g. "PMDC 12345-P"; null: no number on file */
+  registration: string | null;
 }
 
 /** What to report: the incident types — GET /api/v1/incident-types (who may call: any logged-in user). */
-export function listTypes(query?: {
-  area?:
-    | "Clinical"
-    | "Medication"
-    | "Anaesthesia"
-    | "Surgery"
-    | "Diagnostics"
-    | "Transfusion"
-    | "Infection"
-    | "MotherAndBaby"
-    | "Behaviour"
-    | "Facility"
-    | "Occupational"
-    | null;
-  active_only?: boolean;
-}): Promise<IncidentTypeOut[]> {
-  return api<IncidentTypeOut[]>(
-    "GET",
-    withQuery(`/incident-types`, query),
-    undefined,
-  );
+export function listTypes(query?: { area?: "Clinical" | "Medication" | "Anaesthesia" | "Surgery" | "Diagnostics" | "Transfusion" | "Infection" | "MotherAndBaby" | "Behaviour" | "Facility" | "Occupational" | null; active_only?: boolean }): Promise<IncidentTypeOut[]> {
+  return api<IncidentTypeOut[]>("GET", withQuery(`/incident-types`, query), undefined);
 }
 
 /** Report an incident, an adverse event or a near miss — POST /api/v1/incidents (who may call: holders of incident.report). */
-export function report(body: IncidentIn): Promise<IncidentDetailOut> {
-  return api<IncidentDetailOut>("POST", `/incidents`, body, {
-    idempotent: true,
-  });
+export function reportIncidents(body: IncidentIn): Promise<IncidentDetailOut> {
+  return api<IncidentDetailOut>("POST", `/incidents`, body, { idempotent: true });
 }
 
 /** The incident register — GET /api/v1/incidents (who may call: holders of incident.view or incident.report or ot.clinical_statistics.view). */
-export function listIncidents(query?: {
-  status?:
-    "Reported" | "UnderReview" | "Analysed" | "Closed" | "Withdrawn" | null;
-  type_code?: string | null;
-  area?:
-    | "Clinical"
-    | "Medication"
-    | "Anaesthesia"
-    | "Surgery"
-    | "Diagnostics"
-    | "Transfusion"
-    | "Infection"
-    | "MotherAndBaby"
-    | "Behaviour"
-    | "Facility"
-    | "Occupational"
-    | null;
-  sentinel_only?: boolean;
-  harm?: "NoHarm" | "Mild" | "Moderate" | "Severe" | "Death" | null;
-  department_id?: number | null;
-  booking_id?: number | null;
-  patient_id?: number | null;
-  date_from?: string | null;
-  date_to?: string | null;
-  mine?: boolean;
-  open_only?: boolean;
-  limit?: number;
-}): Promise<IncidentOut[]> {
+export function listIncidents(query?: { status?: "Reported" | "UnderReview" | "Analysed" | "Closed" | "Withdrawn" | null; type_code?: string | null; area?: "Clinical" | "Medication" | "Anaesthesia" | "Surgery" | "Diagnostics" | "Transfusion" | "Infection" | "MotherAndBaby" | "Behaviour" | "Facility" | "Occupational" | null; sentinel_only?: boolean; harm?: "NoHarm" | "Mild" | "Moderate" | "Severe" | "Death" | null; department_id?: number | null; booking_id?: number | null; patient_id?: number | null; date_from?: string | null; date_to?: string | null; mine?: boolean; open_only?: boolean; limit?: number }): Promise<IncidentOut[]> {
   return api<IncidentOut[]>("GET", withQuery(`/incidents`, query), undefined);
 }
 
@@ -440,14 +313,6 @@ export function sentinelListPdf(): Promise<unknown> {
 }
 
 /** Find a staff member for a form (badge facts only) — GET /api/v1/staff/lookup (who may call: any logged-in user). */
-export function lookupStaff(query: {
-  q: string;
-  department_id?: number | null;
-  limit?: number;
-}): Promise<StaffLookupOut[]> {
-  return api<StaffLookupOut[]>(
-    "GET",
-    withQuery(`/staff/lookup`, query),
-    undefined,
-  );
+export function lookupStaff(query: { q: string; department_id?: number | null; license_type?: "PMDC" | "PNC" | null; limit?: number }): Promise<StaffLookupOut[]> {
+  return api<StaffLookupOut[]>("GET", withQuery(`/staff/lookup`, query), undefined);
 }

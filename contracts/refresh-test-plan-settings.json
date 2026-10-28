@@ -1,0 +1,654 @@
+{
+  "screen": "settings",
+  "title": "Settings (avatar or Ctrl+,)",
+  "cases": [
+    {
+      "id": "case:GET /settings/sections",
+      "call": "GET /api/v1/settings/sections",
+      "summary": "The Settings window: the tiers and sections this caller may open (also before login)",
+      "happy_path": {
+        "as_one_of": [
+          "any logged-in user"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/settings/sections"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "shortcut": "Ctrl+,",
+                "signed_in": true,
+                "tiers": [
+                  {
+                    "tier": "personal",
+                    "label": "My settings",
+                    "sections": [
+                      {
+                        "key": "preferences",
+                        "label": "Display, language and zoom",
+                        "screen": "settings",
+                        "danger": false,
+                        "before_login": false,
+                        "endpoints": [
+                          "GET /settings/me",
+                          "PUT /settings/me"
+                        ]
+                      },
+                      {
+                        "key": "password",
+                        "label": "Change password",
+                        "screen": "settings",
+                        "danger": false,
+                        "before_login": false,
+                        "endpoints": [
+                          "POST /settings/me/change-password"
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "tier": "terminal",
+                    "label": "This terminal",
+                    "sections": [
+                      {
+                        "key": "connection",
+                        "label": "Server connection and LAN diagnostics",
+                        "screen": "settings",
+                        "danger": false,
+                        "before_login": true,
+                        "endpoints": [
+                          "GET /health",
+                          "GET /meta/server-info",
+                          "GET /meta/license"
+                        ]
+                      },
+                      {
+                        "key": "terminal_identity",
+                        "label": "This terminal: its location and printers",
+                        "screen": "settings",
+                        "danger": false,
+                        "before_login": true,
+                        "endpoints": [
+                          "GET /terminals/whoami"
+                        ]
+                      },
+                      {
+                        "key": "login_display",
+                        "label": "Language and zoom of the login screen",
+                        "screen": "settings",
+                        "danger": false,
+                        "before_login": true,
+                        "endpoints": []
+                      }
+                    ]
+                  }
+                ]
+              },
+              "meta": {
+                "server_time": "2026-10-17T12:44:14.348259+00:00"
+              },
+              "request_id": "bcafa65871af40f3bb5fe1e15981e6e9"
+            }
+          },
+          "errors_seen": [
+            "UNAUTHENTICATED"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "TOKEN_EXPIRED",
+        "TOKEN_REVOKED",
+        "UNAUTHENTICATED"
+      ]
+    },
+    {
+      "id": "case:GET /settings/me",
+      "call": "GET /api/v1/settings/me",
+      "summary": "My preferences (theme, language, UI scale, PDF download)",
+      "happy_path": {
+        "as_one_of": [
+          "any logged-in user"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/settings/me"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "theme": "Light",
+                "language": "en",
+                "ui_scale_pct": 100,
+                "pdf_download": "Separate",
+                "extra": {},
+                "updated_at": null
+              },
+              "meta": {
+                "server_time": "2026-10-03T09:21:31.602908+00:00"
+              },
+              "request_id": "becb3f86a5c44501b5d4cfa51cb74b4b"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": []
+    },
+    {
+      "id": "case:PUT /settings/me",
+      "call": "PUT /api/v1/settings/me",
+      "summary": "Update my preferences (only the fields you send)",
+      "happy_path": {
+        "as_one_of": [
+          "any logged-in user"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/settings/me",
+            "body": {
+              "language": "ur",
+              "ui_scale_pct": 150
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "theme": "Light",
+                "language": "ur",
+                "ui_scale_pct": 150,
+                "pdf_download": "Separate",
+                "extra": {},
+                "updated_at": "2026-10-03T09:14:50.748460+00:00"
+              },
+              "meta": {
+                "server_time": "2026-10-03T09:14:50.753710+00:00"
+              },
+              "request_id": "024ea15b5346445aa5d5070b88ea3f05"
+            }
+          },
+          "errors_seen": [
+            "PAYLOAD_TOO_LARGE",
+            "VALIDATION_ERROR"
+          ],
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "PAYLOAD_TOO_LARGE",
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:POST /settings/me/change-password",
+      "call": "POST /api/v1/settings/me/change-password",
+      "summary": "Change my password (same as /auth/change-password)",
+      "happy_path": {
+        "as_one_of": [
+          "any logged-in user"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/settings/me/change-password",
+            "body": {
+              "current_password": "<secret>",
+              "new_password": "<redacted recorded credential>"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "access_token": "<redacted recorded credential>",
+                "token_type": "bearer",
+                "expires_in": 1800,
+                "refresh_token": "<redacted recorded credential>",
+                "refresh_expires_in": 604800
+              },
+              "meta": {
+                "server_time": "2026-09-27T17:34:33.805213+00:00"
+              },
+              "request_id": "3e4c17d82e2647079ee49be9ce6a9217"
+            }
+          },
+          "errors_seen": [
+            "DEMO_ACCOUNT_PROTECTED"
+          ],
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "DEMO_ACCOUNT_PROTECTED",
+        "INVALID_CREDENTIALS",
+        "PASSWORD_POLICY"
+      ]
+    },
+    {
+      "id": "case:GET /admin/settings",
+      "call": "GET /api/v1/admin/settings",
+      "summary": "Hospital policy settings",
+      "happy_path": {
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "super_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/admin/settings"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "key": "appraisal_criteria",
+                  "value": [
+                    {
+                      "kind": "Administrative",
+                      "criterion": "Punctuality and attendance"
+                    },
+                    {
+                      "kind": "Administrative",
+                      "criterion": "Conduct and teamwork"
+                    },
+                    {
+                      "kind": "Administrative",
+                      "criterion": "Compliance with policies and procedures"
+                    }
+                  ],
+                  "description": "The criteria an appraisal rates from 1 to 5: the administrative factors and the actual performance (MSDS HRM 134)",
+                  "is_control": false,
+                  "updated_at": "2026-10-16T09:26:34.072900+00:00"
+                },
+                {
+                  "key": "appraisal_grace_days",
+                  "value": 30,
+                  "description": "An appraisal signed within this many days of its due date counts as on time (MSDS HRM 137)",
+                  "is_control": false,
+                  "updated_at": "2026-10-16T09:26:34.072900+00:00"
+                },
+                {
+                  "key": "appraisal_interval_months",
+                  "value": 12,
+                  "description": "The annual appraisal falls due this many months after the last one (MSDS HRM 137)",
+                  "is_control": false,
+                  "updated_at": "2026-10-16T09:26:34.072900+00:00"
+                }
+              ],
+              "meta": {
+                "server_time": "2026-10-16T09:27:21.491761+00:00"
+              },
+              "request_id": "e269b96e4014481aa98dd01b12759086"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": []
+    },
+    {
+      "id": "case:PUT /admin/settings/{key}",
+      "call": "PUT /api/v1/admin/settings/{key}",
+      "summary": "Change a policy setting (type-checked, audited)",
+      "happy_path": {
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "super_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/admin/settings/attendance_weekly_off_days",
+            "body": {
+              "value": [
+                5
+              ]
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "key": "attendance_weekly_off_days",
+                "value_jsonb": [
+                  5
+                ],
+                "description": "Default weekly days off of fixed-schedule staff (ISO weekdays: 1 = Monday … 7 = Sunday); a default shift assignment may name its own",
+                "updated_at": "2026-09-27T17:45:38.538943+00:00",
+                "row_version": 2
+              },
+              "meta": {
+                "server_time": "2026-09-27T17:45:38.543220+00:00"
+              },
+              "request_id": "512069c8d4aa4adcb818975b77add081"
+            }
+          },
+          "errors_seen": [
+            "FORBIDDEN",
+            "ICD_SYSTEM_NOT_LOADED",
+            "POLICY_CHANGE_APPROVAL_REQUIRED",
+            "VALIDATION_ERROR"
+          ],
+          "events_emitted": [
+            "risk.critical_event"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "FORBIDDEN",
+        "ICD_SYSTEM_NOT_LOADED",
+        "NOT_FOUND",
+        "POLICY_CHANGE_APPROVAL_REQUIRED",
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:POST /admin/change-requests",
+      "call": "POST /api/v1/admin/change-requests",
+      "summary": "Request a control-setting or privileged-access change (applied at once for an Owner)",
+      "happy_path": {
+        "as_one_of": [
+          "any logged-in user"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/admin/change-requests",
+            "body": {
+              "kind": "Setting",
+              "setting_key": "large_cash_settlement_threshold",
+              "requested_value": 5000,
+              "reason": "Dual control from 5,000"
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "change_request_id": 1,
+                "kind": "Setting",
+                "setting_key": "large_cash_settlement_threshold",
+                "target_user_id": null,
+                "target_role_code": null,
+                "requested_value": 5000,
+                "current_value": 100000,
+                "reason": "Dual control from 5,000",
+                "status": "Pending",
+                "approval_request_id": 1,
+                "requested_by": 1,
+                "requested_by_name": "ue6bcf3798b",
+                "requested_at": "2026-10-16T10:20:46.604135+00:00",
+                "decided_at": null
+              },
+              "meta": {
+                "server_time": "2026-10-16T10:20:46.624661+00:00"
+              },
+              "request_id": "569d0888ac75439c8053ad4c171ce27a"
+            }
+          },
+          "errors_seen": [
+            "DEMO_ACCOUNT_PROTECTED",
+            "REFERENCE_NOT_FOUND",
+            "VALIDATION_ERROR"
+          ],
+          "events_emitted": [
+            "approval.requested",
+            "notification.created"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "DEMO_ACCOUNT_PROTECTED",
+        "FORBIDDEN",
+        "LAST_OWNER",
+        "REFERENCE_NOT_FOUND",
+        "SELF_ROLE_CHANGE_FORBIDDEN",
+        "VALIDATION_ERROR"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:GET /admin/change-requests",
+      "call": "GET /api/v1/admin/change-requests",
+      "summary": "Control-setting and privileged-access change requests",
+      "happy_path": {
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "super_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/admin/change-requests",
+            "query": {
+              "status": "Applied"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "change_request_id": 2,
+                  "kind": "Setting",
+                  "setting_key": "reception_max_discount_pct",
+                  "target_user_id": null,
+                  "target_role_code": null,
+                  "requested_value": 15,
+                  "current_value": 10,
+                  "reason": "Changed directly by an Owner",
+                  "status": "Applied",
+                  "approval_request_id": null,
+                  "requested_by": 2,
+                  "requested_by_name": "u084089a54b",
+                  "requested_at": "2026-10-16T10:20:46.698067+00:00",
+                  "decided_at": "2026-10-16T10:20:46.698067+00:00"
+                },
+                {
+                  "change_request_id": 1,
+                  "kind": "Setting",
+                  "setting_key": "large_cash_settlement_threshold",
+                  "target_user_id": null,
+                  "target_role_code": null,
+                  "requested_value": 5000,
+                  "current_value": 100000,
+                  "reason": "Dual control from 5,000",
+                  "status": "Applied",
+                  "approval_request_id": 1,
+                  "requested_by": 1,
+                  "requested_by_name": "ue6bcf3798b",
+                  "requested_at": "2026-10-16T10:20:46.604135+00:00",
+                  "decided_at": "2026-10-16T10:20:46.638855+00:00"
+                }
+              ],
+              "meta": {
+                "server_time": "2026-10-16T10:20:46.717811+00:00"
+              },
+              "request_id": "550831b65df34c0a903159510bf15cb8"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": []
+    },
+    {
+      "id": "case:GET /admin/change-requests/{change_request_id}",
+      "call": "GET /api/v1/admin/change-requests/{change_request_id}",
+      "summary": "One control-setting or privileged-access change request",
+      "happy_path": {
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "super_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/admin/change-requests/1"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "change_request_id": 1,
+                "kind": "Setting",
+                "setting_key": "large_cash_settlement_threshold",
+                "target_user_id": null,
+                "target_role_code": null,
+                "requested_value": 5000,
+                "current_value": 100000,
+                "reason": "Dual control from 5,000",
+                "status": "Applied",
+                "approval_request_id": 1,
+                "requested_by": 1,
+                "requested_by_name": "ue6bcf3798b",
+                "requested_at": "2026-10-16T10:20:46.604135+00:00",
+                "decided_at": "2026-10-16T10:20:46.638855+00:00"
+              },
+              "meta": {
+                "server_time": "2026-10-16T10:20:46.679857+00:00"
+              },
+              "request_id": "f0d430c7d89b4cf28901eee3a7e09702"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "NOT_FOUND"
+      ]
+    }
+  ],
+  "service_cases": [],
+  "delivery_gate": {
+    "required": true,
+    "status": "required",
+    "progress_reporting": {
+      "required": true,
+      "submit": "propose_progress",
+      "verify": "progress_proposals",
+      "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+    },
+    "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+    "compulsory": [
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+        "points": 2
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+        "points": 3
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+        "points": 2
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+        "points": 4
+      }
+    ],
+    "zoom": {
+      "min_pct": 100,
+      "max_pct": 250,
+      "reset_pct": 100,
+      "keys": [
+        "Ctrl + or Ctrl = (zoom in)",
+        "Ctrl - (zoom out)",
+        "Ctrl 0 (reset to 100 %)",
+        "Command on macOS"
+      ],
+      "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+    },
+    "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+    "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+  },
+  "handbook_page": "screens/settings",
+  "workspace_guide": "get_handbook_outline('*')",
+  "realtime": [],
+  "acceptance_rules": [
+    "Theme: Light / DarkHighContrast.",
+    "Language en/ur is per USER (loaded at login), not per machine; bundle Noto Nastaliq Urdu; no bilingual labels in grids.",
+    "UI scale slider (100–250 %) and Ctrl +/- drive the SAME Electron zoom factor; persist via PUT /settings/me.",
+    "'Documents' section: 'Download a set of documents (the PHC inspection pack) as: separate PDFs, one per click (default) / one combined PDF' → pdf_download Separate | Combined. Never offer a ZIP.",
+    "Open it from the avatar menu or Ctrl+, (Cmd+, on macOS) in every workspace; build its navigation from GET /settings/sections, never from role names: the facility tier opens facility_profile and the policy settings, the system tier opens the IT console's parts.",
+    "Policy settings marked is_control show 'Owner approval': for anyone but an Owner, Save sends POST /admin/change-requests and the row shows 'Waiting for an Owner' until approval.resolved.",
+    "Before login the same window opens from the login screen with the This terminal tier only (signed_in false): Server connection and LAN diagnostics (GET /health, GET /meta/server-info: the addresses and the CA fingerprint, GET /meta/license), This terminal (GET /terminals/whoami: location, printers, cash node, the MAC sent as X-Terminal-Mac), and the login screen's language and zoom, kept on this terminal until a user logs in (then GET /settings/me decides). After login the tier stays, last."
+  ],
+  "demo_accounts": "demo_accounts() lists a login per role; sandbox_call runs each case on the DEV server"
+}

@@ -40,7 +40,7 @@ test('report bounds/active modality findings, cancellation and manual study inpu
  assert.throws(()=>radiologyBody('Cancelled',order,emptyRadiologyDraft()));
  assert.equal(radiologyBody('Cancelled',order,{...emptyRadiologyDraft(),reason:'Synthetic cancellation'}).reason,'Synthetic cancellation');
  assert.throws(()=>radiologyBody('link',order,{...emptyRadiologyDraft(),linkMode:'manual'}));
- assert.deepEqual(radiologyBody('link',order,{...emptyRadiologyDraft(),linkMode:'manual',uid:'actual supplied UID'}),{study_instance_uid:'actual supplied UID'});
+ for(const orthanc of ['actual supplied UID','invalid','AAAAAAAA-AAAAAAAA-AAAAAAAA-AAAAAAAA-AAAAAAAA']) assert.throws(()=>radiologyBody('link',order,{...emptyRadiologyDraft(),linkMode:'manual',orthanc}));
 });
 test('frozen review detects changed order, patient, site, pregnancy need, state and version',()=>{
  for(const changed of [{row_version:5},{status:'Reported'},{patient_id:99},{mrn:'OTHER'},{body_part:'other site'},{laterality:'Left'},{pregnancy_check_needed:false},{accession_number:'OTHER'}])assert.notEqual(imagingSnapshot(order),imagingSnapshot({...order,...changed}));

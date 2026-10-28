@@ -1,0 +1,424 @@
+{
+  "screen": "help_center",
+  "title": "Help: the end-user handbook",
+  "cases": [
+    {
+      "id": "case:GET /meta/handbook",
+      "call": "GET /api/v1/meta/handbook",
+      "summary": "The end-user handbook's outline for the logged-in employee (only what they may use)",
+      "happy_path": {
+        "as_one_of": [
+          "any logged-in user"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/meta/handbook"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "user": "u0dac72edf9",
+                "roles": [
+                  "cashier"
+                ],
+                "workspaces": [
+                  {
+                    "code": "finance_cashier",
+                    "label": "Cashier",
+                    "label_ur": "کیشیئر",
+                    "description": "Counter collections, dues settlement, cash-backs.",
+                    "page": "workspaces/finance_cashier",
+                    "yours": true,
+                    "screens": [
+                      {
+                        "id": "receivables",
+                        "title": "Outstanding dues (Udhaar)",
+                        "purpose": "Collect old dues, aging, write-offs.",
+                        "workflow": "§1.9",
+                        "workspace": "finance_cashier",
+                        "page": "screens/receivables",
+                        "tasks": [
+                          {
+                            "method": "GET",
+                            "path": "/finance/ar/outstanding",
+                            "summary": "Outstanding Patient Dues queue (with age of debt)",
+                            "is_action": false
+                          },
+                          {
+                            "method": "GET",
+                            "path": "/finance/ar/aging",
+                            "summary": "Receivables aging buckets",
+                            "is_action": false
+                          },
+                          {
+                            "method": "POST",
+                            "path": "/finance/ar/{ar_id}/settle",
+                            "summary": "Settle Debt (patient returns to pay)",
+                            "is_action": true
+                          }
+                        ],
+                        "rules": [
+                          "'Write off' (with its reason) only for finance.ar.write_off: the Owner and the Hospital Admin, who open this screen from their workspace; a cashier collects and settles but never writes off."
+                        ],
+                        "events": [],
+                        "view": "full"
+                      }
+                    ]
+                  },
+                  {
+                    "code": "admissions",
+                    "label": "Admissions Desk",
+                    "label_ur": "داخلہ ڈیسک",
+                    "description": "Pending admissions, live bed matrix, bed allocation, waitlists, overflow.",
+                    "page": "workspaces/admissions",
+                    "yours": false,
+                    "screens": [
+                      {
+                        "id": "record_complaint_admissions",
+                        "title": "Record a complaint",
+                        "purpose": "Record a complaint as it is made, verbally or in writing, and give the complainant the tracking number.",
+                        "workflow": "MSDS PRE 80-82",
+                        "workspace": "admissions",
+                        "page": "screens/record_complaint_admissions",
+                        "tasks": [
+                          {
+                            "method": "POST",
+                            "path": "/complaints",
+                            "summary": "Record a complaint",
+                            "is_action": true
+                          },
+                          {
+                            "method": "GET",
+                            "path": "/complaints",
+                            "summary": "The complaints register",
+                            "is_action": false
+                          },
+                          {
+                            "method": "GET",
+                            "path": "/complaints/{complaint_id}",
+                            "summary": "One complaint",
+                            "is_action": false
+                          }
+                        ],
+                        "rules": [
+                          "Form: how it came (in person, telephone, letter, suggestion box, from the Punjab Healthcare Commission), the complainant and how to reach them (a phone or an address unless anonymous or from the box), the patient (search by MRN) or the admission, the department, the category, the complaint in their words, what they ask for. Send an Idempotency-Key.",
+                          "Give the complainant the complaint_number at once: it is their tracking number. The complaints officer acknowledges it within the day with the name of their contact person.",
+                          "An appeal against the outcome comes to any desk: open the complaint (GET /complaints?mine=true or by number) and 'Record appeal' while can_appeal (COMPLAINT_APPEAL_LATE after the window)."
+                        ],
+                        "events": [],
+                        "view": "full"
+                      }
+                    ]
+                  },
+                  {
+                    "code": "badge_station",
+                    "label": "Badge station kiosk",
+                    "label_ur": "بیج اسٹیشن",
+                    "description": "Not a user workspace: the full-screen page of a barcode-scanner badge station (no login; authenticated by the station's key).",
+                    "page": "workspaces/badge_station",
+                    "yours": false,
+                    "screens": [
+                      {
+                        "id": "badge_station_kiosk",
+                        "title": "Badge station kiosk",
+                        "purpose": "Full-screen page on a PC / tablet with a barcode scanner (or camera): staff show their badge, the page posts the scan and flashes the outcome. No login, no keyboard for the person scanning.",
+                        "workflow": "§6.4, §6.8, §8.2",
+                        "workspace": "badge_station",
+                        "page": "screens/badge_station_kiosk",
+                        "tasks": [
+                          {
+                            "method": "GET",
+                            "path": "/badge-stations/me",
+                            "summary": "Kiosk screen setup: what this station does (station-authenticated)",
+                            "is_action": false
+                          },
+                          {
+                            "method": "POST",
+                            "path": "/badge-stations/scans",
+                            "summary": "A badge was presented at a station (station-authenticated, no user login)",
+                            "is_action": true
+                          }
+                        ],
+                        "rules": [
+                          "Configure once with the station id and its key (X-Station-Key); never show the key.",
+                          "A USB scanner types the code and Enter: keep an invisible input focused; or decode the camera stream.",
+                          "needs_bed_code: collect two scans (bed sticker HMS-BED-… and badge) within 60 s, then post them together."
+                        ],
+                        "events": [],
+                        "view": "full"
+                      }
+                    ]
+                  }
+                ],
+                "shared_screens": [
+                  {
+                    "id": "report_incident",
+                    "title": "Report an incident",
+                    "purpose": "Anyone reports an incident, an adverse event or a near miss, the same day, without blame.",
+                    "workflow": "MSDS CQI 106, 107",
+                    "workspace": "*",
+                    "page": "screens/report_incident",
+                    "tasks": [
+                      {
+                        "method": "GET",
+                        "path": "/incident-types",
+                        "summary": "What to report: the incident types",
+                        "is_action": false
+                      },
+                      {
+                        "method": "POST",
+                        "path": "/incidents",
+                        "summary": "Report an incident, an adverse event or a near miss",
+                        "is_action": true
+                      },
+                      {
+                        "method": "GET",
+                        "path": "/incidents",
+                        "summary": "The incident register",
+                        "is_action": false
+                      }
+                    ],
+                    "rules": [
+                      "A button on every workspace's toolbar. Form: the type (GET /incident-types, grouped by area, sentinel types marked), incident or near miss, harm, when (now by default) and where (department, ward, place), who was affected (a patient: search by MRN; staff: the employee), what happened (facts, not blame) and what was done at once; 'Keep my name confidential' (reporter_confidential).",
+                      "Medication errors: the stage and the medicine; theatre events: the operation and the phase (INCIDENT_DETAILS_REQUIRED). Send an Idempotency-Key: a double click must not report twice.",
+                      "After sending: show the incident number and 'The Quality Officer will review it'. 'My reports' = GET /incidents?mine=true."
+                    ],
+                    "events": [],
+                    "view": "full"
+                  },
+                  {
+                    "id": "my_investigations",
+                    "title": "Incidents I investigate",
+                    "purpose": "The analysis of an incident the Quality Officer asked you to investigate, and its actions.",
+                    "workflow": "MSDS CQI 107; AAC 25",
+                    "workspace": "*",
+                    "page": "screens/my_investigations",
+                    "tasks": [
+                      {
+                        "method": "GET",
+                        "path": "/incidents",
+                        "summary": "The incident register",
+                        "is_action": false
+                      },
+                      {
+                        "method": "GET",
+                        "path": "/incidents/{incident_id}",
+                        "summary": "One incident",
+                        "is_action": false
+                      },
+                      {
+                        "method": "PUT",
+                        "path": "/incidents/{incident_id}/analysis",
+                        "summary": "Save the analysis (a draft until signed)",
+                        "is_action": true
+                      }
+                    ],
+                    "rules": [
+                      "List: GET /incidents?mine=true&status=UnderReview (analysis_overdue in red). Show it only to users who have one (notification category incident when named).",
+                      "Analysis form (save as you go with PUT): method (RootCauseAnalysis for a sentinel event), what happened in order, root causes, contributing factors (checkboxes of the fixed list), lessons, whether the patient or the family was told and how, any report made outside (DRAP, PHC).",
+                      "Sign: INCIDENT_ANALYSIS_INCOMPLETE lists details.missing. A sentinel event needs at least one factor of the system, not only 'Individual' or 'Patient' (MSDS CQI 107: blame alone is not an analysis)."
+                    ],
+                    "events": [
+                      "incident.updated",
+                      "notification.created"
+                    ],
+                    "view": "full"
+                  },
+                  {
+                    "id": "my_complaint_investigations",
+                    "title": "Complaints I investigate",
+                    "purpose": "The complaints the complaints officer asked you to investigate: the findings, keeping the complainant informed, the actions.",
+                    "workflow": "MSDS PRE 81-83",
+                    "workspace": "*",
+                    "page": "screens/my_complaint_investigations",
+                    "tasks": [
+                      {
+                        "method": "GET",
+                        "path": "/complaints",
+                        "summary": "The complaints register",
+                        "is_action": false
+                      },
+                      {
+                        "method": "GET",
+                        "path": "/complaints/{complaint_id}",
+                        "summary": "One complaint",
+                        "is_action": false
+                      },
+                      {
+                        "method": "POST",
+                        "path": "/complaints/{complaint_id}/findings",
+                        "summary": "Write the findings of the investigation",
+                        "is_action": true
+                      }
+                    ],
+                    "rules": [
+                      "List: GET /complaints?mine=true&status=Acknowledged, by answer_due (answer_overdue in red). Show the screen only to users who have one (notification category complaint).",
+                      "Findings: what the investigation found (facts, the people spoken to, the records read). The complaints officer conveys the outcome.",
+                      "Tell the complainant how it stands, or that it needs more time and until when (Extension), before answer_due."
+                    ],
+                    "events": [
+                      "complaint.updated",
+                      "notification.created"
+                    ],
+                    "view": "full"
+                  }
+                ],
+                "pages": 36,
+                "guide": "frontend-docs/guides/12-end-user-handbook.md (the frontend portal: Guides, 'The end-user handbook')",
+                "active_workspace": null,
+                "faq_seed": [
+                  {
+                    "id": "finance_cashier:error:SHIFT_NOT_OPEN",
+                    "workspace": "finance_cashier",
+                    "screen_id": "receivables",
+                    "kind": "error",
+                    "code": "SHIFT_NOT_OPEN",
+                    "entity": null,
+                    "question": "The Outstanding dues (Udhaar) screen says \"Open a cash shift before handling cash.\" (SHIFT_NOT_OPEN). Why, and what do I do?"
+                  },
+                  {
+                    "id": "admissions:state:complaint",
+                    "workspace": "admissions",
+                    "screen_id": "record_complaint_admissions",
+                    "kind": "state",
+                    "code": null,
+                    "entity": "complaint",
+                    "question": "What do the states of a complaint mean (Received, Acknowledged, Resolved, Appealed, Closed, Withdrawn, NotMaintainable), and what moves it from one to the next?"
+                  },
+                  {
+                    "id": "admissions:error:COMPLAINT_APPEAL_LATE",
+                    "workspace": "admissions",
+                    "screen_id": "record_complaint_admissions",
+                    "kind": "error",
+                    "code": "COMPLAINT_APPEAL_LATE",
+                    "entity": null,
+                    "question": "The Record a complaint screen says \"The appeal window of this complaint has ended.\" (COMPLAINT_APPEAL_LATE). Why, and what do I do?"
+                  }
+                ],
+                "print_edition": null
+              },
+              "meta": {
+                "server_time": "2026-10-17T03:21:07.828939+00:00"
+              },
+              "request_id": "0cece6b930324781857c60a58e488626"
+            }
+          },
+          "errors_seen": [
+            "FORBIDDEN",
+            "VALIDATION_ERROR"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "FORBIDDEN",
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /settings/me",
+      "call": "GET /api/v1/settings/me",
+      "summary": "My preferences (theme, language, UI scale, PDF download)",
+      "happy_path": {
+        "as_one_of": [
+          "any logged-in user"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/settings/me"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "theme": "Light",
+                "language": "en",
+                "ui_scale_pct": 100,
+                "pdf_download": "Separate",
+                "extra": {},
+                "updated_at": null
+              },
+              "meta": {
+                "server_time": "2026-10-03T09:21:31.602908+00:00"
+              },
+              "request_id": "becb3f86a5c44501b5d4cfa51cb74b4b"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": []
+    }
+  ],
+  "service_cases": [],
+  "delivery_gate": {
+    "required": true,
+    "status": "required",
+    "progress_reporting": {
+      "required": true,
+      "submit": "propose_progress",
+      "verify": "progress_proposals",
+      "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+    },
+    "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+    "compulsory": [
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+        "points": 2
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+        "points": 3
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+        "points": 2
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+        "points": 4
+      }
+    ],
+    "zoom": {
+      "min_pct": 100,
+      "max_pct": 250,
+      "reset_pct": 100,
+      "keys": [
+        "Ctrl + or Ctrl = (zoom in)",
+        "Ctrl - (zoom out)",
+        "Ctrl 0 (reset to 100 %)",
+        "Command on macOS"
+      ],
+      "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+    },
+    "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+    "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+  },
+  "handbook_page": "screens/help_center",
+  "workspace_guide": "get_handbook_outline('*')",
+  "realtime": [],
+  "acceptance_rules": [
+    "Build the handbook as the developer guide 'The end-user handbook' (get_guide('end-user-handbook')) says: one page per screen (screens/<screen id>) and one per workspace (workspaces/<code>), written for the hospital's staff (where to click, what happens, what the system refuses and why, what to do on each error message), in English and Urdu (the user's language preference, GET /settings/me), with screenshots of YOUR UI.",
+    "RBAC is the server's: GET /meta/handbook after login (and after a role change) returns the pages this user may read; show only those pages in the help window and in its search index; a page whose screen is not in the answer is never shown, linked or searchable for this user.",
+    "Localhost-only searchable site: the pages are a static site generated at the app's build (MkDocs-style with a client-side search index), bundled in the app and served to the help window from an HTTP server bound to 127.0.0.1 on an ephemeral port (or a custom app:// protocol); never on the LAN, never on the hospital server. Works offline. Print-friendly for the training room.",
+    "Entry points: 'Help' in the avatar menu (opens the user's handbook home: their workspaces and a search box) and a '?' button on every screen (opens screens/<id>). The home lists the user's own workspaces first (yours true).",
+    "Keep it current: the page ids are the screen ids of the catalogue; what_changed in the MCP server lists screens added or changed since the last build, so the pages are revised with the UI.",
+    "In a workspace window, call GET /meta/handbook?workspace=<that workspace>; never show another workspace's pages in that window."
+  ],
+  "demo_accounts": "demo_accounts() lists a login per role; sandbox_call runs each case on the DEV server"
+}

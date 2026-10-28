@@ -1,0 +1,304 @@
+{
+  "screen": "patient_education",
+  "title": "Health education given",
+  "cases": [
+    {
+      "id": "case:POST /patients/{patient_id}/education",
+      "call": "POST /api/v1/patients/{patient_id}/education",
+      "summary": "Record health education given",
+      "happy_path": {
+        "as_one_of": [
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "pharmacist",
+          "triage_nurse",
+          "ward_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/patients/1/education",
+            "body": {
+              "topic": "Plenty of fluids",
+              "method": "Verbal",
+              "given_to": "Patient",
+              "encounter_id": 1
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "education_id": 1,
+                "patient_id": 1,
+                "mrn": "MRN-2026-000001",
+                "patient_name": "Ali Khan",
+                "encounter_id": 1,
+                "topic": "Plenty of fluids",
+                "method": "Verbal",
+                "material_id": null,
+                "material_title": null,
+                "given_to": "Patient",
+                "note": null,
+                "given_by": 1,
+                "given_by_name": "Dr Ahmed",
+                "given_by_stamp": {
+                  "at": "2026-10-14T10:55:39.999421+00:00",
+                  "name": "Dr Ahmed",
+                  "text": "Dr Ahmed, Doctor, PMDC PMDC-13459, 14-Oct-2026 15:55",
+                  "user_id": 1,
+                  "designation": "Doctor",
+                  "employee_id": 1,
+                  "registration": "PMDC PMDC-13459"
+                },
+                "given_at": "2026-10-14T10:55:39.999421+00:00"
+              },
+              "meta": {
+                "server_time": "2026-10-14T10:55:40.019899+00:00"
+              },
+              "request_id": "a3378e61dd954652a1b18dc4eda46463"
+            }
+          },
+          "errors_seen": [
+            "REFERENCE_NOT_FOUND",
+            "VALIDATION_ERROR"
+          ],
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "NOT_FOUND",
+        "REFERENCE_NOT_FOUND",
+        "VALIDATION_ERROR"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:GET /patients/{patient_id}/education",
+      "call": "GET /api/v1/patients/{patient_id}/education",
+      "summary": "The education a patient was given",
+      "happy_path": {
+        "as_one_of": [
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "pharmacist",
+          "quality_officer",
+          "triage_nurse",
+          "ward_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/patients/1/education"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "education_id": 2,
+                  "patient_id": 1,
+                  "mrn": "MRN-2026-000001",
+                  "patient_name": "Ali Khan",
+                  "encounter_id": null,
+                  "topic": "Plenty of fluids and paracetamol only",
+                  "method": "Verbal",
+                  "material_id": null,
+                  "material_title": null,
+                  "given_to": "Attendant",
+                  "note": null,
+                  "given_by": 1,
+                  "given_by_name": "Dr Ahmed",
+                  "given_by_stamp": {
+                    "at": "2026-10-14T11:26:46.893423+00:00",
+                    "name": "Dr Ahmed",
+                    "text": "Dr Ahmed, Doctor, PMDC PMDC-37977, 14-Oct-2026 16:26",
+                    "user_id": 1,
+                    "designation": "Doctor",
+                    "employee_id": 1,
+                    "registration": "PMDC PMDC-37977"
+                  },
+                  "given_at": "2026-10-14T11:26:46.893423+00:00"
+                },
+                {
+                  "education_id": 1,
+                  "patient_id": 1,
+                  "mrn": "MRN-2026-000001",
+                  "patient_name": "Ali Khan",
+                  "encounter_id": 1,
+                  "topic": "Dengue prevention",
+                  "method": "Leaflet",
+                  "material_id": 1,
+                  "material_title": "Dengue: clean standing water",
+                  "given_to": "Both",
+                  "note": null,
+                  "given_by": 1,
+                  "given_by_name": "Dr Ahmed",
+                  "given_by_stamp": {
+                    "at": "2026-10-14T11:26:46.873269+00:00",
+                    "name": "Dr Ahmed",
+                    "text": "Dr Ahmed, Doctor, PMDC PMDC-37977, 14-Oct-2026 16:26",
+                    "user_id": 1,
+                    "designation": "Doctor",
+                    "employee_id": 1,
+                    "registration": "PMDC PMDC-37977"
+                  },
+                  "given_at": "2026-10-14T11:26:46.873269+00:00"
+                }
+              ],
+              "meta": {
+                "server_time": "2026-10-14T11:26:46.916779+00:00"
+              },
+              "request_id": "87fa231565ac4eaf94eaf85af8bccae5"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "NOT_FOUND"
+      ]
+    },
+    {
+      "id": "case:GET /education/materials",
+      "call": "GET /api/v1/education/materials",
+      "summary": "The education materials",
+      "happy_path": {
+        "as_one_of": [
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "pharmacist",
+          "quality_officer",
+          "triage_nurse",
+          "ward_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/education/materials"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "material_id": 1,
+                  "title": "Dengue: clean standing water",
+                  "topic": "Dengue prevention",
+                  "kind": "Leaflet",
+                  "language": "Urdu",
+                  "displayed_at": "Waiting area rack",
+                  "is_active": true,
+                  "row_version": 1
+                }
+              ],
+              "meta": {
+                "server_time": "2026-10-14T11:26:46.582181+00:00"
+              },
+              "request_id": "6bff3115911847a593c56ae7a9bb8feb"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": []
+    }
+  ],
+  "service_cases": [],
+  "delivery_gate": {
+    "required": true,
+    "status": "required",
+    "progress_reporting": {
+      "required": true,
+      "submit": "propose_progress",
+      "verify": "progress_proposals",
+      "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+    },
+    "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+    "compulsory": [
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+        "points": 2
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+        "points": 3
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+        "points": 2
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+        "points": 4
+      }
+    ],
+    "zoom": {
+      "min_pct": 100,
+      "max_pct": 250,
+      "reset_pct": 100,
+      "keys": [
+        "Ctrl + or Ctrl = (zoom in)",
+        "Ctrl - (zoom out)",
+        "Ctrl 0 (reset to 100 %)",
+        "Command on macOS"
+      ],
+      "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+    },
+    "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+    "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+  },
+  "handbook_page": "screens/patient_education",
+  "workspace_guide": "get_handbook_outline('doctor')",
+  "realtime": [],
+  "acceptance_rules": [
+    "A 'Health education' action in the consultation and the patient's chart: topic, method (Verbal, Leaflet, Written instructions, Demonstration, Video), given to (Patient, Attendant, Both), the material (required for a leaflet or a video: GET /education/materials), a note; in a consultation send its encounter_id.",
+    "Saved with the author's stamp and never edited: record a correct entry after a wrong one.",
+    "The patient's list is the patient's record: the read is logged."
+  ],
+  "demo_accounts": "demo_accounts() lists a login per role; sandbox_call runs each case on the DEV server"
+}

@@ -1,0 +1,439 @@
+{
+  "screen": "imaging_quality_setup",
+  "title": "Imaging turnaround, critical findings and policy",
+  "cases": [
+    {
+      "id": "case:GET /imaging/turnaround-targets",
+      "call": "GET /api/v1/imaging/turnaround-targets",
+      "summary": "The documented turnaround of each modality",
+      "happy_path": {
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "lab_admin",
+          "lab_verifier",
+          "owner",
+          "quality_officer",
+          "radiographer",
+          "radiologist"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/imaging/turnaround-targets"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "modality": "CT",
+                  "routine_perform_minutes": 1440,
+                  "routine_report_minutes": 1440,
+                  "emergency_perform_minutes": 60,
+                  "emergency_report_minutes": 60,
+                  "row_version": 1
+                },
+                {
+                  "modality": "Doppler",
+                  "routine_perform_minutes": 1440,
+                  "routine_report_minutes": 120,
+                  "emergency_perform_minutes": 120,
+                  "emergency_report_minutes": 60,
+                  "row_version": 1
+                },
+                {
+                  "modality": "Fluoroscopy",
+                  "routine_perform_minutes": 2880,
+                  "routine_report_minutes": 1440,
+                  "emergency_perform_minutes": 240,
+                  "emergency_report_minutes": 120,
+                  "row_version": 1
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-30T20:03:02.149719+00:00"
+              },
+              "request_id": "5d436aefd6da43faa1b7151306ca5668"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": []
+    },
+    {
+      "id": "case:PUT /imaging/turnaround-targets/{modality}",
+      "call": "PUT /api/v1/imaging/turnaround-targets/{modality}",
+      "summary": "Set a modality's turnaround",
+      "happy_path": {
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "lab_admin",
+          "owner",
+          "radiologist"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/imaging/turnaround-targets/XRay",
+            "body": {
+              "routine_perform_minutes": 120,
+              "routine_report_minutes": 720,
+              "emergency_perform_minutes": 30,
+              "emergency_report_minutes": 45
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "modality": "XRay",
+                "routine_perform_minutes": 120,
+                "routine_report_minutes": 720,
+                "emergency_perform_minutes": 30,
+                "emergency_report_minutes": 45,
+                "row_version": 2
+              },
+              "meta": {
+                "server_time": "2026-09-30T20:03:02.165302+00:00"
+              },
+              "request_id": "c3d65aefc45c45778ce5cf8ba7b8a7a7"
+            }
+          },
+          "errors_seen": [
+            "FORBIDDEN",
+            "VALIDATION_ERROR"
+          ],
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "FORBIDDEN",
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /critical-imaging-findings",
+      "call": "GET /api/v1/critical-imaging-findings",
+      "summary": "The critical imaging findings list",
+      "happy_path": {
+        "as_one_of": [
+          "anaesthetist",
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "lab_admin",
+          "lab_technician",
+          "lab_verifier",
+          "owner",
+          "quality_officer",
+          "radiographer",
+          "radiologist",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/critical-imaging-findings"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "finding_id": 1,
+                  "name": "Tension or large pneumothorax",
+                  "modality": null,
+                  "description": "Chest film or CT: needs decompression now",
+                  "sort_order": 10,
+                  "is_active": true,
+                  "row_version": 1
+                },
+                {
+                  "finding_id": 2,
+                  "name": "Free intraperitoneal air",
+                  "modality": null,
+                  "description": "Pneumoperitoneum without a recent operation: a perforated viscus",
+                  "sort_order": 20,
+                  "is_active": true,
+                  "row_version": 1
+                },
+                {
+                  "finding_id": 3,
+                  "name": "Intracranial haemorrhage",
+                  "modality": "CT",
+                  "description": "Any new extradural, subdural, subarachnoid or intracerebral bleed",
+                  "sort_order": 30,
+                  "is_active": true,
+                  "row_version": 1
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-30T20:03:01.968312+00:00"
+              },
+              "request_id": "f31771b72ce44a06adb1175a824f1513"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "billing_admin",
+          "cashier",
+          "cssd_technician"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": []
+    },
+    {
+      "id": "case:POST /critical-imaging-findings",
+      "call": "POST /api/v1/critical-imaging-findings",
+      "summary": "Add a critical imaging finding",
+      "happy_path": {
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "lab_admin",
+          "owner",
+          "radiologist"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/critical-imaging-findings",
+            "body": {
+              "name": "Retained surgical item",
+              "modality": "XRay"
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "finding_id": 16,
+                "name": "Retained surgical item",
+                "modality": "XRay",
+                "description": null,
+                "sort_order": 100,
+                "is_active": true,
+                "row_version": 1
+              },
+              "meta": {
+                "server_time": "2026-09-30T20:03:02.132813+00:00"
+              },
+              "request_id": "9f00a6ab5deb416aa1bae2f7d7f4d5eb"
+            }
+          },
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:PATCH /critical-imaging-findings/{finding_id}",
+      "call": "PATCH /api/v1/critical-imaging-findings/{finding_id}",
+      "summary": "Change or retire a critical imaging finding",
+      "happy_path": {
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "lab_admin",
+          "owner",
+          "radiologist"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/critical-imaging-findings/16",
+            "body": {
+              "is_active": false,
+              "expected_version": 1
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "finding_id": 16,
+                "name": "Retained surgical item",
+                "modality": "XRay",
+                "description": null,
+                "sort_order": 100,
+                "is_active": false,
+                "row_version": 2
+              },
+              "meta": {
+                "server_time": "2026-09-30T20:03:02.142613+00:00"
+              },
+              "request_id": "1af0ec21aa064ffd9bc859fcb5d3b175"
+            }
+          },
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [],
+      "concurrent_edit": "send a stale expected_version: expect 409 VERSION_CONFLICT, reload and retry"
+    },
+    {
+      "id": "case:GET /diagnostics/imaging-policy/pdf",
+      "call": "GET /api/v1/diagnostics/imaging-policy/pdf",
+      "summary": "The imaging policy and quality assurance plan (PDF)",
+      "happy_path": {
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "lab_admin",
+          "lab_verifier",
+          "owner",
+          "quality_officer",
+          "radiographer",
+          "radiologist"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/diagnostics/imaging-policy/pdf"
+          },
+          "response": {
+            "status": 200,
+            "content_type": "application/pdf",
+            "bytes": 7168
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": []
+    }
+  ],
+  "service_cases": [
+    {
+      "view": "full",
+      "set_up": "GET /establishment answers views.screens[screen_id=imaging_quality_setup].view = full (imaging): stub that answer, or have the DEV server's admin move the service on Facility settings",
+      "expect": "Show it; every action the user's permissions allow."
+    },
+    {
+      "view": "setup",
+      "set_up": "GET /establishment answers views.screens[screen_id=imaging_quality_setup].view = setup (imaging): stub that answer, or have the DEV server's admin move the service on Facility settings",
+      "expect": "Not in the daily menus: reach it from Facility settings (a preview's prerequisites link to it) to set the service up before switching it on."
+    }
+  ],
+  "delivery_gate": {
+    "required": true,
+    "status": "required",
+    "progress_reporting": {
+      "required": true,
+      "submit": "propose_progress",
+      "verify": "progress_proposals",
+      "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+    },
+    "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+    "compulsory": [
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+        "points": 2
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+        "points": 3
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+        "points": 2
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+        "points": 4
+      }
+    ],
+    "zoom": {
+      "min_pct": 100,
+      "max_pct": 250,
+      "reset_pct": 100,
+      "keys": [
+        "Ctrl + or Ctrl = (zoom in)",
+        "Ctrl - (zoom out)",
+        "Ctrl 0 (reset to 100 %)",
+        "Command on macOS"
+      ],
+      "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+    },
+    "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+    "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+  },
+  "handbook_page": "screens/imaging_quality_setup",
+  "workspace_guide": "get_handbook_outline('radiology')",
+  "realtime": [],
+  "acceptance_rules": [
+    "Targets in minutes per modality: order to examination and examination to report, routine and emergency (an emergency target is never longer than the routine one).",
+    "Critical findings: name, modality (empty = any), description; retire with is_active false.",
+    "The imaging policy PDF prints the privileged radiologists, the targets and the findings from these lists.",
+    "Exists for the service imaging (setup): show it as GET /establishment views.screens says for screen_id imaging_quality_setup (full; open_work: without its new work, with the banner \"No new ... from now on\"; records: history and corrections only; setup: only from Facility settings; hidden: in no menu), after login and again on establishment.changed. Never decide it from the profile's category."
+  ],
+  "demo_accounts": "demo_accounts() lists a login per role; sandbox_call runs each case on the DEV server"
+}

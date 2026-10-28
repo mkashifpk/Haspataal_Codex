@@ -53,7 +53,7 @@ export interface ImagingStatusIn {
   pregnancy_note?: string | null;
   /** Completed: the contrast given (agent, dose, route) */
   contrast?: string | null;
-  /** Completed with contrast: the doctor present (PMDC) */
+  /** Completed with contrast: the employee_id of the doctor present, registered with the PMDC (GET /staff/lookup?license_type=PMDC; never a user_id) */
   contrast_doctor_id?: number | null;
 }
 
@@ -107,9 +107,8 @@ export interface ImagingOrderOut {
 }
 
 export interface LinkIn {
-  /** Omit both to auto-find the study by accession number */
+  /** A manual link: the study's Orthanc id as the PACS shows it (5 groups of 8 hex digits). Omit it to find the study by the order's accession number */
   orthanc_study_id?: string | null;
-  study_instance_uid?: string | null;
 }
 
 export interface ImagingOrderLinkedOut {
@@ -306,6 +305,20 @@ export interface ImagingReportFieldsOut {
   order: ImagingOrderDetailOut;
 }
 
+/** One active staff member as a picker shows them (GET /staff/lookup): the facts on their badge and the registration their stamp prints, nothing else. */
+export interface StaffLookupOut {
+  /** The id a form's staff field takes (contrast_doctor_id, employee_id, ...) */
+  employee_id: number;
+  emp_number: string;
+  full_name: string;
+  designation: string;
+  department_name: string | null;
+  /** The council they are registered with (PMDC: a doctor or dentist; PNC: a nurse); null: none */
+  license_type: "PMDC" | "PNC" | "Other" | null;
+  /** As their stamp prints it, e.g. "PMDC 12345-P"; null: no number on file */
+  registration: string | null;
+}
+
 /** Radiographer worklist (STAT first, then by due time) — GET /api/v1/imaging/worklist (who may call: holders of imaging.order.update). */
 export function worklistImaging(query?: { status?: "Ordered" | "Scheduled" | "InProgress" | "Completed" | null; modality?: "XRay" | "MRI" | "CT" | "Ultrasound" | "Doppler" | "Mammography" | "Fluoroscopy" | "Other" | null }): Promise<ImagingWorklistItemOut[]> {
   return api<ImagingWorklistItemOut[]>("GET", withQuery(`/imaging/worklist`, query), undefined);
@@ -351,3 +364,7 @@ export function reportPdfImagingOrders(order_id: number): Promise<unknown> {
   return api<unknown>("GET", `/imaging/orders/${order_id}/report/pdf`, undefined);
 }
 
+/** Find a staff member for a form (badge facts only) — GET /api/v1/staff/lookup (who may call: any logged-in user). */
+export function lookupStaff(query: { q: string; department_id?: number | null; license_type?: "PMDC" | "PNC" | null; limit?: number }): Promise<StaffLookupOut[]> {
+  return api<StaffLookupOut[]>("GET", withQuery(`/staff/lookup`, query), undefined);
+}

@@ -1,0 +1,2862 @@
+{
+  "screen_id": "support_roster",
+  "contract_fingerprint": "58db76bf7d59ef6d9870",
+  "knowledge_revision": "51c8fe699d47d046",
+  "delivery_gate": {
+    "required": true,
+    "status": "required",
+    "progress_reporting": {
+      "required": true,
+      "submit": "propose_progress",
+      "verify": "progress_proposals",
+      "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+    },
+    "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+    "compulsory": [
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+        "points": 2
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+        "points": 3
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+        "points": 2
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+        "points": 4
+      }
+    ],
+    "zoom": {
+      "min_pct": 100,
+      "max_pct": 250,
+      "reset_pct": 100,
+      "keys": [
+        "Ctrl + or Ctrl = (zoom in)",
+        "Ctrl - (zoom out)",
+        "Ctrl 0 (reset to 100 %)",
+        "Command on macOS"
+      ],
+      "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+    },
+    "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+    "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+  },
+  "screen": {
+    "id": "support_roster",
+    "workspace": "ops_admin",
+    "title": "Support-staff duty roster & roll call",
+    "purpose": "Plan duties by shift: sweepers, janitors and guards onto zones, wards and gates.",
+    "workflow": "§2.6, §6.4, §6.7, §8.1",
+    "rule_objects": [
+      {
+        "id": "rule:50af6ba770",
+        "text": "Week grid: one row per shift pattern (GET /rosters/staff → shift_patterns), one column per day; drag staff from the left column onto a cell. Save with POST /rosters (all or nothing: on an error, highlight details.entry_index).",
+        "cites": []
+      },
+      {
+        "id": "rule:7ee9e5cda4",
+        "text": "Grey out the days in each person's `leave`; ROSTER_CONFLICT means the person already works an overlapping shift (a night shift runs into the next morning).",
+        "cites": []
+      },
+      {
+        "id": "rule:2e75984ff7",
+        "text": "Mark the public holidays (GET /rosters/staff → holidays): rostering on them is allowed, and rostered staff work as rostered.",
+        "cites": []
+      },
+      {
+        "id": "rule:e255d6b71a",
+        "text": "Edit with PATCH (send row_version as expected_version), never delete: cancel with a reason.",
+        "cites": []
+      },
+      {
+        "id": "rule:cbd240746c",
+        "text": "Past days are read-only unless you are HR (ROSTER_DATE_CLOSED).",
+        "cites": []
+      },
+      {
+        "id": "rule:4ea9d4f624",
+        "text": "The hospital works every day: Sunday is a column like any other (usually with fewer staff), and each person gets their weekly rest day on a different day. Staff on a fixed schedule show their weekly day off (default_weekly_off_days) greyed; rostering them that day makes it a working day.",
+        "cites": []
+      },
+      {
+        "id": "rule:f72ed8bfcb",
+        "text": "'Repeat last week' = POST /rosters/copy; show the `skipped` list with its reasons. Offer 'Repeat, moving everyone's days on' (rotate_days 1): rest days, and Sunday duty, then rotate week by week.",
+        "cites": []
+      },
+      {
+        "id": "rule:fb45bf026f",
+        "text": "Week check panel (GET /rosters/week): NoRestDay in amber (each day beyond the allowance is paid as extra duty), NotRostered in grey; under the grid, a row of counts per day and shift from `days`, so a thin Sunday shows before the week starts.",
+        "cites": []
+      },
+      {
+        "id": "rule:83718fc56e",
+        "text": "Swaps tab: GET /rosters/swaps (Accepted = both colleagues agreed, waiting for you) → Approve, or Reject with a reason. For staff without a login, 'Record swap' (POST /rosters/swaps) when the two agreed in person. You never decide a swap you are part of (SWAP_SELF_APPROVAL). Duties taken over show their swap_id.",
+        "cites": []
+      },
+      {
+        "id": "rule:6e21482f49",
+        "text": "Keep the grid live with the roster.changed event, the swaps tab with roster.swap.updated.",
+        "cites": []
+      },
+      {
+        "id": "rule:28262cb3f6",
+        "text": "Support staff never log in: tell them their duties (print the week), and use roll call where there is no badge station.",
+        "cites": []
+      }
+    ],
+    "related_workflows": [
+      "duty-rosters-and-attendance",
+      "facility-and-it",
+      "hr-and-payroll",
+      "inpatient-and-discharge"
+    ]
+  },
+  "rules_in_force": null,
+  "endpoints": [
+    {
+      "endpoint": "GET /rosters",
+      "summary": "Roster entries for a date range (planner grid, a week by default)",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "roster.manage.all",
+          "roster.manage.nursing",
+          "roster.manage.support",
+          "roster.view.all"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of roster.manage.all or roster.manage.nursing or roster.manage.support or roster.view.all",
+        "roles_allowed": [
+          "clinic_director",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "hr_admin",
+          "ops_admin",
+          "owner"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "FORBIDDEN",
+          "http_status": 403,
+          "message": "You do not have permission to do this.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "any_of",
+            "required"
+          ],
+          "details_from": "POST /api/v1/admin/departments"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "date_from",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Date From"
+          }
+        },
+        {
+          "name": "date_to",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Date To"
+          }
+        },
+        {
+          "name": "ward_id",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ward Id"
+          }
+        },
+        {
+          "name": "department_id",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Department Id"
+          }
+        },
+        {
+          "name": "employee_id",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Employee Id"
+          }
+        },
+        {
+          "name": "staff_category",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "enum": [
+                  "Clinical",
+                  "Nursing",
+                  "Administrative",
+                  "Technical",
+                  "SupportZeroInterface",
+                  "Visiting"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Staff Category"
+          }
+        },
+        {
+          "name": "include_cancelled",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "type": "boolean",
+            "default": false,
+            "title": "Include Cancelled"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_RosterRangeOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "object",
+        "paging": [],
+        "search": [],
+        "filters": [
+          {
+            "name": "date_from",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "date_to",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "ward_id",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "department_id",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "employee_id",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "staff_category",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "Clinical",
+              "Nursing",
+              "Administrative",
+              "Technical",
+              "SupportZeroInterface",
+              "Visiting"
+            ]
+          },
+          {
+            "name": "include_cancelled",
+            "required": false,
+            "type": "boolean",
+            "default": false
+          }
+        ],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "GET /rosters/staff",
+      "summary": "Staff I may roster, with default shift and approved leave in the range",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "roster.manage.all",
+          "roster.manage.nursing",
+          "roster.manage.support"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of roster.manage.all or roster.manage.nursing or roster.manage.support",
+        "roles_allowed": [
+          "head_nurse",
+          "hr_admin",
+          "ops_admin"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [],
+      "parameters": [
+        {
+          "name": "date_from",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Date From"
+          }
+        },
+        {
+          "name": "date_to",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Date To"
+          }
+        },
+        {
+          "name": "staff_category",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "enum": [
+                  "Clinical",
+                  "Nursing",
+                  "Administrative",
+                  "Technical",
+                  "SupportZeroInterface",
+                  "Visiting"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Staff Category"
+          }
+        },
+        {
+          "name": "department_id",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Department Id"
+          }
+        },
+        {
+          "name": "q",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Q"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_RosterPlannerOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "object",
+        "paging": [],
+        "search": [
+          {
+            "name": "q",
+            "required": false,
+            "type": "string",
+            "min_length": 1
+          }
+        ],
+        "filters": [
+          {
+            "name": "date_from",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "date_to",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "staff_category",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "Clinical",
+              "Nursing",
+              "Administrative",
+              "Technical",
+              "SupportZeroInterface",
+              "Visiting"
+            ]
+          },
+          {
+            "name": "department_id",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "POST /rosters",
+      "summary": "Roster one or many duties (all or nothing)",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "roster.manage.all",
+          "roster.manage.nursing",
+          "roster.manage.support"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of roster.manage.all or roster.manage.nursing or roster.manage.support",
+        "roles_allowed": [
+          "head_nurse",
+          "hr_admin",
+          "ops_admin"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": true,
+      "errors": [
+        {
+          "code": "REFERENCE_NOT_FOUND",
+          "http_status": 422,
+          "message": "A referenced record does not exist.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "ward_id"
+          ],
+          "details_from": "POST /api/v1/pharmacy/storage-checks"
+        },
+        {
+          "code": "ROSTER_CONFLICT",
+          "http_status": 409,
+          "message": "This duty overlaps another duty of the same employee.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "employee_id",
+            "entry_index",
+            "roster_date",
+            "roster_id",
+            "shift_name"
+          ],
+          "details_from": "POST /api/v1/rosters"
+        },
+        {
+          "code": "ROSTER_DATE_CLOSED",
+          "http_status": 409,
+          "message": "Rosters of past days can only be changed by HR.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "entry_index",
+            "roster_date"
+          ],
+          "details_from": "POST /api/v1/rosters"
+        },
+        {
+          "code": "ROSTER_EMPLOYEE_INACTIVE",
+          "http_status": 409,
+          "message": "Only active staff can be rostered.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "employee_id",
+            "entry_index",
+            "status"
+          ],
+          "details_from": "POST /api/v1/rosters"
+        },
+        {
+          "code": "ROSTER_ON_LEAVE",
+          "http_status": 409,
+          "message": "The employee is on approved leave that day.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "employee_id",
+            "entry_index",
+            "roster_date"
+          ],
+          "details_from": "POST /api/v1/rosters"
+        },
+        {
+          "code": "ROSTER_OUT_OF_SCOPE",
+          "http_status": 403,
+          "message": "You may not roster this employee (outside your staff scope).",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "employee_id",
+            "entry_index",
+            "staff_category"
+          ],
+          "details_from": "POST /api/v1/rosters"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "Idempotency-Key",
+          "in": "header",
+          "required": false,
+          "description": "Unique per logical action; retries return the first result",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Unique per logical action; retries return the first result",
+            "title": "Idempotency-Key"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/EntriesIn"
+            }
+          }
+        }
+      },
+      "responses": {
+        "201": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_RosterEntryOut__"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "application/json",
+        "model": "EntriesIn",
+        "fields": [
+          {
+            "pointer": "/entries",
+            "type": "array",
+            "required": true,
+            "nullable": false,
+            "items": "EntryIn"
+          }
+        ],
+        "cross_field_rules": {},
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "idempotency_key",
+        "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+        "reconcile_with": "GET /rosters",
+        "emits_events": [
+          "notification.created",
+          "roster.changed"
+        ],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "PATCH /rosters/{roster_id}",
+      "summary": "Change a duty (shift, date, place, beds, on-call, notes)",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "roster.manage.all",
+          "roster.manage.nursing",
+          "roster.manage.support"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of roster.manage.all or roster.manage.nursing or roster.manage.support",
+        "roles_allowed": [
+          "head_nurse",
+          "hr_admin",
+          "ops_admin"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "REFERENCE_NOT_FOUND",
+          "http_status": 422,
+          "message": "A referenced record does not exist.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "ward_id"
+          ],
+          "details_from": "POST /api/v1/pharmacy/storage-checks"
+        },
+        {
+          "code": "ROSTER_DATE_CLOSED",
+          "http_status": 409,
+          "message": "Rosters of past days can only be changed by HR.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "entry_index",
+            "roster_date"
+          ],
+          "details_from": "POST /api/v1/rosters"
+        },
+        {
+          "code": "ROSTER_ENTRY_CANCELLED",
+          "http_status": 409,
+          "message": "This duty was cancelled: create a new one.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "POST /api/v1/rosters/{roster_id}/cancel"
+        },
+        {
+          "code": "VERSION_CONFLICT",
+          "http_status": 409,
+          "message": "The record was changed by someone else; reload and try again.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "current_version",
+            "expected_version"
+          ],
+          "details_from": "PATCH /api/v1/finance/service-catalog/{service_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "roster_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Roster Id"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/EntryPatch"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_RosterEntryOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "application/json",
+        "model": "EntryPatch",
+        "fields": [
+          {
+            "pointer": "/expected_version",
+            "type": "integer",
+            "required": false,
+            "nullable": true,
+            "description": "row_version you loaded (optimistic concurrency)"
+          },
+          {
+            "pointer": "/roster_date",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "format": "date"
+          },
+          {
+            "pointer": "/shift_pattern_id",
+            "type": "integer",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "pointer": "/duty_area",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "enum": [
+              "Ward",
+              "Department",
+              "Emergency",
+              "OT",
+              "Facility",
+              "Other"
+            ]
+          },
+          {
+            "pointer": "/ward_id",
+            "type": "integer",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "pointer": "/department_id",
+            "type": "integer",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "pointer": "/zone_label",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "max_length": 100
+          },
+          {
+            "pointer": "/bed_ids",
+            "type": "array",
+            "required": false,
+            "nullable": true,
+            "items": "integer"
+          },
+          {
+            "pointer": "/is_on_call",
+            "type": "boolean",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "pointer": "/notes",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "max_length": 500
+          }
+        ],
+        "cross_field_rules": {},
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "version_check",
+        "on_lost_answer": "Send expected_version from the record you edited. If the first call advances that version, a repeat with the old version is refused (VERSION_CONFLICT or a final-state error). Omitting this optional field gives no version protection. Re-read the record and let the user decide; never retry automatically.",
+        "reconcile_with": "GET /rosters",
+        "emits_events": [
+          "notification.created",
+          "roster.changed"
+        ],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "POST /rosters/{roster_id}/cancel",
+      "summary": "Cancel a duty (reason kept; never deleted)",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "roster.manage.all",
+          "roster.manage.nursing",
+          "roster.manage.support"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of roster.manage.all or roster.manage.nursing or roster.manage.support",
+        "roles_allowed": [
+          "head_nurse",
+          "hr_admin",
+          "ops_admin"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "ROSTER_DATE_CLOSED",
+          "http_status": 409,
+          "message": "Rosters of past days can only be changed by HR.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "entry_index",
+            "roster_date"
+          ],
+          "details_from": "POST /api/v1/rosters"
+        },
+        {
+          "code": "ROSTER_ENTRY_CANCELLED",
+          "http_status": 409,
+          "message": "This duty was cancelled: create a new one.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "POST /api/v1/rosters/{roster_id}/cancel"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "roster_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Roster Id"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/RosterReasonIn"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_RosterEntryOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "application/json",
+        "model": "RosterReasonIn",
+        "fields": [
+          {
+            "pointer": "/reason",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "min_length": 3,
+            "max_length": 500
+          }
+        ],
+        "cross_field_rules": {},
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "state_guard",
+        "on_lost_answer": "A repeat is refused with ROSTER_ENTRY_CANCELLED: the duty is cancelled already. The first call may have succeeded; this error does not replay its result. Never retry automatically; re-read the record, then offer the action again only if it is still needed.",
+        "reconcile_with": "GET /rosters",
+        "refused_with": "ROSTER_ENTRY_CANCELLED",
+        "emits_events": [
+          "notification.created",
+          "roster.changed"
+        ],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "POST /rosters/copy",
+      "summary": "Repeat a period (e.g. last week) from a later date",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "roster.manage.all",
+          "roster.manage.nursing",
+          "roster.manage.support"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of roster.manage.all or roster.manage.nursing or roster.manage.support",
+        "roles_allowed": [
+          "head_nurse",
+          "hr_admin",
+          "ops_admin"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": true,
+      "errors": [
+        {
+          "code": "ROSTER_DATE_CLOSED",
+          "http_status": 409,
+          "message": "Rosters of past days can only be changed by HR.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "entry_index",
+            "roster_date"
+          ],
+          "details_from": "POST /api/v1/rosters"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "Idempotency-Key",
+          "in": "header",
+          "required": false,
+          "description": "Unique per logical action; retries return the first result",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Unique per logical action; retries return the first result",
+            "title": "Idempotency-Key"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/CopyIn"
+            }
+          }
+        }
+      },
+      "responses": {
+        "201": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_RosterCopyOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "application/json",
+        "model": "CopyIn",
+        "fields": [
+          {
+            "pointer": "/source_from",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "format": "date"
+          },
+          {
+            "pointer": "/source_to",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "format": "date"
+          },
+          {
+            "pointer": "/target_from",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "format": "date",
+            "description": "Where the copy starts, e.g. next Monday"
+          },
+          {
+            "pointer": "/ward_id",
+            "type": "integer",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "pointer": "/department_id",
+            "type": "integer",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "pointer": "/staff_category",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "enum": [
+              "Clinical",
+              "Nursing",
+              "Administrative",
+              "Technical",
+              "SupportZeroInterface",
+              "Visiting"
+            ]
+          },
+          {
+            "pointer": "/rotate_days",
+            "type": "integer",
+            "required": false,
+            "nullable": false,
+            "default": 0,
+            "minimum": 0,
+            "maximum": 30,
+            "description": "Move everyone's pattern on by this many days within the period, wrapping round: 1 on a week makes each rest day move to the next weekday, so rest days (and Sunday duty) rotate week by week"
+          }
+        ],
+        "cross_field_rules": {
+          "CopyIn": [
+            "source_to must not be before source_from"
+          ]
+        },
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "idempotency_key",
+        "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+        "reconcile_with": "GET /rosters",
+        "emits_events": [
+          "notification.created",
+          "roster.changed"
+        ],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "GET /hr/shift-patterns",
+      "summary": "Shift patterns",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "hr.employee.view",
+          "hr.shift.manage"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of hr.employee.view or hr.shift.manage",
+        "roles_allowed": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "hr_admin",
+          "owner",
+          "super_admin"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_ShiftPatternOut__"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "GET /rosters/week",
+      "summary": "Week check: rest days per person, staff per day and shift",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "roster.manage.all",
+          "roster.manage.nursing",
+          "roster.manage.support",
+          "roster.view.all"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of roster.manage.all or roster.manage.nursing or roster.manage.support or roster.view.all",
+        "roles_allowed": [
+          "clinic_director",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "hr_admin",
+          "ops_admin",
+          "owner"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [],
+      "parameters": [
+        {
+          "name": "week_of",
+          "in": "query",
+          "required": false,
+          "description": "Any day of the week (default: today)",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Any day of the week (default: today)",
+            "title": "Week Of"
+          }
+        },
+        {
+          "name": "ward_id",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ward Id"
+          }
+        },
+        {
+          "name": "department_id",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Department Id"
+          }
+        },
+        {
+          "name": "staff_category",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "enum": [
+                  "Clinical",
+                  "Nursing",
+                  "Administrative",
+                  "Technical",
+                  "SupportZeroInterface",
+                  "Visiting"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Staff Category"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_RosterWeekOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "object",
+        "paging": [],
+        "search": [],
+        "filters": [
+          {
+            "name": "week_of",
+            "required": false,
+            "type": "string",
+            "description": "Any day of the week (default: today)"
+          },
+          {
+            "name": "ward_id",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "department_id",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "staff_category",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "Clinical",
+              "Nursing",
+              "Administrative",
+              "Technical",
+              "SupportZeroInterface",
+              "Visiting"
+            ]
+          }
+        ],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "GET /rosters/swaps",
+      "summary": "Duty swaps of the staff I roster (open ones by default)",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "roster.manage.all",
+          "roster.manage.nursing",
+          "roster.manage.support"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of roster.manage.all or roster.manage.nursing or roster.manage.support",
+        "roles_allowed": [
+          "head_nurse",
+          "hr_admin",
+          "ops_admin"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [],
+      "parameters": [
+        {
+          "name": "status",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "enum": [
+                  "Requested",
+                  "Accepted",
+                  "Approved",
+                  "Declined",
+                  "Rejected",
+                  "Cancelled",
+                  "Expired"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_DutySwapOut__"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [],
+        "search": [],
+        "filters": [
+          {
+            "name": "status",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "Requested",
+              "Accepted",
+              "Approved",
+              "Declined",
+              "Rejected",
+              "Cancelled",
+              "Expired"
+            ]
+          }
+        ],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "POST /rosters/swaps",
+      "summary": "Record a swap agreed on the ward (staff without a login)",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "roster.manage.all",
+          "roster.manage.nursing",
+          "roster.manage.support"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of roster.manage.all or roster.manage.nursing or roster.manage.support",
+        "roles_allowed": [
+          "head_nurse",
+          "hr_admin",
+          "ops_admin"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": true,
+      "errors": [
+        {
+          "code": "ROSTER_CONFLICT",
+          "http_status": 409,
+          "message": "This duty overlaps another duty of the same employee.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "employee_id",
+            "entry_index",
+            "roster_date",
+            "roster_id",
+            "shift_name"
+          ],
+          "details_from": "POST /api/v1/rosters"
+        },
+        {
+          "code": "ROSTER_ON_LEAVE",
+          "http_status": 409,
+          "message": "The employee is on approved leave that day.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "employee_id",
+            "entry_index",
+            "roster_date"
+          ],
+          "details_from": "POST /api/v1/rosters"
+        },
+        {
+          "code": "ROSTER_OUT_OF_SCOPE",
+          "http_status": 403,
+          "message": "You may not roster this employee (outside your staff scope).",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "employee_id",
+            "entry_index",
+            "staff_category"
+          ],
+          "details_from": "POST /api/v1/rosters"
+        },
+        {
+          "code": "SWAP_COLLEAGUE_INELIGIBLE",
+          "http_status": 409,
+          "message": "Choose an active colleague of the same staff category.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "covering_employee_id",
+            "reason"
+          ],
+          "details_from": "POST /api/v1/self/roster/swaps"
+        },
+        {
+          "code": "SWAP_DUTY_STARTED",
+          "http_status": 409,
+          "message": "A duty is swapped before it starts.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "roster_date",
+            "roster_id"
+          ],
+          "details_from": "POST /api/v1/self/roster/swaps"
+        },
+        {
+          "code": "SWAP_EXISTS",
+          "http_status": 409,
+          "message": "This duty is already in an open swap request.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "roster_id"
+          ],
+          "details_from": "POST /api/v1/self/roster/swaps"
+        },
+        {
+          "code": "SWAP_SELF_APPROVAL",
+          "http_status": 403,
+          "message": "Neither of the two colleagues can approve their own duty swap.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "POST /api/v1/rosters/swaps"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "Idempotency-Key",
+          "in": "header",
+          "required": false,
+          "description": "Unique per logical action; retries return the first result",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Unique per logical action; retries return the first result",
+            "title": "Idempotency-Key"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/SwapIn"
+            }
+          }
+        }
+      },
+      "responses": {
+        "201": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_DutySwapOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "application/json",
+        "model": "SwapIn",
+        "fields": [
+          {
+            "pointer": "/roster_id",
+            "type": "integer",
+            "required": true,
+            "nullable": false,
+            "description": "The duty to be worked by the colleague"
+          },
+          {
+            "pointer": "/covering_employee_id",
+            "type": "integer",
+            "required": true,
+            "nullable": false,
+            "description": "The colleague (same staff category): GET /self/roster/swap-options"
+          },
+          {
+            "pointer": "/return_roster_id",
+            "type": "integer",
+            "required": false,
+            "nullable": true,
+            "description": "For a swap: the colleague's duty the requester works in return; omit for a cover"
+          },
+          {
+            "pointer": "/reason",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "min_length": 3,
+            "max_length": 500
+          }
+        ],
+        "cross_field_rules": {},
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "idempotency_key",
+        "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+        "reconcile_with": "GET /rosters/swaps",
+        "emits_events": [
+          "roster.changed",
+          "roster.swap.updated"
+        ],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "POST /rosters/swaps/{swap_id}/approve",
+      "summary": "Approve a duty swap",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "roster.manage.all",
+          "roster.manage.nursing",
+          "roster.manage.support"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of roster.manage.all or roster.manage.nursing or roster.manage.support",
+        "roles_allowed": [
+          "head_nurse",
+          "hr_admin",
+          "ops_admin"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "ROSTER_OUT_OF_SCOPE",
+          "http_status": 403,
+          "message": "You may not roster this employee (outside your staff scope).",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "employee_id",
+            "entry_index",
+            "staff_category"
+          ],
+          "details_from": "POST /api/v1/rosters"
+        },
+        {
+          "code": "SWAP_DUTY_STARTED",
+          "http_status": 409,
+          "message": "A duty is swapped before it starts.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "roster_date",
+            "roster_id"
+          ],
+          "details_from": "POST /api/v1/self/roster/swaps"
+        },
+        {
+          "code": "SWAP_SELF_APPROVAL",
+          "http_status": 403,
+          "message": "Neither of the two colleagues can approve their own duty swap.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "POST /api/v1/rosters/swaps"
+        },
+        {
+          "code": "SWAP_TRANSITION_INVALID",
+          "http_status": 409,
+          "message": "The duty swap cannot move to that state.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "status"
+          ],
+          "details_from": "POST /api/v1/rosters/swaps/{swap_id}/reject"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "swap_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Swap Id"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/SwapNoteIn"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_DutySwapOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "application/json",
+        "model": "SwapNoteIn",
+        "fields": [
+          {
+            "pointer": "/note",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "max_length": 500
+          }
+        ],
+        "cross_field_rules": {},
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "state_guard",
+        "on_lost_answer": "A repeat is refused with SWAP_TRANSITION_INVALID: the swap is decided already. The first call may have succeeded; this error does not replay its result. Never retry automatically; re-read the record, then offer the action again only if it is still needed.",
+        "reconcile_with": "GET /rosters/swaps",
+        "refused_with": "SWAP_TRANSITION_INVALID",
+        "emits_events": [
+          "notification.created",
+          "roster.changed",
+          "roster.swap.updated"
+        ],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "POST /rosters/swaps/{swap_id}/reject",
+      "summary": "Reject a duty swap",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "roster.manage.all",
+          "roster.manage.nursing",
+          "roster.manage.support"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of roster.manage.all or roster.manage.nursing or roster.manage.support",
+        "roles_allowed": [
+          "head_nurse",
+          "hr_admin",
+          "ops_admin"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": true,
+      "errors": [
+        {
+          "code": "ROSTER_OUT_OF_SCOPE",
+          "http_status": 403,
+          "message": "You may not roster this employee (outside your staff scope).",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "employee_id",
+            "entry_index",
+            "staff_category"
+          ],
+          "details_from": "POST /api/v1/rosters"
+        },
+        {
+          "code": "SWAP_SELF_APPROVAL",
+          "http_status": 403,
+          "message": "Neither of the two colleagues can approve their own duty swap.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "POST /api/v1/rosters/swaps"
+        },
+        {
+          "code": "SWAP_TRANSITION_INVALID",
+          "http_status": 409,
+          "message": "The duty swap cannot move to that state.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "status"
+          ],
+          "details_from": "POST /api/v1/rosters/swaps/{swap_id}/reject"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "swap_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Swap Id"
+          }
+        },
+        {
+          "name": "Idempotency-Key",
+          "in": "header",
+          "required": false,
+          "description": "Unique per logical action; retries return the first result",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Unique per logical action; retries return the first result",
+            "title": "Idempotency-Key"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/SwapRejectIn"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_DutySwapOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "application/json",
+        "model": "SwapRejectIn",
+        "fields": [
+          {
+            "pointer": "/note",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "min_length": 3,
+            "max_length": 500,
+            "description": "Why (the two colleagues see it)"
+          }
+        ],
+        "cross_field_rules": {},
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "idempotency_key",
+        "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+        "reconcile_with": "GET /rosters/swaps",
+        "emits_events": [
+          "notification.created",
+          "roster.swap.updated"
+        ],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "GET /rosters/roll-call",
+      "summary": "Roll-call sheet: who is rostered today and who has arrived",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "attendance.roll_call"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of attendance.roll_call",
+        "roles_allowed": [
+          "head_nurse",
+          "hr_admin",
+          "ops_admin"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [],
+      "parameters": [
+        {
+          "name": "roster_date",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Roster Date"
+          }
+        },
+        {
+          "name": "shift_pattern_id",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Shift Pattern Id"
+          }
+        },
+        {
+          "name": "ward_id",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ward Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_RollCallSheetOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "object",
+        "paging": [],
+        "search": [],
+        "filters": [
+          {
+            "name": "roster_date",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "shift_pattern_id",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "ward_id",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "POST /rosters/roll-call",
+      "summary": "Mark rostered staff present (no badge station)",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "attendance.roll_call"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of attendance.roll_call",
+        "roles_allowed": [
+          "head_nurse",
+          "hr_admin",
+          "ops_admin"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": true,
+      "errors": [
+        {
+          "code": "ROLL_CALL_NOT_ROSTERED",
+          "http_status": 409,
+          "message": "The employee is not rostered on that day.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "employee_id",
+            "roster_date"
+          ],
+          "details_from": "POST /api/v1/rosters/roll-call"
+        },
+        {
+          "code": "ROSTER_DATE_CLOSED",
+          "http_status": 409,
+          "message": "Rosters of past days can only be changed by HR.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "entry_index",
+            "roster_date"
+          ],
+          "details_from": "POST /api/v1/rosters"
+        },
+        {
+          "code": "ROSTER_OUT_OF_SCOPE",
+          "http_status": 403,
+          "message": "You may not roster this employee (outside your staff scope).",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "employee_id",
+            "entry_index",
+            "staff_category"
+          ],
+          "details_from": "POST /api/v1/rosters"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "Idempotency-Key",
+          "in": "header",
+          "required": false,
+          "description": "Unique per logical action; retries return the first result",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Unique per logical action; retries return the first result",
+            "title": "Idempotency-Key"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/RollCallIn"
+            }
+          }
+        }
+      },
+      "responses": {
+        "201": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_RollCallOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "application/json",
+        "model": "RollCallIn",
+        "fields": [
+          {
+            "pointer": "/roster_date",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "format": "date"
+          },
+          {
+            "pointer": "/present",
+            "type": "array",
+            "required": true,
+            "nullable": false,
+            "items": "Present"
+          }
+        ],
+        "cross_field_rules": {},
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "idempotency_key",
+        "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+        "reconcile_with": "GET /rosters/roll-call",
+        "emits_events": [
+          "attendance.flagged"
+        ],
+        "prints": false,
+        "related_state_machine": null
+      }
+    }
+  ],
+  "test_plan": {
+    "screen": "support_roster",
+    "title": "Support-staff duty roster & roll call",
+    "cases": [
+      {
+        "id": "case:GET /rosters",
+        "call": "GET /api/v1/rosters",
+        "summary": "Roster entries for a date range (planner grid, a week by default)",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "FORBIDDEN"
+        ],
+        "as_one_of": [
+          "clinic_director",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "hr_admin",
+          "ops_admin",
+          "owner"
+        ]
+      },
+      {
+        "id": "case:GET /rosters/staff",
+        "call": "GET /api/v1/rosters/staff",
+        "summary": "Staff I may roster, with default shift and approved leave in the range",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [],
+        "as_one_of": [
+          "head_nurse",
+          "hr_admin",
+          "ops_admin"
+        ]
+      },
+      {
+        "id": "case:POST /rosters",
+        "call": "POST /api/v1/rosters",
+        "summary": "Roster one or many duties (all or nothing)",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "REFERENCE_NOT_FOUND",
+          "ROSTER_CONFLICT",
+          "ROSTER_DATE_CLOSED",
+          "ROSTER_EMPLOYEE_INACTIVE",
+          "ROSTER_ON_LEAVE",
+          "ROSTER_OUT_OF_SCOPE",
+          "VALIDATION_ERROR"
+        ],
+        "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)",
+        "as_one_of": [
+          "head_nurse",
+          "hr_admin",
+          "ops_admin"
+        ]
+      },
+      {
+        "id": "case:PATCH /rosters/{roster_id}",
+        "call": "PATCH /api/v1/rosters/{roster_id}",
+        "summary": "Change a duty (shift, date, place, beds, on-call, notes)",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "REFERENCE_NOT_FOUND",
+          "ROSTER_DATE_CLOSED",
+          "ROSTER_ENTRY_CANCELLED",
+          "VERSION_CONFLICT"
+        ],
+        "concurrent_edit": "send a stale expected_version: expect 409 VERSION_CONFLICT, reload and retry",
+        "as_one_of": [
+          "head_nurse",
+          "hr_admin",
+          "ops_admin"
+        ]
+      },
+      {
+        "id": "case:POST /rosters/{roster_id}/cancel",
+        "call": "POST /api/v1/rosters/{roster_id}/cancel",
+        "summary": "Cancel a duty (reason kept; never deleted)",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "ROSTER_DATE_CLOSED",
+          "ROSTER_ENTRY_CANCELLED"
+        ],
+        "as_one_of": [
+          "head_nurse",
+          "hr_admin",
+          "ops_admin"
+        ]
+      },
+      {
+        "id": "case:POST /rosters/copy",
+        "call": "POST /api/v1/rosters/copy",
+        "summary": "Repeat a period (e.g. last week) from a later date",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "ROSTER_DATE_CLOSED",
+          "VALIDATION_ERROR"
+        ],
+        "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)",
+        "as_one_of": [
+          "head_nurse",
+          "hr_admin",
+          "ops_admin"
+        ]
+      },
+      {
+        "id": "case:GET /hr/shift-patterns",
+        "call": "GET /api/v1/hr/shift-patterns",
+        "summary": "Shift patterns",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [],
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "hr_admin",
+          "owner",
+          "super_admin"
+        ]
+      },
+      {
+        "id": "case:GET /rosters/week",
+        "call": "GET /api/v1/rosters/week",
+        "summary": "Week check: rest days per person, staff per day and shift",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [],
+        "as_one_of": [
+          "clinic_director",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "hr_admin",
+          "ops_admin",
+          "owner"
+        ]
+      },
+      {
+        "id": "case:GET /rosters/swaps",
+        "call": "GET /api/v1/rosters/swaps",
+        "summary": "Duty swaps of the staff I roster (open ones by default)",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [],
+        "as_one_of": [
+          "head_nurse",
+          "hr_admin",
+          "ops_admin"
+        ]
+      },
+      {
+        "id": "case:POST /rosters/swaps",
+        "call": "POST /api/v1/rosters/swaps",
+        "summary": "Record a swap agreed on the ward (staff without a login)",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "ROSTER_CONFLICT",
+          "ROSTER_ON_LEAVE",
+          "ROSTER_OUT_OF_SCOPE",
+          "SWAP_COLLEAGUE_INELIGIBLE",
+          "SWAP_DUTY_STARTED",
+          "SWAP_EXISTS",
+          "SWAP_SELF_APPROVAL"
+        ],
+        "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)",
+        "as_one_of": [
+          "head_nurse",
+          "hr_admin",
+          "ops_admin"
+        ]
+      },
+      {
+        "id": "case:POST /rosters/swaps/{swap_id}/approve",
+        "call": "POST /api/v1/rosters/swaps/{swap_id}/approve",
+        "summary": "Approve a duty swap",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "ROSTER_OUT_OF_SCOPE",
+          "SWAP_DUTY_STARTED",
+          "SWAP_SELF_APPROVAL"
+        ],
+        "as_one_of": [
+          "head_nurse",
+          "hr_admin",
+          "ops_admin"
+        ]
+      },
+      {
+        "id": "case:POST /rosters/swaps/{swap_id}/reject",
+        "call": "POST /api/v1/rosters/swaps/{swap_id}/reject",
+        "summary": "Reject a duty swap",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "ROSTER_OUT_OF_SCOPE",
+          "SWAP_SELF_APPROVAL",
+          "SWAP_TRANSITION_INVALID"
+        ],
+        "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)",
+        "as_one_of": [
+          "head_nurse",
+          "hr_admin",
+          "ops_admin"
+        ]
+      },
+      {
+        "id": "case:GET /rosters/roll-call",
+        "call": "GET /api/v1/rosters/roll-call",
+        "summary": "Roll-call sheet: who is rostered today and who has arrived",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [],
+        "as_one_of": [
+          "head_nurse",
+          "hr_admin",
+          "ops_admin"
+        ]
+      },
+      {
+        "id": "case:POST /rosters/roll-call",
+        "call": "POST /api/v1/rosters/roll-call",
+        "summary": "Mark rostered staff present (no badge station)",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "ROLL_CALL_NOT_ROSTERED",
+          "ROSTER_DATE_CLOSED",
+          "ROSTER_OUT_OF_SCOPE",
+          "VALIDATION_ERROR"
+        ],
+        "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)",
+        "as_one_of": [
+          "head_nurse",
+          "hr_admin",
+          "ops_admin"
+        ]
+      }
+    ],
+    "service_cases": [],
+    "delivery_gate": {
+      "required": true,
+      "status": "required",
+      "progress_reporting": {
+        "required": true,
+        "submit": "propose_progress",
+        "verify": "progress_proposals",
+        "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+      },
+      "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+      "compulsory": [
+        {
+          "id": "q:f1_help",
+          "label": "F1 contextual help",
+          "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+          "points": 2
+        },
+        {
+          "id": "q:role_faq",
+          "label": "Complete role-specific FAQs",
+          "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+          "points": 3
+        },
+        {
+          "id": "q:zoom",
+          "label": "Keyboard zoom: 100-250% only",
+          "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+          "points": 2
+        },
+        {
+          "id": "q:fresh_data",
+          "label": "Human review with newly created data",
+          "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+          "points": 4
+        }
+      ],
+      "zoom": {
+        "min_pct": 100,
+        "max_pct": 250,
+        "reset_pct": 100,
+        "keys": [
+          "Ctrl + or Ctrl = (zoom in)",
+          "Ctrl - (zoom out)",
+          "Ctrl 0 (reset to 100 %)",
+          "Command on macOS"
+        ],
+        "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+      },
+      "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+      "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+    },
+    "handbook_page": "screens/support_roster",
+    "workspace_guide": "get_handbook_outline('ops_admin')",
+    "realtime": [
+      {
+        "event": "roster.changed",
+        "check": "the screen refreshes without polling"
+      },
+      {
+        "event": "roster.swap.updated",
+        "check": "the screen refreshes without polling"
+      }
+    ],
+    "acceptance_rules": [
+      "Week grid: one row per shift pattern (GET /rosters/staff → shift_patterns), one column per day; drag staff from the left column onto a cell. Save with POST /rosters (all or nothing: on an error, highlight details.entry_index).",
+      "Grey out the days in each person's `leave`; ROSTER_CONFLICT means the person already works an overlapping shift (a night shift runs into the next morning).",
+      "Mark the public holidays (GET /rosters/staff → holidays): rostering on them is allowed, and rostered staff work as rostered.",
+      "Edit with PATCH (send row_version as expected_version), never delete: cancel with a reason.",
+      "Past days are read-only unless you are HR (ROSTER_DATE_CLOSED).",
+      "The hospital works every day: Sunday is a column like any other (usually with fewer staff), and each person gets their weekly rest day on a different day. Staff on a fixed schedule show their weekly day off (default_weekly_off_days) greyed; rostering them that day makes it a working day.",
+      "'Repeat last week' = POST /rosters/copy; show the `skipped` list with its reasons. Offer 'Repeat, moving everyone's days on' (rotate_days 1): rest days, and Sunday duty, then rotate week by week.",
+      "Week check panel (GET /rosters/week): NoRestDay in amber (each day beyond the allowance is paid as extra duty), NotRostered in grey; under the grid, a row of counts per day and shift from `days`, so a thin Sunday shows before the week starts.",
+      "Swaps tab: GET /rosters/swaps (Accepted = both colleagues agreed, waiting for you) → Approve, or Reject with a reason. For staff without a login, 'Record swap' (POST /rosters/swaps) when the two agreed in person. You never decide a swap you are part of (SWAP_SELF_APPROVAL). Duties taken over show their swap_id.",
+      "Keep the grid live with the roster.changed event, the swaps tab with roster.swap.updated.",
+      "Support staff never log in: tell them their duties (print the week), and use roll call where there is no badge station."
+    ],
+    "demo_accounts": "demo_accounts() lists a login per role; sandbox_call runs each case on the DEV server"
+  },
+  "unknowns": []
+}

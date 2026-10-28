@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { api, call } from "../bridge";
+import { api, call, ApiError } from "../bridge";
 import {
   Empty,
   ErrorBox,
@@ -13,7 +13,7 @@ import type { ClinicalUser } from "../clinical-context";
 import type { EstablishmentOut } from "../generated/facility_profile";
 import * as imaging from "../generated/radiology_worklist";
 import * as patients from "../generated/patient_search";
-import { lookupStaff, type StaffLookupOut } from "../generated/registration";
+import { lookupStaff, type StaffLookupOut } from "../generated/radiology_worklist";
 import { resolvePatientMaster } from "../patient-profile";
 import { formatHospitalTime } from "../hospital-time";
 import { ClinicalWriteFeedback, useClinicalWrite } from "../clinical-write";
@@ -90,22 +90,18 @@ function ReviewFacts({
       add(
         t("Doctor present", "موجود ڈاکٹر"),
         doctor
-          ? `${doctor.full_name} · ${doctor.emp_number}`
+          ? `${doctor.full_name} · ${doctor.registration}`
           : t("Not recorded", "درج نہیں"),
       );
     add(t("Cancellation reason", "منسوخی کی وجہ"), body.reason);
   } else {
     add(
       t("Study lookup method", "مطالعہ تلاش کا طریقہ"),
-      body.orthanc_study_id || body.study_instance_uid
+      body.orthanc_study_id
         ? t("Use actual PACS identifiers", "اصل پیکس نمبر استعمال")
         : t("Find by this accession", "اسی ایکسیشن سے تلاش"),
     );
     add(t("Orthanc study ID", "آرتھینک مطالعہ نمبر"), body.orthanc_study_id);
-    add(
-      t("DICOM Study Instance UID", "ڈائکوم مطالعہ شناخت"),
-      body.study_instance_uid,
-    );
   }
   return (
     <dl className="details">
@@ -264,6 +260,7 @@ export function RadiologyWorklist({
   const locked = write.blocked || printing,
     selected = useRef({ id, patientId: order?.patient_id });
   selected.current = { id, patientId: order?.patient_id };
+  const noPacs = write.error instanceof ApiError && write.error.response.error?.code === "PACS_NOT_CONFIGURED";
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout> | undefined;
     const refreshList = () => {
@@ -1348,7 +1345,7 @@ export function RadiologyWorklist({
                         setDoctorBusy(true);
                         setError(undefined);
                         setDoctorRows([]);
-                        void lookupStaff({ q: doctorQuery.trim(), limit: 20 })
+                        void lookupStaff({ q: doctorQuery.trim(), license_type: "PMDC", limit: 20 })
                           .then((rows) => {
                             if (epoch === doctorEpoch.current)
                               setDoctorRows(rows);
@@ -1372,14 +1369,14 @@ export function RadiologyWorklist({
                             setDoctorRows([]);
                           }}
                         >
-                          {d.full_name} · {d.designation} · {d.emp_number}
+                          {d.full_name} · {d.registration}
                         </button>
                       </p>
                     ))}
                     {chosenDoctor && (
                       <p>
                         {t("Doctor present", "موجود ڈاکٹر")}:{" "}
-                        {chosenDoctor.full_name} · {chosenDoctor.emp_number}
+                        {chosenDoctor.full_name} · {chosenDoctor.registration}
                       </p>
                     )}
                     <p>
@@ -1448,18 +1445,6 @@ export function RadiologyWorklist({
                         data-help="radiology.link"
                         value={editor.form.orthanc}
                         onChange={(e) => field("orthanc", e.target.value)}
-                      />
-                    </Field>
-                    <Field
-                      label={t(
-                        "DICOM Study Instance UID",
-                        "ڈائکوم مطالعہ شناخت",
-                      )}
-                    >
-                      <input
-                        data-help="radiology.link"
-                        value={editor.form.uid}
-                        onChange={(e) => field("uid", e.target.value)}
                       />
                     </Field>
                   </>
@@ -1561,6 +1546,21 @@ export function RadiologyWorklist({
               setRevision((n) => n + 1);
             }}
           />
+          {noPacs && editor.action === "link" && !locked && imagingActionAllowed(editor.order, editor.order.status === "InProgress" ? "Completed" : "InProgress") && (
+            <button data-help="radiology.link" onClick={async () => {
+              try {
+                const fresh = await imaging.getOrder(editor.order.imaging_order_id);
+                setEditor({ ...editor, order: fresh, action: fresh.status === "InProgress" ? "Completed" : "InProgress" });
+                setReview(undefined);
+                setRevision(n => n + 1);
+                write.clearError();
+              } catch (cause) { setError(cause); }
+            }}>
+              {editor.order.status === "InProgress"
+                ? t("Complete examination without images", "تصاویر کے بغیر معائنہ مکمل کریں")
+                : t("Record examination checks, then complete without images", "معائنہ کی جانچ درج کریں، پھر تصاویر کے بغیر مکمل کریں")}
+            </button>
+          )}
           <div className="actions">
             {!review ? (
               <button

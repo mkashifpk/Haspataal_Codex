@@ -1,7 +1,7 @@
 {
   "screen_id": "radiology_worklist",
-  "contract_fingerprint": "8ad8456c41b87dd0031e",
-  "knowledge_revision": "506a43401a2cda4a",
+  "contract_fingerprint": "58db76bf7d59ef6d9870",
+  "knowledge_revision": "51c8fe699d47d046",
   "delivery_gate": {
     "required": true,
     "status": "required",
@@ -55,7 +55,7 @@
   },
   "ui_quality": {
     "source": "frontend-docs/guides/16-ui-quality.md",
-    "standard_revision": "94b18e703d2ab96f",
+    "standard_revision": "5980e5c3b1817f4e",
     "context": {
       "workspace": "radiology",
       "purpose": "Orders to perform with the checks before the examination; link PACS studies; write reports.",
@@ -168,7 +168,7 @@
           "instruction": "- [ ] Every applicable task and mandatory quality check must pass. A blocker, missing FAQ, broken F1, out-of-bounds\n  zoom or untested fresh-data lifecycle keeps the screen/workspace pending. Partial item acceptance remains possible.\n- [ ] The named human signs the review for this build (its *Sign* step: every question answered or decided by the\n  server, the declaration that the writes with the code are theirs, not their agent's), clears the code from the app,\n  accepts only tested proposal items or reports them manually, and returns failures: the agent reads the signed\n  review's failures and notes (`progress_proposals` → `human_reviews`). Agents cannot start, fill or sign a review, nor\n  approve their own claims. Backend inspection can confirm or withdraw accepted claims; verified points are a subset of\n  completion, never an additional award.\n- [ ] Retest affected tasks after fixes or backend changes; stale evidence does not establish the new build's behavior."
         }
       ],
-      "workspace_checklist": "- [ ] **Create:** for an order made in this review: move it through its stages, link the study, enter the report;\n  outsource one and enter the partner's report; a repeated exposure; a critical finding communication.\n- [ ] **Read:** the worklist and the turnaround.\n- [ ] **Update / correct:** change and retire a critical imaging finding; set a turnaround target.\n- [ ] **Cancel / delete:** cancel an order through its status.\n- [ ] **Hand over:** the doctor sees the linked study (`imaging.study.available`), then the report\n  (`imaging.report.ready`).",
+      "workspace_checklist": "- [ ] **Create:** for an order made in this review: move it through its stages (one with contrast, the doctor present\n  picked from the PMDC doctors of the staff picker), link the study, enter the report; outsource one and enter the\n  partner's report; a repeated exposure; a critical finding communication. On a server without PACS (the vendor's DEV\n  servers, decisions 54) linking says so: complete the examination by its status instead, never with a made-up study.\n- [ ] **Read:** the worklist and the turnaround.\n- [ ] **Update / correct:** change and retire a critical imaging finding; set a turnaround target.\n- [ ] **Cancel / delete:** cancel an order through its status.\n- [ ] **Hand over:** the doctor sees the linked study (`imaging.study.available`, where the server has a PACS), then the\n  report (`imaging.report.ready`).",
       "operations": {
         "create": [],
         "update_or_correct": [],
@@ -250,6 +250,16 @@
         "cites": []
       },
       {
+        "id": "rule:11598b3592",
+        "text": "The doctor present at contrast: pick them with GET /staff/lookup?q=...&license_type=PMDC (only PMDC-registered clinical staff; show full_name and registration) and send that employee_id as contrast_doctor_id. Never a user_id, a number typed by hand or an id taken from another list.",
+        "cites": []
+      },
+      {
+        "id": "rule:d6e6fc26ac",
+        "text": "PACS is optional. link-study answers PACS_NOT_CONFIGURED on a server without PACS: never retry, keep the order as it is, say that images are not linked on this server and let the radiographer complete the examination with status Completed; ORTHANC_UNAVAILABLE (retryable): the PACS did not answer; IMAGING_STUDY_NOT_FOUND: the study has not arrived (the server links it by itself once it does). A manual link sends only the orthanc_study_id copied from the PACS: never a made-up or example id.",
+        "cites": []
+      },
+      {
         "id": "rule:03abdf49b5",
         "text": "Exists for the service imaging (work): show it as GET /establishment views.screens says for screen_id radiology_worklist (full; open_work: without its new work, with the banner \"No new ... from now on\"; records: history and corrections only; setup: only from Facility settings; hidden: in no menu), after login and again on establishment.changed. Never decide it from the profile's category.",
         "cites": []
@@ -257,9 +267,18 @@
     ],
     "related_workflows": [
       "blood-transfusion",
+      "clinical-and-prescriptions",
+      "consent",
       "diagnostic-services",
+      "duty-rosters-and-attendance",
+      "facility-and-it",
+      "incidents-and-sentinel-events",
+      "inpatient-and-discharge",
       "laboratory-and-radiology",
-      "medication-safety"
+      "medication-safety",
+      "opd-reception",
+      "operating-theater",
+      "personnel-records"
     ],
     "service": {
       "services": [
@@ -283,7 +302,7 @@
     "workspace": "radiology",
     "phase": "P3",
     "position": 45,
-    "points": 74,
+    "points": 81,
     "capabilities": [
       "realtime",
       "patient_context",
@@ -389,19 +408,19 @@
     "note": "`forward`: a dependency on a later phase; use the demo data or a scenario (sandbox_scenario) until that screen exists. `ordering: false`: a hand-off or a hint, not a reason to wait."
   },
   "definition_of_done": {
-    "points": 74,
+    "points": 81,
     "items": [
       {
         "id": "ep:GET /imaging/worklist",
         "label": "GET /imaging/worklist",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:POST /imaging/orders/{order_id}/status",
         "label": "POST /imaging/orders/{order_id}/status",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:POST /imaging/orders/{order_id}/link-study",
@@ -413,35 +432,41 @@
         "id": "ep:POST /imaging/orders/{order_id}/report",
         "label": "POST /imaging/orders/{order_id}/report",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:GET /imaging/orders/{order_id}",
         "label": "GET /imaging/orders/{order_id}",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:GET /critical-imaging-findings",
         "label": "GET /critical-imaging-findings",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:GET /wristbands/verify",
         "label": "GET /wristbands/verify",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:GET /imaging/orders/{order_id}/report/print-payload",
         "label": "GET /imaging/orders/{order_id}/report/print-payload",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:GET /imaging/orders/{order_id}/report/pdf",
         "label": "GET /imaging/orders/{order_id}/report/pdf",
+        "points": 3,
+        "claimed": true
+      },
+      {
+        "id": "ep:GET /staff/lookup",
+        "label": "GET /staff/lookup",
         "points": 3,
         "claimed": false
       },
@@ -449,19 +474,19 @@
         "id": "ev:imaging.order.created",
         "label": "imaging.order.created",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ev:critical_result.updated",
         "label": "critical_result.updated",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:aeb7f6b119",
         "label": "Show accession_number prominently — the modality must use it so studies auto-link.",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:696b412419",
@@ -473,7 +498,7 @@
         "id": "rule:5f8f35f44b",
         "label": "Start (status InProgress) = the checks before the examination (MSDS AAC 10, 13): scan the wristband (wristband_code) or TwoIdentifiers, tick site_confirmed after checking the site and side against the order, and when pregnancy_check_needed ask and send pregnancy_status (Pregnant: pregnancy_note with the decision). Missing: PATIENT_IDENTITY_REQUIRED / IMAGING_SAFETY_CHECK_REQUIRED.",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:05eb31e266",
@@ -491,31 +516,43 @@
         "id": "rule:28575452c4",
         "label": "A report is final once entered and carries the reporter's stamp; print it for the patient (report/print-payload).",
         "points": 2,
+        "claimed": true
+      },
+      {
+        "id": "rule:11598b3592",
+        "label": "The doctor present at contrast: pick them with GET /staff/lookup?q=...&license_type=PMDC (only PMDC-registered clinical staff; show full_name and registration) and send that employee_id as contrast_doctor_id. Never a user_id, a number typed by hand or an id taken from another list.",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "rule:d6e6fc26ac",
+        "label": "PACS is optional. link-study answers PACS_NOT_CONFIGURED on a server without PACS: never retry, keep the order as it is, say that images are not linked on this server and let the radiographer complete the examination with status Completed; ORTHANC_UNAVAILABLE (retryable): the PACS did not answer; IMAGING_STUDY_NOT_FOUND: the study has not arrived (the server links it by itself once it does). A manual link sends only the orthanc_study_id copied from the PACS: never a made-up or example id.",
+        "points": 2,
         "claimed": false
       },
       {
         "id": "rule:03abdf49b5",
         "label": "Exists for the service imaging (work): show it as GET /establishment views.screens says for screen_id radiology_worklist (full; open_work: without its new work, with the banner \"No new ... from now on\"; records: history and corrections only; setup: only from Facility settings; hidden: in no menu), after login and again on establishment.changed. Never decide it from the profile's category.",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:states",
         "label": "Loading, empty and error states",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:permissions",
         "label": "Actions by permission",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:writes",
         "label": "Safe writes",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:tested",
@@ -527,7 +564,7 @@
         "id": "q:handbook",
         "label": "Handbook page",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:f1_help",
@@ -950,7 +987,7 @@
             "type": "integer",
             "required": false,
             "nullable": true,
-            "description": "Completed with contrast: the doctor present (PMDC)"
+            "description": "Completed with contrast: the employee_id of the doctor present, registered with the PMDC (GET /staff/lookup?license_type=PMDC; never a user_id)"
           }
         ],
         "cross_field_rules": {},
@@ -994,6 +1031,72 @@
           ],
           "details_fields": [],
           "details_from": "POST /api/v1/imaging/orders/{order_id}/report"
+        },
+        {
+          "code": "IMAGING_STUDY_NOT_FOUND",
+          "http_status": 404,
+          "message": "The PACS has no such study (yet).",
+          "retryable": false,
+          "ui_action": "Say 'not found'; refresh the list.",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "accession_number"
+          ],
+          "details_from": "POST /api/v1/imaging/orders/{order_id}/link-study"
+        },
+        {
+          "code": "NOT_FOUND",
+          "http_status": 404,
+          "message": "The requested resource was not found.",
+          "retryable": false,
+          "ui_action": "Say 'not found'; refresh the list.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "resource"
+          ],
+          "details_from": "PUT /api/v1/admin/printers/{printer_id}"
+        },
+        {
+          "code": "ORTHANC_UNAVAILABLE",
+          "http_status": 503,
+          "message": "The PACS server is unavailable.",
+          "retryable": true,
+          "ui_action": "Banner + automatic retry with back-off.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": null
+        },
+        {
+          "code": "PACS_NOT_CONFIGURED",
+          "http_status": 409,
+          "message": "This server has no PACS (Orthanc) set up, so no study can be linked.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "POST /api/v1/imaging/orders/{order_id}/link-study"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
         }
       ],
       "parameters": [
@@ -1067,13 +1170,8 @@
             "type": "string",
             "required": false,
             "nullable": true,
-            "description": "Omit both to auto-find the study by accession number"
-          },
-          {
-            "pointer": "/study_instance_uid",
-            "type": "string",
-            "required": false,
-            "nullable": true
+            "pattern": "^[0-9a-f]{8}(?:-[0-9a-f]{8}){4}$",
+            "description": "A manual link: the study's Orthanc id as the PACS shows it (5 groups of 8 hex digits). Omit it to find the study by the order's accession number"
           }
         ],
         "cross_field_rules": {},
@@ -1710,7 +1808,22 @@
       },
       "service_gates": [],
       "idempotency_key": false,
-      "errors": [],
+      "errors": [
+        {
+          "code": "IMAGING_REPORT_NOT_READY",
+          "http_status": 409,
+          "message": "The study is not reported yet.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "status"
+          ],
+          "details_from": "GET /api/v1/imaging/orders/{order_id}/report/print-payload"
+        }
+      ],
       "parameters": [
         {
           "name": "order_id",
@@ -1760,6 +1873,177 @@
           "application/octet-stream"
         ]
       }
+    },
+    {
+      "endpoint": "GET /staff/lookup",
+      "summary": "Find a staff member for a form (badge facts only)",
+      "access": {
+        "authentication": "user",
+        "permissions": [],
+        "permissions_mode": "all",
+        "who": "any logged-in user"
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "UNAUTHENTICATED",
+          "http_status": 401,
+          "message": "Authentication is required.",
+          "retryable": false,
+          "ui_action": "Refresh the token once; if that fails return to login.",
+          "source": [
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "GET /api/v1/settings/sections"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "q",
+          "in": "query",
+          "required": true,
+          "description": "Part of the name, or the start of the employee number",
+          "schema": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 80,
+            "description": "Part of the name, or the start of the employee number",
+            "title": "Q"
+          }
+        },
+        {
+          "name": "department_id",
+          "in": "query",
+          "required": false,
+          "description": "Only this department",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Only this department",
+            "title": "Department Id"
+          }
+        },
+        {
+          "name": "license_type",
+          "in": "query",
+          "required": false,
+          "description": "Only clinical staff registered with this council, their number on file: PMDC for a doctor (the doctor present at contrast, a second doctor)",
+          "schema": {
+            "anyOf": [
+              {
+                "enum": [
+                  "PMDC",
+                  "PNC"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Only clinical staff registered with this council, their number on file: PMDC for a doctor (the doctor present at contrast, a second doctor)",
+            "title": "License Type"
+          }
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "maximum": 20,
+            "minimum": 1,
+            "default": 20,
+            "title": "Limit"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_StaffLookupOut__"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [
+          {
+            "name": "limit",
+            "required": false,
+            "type": "integer",
+            "default": 20,
+            "minimum": 1,
+            "maximum": 20
+          }
+        ],
+        "search": [
+          {
+            "name": "q",
+            "required": true,
+            "type": "string",
+            "min_length": 2,
+            "description": "Part of the name, or the start of the employee number"
+          }
+        ],
+        "filters": [
+          {
+            "name": "department_id",
+            "required": false,
+            "type": "integer",
+            "description": "Only this department"
+          },
+          {
+            "name": "license_type",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "PMDC",
+              "PNC"
+            ],
+            "description": "Only clinical staff registered with this council, their number on file: PMDC for a doctor (the doctor present at contrast, a second doctor)"
+          }
+        ],
+        "note": "Lists are bounded by `limit` (no cursor paging): ask for what the screen shows, filter on the server."
+      }
     }
   ],
   "realtime": {
@@ -1781,7 +2065,8 @@
         "refresh": [
           "GET /imaging/worklist",
           "GET /critical-imaging-findings",
-          "GET /wristbands/verify"
+          "GET /wristbands/verify",
+          "GET /staff/lookup"
         ]
       },
       {
@@ -1797,7 +2082,8 @@
         "refresh": [
           "GET /imaging/worklist",
           "GET /critical-imaging-findings",
-          "GET /wristbands/verify"
+          "GET /wristbands/verify",
+          "GET /staff/lookup"
         ]
       }
     ],
@@ -1924,6 +2210,20 @@
     "rule": "Every screen that acts on a patient keeps at least two identifiers (name and MRN, with age or date of birth) and the flags visible; bed and room are location, not identity."
   },
   "value_lists": [
+    {
+      "values": [
+        "PMDC",
+        "PNC",
+        "Other"
+      ],
+      "column": "employees.license_type",
+      "used_at": "GET /staff/lookup[].license_type",
+      "labels": {
+        "PMDC": "PMDC",
+        "PNC": "PNC",
+        "Other": "Other"
+      }
+    },
     {
       "values": [
         "None",
@@ -2254,8 +2554,13 @@
       "IMAGING_REPORTER_NOT_AUTHORIZED": "Imaging is reported by a radiologist registered with the PMDC holding the RadiologyReporting privilege.",
       "IMAGING_REPORT_NOT_READY": "The study is not reported yet.",
       "IMAGING_SAFETY_CHECK_REQUIRED": "A check before or during the examination is missing: the site and side confirmed, the pregnancy question, or the doctor present for contrast.",
+      "IMAGING_STUDY_NOT_FOUND": "The PACS has no such study (yet).",
+      "NOT_FOUND": "The requested resource was not found.",
+      "ORTHANC_UNAVAILABLE": "The PACS server is unavailable.",
+      "PACS_NOT_CONFIGURED": "This server has no PACS (Orthanc) set up, so no study can be linked.",
       "PATIENT_IDENTITY_MISMATCH": "The wristband scanned is not this patient's: stop and check who the patient is.",
       "PATIENT_IDENTITY_REQUIRED": "Identify the patient first: scan the wristband, or confirm two identifiers (name and MRN or date of birth).",
+      "UNAUTHENTICATED": "Authentication is required.",
       "VALIDATION_ERROR": "The request is invalid."
     },
     "wording_quoted_in_rules": [
@@ -2369,7 +2674,12 @@
           "expect": "403 FORBIDDEN"
         },
         "errors_to_handle": [
-          "IMAGING_ORDER_STATE_INVALID"
+          "IMAGING_ORDER_STATE_INVALID",
+          "IMAGING_STUDY_NOT_FOUND",
+          "NOT_FOUND",
+          "ORTHANC_UNAVAILABLE",
+          "PACS_NOT_CONFIGURED",
+          "VALIDATION_ERROR"
         ],
         "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)",
         "as_one_of": [
@@ -2544,7 +2854,9 @@
           ],
           "expect": "403 FORBIDDEN"
         },
-        "errors_to_handle": [],
+        "errors_to_handle": [
+          "IMAGING_REPORT_NOT_READY"
+        ],
         "as_one_of": [
           "anaesthetist",
           "clinical_specialist",
@@ -2552,6 +2864,22 @@
           "radiographer",
           "radiologist",
           "surgeon"
+        ]
+      },
+      {
+        "id": "case:GET /staff/lookup",
+        "call": "GET /api/v1/staff/lookup",
+        "summary": "Find a staff member for a form (badge facts only)",
+        "denied": {
+          "as_one_of": [],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "UNAUTHENTICATED",
+          "VALIDATION_ERROR"
+        ],
+        "as_one_of": [
+          "any logged-in user"
         ]
       }
     ],
@@ -2647,6 +2975,8 @@
       "Complete: with contrast, send contrast (agent, dose, route) and contrast_doctor_id (the PMDC doctor present). A study linked while the examination is in progress completes it.",
       "Report (radiologists only: IMAGING_REPORTER_NOT_AUTHORIZED otherwise): pick a critical finding from GET /critical-imaging-findings (critical_finding_id) and/or describe it (critical_finding_note): the critical results log opens and the doctor is alerted; phone them now and record it (screen critical_results_radiology).",
       "A report is final once entered and carries the reporter's stamp; print it for the patient (report/print-payload).",
+      "The doctor present at contrast: pick them with GET /staff/lookup?q=...&license_type=PMDC (only PMDC-registered clinical staff; show full_name and registration) and send that employee_id as contrast_doctor_id. Never a user_id, a number typed by hand or an id taken from another list.",
+      "PACS is optional. link-study answers PACS_NOT_CONFIGURED on a server without PACS: never retry, keep the order as it is, say that images are not linked on this server and let the radiographer complete the examination with status Completed; ORTHANC_UNAVAILABLE (retryable): the PACS did not answer; IMAGING_STUDY_NOT_FOUND: the study has not arrived (the server links it by itself once it does). A manual link sends only the orthanc_study_id copied from the PACS: never a made-up or example id.",
       "Exists for the service imaging (work): show it as GET /establishment views.screens says for screen_id radiology_worklist (full; open_work: without its new work, with the banner \"No new ... from now on\"; records: history and corrections only; setup: only from Facility settings; hidden: in no menu), after login and again on establishment.changed. Never decide it from the profile's category."
     ],
     "demo_accounts": "demo_accounts() lists a login per role; sandbox_call runs each case on the DEV server"
@@ -2757,6 +3087,15 @@
         ],
         "permissions_mode": "all",
         "access": null
+      },
+      {
+        "id": "radiology_worklist::GET /staff/lookup",
+        "task": "Find a staff member for a form (badge facts only)",
+        "call": "GET /staff/lookup",
+        "is_action": false,
+        "permissions": [],
+        "permissions_mode": "all",
+        "access": "any logged-in user"
       }
     ],
     "rules_to_explain": [
@@ -2766,6 +3105,8 @@
       "Complete: with contrast, send contrast (agent, dose, route) and contrast_doctor_id (the PMDC doctor present). A study linked while the examination is in progress completes it.",
       "Report (radiologists only: IMAGING_REPORTER_NOT_AUTHORIZED otherwise): pick a critical finding from GET /critical-imaging-findings (critical_finding_id) and/or describe it (critical_finding_note): the critical results log opens and the doctor is alerted; phone them now and record it (screen critical_results_radiology).",
       "A report is final once entered and carries the reporter's stamp; print it for the patient (report/print-payload).",
+      "The doctor present at contrast: pick them with GET /staff/lookup?q=...&license_type=PMDC (only PMDC-registered clinical staff; show full_name and registration) and send that employee_id as contrast_doctor_id. Never a user_id, a number typed by hand or an id taken from another list.",
+      "PACS is optional. link-study answers PACS_NOT_CONFIGURED on a server without PACS: never retry, keep the order as it is, say that images are not linked on this server and let the radiographer complete the examination with status Completed; ORTHANC_UNAVAILABLE (retryable): the PACS did not answer; IMAGING_STUDY_NOT_FOUND: the study has not arrived (the server links it by itself once it does). A manual link sends only the orthanc_study_id copied from the PACS: never a made-up or example id.",
       "Exists for the service imaging (work): show it as GET /establishment views.screens says for screen_id radiology_worklist (full; open_work: without its new work, with the banner \"No new ... from now on\"; records: history and corrections only; setup: only from Facility settings; hidden: in no menu), after login and again on establishment.changed. Never decide it from the profile's category."
     ],
     "updates_by_itself_on": [
@@ -2799,6 +3140,26 @@
         "ui_action": "Show field errors from details.fields / the message."
       },
       {
+        "code": "IMAGING_STUDY_NOT_FOUND",
+        "message": "The PACS has no such study (yet).",
+        "ui_action": "Say 'not found'; refresh the list."
+      },
+      {
+        "code": "NOT_FOUND",
+        "message": "The requested resource was not found.",
+        "ui_action": "Say 'not found'; refresh the list."
+      },
+      {
+        "code": "ORTHANC_UNAVAILABLE",
+        "message": "The PACS server is unavailable.",
+        "ui_action": "Banner + automatic retry with back-off."
+      },
+      {
+        "code": "PACS_NOT_CONFIGURED",
+        "message": "This server has no PACS (Orthanc) set up, so no study can be linked.",
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      },
+      {
         "code": "PATIENT_IDENTITY_MISMATCH",
         "message": "The wristband scanned is not this patient's: stop and check who the patient is.",
         "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
@@ -2807,6 +3168,11 @@
         "code": "PATIENT_IDENTITY_REQUIRED",
         "message": "Identify the patient first: scan the wristband, or confirm two identifiers (name and MRN or date of birth).",
         "ui_action": "Show field errors from details.fields / the message."
+      },
+      {
+        "code": "UNAUTHENTICATED",
+        "message": "Authentication is required.",
+        "ui_action": "Refresh the token once; if that fails return to login."
       },
       {
         "code": "VALIDATION_ERROR",
@@ -2879,9 +3245,39 @@
       "recipe": "get_workflow_recipe('blood-transfusion')"
     },
     {
+      "slug": "clinical-and-prescriptions",
+      "title": "Consultation, e-prescriptions & pharmacy dispensing",
+      "recipe": "get_workflow_recipe('clinical-and-prescriptions')"
+    },
+    {
+      "slug": "consent",
+      "title": "Consent (MSDS)",
+      "recipe": "get_workflow_recipe('consent')"
+    },
+    {
       "slug": "diagnostic-services",
       "title": "Diagnostic services quality (MSDS)",
       "recipe": "get_workflow_recipe('diagnostic-services')"
+    },
+    {
+      "slug": "duty-rosters-and-attendance",
+      "title": "Duty rosters, roll call, badges & attendance",
+      "recipe": "get_workflow_recipe('duty-rosters-and-attendance')"
+    },
+    {
+      "slug": "facility-and-it",
+      "title": "Facility operations, badge stations & IT administration",
+      "recipe": "get_workflow_recipe('facility-and-it')"
+    },
+    {
+      "slug": "incidents-and-sentinel-events",
+      "title": "Incidents, sentinel events and the action register (MSDS)",
+      "recipe": "get_workflow_recipe('incidents-and-sentinel-events')"
+    },
+    {
+      "slug": "inpatient-and-discharge",
+      "title": "Admission, beds, nursing & discharge",
+      "recipe": "get_workflow_recipe('inpatient-and-discharge')"
     },
     {
       "slug": "laboratory-and-radiology",
@@ -2892,6 +3288,21 @@
       "slug": "medication-safety",
       "title": "Medication safety (MSDS)",
       "recipe": "get_workflow_recipe('medication-safety')"
+    },
+    {
+      "slug": "opd-reception",
+      "title": "OPD reception, queues & re-routing",
+      "recipe": "get_workflow_recipe('opd-reception')"
+    },
+    {
+      "slug": "operating-theater",
+      "title": "Operating theater",
+      "recipe": "get_workflow_recipe('operating-theater')"
+    },
+    {
+      "slug": "personnel-records",
+      "title": "Personnel records (MSDS)",
+      "recipe": "get_workflow_recipe('personnel-records')"
     }
   ],
   "scenarios": [],
@@ -3152,8 +3563,8 @@
       "request": {
         "path": "/api/v1/imaging/orders/1/link-study",
         "body": {
-          "orthanc_study_id": "s-1",
-          "study_instance_uid": "1.2"
+          "orthanc_study_id": "27f7126f-4f66fb14-03f4081b-f9341db2-53925988",
+          "study_instance_uid": "9.9"
         }
       },
       "response": {
@@ -3162,14 +3573,14 @@
           "data": {
             "imaging_order_id": 1,
             "order_number": "IMG-2026-00001",
-            "accession_number": "AEF50A7A1CEF9",
+            "accession_number": "A6AB1E0E46454",
             "patient_id": 1,
             "ticket_id": 1,
             "admission_id": null,
             "requester_doctor_id": 1,
             "modality": "XRay",
             "body_part": "Chest PA",
-            "clinical_indication": "Cough for 3 weeks",
+            "clinical_indication": null,
             "service_id": 2,
             "price_at_order": 1500,
             "priority": "Routine",
@@ -3183,12 +3594,12 @@
             "pregnancy_status": null,
             "pregnancy_note": null,
             "checked_by": 7,
-            "started_at": "2026-09-30T19:59:54.751251+00:00",
+            "started_at": "2026-10-27T15:50:54.177110+00:00",
             "contrast": null,
             "contrast_doctor_id": null,
-            "completed_at": "2026-09-30T19:59:54.767417+00:00",
-            "orthanc_study_id": "s-1",
-            "study_instance_uid": "1.2",
+            "completed_at": "2026-10-27T15:50:54.323560+00:00",
+            "orthanc_study_id": "27f7126f-4f66fb14-03f4081b-f9341db2-53925988",
+            "study_instance_uid": "1.2.840.99.1",
             "partner_id": null,
             "outsourced_at": null,
             "external_reporter": null,
@@ -3199,16 +3610,16 @@
             "critical_finding_note": null,
             "cancel_reason": null,
             "ordered_by": 1,
-            "ordered_at": "2026-09-30T19:59:54.677771+00:00",
+            "ordered_at": "2026-10-27T15:50:54.098536+00:00",
             "perform_alerted_at": null,
             "report_alerted_at": null,
             "row_version": 3,
-            "viewer_url": null
+            "viewer_url": "http://pacs.hospital.lan:8042/stone-webviewer/index.html?study=1.2.840.99.1"
           },
           "meta": {
-            "server_time": "2026-09-30T19:59:54.772069+00:00"
+            "server_time": "2026-10-27T15:50:54.337176+00:00"
           },
-          "request_id": "715d56956f8d45db93e2e5f6cd741ca4"
+          "request_id": "ab917cfde8694beebd3ba45bbee80bee"
         }
       }
     },
@@ -3379,6 +3790,34 @@
         "status": 200,
         "content_type": "application/pdf",
         "bytes": 2394
+      }
+    },
+    "GET /staff/lookup": {
+      "request": {
+        "path": "/api/v1/staff/lookup",
+        "query": {
+          "q": "sana look"
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": [
+            {
+              "employee_id": 2,
+              "emp_number": "EMP-2026-0002",
+              "full_name": "Sana Lookuptest",
+              "designation": "Officer",
+              "department_name": null,
+              "license_type": "PNC",
+              "registration": "PNC PNC-8403"
+            }
+          ],
+          "meta": {
+            "server_time": "2026-10-27T15:29:53.668901+00:00"
+          },
+          "request_id": "4e2ee3a40faa41c195bc2aa08edaa30b"
+        }
       }
     }
   },
@@ -3682,6 +4121,31 @@
         "request_id"
       ],
       "title": "Envelope[list[ImagingWorklistItemOut]]"
+    },
+    "Envelope_list_StaffLookupOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/StaffLookupOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[StaffLookupOut]]"
     },
     "HTTPValidationError": {
       "properties": {
@@ -5600,7 +6064,7 @@
             }
           ],
           "title": "Contrast Doctor Id",
-          "description": "Completed with contrast: the doctor present (PMDC)"
+          "description": "Completed with contrast: the employee_id of the doctor present, registered with the PMDC (GET /staff/lookup?license_type=PMDC; never a user_id)"
         }
       },
       "type": "object",
@@ -5838,25 +6302,15 @@
         "orthanc_study_id": {
           "anyOf": [
             {
-              "type": "string"
+              "type": "string",
+              "pattern": "^[0-9a-f]{8}(?:-[0-9a-f]{8}){4}$"
             },
             {
               "type": "null"
             }
           ],
           "title": "Orthanc Study Id",
-          "description": "Omit both to auto-find the study by accession number"
-        },
-        "study_instance_uid": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "title": "Study Instance Uid"
+          "description": "A manual link: the study's Orthanc id as the PACS shows it (5 groups of 8 hex digits). Omit it to find the study by the order's accession number"
         }
       },
       "type": "object",
@@ -6112,6 +6566,79 @@
         "report_text"
       ],
       "title": "ReportIn"
+    },
+    "StaffLookupOut": {
+      "properties": {
+        "employee_id": {
+          "type": "integer",
+          "title": "Employee Id",
+          "description": "The id a form's staff field takes (contrast_doctor_id, employee_id, ...)"
+        },
+        "emp_number": {
+          "type": "string",
+          "title": "Emp Number"
+        },
+        "full_name": {
+          "type": "string",
+          "title": "Full Name"
+        },
+        "designation": {
+          "type": "string",
+          "title": "Designation"
+        },
+        "department_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Department Name"
+        },
+        "license_type": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "PMDC",
+                "PNC",
+                "Other"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "License Type",
+          "description": "The council they are registered with (PMDC: a doctor or dentist; PNC: a nurse); null: none"
+        },
+        "registration": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Registration",
+          "description": "As their stamp prints it, e.g. \"PMDC 12345-P\"; null: no number on file"
+        }
+      },
+      "type": "object",
+      "required": [
+        "employee_id",
+        "emp_number",
+        "full_name",
+        "designation",
+        "department_name",
+        "license_type",
+        "registration"
+      ],
+      "title": "StaffLookupOut",
+      "description": "One active staff member as a picker shows them (GET /staff/lookup): the facts on their badge and the registration\ntheir stamp prints, nothing else."
     },
     "ValidationError": {
       "properties": {
