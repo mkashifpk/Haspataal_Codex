@@ -1,0 +1,10 @@
+const escape=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
+function assertWristband(p,id,mrn){
+ if(!Number.isSafeInteger(id)||id<1||p?.document_type!=='wristband'||p.printer_role!=='label'||p.fields?.wristband_id!==id||p.fields.mrn!==mrn||!p.fields.patient_name||!p.barcode_svg||!p.qr_svg||!Number.isFinite(p.paper_width_mm)||p.paper_width_mm<25||p.paper_width_mm>210)throw Error('The wristband print payload does not match this patient and band.');
+ return p.fields;
+}
+function wristbandHtml(p,font){
+ const f=assertWristband(p,p.fields?.wristband_id,p.fields?.mrn),img=svg=>`<img src="data:image/svg+xml;base64,${Buffer.from(svg).toString('base64')}" />`;
+ return `<!doctype html><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data:; style-src 'unsafe-inline'; font-src data:"><style>@font-face{font-family:Urdu;src:url(data:font/woff2;base64,${font})}@page{size:${p.paper_width_mm}mm auto;margin:2mm}body{width:${p.paper_width_mm-4}mm;margin:0;background:white;color:black;font:10px Urdu,sans-serif;overflow-wrap:anywhere;line-height:2.2}bdi{unicode-bidi:isolate}h1{font: bold 13px Urdu,sans-serif;margin:1mm 0}.allergy{border:2px solid #a00000;color:#a00000;font-weight:bold;padding:1mm}img{display:block;max-width:100%;margin:1mm auto}p{margin:1mm 0}</style><strong>${escape(f.hospital_name)}</strong><h1 dir="auto">${escape(f.patient_name)}</h1><p dir="auto">${escape(f.father_or_husband_name)}</p><bdi>${escape(f.mrn)}</bdi><p>${escape(f.age)} · ${escape(f.gender)} · ${escape(f.dob)}</p><p><bdi>${escape(f.admission_number||f.er_number)}</bdi></p><p dir="auto">${escape(f.ward_name)} ${escape(f.bed_label)}</p>${f.allergies?`<p class="allergy" dir="auto">ALLERGIES / حساسیت: ${escape(f.allergies)}</p>`:''}${f.blood_group?`<p>${escape(f.blood_group)}</p>`:''}${img(p.barcode_svg)}${img(p.qr_svg)}<small>${escape(f.issued_at)}</small>`;
+}
+module.exports={assertWristband,wristbandHtml};

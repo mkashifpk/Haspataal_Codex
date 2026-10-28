@@ -960,6 +960,21 @@ ipcMain.handle("terminal", async (event, action, args = {}) => {
       if (played) shell.beep();
       return {ok:true,data:{played}};
     }
+    if (action === "print-wristband") {
+      if(!Number.isSafeInteger(args.wristbandId)||args.wristbandId<1||!Number.isSafeInteger(args.patientId)||args.patientId<1||typeof args.mrn!=='string')throw Error('Invalid wristband reference');
+      const actor=auth?.user.user_id,workspace=windows.get(win.id);
+      const [history,payload,est]=await Promise.all([api('GET','/wristbands?patient_id='+args.patientId,undefined,workspace),api('GET','/wristbands/'+args.wristbandId+'/print-payload',undefined,workspace),api('GET','/establishment',undefined,workspace)]);
+      if(!history.ok)return history;if(!payload.ok)return payload;if(!est.ok)return est;
+      const row=history.data.find(b=>b.wristband_id===args.wristbandId);
+      if(!row?.is_current||row.patient_id!==args.patientId||row.mrn!==args.mrn)throw Error('The band changed or was replaced. Read the current band before printing.');
+      if(!['full','open_work','records'].includes(est.data.views.screens.find(s=>s.screen_id==='wristbands_admissions')?.view))throw Error('The wristband records view is unavailable');
+      const {assertWristband,wristbandHtml}=require('./wristband-print.cjs');assertWristband(payload.data,args.wristbandId,args.mrn);
+      const terminal=await api('GET','/terminals/whoami');if(!terminal.ok)return terminal;
+      if(!actor||actor!==auth?.user.user_id||workspace!==windows.get(win.id))throw Error('The session changed before wristband printing');
+      const printed=await require('./opd-print.cjs').printSlip(payload.data,terminal.data,{owner:win,pdf:!!args.pdf,renderHtml:wristbandHtml});
+      if(printed.bytes){const target=await dialog.showSaveDialog(win,{defaultPath:'Wristband-'+args.wristbandId+'.pdf',filters:[{name:'PDF',extensions:['pdf']}]});if(!target.canceled)fs.writeFileSync(target.filePath,printed.bytes);return{ok:true,data:{saved:!target.canceled}};}
+      return{ok:true,data:printed};
+    }
     if (action === "print-lab-label") {
       if(!Number.isSafeInteger(args.sampleId)||args.sampleId<=0)throw new Error('Invalid lab sample');
       const actor=auth?.user.user_id;

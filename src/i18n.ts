@@ -9,6 +9,17 @@ export function setLanguage(value: string) {
   language = value;
 }
 const ur: Record<string, string> = {
+"Band PDF saved. No new band was issued.":"پٹی پی ڈی ایف محفوظ؛ نئی پٹی جاری نہیں۔",
+"Band issued on the server. Printing is a separate step; check and print this same band.":"پٹی سرور پر جاری۔ پرنٹ الگ مرحلہ؛ اسی پٹی کو چیک و پرنٹ کریں۔",
+"Band sent to the label printer. Check the physical band before fitting it.":"پٹی لیبل پرنٹر کو بھیج دی۔ پہناتے وقت اصل پٹی چیک کریں۔",
+"Save cancelled. The issued band remains; do not issue it again.":"محفوظ منسوخ؛ جاری پٹی موجود، دوبارہ جاری نہ کریں۔",
+"The band record is unchanged. Check the printer, then reprint this same band.":"پٹی ریکارڈ برقرار۔ پرنٹر چیک کرکے اسی پٹی کو دوبارہ پرنٹ کریں۔",
+"Read and select the actual patient stay first.":"پہلے مریض کا اصل داخلہ پڑھ کر منتخب کریں۔",
+"Confirm the patient and stay before issuing a band.":"پٹی جاری کرنے سے پہلے مریض و داخلہ کی تصدیق کریں۔",
+"Replacement reason must be at most 300 characters.":"پٹی بدلنے کی وجہ زیادہ سے زیادہ300حروف ہو۔",
+"The wristband history belongs to another patient.":"پٹی کی تاریخ دوسرے مریض کی ہے۔",
+"A current band exists. Enter why it must be replaced, or reprint the same band.":"موجودہ پٹی موجود ہے۔ بدلنے کی وجہ دیں، یا اسی پٹی کا دوبارہ پرنٹ کریں۔",
+"Scan a patient wristband (3–80 characters).":"مریض کی شناختی پٹی اسکین کریں،3تا80حروف۔",
 "This bed no longer permits that action. Read the current bed and keep your reason.":"یہ بستر اب یہ عمل نہیں مانتا۔ وجہ رکھ کر تازہ بستر پڑھیں۔",
 "Check the actual bed, ward and service readiness before review.":"جائزے سے پہلے اصل بستر، وارڈ اور خدمت کی تیاری چیک کریں۔",
 "Enter a factual bed service reason of 3–300 characters.":"بستر کی خدمت کی اصل وجہ3تا300حروف دیں۔",

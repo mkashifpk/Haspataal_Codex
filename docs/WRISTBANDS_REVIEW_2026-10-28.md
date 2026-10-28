@@ -1,0 +1,36 @@
+# Identity wristbands — Phase 4 screen 53
+
+Built from clean baseline8999b5d. Server2026-10-27T21:34:51.340676+00:00, contract58db76bf7d59ef6d9870, rubric378ea8e0f42b. Implementation1/mkashif. Final renderer index-zFbMX4us.js. Required screen/endpoint/types/design/quality/workspace/printing/recipe/test-plan contracts read; saved contracts/wristbands*. No backend update or new backend finding. Prior issues35–38 remainNew; Bed Matrix proposal185pending/no feedback.
+
+The admissions officer verifies the actual patient and stay, issues once, then checks the printed band before fitting it. The screen uses the existing terminal shell, patient block, guarded writes, F1, bilingual guidance, permissions, runtime service views and shared zoom. Replaced history expands separately to keep the current task visible. Urdu is a draft; human translation/editor review remains required.
+
+## Delivered behaviour and evidence
+
+| Endpoint or task | Observed DEV checks | Limits |
+|---|---|---|
+| POST /wristbands | Fresh admission issue201; genuine committed reply lost; double-click one original; explicit identical-key/body replay201/replay flag/same band1. Required replacement reason refused422; actual reviewed replacement creates2/retires1. Other terminal replaces2→4; stale UI detects changed history before POST and keeps reason. Fresh final reviewed issue201creates5/retires4. ER2issue201creates3 and exact original-key replay201 | No newborn issue; that workflow needs its own registered baby. No physical fitting/care claimed |
+| GET /wristbands | Patient-scoped history across stays, current/replaced rows, issuer/time/reason; fresh end reads exactly one current per patient. CSSD403 | No unfiltered global wristband list or invented patient context |
+| GET /wristbands/{id}/print-payload | Same current band read for preview/reprint; secure terminal rereads its patient history, payload and printer mapping. Actual replaced-band2 print refused before output. Saved/cancelled PDFs and injected physical-printer failure never issue a new band | Physical label printer, stock size, colour and scanner scannability await human/device review |
+| GET /wristbands/verify | Actual patient8/admission8 match=true; scanpatient9 names9 and expected8 with match=false. UI STOP blocks review/confirm. Changed scan clears old approval. CSSD403 | This page does not record another procedure's bedside safety check |
+| GET /medication-safety/worklist | HeadNurse sees new ER2NoWristband; after own band3 it disappears. Admissions403 correctly handled by permissions; conditional red worklist implemented | Nurse's daily workspace uses a separate catalogue wristband screen, not built in this turn. No claim for the worklist UI/rule |
+| Reads, concurrency, recovery | Sustained real read loss hides selected identity/actions; refresh retries the original stay and keeps reason. Stale write preflight detects another terminal's actual replacement. Unknown write keeps original payload/key/draft; no automatic write retry | Long outage/retention expiry and all service transitions/roles remain human tests |
+| Help, visuals, print | Field and review F1/focus; actual EN/UR screenshots, both themes250 no root overflow; final print uses bundled Noto Nastaliq Urdu, escaped fields, exact server codes and prominent allergy. Actual final PDF rendered with Poppler and visually inspected as one page | No named human role/Urdu/editor/fresh-data review or busiest-hour/device timing; no Review code entered |
+
+Final npm test197/197PASS: artifacts/wristbands-post-polish-tests.log. npm run buildPASS: artifacts/wristbands-polish-build.log, 53screens/1055controls/438groups/63FAQseeds/30workspaceguides; existing bundle-size warning. npm run test:live32requestsPASS and npm run test:uiPASS (before final display-only history/translation polish; final source has independent read/PDF/media/F1 review and full197tests/build). Earlier original-key/business paths ran on DI1LByAI and CKy1TcMF; final zFbMX4us changes only history presentation/notice translations, and its read-only review passed. No whole-screen q:tested or human-gate claim.
+
+Source: src/screens/Wristbands.tsx, wristband-policy.ts, generated/wristbands_admissions.ts; App/menu/runtime guards; electron/wristband-print.cjs and main.cjs secure printing; opd-print.cjs accepts an internal renderer while preserving its default; authored help/tasks/role journey/media and tests. Exact business requests/keys/results: wristbands-live-2026-10-28.json. UI evidence: wristbands-ui-evidence-2026-10-28.json. All business UI runners passed. Read-only handbook response was reread after a local Windows command-length limit; no write was retried. Label same-er-key-replay accidentally used a NEW key and returned422/no mutation; er-original-key-confirmed-replay alone proves the ER replay. Zero admission reference intentionally returns VALIDATION_ERROR, not REFERENCE_NOT_FOUND; no nonexistent-positive-reference test claimed.
+
+## Synthetic records and cleanup
+
+Owned runDEMO-WRISTBANDS-1793183747401; scenariosd7a37c(patient8/ticket8/admission8) and4be688(patient9/ticket9/admission9). Patient8 carries explicitly synthetic allergy text. Band1first,2replacement,4concurrent replacement,5final current; patient9ER2band3current. Current rows were reread after cleanup. Both admissionsCancelled200 (02b27ac7537941369a8c40b5e331256f / 78a01a85f4894be8b48b96b5e1d0ad62); no bed ever allocated and no IPD invoice. ER2 remains Arrived, with a software-only note; no invented departure or clinical care. Historical band/patient/ticket records retained because no delete/revoke operation is declared. No old record mutated, real patient/physical exposure/medicine/money, or uncertain write. All test actors restored display preferences/logged out/closed.
+
+## Human checklist
+
+1. Open Admissions Desk → Identity wristbands. Create a NEW synthetic upstream patient/admission in this review. Select the actual stay and check two identifiers; a photo is optional. Verify current ward/bed and recorded allergies.
+2. Issue once, check print fields/codes/allergies and actual physical band size, readability and scanning. A printer jam must reprint the same band. Cancel a PDF save and verify no extra issuance.
+3. Replace for a factual reason; Earlier bands must show the previous band/issuer/time. A blank replacement reason must stop. Never fit a test band to a real patient.
+4. Scan a second NEW synthetic patient's code against the first stay: STOP must name both identities. Correct it and rescan. Do not treat this as a different procedure's safety check.
+5. Replace the same patient's band from a second terminal while a draft is open. Check retained reason, rejected stale review, read recovery, session/offline and original-key handling. Check record-only views and permissions with the authorised tester.
+6. Check English/Urdu, both themes, keyboard/touch/F1/focus and shared native keyboard/Settings100–250zoom. Native Urdu/editor/device review remains pending. Only the human starts, fills and signs the portal review and accepts proposals.
+
+Next dependency-order screen is General consent (consents_admissions), position54; refresh roadmap and contracts before selecting it.

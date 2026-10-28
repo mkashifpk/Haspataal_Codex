@@ -21,12 +21,12 @@ function slipHtml(payload, font) {
       : "";
   return `<!doctype html><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data:; style-src 'unsafe-inline'; font-src data:"><style>@font-face{font-family:Urdu;src:url(data:font/woff2;base64,${font})} @page{size:${width}mm auto;margin:3mm}body{margin:0;width:${width - 6}mm;color:#000;background:#fff}pre{font-family:monospace,Urdu;font-size:9px;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.5}img{display:block;max-width:100%;max-height:35mm;margin:3mm auto}</style><pre>${escape(payload.text)}</pre>${img(payload.barcode_svg)}${img(payload.qr_svg)}`;
 }
-async function printSlip(payload, terminal, { pdf, owner } = {}) {
+async function printSlip(payload, terminal, { pdf, owner, renderHtml = slipHtml } = {}) {
   const fontPath = path.join(
     __dirname,
     "../node_modules/@fontsource/noto-nastaliq-urdu/files/noto-nastaliq-urdu-arabic-400-normal.woff2",
   );
-  const html = slipHtml(payload, fs.readFileSync(fontPath).toString("base64"));
+  const html = renderHtml(payload, fs.readFileSync(fontPath).toString("base64"));
   const window = new BrowserWindow({
     show: false,
     parent: owner,
