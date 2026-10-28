@@ -29,7 +29,7 @@ test("separately authored registration help must retain its Urdu title", () => {
 });
 test("all delivered controls, tasks, role guides and FAQ seeds have bilingual help", () => {
   const result = checkHelp({ media: false });
-  assert.equal(result.screens, 49);
+  assert.equal(result.screens, 50);
   assert(result.controls > 90);
   assert.equal(result.workspaceGuides, 30);
 });
@@ -123,3 +123,5 @@ test('Send-out confirmation and rejection recovery cannot lose their control hel
 test('Outsourced imaging cannot ship an unmapped final confirmation',()=>{assert.throws(()=>checkHelp({media:false,read:file=>file==='src/screens/ImagingOutsourced.tsx'?read(file).replace('data-help="outsourced.confirm"',''):read(file)}),/missing\/broken control help mapping/);});
 
 test('Repeat register cannot ship an unmapped clinical confirmation',()=>{assert.throws(()=>checkHelp({media:false,read:file=>file==='src/screens/ImagingRepeats.tsx'?read(file).replace('data-help="repeats.confirm"',''):read(file)}),/missing\/broken control help mapping/);});
+
+test("Roll Call cannot ship an unmapped attendance confirmation",()=>{assert.throws(()=>checkHelp({media:false,read:file=>file==="src/screens/RollCall.tsx"?read(file).replace('data-help="rollcall.confirm"',''):read(file)}),/missing\/broken control help mapping/)});

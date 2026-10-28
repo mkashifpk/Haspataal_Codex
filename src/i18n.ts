@@ -9,6 +9,13 @@ export function setLanguage(value: string) {
   language = value;
 }
 const ur: Record<string, string> = {
+ "Choose between 1 and 300 rostered staff.":"ڈیوٹی عملے میں سے1سے300افراد چنیں۔",
+ "Confirm one duty date at a time; overnight duties keep their own date.":"ایک وقت میں ایک ڈیوٹی تاریخ کی تصدیق کریں؛ رات کی ڈیوٹی اپنی تاریخ رکھتی ہے۔",
+ "Choose only one duty per employee in this request.":"اس درخواست میں ہر ملازم کی ایک ڈیوٹی چنیں۔",
+ "This duty is no longer available for roll call. Refresh the sheet.":"یہ ڈیوٹی اب حاضری کے لیے دستیاب نہیں۔ فہرست تازہ کریں۔",
+ "Enter the actual arrival time for every selected person.":"ہر منتخب فرد کی آمد کا اصل وقت درج کریں۔",
+ "The arrival time must fall within this duty's shift.":"آمد کا وقت اسی ڈیوٹی کی شفٹ کے اندر ہونا چاہیے۔",
+ "The actual arrival time cannot be in the future.":"آمد کا اصل وقت آئندہ کا نہیں ہو سکتا۔",
  "Choose a valid duty date.":"ڈیوٹی کی درست تاریخ چنیں۔",
  "Choose staff from the current permitted list.":"موجودہ مجاز فہرست سے عملہ چنیں۔",
  "Past duties require HR roster management.":"گزشتہ ڈیوٹی کے لیے ایچ آر روسٹر کی اجازت لازم ہے۔",

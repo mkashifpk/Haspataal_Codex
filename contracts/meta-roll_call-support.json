@@ -1,0 +1,898 @@
+{
+  "reference_endpoints": [
+    {
+      "method": "GET",
+      "path": "/api/v1/rosters/roll-call",
+      "summary": "Roll-call sheet: who is rostered today and who has arrived",
+      "tags": [
+        "Duty Rosters"
+      ],
+      "permissions": [
+        "attendance.roll_call"
+      ],
+      "permissions_mode": "all",
+      "idempotency_key": false,
+      "description": "For wards and hospitals without a badge station. `first_in` / `first_source` show who already arrived\n(by badge, earlier roll call or HR correction). Without `roster_date`: today's duties plus a night shift from\nyesterday that is still running, so the sheet works after midnight; each entry carries its `roster_date`, which\nis what the roll call is sent for.\n\n**Required permission:** `attendance.roll_call`\n\n**Required permission:** `attendance.roll_call`",
+      "roles_allowed": [
+        "head_nurse",
+        "hr_admin",
+        "ops_admin"
+      ],
+      "parameters": [
+        {
+          "name": "roster_date",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Roster Date"
+          }
+        },
+        {
+          "name": "shift_pattern_id",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Shift Pattern Id"
+          }
+        },
+        {
+          "name": "ward_id",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ward Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "request_content_type": null,
+      "response_schema": {
+        "title": "Envelope[RollCallSheetOut]",
+        "properties": {
+          "data": {
+            "title": "RollCallSheetOut",
+            "properties": {
+              "roster_date": {
+                "type": "string",
+                "format": "date",
+                "title": "Roster Date"
+              },
+              "entries": {
+                "items": {
+                  "$ref": "#/components/schemas/RollCallEntryOut"
+                },
+                "type": "array",
+                "title": "Entries"
+              }
+            },
+            "type": "object",
+            "required": [
+              "roster_date",
+              "entries"
+            ]
+          },
+          "meta": {
+            "title": "Meta",
+            "properties": {
+              "server_time": {
+                "type": "string",
+                "title": "Server Time",
+                "description": "Server clock (UTC). Use it to detect terminal clock skew."
+              },
+              "page": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Page"
+              },
+              "page_size": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Page Size"
+              },
+              "total_count": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Total Count"
+              },
+              "next_cursor": {
+                "title": "Next Cursor"
+              }
+            },
+            "type": "object",
+            "required": [
+              "server_time"
+            ]
+          },
+          "request_id": {
+            "type": "string",
+            "title": "Request Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data",
+          "meta",
+          "request_id"
+        ]
+      },
+      "recorded_example": {
+        "request": {
+          "path": "/api/v1/rosters/roll-call"
+        },
+        "response": {
+          "status": 200,
+          "body": {
+            "data": {
+              "roster_date": "2026-09-29",
+              "entries": [
+                {
+                  "roster_id": 1,
+                  "employee_id": 1,
+                  "emp_number": "EMP-2026-0001",
+                  "full_name": "Nurse Amna",
+                  "designation": "Officer",
+                  "staff_category": "Nursing",
+                  "roster_date": "2026-09-29",
+                  "shift_pattern_id": 5,
+                  "shift_name": "Day",
+                  "start_time": "00:00:00",
+                  "end_time": "23:59:00",
+                  "duty_area": "Ward",
+                  "ward_id": 1,
+                  "ward_name": "Roster Ward",
+                  "department_id": null,
+                  "department_name": null,
+                  "zone_label": null,
+                  "is_on_call": false,
+                  "notes": null,
+                  "status": "Active",
+                  "cancel_reason": null,
+                  "swap_id": null,
+                  "row_version": 1,
+                  "bed_ids": [],
+                  "first_in": null,
+                  "first_source": null
+                }
+              ]
+            },
+            "meta": {
+              "server_time": "2026-09-29T02:52:02.249675+00:00"
+            },
+            "request_id": "11d6deadf28342f9a75c74ecc93e124f"
+          }
+        }
+      },
+      "errors": [],
+      "errors_seen_in_tests": [],
+      "used_by_screens": [
+        "roll_call",
+        "attendance",
+        "support_roster"
+      ],
+      "used_by_workflows": [
+        "duty-rosters-and-attendance"
+      ],
+      "typescript_example": "// Roll-call sheet: who is rostered today and who has arrived  (permissions: attendance.roll_call)\nexport const rollCallSheet = () =>\n  api(\"GET\", `/rosters/roll-call`, undefined);   // api(): see get_guide('envelope-and-errors')",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "attendance.roll_call"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of attendance.roll_call",
+        "roles_allowed": [
+          "head_nurse",
+          "hr_admin",
+          "ops_admin"
+        ]
+      },
+      "write_semantics": null,
+      "emits_events": [],
+      "list": {
+        "returns": "object",
+        "paging": [],
+        "search": [],
+        "filters": [
+          {
+            "name": "roster_date",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "shift_pattern_id",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "ward_id",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "note": null
+      },
+      "cross_field_rules": {},
+      "errors_detail": []
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/rosters/roll-call",
+      "summary": "Mark rostered staff present (no badge station)",
+      "tags": [
+        "Duty Rosters"
+      ],
+      "permissions": [
+        "attendance.roll_call"
+      ],
+      "permissions_mode": "all",
+      "idempotency_key": true,
+      "description": "Records an `In` punch with source `RollCall` and you as the recorder for the duty on `roster_date`, then\nrecomputes that duty's flag (late / half day against the rostered shift). Staff who already punched for that\nduty are skipped. Only staff you may roster, and only if rostered that day (`ROLL_CALL_NOT_ROSTERED`).\nOpen for today's duties and for a night shift from yesterday that is still running; an earlier day's shift only for HR\nand with the real arrival time `at` (`ROSTER_DATE_CLOSED` for others), which must fall within the shift.\n`ROSTER_OUT_OF_SCOPE`: you may not roster this employee (outside your staff scope).\n\n**Required permission:** `attendance.roll_call`\n\n**Required permission:** `attendance.roll_call`",
+      "roles_allowed": [
+        "head_nurse",
+        "hr_admin",
+        "ops_admin"
+      ],
+      "parameters": [
+        {
+          "name": "Idempotency-Key",
+          "in": "header",
+          "required": false,
+          "description": "Unique per logical action; retries return the first result",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Unique per logical action; retries return the first result",
+            "title": "Idempotency-Key"
+          }
+        }
+      ],
+      "request_body": {
+        "title": "RollCallIn",
+        "properties": {
+          "roster_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Roster Date"
+          },
+          "present": {
+            "items": {
+              "title": "Present",
+              "properties": {
+                "employee_id": {
+                  "type": "integer",
+                  "title": "Employee Id"
+                },
+                "at": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "At",
+                  "description": "Arrival time; default now (required for an earlier day's shift). Without a UTC offset it is the hospital's local time"
+                }
+              },
+              "type": "object",
+              "required": [
+                "employee_id"
+              ]
+            },
+            "type": "array",
+            "maxItems": 300,
+            "minItems": 1,
+            "title": "Present"
+          }
+        },
+        "type": "object",
+        "required": [
+          "roster_date",
+          "present"
+        ]
+      },
+      "request_content_type": "application/json",
+      "response_schema": {
+        "title": "Envelope[RollCallOut]",
+        "properties": {
+          "data": {
+            "title": "RollCallOut",
+            "properties": {
+              "roster_date": {
+                "type": "string",
+                "format": "date",
+                "title": "Roster Date"
+              },
+              "recorded": {
+                "items": {
+                  "$ref": "#/components/schemas/AttendanceLogOut"
+                },
+                "type": "array",
+                "title": "Recorded"
+              },
+              "skipped": {
+                "items": {
+                  "$ref": "#/components/schemas/RollCallSkippedOut"
+                },
+                "type": "array",
+                "title": "Skipped",
+                "description": "Staff who had already punched in"
+              }
+            },
+            "type": "object",
+            "required": [
+              "roster_date",
+              "recorded",
+              "skipped"
+            ]
+          },
+          "meta": {
+            "title": "Meta",
+            "properties": {
+              "server_time": {
+                "type": "string",
+                "title": "Server Time",
+                "description": "Server clock (UTC). Use it to detect terminal clock skew."
+              },
+              "page": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Page"
+              },
+              "page_size": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Page Size"
+              },
+              "total_count": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Total Count"
+              },
+              "next_cursor": {
+                "title": "Next Cursor"
+              }
+            },
+            "type": "object",
+            "required": [
+              "server_time"
+            ]
+          },
+          "request_id": {
+            "type": "string",
+            "title": "Request Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data",
+          "meta",
+          "request_id"
+        ]
+      },
+      "recorded_example": {
+        "request": {
+          "path": "/api/v1/rosters/roll-call",
+          "body": {
+            "roster_date": "2026-09-27",
+            "present": [
+              {
+                "employee_id": 1
+              }
+            ]
+          }
+        },
+        "response": {
+          "status": 201,
+          "body": {
+            "data": {
+              "roster_date": "2026-09-27",
+              "recorded": [
+                {
+                  "attendance_log_id": 1,
+                  "employee_id": 1,
+                  "badge_code": null,
+                  "station_id": null,
+                  "punch_time": "2026-09-27T17:45:07.230283+00:00",
+                  "punch_type": "In",
+                  "source": "RollCall",
+                  "manual_reason": null,
+                  "entered_by": 3,
+                  "attendance_date": "2026-09-27",
+                  "created_at": "2026-09-27T17:45:07.227303+00:00"
+                }
+              ],
+              "skipped": []
+            },
+            "meta": {
+              "server_time": "2026-09-27T17:45:07.276809+00:00"
+            },
+            "request_id": "8915d72b85e048bcab881d9a737e6b42"
+          }
+        },
+        "errors_seen": [
+          "ROLL_CALL_NOT_ROSTERED",
+          "ROSTER_DATE_CLOSED",
+          "ROSTER_OUT_OF_SCOPE",
+          "VALIDATION_ERROR"
+        ],
+        "events_emitted": [
+          "attendance.flagged"
+        ]
+      },
+      "errors": [
+        {
+          "code": "ROLL_CALL_NOT_ROSTERED",
+          "http_status": 409,
+          "message": "The employee is not rostered on that day.",
+          "retryable": false,
+          "category": "business",
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+        },
+        {
+          "code": "ROSTER_DATE_CLOSED",
+          "http_status": 409,
+          "message": "Rosters of past days can only be changed by HR.",
+          "retryable": false,
+          "category": "business",
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+        },
+        {
+          "code": "ROSTER_OUT_OF_SCOPE",
+          "http_status": 403,
+          "message": "You may not roster this employee (outside your staff scope).",
+          "retryable": false,
+          "category": "auth",
+          "ui_action": "Explain and hide the action (check x-permissions)."
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "category": "request",
+          "ui_action": "Show field errors from details.fields / the message."
+        }
+      ],
+      "errors_seen_in_tests": [
+        "ROLL_CALL_NOT_ROSTERED",
+        "ROSTER_DATE_CLOSED",
+        "ROSTER_OUT_OF_SCOPE",
+        "VALIDATION_ERROR"
+      ],
+      "used_by_screens": [
+        "roll_call",
+        "attendance",
+        "support_roster"
+      ],
+      "used_by_workflows": [
+        "duty-rosters-and-attendance",
+        "hr-and-payroll"
+      ],
+      "typescript_example": "// Mark rostered staff present (no badge station)  (permissions: attendance.roll_call)\nexport const takeRollCall = (body) =>\n  api(\"POST\", `/rosters/roll-call`, body, { idempotent: true });   // api(): see get_guide('envelope-and-errors')",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "attendance.roll_call"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of attendance.roll_call",
+        "roles_allowed": [
+          "head_nurse",
+          "hr_admin",
+          "ops_admin"
+        ]
+      },
+      "write_semantics": {
+        "protection": "idempotency_key",
+        "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+        "reconcile_with": "GET /rosters/roll-call",
+        "emits_events": [
+          "attendance.flagged"
+        ],
+        "prints": false,
+        "related_state_machine": null
+      },
+      "emits_events": [
+        "attendance.flagged"
+      ],
+      "list": null,
+      "cross_field_rules": {},
+      "errors_detail": [
+        {
+          "code": "ROLL_CALL_NOT_ROSTERED",
+          "http_status": 409,
+          "message": "The employee is not rostered on that day.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "employee_id",
+            "roster_date"
+          ],
+          "details_from": "POST /api/v1/rosters/roll-call"
+        },
+        {
+          "code": "ROSTER_DATE_CLOSED",
+          "http_status": 409,
+          "message": "Rosters of past days can only be changed by HR.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "entry_index",
+            "roster_date"
+          ],
+          "details_from": "POST /api/v1/rosters"
+        },
+        {
+          "code": "ROSTER_OUT_OF_SCOPE",
+          "http_status": 403,
+          "message": "You may not roster this employee (outside your staff scope).",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "employee_id",
+            "entry_index",
+            "staff_category"
+          ],
+          "details_from": "POST /api/v1/rosters"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ]
+    }
+  ],
+  "event": {
+    "event_type": "roster.changed",
+    "description": "A duty roster entry was created, changed or cancelled: refresh the planner / my duties.",
+    "audience": "the rostered employee, and holders of roster.manage.all, roster.view.all and the scope permission of the employee's staff category (roster.manage.nursing / roster.manage.support)",
+    "payload_fields": {
+      "roster_id": "int",
+      "employee_id": "int",
+      "action": "created|updated|cancelled",
+      "roster_date": "date",
+      "shift_name": "str",
+      "ward_id": "int|null",
+      "department_id": "int|null"
+    },
+    "priority": "normal",
+    "workflow": "§2.6, §8.1",
+    "presentation": null,
+    "subscribed_by_screens": [
+      "duty_roster",
+      "roll_call",
+      "duty_roster_hr",
+      "support_roster"
+    ],
+    "protocol": "WS /ws/v1/events: send {type:'auth', access_token, resume_from, topics}; get_guide('realtime')",
+    "emitted_by_operations": [
+      "PATCH /rosters/{roster_id}",
+      "POST /rosters",
+      "POST /rosters/copy",
+      "POST /rosters/swaps",
+      "POST /rosters/swaps/{swap_id}/approve",
+      "POST /rosters/{roster_id}/cancel",
+      "POST /self/roster/swaps/{swap_id}/accept"
+    ],
+    "emitted_in_code": [
+      "haspataal.domains.rosters.service:announce"
+    ],
+    "rereads_by_id": [],
+    "rereads_by_id_means": "the subscribing screens' reads of one record whose id the payload carries",
+    "note": "emitted_by_operations: seen in the tests; emitted_in_code: every place that emits it (worker jobs and database triggers included). Treat the payload as a hint and re-read what it names."
+  },
+  "test_plan": {
+    "screen": "roll_call",
+    "title": "Roll call",
+    "cases": [
+      {
+        "id": "case:GET /rosters/roll-call",
+        "call": "GET /api/v1/rosters/roll-call",
+        "summary": "Roll-call sheet: who is rostered today and who has arrived",
+        "happy_path": {
+          "as_one_of": [
+            "head_nurse",
+            "hr_admin",
+            "ops_admin"
+          ],
+          "example": {
+            "request": {
+              "path": "/api/v1/rosters/roll-call"
+            },
+            "response": {
+              "status": 200,
+              "body": {
+                "data": {
+                  "roster_date": "2026-09-29",
+                  "entries": [
+                    {
+                      "roster_id": 1,
+                      "employee_id": 1,
+                      "emp_number": "EMP-2026-0001",
+                      "full_name": "Nurse Amna",
+                      "designation": "Officer",
+                      "staff_category": "Nursing",
+                      "roster_date": "2026-09-29",
+                      "shift_pattern_id": 5,
+                      "shift_name": "Day",
+                      "start_time": "00:00:00",
+                      "end_time": "23:59:00",
+                      "duty_area": "Ward",
+                      "ward_id": 1,
+                      "ward_name": "Roster Ward",
+                      "department_id": null,
+                      "department_name": null,
+                      "zone_label": null,
+                      "is_on_call": false,
+                      "notes": null,
+                      "status": "Active",
+                      "cancel_reason": null,
+                      "swap_id": null,
+                      "row_version": 1,
+                      "bed_ids": [],
+                      "first_in": null,
+                      "first_source": null
+                    }
+                  ]
+                },
+                "meta": {
+                  "server_time": "2026-09-29T02:52:02.249675+00:00"
+                },
+                "request_id": "11d6deadf28342f9a75c74ecc93e124f"
+              }
+            }
+          }
+        },
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": []
+      },
+      {
+        "id": "case:POST /rosters/roll-call",
+        "call": "POST /api/v1/rosters/roll-call",
+        "summary": "Mark rostered staff present (no badge station)",
+        "happy_path": {
+          "as_one_of": [
+            "head_nurse",
+            "hr_admin",
+            "ops_admin"
+          ],
+          "example": {
+            "request": {
+              "path": "/api/v1/rosters/roll-call",
+              "body": {
+                "roster_date": "2026-09-27",
+                "present": [
+                  {
+                    "employee_id": 1
+                  }
+                ]
+              }
+            },
+            "response": {
+              "status": 201,
+              "body": {
+                "data": {
+                  "roster_date": "2026-09-27",
+                  "recorded": [
+                    {
+                      "attendance_log_id": 1,
+                      "employee_id": 1,
+                      "badge_code": null,
+                      "station_id": null,
+                      "punch_time": "2026-09-27T17:45:07.230283+00:00",
+                      "punch_type": "In",
+                      "source": "RollCall",
+                      "manual_reason": null,
+                      "entered_by": 3,
+                      "attendance_date": "2026-09-27",
+                      "created_at": "2026-09-27T17:45:07.227303+00:00"
+                    }
+                  ],
+                  "skipped": []
+                },
+                "meta": {
+                  "server_time": "2026-09-27T17:45:07.276809+00:00"
+                },
+                "request_id": "8915d72b85e048bcab881d9a737e6b42"
+              }
+            },
+            "errors_seen": [
+              "ROLL_CALL_NOT_ROSTERED",
+              "ROSTER_DATE_CLOSED",
+              "ROSTER_OUT_OF_SCOPE",
+              "VALIDATION_ERROR"
+            ],
+            "events_emitted": [
+              "attendance.flagged"
+            ]
+          }
+        },
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "ROLL_CALL_NOT_ROSTERED",
+          "ROSTER_DATE_CLOSED",
+          "ROSTER_OUT_OF_SCOPE",
+          "VALIDATION_ERROR"
+        ],
+        "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+      }
+    ],
+    "service_cases": [],
+    "delivery_gate": {
+      "required": true,
+      "status": "required",
+      "progress_reporting": {
+        "required": true,
+        "submit": "propose_progress",
+        "verify": "progress_proposals",
+        "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+      },
+      "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+      "compulsory": [
+        {
+          "id": "q:f1_help",
+          "label": "F1 contextual help",
+          "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+          "points": 2
+        },
+        {
+          "id": "q:role_faq",
+          "label": "Complete role-specific FAQs",
+          "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+          "points": 3
+        },
+        {
+          "id": "q:zoom",
+          "label": "Keyboard zoom: 100-250% only",
+          "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+          "points": 2
+        },
+        {
+          "id": "q:fresh_data",
+          "label": "Human review with newly created data",
+          "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+          "points": 4
+        }
+      ],
+      "zoom": {
+        "min_pct": 100,
+        "max_pct": 250,
+        "reset_pct": 100,
+        "keys": [
+          "Ctrl + or Ctrl = (zoom in)",
+          "Ctrl - (zoom out)",
+          "Ctrl 0 (reset to 100 %)",
+          "Command on macOS"
+        ],
+        "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+      },
+      "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+      "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+    },
+    "handbook_page": "screens/roll_call",
+    "workspace_guide": "get_handbook_outline('head_nurse')",
+    "realtime": [
+      {
+        "event": "roster.changed",
+        "check": "the screen refreshes without polling"
+      }
+    ],
+    "acceptance_rules": [
+      "For wards and hospitals without a badge station: tick who is present at the start of the shift; staff who already scanned a badge show their first_in and cannot be ticked again.",
+      "Send each entry's own roster_date: after midnight the sheet still lists last night's running shift, which belongs to yesterday's date.",
+      "For a late arrival, or an earlier day's shift (HR only), send the actual arrival time (`at`); it must fall within the shift."
+    ],
+    "demo_accounts": "demo_accounts() lists a login per role; sandbox_call runs each case on the DEV server"
+  }
+}

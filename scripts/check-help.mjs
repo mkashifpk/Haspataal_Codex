@@ -204,6 +204,7 @@ export function checkHelp({
       "ImagingOutsourced",
       "ImagingRepeats",
       "DutyRoster",
+      "RollCall",
       "LabVerification",
       "CriticalResultsBench",
       "CriticalResultsDoctor",

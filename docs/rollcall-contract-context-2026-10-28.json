@@ -1,0 +1,475 @@
+{
+  "server_build": "2026-10-27T21:34:51.340676+00:00",
+  "contract": "58db76bf7d59ef6d9870",
+  "rubric": "378ea8e0f42b",
+  "backend_answers": [
+    {
+      "id": 34,
+      "status": "Fixed",
+      "response": "Confirmed, and thank you for the exact request ids and for not retrying. Changing a duty's beds replaces its bed assignment: the server deletes the duty's old beds and writes the new ones. The application's database role may delete only from the tables a migration allows, and the duty's beds were not among them, so the change answered 500 and nothing was saved (the transaction rolled back, as your read showed). Creating a duty with beds and a zone-only change never delete, which is why they worked. From fixed_in on (compare overview's server_build with fixed_in): (1) PATCH /rosters/{roster_id} with bed_ids replaces the duty's beds with the ones sent (the same ward rules as a new duty), answers 200 with the new row_version and bed_ids, and audits the beds before and after; bed_ids [] takes them all away. (2) A backend test now changes a duty's beds twice, and another fails whenever the application deletes from a table the database does not let it delete from, so this kind of 500 cannot come back unnoticed. No field, rule or behaviour of the contract changed: your request was right, and your recovery (read-only after an unknown result, no automatic retry, no false success) fits. The fix is in a migration, so the DEV server is reinstalled with fresh hospital data (your registry account stays) and duty 24 is gone: repeat your steps with a new synthetic duty (POST /rosters with one bed, a zone-only PATCH, then PATCH with expected_version and another bed of the same ward); GET /rosters for that day shows the second bed.",
+      "fixed_in": "2026-10-27T21:34:51.340676+00:00"
+    },
+    {
+      "id": 33,
+      "status": "Fixed",
+      "response": "Confirmed, and thank you for testing the repeat on purpose. The route's contract (its x-repeat, refused_with) and the answer to #23 promised DISCHARGE_STAGE_IMMUTABLE for a stage already cleared, but the order check ran first and named the stage now waiting (DISCHARGE_STAGE_OUT_OF_ORDER), so the promised code was never answered. The code now follows the contract. From fixed_in on (compare overview's server_build with fixed_in): (1) clearing a stage that is already Cleared answers 409 DISCHARGE_STAGE_IMMUTABLE with details.stage and details.cleared_at, and nothing changes. It is checked before everything else, so it is also the answer once the whole discharge is complete (that used to be DISCHARGE_NOT_ALLOWED, as if the discharge had never started). (2) DISCHARGE_STAGE_OUT_OF_ORDER (details.blocked_on) now means only a stage still Pending behind another, and DISCHARGE_NOT_ALLOWED a discharge not started or cancelled. (3) The endpoint's description names all three, and the inpatient-and-discharge playbook says the same. Your UI fits as it is: the Cleared stage disabled and no automatic retry. On DISCHARGE_STAGE_IMMUTABLE after a lost answer, read GET /admissions/{admission_id}/discharge-status as before and show the clearance as done. Re-read get_endpoint for POST /admissions/{admission_id}/discharge/{stage}/clear. The same update changes a migration (backend issue #34), so the DEV server is reinstalled with fresh hospital data (your registry account stays): retest with a new synthetic admission.",
+      "fixed_in": "2026-10-27T21:34:51.340676+00:00"
+    },
+    {
+      "id": 32,
+      "status": "Fixed",
+      "response": "Confirmed, thank you for the exact request and for not replaying a completed source. The stage guard was right, but POST /imaging/orders/{order_id}/repeats did not name IMAGING_ORDER_STATE_INVALID in its description and no backend test had made it, so get_endpoint, the screen bundle and screen_test_plan listed only VALIDATION_ERROR (an endpoint's errors are the codes its description names plus those seen in the backend's tests). From fixed_in on (compare overview's server_build with fixed_in): (1) the repeats endpoint names it: a repeat is recorded only for an examination that was performed (InProgress, Completed or Reported); an Ordered, Scheduled, Outsourced or Cancelled order answers 409 IMAGING_ORDER_STATE_INVALID and nothing is recorded: read GET /imaging/orders/{order_id} again and check its status before another action. (2) Its two neighbours had the same gap and name it now: POST /imaging/orders/{order_id}/outsource (only an Ordered or Scheduled order) and POST /imaging/orders/{order_id}/external-report (only an Outsourced order; VALIDATION_ERROR for a critical_finding_id not on the active list). (3) The backend's tests now make each of these refusals, so the recorded examples show them too (source seen_in_tests as well as documented). No rule, field or behaviour changed and imaging_repeats keeps its checklist: your stage guard and refusal display fit as they are. Re-read get_endpoint for the three endpoints and screen_test_plan('imaging_repeats'). The diagnostic services playbook (section 6, step 4, and section 7) says the same. (4) Your report showed a pattern, so the same update names such refusals on about 100 other endpoints (state refusals of OPD tickets and queues, admissions, theatre bookings and records, complaints, incidents, drug recalls, consents, rosters and others, and the not-ready answers of the printouts), and a backend test now fails whenever a route's service can refuse with a code its description does not name. Re-read get_endpoint's errors for the screens you have built: an error newly listed there is one the server could already answer. The database's own checks are not part of that test, so the server's answer stays authoritative: keep handling any error by its code (guide 03) and report one that is not listed.",
+      "fixed_in": "2026-10-27T21:34:51.340676+00:00"
+    },
+    {
+      "id": 31,
+      "status": "Fixed",
+      "response": "Thank you for not linking a guessed or example id. Confirmed: this DEV deployment intentionally has no PACS. The owner decided (decisions 54) that DEV builds stay without one: a successful link, its viewer link and imaging.study.available after a link are not applicable on DEV and are tested at a hospital that has Orthanc, never with an invented study. No synthetic fixture will be added. What your report found is fixed. From fixed_in on (compare overview's server_build with fixed_in): (1) a server without PACS answers 409 PACS_NOT_CONFIGURED, retryable false. It was 503 ORTHANC_UNAVAILABLE, retryable true, so a client following guide 03 retried a PACS that does not exist. ORTHANC_UNAVAILABLE (503, retryable) now means only a PACS that is set up but did not answer. Either way nothing is linked and the order is unchanged. (2) A study the PACS does not hold answers 404 IMAGING_STUDY_NOT_FOUND with details.accession_number (it was a bare NOT_FOUND, which looked like a missing order). (3) A manual link (orthanc_study_id) is checked: Orthanc's format (5 groups of 8 lower-case hex digits; anything else VALIDATION_ERROR) and a study the PACS holds. study_instance_uid is no longer a request field: the UID comes from the PACS. Before, any id was linked unchecked, even without PACS, which completed the examination and announced images that did not exist. (4) The endpoint's description names every refusal, and radiology_worklist has a new UX rule (a new checklist item): on PACS_NOT_CONFIGURED never retry, keep the order, say images are not linked on this server and let the radiographer complete the examination with POST /imaging/orders/{order_id}/status (Completed); the report works without images. Your recovery (order kept, exact refusal shown) fits: switch it to PACS_NOT_CONFIGURED and retry nothing for it. Regenerate your types (LinkIn loses study_instance_uid; the error codes gain PACS_NOT_CONFIGURED and IMAGING_STUDY_NOT_FOUND) and re-read get_endpoint for POST /imaging/orders/{order_id}/link-study, explain_error for both codes and get_screen_bundle('radiology_worklist'). Frontend guide 15 (Integrations), the laboratory and radiology playbook (step 3) and guide 17's Radiology review say the same: without PACS, the review completes the examination by its status. To check it on DEV: POST link-study with {} on a fresh order of your own answers 409 PACS_NOT_CONFIGURED, retryable false, and GET /imaging/orders/{order_id} shows the order unchanged.",
+      "fixed_in": "2026-10-27T21:34:51.340676+00:00"
+    },
+    {
+      "id": 30,
+      "status": "Fixed",
+      "response": "Confirmed, and thank you for not sending a guessed id. One correction: contrast_doctor_id is not a separate clinical doctor id. It is an employee_id, and the database accepts it only for an employee registered with the PMDC (license_type PMDC). Neither the field nor the screen said so, and no list a radiographer may read showed who is registered. From fixed_in on (compare overview's server_build with fixed_in): (1) GET /staff/lookup (any signed-in user, radiographers included) takes license_type: PMDC lists only the active clinical staff registered with the PMDC, their number on file; PNC the registered nurses. (2) Every row also carries license_type and registration, the council registration as every author stamp prints it (e.g. \"PMDC 12345-P\"). Show full_name and registration in the picker and send that row's employee_id as contrast_doctor_id: a doctor from this list always passes the database's contrast rule, anyone else is refused with IMAGING_SAFETY_CHECK_REQUIRED. Never a user_id, a typed number or an id from another list. (3) radiology_worklist now lists GET /staff/lookup and has a new UX rule (a new checklist item) for this picker; the descriptions of contrast_doctor_id and of POST /imaging/orders/{order_id}/status say the same. The emergency consent's second_doctor_id is the same kind of id and uses the same filter. No field was removed or renamed: regenerate your types (StaffLookupOut gains license_type and registration) and re-read get_endpoint for GET /staff/lookup and POST /imaging/orders/{order_id}/status and get_screen_bundle('radiology_worklist'). The diagnostic services playbook (section 6, step 3), the laboratory and radiology playbook (step 2) and frontend guide 17's Radiology review were updated. To check it, as demo.radiographer: GET /staff/lookup?q=...&license_type=PMDC lists doctors only, each with registration. The same update changes a migration (backend issue #34), so the DEV server is reinstalled with fresh hospital data (your registry account stays).",
+      "fixed_in": "2026-10-27T21:34:51.340676+00:00"
+    }
+  ],
+  "changed": {
+    "since": {
+      "fingerprint": "8ad8456c41b87dd0031e",
+      "version": "1.0.0",
+      "generated_at": "2026-10-27T06:11:24.313207+00:00",
+      "first_seen_at": "2026-10-27T07:54:44.814795+00:00"
+    },
+    "current": "58db76bf7d59ef6d9870",
+    "operations": {
+      "added": [],
+      "removed": [],
+      "changed": [
+        {
+          "operation": "GET /api/v1/staff/lookup",
+          "what": [
+            "params"
+          ]
+        }
+      ]
+    },
+    "schemas": {
+      "added": [],
+      "removed": [],
+      "changed": [
+        "ConsentSignIn",
+        "ImagingStatusIn",
+        "LinkIn",
+        "StaffLookupOut"
+      ]
+    },
+    "events": {
+      "added": [],
+      "removed": [],
+      "changed": []
+    },
+    "errors": {
+      "added": [
+        "IMAGING_STUDY_NOT_FOUND",
+        "PACS_NOT_CONFIGURED"
+      ],
+      "removed": []
+    },
+    "screens": {
+      "added": [],
+      "removed": []
+    },
+    "enums": {
+      "added": [],
+      "removed": [],
+      "changed": []
+    },
+    "changes": [
+      {
+        "kind": "operation",
+        "what": "GET /api/v1/staff/lookup",
+        "classification": "breaking",
+        "why": "changed params: check the request you send"
+      },
+      {
+        "kind": "schema",
+        "what": "ConsentSignIn",
+        "classification": "check",
+        "why": "fields changed: compare get_schema with your types (regenerate them)"
+      },
+      {
+        "kind": "schema",
+        "what": "ImagingStatusIn",
+        "classification": "check",
+        "why": "fields changed: compare get_schema with your types (regenerate them)"
+      },
+      {
+        "kind": "schema",
+        "what": "LinkIn",
+        "classification": "check",
+        "why": "fields changed: compare get_schema with your types (regenerate them)"
+      },
+      {
+        "kind": "schema",
+        "what": "StaffLookupOut",
+        "classification": "check",
+        "why": "fields changed: compare get_schema with your types (regenerate them)"
+      }
+    ],
+    "breaking": true,
+    "needs_review": true,
+    "screens_touched": {
+      "anaesthesia_record": [
+        "an endpoint it calls changed"
+      ],
+      "appraisals_hr": [
+        "an endpoint it calls changed"
+      ],
+      "appraise_staff_doctor": [
+        "an endpoint it calls changed"
+      ],
+      "appraise_staff_head_nurse": [
+        "an endpoint it calls changed"
+      ],
+      "billing_admin": [
+        "an endpoint it calls changed"
+      ],
+      "complaints_register": [
+        "an endpoint it calls changed"
+      ],
+      "consents_admissions": [
+        "an endpoint it calls changed"
+      ],
+      "consents_anaesthesia": [
+        "an endpoint it calls changed"
+      ],
+      "consents_doctor": [
+        "an endpoint it calls changed"
+      ],
+      "consents_triage": [
+        "an endpoint it calls changed"
+      ],
+      "consents_ward": [
+        "an endpoint it calls changed"
+      ],
+      "consultation": [
+        "an endpoint it calls changed"
+      ],
+      "incident_screening": [
+        "an endpoint it calls changed"
+      ],
+      "lab_admin": [
+        "an endpoint it calls changed"
+      ],
+      "my_beds": [
+        "an endpoint it calls changed"
+      ],
+      "ops_console": [
+        "an endpoint it calls changed"
+      ],
+      "ot_settlement": [
+        "an endpoint it calls changed"
+      ],
+      "pre_anaesthesia_clinic": [
+        "an endpoint it calls changed"
+      ],
+      "radiology_worklist": [
+        "its endpoints changed",
+        "an endpoint it calls changed",
+        "rules: 2 new or reworded (their rubric items come back unticked), 0 gone"
+      ],
+      "recovery_board": [
+        "an endpoint it calls changed"
+      ],
+      "recovery_board_admin": [
+        "an endpoint it calls changed"
+      ],
+      "recovery_board_anaesthesia": [
+        "an endpoint it calls changed"
+      ],
+      "registration": [
+        "an endpoint it calls changed"
+      ],
+      "report_incident": [
+        "an endpoint it calls changed"
+      ],
+      "safety_checklist": [
+        "an endpoint it calls changed"
+      ],
+      "safety_checklist_admin": [
+        "an endpoint it calls changed"
+      ],
+      "safety_checklist_anaesthesia": [
+        "an endpoint it calls changed"
+      ],
+      "surgical_record_surgeon": [
+        "an endpoint it calls changed"
+      ]
+    },
+    "rubric_items_affected": {
+      "anaesthesia_record": {
+        "added": [],
+        "removed": [],
+        "review": [
+          "ep:GET /staff/lookup"
+        ],
+        "rule": "Added or reworded rules are unticked; review does not withdraw existing claims."
+      },
+      "appraisals_hr": {
+        "added": [],
+        "removed": [],
+        "review": [
+          "ep:GET /staff/lookup"
+        ],
+        "rule": "Added or reworded rules are unticked; review does not withdraw existing claims."
+      },
+      "appraise_staff_doctor": {
+        "added": [],
+        "removed": [],
+        "review": [
+          "ep:GET /staff/lookup"
+        ],
+        "rule": "Added or reworded rules are unticked; review does not withdraw existing claims."
+      },
+      "appraise_staff_head_nurse": {
+        "added": [],
+        "removed": [],
+        "review": [
+          "ep:GET /staff/lookup"
+        ],
+        "rule": "Added or reworded rules are unticked; review does not withdraw existing claims."
+      },
+      "billing_admin": {
+        "added": [],
+        "removed": [],
+        "review": [
+          "ep:GET /staff/lookup"
+        ],
+        "rule": "Added or reworded rules are unticked; review does not withdraw existing claims."
+      },
+      "complaints_register": {
+        "added": [],
+        "removed": [],
+        "review": [
+          "ep:GET /staff/lookup"
+        ],
+        "rule": "Added or reworded rules are unticked; review does not withdraw existing claims."
+      },
+      "consents_admissions": {
+        "added": [],
+        "removed": [],
+        "review": [
+          "ep:POST /consents/{consent_id}/sign"
+        ],
+        "rule": "Added or reworded rules are unticked; review does not withdraw existing claims."
+      },
+      "consents_anaesthesia": {
+        "added": [],
+        "removed": [],
+        "review": [
+          "ep:POST /consents/{consent_id}/sign"
+        ],
+        "rule": "Added or reworded rules are unticked; review does not withdraw existing claims."
+      },
+      "consents_doctor": {
+        "added": [],
+        "removed": [],
+        "review": [
+          "ep:POST /consents/{consent_id}/sign"
+        ],
+        "rule": "Added or reworded rules are unticked; review does not withdraw existing claims."
+      },
+      "consents_triage": {
+        "added": [],
+        "removed": [],
+        "review": [
+          "ep:POST /consents/{consent_id}/sign"
+        ],
+        "rule": "Added or reworded rules are unticked; review does not withdraw existing claims."
+      },
+      "consents_ward": {
+        "added": [],
+        "removed": [],
+        "review": [
+          "ep:POST /consents/{consent_id}/sign"
+        ],
+        "rule": "Added or reworded rules are unticked; review does not withdraw existing claims."
+      },
+      "consultation": {
+        "added": [],
+        "removed": [],
+        "review": [
+          "ep:GET /staff/lookup"
+        ],
+        "rule": "Added or reworded rules are unticked; review does not withdraw existing claims."
+      },
+      "incident_screening": {
+        "added": [],
+        "removed": [],
+        "review": [
+          "ep:GET /staff/lookup"
+        ],
+        "rule": "Added or reworded rules are unticked; review does not withdraw existing claims."
+      },
+      "lab_admin": {
+        "added": [],
+        "removed": [],
+        "review": [
+          "ep:GET /staff/lookup"
+        ],
+        "rule": "Added or reworded rules are unticked; review does not withdraw existing claims."
+      },
+      "my_beds": {
+        "added": [],
+        "removed": [],
+        "review": [
+          "ep:GET /staff/lookup"
+        ],
+        "rule": "Added or reworded rules are unticked; review does not withdraw existing claims."
+      },
+      "ops_console": {
+        "added": [],
+        "removed": [],
+        "review": [
+          "ep:GET /staff/lookup"
+        ],
+        "rule": "Added or reworded rules are unticked; review does not withdraw existing claims."
+      },
+      "ot_settlement": {
+        "added": [],
+        "removed": [],
+        "review": [
+          "ep:GET /staff/lookup"
+        ],
+        "rule": "Added or reworded rules are unticked; review does not withdraw existing claims."
+      },
+      "pre_anaesthesia_clinic": {
+        "added": [],
+        "removed": [],
+        "review": [
+          "ep:POST /consents/{consent_id}/sign"
+        ],
+        "rule": "Added or reworded rules are unticked; review does not withdraw existing claims."
+      },
+      "radiology_worklist": {
+        "added": [
+          "ep:GET /staff/lookup",
+          "rule:11598b3592",
+          "rule:d6e6fc26ac"
+        ],
+        "removed": [],
+        "review": [
+          "ep:GET /staff/lookup",
+          "ep:POST /imaging/orders/{order_id}/link-study",
+          "ep:POST /imaging/orders/{order_id}/status"
+        ],
+        "rule": "Added or reworded rules are unticked; review does not withdraw existing claims."
+      },
+      "recovery_board": {
+        "added": [],
+        "removed": [],
+        "review": [
+          "ep:GET /staff/lookup"
+        ],
+        "rule": "Added or reworded rules are unticked; review does not withdraw existing claims."
+      },
+      "recovery_board_admin": {
+        "added": [],
+        "removed": [],
+        "review": [
+          "ep:GET /staff/lookup"
+        ],
+        "rule": "Added or reworded rules are unticked; review does not withdraw existing claims."
+      },
+      "recovery_board_anaesthesia": {
+        "added": [],
+        "removed": [],
+        "review": [
+          "ep:GET /staff/lookup"
+        ],
+        "rule": "Added or reworded rules are unticked; review does not withdraw existing claims."
+      },
+      "registration": {
+        "added": [],
+        "removed": [],
+        "review": [
+          "ep:GET /staff/lookup"
+        ],
+        "rule": "Added or reworded rules are unticked; review does not withdraw existing claims."
+      },
+      "report_incident": {
+        "added": [],
+        "removed": [],
+        "review": [
+          "ep:GET /staff/lookup"
+        ],
+        "rule": "Added or reworded rules are unticked; review does not withdraw existing claims."
+      },
+      "safety_checklist": {
+        "added": [],
+        "removed": [],
+        "review": [
+          "ep:GET /staff/lookup"
+        ],
+        "rule": "Added or reworded rules are unticked; review does not withdraw existing claims."
+      },
+      "safety_checklist_admin": {
+        "added": [],
+        "removed": [],
+        "review": [
+          "ep:GET /staff/lookup"
+        ],
+        "rule": "Added or reworded rules are unticked; review does not withdraw existing claims."
+      },
+      "safety_checklist_anaesthesia": {
+        "added": [],
+        "removed": [],
+        "review": [
+          "ep:GET /staff/lookup"
+        ],
+        "rule": "Added or reworded rules are unticked; review does not withdraw existing claims."
+      },
+      "surgical_record_surgeon": {
+        "added": [],
+        "removed": [],
+        "review": [
+          "ep:GET /staff/lookup",
+          "ep:POST /consents/{consent_id}/sign"
+        ],
+        "rule": "Added or reworded rules are unticked; review does not withdraw existing claims."
+      }
+    },
+    "handbook_pages_to_revise": [
+      "screens/anaesthesia_record",
+      "screens/appraisals_hr",
+      "screens/appraise_staff_doctor",
+      "screens/appraise_staff_head_nurse",
+      "screens/billing_admin",
+      "screens/complaints_register",
+      "screens/consents_admissions",
+      "screens/consents_anaesthesia",
+      "screens/consents_doctor",
+      "screens/consents_triage",
+      "screens/consents_ward",
+      "screens/consultation",
+      "screens/incident_screening",
+      "screens/lab_admin",
+      "screens/my_beds",
+      "screens/ops_console",
+      "screens/ot_settlement",
+      "screens/pre_anaesthesia_clinic",
+      "screens/radiology_worklist",
+      "screens/recovery_board",
+      "screens/recovery_board_admin",
+      "screens/recovery_board_anaesthesia",
+      "screens/registration",
+      "screens/report_incident",
+      "screens/safety_checklist",
+      "screens/safety_checklist_admin",
+      "screens/safety_checklist_anaesthesia",
+      "screens/surgical_record_surgeon"
+    ],
+    "note": null
+  }
+}
