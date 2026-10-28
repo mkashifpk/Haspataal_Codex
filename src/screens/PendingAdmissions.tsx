@@ -58,6 +58,7 @@ export function PendingAdmissions({
   stream,
   timeZone,
   currency,
+  initialAdmissionId=0,
 }: {
   user: ClinicalUser;
   establishment: EstablishmentOut;
@@ -65,6 +66,7 @@ export function PendingAdmissions({
   stream: string;
   timeZone?: string;
   currency?: string;
+  initialAdmissionId?: number;
 }) {
   const can = (p: string) => user.permissions.includes(p);
   const view = establishment.views.screens.find(
@@ -76,8 +78,8 @@ export function PendingAdmissions({
     [ward, setWard] = useState(""),
     [tab, setTab] = useState("waiting"),
     [find, setFind] = useState(""),
-    [lookup, setLookup] = useState(""),
-    [id, setId] = useState(0);
+    [lookup, setLookup] = useState(initialAdmissionId ? String(initialAdmissionId) : ""),
+    [id, setId] = useState(initialAdmissionId);
   const [docContext, setDocContext] = useState<{
     admissionId: number;
     person: patients.PatientDetailOut;

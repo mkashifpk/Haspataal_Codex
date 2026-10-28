@@ -10,6 +10,102 @@ export type HelpPage = {
   faqUr: [string, string][];
 };
 export const help: Record<string, HelpPage> = {
+ bed_matrix: {
+  title: "Live bed matrix",
+  titleUr: "بستروں کی تازہ صورت حال",
+  purpose: "At the admissions desk during the shift, the officer reads each ward’s current beds and changes a verified bed’s service readiness with a reason; the server-confirmed bed and ward counts define the result. The ward bays are a schematic grouping, not a physical floor plan.",
+  purposeUr: "داخلہ ڈیسک پر افسر شفٹ میں ہر وارڈ کے تازہ بستر پڑھتا اور اصل بستر کی خدمت کی تیاری وجہ سے بدلتا ہے؛ نتیجہ سرور کی تصدیق شدہ حالت و گنتی ہے۔ خانے وارڈ کی ترتیب ہیں، عمارت کا اصلی نقشہ نہیں۔ اردو انسانی جائزے تک مسودہ ہے۔",
+  steps: [
+    "Open Admissions Desk → Live bed matrix. Ward to show selects an actual ward. Bed state to show and Find a bed or returned patient filter only the returned tiles; counts always describe the whole ward. Clear bed filters restores all wards/states. An empty result says whether no wards, no matching beds or unavailable detail; Refresh bed matrix rereads actual data. Try again retries only the failed read.",
+    "Each ward groups its beds beside counts: available, reserved, occupied, turnover and out of service. Available is green, Reserved blue, Occupied red, Dirty/Cleaning amber and Out of service grey; every tile also says the state in words. Turnover includes discharge/cleaning, never a free bed. Select an actual bed tile by keyboard, touch or mouse; its location, state time, permitted patient identity and discharge blocker appear beside the board. A bed number is not patient identity.",
+    "Only a user with bed-management permission may Take bed out of service from Available, Dirty or Cleaning. Reserved and Occupied beds have no service-change action here. Return bed to service is offered on Out of service and requests Available. Verify the real bed is ready before returning it. This changes service readiness; it does not certify physical cleaning or clear an admission’s discharge. Use the clinical/ward/Ops handover for those tasks.",
+    "Enter Bed service reason, 3–300 factual characters. Check the actual bed/ward/readiness statement, Review bed change, then Confirm bed change once. The review freezes the original bed, target and reason; Back to bed reason keeps input. Closing a changed draft asks before discarding. Before sending, current actor, permission, service view and exact bed state/time/occupancy are checked again. A changed bed blocks the stale review and keeps the reason.",
+    "Bed events immediately update the affected state and ward counts; old occupant details are hidden until the server reread confirms them. Refreshing bed details disables service changes during reconciliation. Live/Reconnecting tells whether the data is current; reconnect rereads the whole matrix. There is no polling. An event never changes your selected bed or typed reason silently. Read current bed and keep reason explicitly accepts the new source before another review.",
+    "If a response is lost, keep the original request/key, reason and bed; do not make a replacement. Read original bed result checks that exact bed in a fresh matrix. Only after that original bed is found may Bed result reviewed; return to draft release the hold. Retry original request uses the identical key/body only within its retention, never automatically. A changed current state does not prove who performed an earlier action. If absent, outside retention or still uncertain, ask IT. Server errors remain visible by code/reference; correct a definite refusal before a new reviewed action.",
+    "Open this admission is shown only for an actual occupied/reserved admission and a permitted Admissions screen; it opens that exact current record. Allocating a patient belongs to Pending admissions & allocation; this board does not reserve a bed by selecting its tile. Ward transfers and discharge cleaning follow their own permissions and workflows. Patient names are only those the server returns to your permission.",
+    "F1 or visible Help opens the current control’s bilingual guide and restores focus with the draft intact. Settings and native Ctrl plus/minus/0 share100–250% zoom, reset100. Both themes and Urdu use text as well as colour. Records-only is read-only; Retiring keeps existing bed work with its banner, while menu visibility follows the server. This screen has no print/scanner endpoint. Named human fresh-data, Urdu, role and editor review remain pending.",
+    "If beds need their ward verified appears, open that notice to read the actual returned bed labels. The server supplied no matching ward summary, so no service changes are offered for those beds. Ask Admissions or IT to verify the ward and refresh; never invent a ward or assume the bed is usable."
+  ],
+  stepsUr: [
+    "داخلہ ڈیسک سے بستروں کی تازہ صورت حال کھولیں۔ اصل وارڈ، حالت اور بستر یا موصولہ مریض کی تلاش صرف خانے محدود کرتی، گنتی پورے وارڈ کی رہتی ہے۔ شرطیں صاف سب بحال۔ خالی نتیجہ وارڈ، بستر یا تفصیل کی کمی بتاتا؛ تازہ اصل سرور پڑھتا، دوبارہ کوشش صرف ناکام مطالعہ۔",
+    "وارڈ کے بستر و گنتی: دستیاب، محفوظ، زیر استعمال، ڈسچارج یا صفائی اور خدمت سے باہر۔ دستیاب سبز، محفوظ نیلا، زیر استعمال سرخ، صفائی زرد و باہر سرمئی؛ عبارت بھی حالت بتاتی ہے۔ صفائی کی گنتی آزاد بستر نہیں۔ کی بورڈ، ٹچ یا ماؤس سے اصل بستر چنیں؛ جگہ، وقت، مجاز شناخت و رکا ہوا مرحلہ ساتھ۔ بستر مریض کی شناخت نہیں۔",
+    "بستر انتظام کی اجازت سے دستیاب یا صفائی والے بستر کو خدمت سے باہر کریں۔ محفوظ یا زیر استعمال پر یہاں عمل نہیں۔ باہر بستر پر واپسی دستیاب حالت مانگتی؛ اصل تیاری پہلے چیک۔ یہ خدمت کی تیاری ہے، جسمانی صفائی یا داخلہ ڈسچارج کلیئرنس نہیں۔ ان کے لیے طبی، وارڈ یا انتظامی طریقہ ہے۔",
+    "بستر کی خدمت کی اصل وجہ3تا300حروف۔ اصل بستر، وارڈ و تیاری کا نشان، جائزہ، پھر ایک تصدیق۔ اصل بستر، ہدف و وجہ منجمد؛ وجہ پر واپس معلومات رکھتا ہے۔ بدلا مسودہ بند کرنے سے پہلے پوچھتا۔ ارسال سے پہلے اصل صارف، اجازت، خدمت و بستر کی حالت، وقت و مریض دوبارہ چیک۔ بدلاؤ پر پرانا جائزہ رکے، وجہ محفوظ۔",
+    "بستر واقعہ اسی حالت و گنتی کو فوراً تازہ کرتا؛ پرانی مریض تفصیل تازہ سرور مطالعے تک چھپتی۔ تفصیل تازہ ہوتے خدمت بدلنا بند۔ براہ راست یا رابطہ بحالی کیفیت بتاتی؛ بحالی پر پوری فہرست دوبارہ، پولنگ نہیں۔ واقعہ منتخب بستر یا وجہ خاموش نہیں بدلتا۔ وجہ رکھ کر تازہ بستر پڑھیں واضح نیا اصل قبول کرکے جائزہ دیتا ہے۔",
+    "جواب گم تو اصل درخواست، کلید، وجہ و بستر رکھیں؛ متبادل نہیں۔ اصل نتیجہ پڑھیں تازہ فہرست میں عین بستر دیکھتا؛ وہ ملنے اور جائزے کے بعد ہی مسودہ کھلے۔ اصل کوشش مدت میں عین کلید و معلومات، خودکار نہیں۔ بدلی حالت پچھلے عمل کے افسر کا ثبوت نہیں۔ غائب، مدت یا نامعلوم پر آئی ٹی۔ کوڈ و حوالہ برقرار؛ انکار کی وجہ درست پھر نیا جائزہ۔",
+    "یہ داخلہ کھولیں اصل داخلے اور مجاز داخلہ صفحے پر ہی، عین ریکارڈ کھولتا ہے۔ مریض کا بستر منتظر داخلوں میں؛ خانہ چننے سے محفوظ نہیں ہوتا۔ منتقلی و ڈسچارج صفائی کے الگ اجازت و طریقے۔ نام صرف سرور کی مجاز موصولہ تفصیل سے۔",
+    "ایف ون یا مدد موجودہ خانے کی دو زبان رہنمائی، فوکس و مسودہ رکھتی۔ ترتیب اور اصل کی بورڈ جمع، منفی، صفر مشترک زوم100تا250، ری سیٹ100۔ دونوں تھیم و اردو میں رنگ کے ساتھ عبارت۔ صرف ریکارڈ میں مطالعہ؛ بند ہوتی خدمت موجودہ کام و اطلاع رکھتی، فہرست سرور سے۔ اس صفحے کا پرنٹ یا سکین راستہ نہیں۔ انسانی نئے ریکارڈ، اردو، کردار و تدوین جائزہ باقی۔",
+    "وارڈ کی تصدیق چاہیے کی اطلاع کھول کر اصل موصولہ بستر دیکھیں۔ سرور نے متعلقہ وارڈ تفصیل نہیں دی، اس لیے ان کی خدمت کے اعمال نہیں۔ داخلہ ڈیسک یا آئی ٹی سے وارڈ تصدیق پھر تازہ؛ وارڈ فرض یا بستر قابل استعمال نہ مانیں۔"
+  ],
+  faq: [
+    [
+      "Does selecting a green tile reserve it?",
+      "Open this admission is shown only for an actual occupied/reserved admission and a permitted Admissions screen; it opens that exact current record. Allocating a patient belongs to Pending admissions & allocation; this board does not reserve a bed by selecting its tile. Ward transfers and discharge cleaning follow their own permissions and workflows. Patient names are only those the server returns to your permission."
+    ],
+    [
+      "What do counts and colours mean?",
+      "Each ward groups its beds beside counts: available, reserved, occupied, turnover and out of service. Available is green, Reserved blue, Occupied red, Dirty/Cleaning amber and Out of service grey; every tile also says the state in words. Turnover includes discharge/cleaning, never a free bed. Select an actual bed tile by keyboard, touch or mouse; its location, state time, permitted patient identity and discharge blocker appear beside the board. A bed number is not patient identity."
+    ],
+    [
+      "Can I disable an occupied bed?",
+      "Only a user with bed-management permission may Take bed out of service from Available, Dirty or Cleaning. Reserved and Occupied beds have no service-change action here. Return bed to service is offered on Out of service and requests Available. Verify the real bed is ready before returning it. This changes service readiness; it does not certify physical cleaning or clear an admission’s discharge. Use the clinical/ward/Ops handover for those tasks."
+    ],
+    [
+      "How do I change service readiness?",
+      "Enter Bed service reason, 3–300 factual characters. Check the actual bed/ward/readiness statement, Review bed change, then Confirm bed change once. The review freezes the original bed, target and reason; Back to bed reason keeps input. Closing a changed draft asks before discarding. Before sending, current actor, permission, service view and exact bed state/time/occupancy are checked again. A changed bed blocks the stale review and keeps the reason."
+    ],
+    [
+      "What if another terminal changes the bed?",
+      "Bed events immediately update the affected state and ward counts; old occupant details are hidden until the server reread confirms them. Refreshing bed details disables service changes during reconciliation. Live/Reconnecting tells whether the data is current; reconnect rereads the whole matrix. There is no polling. An event never changes your selected bed or typed reason silently. Read current bed and keep reason explicitly accepts the new source before another review."
+    ],
+    [
+      "What if the response is lost?",
+      "If a response is lost, keep the original request/key, reason and bed; do not make a replacement. Read original bed result checks that exact bed in a fresh matrix. Only after that original bed is found may Bed result reviewed; return to draft release the hold. Retry original request uses the identical key/body only within its retention, never automatically. A changed current state does not prove who performed an earlier action. If absent, outside retention or still uncertain, ask IT. Server errors remain visible by code/reference; correct a definite refusal before a new reviewed action."
+    ],
+    [
+      "Can returning a bed clear discharge?",
+      "Only a user with bed-management permission may Take bed out of service from Available, Dirty or Cleaning. Reserved and Occupied beds have no service-change action here. Return bed to service is offered on Out of service and requests Available. Verify the real bed is ready before returning it. This changes service readiness; it does not certify physical cleaning or clear an admission’s discharge. Use the clinical/ward/Ops handover for those tasks."
+    ],
+    [
+      "Why does a bed need its ward verified?",
+      "If beds need their ward verified appears, open that notice to read the actual returned bed labels. The server supplied no matching ward summary, so no service changes are offered for those beds. Ask Admissions or IT to verify the ward and refresh; never invent a ward or assume the bed is usable."
+    ]
+  ],
+  faqUr: [
+    [
+      "سبز خانہ چننا بستر محفوظ کرتا؟",
+      "یہ داخلہ کھولیں اصل داخلے اور مجاز داخلہ صفحے پر ہی، عین ریکارڈ کھولتا ہے۔ مریض کا بستر منتظر داخلوں میں؛ خانہ چننے سے محفوظ نہیں ہوتا۔ منتقلی و ڈسچارج صفائی کے الگ اجازت و طریقے۔ نام صرف سرور کی مجاز موصولہ تفصیل سے۔"
+    ],
+    [
+      "گنتی و رنگ کا مطلب؟",
+      "وارڈ کے بستر و گنتی: دستیاب، محفوظ، زیر استعمال، ڈسچارج یا صفائی اور خدمت سے باہر۔ دستیاب سبز، محفوظ نیلا، زیر استعمال سرخ، صفائی زرد و باہر سرمئی؛ عبارت بھی حالت بتاتی ہے۔ صفائی کی گنتی آزاد بستر نہیں۔ کی بورڈ، ٹچ یا ماؤس سے اصل بستر چنیں؛ جگہ، وقت، مجاز شناخت و رکا ہوا مرحلہ ساتھ۔ بستر مریض کی شناخت نہیں۔"
+    ],
+    [
+      "زیر استعمال بستر بند کر سکتے؟",
+      "بستر انتظام کی اجازت سے دستیاب یا صفائی والے بستر کو خدمت سے باہر کریں۔ محفوظ یا زیر استعمال پر یہاں عمل نہیں۔ باہر بستر پر واپسی دستیاب حالت مانگتی؛ اصل تیاری پہلے چیک۔ یہ خدمت کی تیاری ہے، جسمانی صفائی یا داخلہ ڈسچارج کلیئرنس نہیں۔ ان کے لیے طبی، وارڈ یا انتظامی طریقہ ہے۔"
+    ],
+    [
+      "خدمت کی تیاری کیسے بدلیں؟",
+      "بستر کی خدمت کی اصل وجہ3تا300حروف۔ اصل بستر، وارڈ و تیاری کا نشان، جائزہ، پھر ایک تصدیق۔ اصل بستر، ہدف و وجہ منجمد؛ وجہ پر واپس معلومات رکھتا ہے۔ بدلا مسودہ بند کرنے سے پہلے پوچھتا۔ ارسال سے پہلے اصل صارف، اجازت، خدمت و بستر کی حالت، وقت و مریض دوبارہ چیک۔ بدلاؤ پر پرانا جائزہ رکے، وجہ محفوظ۔"
+    ],
+    [
+      "دوسرا ٹرمینل بستر بدلے تو؟",
+      "بستر واقعہ اسی حالت و گنتی کو فوراً تازہ کرتا؛ پرانی مریض تفصیل تازہ سرور مطالعے تک چھپتی۔ تفصیل تازہ ہوتے خدمت بدلنا بند۔ براہ راست یا رابطہ بحالی کیفیت بتاتی؛ بحالی پر پوری فہرست دوبارہ، پولنگ نہیں۔ واقعہ منتخب بستر یا وجہ خاموش نہیں بدلتا۔ وجہ رکھ کر تازہ بستر پڑھیں واضح نیا اصل قبول کرکے جائزہ دیتا ہے۔"
+    ],
+    [
+      "جواب گم ہو تو؟",
+      "جواب گم تو اصل درخواست، کلید، وجہ و بستر رکھیں؛ متبادل نہیں۔ اصل نتیجہ پڑھیں تازہ فہرست میں عین بستر دیکھتا؛ وہ ملنے اور جائزے کے بعد ہی مسودہ کھلے۔ اصل کوشش مدت میں عین کلید و معلومات، خودکار نہیں۔ بدلی حالت پچھلے عمل کے افسر کا ثبوت نہیں۔ غائب، مدت یا نامعلوم پر آئی ٹی۔ کوڈ و حوالہ برقرار؛ انکار کی وجہ درست پھر نیا جائزہ۔"
+    ],
+    [
+      "واپسی سے ڈسچارج کلیئر ہوتا؟",
+      "بستر انتظام کی اجازت سے دستیاب یا صفائی والے بستر کو خدمت سے باہر کریں۔ محفوظ یا زیر استعمال پر یہاں عمل نہیں۔ باہر بستر پر واپسی دستیاب حالت مانگتی؛ اصل تیاری پہلے چیک۔ یہ خدمت کی تیاری ہے، جسمانی صفائی یا داخلہ ڈسچارج کلیئرنس نہیں۔ ان کے لیے طبی، وارڈ یا انتظامی طریقہ ہے۔"
+    ],
+    [
+      "بستر کے وارڈ کی تصدیق کیوں؟",
+      "وارڈ کی تصدیق چاہیے کی اطلاع کھول کر اصل موصولہ بستر دیکھیں۔ سرور نے متعلقہ وارڈ تفصیل نہیں دی، اس لیے ان کی خدمت کے اعمال نہیں۔ داخلہ ڈیسک یا آئی ٹی سے وارڈ تصدیق پھر تازہ؛ وارڈ فرض یا بستر قابل استعمال نہ مانیں۔"
+    ]
+  ]
+},
  pending_admissions: {
   title: "Pending admissions & allocation",
   titleUr: "منتظر داخلے اور بستر کی تعیناتی",

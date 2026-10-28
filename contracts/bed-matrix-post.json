@@ -1,0 +1,295 @@
+{
+  "method": "POST",
+  "path": "/api/v1/beds/{bed_id}/state",
+  "summary": "Take a bed out of / back into service",
+  "tags": [
+    "IPD"
+  ],
+  "permissions": [
+    "ipd.bed.manage"
+  ],
+  "permissions_mode": "all",
+  "idempotency_key": true,
+  "description": "**Required permission:** `ipd.bed.manage`\n\n**Required permission:** `ipd.bed.manage`",
+  "roles_allowed": [
+    "admissions_officer"
+  ],
+  "parameters": [
+    {
+      "name": "bed_id",
+      "in": "path",
+      "required": true,
+      "description": "",
+      "schema": {
+        "type": "integer",
+        "title": "Bed Id"
+      }
+    },
+    {
+      "name": "Idempotency-Key",
+      "in": "header",
+      "required": false,
+      "description": "Unique per logical action; retries return the first result",
+      "schema": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "description": "Unique per logical action; retries return the first result",
+        "title": "Idempotency-Key"
+      }
+    }
+  ],
+  "request_body": {
+    "title": "BedStateIn",
+    "properties": {
+      "state": {
+        "type": "string",
+        "enum": [
+          "OutOfService",
+          "Available"
+        ],
+        "title": "State"
+      },
+      "reason": {
+        "type": "string",
+        "maxLength": 300,
+        "minLength": 3,
+        "title": "Reason"
+      }
+    },
+    "type": "object",
+    "required": [
+      "state",
+      "reason"
+    ]
+  },
+  "request_content_type": "application/json",
+  "response_schema": {
+    "title": "Envelope[BedOut]",
+    "properties": {
+      "data": {
+        "title": "BedOut",
+        "properties": {
+          "bed_id": {
+            "type": "integer",
+            "title": "Bed Id"
+          },
+          "ward_id": {
+            "type": "integer",
+            "title": "Ward Id"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "current_state": {
+            "type": "string",
+            "enum": [
+              "Available",
+              "Reserved",
+              "Occupied",
+              "Dirty",
+              "Cleaning",
+              "OutOfService"
+            ],
+            "title": "Current State"
+          },
+          "state_changed_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "State Changed At"
+          },
+          "is_overflow_allowed": {
+            "type": "boolean",
+            "title": "Is Overflow Allowed"
+          },
+          "sort_order": {
+            "type": "integer",
+            "title": "Sort Order"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active"
+          },
+          "row_version": {
+            "type": "integer",
+            "title": "Row Version"
+          }
+        },
+        "type": "object",
+        "required": [
+          "bed_id",
+          "ward_id",
+          "label",
+          "current_state",
+          "state_changed_at",
+          "is_overflow_allowed",
+          "sort_order",
+          "is_active",
+          "row_version"
+        ]
+      },
+      "meta": {
+        "title": "Meta",
+        "properties": {
+          "server_time": {
+            "type": "string",
+            "title": "Server Time",
+            "description": "Server clock (UTC). Use it to detect terminal clock skew."
+          },
+          "page": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page"
+          },
+          "page_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page Size"
+          },
+          "total_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total Count"
+          },
+          "next_cursor": {
+            "title": "Next Cursor"
+          }
+        },
+        "type": "object",
+        "required": [
+          "server_time"
+        ]
+      },
+      "request_id": {
+        "type": "string",
+        "title": "Request Id"
+      }
+    },
+    "type": "object",
+    "required": [
+      "data",
+      "meta",
+      "request_id"
+    ]
+  },
+  "recorded_example": {
+    "request": {
+      "path": "/api/v1/beds/2/state",
+      "body": {
+        "state": "OutOfService",
+        "reason": "broken rail"
+      }
+    },
+    "response": {
+      "status": 200,
+      "body": {
+        "data": {
+          "bed_id": 2,
+          "ward_id": 2,
+          "label": "GW-1",
+          "current_state": "OutOfService",
+          "state_changed_at": "2026-09-27T17:38:56.146222+00:00",
+          "is_overflow_allowed": false,
+          "sort_order": 0,
+          "is_active": true,
+          "row_version": 2
+        },
+        "meta": {
+          "server_time": "2026-09-27T17:38:56.181202+00:00"
+        },
+        "request_id": "aad32480dd654f26839aef38ff9eca57"
+      }
+    },
+    "errors_seen": [
+      "FORBIDDEN"
+    ],
+    "events_emitted": [
+      "bed.state_changed"
+    ]
+  },
+  "errors": [
+    {
+      "code": "FORBIDDEN",
+      "http_status": 403,
+      "message": "You do not have permission to do this.",
+      "retryable": false,
+      "category": "auth",
+      "ui_action": "Explain and hide the action (check x-permissions)."
+    }
+  ],
+  "errors_seen_in_tests": [
+    "FORBIDDEN"
+  ],
+  "used_by_screens": [
+    "bed_matrix"
+  ],
+  "used_by_workflows": [],
+  "typescript_example": "// Take a bed out of / back into service  (permissions: ipd.bed.manage)\nexport const bedState = (bed_id, body) =>\n  api(\"POST\", `/beds/${bed_id}/state`, body, { idempotent: true });   // api(): see get_guide('envelope-and-errors')",
+  "access": {
+    "authentication": "user",
+    "permissions": [
+      "ipd.bed.manage"
+    ],
+    "permissions_mode": "all",
+    "who": "holders of ipd.bed.manage",
+    "roles_allowed": [
+      "admissions_officer"
+    ]
+  },
+  "write_semantics": {
+    "protection": "idempotency_key",
+    "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+    "reconcile_with": null,
+    "emits_events": [
+      "bed.state_changed"
+    ],
+    "prints": false,
+    "related_state_machine": "bed"
+  },
+  "emits_events": [
+    "bed.state_changed"
+  ],
+  "list": null,
+  "cross_field_rules": {},
+  "errors_detail": [
+    {
+      "code": "FORBIDDEN",
+      "http_status": 403,
+      "message": "You do not have permission to do this.",
+      "retryable": false,
+      "ui_action": "Explain and hide the action (check x-permissions).",
+      "source": [
+        "seen_in_tests"
+      ],
+      "details_fields": [
+        "any_of",
+        "required"
+      ],
+      "details_from": "POST /api/v1/admin/departments"
+    }
+  ]
+}

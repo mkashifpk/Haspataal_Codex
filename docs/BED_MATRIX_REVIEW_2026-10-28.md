@@ -1,0 +1,34 @@
+# Live Bed Matrix — Phase4 screen52
+
+Built from clean354abea against server2026-10-27T21:34:51.340676+00:00, contract58db76bf7d59ef6d9870/rubric378ea8e0f42b. Source `src/screens/BedMatrix.tsx`, `bed-matrix-policy.ts`, MCP-generated `bed_matrix.ts`; current screen/endpoint/event/quality/design contracts saved under `contracts/bed*`.
+
+The admissions officer reads the shift's ward capacity and changes a verified bed's service readiness with a factual reason. Ward bays are schematic groups, not an invented physical floor plan. Colours follow the prescribed state rule and always have text. Existing terminal components/tokens are reused; H09's shared design ownership and named editor review remain human-owned.
+
+The matrix has ward/state/text filters, whole-ward counts, bed selection/current context, exact admission handover, and reviewed service changes. Selecting a tile never allocates a patient. State changes use only `state`/`reason` plus the original Idempotency-Key: no guessed expected_version field. Preflight rechecks actor/permission/service view and the exact bed's state/time/occupancy/ward context; the server remains authoritative for a race after that read. Drafts are kept, original responses are reconciled by exact bed, and writes never retry automatically. An explicit identical-key retry is bounded by the shared retention rules.
+
+## Observed checks
+
+| Contract/task | Actual evidence | Limits |
+|---|---|---|
+| GET /beds/matrix | Fresh owned ward6/beds35–37 and counts; include_beds=true; cashier403; filters/empty results; genuine failed-read recovery | Every denied role and hospital service transition not exercised |
+| POST /beds/{bed_id}/state | Available→OutOfService200/v2; identical-key replay200/v2 with replay flag; returnAvailable200/v3; invalidreason422; cashier403; Reserved409BED_STATE_INVALID | Dirty/Cleaning/Occupied readiness guards covered by policy tests; no physical clinical/cleaning transition claimed |
+| Reviewed write/current source | Actual UI double-click onePOST; lost real committed200→exact-bed read→same-key/body replay200; final source after ward guard also passed separate new OutOfService/Available200 actions | No atomic expected-version guarantee claimed beyond contract/state guards |
+| bed.state_changed | Another actual terminal changed same owned bed; tile/count update before REST reconciliation, stale review disabled and reason retained | No invented occupant from sparse event payload |
+| Reconnect | Real actor socket terminated after actual heartbeat; observed Reconnecting then resumedLive/resync and full matrix reread, no business write | Long outage/retention expiry remains human review |
+| Handover | Fresh synthetic admission7/SCN2f7273/bed37 opens exact current Pending Admissions detail and known-ID field | Pending Admissions' accepted184items are not duplicated; this small direct-entry parameter introduces no separate new ready rubric claim |
+| F1/visuals/zoom | Actual field/dialog/notice F1 and restored focus; EN/UR current screenshots; both themes250 root layout; native plus/minus/0 agrees with Settings100–250 | Native Urdu/editor/device review and busiest-hour timing remain pending |
+| Missing ward context | Actual cleanup matrix omits deactivatedward6 but returns35–37; visible notice lists actual bed labels, no selectable/actionable unverified bed; guard tests and final actual UI pass | Backend issue38New; never fabricate ward status or hide the discrepancy |
+
+191/191 testsPASS (`artifacts/bed-matrix-verified-tests.log`); mandatory buildPASS (`bed-matrix-ward-verified-build.log`):52screens/1032controls/428help groups/63FAQ seeds/30workspaceguides, TypeScript and DEV bundle. Existing bundle-size warning only. Earlier final targeted26testsPASS; after the ward guard5policy tests and full191PASS. Live32requests and Electron smokePASS. Actual final renderer and per-run status are in `bed-matrix-verification-2026-10-28.json` and `bed-matrix-ui-evidence-2026-10-28.json`.
+
+The first lost-reply test stopped because destroying an already-buffered response did not emit a read error; the actual200 was reconciled before a separate restoration/new run. Test-only injection now emits an error, retaining real status/body in trace. The second runner's business sections passed but a one-shot matrix loss was superseded by a newer successful event read; the sustained read-loss continuation passed. Reconnect instrumentation initially rejected dynamic import before any socket change; createRequire corrected that and the actual socket interruption passed. Original failed results are preserved; neither failed runner is labelled a full pass. No q:tested/full-plan or human acceptance is claimed.
+
+## Backend reports and synthetic cleanup
+
+Issue37New: POSTbedstate errors omit actual409BED_STATE_INVALID (requestbd3a9d9253b34e3a8544d13ea19d7e9e) and422VALIDATION_ERROR (2875b374af2e4627b8ad66726fe2a649). Backend guard is correct. Issue38New: after own ward6 deactivation200c55086cff6bf4b8b8c7b416b5e0a4112, matrix200d35ac9a78bf34dbebca67b9a6e409058 excludes its ward summary but still contains its beds. Payloads/receipts saved in `bed-matrix-issue-*` and `bed-matrix-orphan-ward-*` JSON. Prior35/36 remainNew, unrelated and unchanged.
+
+RunDEMO-BED-MATRIX-1793180412926 used only new owned ward6/codeDBED3180413654/beds35–37 and fresh scenario2f7273(patient7/ticket7/admission7). Admission7 was cancelled and bed37released; all three beds were readAvailable/noadmission. Ward6 was deactivated, intentionally reactivated once for final-source positive guard verification with NEW actions/keys, then deactivated again (7232a04fb0134d86ab4f451b4f74d463); final matrix d1fdd61b3edb4f62ae71452c4e0ee1a2 verifies no ward6summary and still-returned unverified bed rows. No original completed action/key was replayed as new work. Metadata/history are retained; no real patient/bed, physical care/cleaning, medicine, exposure or money. Earlier records were read by the full matrix but never mutated. All actors restored preferences/logged out/closed; no uncertain write remains.
+
+## Human check
+
+Open Admissions Desk → Live bed matrix. Use NEW synthetic bed setup through the app/authorized upstream role. Check all colours/text/counts and keyboard/touch selection; reserve a new synthetic admission upstream and verify identity/handover and unavailable service actions. Review and reverse a permitted service change with a factual reason. Change the same bed from another terminal while a draft is open; verify retained reason/current-state comparison. Check actual reconnect/offline and original-key recovery, read-only/service views, EN/UR/themes and100–250zoom. Never mark real cleaning/discharge from this screen. Inspect the unverified-ward notice until backend38is answered. Only the human starts/records/signs the portal workspace review; no agent Review code is used.

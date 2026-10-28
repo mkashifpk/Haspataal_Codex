@@ -9,6 +9,9 @@ export function setLanguage(value: string) {
   language = value;
 }
 const ur: Record<string, string> = {
+"This bed no longer permits that action. Read the current bed and keep your reason.":"یہ بستر اب یہ عمل نہیں مانتا۔ وجہ رکھ کر تازہ بستر پڑھیں۔",
+"Check the actual bed, ward and service readiness before review.":"جائزے سے پہلے اصل بستر، وارڈ اور خدمت کی تیاری چیک کریں۔",
+"Enter a factual bed service reason of 3–300 characters.":"بستر کی خدمت کی اصل وجہ3تا300حروف دیں۔",
 "AdmissionPending":"داخلہ منتظر",
 "Waitlisted":"انتظار میں",
 "BedReserved":"بستر محفوظ",

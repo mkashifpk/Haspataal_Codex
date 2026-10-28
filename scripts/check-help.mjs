@@ -206,6 +206,7 @@ export function checkHelp({
       "DutyRoster",
       "RollCall",
       "PendingAdmissions",
+      "BedMatrix",
       "LabVerification",
       "CriticalResultsBench",
       "CriticalResultsDoctor",

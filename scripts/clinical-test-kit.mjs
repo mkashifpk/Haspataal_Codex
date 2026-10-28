@@ -171,6 +171,10 @@ export async function session(name, account = "demo.doctor") {
                 a.reply_lost = true;
                 persist();
                 response.destroy(new Error("TEST: lost real DEV reply"));
+                // A fully buffered response may already be complete, so destroy alone
+                // need not emit an error. Reject the client read explicitly while
+                // retaining the actual committed status/body in this trace.
+                emit("error", new Error("TEST: lost real DEV reply"));
                 return true;
               }
               if (t.delayPath && a.path.includes(t.delayPath)) {

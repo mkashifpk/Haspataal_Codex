@@ -1,6 +1,7 @@
 import type { Bilingual } from "./foundation-help";
 // Recovery guidance, not a substitute for server validation or authorization.
 export const foundationErrors: Record<string, Bilingual> = {
+ BED_STATE_INVALID: ["The bed state changed. Refresh the actual matrix and keep your reason. Reserved or occupied beds cannot be changed here; no automatic retry.","بستر کی حالت بدلی۔ اصل فہرست تازہ اور وجہ محفوظ رکھیں۔ محفوظ یا زیر استعمال یہاں نہیں بدلتے؛ خودکار تکرار نہیں۔"],
 ADMISSION_STATE_INVALID:["Read the original admission and compare its current state. Keep your draft. Only pending admissions can be cancelled; admitted patients need discharge. No automatic retry.","اصل داخلہ پڑھ کر موجودہ حالت ملائیں۔ مسودہ رکھیں۔ منسوخ صرف منتظر داخلہ؛ داخل مریض کو ڈسچارج۔ خودکار تکرار نہیں۔"],
 BED_NO_LONGER_AVAILABLE:["Another action took this bed. Refresh the actual bed matrix and choose an available bed again; keep the rest of the draft. Never invent a replacement bed or retry this write automatically.","بستر دوسرے عمل کو مل گیا۔ اصل بستر فہرست تازہ کرکے دستیاب بستر دوبارہ چنیں؛ باقی مسودہ رکھیں۔ فرضی بستر یا خودکار ارسال نہیں۔"],
 BILLING_DEFERRED:["The emergency stay is deferred, not free. Resolve any temporary identity through Reception, then confirm Cash or an active Panel. Read current billing before final bill or Billing Settlement.","ہنگامی قیام ملتوی ہے، مفت نہیں۔ استقبالیہ سے عارضی شناخت حل پھر نقد یا فعال پینل تصدیق کریں۔ حتمی بل و کلیئرنس سے پہلے تازہ بل پڑھیں۔"],

@@ -1,0 +1,39 @@
+{
+  "event_type": "bed.state_changed",
+  "description": "A bed changed state; update the live bed matrix.",
+  "audience": "permission ipd.bed.view",
+  "payload_fields": {
+    "bed_id": "int",
+    "ward_id": "int",
+    "label": "str",
+    "from_state": "str",
+    "to_state": "str"
+  },
+  "priority": "normal",
+  "workflow": "§2.1",
+  "presentation": null,
+  "subscribed_by_screens": [
+    "bed_matrix",
+    "ward_transfer"
+  ],
+  "protocol": "WS /ws/v1/events: send {type:'auth', access_token, resume_from, topics}; get_guide('realtime')",
+  "emitted_by_operations": [
+    "POST /admissions/code-red",
+    "POST /admissions/{admission_id}/admit",
+    "POST /admissions/{admission_id}/allocate-bed",
+    "POST /admissions/{admission_id}/arrived",
+    "POST /admissions/{admission_id}/cancel",
+    "POST /admissions/{admission_id}/discharge",
+    "POST /admissions/{admission_id}/overflow-override",
+    "POST /admissions/{admission_id}/transfer",
+    "POST /badge-stations/scans",
+    "POST /beds/{bed_id}/mark-cleaned",
+    "POST /beds/{bed_id}/state"
+  ],
+  "emitted_in_code": [
+    "migrations:hms_bed_after"
+  ],
+  "rereads_by_id": [],
+  "rereads_by_id_means": "the subscribing screens' reads of one record whose id the payload carries",
+  "note": "emitted_by_operations: seen in the tests; emitted_in_code: every place that emits it (worker jobs and database triggers included). Treat the payload as a hint and re-read what it names."
+}

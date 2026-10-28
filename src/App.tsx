@@ -34,6 +34,7 @@ import { ImagingQualitySetup } from './screens/ImagingQualitySetup';
 import { DiagnosticServicesList } from './screens/DiagnosticServicesList';
 import { LabBench } from './screens/LabBench';
 import { ImagingRepeats } from './screens/ImagingRepeats';
+import { BedMatrix } from './screens/BedMatrix';
 import { PendingAdmissions } from './screens/PendingAdmissions';
 import { RollCall } from './screens/RollCall';
 import { DutyRoster } from './screens/DutyRoster';
@@ -60,6 +61,7 @@ import { createMetadataFlight } from "./metadata-flight";
 import { createBootstrapSeed } from "./bootstrap-seed";
 type WorkspaceSnapshot = {establishment:EstablishmentOut;settings:any;me:MeOut;permittedWorkspaces:MeOut["workspaces"]};
 const labels: Record<string, [string, string, string]> = {
+  bed_matrix: ["Live bed matrix", "بستروں کی تازہ صورت حال", "▦"],
   roll_call: ["Roll call", "حاضری کی فہرست", "☑"],
   pending_admissions: ["Pending admissions & allocation", "منتظر داخلے اور بستر کی تعیناتی", "▤"],
   duty_roster: ["Nursing duty roster", "نرسنگ ڈیوٹی روسٹر", "▦"],
@@ -123,6 +125,7 @@ const labels: Record<string, [string, string, string]> = {
 };
 const frontDeskScreens = new Set([
   'roll_call',
+  'bed_matrix',
   'pending_admissions',
   'duty_roster',
   'imaging_repeats',
@@ -608,6 +611,7 @@ export function App() {
       setLogoutBusy(false);
     }
   }
+  const [bedAdmissionEntry,setBedAdmissionEntry]=useState<{userId:number;admissionId:number}>();
   const [imagingSetupEntry, setImagingSetupEntry] = useState(false);
   const facilitySetupScope = !!user && user.permissions.includes('establishment.manage') && user.permissions.includes('diagnostics.setup.manage') && (screen === 'facility_profile' || (screen === 'imaging_quality_setup' && imagingSetupEntry));
   const facilitySetupHandbook = useLoad(() => facilitySetupScope && user ? call<HandbookOut>('service-setup-handbook').then(data=>({userId:user.user_id, data})) : Promise.resolve(undefined), [facilitySetupScope,user?.user_id,revision]);
@@ -772,6 +776,7 @@ export function App() {
     'lab_send_outs',
     'imaging_quality_setup',
     'roll_call',
+  'bed_matrix',
   'pending_admissions',
   'duty_roster',
     'imaging_repeats',
@@ -821,7 +826,7 @@ export function App() {
         )))) &&
       est?.views.screens.find((v) => v.screen_id === id)?.view !== "hidden" &&
       (id !== "imaging_quality_setup" || ["full","open_work","records"].includes(est?.views.screens.find(v=>v.screen_id===id)?.view || "")) &&
-      (!["imaging_repeats","imaging_outsourced","critical_results_radiology","radiology_worklist","rx_queue","dispense","order_queries","otc","charity_override","lab_only_walkin","lab_bench","lab_send_outs","lab_verification","critical_results_bench","critical_results_verifier","critical_results_doctor"].includes(id) || ["full", "open_work", "records"].includes(est?.views.screens.find(v => v.screen_id === id)?.view || "")),
+      (!["bed_matrix","pending_admissions","imaging_repeats","imaging_outsourced","critical_results_radiology","radiology_worklist","rx_queue","dispense","order_queries","otc","charity_override","lab_only_walkin","lab_bench","lab_send_outs","lab_verification","critical_results_bench","critical_results_verifier","critical_results_doctor"].includes(id) || ["full", "open_work", "records"].includes(est?.views.screens.find(v => v.screen_id === id)?.view || "")),
   );
   const view = est?.views.workspaces.find(
     (v) => v.workspace === workspace,
@@ -1183,7 +1188,8 @@ export function App() {
               {screen === 'imaging_quality_setup' && est && <ImagingQualitySetup key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} fromFacility={imagingSetupEntry}/>}
               {screen === 'diagnostic_services_list' && <DiagnosticServicesList key={user.user_id} user={user} connected={connected} stream={stream}/>}
               {screen === 'lab_send_outs' && est && <LabSendOuts key={user.user_id} user={user} connected={connected} stream={stream} establishment={est} timeZone={meta?.hospital_timezone}/>}
-              {screen === 'pending_admissions' && est && <PendingAdmissions key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone} currency={meta?.currency_code}/>}
+              {screen === 'bed_matrix' && est && <BedMatrix key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone} onAdmission={nav.includes("pending_admissions")?id=>{if(navigate("pending_admissions"))setBedAdmissionEntry({userId:user.user_id,admissionId:id})}:undefined}/>}
+              {screen === 'pending_admissions' && est && <PendingAdmissions key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone} currency={meta?.currency_code} initialAdmissionId={bedAdmissionEntry?.userId===user.user_id?bedAdmissionEntry.admissionId:undefined}/>}
               {screen === 'roll_call' && <RollCall key={user.user_id} user={user} connected={connected} stream={stream} timeZone={meta?.hospital_timezone}/>}
               {screen === 'duty_roster' && <DutyRoster key={user.user_id} user={user} connected={connected} stream={stream} timeZone={meta?.hospital_timezone}/>}
               {screen === 'imaging_repeats' && est && <ImagingRepeats key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone}/>}
