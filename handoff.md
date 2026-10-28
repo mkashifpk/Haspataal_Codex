@@ -22,3 +22,8 @@ Preserve prior fixtures: ward6inactive/beds35–37Available/admission7Cancelled;
 ## Git/setup/next
 Source commit pending, then proposal receipt/reporting commit. DEV https://hms-dev.netbird.cloud; authorized configuration ignored .dev-terminal.json/.codex/config.toml/local profiles/CA; no secrets committed. PowerShell/Node; bundled Python has pypdf/PIL; Poppler on PATH.
 Human checks docs/CONSENTS_REVIEW_2026-10-28.md with NEW synthetic app records, physical A4/scanner and clinical Urdu/role review. Workspace pending acceptance. Next catalogue screen cost_estimates_admissions55; refresh roadmap/contracts before building.
+
+Source committed1b66807. Final204tests/buildPASS. Pending propose_progress exact saved docs/consents-progress-payload-2026-10-28.json request codex-consents-1b66807-20261028-v1 (21 tested items); then verify receipt and reporting commit. No active implementation/commands/business writes.
+
+## Final handoff
+Source1b66807aef6b406c55f0a27d3877131817907885 committed. Proposal187 confirmed saved and independently verified pending,21 tested items, request codex-consents-1b66807-20261028-v1; exact payload/receipt docs/consents-progress-{payload,receipt}-2026-10-28.json. Proposal187 is awaiting human review on /docs -> My progress.185/186 unchanged pending, no human reviews. No implementation in progress, running commands or uncertain business writes. Final204tests/build passed. Reporting-only commit follows this handoff; working tree expected clean. Next action: human manual checklist in docs/CONSENTS_REVIEW_2026-10-28.md, wait for backend39 eligibility answer; only then/new request start cost_estimates_admissions55 with refreshed roadmap/contracts. Do not repeat fixtures or resubmit unchanged claims.
