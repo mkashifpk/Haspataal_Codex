@@ -10,6 +10,112 @@ export type HelpPage = {
   faqUr: [string, string][];
 };
 export const help: Record<string, HelpPage> = {
+ pending_admissions: {
+  title: "Pending admissions & allocation",
+  titleUr: "منتظر داخلے اور بستر کی تعیناتی",
+  purpose: "The admissions officer turns a doctor’s request into a verified bed and arrival during the shift, then hands a settled discharge bill to the next stage. Match name, MRN and age/date of birth; ward and bed are location, never identity.",
+  purposeUr: "داخلہ افسر شفٹ میں ڈاکٹر کی درخواست کو تصدیق شدہ بستر و آمد تک پہنچاتا، پھر ادا شدہ ڈسچارج بل اگلے مرحلے کو دیتا ہے۔ نام، ایم آر این اور عمر یا تاریخ پیدائش ملائیں؛ وارڈ و بستر مقام ہیں، شناخت نہیں۔ اردو انسانی جائزے تک مسودہ ہے۔",
+  steps: [
+    "Waiting / reserved, Billing to confirm, Discharge billing and All live admissions narrow the actual worklist. Ward is a server filter; Find searches returned names/MRNs/admissions/doctors. Open admission reads its current detail and patient identity. Known admission ID opens actual history, including cancellation; use a number from a real record, never guess. Refresh rereads admissions, beds, panels and the chosen ward waitlist. Failed reads hide stale action data.",
+    "Reserve a bed: choose an actual available bed in the requested ward and confirmed Cash or active Panel. Tick Patient is already at this bedside only for actual arrival; otherwise reserve only. Patient arrived at the bed later changes BedReserved to Admitted/Occupied. A bed taken meanwhile means refresh and choose another. Never treat a lost answer as another admission.",
+    "Add to ward waitlist chooses an actual ward and whole priority 0–100. The ward’s waitlist shows actual people and request times. Arrange overflow bed needs permission, an actual bed and a factual reason of 3–500 characters; the original doctor retains rounds. Cancel this pending admission needs a reason and is offered only for AdmissionPending, Waitlisted or BedReserved. It keeps history, closes waiting and releases a reserved bed; after admission use clinical discharge instead.",
+    "Billing to confirm means deferred, never free. Ask Reception to merge a temporary trauma identity into its verified permanent patient first. Once stable and identified, Confirm billing arrangements selects Cash or an active Panel. Until confirmed, final bill and Billing Settlement are blocked by BILLING_DEFERRED. Charges accrue from day one; do not invent a waiver.",
+    "Finalize this bill reviews the running charges, discount and reason once. A repeated finalization returns the same finalized bill and ignores a new discount; read the original admission first. Give its actual invoice number and balance to the permitted cashier for separate payment. This screen collects no payment. Clear Billing Settlement only after the finalized bill is actually settled and prior stages cleared. The server decides whether settlement is sufficient.",
+    "Already cleared shows the officer and time from the server; do not clear again. DISCHARGE_STAGE_IMMUTABLE rereads discharge status. OUT_OF_ORDER names the pending predecessor, not a completed stage. DISCHARGE_NOT_ALLOWED requires checking discharge state and, for Billing Settlement, the final bill and outstanding settlement. There is no automatic retry.",
+    "Review admission action freezes patient, original state, location and typed fields. Check the review statement, then Confirm admission action once. Fresh permissions, patient identity, admission and bed/panel are checked again before sending. Back to draft keeps input; closing asks before discarding changes. A refusal preserves input. Read current admission and keep draft explicitly compares the new state before a new review; a changed patient identity requires reopening the verified admission.",
+    "If an answer is lost, keep the original action and key. Read the exact admission or discharge status before any replacement. Only arrival’s idempotent request offers explicit identical retry within its retention; state-guarded actions never retry automatically. Missing records and matching names do not prove success. Ask IT if still uncertain. Events silently refresh actual data and reconnect resynchronizes without polling or discarding your draft.",
+    "Photos are optional: ask consent, Take photo or Choose JPEG/PNG, preview/retake or Skip with no reason. Refusal, privacy, injury and emergency never delay a bed, overflow or arrival. Each photo/report upload has its own original key and patient. Reports brought by the patient accept PDF/JPEG/PNG plus type, title, issuing facility and document date. Outside provenance remains separate from hospital results. Open stored files through the authenticated viewer. A failed file never repeats an admission, bill or payment.",
+    "F1 or visible Help explains the current control and restores focus with the draft intact. English/Urdu and both themes use the shared Settings/native-key zoom 100–250%, reset100%. Service views and actions follow server permissions; records-only shows history and files without admission actions. Wristbands, general consent, cost estimates, ward care and cashier payment are separate permitted handovers. Named human fresh-data, Urdu and editor review remain required."
+  ],
+  stepsUr: [
+    "منتظر، بل تصدیق طلب، ڈسچارج بل یا تمام جاری داخلے چنیں۔ وارڈ سرور کی شرط، تلاش موصولہ نام و نمبر میں ہے۔ داخلہ کھولیں تازہ تفصیل اور مریض پڑھتا ہے۔ اصل ریکارڈ کا معلوم داخلہ نمبر منسوخ تاریخ بھی کھولتا ہے؛ اندازہ نہ کریں۔ تازہ اصل فہرست، بستر، پینل اور وارڈ انتظار دوبارہ پڑھتا ہے۔ ناکام مطالعے پر پرانے اعمال نہیں۔",
+    "بستر محفوظ میں مطلوبہ وارڈ کا اصل دستیاب بستر اور نقد یا فعال پینل چنیں۔ مریض بستر پر موجود کا نشان صرف اصل آمد پر؛ ورنہ صرف محفوظ۔ بعد میں آمد محفوظ بستر کو داخل و زیر استعمال کرتی ہے۔ بستر کسی اور کو ملے تو تازہ کرکے دوسرا چنیں۔ گم جواب نیا داخلہ بنانے کی وجہ نہیں۔",
+    "انتظار میں اصل وارڈ اور ترجیح 0 تا 100 مکمل عدد۔ وارڈ انتظار اصل مریض اور وقت دکھاتا ہے۔ دوسرے وارڈ میں اضافی بستر کے لیے اجازت، اصل بستر اور 3 تا 500 حروف کی وجہ؛ اصل ڈاکٹر کے راؤنڈ برقرار۔ منسوخ صرف منتظر، انتظار یا محفوظ حالت میں وجہ سے؛ تاریخ رہتی، انتظار بند اور محفوظ بستر آزاد۔ داخل مریض کے لیے طبی ڈسچارج ہے۔",
+    "بل تصدیق طلب کا مطلب ملتوی، مفت نہیں۔ استقبالیہ سے عارضی حادثاتی شناخت اصل مستقل مریض میں پہلے ضم کرائیں۔ مستحکم و شناخت کے بعد نقد یا فعال پینل تصدیق کریں۔ پہلے حتمی بل و بل کلیئرنس رکتے ہیں۔ پہلے دن سے اخراجات؛ رعایت فرض نہیں۔",
+    "حتمی بل میں جاری اخراجات، رعایت اور وجہ کا ایک جائزہ۔ تکرار وہی بل واپس دیتی، نئی رعایت نظر انداز؛ پہلے اصل داخلہ پڑھیں۔ اصل بل نمبر و بقایا مجاز کیشیئر کو الگ ادائیگی کے لیے دیں؛ یہ صفحہ رقم وصول نہیں کرتا۔ بل تصفیہ کے بعد اور پچھلے مراحل مکمل ہوں تو بل کلیئرنس۔ سرور تصفیہ کا فیصلہ کرتا ہے۔",
+    "پہلے مکمل مرحلہ سرور کے افسر و وقت کے ساتھ؛ دوبارہ نہیں۔ ناقابل تبدیلی انکار پر ڈسچارج حالت پڑھیں۔ ترتیب کا انکار پہلے منتظر مرحلے کو نام دیتا، مکمل مرحلہ نہیں۔ بل کلیئرنس کے انکار میں ڈسچارج، حتمی بل و بقایا چیک۔ خودکار تکرار نہیں۔",
+    "عمل کا جائزہ مریض، اصل حالت، جگہ و معلومات منجمد کرتا ہے۔ نشان پھر ایک تصدیق؛ ارسال سے پہلے تازہ اجازت، شناخت، داخلہ و بستر یا پینل دوبارہ چیک۔ واپس مسودہ معلومات رکھتا، بدلاؤ بند سے پہلے پوچھتا۔ انکار پر مسودہ محفوظ؛ تازہ داخلہ پڑھ کر موازنہ پھر نیا جائزہ۔ شناخت بدلے تو اصل داخلہ دوبارہ کھولیں۔",
+    "جواب گم تو اصل عمل و کلید رکھیں۔ متبادل سے پہلے عین داخلہ یا ڈسچارج پڑھیں۔ صرف آمد کی محفوظ کلید مدت میں عین کوشش دیتی؛ باقی خود نہیں دہرائے جاتے۔ غائب ریکارڈ یا نام کامیابی کا ثبوت نہیں؛ نامعلوم پر آئی ٹی۔ واقعات اصل معلومات خاموش تازہ، رابطہ بحالی پر دوبارہ مطالعہ؛ مسودہ و پولنگ نہیں۔",
+    "تصویر اختیاری: اجازت، کیمرہ یا جے پیگ/پی این جی، پیش منظر، دوبارہ یا بلا وجہ چھوڑیں۔ انکار، پردہ، چوٹ یا ہنگامی حالت بستر و آمد نہیں روکتی۔ ہر اپ لوڈ الگ اصل کلید و مریض۔ بیرونی رپورٹ پی ڈی ایف یا تصویر، قسم، عنوان، ادارہ و تاریخ کے ساتھ؛ اپنے ہسپتال کے نتائج سے الگ۔ محفوظ فائل مجاز ناظر میں کھولیں۔ فائل کی خرابی داخلہ، بل یا ادائیگی نہیں دہراتی۔",
+    "ایف ون یا مدد موجودہ خانے کی رہنمائی اور فوکس و مسودہ رکھتی ہے۔ انگریزی/اردو و دونوں تھیم میں مشترک ترتیب و کی بورڈ زوم100تا250، ری سیٹ100۔ خدمت و اعمال سرور کی اجازت سے؛ صرف ریکارڈ میں تاریخ و فائل، داخلے کے اعمال نہیں۔ شناختی پٹی، رضامندی، تخمینہ، وارڈ نگہداشت اور کیشیئر الگ مجاز کام۔ نامزد انسانی نئے ریکارڈ، اردو و تدوین جائزہ لازم۔"
+  ],
+  faq: [
+    [
+      "How do I reserve without recording arrival?",
+      "Reserve a bed: choose an actual available bed in the requested ward and confirmed Cash or active Panel. Tick Patient is already at this bedside only for actual arrival; otherwise reserve only. Patient arrived at the bed later changes BedReserved to Admitted/Occupied. A bed taken meanwhile means refresh and choose another. Never treat a lost answer as another admission."
+    ],
+    [
+      "What if there is no suitable bed?",
+      "Add to ward waitlist chooses an actual ward and whole priority 0–100. The ward’s waitlist shows actual people and request times. Arrange overflow bed needs permission, an actual bed and a factual reason of 3–500 characters; the original doctor retains rounds. Cancel this pending admission needs a reason and is offered only for AdmissionPending, Waitlisted or BedReserved. It keeps history, closes waiting and releases a reserved bed; after admission use clinical discharge instead."
+    ],
+    [
+      "Is a deferred emergency admission free?",
+      "Billing to confirm means deferred, never free. Ask Reception to merge a temporary trauma identity into its verified permanent patient first. Once stable and identified, Confirm billing arrangements selects Cash or an active Panel. Until confirmed, final bill and Billing Settlement are blocked by BILLING_DEFERRED. Charges accrue from day one; do not invent a waiver."
+    ],
+    [
+      "Does finalizing the bill collect payment?",
+      "Finalize this bill reviews the running charges, discount and reason once. A repeated finalization returns the same finalized bill and ignores a new discount; read the original admission first. Give its actual invoice number and balance to the permitted cashier for separate payment. This screen collects no payment. Clear Billing Settlement only after the finalized bill is actually settled and prior stages cleared. The server decides whether settlement is sufficient."
+    ],
+    [
+      "Why does a cleared stage say already done?",
+      "Already cleared shows the officer and time from the server; do not clear again. DISCHARGE_STAGE_IMMUTABLE rereads discharge status. OUT_OF_ORDER names the pending predecessor, not a completed stage. DISCHARGE_NOT_ALLOWED requires checking discharge state and, for Billing Settlement, the final bill and outstanding settlement. There is no automatic retry."
+    ],
+    [
+      "Can I keep my draft after a refusal?",
+      "Review admission action freezes patient, original state, location and typed fields. Check the review statement, then Confirm admission action once. Fresh permissions, patient identity, admission and bed/panel are checked again before sending. Back to draft keeps input; closing asks before discarding changes. A refusal preserves input. Read current admission and keep draft explicitly compares the new state before a new review; a changed patient identity requires reopening the verified admission."
+    ],
+    [
+      "What if the answer is lost?",
+      "If an answer is lost, keep the original action and key. Read the exact admission or discharge status before any replacement. Only arrival’s idempotent request offers explicit identical retry within its retention; state-guarded actions never retry automatically. Missing records and matching names do not prove success. Ask IT if still uncertain. Events silently refresh actual data and reconnect resynchronizes without polling or discarding your draft."
+    ],
+    [
+      "Must I take a photo before a bed?",
+      "Photos are optional: ask consent, Take photo or Choose JPEG/PNG, preview/retake or Skip with no reason. Refusal, privacy, injury and emergency never delay a bed, overflow or arrival. Each photo/report upload has its own original key and patient. Reports brought by the patient accept PDF/JPEG/PNG plus type, title, issuing facility and document date. Outside provenance remains separate from hospital results. Open stored files through the authenticated viewer. A failed file never repeats an admission, bill or payment."
+    ],
+    [
+      "Who completes the next steps?",
+      "F1 or visible Help explains the current control and restores focus with the draft intact. English/Urdu and both themes use the shared Settings/native-key zoom 100–250%, reset100%. Service views and actions follow server permissions; records-only shows history and files without admission actions. Wristbands, general consent, cost estimates, ward care and cashier payment are separate permitted handovers. Named human fresh-data, Urdu and editor review remain required."
+    ]
+  ],
+  faqUr: [
+    [
+      "آمد درج کیے بغیر بستر کیسے؟",
+      "بستر محفوظ میں مطلوبہ وارڈ کا اصل دستیاب بستر اور نقد یا فعال پینل چنیں۔ مریض بستر پر موجود کا نشان صرف اصل آمد پر؛ ورنہ صرف محفوظ۔ بعد میں آمد محفوظ بستر کو داخل و زیر استعمال کرتی ہے۔ بستر کسی اور کو ملے تو تازہ کرکے دوسرا چنیں۔ گم جواب نیا داخلہ بنانے کی وجہ نہیں۔"
+    ],
+    [
+      "مناسب بستر نہ ہو تو؟",
+      "انتظار میں اصل وارڈ اور ترجیح 0 تا 100 مکمل عدد۔ وارڈ انتظار اصل مریض اور وقت دکھاتا ہے۔ دوسرے وارڈ میں اضافی بستر کے لیے اجازت، اصل بستر اور 3 تا 500 حروف کی وجہ؛ اصل ڈاکٹر کے راؤنڈ برقرار۔ منسوخ صرف منتظر، انتظار یا محفوظ حالت میں وجہ سے؛ تاریخ رہتی، انتظار بند اور محفوظ بستر آزاد۔ داخل مریض کے لیے طبی ڈسچارج ہے۔"
+    ],
+    [
+      "ملتوی ہنگامی داخلہ مفت ہے؟",
+      "بل تصدیق طلب کا مطلب ملتوی، مفت نہیں۔ استقبالیہ سے عارضی حادثاتی شناخت اصل مستقل مریض میں پہلے ضم کرائیں۔ مستحکم و شناخت کے بعد نقد یا فعال پینل تصدیق کریں۔ پہلے حتمی بل و بل کلیئرنس رکتے ہیں۔ پہلے دن سے اخراجات؛ رعایت فرض نہیں۔"
+    ],
+    [
+      "حتمی بل سے ادائیگی وصول ہوتی؟",
+      "حتمی بل میں جاری اخراجات، رعایت اور وجہ کا ایک جائزہ۔ تکرار وہی بل واپس دیتی، نئی رعایت نظر انداز؛ پہلے اصل داخلہ پڑھیں۔ اصل بل نمبر و بقایا مجاز کیشیئر کو الگ ادائیگی کے لیے دیں؛ یہ صفحہ رقم وصول نہیں کرتا۔ بل تصفیہ کے بعد اور پچھلے مراحل مکمل ہوں تو بل کلیئرنس۔ سرور تصفیہ کا فیصلہ کرتا ہے۔"
+    ],
+    [
+      "مکمل مرحلہ پہلے مکمل کیوں؟",
+      "پہلے مکمل مرحلہ سرور کے افسر و وقت کے ساتھ؛ دوبارہ نہیں۔ ناقابل تبدیلی انکار پر ڈسچارج حالت پڑھیں۔ ترتیب کا انکار پہلے منتظر مرحلے کو نام دیتا، مکمل مرحلہ نہیں۔ بل کلیئرنس کے انکار میں ڈسچارج، حتمی بل و بقایا چیک۔ خودکار تکرار نہیں۔"
+    ],
+    [
+      "انکار پر مسودہ رکھ سکتے؟",
+      "عمل کا جائزہ مریض، اصل حالت، جگہ و معلومات منجمد کرتا ہے۔ نشان پھر ایک تصدیق؛ ارسال سے پہلے تازہ اجازت، شناخت، داخلہ و بستر یا پینل دوبارہ چیک۔ واپس مسودہ معلومات رکھتا، بدلاؤ بند سے پہلے پوچھتا۔ انکار پر مسودہ محفوظ؛ تازہ داخلہ پڑھ کر موازنہ پھر نیا جائزہ۔ شناخت بدلے تو اصل داخلہ دوبارہ کھولیں۔"
+    ],
+    [
+      "جواب گم ہو تو؟",
+      "جواب گم تو اصل عمل و کلید رکھیں۔ متبادل سے پہلے عین داخلہ یا ڈسچارج پڑھیں۔ صرف آمد کی محفوظ کلید مدت میں عین کوشش دیتی؛ باقی خود نہیں دہرائے جاتے۔ غائب ریکارڈ یا نام کامیابی کا ثبوت نہیں؛ نامعلوم پر آئی ٹی۔ واقعات اصل معلومات خاموش تازہ، رابطہ بحالی پر دوبارہ مطالعہ؛ مسودہ و پولنگ نہیں۔"
+    ],
+    [
+      "بستر سے پہلے تصویر لازم؟",
+      "تصویر اختیاری: اجازت، کیمرہ یا جے پیگ/پی این جی، پیش منظر، دوبارہ یا بلا وجہ چھوڑیں۔ انکار، پردہ، چوٹ یا ہنگامی حالت بستر و آمد نہیں روکتی۔ ہر اپ لوڈ الگ اصل کلید و مریض۔ بیرونی رپورٹ پی ڈی ایف یا تصویر، قسم، عنوان، ادارہ و تاریخ کے ساتھ؛ اپنے ہسپتال کے نتائج سے الگ۔ محفوظ فائل مجاز ناظر میں کھولیں۔ فائل کی خرابی داخلہ، بل یا ادائیگی نہیں دہراتی۔"
+    ],
+    [
+      "اگلا کام کون کرے؟",
+      "ایف ون یا مدد موجودہ خانے کی رہنمائی اور فوکس و مسودہ رکھتی ہے۔ انگریزی/اردو و دونوں تھیم میں مشترک ترتیب و کی بورڈ زوم100تا250، ری سیٹ100۔ خدمت و اعمال سرور کی اجازت سے؛ صرف ریکارڈ میں تاریخ و فائل، داخلے کے اعمال نہیں۔ شناختی پٹی، رضامندی، تخمینہ، وارڈ نگہداشت اور کیشیئر الگ مجاز کام۔ نامزد انسانی نئے ریکارڈ، اردو و تدوین جائزہ لازم۔"
+    ]
+  ]
+},
  roll_call: {
   title: "Roll call",
   titleUr: "حاضری کی فہرست",

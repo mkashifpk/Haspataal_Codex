@@ -34,6 +34,7 @@ import { ImagingQualitySetup } from './screens/ImagingQualitySetup';
 import { DiagnosticServicesList } from './screens/DiagnosticServicesList';
 import { LabBench } from './screens/LabBench';
 import { ImagingRepeats } from './screens/ImagingRepeats';
+import { PendingAdmissions } from './screens/PendingAdmissions';
 import { RollCall } from './screens/RollCall';
 import { DutyRoster } from './screens/DutyRoster';
 import { ImagingOutsourced } from './screens/ImagingOutsourced';
@@ -60,6 +61,7 @@ import { createBootstrapSeed } from "./bootstrap-seed";
 type WorkspaceSnapshot = {establishment:EstablishmentOut;settings:any;me:MeOut;permittedWorkspaces:MeOut["workspaces"]};
 const labels: Record<string, [string, string, string]> = {
   roll_call: ["Roll call", "حاضری کی فہرست", "☑"],
+  pending_admissions: ["Pending admissions & allocation", "منتظر داخلے اور بستر کی تعیناتی", "▤"],
   duty_roster: ["Nursing duty roster", "نرسنگ ڈیوٹی روسٹر", "▦"],
   imaging_repeats: ["Repeated images register","دوبارہ عکس کا رجسٹر","▤"],
   imaging_outsourced: ["Outsourced examinations","بیرونی مرکز کے معائنے","↗"],
@@ -121,6 +123,7 @@ const labels: Record<string, [string, string, string]> = {
 };
 const frontDeskScreens = new Set([
   'roll_call',
+  'pending_admissions',
   'duty_roster',
   'imaging_repeats',
   'imaging_outsourced',
@@ -769,6 +772,7 @@ export function App() {
     'lab_send_outs',
     'imaging_quality_setup',
     'roll_call',
+  'pending_admissions',
   'duty_roster',
     'imaging_repeats',
     'imaging_outsourced',
@@ -1179,6 +1183,7 @@ export function App() {
               {screen === 'imaging_quality_setup' && est && <ImagingQualitySetup key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} fromFacility={imagingSetupEntry}/>}
               {screen === 'diagnostic_services_list' && <DiagnosticServicesList key={user.user_id} user={user} connected={connected} stream={stream}/>}
               {screen === 'lab_send_outs' && est && <LabSendOuts key={user.user_id} user={user} connected={connected} stream={stream} establishment={est} timeZone={meta?.hospital_timezone}/>}
+              {screen === 'pending_admissions' && est && <PendingAdmissions key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone} currency={meta?.currency_code}/>}
               {screen === 'roll_call' && <RollCall key={user.user_id} user={user} connected={connected} stream={stream} timeZone={meta?.hospital_timezone}/>}
               {screen === 'duty_roster' && <DutyRoster key={user.user_id} user={user} connected={connected} stream={stream} timeZone={meta?.hospital_timezone}/>}
               {screen === 'imaging_repeats' && est && <ImagingRepeats key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone}/>}

@@ -46,6 +46,7 @@ export function RegistrationDocuments({
   onPending,
   onChanged,
   vault = false,
+  independentPatient = false,
 }: {
   patientId?: number;
   photoId?: number | null;
@@ -53,6 +54,7 @@ export function RegistrationDocuments({
   onPending: (pending: boolean) => void;
   onChanged: () => void;
   vault?: boolean;
+  independentPatient?: boolean;
 }) {
   const allowed = permissions.includes("patient.document.upload");
   const canView = permissions.includes("patient.document.view");
@@ -230,6 +232,7 @@ export function RegistrationDocuments({
   return (
     <section
       className="card"
+      data-independent-upload-patient={independentPatient ? patientId : undefined}
       data-write-pending={
         !!photo?.busy ||
         drafts.some((d) => d.busy || (d.locked && !d.saved)) ||

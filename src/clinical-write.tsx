@@ -9,6 +9,7 @@ import {
   type WriteAttempt,
 } from "./write-attempt";
 import type { ClinicalUser } from "./clinical-context";
+import { hasBlockingWrite } from "./independent-write";
 export type ClinicalCommand = {
   method: "POST" | "PATCH" | "PUT" | "DELETE";
   path: string;
@@ -19,6 +20,7 @@ export type ClinicalCommand = {
   label: string;
   scope: string;
   actor: number;
+  independentUploadPatientId?: number;
 };
 export function useClinicalWrite(
   user: ClinicalUser,
@@ -115,7 +117,7 @@ export function useClinicalWrite(
       command: Omit<ClinicalCommand, "scope" | "actor">,
       prepare?: () => Promise<void>,
     ) => {
-      if (!flight.current && !attemptRef.current && !document.querySelector('[data-write-pending="true"]'))
+      if (!flight.current && !attemptRef.current && !hasBlockingWrite(Array.from(document.querySelectorAll('[data-write-pending="true"]')).map(node => node.closest('[data-independent-upload-patient]')?.getAttribute('data-independent-upload-patient') ?? null), command.independentUploadPatientId))
         void send(
           writeAttempt({ ...command, scope, actor: user.user_id }),
           prepare,

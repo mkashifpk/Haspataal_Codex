@@ -1,0 +1,236 @@
+import type {
+  AdmissionDetailOut,
+  AllocateIn,
+  OverflowIn,
+  WaitlistIn,
+  BillingConfirmIn,
+  FinalBillIn,
+  AdmissionCancelIn,
+  ClearIn,
+} from "./generated/pending_admissions";
+import type { PatientDetailOut } from "./generated/patient_search";
+import type { BedMatrixBedOut } from "./generated/duty_roster";
+export type AdmissionAction =
+  | "allocate"
+  | "overflow"
+  | "waitlist"
+  | "admit"
+  | "cancel"
+  | "confirm-billing"
+  | "final-bill"
+  | "clear";
+export type AdmissionDraft = {
+  bed: string;
+  ward: string;
+  category: "Cash" | "Panel";
+  panel: string;
+  arrived: boolean;
+  reason: string;
+  priority: string;
+  discount: string;
+  discountReason: string;
+  note: string;
+  ack: boolean;
+};
+export const emptyAdmissionDraft = (a: AdmissionDetailOut): AdmissionDraft => ({
+  bed: "",
+  ward: String(a.requested_ward_id || a.ward_id || ""),
+  category: a.billing_category,
+  panel: String(a.panel_id || ""),
+  arrived: false,
+  reason: "",
+  priority: "0",
+  discount: "0",
+  discountReason: "",
+  note: "",
+  ack: false,
+});
+export function admissionAccess(
+  view: string | undefined,
+  permissions: string[],
+) {
+  const visible = ["full", "open_work", "records"].includes(view || "");
+  return {
+    visible,
+    read: visible && permissions.includes("ipd.admission.view"),
+    work: visible && view !== "records",
+  };
+}
+export const admissionPermission = (action: AdmissionAction) =>
+  ({
+    allocate: ["ipd.admission.allocate"],
+    overflow: ["ipd.admission.overflow"],
+    waitlist: ["ipd.waitlist.manage", "ipd.admission.request"],
+    admit: ["ipd.admission.allocate", "ipd.flowsheet.record"],
+    cancel: ["ipd.admission.allocate", "ipd.admission.request"],
+    "confirm-billing": [
+      "ipd.admission.allocate",
+      "ipd.discharge.clear_billing",
+    ],
+    "final-bill": ["ipd.discharge.clear_billing"],
+    clear: ["ipd.discharge.clear_billing"],
+  })[action];
+export function admissionActionAllowed(
+  a: AdmissionDetailOut,
+  action: AdmissionAction,
+) {
+  const pending = ["AdmissionPending", "Waitlisted"].includes(a.status);
+  if (action === "allocate" || action === "overflow") return pending;
+  if (action === "waitlist") return a.status === "AdmissionPending";
+  if (action === "admit") return a.status === "BedReserved";
+  if (action === "cancel")
+    return [...["AdmissionPending", "Waitlisted"], "BedReserved"].includes(
+      a.status,
+    );
+  if (action === "confirm-billing")
+    return (
+      a.is_billing_deferred &&
+      ["CodeRedActive", "Admitted", "DischargeInProgress"].includes(a.status)
+    );
+  if (action === "final-bill")
+    return (
+      !a.is_billing_deferred &&
+      ["Admitted", "DischargeInProgress"].includes(a.status) &&
+      a.invoice?.status === "Draft"
+    );
+  return (
+    a.status === "DischargeInProgress" &&
+    !a.is_billing_deferred &&
+    a.discharge.blocked_on === "BillingSettlement" &&
+    a.discharge.stages.some(
+      (s) => s.stage === "BillingSettlement" && s.status === "Pending",
+    ) &&
+    !!a.invoice &&
+    a.invoice.status !== "Draft"
+  );
+}
+export function admissionSnapshot(a: AdmissionDetailOut) {
+  return JSON.stringify([
+    a.admission_id,
+    a.patient_id,
+    a.mrn,
+    a.row_version,
+    a.status,
+    a.requested_ward_id,
+    a.ward_id,
+    a.bed_id,
+    a.is_billing_deferred,
+    a.billing_category,
+    a.panel_id,
+    a.discharge,
+    a.invoice,
+  ]);
+}
+export function admissionPatientSnapshot(p: PatientDetailOut) {
+  // Optional photo/document updates do not hold up a bed. Identity and care flags do.
+  return JSON.stringify([
+    p.patient_id,
+    p.mrn,
+    p.full_name,
+    p.gender,
+    p.dob,
+    p.age_years,
+    p.merged_into_id,
+    p.is_deceased,
+    p.temp_identifier,
+    p.allergies,
+    p.blood_group,
+    p.mlc_numbers,
+    p.outstanding,
+  ]);
+}
+export function admissionBody(
+  action: AdmissionAction,
+  a: AdmissionDetailOut,
+  d: AdmissionDraft,
+  beds: BedMatrixBedOut[],
+  panels: { panel_id: number; is_active: boolean }[],
+) {
+  if (!admissionActionAllowed(a, action))
+    throw Error(
+      "This admission no longer permits that action. Read the current admission and keep your draft.",
+    );
+  if (!d.ack)
+    throw Error(
+      "Check the actual patient, admission and proposed action before review.",
+    );
+  const bill = (): BillingConfirmIn => {
+    if (d.category === "Cash")
+      return { billing_category: "Cash", panel_id: null };
+    const panel = panels.find(
+      (p) => String(p.panel_id) === d.panel && p.is_active,
+    );
+    if (!panel) throw Error("Choose an actual active billing panel.");
+    return { billing_category: "Panel", panel_id: panel.panel_id };
+  };
+  if (action === "allocate" || action === "overflow") {
+    const bed = beds.find((b) => String(b.bed_id) === d.bed);
+    if (!bed || bed.current_state !== "Available")
+      throw Error(
+        "The selected bed is no longer available. Refresh the beds and choose another.",
+      );
+    if (
+      action === "allocate" &&
+      a.requested_ward_id &&
+      bed.ward_id !== a.requested_ward_id
+    )
+      throw Error(
+        "Choose a bed in the requested ward, or use the permitted overflow action with its reason.",
+      );
+    const body: AllocateIn = {
+      bed_id: bed.bed_id,
+      admit_now: d.arrived,
+      ...bill(),
+    };
+    if (action === "overflow") {
+      const reason = d.reason.trim();
+      if (reason.length < 3 || reason.length > 500)
+        throw Error("Enter an overflow reason of 3–500 characters.");
+      return { ...body, reason } as OverflowIn;
+    }
+    return body;
+  }
+  if (action === "waitlist") {
+    if (!/^[1-9]\d*$/.test(d.ward) || !Number.isSafeInteger(Number(d.ward)))
+      throw Error("Choose an actual ward.");
+    if (
+      !/^\d+$/.test(d.priority) ||
+      !Number.isSafeInteger(Number(d.priority)) ||
+      Number(d.priority) < 0 ||
+      Number(d.priority) > 100
+    )
+      throw Error("Enter a whole-number waitlist priority from 0 to 100.");
+    return {
+      ward_id: Number(d.ward),
+      priority: Number(d.priority),
+    } as WaitlistIn;
+  }
+  if (action === "confirm-billing") return bill();
+  if (action === "cancel") {
+    const reason = d.reason.trim();
+    if (reason.length < 3 || reason.length > 500)
+      throw Error("Enter a cancellation reason of 3–500 characters.");
+    return { reason } as AdmissionCancelIn;
+  }
+  if (action === "final-bill") {
+    if (
+      !/^(?:0|[1-9]\d*)(?:\.\d+)?$/.test(d.discount) ||
+      !Number.isFinite(Number(d.discount))
+    )
+      throw Error("Enter a finite non-negative discount.");
+    const discount = Number(d.discount),
+      reason = d.discountReason.trim();
+    if (discount > 0 && !reason)
+      throw Error("Explain the final bill discount.");
+    return {
+      discount: d.discount,
+      discount_reason: reason || null,
+    } as FinalBillIn;
+  }
+  if (action === "clear") {
+    if (d.note.trim().length > 1000)
+      throw Error("The clearance note is limited to 1000 characters.");
+    return { note: d.note.trim() || null } as ClearIn;
+  }
+  return undefined;
+}

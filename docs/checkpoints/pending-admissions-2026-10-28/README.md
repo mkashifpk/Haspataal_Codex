@@ -1,3 +1,5 @@
+This historical draft was resumed into src/ on28Oct2026. See docs/PENDING_ADMISSIONS_REVIEW_2026-10-28.md and handoff.md for the current enabled implementation and verification limits. The material below describes the earlier saved draft only.
+
 # Pending Admissions continuation draft — 28 October 2026
 
 This is an unfinished source draft, excluded from the enabled screen catalogue and TypeScript source tree. It is not delivered, tested against fresh admissions journeys, or proposed for progress. The reviewed app remains at source commit 19442b4 (50 screens).

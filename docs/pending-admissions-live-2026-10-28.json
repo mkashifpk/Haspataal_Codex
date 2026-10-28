@@ -1,0 +1,4516 @@
+{
+  "run": "DEMO-ADMISSIONS-1793166314108",
+  "created": "2026-10-28T05:45:14.108Z",
+  "baseline": "3445cab",
+  "requests": [
+    {
+      "label": "fresh-scenario",
+      "args": {
+        "scenario_id": "ipd.admission_pending"
+      },
+      "state": "answered",
+      "scenario": true,
+      "result": {
+        "unknowns": [],
+        "scenario": "ipd.admission_pending",
+        "run": "3bb438",
+        "ok": true,
+        "steps": [
+          {
+            "step": "my_shift",
+            "as": "demo.reception",
+            "call": "GET /finance/cash-shifts/mine",
+            "status": 200,
+            "error_code": null,
+            "request_id": "d8eaa85875f844faaa48cd3f6e8ee236",
+            "ms": 1024,
+            "ok": true
+          },
+          {
+            "step": "open_shift",
+            "skipped": "shift_id is already set"
+          },
+          {
+            "step": "doctor",
+            "as": "demo.doctor",
+            "call": "GET /auth/me",
+            "status": 200,
+            "error_code": null,
+            "request_id": "957f65c99a31431b925ffb675d18daee",
+            "ms": 967,
+            "ok": true
+          },
+          {
+            "step": "register",
+            "as": "demo.reception",
+            "call": "POST /reception/registrations",
+            "status": 201,
+            "error_code": null,
+            "request_id": "c446f1291a934d23893a33777f30b435",
+            "ms": 1186,
+            "ok": true
+          },
+          {
+            "step": "admit",
+            "as": "demo.doctor",
+            "call": "POST /admissions",
+            "status": 201,
+            "error_code": null,
+            "request_id": "44b524b314054650aefe8ccd6c1bf27d",
+            "ms": 973,
+            "ok": true
+          }
+        ],
+        "saved": {
+          "run": "3bb438",
+          "now": "2026-10-28T05:45:14.129281+00:00",
+          "shift_id": 1,
+          "doctor_id": 10,
+          "ticket_id": 3,
+          "patient_id": 3,
+          "mrn": "MRN-2026-000003",
+          "admission_id": 2
+        },
+        "events": {
+          "demo.reception": [
+            {
+              "event_id": 220,
+              "event_type": "opd.ticket.status_changed",
+              "priority": "normal"
+            },
+            {
+              "event_id": 221,
+              "event_type": "opd.ticket.status_changed",
+              "priority": "normal"
+            },
+            {
+              "event_id": 222,
+              "event_type": "opd.queue.updated",
+              "priority": "normal"
+            },
+            {
+              "event_id": 223,
+              "event_type": "opd.ticket.status_changed",
+              "priority": "normal"
+            }
+          ],
+          "demo.doctor": [
+            {
+              "event_id": 220,
+              "event_type": "opd.ticket.status_changed",
+              "priority": "normal"
+            },
+            {
+              "event_id": 221,
+              "event_type": "opd.ticket.status_changed",
+              "priority": "normal"
+            },
+            {
+              "event_id": 222,
+              "event_type": "opd.queue.updated",
+              "priority": "normal"
+            },
+            {
+              "event_id": 223,
+              "event_type": "opd.ticket.status_changed",
+              "priority": "normal"
+            }
+          ],
+          "demo.admissions": [
+            {
+              "event_id": 224,
+              "event_type": "admission.requested",
+              "priority": "high"
+            }
+          ]
+        },
+        "tag": "SCN 3bb438",
+        "screens_to_open": [
+          {
+            "screen": "pending_admissions",
+            "as": "demo.admissions",
+            "state": "a request waiting for a bed"
+          },
+          {
+            "screen": "bed_matrix",
+            "as": "demo.admissions",
+            "state": "the beds to allocate from"
+          }
+        ],
+        "note": "The records stay on the shared DEV server, named or noted SCN <run>.",
+        "contract_fingerprint": "58db76bf7d59ef6d9870",
+        "knowledge_revision": "51c8fe699d47d046"
+      }
+    },
+    {
+      "label": "admissions-list",
+      "args": {
+        "method": "GET",
+        "path": "/admissions",
+        "as_user": "demo.admissions"
+      },
+      "state": "answered",
+      "scenario": false,
+      "result": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v1/admissions",
+          "as_user": "demo.admissions",
+          "query": null,
+          "body": null,
+          "idempotency_key": null
+        },
+        "status": 200,
+        "ms": 791,
+        "request_id": "a7fda991334b4883a41988a9e07de693",
+        "body": {
+          "data": [
+            {
+              "admission_id": 1,
+              "admission_number": "ADM-2026-00001",
+              "patient_id": 1,
+              "mrn": "MRN-2026-000001",
+              "patient_name": "SCN 02a1a5 Paid",
+              "gender": "male",
+              "age_years": 40,
+              "requested_ward_id": 1,
+              "requested_ward_name": "General Ward (Male)",
+              "ward_id": 1,
+              "ward_name": "General Ward (Male)",
+              "bed_id": 1,
+              "bed_label": "GW-M-1",
+              "primary_doctor_id": 10,
+              "primary_doctor_name": "Dr. Ahmed Khan",
+              "admission_type": "Standard",
+              "status": "DischargeInProgress",
+              "billing_category": "Cash",
+              "panel_id": null,
+              "is_billing_confirmed": true,
+              "is_billing_deferred": false,
+              "is_overflow": false,
+              "overflow_reason": null,
+              "eta_minutes": null,
+              "source_ticket_id": 1,
+              "admission_reason": "DEMO software-only discharge regression; no actual admission",
+              "provisional_diagnosis": "Synthetic exercise, no real diagnosis",
+              "initial_care_plan": "No actual care",
+              "photo_document_id": null,
+              "details_stamp": {
+                "at": "2026-10-28T04:32:04.963965+00:00",
+                "name": "Dr. Ahmed Khan",
+                "text": "Dr. Ahmed Khan, Doctor, PMDC LIC-00010, 28-Oct-2026 09:32",
+                "user_id": 11,
+                "designation": "Doctor",
+                "employee_id": 10,
+                "registration": "PMDC LIC-00010"
+              },
+              "admission_notes": null,
+              "requested_at": "2026-10-28T04:32:04.963965+00:00",
+              "reserved_at": "2026-10-28T04:32:09.168285+00:00",
+              "admitted_at": "2026-10-28T04:32:09.168285+00:00",
+              "discharge_initiated_at": "2026-10-28T04:32:44.830890+00:00",
+              "discharged_at": null,
+              "row_version": 5
+            },
+            {
+              "admission_id": 2,
+              "admission_number": "ADM-2026-00002",
+              "patient_id": 3,
+              "mrn": "MRN-2026-000003",
+              "patient_name": "SCN 3bb438 Admission",
+              "gender": "male",
+              "age_years": 40,
+              "requested_ward_id": null,
+              "requested_ward_name": null,
+              "ward_id": null,
+              "ward_name": null,
+              "bed_id": null,
+              "bed_label": null,
+              "primary_doctor_id": 10,
+              "primary_doctor_name": "Dr. Ahmed Khan",
+              "admission_type": "Standard",
+              "status": "AdmissionPending",
+              "billing_category": "Cash",
+              "panel_id": null,
+              "is_billing_confirmed": false,
+              "is_billing_deferred": false,
+              "is_overflow": false,
+              "overflow_reason": null,
+              "eta_minutes": null,
+              "source_ticket_id": 3,
+              "admission_reason": "SCN 3bb438: fever and cough for 5 days",
+              "provisional_diagnosis": "Community-acquired pneumonia",
+              "initial_care_plan": null,
+              "photo_document_id": null,
+              "details_stamp": {
+                "at": "2026-10-28T05:45:22.788558+00:00",
+                "name": "Dr. Ahmed Khan",
+                "text": "Dr. Ahmed Khan, Doctor, PMDC LIC-00010, 28-Oct-2026 10:45",
+                "user_id": 11,
+                "designation": "Doctor",
+                "employee_id": 10,
+                "registration": "PMDC LIC-00010"
+              },
+              "admission_notes": null,
+              "requested_at": "2026-10-28T05:45:22.788558+00:00",
+              "reserved_at": null,
+              "admitted_at": null,
+              "discharge_initiated_at": null,
+              "discharged_at": null,
+              "row_version": 1
+            }
+          ],
+          "meta": {
+            "server_time": "2026-10-28T05:45:33.983831+00:00"
+          },
+          "request_id": "a7fda991334b4883a41988a9e07de693"
+        }
+      }
+    },
+    {
+      "label": "source-detail",
+      "args": {
+        "method": "GET",
+        "path": "/admissions/2",
+        "as_user": "demo.admissions"
+      },
+      "state": "answered",
+      "scenario": false,
+      "result": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v1/admissions/2",
+          "as_user": "demo.admissions",
+          "query": null,
+          "body": null,
+          "idempotency_key": null
+        },
+        "status": 200,
+        "ms": 874,
+        "request_id": "71f94d55895f426d90c079931813e871",
+        "body": {
+          "data": {
+            "admission_id": 2,
+            "admission_number": "ADM-2026-00002",
+            "patient_id": 3,
+            "mrn": "MRN-2026-000003",
+            "patient_name": "SCN 3bb438 Admission",
+            "gender": "male",
+            "age_years": 40,
+            "requested_ward_id": null,
+            "requested_ward_name": null,
+            "ward_id": null,
+            "ward_name": null,
+            "bed_id": null,
+            "bed_label": null,
+            "primary_doctor_id": 10,
+            "primary_doctor_name": "Dr. Ahmed Khan",
+            "admission_type": "Standard",
+            "status": "AdmissionPending",
+            "billing_category": "Cash",
+            "panel_id": null,
+            "is_billing_confirmed": false,
+            "is_billing_deferred": false,
+            "is_overflow": false,
+            "overflow_reason": null,
+            "eta_minutes": null,
+            "source_ticket_id": 3,
+            "admission_reason": "SCN 3bb438: fever and cough for 5 days",
+            "provisional_diagnosis": "Community-acquired pneumonia",
+            "initial_care_plan": null,
+            "photo_document_id": null,
+            "details_stamp": {
+              "at": "2026-10-28T05:45:22.788558+00:00",
+              "name": "Dr. Ahmed Khan",
+              "text": "Dr. Ahmed Khan, Doctor, PMDC LIC-00010, 28-Oct-2026 10:45",
+              "user_id": 11,
+              "designation": "Doctor",
+              "employee_id": 10,
+              "registration": "PMDC LIC-00010"
+            },
+            "admission_notes": null,
+            "requested_at": "2026-10-28T05:45:22.788558+00:00",
+            "reserved_at": null,
+            "admitted_at": null,
+            "discharge_initiated_at": null,
+            "discharged_at": null,
+            "row_version": 1,
+            "discharge": {
+              "stages": [],
+              "blocked_on": null,
+              "started": false,
+              "complete": false
+            },
+            "invoice": null
+          },
+          "meta": {
+            "server_time": "2026-10-28T05:45:35.127483+00:00"
+          },
+          "request_id": "71f94d55895f426d90c079931813e871"
+        }
+      }
+    },
+    {
+      "label": "beds-current",
+      "args": {
+        "method": "GET",
+        "path": "/beds/matrix",
+        "as_user": "demo.admissions",
+        "query": {
+          "include_beds": true
+        }
+      },
+      "state": "answered",
+      "scenario": false,
+      "result": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v1/beds/matrix",
+          "as_user": "demo.admissions",
+          "query": {
+            "include_beds": true
+          },
+          "body": null,
+          "idempotency_key": null
+        },
+        "status": 200,
+        "ms": 920,
+        "request_id": "8c351694e04d4d208efe95d9df4dda99",
+        "body": {
+          "data": {
+            "wards": [
+              {
+                "ward_id": 5,
+                "code": "ER",
+                "name": "Emergency",
+                "ward_type": "Emergency",
+                "gender_restriction": "any",
+                "total_beds": 6,
+                "available": 6,
+                "reserved": 0,
+                "occupied": 0,
+                "turnover": 0,
+                "out_of_service": 0
+              },
+              {
+                "ward_id": 2,
+                "code": "GW-F",
+                "name": "General Ward (Female)",
+                "ward_type": "General",
+                "gender_restriction": "female",
+                "total_beds": 10,
+                "available": 10,
+                "reserved": 0,
+                "occupied": 0,
+                "turnover": 0,
+                "out_of_service": 0
+              },
+              {
+                "ward_id": 1,
+                "code": "GW-M",
+                "name": "General Ward (Male)",
+                "ward_type": "General",
+                "gender_restriction": "male",
+                "total_beds": 10,
+                "available": 9,
+                "reserved": 0,
+                "occupied": 0,
+                "turnover": 1,
+                "out_of_service": 0
+              },
+              {
+                "ward_id": 3,
+                "code": "ICU",
+                "name": "Intensive Care Unit",
+                "ward_type": "ICU",
+                "gender_restriction": "any",
+                "total_beds": 4,
+                "available": 4,
+                "reserved": 0,
+                "occupied": 0,
+                "turnover": 0,
+                "out_of_service": 0
+              },
+              {
+                "ward_id": 4,
+                "code": "PVT",
+                "name": "Private Rooms",
+                "ward_type": "Private",
+                "gender_restriction": "any",
+                "total_beds": 4,
+                "available": 4,
+                "reserved": 0,
+                "occupied": 0,
+                "turnover": 0,
+                "out_of_service": 0
+              }
+            ],
+            "summary": {
+              "Emergency": 6,
+              "General Ward (Female)": 10,
+              "General Ward (Male)": 9,
+              "Intensive Care Unit": 4,
+              "Private Rooms": 4
+            },
+            "beds": [
+              {
+                "bed_id": 1,
+                "ward_id": 1,
+                "label": "GW-M-1",
+                "current_state": "Dirty",
+                "state_changed_at": "2026-10-28T04:32:44.830890+00:00",
+                "is_overflow_allowed": false,
+                "admission_id": 1,
+                "patient_name": "SCN 02a1a5 Paid",
+                "mrn": "MRN-2026-000001",
+                "admission_status": "DischargeInProgress",
+                "is_overflow": false,
+                "discharge_blocked_on": "BillingSettlement"
+              },
+              {
+                "bed_id": 2,
+                "ward_id": 1,
+                "label": "GW-M-2",
+                "current_state": "Available",
+                "state_changed_at": "2026-10-27T21:49:36.568868+00:00",
+                "is_overflow_allowed": false,
+                "admission_id": null,
+                "patient_name": null,
+                "mrn": null,
+                "admission_status": null,
+                "is_overflow": null,
+                "discharge_blocked_on": null
+              },
+              {
+                "bed_id": 3,
+                "ward_id": 1,
+                "label": "GW-M-3",
+                "current_state": "Available",
+                "state_changed_at": "2026-10-27T21:49:36.568868+00:00",
+                "is_overflow_allowed": false,
+                "admission_id": null,
+                "patient_name": null,
+                "mrn": null,
+                "admission_status": null,
+                "is_overflow": null,
+                "discharge_blocked_on": null
+              },
+              {
+                "bed_id": 4,
+                "ward_id": 1,
+                "label": "GW-M-4",
+                "current_state": "Available",
+                "state_changed_at": "2026-10-27T21:49:36.568868+00:00",
+                "is_overflow_allowed": false,
+                "admission_id": null,
+                "patient_name": null,
+                "mrn": null,
+                "admission_status": null,
+                "is_overflow": null,
+                "discharge_blocked_on": null
+              },
+              {
+                "bed_id": 5,
+                "ward_id": 1,
+                "label": "GW-M-5",
+                "current_state": "Available",
+                "state_changed_at": "2026-10-27T21:49:36.568868+00:00",
+                "is_overflow_allowed": false,
+                "admission_id": null,
+                "patient_name": null,
+                "mrn": null,
+                "admission_status": null,
+                "is_overflow": null,
+                "discharge_blocked_on": null
+              },
+              {
+                "bed_id": 6,
+                "ward_id": 1,
+                "label": "GW-M-6",
+                "current_state": "Available",
+                "state_changed_at": "2026-10-27T21:49:36.568868+00:00",
+                "is_overflow_allowed": false,
+                "admission_id": null,
+                "patient_name": null,
+                "mrn": null,
+                "admission_status": null,
+                "is_overflow": null,
+                "discharge_blocked_on": null
+              },
+              {
+                "bed_id": 7,
+                "ward_id": 1,
+                "label": "GW-M-7",
+                "current_state": "Available",
+                "state_changed_at": "2026-10-27T21:49:36.568868+00:00",
+                "is_overflow_allowed": false,
+                "admission_id": null,
+                "patient_name": null,
+                "mrn": null,
+                "admission_status": null,
+                "is_overflow": null,
+                "discharge_blocked_on": null
+              },
+              {
+                "bed_id": 8,
+                "ward_id": 1,
+                "label": "GW-M-8",
+                "current_state": "Available",
+                "state_changed_at": "2026-10-27T21:49:36.568868+00:00",
+                "is_overflow_allowed": false,
+                "admission_id": null,
+                "patient_name": null,
+                "mrn": null,
+                "admission_status": null,
+                "is_overflow": null,
+                "discharge_blocked_on": null
+              },
+              {
+                "bed_id": 9,
+                "ward_id": 1,
+                "label": "GW-M-9",
+                "current_state": "Available",
+                "state_changed_at": "2026-10-27T21:49:36.568868+00:00",
+                "is_overflow_allowed": false,
+                "admission_id": null,
+                "patient_name": null,
+                "mrn": null,
+                "admission_status": null,
+                "is_overflow": null,
+                "discharge_blocked_on": null
+              },
+              {
+                "bed_id": 10,
+                "ward_id": 1,
+                "label": "GW-M-10",
+                "current_state": "Available",
+                "state_changed_at": "2026-10-27T21:49:36.568868+00:00",
+                "is_overflow_allowed": false,
+                "admission_id": null,
+                "patient_name": null,
+                "mrn": null,
+                "admission_status": null,
+                "is_overflow": null,
+                "discharge_blocked_on": null
+              },
+              {
+                "bed_id": 11,
+                "ward_id": 2,
+                "label": "GW-F-1",
+                "current_state": "Available",
+                "state_changed_at": "2026-10-27T21:49:36.568868+00:00",
+                "is_overflow_allowed": false,
+                "admission_id": null,
+                "patient_name": null,
+                "mrn": null,
+                "admission_status": null,
+                "is_overflow": null,
+                "discharge_blocked_on": null
+              },
+              {
+                "bed_id": 12,
+                "ward_id": 2,
+                "label": "GW-F-2",
+                "current_state": "Available",
+                "state_changed_at": "2026-10-27T21:49:36.568868+00:00",
+                "is_overflow_allowed": false,
+                "admission_id": null,
+                "patient_name": null,
+                "mrn": null,
+                "admission_status": null,
+                "is_overflow": null,
+                "discharge_blocked_on": null
+              },
+              {
+                "bed_id": 13,
+                "ward_id": 2,
+                "label": "GW-F-3",
+                "current_state": "Available",
+                "state_changed_at": "2026-10-27T21:49:36.568868+00:00",
+                "is_overflow_allowed": false,
+                "admission_id": null,
+                "patient_name": null,
+                "mrn": null,
+                "admission_status": null,
+                "is_overflow": null,
+                "discharge_blocked_on": null
+              },
+              {
+                "bed_id": 14,
+                "ward_id": 2,
+                "label": "GW-F-4",
+                "current_state": "Available",
+                "state_changed_at": "2026-10-27T21:49:36.568868+00:00",
+                "is_overflow_allowed": false,
+                "admission_id": null,
+                "patient_name": null,
+                "mrn": null,
+                "admission_status": null,
+                "is_overflow": null,
+                "discharge_blocked_on": null
+              },
+              {
+                "bed_id": 15,
+                "ward_id": 2,
+                "label": "GW-F-5",
+                "current_state": "Available",
+                "state_changed_at": "2026-10-27T21:49:36.568868+00:00",
+                "is_overflow_allowed": false,
+                "admission_id": null,
+                "patient_name": null,
+                "mrn": null,
+                "admission_status": null,
+                "is_overflow": null,
+                "discharge_blocked_on": null
+              },
+              {
+                "bed_id": 16,
+                "ward_id": 2,
+                "label": "GW-F-6",
+                "current_state": "Available",
+                "state_changed_at": "2026-10-27T21:49:36.568868+00:00",
+                "is_overflow_allowed": false,
+                "admission_id": null,
+                "patient_name": null,
+                "mrn": null,
+                "admission_status": null,
+                "is_overflow": null,
+                "discharge_blocked_on": null
+              },
+              {
+                "bed_id": 17,
+                "ward_id": 2,
+                "label": "GW-F-7",
+                "current_state": "Available",
+                "state_changed_at": "2026-10-27T21:49:36.568868+00:00",
+                "is_overflow_allowed": false,
+                "admission_id": null,
+                "patient_name": null,
+                "mrn": null,
+                "admission_status": null,
+                "is_overflow": null,
+                "discharge_blocked_on": null
+              },
+              {
+                "bed_id": 18,
+                "ward_id": 2,
+                "label": "GW-F-8",
+                "current_state": "Available",
+                "state_changed_at": "2026-10-27T21:49:36.568868+00:00",
+                "is_overflow_allowed": false,
+                "admission_id": null,
+                "patient_name": null,
+                "mrn": null,
+                "admission_status": null,
+                "is_overflow": null,
+                "discharge_blocked_on": null
+              },
+              {
+                "bed_id": 19,
+                "ward_id": 2,
+                "label": "GW-F-9",
+                "current_state": "Available",
+                "state_changed_at": "2026-10-27T21:49:36.568868+00:00",
+                "is_overflow_allowed": false,
+                "admission_id": null,
+                "patient_name": null,
+                "mrn": null,
+                "admission_status": null,
+                "is_overflow": null,
+                "discharge_blocked_on": null
+              },
+              {
+                "bed_id": 20,
+                "ward_id": 2,
+                "label": "GW-F-10",
+                "current_state": "Available",
+                "state_changed_at": "2026-10-27T21:49:36.568868+00:00",
+                "is_overflow_allowed": false,
+                "admission_id": null,
+                "patient_name": null,
+                "mrn": null,
+                "admission_status": null,
+                "is_overflow": null,
+                "discharge_blocked_on": null
+              },
+              {
+                "bed_id": 21,
+                "ward_id": 3,
+                "label": "ICU-1",
+                "current_state": "Available",
+                "state_changed_at": "2026-10-27T21:49:36.568868+00:00",
+                "is_overflow_allowed": false,
+                "admission_id": null,
+                "patient_name": null,
+                "mrn": null,
+                "admission_status": null,
+                "is_overflow": null,
+                "discharge_blocked_on": null
+              },
+              {
+                "bed_id": 22,
+                "ward_id": 3,
+                "label": "ICU-2",
+                "current_state": "Available",
+                "state_changed_at": "2026-10-27T21:49:36.568868+00:00",
+                "is_overflow_allowed": false,
+                "admission_id": null,
+                "patient_name": null,
+                "mrn": null,
+                "admission_status": null,
+                "is_overflow": null,
+                "discharge_blocked_on": null
+              },
+              {
+                "bed_id": 23,
+                "ward_id": 3,
+                "label": "ICU-3",
+                "current_state": "Available",
+                "state_changed_at": "2026-10-27T21:49:36.568868+00:00",
+                "is_overflow_allowed": false,
+                "admission_id": null,
+                "patient_name": null,
+                "mrn": null,
+                "admission_status": null,
+                "is_overflow": null,
+                "discharge_blocked_on": null
+              },
+              {
+                "bed_id": 24,
+                "ward_id": 3,
+                "label": "ICU-4",
+                "current_state": "Available",
+                "state_changed_at": "2026-10-27T21:49:36.568868+00:00",
+                "is_overflow_allowed": false,
+                "admission_id": null,
+                "patient_name": null,
+                "mrn": null,
+                "admission_status": null,
+                "is_overflow": null,
+                "discharge_blocked_on": null
+              },
+              {
+                "bed_id": 25,
+                "ward_id": 4,
+                "label": "PVT-1",
+                "current_state": "Available",
+                "state_changed_at": "2026-10-27T21:49:36.568868+00:00",
+                "is_overflow_allowed": false,
+                "admission_id": null,
+                "patient_name": null,
+                "mrn": null,
+                "admission_status": null,
+                "is_overflow": null,
+                "discharge_blocked_on": null
+              },
+              {
+                "bed_id": 26,
+                "ward_id": 4,
+                "label": "PVT-2",
+                "current_state": "Available",
+                "state_changed_at": "2026-10-27T21:49:36.568868+00:00",
+                "is_overflow_allowed": false,
+                "admission_id": null,
+                "patient_name": null,
+                "mrn": null,
+                "admission_status": null,
+                "is_overflow": null,
+                "discharge_blocked_on": null
+              },
+              {
+                "bed_id": 27,
+                "ward_id": 4,
+                "label": "PVT-3",
+                "current_state": "Available",
+                "state_changed_at": "2026-10-27T21:49:36.568868+00:00",
+                "is_overflow_allowed": false,
+                "admission_id": null,
+                "patient_name": null,
+                "mrn": null,
+                "admission_status": null,
+                "is_overflow": null,
+                "discharge_blocked_on": null
+              },
+              {
+                "bed_id": 28,
+                "ward_id": 4,
+                "label": "PVT-4",
+                "current_state": "Available",
+                "state_changed_at": "2026-10-27T21:49:36.568868+00:00",
+                "is_overflow_allowed": false,
+                "admission_id": null,
+                "patient_name": null,
+                "mrn": null,
+                "admission_status": null,
+                "is_overflow": null,
+                "discharge_blocked_on": null
+              },
+              {
+                "bed_id": 29,
+                "ward_id": 5,
+                "label": "ER-1",
+                "current_state": "Available",
+                "state_changed_at": "2026-10-27T21:49:36.568868+00:00",
+                "is_overflow_allowed": false,
+                "admission_id": null,
+                "patient_name": null,
+                "mrn": null,
+                "admission_status": null,
+                "is_overflow": null,
+                "discharge_blocked_on": null
+              },
+              {
+                "bed_id": 30,
+                "ward_id": 5,
+                "label": "ER-2",
+                "current_state": "Available",
+                "state_changed_at": "2026-10-27T21:49:36.568868+00:00",
+                "is_overflow_allowed": false,
+                "admission_id": null,
+                "patient_name": null,
+                "mrn": null,
+                "admission_status": null,
+                "is_overflow": null,
+                "discharge_blocked_on": null
+              },
+              {
+                "bed_id": 31,
+                "ward_id": 5,
+                "label": "ER-3",
+                "current_state": "Available",
+                "state_changed_at": "2026-10-27T21:49:36.568868+00:00",
+                "is_overflow_allowed": false,
+                "admission_id": null,
+                "patient_name": null,
+                "mrn": null,
+                "admission_status": null,
+                "is_overflow": null,
+                "discharge_blocked_on": null
+              },
+              {
+                "bed_id": 32,
+                "ward_id": 5,
+                "label": "ER-4",
+                "current_state": "Available",
+                "state_changed_at": "2026-10-27T21:49:36.568868+00:00",
+                "is_overflow_allowed": false,
+                "admission_id": null,
+                "patient_name": null,
+                "mrn": null,
+                "admission_status": null,
+                "is_overflow": null,
+                "discharge_blocked_on": null
+              },
+              {
+                "bed_id": 33,
+                "ward_id": 5,
+                "label": "ER-5",
+                "current_state": "Available",
+                "state_changed_at": "2026-10-27T21:49:36.568868+00:00",
+                "is_overflow_allowed": false,
+                "admission_id": null,
+                "patient_name": null,
+                "mrn": null,
+                "admission_status": null,
+                "is_overflow": null,
+                "discharge_blocked_on": null
+              },
+              {
+                "bed_id": 34,
+                "ward_id": 5,
+                "label": "ER-6",
+                "current_state": "Available",
+                "state_changed_at": "2026-10-27T21:49:36.568868+00:00",
+                "is_overflow_allowed": false,
+                "admission_id": null,
+                "patient_name": null,
+                "mrn": null,
+                "admission_status": null,
+                "is_overflow": null,
+                "discharge_blocked_on": null
+              }
+            ]
+          },
+          "meta": {
+            "server_time": "2026-10-28T05:45:36.293441+00:00"
+          },
+          "request_id": "8c351694e04d4d208efe95d9df4dda99"
+        }
+      }
+    },
+    {
+      "label": "panels-current",
+      "args": {
+        "method": "GET",
+        "path": "/finance/panels",
+        "as_user": "demo.admissions"
+      },
+      "state": "answered",
+      "scenario": false,
+      "result": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v1/finance/panels",
+          "as_user": "demo.admissions",
+          "query": null,
+          "body": null,
+          "idempotency_key": null
+        },
+        "status": 200,
+        "ms": 853,
+        "request_id": "dd6adf22a9c742c5beb5abb96d79ffae",
+        "body": {
+          "data": [],
+          "meta": {
+            "server_time": "2026-10-28T05:45:37.494649+00:00"
+          },
+          "request_id": "dd6adf22a9c742c5beb5abb96d79ffae"
+        }
+      }
+    },
+    {
+      "label": "arrival-scenario",
+      "args": {
+        "scenario_id": "ipd.admission_pending"
+      },
+      "state": "answered",
+      "scenario": true,
+      "result": {
+        "unknowns": [],
+        "scenario": "ipd.admission_pending",
+        "run": "c74cf6",
+        "ok": true,
+        "steps": [
+          {
+            "step": "my_shift",
+            "as": "demo.reception",
+            "call": "GET /finance/cash-shifts/mine",
+            "status": 200,
+            "error_code": null,
+            "request_id": "c10ceac3a18b483695ccc3d82c4a491b",
+            "ms": 1017,
+            "ok": true
+          },
+          {
+            "step": "open_shift",
+            "skipped": "shift_id is already set"
+          },
+          {
+            "step": "doctor",
+            "as": "demo.doctor",
+            "call": "GET /auth/me",
+            "status": 200,
+            "error_code": null,
+            "request_id": "c76df54d67c640a7b2c81c14ab966076",
+            "ms": 774,
+            "ok": true
+          },
+          {
+            "step": "register",
+            "as": "demo.reception",
+            "call": "POST /reception/registrations",
+            "status": 201,
+            "error_code": null,
+            "request_id": "3a6f941afc1d47939955f4ff4f955b43",
+            "ms": 990,
+            "ok": true
+          },
+          {
+            "step": "admit",
+            "as": "demo.doctor",
+            "call": "POST /admissions",
+            "status": 201,
+            "error_code": null,
+            "request_id": "70e9d300d6c14bd8830a81b676549719",
+            "ms": 817,
+            "ok": true
+          }
+        ],
+        "saved": {
+          "run": "c74cf6",
+          "now": "2026-10-28T05:46:24.214007+00:00",
+          "shift_id": 1,
+          "doctor_id": 10,
+          "ticket_id": 4,
+          "patient_id": 4,
+          "mrn": "MRN-2026-000004",
+          "admission_id": 3
+        },
+        "events": {
+          "demo.reception": [
+            {
+              "event_id": 225,
+              "event_type": "opd.ticket.status_changed",
+              "priority": "normal"
+            },
+            {
+              "event_id": 226,
+              "event_type": "opd.ticket.status_changed",
+              "priority": "normal"
+            },
+            {
+              "event_id": 227,
+              "event_type": "opd.queue.updated",
+              "priority": "normal"
+            },
+            {
+              "event_id": 228,
+              "event_type": "opd.ticket.status_changed",
+              "priority": "normal"
+            }
+          ],
+          "demo.doctor": [
+            {
+              "event_id": 225,
+              "event_type": "opd.ticket.status_changed",
+              "priority": "normal"
+            },
+            {
+              "event_id": 226,
+              "event_type": "opd.ticket.status_changed",
+              "priority": "normal"
+            },
+            {
+              "event_id": 227,
+              "event_type": "opd.queue.updated",
+              "priority": "normal"
+            },
+            {
+              "event_id": 228,
+              "event_type": "opd.ticket.status_changed",
+              "priority": "normal"
+            }
+          ],
+          "demo.admissions": [
+            {
+              "event_id": 229,
+              "event_type": "admission.requested",
+              "priority": "high"
+            }
+          ]
+        },
+        "tag": "SCN c74cf6",
+        "screens_to_open": [
+          {
+            "screen": "pending_admissions",
+            "as": "demo.admissions",
+            "state": "a request waiting for a bed"
+          },
+          {
+            "screen": "bed_matrix",
+            "as": "demo.admissions",
+            "state": "the beds to allocate from"
+          }
+        ],
+        "note": "The records stay on the shared DEV server, named or noted SCN <run>.",
+        "contract_fingerprint": "58db76bf7d59ef6d9870",
+        "knowledge_revision": "51c8fe699d47d046"
+      }
+    },
+    {
+      "label": "overflow-scenario",
+      "args": {
+        "scenario_id": "ipd.admission_pending"
+      },
+      "state": "answered",
+      "scenario": true,
+      "result": {
+        "unknowns": [],
+        "scenario": "ipd.admission_pending",
+        "run": "e1e608",
+        "ok": true,
+        "steps": [
+          {
+            "step": "my_shift",
+            "as": "demo.reception",
+            "call": "GET /finance/cash-shifts/mine",
+            "status": 200,
+            "error_code": null,
+            "request_id": "e740557900e04c03b8ed65f519daae8c",
+            "ms": 824,
+            "ok": true
+          },
+          {
+            "step": "open_shift",
+            "skipped": "shift_id is already set"
+          },
+          {
+            "step": "doctor",
+            "as": "demo.doctor",
+            "call": "GET /auth/me",
+            "status": 200,
+            "error_code": null,
+            "request_id": "f0f638c491f447479020c4f42ef144a8",
+            "ms": 944,
+            "ok": true
+          },
+          {
+            "step": "register",
+            "as": "demo.reception",
+            "call": "POST /reception/registrations",
+            "status": 201,
+            "error_code": null,
+            "request_id": "eaa6c9ebd8624e3990daa58b6296f51a",
+            "ms": 885,
+            "ok": true
+          },
+          {
+            "step": "admit",
+            "as": "demo.doctor",
+            "call": "POST /admissions",
+            "status": 201,
+            "error_code": null,
+            "request_id": "aa51e0a593be4905a17d93ea238d94d6",
+            "ms": 938,
+            "ok": true
+          }
+        ],
+        "saved": {
+          "run": "e1e608",
+          "now": "2026-10-28T05:47:43.062334+00:00",
+          "shift_id": 1,
+          "doctor_id": 10,
+          "ticket_id": 5,
+          "patient_id": 5,
+          "mrn": "MRN-2026-000005",
+          "admission_id": 4
+        },
+        "events": {
+          "demo.reception": [
+            {
+              "event_id": 230,
+              "event_type": "opd.ticket.status_changed",
+              "priority": "normal"
+            },
+            {
+              "event_id": 231,
+              "event_type": "opd.ticket.status_changed",
+              "priority": "normal"
+            },
+            {
+              "event_id": 232,
+              "event_type": "opd.queue.updated",
+              "priority": "normal"
+            },
+            {
+              "event_id": 233,
+              "event_type": "opd.ticket.status_changed",
+              "priority": "normal"
+            }
+          ],
+          "demo.doctor": [
+            {
+              "event_id": 230,
+              "event_type": "opd.ticket.status_changed",
+              "priority": "normal"
+            },
+            {
+              "event_id": 231,
+              "event_type": "opd.ticket.status_changed",
+              "priority": "normal"
+            },
+            {
+              "event_id": 232,
+              "event_type": "opd.queue.updated",
+              "priority": "normal"
+            },
+            {
+              "event_id": 233,
+              "event_type": "opd.ticket.status_changed",
+              "priority": "normal"
+            }
+          ],
+          "demo.admissions": [
+            {
+              "event_id": 234,
+              "event_type": "admission.requested",
+              "priority": "high"
+            }
+          ]
+        },
+        "tag": "SCN e1e608",
+        "screens_to_open": [
+          {
+            "screen": "pending_admissions",
+            "as": "demo.admissions",
+            "state": "a request waiting for a bed"
+          },
+          {
+            "screen": "bed_matrix",
+            "as": "demo.admissions",
+            "state": "the beds to allocate from"
+          }
+        ],
+        "note": "The records stay on the shared DEV server, named or noted SCN <run>.",
+        "contract_fingerprint": "58db76bf7d59ef6d9870",
+        "knowledge_revision": "51c8fe699d47d046"
+      }
+    },
+    {
+      "label": "overflow-waitlist",
+      "args": {
+        "method": "POST",
+        "path": "/admissions/4/waitlist",
+        "body": {
+          "ward_id": 4,
+          "priority": 1
+        },
+        "as_user": "demo.admissions",
+        "idempotency_key": "admissions-1793166480448-88c7cd177b5-overflow-waitlist"
+      },
+      "state": "answered",
+      "scenario": false,
+      "result": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v1/admissions/4/waitlist",
+          "as_user": "demo.admissions",
+          "query": null,
+          "body": {
+            "ward_id": 4,
+            "priority": 1
+          },
+          "idempotency_key": "admissions-1793166480448-88c7cd177b5-overflow-waitlist"
+        },
+        "status": 200,
+        "ms": 861,
+        "request_id": "6027b6d5370143bd83a0c9d3e8d8e627",
+        "body": {
+          "data": {
+            "admission_id": 4,
+            "admission_number": "ADM-2026-00004",
+            "patient_id": 5,
+            "mrn": "MRN-2026-000005",
+            "patient_name": "SCN e1e608 Admission",
+            "gender": "male",
+            "age_years": 40,
+            "requested_ward_id": 4,
+            "requested_ward_name": "Private Rooms",
+            "ward_id": null,
+            "ward_name": null,
+            "bed_id": null,
+            "bed_label": null,
+            "primary_doctor_id": 10,
+            "primary_doctor_name": "Dr. Ahmed Khan",
+            "admission_type": "Standard",
+            "status": "Waitlisted",
+            "billing_category": "Cash",
+            "panel_id": null,
+            "is_billing_confirmed": false,
+            "is_billing_deferred": false,
+            "is_overflow": false,
+            "overflow_reason": null,
+            "eta_minutes": null,
+            "source_ticket_id": 5,
+            "admission_reason": "SCN e1e608: fever and cough for 5 days",
+            "provisional_diagnosis": "Community-acquired pneumonia",
+            "initial_care_plan": null,
+            "photo_document_id": null,
+            "details_stamp": {
+              "at": "2026-10-28T05:47:47.628514+00:00",
+              "name": "Dr. Ahmed Khan",
+              "text": "Dr. Ahmed Khan, Doctor, PMDC LIC-00010, 28-Oct-2026 10:47",
+              "user_id": 11,
+              "designation": "Doctor",
+              "employee_id": 10,
+              "registration": "PMDC LIC-00010"
+            },
+            "admission_notes": null,
+            "requested_at": "2026-10-28T05:47:47.628514+00:00",
+            "reserved_at": null,
+            "admitted_at": null,
+            "discharge_initiated_at": null,
+            "discharged_at": null,
+            "row_version": 2,
+            "discharge": {
+              "stages": [],
+              "blocked_on": null,
+              "started": false,
+              "complete": false
+            },
+            "invoice": null
+          },
+          "meta": {
+            "server_time": "2026-10-28T05:48:01.313053+00:00"
+          },
+          "request_id": "6027b6d5370143bd83a0c9d3e8d8e627"
+        }
+      }
+    },
+    {
+      "label": "repeated-waitlist-refusal",
+      "args": {
+        "method": "POST",
+        "path": "/admissions/4/waitlist",
+        "body": {
+          "ward_id": 4,
+          "priority": 1
+        },
+        "as_user": "demo.admissions",
+        "idempotency_key": "admissions-1793166481931-af3d97c303892-repeated-waitlist-refusal"
+      },
+      "state": "answered",
+      "scenario": false,
+      "result": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v1/admissions/4/waitlist",
+          "as_user": "demo.admissions",
+          "query": null,
+          "body": {
+            "ward_id": 4,
+            "priority": 1
+          },
+          "idempotency_key": "admissions-1793166481931-af3d97c303892-repeated-waitlist-refusal"
+        },
+        "status": 409,
+        "ms": 763,
+        "request_id": "d5acbacb364040fda9cf7733e338ddbd",
+        "body": {
+          "error": {
+            "code": "ADMISSION_STATE_INVALID",
+            "message": "Admission is Waitlisted",
+            "details": {},
+            "retryable": false,
+            "retry_after_seconds": null
+          },
+          "request_id": "d5acbacb364040fda9cf7733e338ddbd"
+        },
+        "explain": {
+          "http_status": 409,
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+        }
+      }
+    },
+    {
+      "label": "overflow-bed-read",
+      "args": {
+        "method": "GET",
+        "path": "/beds/matrix",
+        "as_user": "demo.admissions"
+      },
+      "state": "answered",
+      "scenario": false,
+      "result": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v1/beds/matrix",
+          "as_user": "demo.admissions",
+          "query": null,
+          "body": null,
+          "idempotency_key": null
+        },
+        "status": 200,
+        "ms": 830,
+        "request_id": "45cace86e58f4e6fb0413cc32c08295e",
+        "body": {
+          "data": {
+            "wards": [
+              {
+                "ward_id": 5,
+                "code": "ER",
+                "name": "Emergency",
+                "ward_type": "Emergency",
+                "gender_restriction": "any",
+                "total_beds": 6,
+                "available": 6,
+                "reserved": 0,
+                "occupied": 0,
+                "turnover": 0,
+                "out_of_service": 0
+              },
+              {
+                "ward_id": 2,
+                "code": "GW-F",
+                "name": "General Ward (Female)",
+                "ward_type": "General",
+                "gender_restriction": "female",
+                "total_beds": 10,
+                "available": 10,
+                "reserved": 0,
+                "occupied": 0,
+                "turnover": 0,
+                "out_of_service": 0
+              },
+              {
+                "ward_id": 1,
+                "code": "GW-M",
+                "name": "General Ward (Male)",
+                "ward_type": "General",
+                "gender_restriction": "male",
+                "total_beds": 10,
+                "available": 8,
+                "reserved": 1,
+                "occupied": 0,
+                "turnover": 1,
+                "out_of_service": 0
+              },
+              {
+                "ward_id": 3,
+                "code": "ICU",
+                "name": "Intensive Care Unit",
+                "ward_type": "ICU",
+                "gender_restriction": "any",
+                "total_beds": 4,
+                "available": 4,
+                "reserved": 0,
+                "occupied": 0,
+                "turnover": 0,
+                "out_of_service": 0
+              },
+              {
+                "ward_id": 4,
+                "code": "PVT",
+                "name": "Private Rooms",
+                "ward_type": "Private",
+                "gender_restriction": "any",
+                "total_beds": 4,
+                "available": 4,
+                "reserved": 0,
+                "occupied": 0,
+                "turnover": 0,
+                "out_of_service": 0
+              }
+            ],
+            "summary": {
+              "Emergency": 6,
+              "General Ward (Female)": 10,
+              "General Ward (Male)": 8,
+              "Intensive Care Unit": 4,
+              "Private Rooms": 4
+            },
+            "beds": [
+              {
+                "bed_id": 1,
+                "ward_id": 1,
+                "label": "GW-M-1",
+                "current_state": "Dirty",
+                "state_changed_at": "2026-10-28T04:32:44.830890+00:00",
+                "is_overflow_allowed": false,
+                "admission_id": 1,
+                "patient_name": "SCN 02a1a5 Paid",
+                "mrn": "MRN-2026-000001",
+                "admission_status": "DischargeInProgress",
+                "is_overflow": false,
+                "discharge_blocked_on": "BillingSettlement"
+              },
+              {
+                "bed_id": 2,
+                "ward_id": 1,
+                "label": "GW-M-2",
+                "current_state": "Reserved",
+                "state_changed_at": "2026-10-28T05:48:11.586535+00:00",
+                "is_overflow_allowed": false,
+                "admission_id": 2,
+                "patient_name": "SCN 3bb438 Admission",
+                "mrn": "MRN-2026-000003",
+                "admission_status": "BedReserved",
+                "is_overflow": false,
+                "discharge_blocked_on": null
+              },
+              {
+                "bed_id": 3,
+                "ward_id": 1,
+                "label": "GW-M-3",
+                "current_state": "Available",
+                "state_changed_at": "2026-10-27T21:49:36.568868+00:00",
+                "is_overflow_allowed": false,
+                "admission_id": null,
+                "patient_name": null,
+                "mrn": null,
+                "admission_status": null,
+                "is_overflow": null,
+                "discharge_blocked_on": null
+              },
+              {
+                "bed_id": 4,
+                "ward_id": 1,
+                "label": "GW-M-4",
+                "current_state": "Available",
+                "state_changed_at": "2026-10-27T21:49:36.568868+00:00",
+                "is_overflow_allowed": false,
+                "admission_id": null,
+                "patient_name": null,
+                "mrn": null,
+                "admission_status": null,
+                "is_overflow": null,
+                "discharge_blocked_on": null
+              },
+              {
+                "bed_id": 5,
+                "ward_id": 1,
+                "label": "GW-M-5",
+                "current_state": "Available",
+                "state_changed_at": "2026-10-27T21:49:36.568868+00:00",
+                "is_overflow_allowed": false,
+                "admission_id": null,
+                "patient_name": null,
+                "mrn": null,
+                "admission_status": null,
+                "is_overflow": null,
+                "discharge_blocked_on": null
+              },
+              {
+                "bed_id": 6,
+                "ward_id": 1,
+                "label": "GW-M-6",
+                "current_state": "Available",
+                "state_changed_at": "2026-10-27T21:49:36.568868+00:00",
+                "is_overflow_allowed": false,
+                "admission_id": null,
+                "patient_name": null,
+                "mrn": null,
+                "admission_status": null,
+                "is_overflow": null,
+                "discharge_blocked_on": null
+              },
+              {
+                "bed_id": 7,
+                "ward_id": 1,
+                "label": "GW-M-7",
+                "current_state": "Available",
+                "state_changed_at": "2026-10-27T21:49:36.568868+00:00",
+                "is_overflow_allowed": false,
+                "admission_id": null,
+                "patient_name": null,
+                "mrn": null,
+                "admission_status": null,
+                "is_overflow": null,
+                "discharge_blocked_on": null
+              },
+              {
+                "bed_id": 8,
+                "ward_id": 1,
+                "label": "GW-M-8",
+                "current_state": "Available",
+                "state_changed_at": "2026-10-27T21:49:36.568868+00:00",
+                "is_overflow_allowed": false,
+                "admission_id": null,
+                "patient_name": null,
+                "mrn": null,
+                "admission_status": null,
+                "is_overflow": null,
+                "discharge_blocked_on": null
+              },
+              {
+                "bed_id": 9,
+                "ward_id": 1,
+                "label": "GW-M-9",
+                "current_state": "Available",
+                "state_changed_at": "2026-10-27T21:49:36.568868+00:00",
+                "is_overflow_allowed": false,
+                "admission_id": null,
+                "patient_name": null,
+                "mrn": null,
+                "admission_status": null,
+                "is_overflow": null,
+                "discharge_blocked_on": null
+              },
+              {
+                "bed_id": 10,
+                "ward_id": 1,
+                "label": "GW-M-10",
+                "current_state": "Available",
+                "state_changed_at": "2026-10-27T21:49:36.568868+00:00",
+                "is_overflow_allowed": false,
+                "admission_id": null,
+                "patient_name": null,
+                "mrn": null,
+                "admission_status": null,
+                "is_overflow": null,
+                "discharge_blocked_on": null
+              },
+              {
+                "bed_id": 11,
+                "ward_id": 2,
+                "label": "GW-F-1",
+                "current_state": "Available",
+                "state_changed_at": "2026-10-27T21:49:36.568868+00:00",
+                "is_overflow_allowed": false,
+                "admission_id": null,
+                "patient_name": null,
+                "mrn": null,
+                "admission_status": null,
+                "is_overflow": null,
+                "discharge_blocked_on": null
+              },
+              {
+                "bed_id": 12,
+                "ward_id": 2,
+                "label": "GW-F-2",
+                "current_state": "Available",
+                "state_changed_at": "2026-10-27T21:49:36.568868+00:00",
+                "is_overflow_allowed": false,
+                "admission_id": null,
+                "patient_name": null,
+                "mrn": null,
+                "admission_status": null,
+                "is_overflow": null,
+                "discharge_blocked_on": null
+              },
+              {
+                "bed_id": 13,
+                "ward_id": 2,
+                "label": "GW-F-3",
+                "current_state": "Available",
+                "state_changed_at": "2026-10-27T21:49:36.568868+00:00",
+                "is_overflow_allowed": false,
+                "admission_id": null,
+                "patient_name": null,
+                "mrn": null,
+                "admission_status": null,
+                "is_overflow": null,
+                "discharge_blocked_on": null
+              },
+              {
+                "bed_id": 14,
+                "ward_id": 2,
+                "label": "GW-F-4",
+                "current_state": "Available",
+                "state_changed_at": "2026-10-27T21:49:36.568868+00:00",
+                "is_overflow_allowed": false,
+                "admission_id": null,
+                "patient_name": null,
+                "mrn": null,
+                "admission_status": null,
+                "is_overflow": null,
+                "discharge_blocked_on": null
+              },
+              {
+                "bed_id": 15,
+                "ward_id": 2,
+                "label": "GW-F-5",
+                "current_state": "Available",
+                "state_changed_at": "2026-10-27T21:49:36.568868+00:00",
+                "is_overflow_allowed": false,
+                "admission_id": null,
+                "patient_name": null,
+                "mrn": null,
+                "admission_status": null,
+                "is_overflow": null,
+                "discharge_blocked_on": null
+              },
+              {
+                "bed_id": 16,
+                "ward_id": 2,
+                "label": "GW-F-6",
+                "current_state": "Available",
+                "state_changed_at": "2026-10-27T21:49:36.568868+00:00",
+                "is_overflow_allowed": false,
+                "admission_id": null,
+                "patient_name": null,
+                "mrn": null,
+                "admission_status": null,
+                "is_overflow": null,
+                "discharge_blocked_on": null
+              },
+              {
+                "bed_id": 17,
+                "ward_id": 2,
+                "label": "GW-F-7",
+                "current_state": "Available",
+                "state_changed_at": "2026-10-27T21:49:36.568868+00:00",
+                "is_overflow_allowed": false,
+                "admission_id": null,
+                "patient_name": null,
+                "mrn": null,
+                "admission_status": null,
+                "is_overflow": null,
+                "discharge_blocked_on": null
+              },
+              {
+                "bed_id": 18,
+                "ward_id": 2,
+                "label": "GW-F-8",
+                "current_state": "Available",
+                "state_changed_at": "2026-10-27T21:49:36.568868+00:00",
+                "is_overflow_allowed": false,
+                "admission_id": null,
+                "patient_name": null,
+                "mrn": null,
+                "admission_status": null,
+                "is_overflow": null,
+                "discharge_blocked_on": null
+              },
+              {
+                "bed_id": 19,
+                "ward_id": 2,
+                "label": "GW-F-9",
+                "current_state": "Available",
+                "state_changed_at": "2026-10-27T21:49:36.568868+00:00",
+                "is_overflow_allowed": false,
+                "admission_id": null,
+                "patient_name": null,
+                "mrn": null,
+                "admission_status": null,
+                "is_overflow": null,
+                "discharge_blocked_on": null
+              },
+              {
+                "bed_id": 20,
+                "ward_id": 2,
+                "label": "GW-F-10",
+                "current_state": "Available",
+                "state_changed_at": "2026-10-27T21:49:36.568868+00:00",
+                "is_overflow_allowed": false,
+                "admission_id": null,
+                "patient_name": null,
+                "mrn": null,
+                "admission_status": null,
+                "is_overflow": null,
+                "discharge_blocked_on": null
+              },
+              {
+                "bed_id": 21,
+                "ward_id": 3,
+                "label": "ICU-1",
+                "current_state": "Available",
+                "state_changed_at": "2026-10-27T21:49:36.568868+00:00",
+                "is_overflow_allowed": false,
+                "admission_id": null,
+                "patient_name": null,
+                "mrn": null,
+                "admission_status": null,
+                "is_overflow": null,
+                "discharge_blocked_on": null
+              },
+              {
+                "bed_id": 22,
+                "ward_id": 3,
+                "label": "ICU-2",
+                "current_state": "Available",
+                "state_changed_at": "2026-10-27T21:49:36.568868+00:00",
+                "is_overflow_allowed": false,
+                "admission_id": null,
+                "patient_name": null,
+                "mrn": null,
+                "admission_status": null,
+                "is_overflow": null,
+                "discharge_blocked_on": null
+              },
+              {
+                "bed_id": 23,
+                "ward_id": 3,
+                "label": "ICU-3",
+                "current_state": "Available",
+                "state_changed_at": "2026-10-27T21:49:36.568868+00:00",
+                "is_overflow_allowed": false,
+                "admission_id": null,
+                "patient_name": null,
+                "mrn": null,
+                "admission_status": null,
+                "is_overflow": null,
+                "discharge_blocked_on": null
+              },
+              {
+                "bed_id": 24,
+                "ward_id": 3,
+                "label": "ICU-4",
+                "current_state": "Available",
+                "state_changed_at": "2026-10-27T21:49:36.568868+00:00",
+                "is_overflow_allowed": false,
+                "admission_id": null,
+                "patient_name": null,
+                "mrn": null,
+                "admission_status": null,
+                "is_overflow": null,
+                "discharge_blocked_on": null
+              },
+              {
+                "bed_id": 25,
+                "ward_id": 4,
+                "label": "PVT-1",
+                "current_state": "Available",
+                "state_changed_at": "2026-10-27T21:49:36.568868+00:00",
+                "is_overflow_allowed": false,
+                "admission_id": null,
+                "patient_name": null,
+                "mrn": null,
+                "admission_status": null,
+                "is_overflow": null,
+                "discharge_blocked_on": null
+              },
+              {
+                "bed_id": 26,
+                "ward_id": 4,
+                "label": "PVT-2",
+                "current_state": "Available",
+                "state_changed_at": "2026-10-27T21:49:36.568868+00:00",
+                "is_overflow_allowed": false,
+                "admission_id": null,
+                "patient_name": null,
+                "mrn": null,
+                "admission_status": null,
+                "is_overflow": null,
+                "discharge_blocked_on": null
+              },
+              {
+                "bed_id": 27,
+                "ward_id": 4,
+                "label": "PVT-3",
+                "current_state": "Available",
+                "state_changed_at": "2026-10-27T21:49:36.568868+00:00",
+                "is_overflow_allowed": false,
+                "admission_id": null,
+                "patient_name": null,
+                "mrn": null,
+                "admission_status": null,
+                "is_overflow": null,
+                "discharge_blocked_on": null
+              },
+              {
+                "bed_id": 28,
+                "ward_id": 4,
+                "label": "PVT-4",
+                "current_state": "Available",
+                "state_changed_at": "2026-10-27T21:49:36.568868+00:00",
+                "is_overflow_allowed": false,
+                "admission_id": null,
+                "patient_name": null,
+                "mrn": null,
+                "admission_status": null,
+                "is_overflow": null,
+                "discharge_blocked_on": null
+              },
+              {
+                "bed_id": 29,
+                "ward_id": 5,
+                "label": "ER-1",
+                "current_state": "Available",
+                "state_changed_at": "2026-10-27T21:49:36.568868+00:00",
+                "is_overflow_allowed": false,
+                "admission_id": null,
+                "patient_name": null,
+                "mrn": null,
+                "admission_status": null,
+                "is_overflow": null,
+                "discharge_blocked_on": null
+              },
+              {
+                "bed_id": 30,
+                "ward_id": 5,
+                "label": "ER-2",
+                "current_state": "Available",
+                "state_changed_at": "2026-10-27T21:49:36.568868+00:00",
+                "is_overflow_allowed": false,
+                "admission_id": null,
+                "patient_name": null,
+                "mrn": null,
+                "admission_status": null,
+                "is_overflow": null,
+                "discharge_blocked_on": null
+              },
+              {
+                "bed_id": 31,
+                "ward_id": 5,
+                "label": "ER-3",
+                "current_state": "Available",
+                "state_changed_at": "2026-10-27T21:49:36.568868+00:00",
+                "is_overflow_allowed": false,
+                "admission_id": null,
+                "patient_name": null,
+                "mrn": null,
+                "admission_status": null,
+                "is_overflow": null,
+                "discharge_blocked_on": null
+              },
+              {
+                "bed_id": 32,
+                "ward_id": 5,
+                "label": "ER-4",
+                "current_state": "Available",
+                "state_changed_at": "2026-10-27T21:49:36.568868+00:00",
+                "is_overflow_allowed": false,
+                "admission_id": null,
+                "patient_name": null,
+                "mrn": null,
+                "admission_status": null,
+                "is_overflow": null,
+                "discharge_blocked_on": null
+              },
+              {
+                "bed_id": 33,
+                "ward_id": 5,
+                "label": "ER-5",
+                "current_state": "Available",
+                "state_changed_at": "2026-10-27T21:49:36.568868+00:00",
+                "is_overflow_allowed": false,
+                "admission_id": null,
+                "patient_name": null,
+                "mrn": null,
+                "admission_status": null,
+                "is_overflow": null,
+                "discharge_blocked_on": null
+              },
+              {
+                "bed_id": 34,
+                "ward_id": 5,
+                "label": "ER-6",
+                "current_state": "Available",
+                "state_changed_at": "2026-10-27T21:49:36.568868+00:00",
+                "is_overflow_allowed": false,
+                "admission_id": null,
+                "patient_name": null,
+                "mrn": null,
+                "admission_status": null,
+                "is_overflow": null,
+                "discharge_blocked_on": null
+              }
+            ]
+          },
+          "meta": {
+            "server_time": "2026-10-28T05:48:16.221005+00:00"
+          },
+          "request_id": "45cace86e58f4e6fb0413cc32c08295e"
+        }
+      }
+    },
+    {
+      "label": "overflow-reserve",
+      "args": {
+        "method": "POST",
+        "path": "/admissions/4/overflow-override",
+        "body": {
+          "bed_id": 3,
+          "reason": "DEMO software-only cross-ward overflow test",
+          "admit_now": false,
+          "billing_category": "Cash",
+          "panel_id": null
+        },
+        "as_user": "demo.admissions",
+        "idempotency_key": "admissions-1793166496676-7001b08fb1535-overflow-reserve"
+      },
+      "state": "answered",
+      "scenario": false,
+      "result": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v1/admissions/4/overflow-override",
+          "as_user": "demo.admissions",
+          "query": null,
+          "body": {
+            "bed_id": 3,
+            "reason": "DEMO software-only cross-ward overflow test",
+            "admit_now": false,
+            "billing_category": "Cash",
+            "panel_id": null
+          },
+          "idempotency_key": "admissions-1793166496676-7001b08fb1535-overflow-reserve"
+        },
+        "status": 200,
+        "ms": 854,
+        "request_id": "67b22fab31344962a575eed38d19d5b8",
+        "body": {
+          "data": {
+            "admission_id": 4,
+            "admission_number": "ADM-2026-00004",
+            "patient_id": 5,
+            "mrn": "MRN-2026-000005",
+            "patient_name": "SCN e1e608 Admission",
+            "gender": "male",
+            "age_years": 40,
+            "requested_ward_id": 4,
+            "requested_ward_name": "Private Rooms",
+            "ward_id": 1,
+            "ward_name": "General Ward (Male)",
+            "bed_id": 3,
+            "bed_label": "GW-M-3",
+            "primary_doctor_id": 10,
+            "primary_doctor_name": "Dr. Ahmed Khan",
+            "admission_type": "Standard",
+            "status": "BedReserved",
+            "billing_category": "Cash",
+            "panel_id": null,
+            "is_billing_confirmed": true,
+            "is_billing_deferred": false,
+            "is_overflow": true,
+            "overflow_reason": "DEMO software-only cross-ward overflow test",
+            "eta_minutes": null,
+            "source_ticket_id": 5,
+            "admission_reason": "SCN e1e608: fever and cough for 5 days",
+            "provisional_diagnosis": "Community-acquired pneumonia",
+            "initial_care_plan": null,
+            "photo_document_id": null,
+            "details_stamp": {
+              "at": "2026-10-28T05:47:47.628514+00:00",
+              "name": "Dr. Ahmed Khan",
+              "text": "Dr. Ahmed Khan, Doctor, PMDC LIC-00010, 28-Oct-2026 10:47",
+              "user_id": 11,
+              "designation": "Doctor",
+              "employee_id": 10,
+              "registration": "PMDC LIC-00010"
+            },
+            "admission_notes": null,
+            "requested_at": "2026-10-28T05:47:47.628514+00:00",
+            "reserved_at": "2026-10-28T05:48:17.462457+00:00",
+            "admitted_at": null,
+            "discharge_initiated_at": null,
+            "discharged_at": null,
+            "row_version": 4,
+            "discharge": {
+              "stages": [],
+              "blocked_on": null,
+              "started": false,
+              "complete": false
+            },
+            "invoice": null
+          },
+          "meta": {
+            "server_time": "2026-10-28T05:48:17.482717+00:00"
+          },
+          "request_id": "67b22fab31344962a575eed38d19d5b8"
+        }
+      }
+    },
+    {
+      "label": "repeated-overflow-refusal",
+      "args": {
+        "method": "POST",
+        "path": "/admissions/4/overflow-override",
+        "body": {
+          "bed_id": 3,
+          "reason": "DEMO intentional repeat refusal",
+          "admit_now": false
+        },
+        "as_user": "demo.admissions",
+        "idempotency_key": "admissions-1793166497872-c31febe7fdbb9-repeated-overflow-refusal"
+      },
+      "state": "answered",
+      "scenario": false,
+      "result": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v1/admissions/4/overflow-override",
+          "as_user": "demo.admissions",
+          "query": null,
+          "body": {
+            "bed_id": 3,
+            "reason": "DEMO intentional repeat refusal",
+            "admit_now": false
+          },
+          "idempotency_key": "admissions-1793166497872-c31febe7fdbb9-repeated-overflow-refusal"
+        },
+        "status": 409,
+        "ms": 833,
+        "request_id": "ccb75494ecce4299a0ea17ca45f92d15",
+        "body": {
+          "error": {
+            "code": "ADMISSION_STATE_INVALID",
+            "message": "Admission is BedReserved",
+            "details": {},
+            "retryable": false,
+            "retry_after_seconds": null
+          },
+          "request_id": "ccb75494ecce4299a0ea17ca45f92d15"
+        },
+        "explain": {
+          "http_status": 409,
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+        }
+      }
+    },
+    {
+      "label": "repeated-allocation-refusal",
+      "args": {
+        "method": "POST",
+        "path": "/admissions/4/allocate-bed",
+        "body": {
+          "bed_id": 3,
+          "admit_now": false
+        },
+        "as_user": "demo.admissions",
+        "idempotency_key": "admissions-1793166499056-9b060d2d70dfc8-repeated-allocation-refusal"
+      },
+      "state": "answered",
+      "scenario": false,
+      "result": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v1/admissions/4/allocate-bed",
+          "as_user": "demo.admissions",
+          "query": null,
+          "body": {
+            "bed_id": 3,
+            "admit_now": false
+          },
+          "idempotency_key": "admissions-1793166499056-9b060d2d70dfc8-repeated-allocation-refusal"
+        },
+        "status": 409,
+        "ms": 906,
+        "request_id": "f81f94c39ddb4f4b911c7cfa1e84946d",
+        "body": {
+          "error": {
+            "code": "ADMISSION_STATE_INVALID",
+            "message": "Admission is BedReserved",
+            "details": {},
+            "retryable": false,
+            "retry_after_seconds": null
+          },
+          "request_id": "f81f94c39ddb4f4b911c7cfa1e84946d"
+        },
+        "explain": {
+          "http_status": 409,
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+        }
+      }
+    },
+    {
+      "label": "overflow-cancel",
+      "args": {
+        "method": "POST",
+        "path": "/admissions/4/cancel",
+        "body": {
+          "reason": "DEMO finished software-only overflow verification; no real care"
+        },
+        "as_user": "demo.admissions",
+        "idempotency_key": "admissions-1793166564471-84bb5c3c7f2a6-overflow-cancel"
+      },
+      "state": "answered",
+      "scenario": false,
+      "result": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v1/admissions/4/cancel",
+          "as_user": "demo.admissions",
+          "query": null,
+          "body": {
+            "reason": "DEMO finished software-only overflow verification; no real care"
+          },
+          "idempotency_key": "admissions-1793166564471-84bb5c3c7f2a6-overflow-cancel"
+        },
+        "status": 200,
+        "ms": 801,
+        "request_id": "da5750f068fa4e0cad4b3f6a5bd73212",
+        "body": {
+          "data": {
+            "admission_id": 4,
+            "admission_number": "ADM-2026-00004",
+            "patient_id": 5,
+            "mrn": "MRN-2026-000005",
+            "patient_name": "SCN e1e608 Admission",
+            "gender": "male",
+            "age_years": 40,
+            "requested_ward_id": 4,
+            "requested_ward_name": "Private Rooms",
+            "ward_id": 1,
+            "ward_name": "General Ward (Male)",
+            "bed_id": 3,
+            "bed_label": "GW-M-3",
+            "primary_doctor_id": 10,
+            "primary_doctor_name": "Dr. Ahmed Khan",
+            "admission_type": "Standard",
+            "status": "Cancelled",
+            "billing_category": "Cash",
+            "panel_id": null,
+            "is_billing_confirmed": true,
+            "is_billing_deferred": false,
+            "is_overflow": true,
+            "overflow_reason": "DEMO software-only cross-ward overflow test",
+            "eta_minutes": null,
+            "source_ticket_id": 5,
+            "admission_reason": "SCN e1e608: fever and cough for 5 days",
+            "provisional_diagnosis": "Community-acquired pneumonia",
+            "initial_care_plan": null,
+            "photo_document_id": null,
+            "details_stamp": {
+              "at": "2026-10-28T05:47:47.628514+00:00",
+              "name": "Dr. Ahmed Khan",
+              "text": "Dr. Ahmed Khan, Doctor, PMDC LIC-00010, 28-Oct-2026 10:47",
+              "user_id": 11,
+              "designation": "Doctor",
+              "employee_id": 10,
+              "registration": "PMDC LIC-00010"
+            },
+            "admission_notes": null,
+            "requested_at": "2026-10-28T05:47:47.628514+00:00",
+            "reserved_at": "2026-10-28T05:48:17.462457+00:00",
+            "admitted_at": null,
+            "discharge_initiated_at": null,
+            "discharged_at": null,
+            "row_version": 5,
+            "discharge": {
+              "stages": [],
+              "blocked_on": null,
+              "started": false,
+              "complete": false
+            },
+            "invoice": null
+          },
+          "meta": {
+            "server_time": "2026-10-28T05:49:26.191370+00:00"
+          },
+          "request_id": "da5750f068fa4e0cad4b3f6a5bd73212"
+        }
+      }
+    },
+    {
+      "label": "overflow-cancelled-read",
+      "args": {
+        "method": "GET",
+        "path": "/admissions/4",
+        "as_user": "demo.admissions"
+      },
+      "state": "answered",
+      "scenario": false,
+      "result": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v1/admissions/4",
+          "as_user": "demo.admissions",
+          "query": null,
+          "body": null,
+          "idempotency_key": null
+        },
+        "status": 200,
+        "ms": 864,
+        "request_id": "a8735bf4de094e5c8da5c0ff235c2da6",
+        "body": {
+          "data": {
+            "admission_id": 4,
+            "admission_number": "ADM-2026-00004",
+            "patient_id": 5,
+            "mrn": "MRN-2026-000005",
+            "patient_name": "SCN e1e608 Admission",
+            "gender": "male",
+            "age_years": 40,
+            "requested_ward_id": 4,
+            "requested_ward_name": "Private Rooms",
+            "ward_id": 1,
+            "ward_name": "General Ward (Male)",
+            "bed_id": 3,
+            "bed_label": "GW-M-3",
+            "primary_doctor_id": 10,
+            "primary_doctor_name": "Dr. Ahmed Khan",
+            "admission_type": "Standard",
+            "status": "Cancelled",
+            "billing_category": "Cash",
+            "panel_id": null,
+            "is_billing_confirmed": true,
+            "is_billing_deferred": false,
+            "is_overflow": true,
+            "overflow_reason": "DEMO software-only cross-ward overflow test",
+            "eta_minutes": null,
+            "source_ticket_id": 5,
+            "admission_reason": "SCN e1e608: fever and cough for 5 days",
+            "provisional_diagnosis": "Community-acquired pneumonia",
+            "initial_care_plan": null,
+            "photo_document_id": null,
+            "details_stamp": {
+              "at": "2026-10-28T05:47:47.628514+00:00",
+              "name": "Dr. Ahmed Khan",
+              "text": "Dr. Ahmed Khan, Doctor, PMDC LIC-00010, 28-Oct-2026 10:47",
+              "user_id": 11,
+              "designation": "Doctor",
+              "employee_id": 10,
+              "registration": "PMDC LIC-00010"
+            },
+            "admission_notes": null,
+            "requested_at": "2026-10-28T05:47:47.628514+00:00",
+            "reserved_at": "2026-10-28T05:48:17.462457+00:00",
+            "admitted_at": null,
+            "discharge_initiated_at": null,
+            "discharged_at": null,
+            "row_version": 5,
+            "discharge": {
+              "stages": [],
+              "blocked_on": null,
+              "started": false,
+              "complete": false
+            },
+            "invoice": null
+          },
+          "meta": {
+            "server_time": "2026-10-28T05:49:27.990705+00:00"
+          },
+          "request_id": "a8735bf4de094e5c8da5c0ff235c2da6"
+        }
+      }
+    },
+    {
+      "label": "known-patient-code-red",
+      "args": {
+        "method": "POST",
+        "path": "/admissions/code-red",
+        "as_user": "demo.triage",
+        "body": {
+          "patient_id": 5,
+          "gender": "male",
+          "ward_type": "Emergency",
+          "needs_ot": false,
+          "notes": "DEMO SOFTWARE TEST ONLY; no real emergency or care"
+        },
+        "idempotency_key": "admissions-1793166599177-a5150aa1040e68-known-patient-code-red"
+      },
+      "state": "answered",
+      "scenario": false,
+      "result": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v1/admissions/code-red",
+          "as_user": "demo.triage",
+          "query": null,
+          "body": {
+            "patient_id": 5,
+            "gender": "male",
+            "ward_type": "Emergency",
+            "needs_ot": false,
+            "notes": "DEMO SOFTWARE TEST ONLY; no real emergency or care"
+          },
+          "idempotency_key": "admissions-1793166599177-a5150aa1040e68-known-patient-code-red"
+        },
+        "status": 201,
+        "ms": 787,
+        "request_id": "69c273ec13634fa1860ee3c126fbbbf5",
+        "body": {
+          "data": {
+            "admission_id": 5,
+            "admission_number": "ADM-2026-00005",
+            "patient_id": 5,
+            "mrn": "MRN-2026-000005",
+            "patient_name": "SCN e1e608 Admission",
+            "gender": "male",
+            "age_years": 40,
+            "requested_ward_id": 5,
+            "requested_ward_name": "Emergency",
+            "ward_id": 5,
+            "ward_name": "Emergency",
+            "bed_id": 29,
+            "bed_label": "ER-1",
+            "primary_doctor_id": 9,
+            "primary_doctor_name": "Nadia (Triage Nurse)",
+            "admission_type": "CodeRed",
+            "status": "CodeRedActive",
+            "billing_category": "Cash",
+            "panel_id": null,
+            "is_billing_confirmed": false,
+            "is_billing_deferred": true,
+            "is_overflow": false,
+            "overflow_reason": null,
+            "eta_minutes": null,
+            "source_ticket_id": null,
+            "admission_reason": null,
+            "provisional_diagnosis": null,
+            "initial_care_plan": null,
+            "photo_document_id": null,
+            "details_stamp": null,
+            "admission_notes": "DEMO SOFTWARE TEST ONLY; no real emergency or care",
+            "requested_at": "2026-10-28T05:50:00.839806+00:00",
+            "reserved_at": "2026-10-28T05:50:00.839806+00:00",
+            "admitted_at": null,
+            "discharge_initiated_at": null,
+            "discharged_at": null,
+            "row_version": 2,
+            "discharge": {
+              "stages": [],
+              "blocked_on": null,
+              "started": false,
+              "complete": false
+            },
+            "invoice": null,
+            "alert_message": "Incoming Trauma. Prepare Bed ER-1 (Emergency).",
+            "ot_booking": null
+          },
+          "meta": {
+            "server_time": "2026-10-28T05:50:00.887738+00:00"
+          },
+          "request_id": "69c273ec13634fa1860ee3c126fbbbf5"
+        }
+      }
+    },
+    {
+      "label": "deferred-final-bill-refusal",
+      "args": {
+        "method": "POST",
+        "path": "/admissions/5/final-bill",
+        "body": {
+          "discount": "0"
+        },
+        "as_user": "demo.admissions",
+        "idempotency_key": "admissions-1793166601316-006557ac64e63-deferred-final-bill-refusal"
+      },
+      "state": "answered",
+      "scenario": false,
+      "result": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v1/admissions/5/final-bill",
+          "as_user": "demo.admissions",
+          "query": null,
+          "body": {
+            "discount": "0"
+          },
+          "idempotency_key": "admissions-1793166601316-006557ac64e63-deferred-final-bill-refusal"
+        },
+        "status": 409,
+        "ms": 764,
+        "request_id": "ba48cd8788a24c90bf1b1b04411eda33",
+        "body": {
+          "error": {
+            "code": "BILLING_DEFERRED",
+            "message": "Confirm how this emergency admission is paid first.",
+            "details": {
+              "admission_id": 5,
+              "next_step": "POST /admissions/5/confirm-billing"
+            },
+            "retryable": false,
+            "retry_after_seconds": null
+          },
+          "request_id": "ba48cd8788a24c90bf1b1b04411eda33"
+        },
+        "explain": {
+          "http_status": 409,
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+        }
+      }
+    },
+    {
+      "label": "deferred-clear-refusal",
+      "args": {
+        "method": "POST",
+        "path": "/admissions/5/discharge/BillingSettlement/clear",
+        "body": {
+          "note": "DEMO intended deferred refusal"
+        },
+        "as_user": "demo.admissions",
+        "idempotency_key": "admissions-1793166602415-abd6a297b96ec8-deferred-clear-refusal"
+      },
+      "state": "answered",
+      "scenario": false,
+      "result": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v1/admissions/5/discharge/BillingSettlement/clear",
+          "as_user": "demo.admissions",
+          "query": null,
+          "body": {
+            "note": "DEMO intended deferred refusal"
+          },
+          "idempotency_key": "admissions-1793166602415-abd6a297b96ec8-deferred-clear-refusal"
+        },
+        "status": 409,
+        "ms": 907,
+        "request_id": "e86f2b2a7b354513b2592c00a015b6d6",
+        "body": {
+          "error": {
+            "code": "DISCHARGE_NOT_ALLOWED",
+            "message": "Discharge has not started",
+            "details": {},
+            "retryable": false,
+            "retry_after_seconds": null
+          },
+          "request_id": "e86f2b2a7b354513b2592c00a015b6d6"
+        },
+        "explain": {
+          "http_status": 409,
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+        }
+      }
+    },
+    {
+      "label": "billing-admission-read",
+      "args": {
+        "method": "GET",
+        "path": "/admissions/3",
+        "as_user": "demo.admissions"
+      },
+      "state": "answered",
+      "scenario": false,
+      "result": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v1/admissions/3",
+          "as_user": "demo.admissions",
+          "query": null,
+          "body": null,
+          "idempotency_key": null
+        },
+        "status": 200,
+        "ms": 757,
+        "request_id": "6aadd2d7f29b4fe3ac55026d219e7c45",
+        "body": {
+          "data": {
+            "admission_id": 3,
+            "admission_number": "ADM-2026-00003",
+            "patient_id": 4,
+            "mrn": "MRN-2026-000004",
+            "patient_name": "SCN c74cf6 Admission",
+            "gender": "male",
+            "age_years": 40,
+            "requested_ward_id": null,
+            "requested_ward_name": null,
+            "ward_id": 1,
+            "ward_name": "General Ward (Male)",
+            "bed_id": 2,
+            "bed_label": "GW-M-2",
+            "primary_doctor_id": 10,
+            "primary_doctor_name": "Dr. Ahmed Khan",
+            "admission_type": "Standard",
+            "status": "Admitted",
+            "billing_category": "Cash",
+            "panel_id": null,
+            "is_billing_confirmed": true,
+            "is_billing_deferred": false,
+            "is_overflow": false,
+            "overflow_reason": null,
+            "eta_minutes": null,
+            "source_ticket_id": 4,
+            "admission_reason": "SCN c74cf6: fever and cough for 5 days",
+            "provisional_diagnosis": "Community-acquired pneumonia",
+            "initial_care_plan": null,
+            "photo_document_id": null,
+            "details_stamp": {
+              "at": "2026-10-28T05:46:28.839129+00:00",
+              "name": "Dr. Ahmed Khan",
+              "text": "Dr. Ahmed Khan, Doctor, PMDC LIC-00010, 28-Oct-2026 10:46",
+              "user_id": 11,
+              "designation": "Doctor",
+              "employee_id": 10,
+              "registration": "PMDC LIC-00010"
+            },
+            "admission_notes": null,
+            "requested_at": "2026-10-28T05:46:28.839129+00:00",
+            "reserved_at": "2026-10-28T05:49:03.965801+00:00",
+            "admitted_at": "2026-10-28T05:49:13.891602+00:00",
+            "discharge_initiated_at": null,
+            "discharged_at": null,
+            "row_version": 4,
+            "discharge": {
+              "stages": [],
+              "blocked_on": null,
+              "started": false,
+              "complete": false
+            },
+            "invoice": {
+              "invoice_id": 7,
+              "invoice_no": "INV-2026-0000007",
+              "status": "Paid",
+              "gross_total": 0,
+              "net_payable": 0,
+              "amount_paid": 0
+            }
+          },
+          "meta": {
+            "server_time": "2026-10-28T05:50:36.954586+00:00"
+          },
+          "request_id": "6aadd2d7f29b4fe3ac55026d219e7c45"
+        }
+      }
+    },
+    {
+      "label": "billing-draft-summary",
+      "args": {
+        "method": "PUT",
+        "path": "/admissions/3/discharge-summary",
+        "body": {
+          "outcome": "Home",
+          "condition_at_discharge": "Improved",
+          "reason_for_admission": "DEMO software test; no actual admission",
+          "final_diagnosis": "Synthetic exercise only",
+          "significant_findings": "None; software exercise",
+          "procedures_and_treatment": "None; no real care",
+          "response_to_treatment": "Not applicable; software only",
+          "discharge_medications": "None",
+          "follow_up_instructions": "None; synthetic software exercise"
+        },
+        "as_user": "demo.doctor",
+        "idempotency_key": "admissions-1793166637389-502975fa7d3e-billing-draft-summary"
+      },
+      "state": "answered",
+      "scenario": false,
+      "result": {
+        "request": {
+          "method": "PUT",
+          "path": "/api/v1/admissions/3/discharge-summary",
+          "as_user": "demo.doctor",
+          "query": null,
+          "body": {
+            "outcome": "Home",
+            "condition_at_discharge": "Improved",
+            "reason_for_admission": "DEMO software test; no actual admission",
+            "final_diagnosis": "Synthetic exercise only",
+            "significant_findings": "None; software exercise",
+            "procedures_and_treatment": "None; no real care",
+            "response_to_treatment": "Not applicable; software only",
+            "discharge_medications": "None",
+            "follow_up_instructions": "None; synthetic software exercise"
+          },
+          "idempotency_key": "admissions-1793166637389-502975fa7d3e-billing-draft-summary"
+        },
+        "status": 200,
+        "ms": 854,
+        "request_id": "131715c57eb4481ab288ddacecf598ae",
+        "body": {
+          "data": {
+            "admission": {
+              "admission_id": 3,
+              "admission_number": "ADM-2026-00003",
+              "admission_status": "Admitted",
+              "admission_type": "Standard",
+              "patient_id": 4,
+              "mrn": "MRN-2026-000004",
+              "patient_name": "SCN c74cf6 Admission",
+              "gender": "male",
+              "age_years": 40,
+              "dob": null,
+              "requested_at": "2026-10-28T05:46:28.839129+00:00",
+              "admitted_at": "2026-10-28T05:49:13.891602+00:00",
+              "discharged_at": null,
+              "ward_name": "General Ward (Male)",
+              "bed_label": "GW-M-2",
+              "primary_doctor_name": "Dr. Ahmed Khan",
+              "admission_reason": "SCN c74cf6: fever and cough for 5 days",
+              "provisional_diagnosis": "Community-acquired pneumonia"
+            },
+            "summary": {
+              "summary_id": 2,
+              "admission_id": 3,
+              "patient_id": 4,
+              "outcome": "Home",
+              "condition_at_discharge": "Improved",
+              "reason_for_admission": "DEMO software test; no actual admission",
+              "final_diagnosis": "Synthetic exercise only",
+              "icd_codes": [],
+              "significant_findings": "None; software exercise",
+              "procedures_and_treatment": "None; no real care",
+              "response_to_treatment": "Not applicable; software only",
+              "discharge_medications": "None",
+              "follow_up_instructions": "None; synthetic software exercise",
+              "follow_up_date": null,
+              "receiving_hospital": null,
+              "transfer_reason": null,
+              "transfer_arrangements": null,
+              "outcome_note": null,
+              "status": "Draft",
+              "created_by": 11,
+              "created_by_name": "Dr. Ahmed Khan",
+              "created_at": "2026-10-28T05:50:38.159054+00:00",
+              "signed_by": null,
+              "signed_at": null,
+              "signer_name": null,
+              "signer_designation": null,
+              "signer_license": null,
+              "row_version": 1,
+              "icd_terms": []
+            },
+            "corrections": [],
+            "suggested": {
+              "outcome": null,
+              "reason_for_admission": "SCN c74cf6: fever and cough for 5 days",
+              "final_diagnosis": "Community-acquired pneumonia",
+              "icd_codes": [],
+              "icd_terms": [],
+              "significant_findings": null,
+              "procedures_and_treatment": null,
+              "discharge_medications": null
+            },
+            "missing": []
+          },
+          "meta": {
+            "server_time": "2026-10-28T05:50:38.191429+00:00"
+          },
+          "request_id": "131715c57eb4481ab288ddacecf598ae"
+        }
+      }
+    },
+    {
+      "label": "billing-general-consent",
+      "args": {
+        "method": "POST",
+        "path": "/consents",
+        "body": {
+          "form_code": "GENERAL",
+          "language": "English",
+          "admission_id": 3,
+          "admission_need": "DEMO software-only admission; no real care",
+          "estimated_days": 0,
+          "estimated_cost": 0
+        },
+        "as_user": "demo.doctor",
+        "idempotency_key": "admissions-1793166638582-d3cb5276c423d-billing-general-consent"
+      },
+      "state": "answered",
+      "scenario": false,
+      "result": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v1/consents",
+          "as_user": "demo.doctor",
+          "query": null,
+          "body": {
+            "form_code": "GENERAL",
+            "language": "English",
+            "admission_id": 3,
+            "admission_need": "DEMO software-only admission; no real care",
+            "estimated_days": 0,
+            "estimated_cost": 0
+          },
+          "idempotency_key": "admissions-1793166638582-d3cb5276c423d-billing-general-consent"
+        },
+        "status": 201,
+        "ms": 740,
+        "request_id": "10ec59f90693483e967f4ffb1591ef9f",
+        "body": {
+          "data": {
+            "consent_id": 2,
+            "consent_number": "CN-2026-000002",
+            "patient_id": 4,
+            "mrn": "MRN-2026-000004",
+            "patient_name": "SCN c74cf6 Admission",
+            "gender": "male",
+            "father_or_husband_name": null,
+            "patient_age": 40,
+            "form_id": 1,
+            "form_code": "GENERAL",
+            "category": "General",
+            "taken_by": "AnyStaff",
+            "requires_witness": false,
+            "admission_id": 3,
+            "admission_number": "ADM-2026-00003",
+            "booking_id": null,
+            "booking_number": null,
+            "er_visit_id": null,
+            "er_number": null,
+            "ticket_id": null,
+            "ticket_number": null,
+            "status": "Draft",
+            "language": "English",
+            "form_title": "General consent for admission and treatment",
+            "form_body": "I agree to be admitted to this hospital and to receive the examinations, tests, nursing care and treatment my doctors consider necessary. An operation, anaesthesia, a blood transfusion or another risky procedure will be explained to me separately and done only with my separate consent.\nThe need for my admission and the expected length and cost of my stay, written below, were explained to me. I understand that they are estimates that may change with my condition, and that I will be told when they change.\nI will follow the rules of the hospital: visiting hours, attendants, no smoking, and the safety of its property and staff.\nI will tell the doctors and nurses the truth about my illness, my medicines, my allergies and my earlier treatment.\nI allow the hospital to share information about my illness with the health authorities where the law requires it (for example notifiable diseases, births and deaths). Otherwise my information stays confidential.\nI may ask questions at any time, and I may refuse or stop a treatment after I am told what that may mean.",
+            "procedure_name": null,
+            "performer_id": null,
+            "performer_name": null,
+            "risks": null,
+            "benefits": null,
+            "alternatives": null,
+            "admission_need": "DEMO software-only admission; no real care",
+            "estimated_days": 0,
+            "estimated_cost": 0,
+            "interpreter_name": null,
+            "read_to_patient": false,
+            "questions_answers": null,
+            "understanding_confirmed": false,
+            "mode": null,
+            "patient_capable": null,
+            "incapacity_reason": null,
+            "signer": null,
+            "signer_name": null,
+            "signer_relationship": null,
+            "signer_cnic": null,
+            "signer_phone": null,
+            "signer_mark": null,
+            "witness_name": null,
+            "witness_role": null,
+            "emergency_note": null,
+            "second_doctor_id": null,
+            "second_doctor_name": null,
+            "refusal_reason": null,
+            "decided_at": null,
+            "obtained_stamp": null,
+            "document_id": null,
+            "scanned_at": null,
+            "withdrawn_at": null,
+            "withdrawal_reason": null,
+            "withdrawal_stamp": null,
+            "cancelled_at": null,
+            "cancel_reason": null,
+            "created_at": "2026-10-28T05:50:39.244903+00:00",
+            "created_by_name": "Dr. Ahmed Khan",
+            "row_version": 1,
+            "direction": "ltr",
+            "missing": []
+          },
+          "meta": {
+            "server_time": "2026-10-28T05:50:39.269643+00:00"
+          },
+          "request_id": "10ec59f90693483e967f4ffb1591ef9f"
+        }
+      }
+    },
+    {
+      "label": "billing-sign-summary",
+      "args": {
+        "method": "POST",
+        "path": "/admissions/3/discharge-summary/sign",
+        "body": {
+          "expected_version": 1
+        },
+        "as_user": "demo.doctor",
+        "idempotency_key": "admissions-1793166663217-46a5ae79212d8-billing-sign-summary"
+      },
+      "state": "answered",
+      "scenario": false,
+      "result": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v1/admissions/3/discharge-summary/sign",
+          "as_user": "demo.doctor",
+          "query": null,
+          "body": {
+            "expected_version": 1
+          },
+          "idempotency_key": "admissions-1793166663217-46a5ae79212d8-billing-sign-summary"
+        },
+        "status": 200,
+        "ms": 933,
+        "request_id": "1459e7141d824621860876ae1a453c45",
+        "body": {
+          "data": {
+            "admission": {
+              "admission_id": 3,
+              "admission_number": "ADM-2026-00003",
+              "admission_status": "Admitted",
+              "admission_type": "Standard",
+              "patient_id": 4,
+              "mrn": "MRN-2026-000004",
+              "patient_name": "SCN c74cf6 Admission",
+              "gender": "male",
+              "age_years": 40,
+              "dob": null,
+              "requested_at": "2026-10-28T05:46:28.839129+00:00",
+              "admitted_at": "2026-10-28T05:49:13.891602+00:00",
+              "discharged_at": null,
+              "ward_name": "General Ward (Male)",
+              "bed_label": "GW-M-2",
+              "primary_doctor_name": "Dr. Ahmed Khan",
+              "admission_reason": "SCN c74cf6: fever and cough for 5 days",
+              "provisional_diagnosis": "Community-acquired pneumonia"
+            },
+            "summary": {
+              "summary_id": 2,
+              "admission_id": 3,
+              "patient_id": 4,
+              "outcome": "Home",
+              "condition_at_discharge": "Improved",
+              "reason_for_admission": "DEMO software test; no actual admission",
+              "final_diagnosis": "Synthetic exercise only",
+              "icd_codes": [],
+              "significant_findings": "None; software exercise",
+              "procedures_and_treatment": "None; no real care",
+              "response_to_treatment": "Not applicable; software only",
+              "discharge_medications": "None",
+              "follow_up_instructions": "None; synthetic software exercise",
+              "follow_up_date": null,
+              "receiving_hospital": null,
+              "transfer_reason": null,
+              "transfer_arrangements": null,
+              "outcome_note": null,
+              "status": "Final",
+              "created_by": 11,
+              "created_by_name": "Dr. Ahmed Khan",
+              "created_at": "2026-10-28T05:50:38.159054+00:00",
+              "signed_by": 11,
+              "signed_at": "2026-10-28T05:51:04.141716+00:00",
+              "signer_name": "Dr. Ahmed Khan",
+              "signer_designation": "Doctor",
+              "signer_license": "PMDC LIC-00010",
+              "row_version": 2,
+              "icd_terms": []
+            },
+            "corrections": [],
+            "suggested": {
+              "outcome": null,
+              "reason_for_admission": "SCN c74cf6: fever and cough for 5 days",
+              "final_diagnosis": "Community-acquired pneumonia",
+              "icd_codes": [],
+              "icd_terms": [],
+              "significant_findings": null,
+              "procedures_and_treatment": null,
+              "discharge_medications": null
+            },
+            "missing": []
+          },
+          "meta": {
+            "server_time": "2026-10-28T05:51:04.165512+00:00"
+          },
+          "request_id": "1459e7141d824621860876ae1a453c45"
+        }
+      }
+    },
+    {
+      "label": "billing-sign-general-consent",
+      "args": {
+        "method": "POST",
+        "path": "/consents/2/sign",
+        "body": {
+          "expected_version": 1,
+          "mode": "Signed",
+          "signer": "Patient",
+          "signer_name": "DEMO SOFTWARE-ONLY synthetic signer",
+          "signer_mark": "Signature",
+          "questions_answers": "None; software test only",
+          "understanding_confirmed": true
+        },
+        "as_user": "demo.doctor",
+        "idempotency_key": "admissions-1793166664651-8ff819c6d884a8-billing-sign-general-consent"
+      },
+      "state": "answered",
+      "scenario": false,
+      "result": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v1/consents/2/sign",
+          "as_user": "demo.doctor",
+          "query": null,
+          "body": {
+            "expected_version": 1,
+            "mode": "Signed",
+            "signer": "Patient",
+            "signer_name": "DEMO SOFTWARE-ONLY synthetic signer",
+            "signer_mark": "Signature",
+            "questions_answers": "None; software test only",
+            "understanding_confirmed": true
+          },
+          "idempotency_key": "admissions-1793166664651-8ff819c6d884a8-billing-sign-general-consent"
+        },
+        "status": 200,
+        "ms": 803,
+        "request_id": "807256cc61344501a970c8a37086b265",
+        "body": {
+          "data": {
+            "consent_id": 2,
+            "consent_number": "CN-2026-000002",
+            "patient_id": 4,
+            "mrn": "MRN-2026-000004",
+            "patient_name": "SCN c74cf6 Admission",
+            "gender": "male",
+            "father_or_husband_name": null,
+            "patient_age": 40,
+            "form_id": 1,
+            "form_code": "GENERAL",
+            "category": "General",
+            "taken_by": "AnyStaff",
+            "requires_witness": false,
+            "admission_id": 3,
+            "admission_number": "ADM-2026-00003",
+            "booking_id": null,
+            "booking_number": null,
+            "er_visit_id": null,
+            "er_number": null,
+            "ticket_id": null,
+            "ticket_number": null,
+            "status": "Given",
+            "language": "English",
+            "form_title": "General consent for admission and treatment",
+            "form_body": "I agree to be admitted to this hospital and to receive the examinations, tests, nursing care and treatment my doctors consider necessary. An operation, anaesthesia, a blood transfusion or another risky procedure will be explained to me separately and done only with my separate consent.\nThe need for my admission and the expected length and cost of my stay, written below, were explained to me. I understand that they are estimates that may change with my condition, and that I will be told when they change.\nI will follow the rules of the hospital: visiting hours, attendants, no smoking, and the safety of its property and staff.\nI will tell the doctors and nurses the truth about my illness, my medicines, my allergies and my earlier treatment.\nI allow the hospital to share information about my illness with the health authorities where the law requires it (for example notifiable diseases, births and deaths). Otherwise my information stays confidential.\nI may ask questions at any time, and I may refuse or stop a treatment after I am told what that may mean.",
+            "procedure_name": null,
+            "performer_id": null,
+            "performer_name": null,
+            "risks": null,
+            "benefits": null,
+            "alternatives": null,
+            "admission_need": "DEMO software-only admission; no real care",
+            "estimated_days": 0,
+            "estimated_cost": 0,
+            "interpreter_name": null,
+            "read_to_patient": false,
+            "questions_answers": "None; software test only",
+            "understanding_confirmed": true,
+            "mode": "Signed",
+            "patient_capable": true,
+            "incapacity_reason": null,
+            "signer": "Patient",
+            "signer_name": "DEMO SOFTWARE-ONLY synthetic signer",
+            "signer_relationship": null,
+            "signer_cnic": null,
+            "signer_phone": null,
+            "signer_mark": "Signature",
+            "witness_name": null,
+            "witness_role": null,
+            "emergency_note": null,
+            "second_doctor_id": null,
+            "second_doctor_name": null,
+            "refusal_reason": null,
+            "decided_at": "2026-10-28T05:51:05.386468+00:00",
+            "obtained_stamp": {
+              "at": "2026-10-28T05:51:05.386468+00:00",
+              "name": "Dr. Ahmed Khan",
+              "text": "Dr. Ahmed Khan, Doctor, PMDC LIC-00010, 28-Oct-2026 10:51",
+              "user_id": 11,
+              "designation": "Doctor",
+              "employee_id": 10,
+              "registration": "PMDC LIC-00010"
+            },
+            "document_id": null,
+            "scanned_at": null,
+            "withdrawn_at": null,
+            "withdrawal_reason": null,
+            "withdrawal_stamp": null,
+            "cancelled_at": null,
+            "cancel_reason": null,
+            "created_at": "2026-10-28T05:50:39.244903+00:00",
+            "created_by_name": "Dr. Ahmed Khan",
+            "row_version": 2,
+            "direction": "ltr",
+            "missing": []
+          },
+          "meta": {
+            "server_time": "2026-10-28T05:51:05.406390+00:00"
+          },
+          "request_id": "807256cc61344501a970c8a37086b265"
+        }
+      }
+    },
+    {
+      "label": "billing-initiate-discharge",
+      "args": {
+        "method": "POST",
+        "path": "/admissions/3/discharge",
+        "body": {
+          "note": "DEMO software-only discharge; no actual care"
+        },
+        "as_user": "demo.doctor",
+        "idempotency_key": "admissions-1793166665803-2c61845bf4eca-billing-initiate-discharge"
+      },
+      "state": "answered",
+      "scenario": false,
+      "result": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v1/admissions/3/discharge",
+          "as_user": "demo.doctor",
+          "query": null,
+          "body": {
+            "note": "DEMO software-only discharge; no actual care"
+          },
+          "idempotency_key": "admissions-1793166665803-2c61845bf4eca-billing-initiate-discharge"
+        },
+        "status": 200,
+        "ms": 764,
+        "request_id": "49c303058e384533a4d523fd46287f14",
+        "body": {
+          "data": {
+            "admission_id": 3,
+            "admission_number": "ADM-2026-00003",
+            "patient_id": 4,
+            "mrn": "MRN-2026-000004",
+            "patient_name": "SCN c74cf6 Admission",
+            "gender": "male",
+            "age_years": 40,
+            "requested_ward_id": null,
+            "requested_ward_name": null,
+            "ward_id": 1,
+            "ward_name": "General Ward (Male)",
+            "bed_id": 2,
+            "bed_label": "GW-M-2",
+            "primary_doctor_id": 10,
+            "primary_doctor_name": "Dr. Ahmed Khan",
+            "admission_type": "Standard",
+            "status": "DischargeInProgress",
+            "billing_category": "Cash",
+            "panel_id": null,
+            "is_billing_confirmed": true,
+            "is_billing_deferred": false,
+            "is_overflow": false,
+            "overflow_reason": null,
+            "eta_minutes": null,
+            "source_ticket_id": 4,
+            "admission_reason": "SCN c74cf6: fever and cough for 5 days",
+            "provisional_diagnosis": "Community-acquired pneumonia",
+            "initial_care_plan": null,
+            "photo_document_id": null,
+            "details_stamp": {
+              "at": "2026-10-28T05:46:28.839129+00:00",
+              "name": "Dr. Ahmed Khan",
+              "text": "Dr. Ahmed Khan, Doctor, PMDC LIC-00010, 28-Oct-2026 10:46",
+              "user_id": 11,
+              "designation": "Doctor",
+              "employee_id": 10,
+              "registration": "PMDC LIC-00010"
+            },
+            "admission_notes": null,
+            "requested_at": "2026-10-28T05:46:28.839129+00:00",
+            "reserved_at": "2026-10-28T05:49:03.965801+00:00",
+            "admitted_at": "2026-10-28T05:49:13.891602+00:00",
+            "discharge_initiated_at": "2026-10-28T05:51:06.515752+00:00",
+            "discharged_at": null,
+            "row_version": 5,
+            "discharge": {
+              "stages": [
+                {
+                  "clearance_id": 6,
+                  "stage": "ClinicalDischarge",
+                  "sequence_no": 1,
+                  "status": "Cleared",
+                  "cleared_by": 11,
+                  "cleared_by_name": "Dr. Ahmed Khan",
+                  "cleared_at": "2026-10-28T05:51:06.515752+00:00",
+                  "note": "DEMO software-only discharge; no actual care",
+                  "physically_cleaned_at": null
+                },
+                {
+                  "clearance_id": 7,
+                  "stage": "PharmacyClearance",
+                  "sequence_no": 2,
+                  "status": "Pending",
+                  "cleared_by": null,
+                  "cleared_by_name": null,
+                  "cleared_at": null,
+                  "note": null,
+                  "physically_cleaned_at": null
+                },
+                {
+                  "clearance_id": 8,
+                  "stage": "NursingMARVerification",
+                  "sequence_no": 3,
+                  "status": "Pending",
+                  "cleared_by": null,
+                  "cleared_by_name": null,
+                  "cleared_at": null,
+                  "note": null,
+                  "physically_cleaned_at": null
+                },
+                {
+                  "clearance_id": 9,
+                  "stage": "BillingSettlement",
+                  "sequence_no": 4,
+                  "status": "Pending",
+                  "cleared_by": null,
+                  "cleared_by_name": null,
+                  "cleared_at": null,
+                  "note": null,
+                  "physically_cleaned_at": null
+                },
+                {
+                  "clearance_id": 10,
+                  "stage": "OpsCleaning",
+                  "sequence_no": 5,
+                  "status": "Pending",
+                  "cleared_by": null,
+                  "cleared_by_name": null,
+                  "cleared_at": null,
+                  "note": null,
+                  "physically_cleaned_at": null
+                }
+              ],
+              "blocked_on": "PharmacyClearance",
+              "started": true,
+              "complete": false
+            },
+            "invoice": {
+              "invoice_id": 7,
+              "invoice_no": "INV-2026-0000007",
+              "status": "Paid",
+              "gross_total": 0,
+              "net_payable": 0,
+              "amount_paid": 0
+            }
+          },
+          "meta": {
+            "server_time": "2026-10-28T05:51:06.528500+00:00"
+          },
+          "request_id": "49c303058e384533a4d523fd46287f14"
+        }
+      }
+    },
+    {
+      "label": "billing-out-of-order-refusal",
+      "args": {
+        "method": "POST",
+        "path": "/admissions/3/discharge/BillingSettlement/clear",
+        "body": {
+          "note": "DEMO intentional predecessor refusal"
+        },
+        "as_user": "demo.admissions",
+        "idempotency_key": "admissions-1793166666928-7ff9d25033907-billing-out-of-order-refusal"
+      },
+      "state": "answered",
+      "scenario": false,
+      "result": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v1/admissions/3/discharge/BillingSettlement/clear",
+          "as_user": "demo.admissions",
+          "query": null,
+          "body": {
+            "note": "DEMO intentional predecessor refusal"
+          },
+          "idempotency_key": "admissions-1793166666928-7ff9d25033907-billing-out-of-order-refusal"
+        },
+        "status": 409,
+        "ms": 794,
+        "request_id": "7e7f6faab3364270bb638df55e383730",
+        "body": {
+          "error": {
+            "code": "DISCHARGE_STAGE_OUT_OF_ORDER",
+            "message": "Discharge is waiting for PharmacyClearance",
+            "details": {
+              "blocked_on": "PharmacyClearance"
+            },
+            "retryable": false,
+            "retry_after_seconds": null
+          },
+          "request_id": "7e7f6faab3364270bb638df55e383730"
+        },
+        "explain": {
+          "http_status": 409,
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+        }
+      }
+    },
+    {
+      "label": "billing-pharmacy-clear",
+      "args": {
+        "method": "POST",
+        "path": "/admissions/3/discharge/PharmacyClearance/clear",
+        "body": {
+          "note": "DEMO no medicines/care"
+        },
+        "as_user": "demo.pharmacist",
+        "idempotency_key": "admissions-1793166668096-25a6096a2f9228-billing-pharmacy-clear"
+      },
+      "state": "answered",
+      "scenario": false,
+      "result": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v1/admissions/3/discharge/PharmacyClearance/clear",
+          "as_user": "demo.pharmacist",
+          "query": null,
+          "body": {
+            "note": "DEMO no medicines/care"
+          },
+          "idempotency_key": "admissions-1793166668096-25a6096a2f9228-billing-pharmacy-clear"
+        },
+        "status": 200,
+        "ms": 770,
+        "request_id": "078022993c764714a70bd62f28fb8ca1",
+        "body": {
+          "data": {
+            "admission_id": 3,
+            "admission_number": "ADM-2026-00003",
+            "patient_id": 4,
+            "mrn": "MRN-2026-000004",
+            "patient_name": "SCN c74cf6 Admission",
+            "gender": "male",
+            "age_years": 40,
+            "requested_ward_id": null,
+            "requested_ward_name": null,
+            "ward_id": 1,
+            "ward_name": "General Ward (Male)",
+            "bed_id": 2,
+            "bed_label": "GW-M-2",
+            "primary_doctor_id": 10,
+            "primary_doctor_name": "Dr. Ahmed Khan",
+            "admission_type": "Standard",
+            "status": "DischargeInProgress",
+            "billing_category": "Cash",
+            "panel_id": null,
+            "is_billing_confirmed": true,
+            "is_billing_deferred": false,
+            "is_overflow": false,
+            "overflow_reason": null,
+            "eta_minutes": null,
+            "source_ticket_id": 4,
+            "admission_reason": "SCN c74cf6: fever and cough for 5 days",
+            "provisional_diagnosis": "Community-acquired pneumonia",
+            "initial_care_plan": null,
+            "photo_document_id": null,
+            "details_stamp": {
+              "at": "2026-10-28T05:46:28.839129+00:00",
+              "name": "Dr. Ahmed Khan",
+              "text": "Dr. Ahmed Khan, Doctor, PMDC LIC-00010, 28-Oct-2026 10:46",
+              "user_id": 11,
+              "designation": "Doctor",
+              "employee_id": 10,
+              "registration": "PMDC LIC-00010"
+            },
+            "admission_notes": null,
+            "requested_at": "2026-10-28T05:46:28.839129+00:00",
+            "reserved_at": "2026-10-28T05:49:03.965801+00:00",
+            "admitted_at": "2026-10-28T05:49:13.891602+00:00",
+            "discharge_initiated_at": "2026-10-28T05:51:06.515752+00:00",
+            "discharged_at": null,
+            "row_version": 5,
+            "discharge": {
+              "stages": [
+                {
+                  "clearance_id": 6,
+                  "stage": "ClinicalDischarge",
+                  "sequence_no": 1,
+                  "status": "Cleared",
+                  "cleared_by": 11,
+                  "cleared_by_name": "Dr. Ahmed Khan",
+                  "cleared_at": "2026-10-28T05:51:06.515752+00:00",
+                  "note": "DEMO software-only discharge; no actual care",
+                  "physically_cleaned_at": null
+                },
+                {
+                  "clearance_id": 7,
+                  "stage": "PharmacyClearance",
+                  "sequence_no": 2,
+                  "status": "Cleared",
+                  "cleared_by": 19,
+                  "cleared_by_name": "Usman (Pharmacist)",
+                  "cleared_at": "2026-10-28T05:51:09.739924+00:00",
+                  "note": "DEMO no medicines/care",
+                  "physically_cleaned_at": null
+                },
+                {
+                  "clearance_id": 8,
+                  "stage": "NursingMARVerification",
+                  "sequence_no": 3,
+                  "status": "Pending",
+                  "cleared_by": null,
+                  "cleared_by_name": null,
+                  "cleared_at": null,
+                  "note": null,
+                  "physically_cleaned_at": null
+                },
+                {
+                  "clearance_id": 9,
+                  "stage": "BillingSettlement",
+                  "sequence_no": 4,
+                  "status": "Pending",
+                  "cleared_by": null,
+                  "cleared_by_name": null,
+                  "cleared_at": null,
+                  "note": null,
+                  "physically_cleaned_at": null
+                },
+                {
+                  "clearance_id": 10,
+                  "stage": "OpsCleaning",
+                  "sequence_no": 5,
+                  "status": "Pending",
+                  "cleared_by": null,
+                  "cleared_by_name": null,
+                  "cleared_at": null,
+                  "note": null,
+                  "physically_cleaned_at": null
+                }
+              ],
+              "blocked_on": "NursingMARVerification",
+              "started": true,
+              "complete": false
+            },
+            "invoice": {
+              "invoice_id": 7,
+              "invoice_no": "INV-2026-0000007",
+              "status": "Paid",
+              "gross_total": 0,
+              "net_payable": 0,
+              "amount_paid": 0
+            }
+          },
+          "meta": {
+            "server_time": "2026-10-28T05:51:09.751771+00:00"
+          },
+          "request_id": "078022993c764714a70bd62f28fb8ca1"
+        }
+      }
+    },
+    {
+      "label": "billing-nursing-clear",
+      "args": {
+        "method": "POST",
+        "path": "/admissions/3/discharge/NursingMARVerification/clear",
+        "body": {
+          "note": "DEMO no medicines/care"
+        },
+        "as_user": "demo.nurse",
+        "idempotency_key": "admissions-1793166670180-bd3ebb2fb47b9-billing-nursing-clear"
+      },
+      "state": "answered",
+      "scenario": false,
+      "result": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v1/admissions/3/discharge/NursingMARVerification/clear",
+          "as_user": "demo.nurse",
+          "query": null,
+          "body": {
+            "note": "DEMO no medicines/care"
+          },
+          "idempotency_key": "admissions-1793166670180-bd3ebb2fb47b9-billing-nursing-clear"
+        },
+        "status": 200,
+        "ms": 745,
+        "request_id": "21093abf124847dd945cd777d0112204",
+        "body": {
+          "data": {
+            "admission_id": 3,
+            "admission_number": "ADM-2026-00003",
+            "patient_id": 4,
+            "mrn": "MRN-2026-000004",
+            "patient_name": "SCN c74cf6 Admission",
+            "gender": "male",
+            "age_years": 40,
+            "requested_ward_id": null,
+            "requested_ward_name": null,
+            "ward_id": 1,
+            "ward_name": "General Ward (Male)",
+            "bed_id": 2,
+            "bed_label": "GW-M-2",
+            "primary_doctor_id": 10,
+            "primary_doctor_name": "Dr. Ahmed Khan",
+            "admission_type": "Standard",
+            "status": "DischargeInProgress",
+            "billing_category": "Cash",
+            "panel_id": null,
+            "is_billing_confirmed": true,
+            "is_billing_deferred": false,
+            "is_overflow": false,
+            "overflow_reason": null,
+            "eta_minutes": null,
+            "source_ticket_id": 4,
+            "admission_reason": "SCN c74cf6: fever and cough for 5 days",
+            "provisional_diagnosis": "Community-acquired pneumonia",
+            "initial_care_plan": null,
+            "photo_document_id": null,
+            "details_stamp": {
+              "at": "2026-10-28T05:46:28.839129+00:00",
+              "name": "Dr. Ahmed Khan",
+              "text": "Dr. Ahmed Khan, Doctor, PMDC LIC-00010, 28-Oct-2026 10:46",
+              "user_id": 11,
+              "designation": "Doctor",
+              "employee_id": 10,
+              "registration": "PMDC LIC-00010"
+            },
+            "admission_notes": null,
+            "requested_at": "2026-10-28T05:46:28.839129+00:00",
+            "reserved_at": "2026-10-28T05:49:03.965801+00:00",
+            "admitted_at": "2026-10-28T05:49:13.891602+00:00",
+            "discharge_initiated_at": "2026-10-28T05:51:06.515752+00:00",
+            "discharged_at": null,
+            "row_version": 5,
+            "discharge": {
+              "stages": [
+                {
+                  "clearance_id": 6,
+                  "stage": "ClinicalDischarge",
+                  "sequence_no": 1,
+                  "status": "Cleared",
+                  "cleared_by": 11,
+                  "cleared_by_name": "Dr. Ahmed Khan",
+                  "cleared_at": "2026-10-28T05:51:06.515752+00:00",
+                  "note": "DEMO software-only discharge; no actual care",
+                  "physically_cleaned_at": null
+                },
+                {
+                  "clearance_id": 7,
+                  "stage": "PharmacyClearance",
+                  "sequence_no": 2,
+                  "status": "Cleared",
+                  "cleared_by": 19,
+                  "cleared_by_name": "Usman (Pharmacist)",
+                  "cleared_at": "2026-10-28T05:51:09.739924+00:00",
+                  "note": "DEMO no medicines/care",
+                  "physically_cleaned_at": null
+                },
+                {
+                  "clearance_id": 8,
+                  "stage": "NursingMARVerification",
+                  "sequence_no": 3,
+                  "status": "Cleared",
+                  "cleared_by": 18,
+                  "cleared_by_name": "Nurse Hina",
+                  "cleared_at": "2026-10-28T05:51:11.650841+00:00",
+                  "note": "DEMO no medicines/care",
+                  "physically_cleaned_at": null
+                },
+                {
+                  "clearance_id": 9,
+                  "stage": "BillingSettlement",
+                  "sequence_no": 4,
+                  "status": "Pending",
+                  "cleared_by": null,
+                  "cleared_by_name": null,
+                  "cleared_at": null,
+                  "note": null,
+                  "physically_cleaned_at": null
+                },
+                {
+                  "clearance_id": 10,
+                  "stage": "OpsCleaning",
+                  "sequence_no": 5,
+                  "status": "Pending",
+                  "cleared_by": null,
+                  "cleared_by_name": null,
+                  "cleared_at": null,
+                  "note": null,
+                  "physically_cleaned_at": null
+                }
+              ],
+              "blocked_on": "BillingSettlement",
+              "started": true,
+              "complete": false
+            },
+            "invoice": {
+              "invoice_id": 7,
+              "invoice_no": "INV-2026-0000007",
+              "status": "Paid",
+              "gross_total": 0,
+              "net_payable": 0,
+              "amount_paid": 0
+            }
+          },
+          "meta": {
+            "server_time": "2026-10-28T05:51:11.660931+00:00"
+          },
+          "request_id": "21093abf124847dd945cd777d0112204"
+        }
+      }
+    },
+    {
+      "label": "event-race-scenario",
+      "args": {
+        "scenario_id": "ipd.admission_pending"
+      },
+      "state": "answered",
+      "scenario": true,
+      "result": {
+        "unknowns": [],
+        "scenario": "ipd.admission_pending",
+        "run": "d16803",
+        "ok": true,
+        "steps": [
+          {
+            "step": "my_shift",
+            "as": "demo.reception",
+            "call": "GET /finance/cash-shifts/mine",
+            "status": 200,
+            "error_code": null,
+            "request_id": "0b36b147b7484da1ad135b6e1e08b9fd",
+            "ms": 832,
+            "ok": true
+          },
+          {
+            "step": "open_shift",
+            "skipped": "shift_id is already set"
+          },
+          {
+            "step": "doctor",
+            "as": "demo.doctor",
+            "call": "GET /auth/me",
+            "status": 200,
+            "error_code": null,
+            "request_id": "e5eb72a3f81d402e8f1c8c5601928c92",
+            "ms": 670,
+            "ok": true
+          },
+          {
+            "step": "register",
+            "as": "demo.reception",
+            "call": "POST /reception/registrations",
+            "status": 201,
+            "error_code": null,
+            "request_id": "573c0b82def34c40ae2ab215d709f9d8",
+            "ms": 941,
+            "ok": true
+          },
+          {
+            "step": "admit",
+            "as": "demo.doctor",
+            "call": "POST /admissions",
+            "status": 201,
+            "error_code": null,
+            "request_id": "877ec2962c0f4a84af4e32bbe50808d3",
+            "ms": 717,
+            "ok": true
+          }
+        ],
+        "saved": {
+          "run": "d16803",
+          "now": "2026-10-28T05:52:22.790677+00:00",
+          "shift_id": 1,
+          "doctor_id": 10,
+          "ticket_id": 6,
+          "patient_id": 6,
+          "mrn": "MRN-2026-000006",
+          "admission_id": 6
+        },
+        "events": {
+          "demo.reception": [
+            {
+              "event_id": 255,
+              "event_type": "opd.ticket.status_changed",
+              "priority": "normal"
+            },
+            {
+              "event_id": 256,
+              "event_type": "opd.ticket.status_changed",
+              "priority": "normal"
+            },
+            {
+              "event_id": 257,
+              "event_type": "opd.queue.updated",
+              "priority": "normal"
+            },
+            {
+              "event_id": 258,
+              "event_type": "opd.ticket.status_changed",
+              "priority": "normal"
+            }
+          ],
+          "demo.doctor": [
+            {
+              "event_id": 255,
+              "event_type": "opd.ticket.status_changed",
+              "priority": "normal"
+            },
+            {
+              "event_id": 256,
+              "event_type": "opd.ticket.status_changed",
+              "priority": "normal"
+            },
+            {
+              "event_id": 257,
+              "event_type": "opd.queue.updated",
+              "priority": "normal"
+            },
+            {
+              "event_id": 258,
+              "event_type": "opd.ticket.status_changed",
+              "priority": "normal"
+            }
+          ],
+          "demo.admissions": [
+            {
+              "event_id": 259,
+              "event_type": "admission.requested",
+              "priority": "high"
+            }
+          ]
+        },
+        "tag": "SCN d16803",
+        "screens_to_open": [
+          {
+            "screen": "pending_admissions",
+            "as": "demo.admissions",
+            "state": "a request waiting for a bed"
+          },
+          {
+            "screen": "bed_matrix",
+            "as": "demo.admissions",
+            "state": "the beds to allocate from"
+          }
+        ],
+        "note": "The records stay on the shared DEV server, named or noted SCN <run>.",
+        "contract_fingerprint": "58db76bf7d59ef6d9870",
+        "knowledge_revision": "51c8fe699d47d046"
+      }
+    },
+    {
+      "label": "bed-no-longer-available-refusal",
+      "args": {
+        "method": "POST",
+        "path": "/admissions/6/allocate-bed",
+        "as_user": "demo.admissions",
+        "body": {
+          "bed_id": 2,
+          "admit_now": false,
+          "billing_category": "Cash"
+        },
+        "idempotency_key": "admissions-1793166749549-afa9ad4776f148-bed-no-longer-available-refusal"
+      },
+      "state": "answered",
+      "scenario": false,
+      "result": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v1/admissions/6/allocate-bed",
+          "as_user": "demo.admissions",
+          "query": null,
+          "body": {
+            "bed_id": 2,
+            "admit_now": false,
+            "billing_category": "Cash"
+          },
+          "idempotency_key": "admissions-1793166749549-afa9ad4776f148-bed-no-longer-available-refusal"
+        },
+        "status": 409,
+        "ms": 703,
+        "request_id": "cda092a85d03479a8c497ab4ef147e13",
+        "body": {
+          "error": {
+            "code": "BED_NO_LONGER_AVAILABLE",
+            "message": "Bed was reserved by another terminal.",
+            "details": {
+              "bed_id": 2,
+              "current_state": "Dirty"
+            },
+            "retryable": false,
+            "retry_after_seconds": null
+          },
+          "request_id": "cda092a85d03479a8c497ab4ef147e13"
+        },
+        "explain": {
+          "http_status": 409,
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+        }
+      }
+    },
+    {
+      "label": "admitted-cancel-refusal",
+      "args": {
+        "method": "POST",
+        "path": "/admissions/3/cancel",
+        "body": {
+          "reason": "DEMO intentional refusal after admission"
+        },
+        "as_user": "demo.admissions",
+        "idempotency_key": "admissions-1793166833975-ab9d3634249898-admitted-cancel-refusal"
+      },
+      "state": "answered",
+      "scenario": false,
+      "result": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v1/admissions/3/cancel",
+          "as_user": "demo.admissions",
+          "query": null,
+          "body": {
+            "reason": "DEMO intentional refusal after admission"
+          },
+          "idempotency_key": "admissions-1793166833975-ab9d3634249898-admitted-cancel-refusal"
+        },
+        "status": 409,
+        "ms": 919,
+        "request_id": "73fbfa8fcdea4086971c371e27f2bc1e",
+        "body": {
+          "error": {
+            "code": "ADMISSION_STATE_INVALID",
+            "message": "Admission is DischargeInProgress: only a pending admission is cancelled",
+            "details": {
+              "status": "DischargeInProgress"
+            },
+            "retryable": false,
+            "retry_after_seconds": null
+          },
+          "request_id": "73fbfa8fcdea4086971c371e27f2bc1e"
+        },
+        "explain": {
+          "http_status": 409,
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+        }
+      }
+    },
+    {
+      "label": "admission-write-denied",
+      "args": {
+        "method": "POST",
+        "path": "/admissions/6/allocate-bed",
+        "body": {
+          "bed_id": 3
+        },
+        "as_user": "demo.cashier",
+        "idempotency_key": "admissions-1793166835908-15810e7c9789d-admission-write-denied"
+      },
+      "state": "answered",
+      "scenario": false,
+      "result": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v1/admissions/6/allocate-bed",
+          "as_user": "demo.cashier",
+          "query": null,
+          "body": {
+            "bed_id": 3
+          },
+          "idempotency_key": "admissions-1793166835908-15810e7c9789d-admission-write-denied"
+        },
+        "status": 403,
+        "ms": 927,
+        "request_id": "06b8a70d416c4eeba70d204863da8e37",
+        "body": {
+          "error": {
+            "code": "FORBIDDEN",
+            "message": "Missing permission: ipd.admission.allocate",
+            "details": {
+              "required": [
+                "ipd.admission.allocate"
+              ],
+              "any_of": false
+            },
+            "retryable": false,
+            "retry_after_seconds": null
+          },
+          "request_id": "06b8a70d416c4eeba70d204863da8e37"
+        },
+        "explain": {
+          "http_status": 403,
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions)."
+        }
+      }
+    },
+    {
+      "label": "repeated-billing-clear-refusal",
+      "args": {
+        "method": "POST",
+        "path": "/admissions/3/discharge/BillingSettlement/clear",
+        "body": {
+          "note": "DEMO intentional repeat of already-cleared stage"
+        },
+        "as_user": "demo.admissions",
+        "idempotency_key": "admissions-1793166885156-aad8a9dc06787-repeated-billing-clear-refusal"
+      },
+      "state": "answered",
+      "scenario": false,
+      "result": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v1/admissions/3/discharge/BillingSettlement/clear",
+          "as_user": "demo.admissions",
+          "query": null,
+          "body": {
+            "note": "DEMO intentional repeat of already-cleared stage"
+          },
+          "idempotency_key": "admissions-1793166885156-aad8a9dc06787-repeated-billing-clear-refusal"
+        },
+        "status": 409,
+        "ms": 773,
+        "request_id": "fffd2a96831d4f27bf6f06e686031522",
+        "body": {
+          "error": {
+            "code": "DISCHARGE_STAGE_IMMUTABLE",
+            "message": "BillingSettlement is already cleared",
+            "details": {
+              "stage": "BillingSettlement",
+              "cleared_at": "2026-10-28T05:53:57.851920+00:00"
+            },
+            "retryable": false,
+            "retry_after_seconds": null
+          },
+          "request_id": "fffd2a96831d4f27bf6f06e686031522"
+        },
+        "explain": {
+          "http_status": 409,
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+        }
+      }
+    },
+    {
+      "label": "billing-cleared-status",
+      "args": {
+        "method": "GET",
+        "path": "/admissions/3/discharge-status",
+        "as_user": "demo.admissions"
+      },
+      "state": "answered",
+      "scenario": false,
+      "result": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v1/admissions/3/discharge-status",
+          "as_user": "demo.admissions",
+          "query": null,
+          "body": null,
+          "idempotency_key": null
+        },
+        "status": 200,
+        "ms": 804,
+        "request_id": "e9ac122bae084bcd9b3f99409df6c901",
+        "body": {
+          "data": {
+            "admission_id": 3,
+            "admission_number": "ADM-2026-00003",
+            "patient_id": 4,
+            "status": "DischargeInProgress",
+            "mrn": "MRN-2026-000004",
+            "patient_name": "SCN c74cf6 Admission",
+            "stages": [
+              {
+                "clearance_id": 6,
+                "stage": "ClinicalDischarge",
+                "sequence_no": 1,
+                "status": "Cleared",
+                "cleared_by": 11,
+                "cleared_by_name": "Dr. Ahmed Khan",
+                "cleared_at": "2026-10-28T05:51:06.515752+00:00",
+                "note": "DEMO software-only discharge; no actual care",
+                "physically_cleaned_at": null
+              },
+              {
+                "clearance_id": 7,
+                "stage": "PharmacyClearance",
+                "sequence_no": 2,
+                "status": "Cleared",
+                "cleared_by": 19,
+                "cleared_by_name": "Usman (Pharmacist)",
+                "cleared_at": "2026-10-28T05:51:09.739924+00:00",
+                "note": "DEMO no medicines/care",
+                "physically_cleaned_at": null
+              },
+              {
+                "clearance_id": 8,
+                "stage": "NursingMARVerification",
+                "sequence_no": 3,
+                "status": "Cleared",
+                "cleared_by": 18,
+                "cleared_by_name": "Nurse Hina",
+                "cleared_at": "2026-10-28T05:51:11.650841+00:00",
+                "note": "DEMO no medicines/care",
+                "physically_cleaned_at": null
+              },
+              {
+                "clearance_id": 9,
+                "stage": "BillingSettlement",
+                "sequence_no": 4,
+                "status": "Cleared",
+                "cleared_by": 9,
+                "cleared_by_name": "Imran (Admissions)",
+                "cleared_at": "2026-10-28T05:53:57.851920+00:00",
+                "note": "DEMO zero-balance synthetic final bill; no money or real care",
+                "physically_cleaned_at": null
+              },
+              {
+                "clearance_id": 10,
+                "stage": "OpsCleaning",
+                "sequence_no": 5,
+                "status": "Pending",
+                "cleared_by": null,
+                "cleared_by_name": null,
+                "cleared_at": null,
+                "note": null,
+                "physically_cleaned_at": null
+              }
+            ],
+            "blocked_on": "OpsCleaning",
+            "started": true,
+            "complete": false
+          },
+          "meta": {
+            "server_time": "2026-10-28T05:54:47.118366+00:00"
+          },
+          "request_id": "e9ac122bae084bcd9b3f99409df6c901"
+        }
+      }
+    },
+    {
+      "label": "confirmed-billing-repeat-refusal",
+      "args": {
+        "method": "POST",
+        "path": "/admissions/5/confirm-billing",
+        "body": {
+          "billing_category": "Cash",
+          "panel_id": null
+        },
+        "as_user": "demo.admissions",
+        "idempotency_key": "admissions-1793166887562-25963aa3815388-confirmed-billing-repeat-refusal"
+      },
+      "state": "answered",
+      "scenario": false,
+      "result": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v1/admissions/5/confirm-billing",
+          "as_user": "demo.admissions",
+          "query": null,
+          "body": {
+            "billing_category": "Cash",
+            "panel_id": null
+          },
+          "idempotency_key": "admissions-1793166887562-25963aa3815388-confirmed-billing-repeat-refusal"
+        },
+        "status": 409,
+        "ms": 768,
+        "request_id": "bdfbd0d443904d6e9997a187d0ba63b3",
+        "body": {
+          "error": {
+            "code": "BILLING_NOT_DEFERRED",
+            "message": "This admission's billing is not deferred: there is nothing to confirm.",
+            "details": {
+              "admission_id": 5
+            },
+            "retryable": false,
+            "retry_after_seconds": null
+          },
+          "request_id": "bdfbd0d443904d6e9997a187d0ba63b3"
+        },
+        "explain": {
+          "http_status": 409,
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+        }
+      }
+    },
+    {
+      "label": "final-admission-4",
+      "args": {
+        "method": "GET",
+        "path": "/admissions/4",
+        "as_user": "demo.admissions"
+      },
+      "state": "answered",
+      "scenario": false,
+      "result": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v1/admissions/4",
+          "as_user": "demo.admissions",
+          "query": null,
+          "body": null,
+          "idempotency_key": null
+        },
+        "status": 200,
+        "ms": 720,
+        "request_id": "af8003fb6f5b46b2b507aa0e48a47a32",
+        "body": {
+          "data": {
+            "admission_id": 4,
+            "admission_number": "ADM-2026-00004",
+            "patient_id": 5,
+            "mrn": "MRN-2026-000005",
+            "patient_name": "SCN e1e608 Admission",
+            "gender": "male",
+            "age_years": 40,
+            "requested_ward_id": 4,
+            "requested_ward_name": "Private Rooms",
+            "ward_id": 1,
+            "ward_name": "General Ward (Male)",
+            "bed_id": 3,
+            "bed_label": "GW-M-3",
+            "primary_doctor_id": 10,
+            "primary_doctor_name": "Dr. Ahmed Khan",
+            "admission_type": "Standard",
+            "status": "Cancelled",
+            "billing_category": "Cash",
+            "panel_id": null,
+            "is_billing_confirmed": true,
+            "is_billing_deferred": false,
+            "is_overflow": true,
+            "overflow_reason": "DEMO software-only cross-ward overflow test",
+            "eta_minutes": null,
+            "source_ticket_id": 5,
+            "admission_reason": "SCN e1e608: fever and cough for 5 days",
+            "provisional_diagnosis": "Community-acquired pneumonia",
+            "initial_care_plan": null,
+            "photo_document_id": null,
+            "details_stamp": {
+              "at": "2026-10-28T05:47:47.628514+00:00",
+              "name": "Dr. Ahmed Khan",
+              "text": "Dr. Ahmed Khan, Doctor, PMDC LIC-00010, 28-Oct-2026 10:47",
+              "user_id": 11,
+              "designation": "Doctor",
+              "employee_id": 10,
+              "registration": "PMDC LIC-00010"
+            },
+            "admission_notes": null,
+            "requested_at": "2026-10-28T05:47:47.628514+00:00",
+            "reserved_at": "2026-10-28T05:48:17.462457+00:00",
+            "admitted_at": null,
+            "discharge_initiated_at": null,
+            "discharged_at": null,
+            "row_version": 5,
+            "discharge": {
+              "stages": [],
+              "blocked_on": null,
+              "started": false,
+              "complete": false
+            },
+            "invoice": null
+          },
+          "meta": {
+            "server_time": "2026-10-28T05:57:23.006757+00:00"
+          },
+          "request_id": "af8003fb6f5b46b2b507aa0e48a47a32"
+        }
+      }
+    },
+    {
+      "label": "final-admission-2",
+      "args": {
+        "method": "GET",
+        "path": "/admissions/2",
+        "as_user": "demo.admissions"
+      },
+      "state": "answered",
+      "scenario": false,
+      "result": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v1/admissions/2",
+          "as_user": "demo.admissions",
+          "query": null,
+          "body": null,
+          "idempotency_key": null
+        },
+        "status": 200,
+        "ms": 603,
+        "request_id": "02217bd031b5433688f305bdab62069d",
+        "body": {
+          "data": {
+            "admission_id": 2,
+            "admission_number": "ADM-2026-00002",
+            "patient_id": 3,
+            "mrn": "MRN-2026-000003",
+            "patient_name": "SCN 3bb438 Admission",
+            "gender": "male",
+            "age_years": 40,
+            "requested_ward_id": 1,
+            "requested_ward_name": "General Ward (Male)",
+            "ward_id": 1,
+            "ward_name": "General Ward (Male)",
+            "bed_id": 2,
+            "bed_label": "GW-M-2",
+            "primary_doctor_id": 10,
+            "primary_doctor_name": "Dr. Ahmed Khan",
+            "admission_type": "Standard",
+            "status": "Cancelled",
+            "billing_category": "Cash",
+            "panel_id": null,
+            "is_billing_confirmed": true,
+            "is_billing_deferred": false,
+            "is_overflow": false,
+            "overflow_reason": null,
+            "eta_minutes": null,
+            "source_ticket_id": 3,
+            "admission_reason": "SCN 3bb438: fever and cough for 5 days",
+            "provisional_diagnosis": "Community-acquired pneumonia",
+            "initial_care_plan": null,
+            "photo_document_id": 1,
+            "details_stamp": {
+              "at": "2026-10-28T05:45:22.788558+00:00",
+              "name": "Dr. Ahmed Khan",
+              "text": "Dr. Ahmed Khan, Doctor, PMDC LIC-00010, 28-Oct-2026 10:45",
+              "user_id": 11,
+              "designation": "Doctor",
+              "employee_id": 10,
+              "registration": "PMDC LIC-00010"
+            },
+            "admission_notes": null,
+            "requested_at": "2026-10-28T05:45:22.788558+00:00",
+            "reserved_at": "2026-10-28T05:48:11.586535+00:00",
+            "admitted_at": null,
+            "discharge_initiated_at": null,
+            "discharged_at": null,
+            "row_version": 5,
+            "discharge": {
+              "stages": [],
+              "blocked_on": null,
+              "started": false,
+              "complete": false
+            },
+            "invoice": null
+          },
+          "meta": {
+            "server_time": "2026-10-28T05:57:23.835193+00:00"
+          },
+          "request_id": "02217bd031b5433688f305bdab62069d"
+        }
+      }
+    },
+    {
+      "label": "final-admission-3",
+      "args": {
+        "method": "GET",
+        "path": "/admissions/3",
+        "as_user": "demo.admissions"
+      },
+      "state": "answered",
+      "scenario": false,
+      "result": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v1/admissions/3",
+          "as_user": "demo.admissions",
+          "query": null,
+          "body": null,
+          "idempotency_key": null
+        },
+        "status": 200,
+        "ms": 785,
+        "request_id": "6590f8a031ad468fa37dc143d1d96a47",
+        "body": {
+          "data": {
+            "admission_id": 3,
+            "admission_number": "ADM-2026-00003",
+            "patient_id": 4,
+            "mrn": "MRN-2026-000004",
+            "patient_name": "SCN c74cf6 Admission",
+            "gender": "male",
+            "age_years": 40,
+            "requested_ward_id": null,
+            "requested_ward_name": null,
+            "ward_id": 1,
+            "ward_name": "General Ward (Male)",
+            "bed_id": 2,
+            "bed_label": "GW-M-2",
+            "primary_doctor_id": 10,
+            "primary_doctor_name": "Dr. Ahmed Khan",
+            "admission_type": "Standard",
+            "status": "DischargeInProgress",
+            "billing_category": "Cash",
+            "panel_id": null,
+            "is_billing_confirmed": true,
+            "is_billing_deferred": false,
+            "is_overflow": false,
+            "overflow_reason": null,
+            "eta_minutes": null,
+            "source_ticket_id": 4,
+            "admission_reason": "SCN c74cf6: fever and cough for 5 days",
+            "provisional_diagnosis": "Community-acquired pneumonia",
+            "initial_care_plan": null,
+            "photo_document_id": null,
+            "details_stamp": {
+              "at": "2026-10-28T05:46:28.839129+00:00",
+              "name": "Dr. Ahmed Khan",
+              "text": "Dr. Ahmed Khan, Doctor, PMDC LIC-00010, 28-Oct-2026 10:46",
+              "user_id": 11,
+              "designation": "Doctor",
+              "employee_id": 10,
+              "registration": "PMDC LIC-00010"
+            },
+            "admission_notes": null,
+            "requested_at": "2026-10-28T05:46:28.839129+00:00",
+            "reserved_at": "2026-10-28T05:49:03.965801+00:00",
+            "admitted_at": "2026-10-28T05:49:13.891602+00:00",
+            "discharge_initiated_at": "2026-10-28T05:51:06.515752+00:00",
+            "discharged_at": null,
+            "row_version": 5,
+            "discharge": {
+              "stages": [
+                {
+                  "clearance_id": 6,
+                  "stage": "ClinicalDischarge",
+                  "sequence_no": 1,
+                  "status": "Cleared",
+                  "cleared_by": 11,
+                  "cleared_by_name": "Dr. Ahmed Khan",
+                  "cleared_at": "2026-10-28T05:51:06.515752+00:00",
+                  "note": "DEMO software-only discharge; no actual care",
+                  "physically_cleaned_at": null
+                },
+                {
+                  "clearance_id": 7,
+                  "stage": "PharmacyClearance",
+                  "sequence_no": 2,
+                  "status": "Cleared",
+                  "cleared_by": 19,
+                  "cleared_by_name": "Usman (Pharmacist)",
+                  "cleared_at": "2026-10-28T05:51:09.739924+00:00",
+                  "note": "DEMO no medicines/care",
+                  "physically_cleaned_at": null
+                },
+                {
+                  "clearance_id": 8,
+                  "stage": "NursingMARVerification",
+                  "sequence_no": 3,
+                  "status": "Cleared",
+                  "cleared_by": 18,
+                  "cleared_by_name": "Nurse Hina",
+                  "cleared_at": "2026-10-28T05:51:11.650841+00:00",
+                  "note": "DEMO no medicines/care",
+                  "physically_cleaned_at": null
+                },
+                {
+                  "clearance_id": 9,
+                  "stage": "BillingSettlement",
+                  "sequence_no": 4,
+                  "status": "Cleared",
+                  "cleared_by": 9,
+                  "cleared_by_name": "Imran (Admissions)",
+                  "cleared_at": "2026-10-28T05:53:57.851920+00:00",
+                  "note": "DEMO zero-balance synthetic final bill; no money or real care",
+                  "physically_cleaned_at": null
+                },
+                {
+                  "clearance_id": 10,
+                  "stage": "OpsCleaning",
+                  "sequence_no": 5,
+                  "status": "Pending",
+                  "cleared_by": null,
+                  "cleared_by_name": null,
+                  "cleared_at": null,
+                  "note": null,
+                  "physically_cleaned_at": null
+                }
+              ],
+              "blocked_on": "OpsCleaning",
+              "started": true,
+              "complete": false
+            },
+            "invoice": {
+              "invoice_id": 7,
+              "invoice_no": "INV-2026-0000007",
+              "status": "Paid",
+              "gross_total": 0,
+              "net_payable": 0,
+              "amount_paid": 0
+            }
+          },
+          "meta": {
+            "server_time": "2026-10-28T05:57:24.867266+00:00"
+          },
+          "request_id": "6590f8a031ad468fa37dc143d1d96a47"
+        }
+      }
+    },
+    {
+      "label": "final-admission-5",
+      "args": {
+        "method": "GET",
+        "path": "/admissions/5",
+        "as_user": "demo.admissions"
+      },
+      "state": "answered",
+      "scenario": false,
+      "result": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v1/admissions/5",
+          "as_user": "demo.admissions",
+          "query": null,
+          "body": null,
+          "idempotency_key": null
+        },
+        "status": 200,
+        "ms": 831,
+        "request_id": "feff069a03f04c89bc3a5264bb555991",
+        "body": {
+          "data": {
+            "admission_id": 5,
+            "admission_number": "ADM-2026-00005",
+            "patient_id": 5,
+            "mrn": "MRN-2026-000005",
+            "patient_name": "SCN e1e608 Admission",
+            "gender": "male",
+            "age_years": 40,
+            "requested_ward_id": 5,
+            "requested_ward_name": "Emergency",
+            "ward_id": 5,
+            "ward_name": "Emergency",
+            "bed_id": 29,
+            "bed_label": "ER-1",
+            "primary_doctor_id": 9,
+            "primary_doctor_name": "Nadia (Triage Nurse)",
+            "admission_type": "CodeRed",
+            "status": "CodeRedActive",
+            "billing_category": "Cash",
+            "panel_id": null,
+            "is_billing_confirmed": true,
+            "is_billing_deferred": false,
+            "is_overflow": false,
+            "overflow_reason": null,
+            "eta_minutes": null,
+            "source_ticket_id": null,
+            "admission_reason": null,
+            "provisional_diagnosis": null,
+            "initial_care_plan": null,
+            "photo_document_id": null,
+            "details_stamp": null,
+            "admission_notes": "DEMO SOFTWARE TEST ONLY; no real emergency or care",
+            "requested_at": "2026-10-28T05:50:00.839806+00:00",
+            "reserved_at": "2026-10-28T05:50:00.839806+00:00",
+            "admitted_at": null,
+            "discharge_initiated_at": null,
+            "discharged_at": null,
+            "row_version": 3,
+            "discharge": {
+              "stages": [],
+              "blocked_on": null,
+              "started": false,
+              "complete": false
+            },
+            "invoice": {
+              "invoice_id": 8,
+              "invoice_no": "INV-2026-0000008",
+              "status": "Draft",
+              "gross_total": 2500,
+              "net_payable": 2500,
+              "amount_paid": 0
+            }
+          },
+          "meta": {
+            "server_time": "2026-10-28T05:57:26.902262+00:00"
+          },
+          "request_id": "feff069a03f04c89bc3a5264bb555991"
+        }
+      }
+    },
+    {
+      "label": "final-admission-6",
+      "args": {
+        "method": "GET",
+        "path": "/admissions/6",
+        "as_user": "demo.admissions"
+      },
+      "state": "answered",
+      "scenario": false,
+      "result": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v1/admissions/6",
+          "as_user": "demo.admissions",
+          "query": null,
+          "body": null,
+          "idempotency_key": null
+        },
+        "status": 200,
+        "ms": 696,
+        "request_id": "2241f2d48acd45f99ce28fedbcd4a3ea",
+        "body": {
+          "data": {
+            "admission_id": 6,
+            "admission_number": "ADM-2026-00006",
+            "patient_id": 6,
+            "mrn": "MRN-2026-000006",
+            "patient_name": "SCN d16803 Admission",
+            "gender": "male",
+            "age_years": 40,
+            "requested_ward_id": null,
+            "requested_ward_name": null,
+            "ward_id": null,
+            "ward_name": null,
+            "bed_id": null,
+            "bed_label": null,
+            "primary_doctor_id": 10,
+            "primary_doctor_name": "Dr. Ahmed Khan",
+            "admission_type": "Standard",
+            "status": "Cancelled",
+            "billing_category": "Cash",
+            "panel_id": null,
+            "is_billing_confirmed": false,
+            "is_billing_deferred": false,
+            "is_overflow": false,
+            "overflow_reason": null,
+            "eta_minutes": null,
+            "source_ticket_id": 6,
+            "admission_reason": "SCN d16803: fever and cough for 5 days",
+            "provisional_diagnosis": "Community-acquired pneumonia",
+            "initial_care_plan": null,
+            "photo_document_id": null,
+            "details_stamp": {
+              "at": "2026-10-28T05:52:26.018071+00:00",
+              "name": "Dr. Ahmed Khan",
+              "text": "Dr. Ahmed Khan, Doctor, PMDC LIC-00010, 28-Oct-2026 10:52",
+              "user_id": 11,
+              "designation": "Doctor",
+              "employee_id": 10,
+              "registration": "PMDC LIC-00010"
+            },
+            "admission_notes": null,
+            "requested_at": "2026-10-28T05:52:26.018071+00:00",
+            "reserved_at": null,
+            "admitted_at": null,
+            "discharge_initiated_at": null,
+            "discharged_at": null,
+            "row_version": 2,
+            "discharge": {
+              "stages": [],
+              "blocked_on": null,
+              "started": false,
+              "complete": false
+            },
+            "invoice": null
+          },
+          "meta": {
+            "server_time": "2026-10-28T05:57:25.810757+00:00"
+          },
+          "request_id": "2241f2d48acd45f99ce28fedbcd4a3ea"
+        }
+      }
+    }
+  ],
+  "checks": []
+}
