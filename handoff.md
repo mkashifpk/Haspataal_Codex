@@ -3,7 +3,7 @@
 Last update: 28 October 2026, Codex/functions, Asia/Karachi.
 
 ## Current request and status
-User requested the next screen: Live bed matrix (bed_matrix). Implemented and tested; final commit/reporting in progress. Baseline clean 354abea; no existing changes overwritten. Next: commit, submit only tested new Bed Matrix items, verify proposal, record ID. Do not start another screen this turn.
+User requested the next screen: Live bed matrix (bed_matrix). Implemented/tested in source commit 583013a0b74755bfc51015bf6495d4adc2000629, from clean 354abea. Proposal 185 saved and verified pending: nine new tested Bed Matrix items, awaiting human review on /docs -> My progress. Exact payload/receipt in docs/bed-matrix-progress-*-2026-10-28.json. No duplicate accepted claims. Next concrete action: human checklist/translation review; no further screen development started in this turn.
 
 ## Implementation
 src/screens/BedMatrix.tsx, src/bed-matrix-policy.ts, generated types and contracts/bed*: ward bays/counts/filter/selection, exact admission handover, prescribed colours plus text, permission/runtime-view guards, reviewed service changes. No invented floor coordinates or expected_version field. Lost writes retain original key/body/draft with explicit recovery; no automatic retry. Actual sparse events update state/counts then REST-reconcile; actual reconnect rereads. Missing ward context lists unverified beds read-only (issue 38).
@@ -23,6 +23,6 @@ Owned run DEMO-BED-MATRIX-1793180412926: ward 6/code DBED3180413654; beds 35–3
 Preserve prior records: patients 1/2/tickets 1/2/orders 1–3 Completed no images and 4 Reported; duties 35/36 and approval 1 Cancelled. Admission 1 DischargeInProgress/BillingSettlement, invoice 2 Draft 2500 unpaid, bed 1 Dirty; admission 3 DischargeInProgress/OpsCleaning, invoice 7 Paid 0, bed 2 Dirty; Code Red admission 5/patient 5 confirmed Cash/CodeRedActive/reserved ER bed 29, invoice 8 Draft 2500 unpaid. Never invent cleaning/care/payment to clean up old records; earlier journals retained.
 
 ## Git / setup / next
-Current source/contracts/help/media/tests/evidence and own support scripts uncommitted pending final commit. Nothing running or uncertain. DEV https://hms-dev.netbird.cloud; authorized configuration from ignored .dev-terminal.json, .codex/config.toml, local test profiles and CA. Never copy secrets. Node REPL failed before writing kernel assets; normal Node/PowerShell works.
+Source/contracts/help/media/tests/evidence and own support scripts committed 583013a. Reporting receipt/handoff checkpoint committed separately after verification. Nothing running or uncertain; no business writes pending. DEV https://hms-dev.netbird.cloud; authorized configuration from ignored .dev-terminal.json, .codex/config.toml, local test profiles and CA. Never copy secrets. Node REPL failed before writing kernel assets; normal Node/PowerShell works.
 Human checks Admissions Desk → Live bed matrix using NEW synthetic app records: capacity/identity/handover, reviewed service changes, concurrency/reconnect/recovery, views/permissions, EN/UR/themes/zoom. See review Markdown; human alone signs portal review. Next dependency-order screen is wristbands_admissions (53), then consents_admissions (54), cost_estimates_admissions (55); refresh roadmap/contracts first.
 
