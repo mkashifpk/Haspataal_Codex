@@ -1,0 +1,23 @@
+import fs from 'node:fs';const map={
+'Saved on the server. Printing, upload and scan attachment remain separate.':'سرور پر محفوظ۔ پرنٹ، اپ لوڈ و اسکین ربط الگ اعمال ہیں۔',
+'Consent PDF saved. No decision was recorded.':'رضامندی پی ڈی ایف محفوظ؛ کوئی فیصلہ درج نہیں ہوا۔',
+'Save cancelled; consent unchanged.':'محفوظ منسوخ؛ رضامندی برقرار۔',
+'Form sent to the document printer. Explain it and check the paper.':'فارم دستاویز پرنٹر کو بھیجا۔ سمجھائیں اور کاغذ چیک کریں۔',
+'Print/download failure does not repeat preparation or the decision. Read and print the same consent.':'پرنٹ یا ڈاؤن لوڈ ناکامی پر تیاری یا فیصلہ نہ دہرائیں؛ یہی رضامندی پڑھ کر پرنٹ کریں۔',
+'Choose a language supplied by this hospital form.':'ہسپتال کے فارم میں موجود زبان منتخب کریں۔',
+'Admission need must be at most 2000 characters.':'داخلے کی ضرورت زیادہ سے زیادہ2000حروف ہو۔',
+'Estimated stay must be a whole number from 0 to 365.':'متوقع قیام0تا365پورے دن ہو۔',
+'Estimated cost must be a non-negative amount.':'متوقع خرچ صفر یا زیادہ ہو۔',
+'This consent is final. Read it; withdraw a given consent and prepare a new one.':'رضامندی حتمی ہے۔ پڑھیں؛ دی ہوئی واپس لے کر نئی تیار کریں۔',
+'Confirm the actual decision and paper before recording it.':'اندراج سے پہلے اصل فیصلہ و کاغذ چیک کریں۔',
+'Complete the missing explanation fields and reprint before recording the decision.':'فیصلہ درج کرنے سے پہلے وضاحت کی کمی پوری و دوبارہ پرنٹ کریں۔',
+'Choose the correct decision mode.':'فیصلے کا درست طریقہ چنیں۔',
+'Enter the refusal in the patient’s words (3–2000 characters).':'انکار مریض کے الفاظ میں3تا2000حروف درج کریں۔',
+'Enter a valid signer CNIC, or leave it empty.':'فیصلہ کنندہ کا درست شناختی کارڈ دیں یا خالی چھوڑیں۔',
+'Record why the patient cannot decide and why treatment cannot wait.':'مریض فیصلہ کیوں نہ کر سکا و علاج کیوں نہ رکا، اصل وجہ درج کریں۔',
+'Choose a different registered PMDC doctor from the staff search.':'تلاش سے اصل الگ رجسٹرڈ پی ایم ڈی سی ڈاکٹر چنیں۔',
+'Deliberately choose who made the decision.':'اصل فیصلہ کنندہ خود منتخب کریں۔',
+'Choose a returned policy relationship, their name and the reason the patient cannot decide. The server checks eligibility.':'پالیسی سے واپس اصل رشتہ، نام و مریض کی معذوری کی وجہ چنیں۔ اہلیت سرور چیک کرتا ہے۔',
+'A witness is required for this form, mark or verbal refusal.':'اس فارم، نشان یا زبانی انکار کے لیے گواہ لازم۔',
+'Record the questions and answers and confirm the explanation back.':'سوال و جواب اور واپس سمجھانے کی تصدیق درج کریں۔'};
+const p='src/i18n.ts',s=fs.readFileSync(p,'utf8');fs.writeFileSync(p,s.replace('const ur: Record<string, string> = {','const ur: Record<string, string> = {\n'+Object.entries(map).map(([k,v])=>JSON.stringify(k)+':'+JSON.stringify(v)+',').join('\n')));

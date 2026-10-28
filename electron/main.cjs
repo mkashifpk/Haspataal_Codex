@@ -886,6 +886,7 @@ ipcMain.handle("terminal", async (event, action, args = {}) => {
       const op = matchOperation("GET", p);
       if (!auth || !op || !permissionAllows(op, auth.user))
         throw new Error("You do not have permission to view patient documents");
+      const documentActor=auth.user.user_id;
       if (Date.now() > auth.expires - 60000) await refresh();
       let r = await raw(
         "GET",
@@ -922,12 +923,14 @@ ipcMain.handle("terminal", async (event, action, args = {}) => {
         }
       }
       const type = String(r.headers["content-type"]).split(";")[0];
+      if(documentActor!==auth?.user.user_id)throw Error('The session changed during patient document download');
       if (!["image/jpeg", "image/png", "application/pdf"].includes(type))
         throw new Error("Unexpected patient document type");
-      if (type === "application/pdf" && args.save) {
+      if ((type === "application/pdf" && args.save) || args.saveImage) {
+        const extension=type==='application/pdf'?'pdf':type==='image/png'?'png':'jpg';
         const target = await dialog.showSaveDialog(win, {
-          defaultPath: `Patient-document-${args.documentId}.pdf`,
-          filters: [{ name: "PDF", extensions: ["pdf"] }],
+          defaultPath: `Patient-document-${args.documentId}.${extension}`,
+          filters: [{ name: type==='application/pdf'?'PDF':'Image', extensions: [extension] }],
         });
         if (!target.canceled) fs.writeFileSync(target.filePath, r.bytes);
         return { ok: true, data: { saved: !target.canceled, type } };
@@ -959,6 +962,20 @@ ipcMain.handle("terminal", async (event, action, args = {}) => {
       const played = require('./critical-alarm.cjs').criticalAlarmRecord(record.data, args.criticalResultId, require('./critical-alarm.cjs').criticalAlarmSources(screenId));
       if (played) shell.beep();
       return {ok:true,data:{played}};
+    }
+    if (action === "print-consent") {
+      if(!Number.isSafeInteger(args.consentId)||args.consentId<1||!Number.isSafeInteger(args.expectedVersion))throw Error('Invalid consent reference');
+      const actor=auth?.user.user_id,workspace=windows.get(win.id);
+      const [record,payload,est]=await Promise.all([api('GET','/consents/'+args.consentId,undefined,workspace),api('GET','/consents/'+args.consentId+'/print-payload',undefined,workspace),api('GET','/establishment',undefined,workspace)]);
+      if(!record.ok)return record;if(!payload.ok)return payload;if(!est.ok)return est;
+      if(!['full','open_work','records'].includes(est.data.views.screens.find(s=>s.screen_id==='consents_admissions')?.view))throw Error('The consent records view is unavailable');
+      const f=require('./consent-print.cjs').assertConsent(payload.data,args.consentId);
+      if(record.data.row_version!==args.expectedVersion||f.consent.row_version!==args.expectedVersion||record.data.patient_id!==f.consent.patient_id||record.data.mrn!==f.consent.mrn)throw Error('The consent changed. Read it before printing; do not use the old form.');
+      const terminal=await api('GET','/terminals/whoami');if(!terminal.ok)return terminal;
+      if(!actor||actor!==auth?.user.user_id||workspace!==windows.get(win.id))throw Error('The session changed before consent printing');
+      const printed=await require('./consent-print.cjs').printConsent(payload.data,terminal.data,{owner:win,pdf:!!args.pdf});
+      if(printed.bytes){const target=await dialog.showSaveDialog(win,{defaultPath:'Consent-'+record.data.consent_number+'.pdf',filters:[{name:'PDF',extensions:['pdf']}]});if(!target.canceled)fs.writeFileSync(target.filePath,printed.bytes);return{ok:true,data:{saved:!target.canceled}};}
+      return{ok:true,data:printed};
     }
     if (action === "print-wristband") {
       if(!Number.isSafeInteger(args.wristbandId)||args.wristbandId<1||!Number.isSafeInteger(args.patientId)||args.patientId<1||typeof args.mrn!=='string')throw Error('Invalid wristband reference');
@@ -1099,7 +1116,7 @@ ipcMain.handle("terminal", async (event, action, args = {}) => {
       return await api("GET", "/meta/handbook", undefined, undefined);
     }
     if (action === "clinical-pdf") {
-      if (typeof args.path !== "string" || !/^(?:\/(?:clinical-encounters|referrals)\/[1-9]\d*\/pdf|\/(?:lab\/requisitions|imaging\/orders)\/[1-9]\d*\/report\/pdf|\/preventive-programmes\/list\/pdf|\/home-visits\/notice\/pdf|\/diagnostics\/(?:services|imaging-policy)\/pdf)$/.test(args.path)) throw new Error("Clinical download not permitted");
+      if (typeof args.path !== "string" || !/^(?:\/(?:clinical-encounters|referrals)\/[1-9]\d*\/pdf|\/(?:lab\/requisitions|imaging\/orders)\/[1-9]\d*\/report\/pdf|\/consents\/[1-9]\d*\/pdf|\/preventive-programmes\/list\/pdf|\/home-visits\/notice\/pdf|\/diagnostics\/(?:services|imaging-policy)\/pdf)$/.test(args.path)) throw new Error("Clinical download not permitted");
       const op=matchOperation("GET",args.path);
       if(!op || !auth || !permissionAllows(op,auth.user)) throw new Error("You do not have permission to download this document");
       if(Date.now()>auth.expires-60000)await refresh();

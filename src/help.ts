@@ -10,6 +10,112 @@ export type HelpPage = {
   faqUr: [string, string][];
 };
 export const help: Record<string, HelpPage> = {
+ consents_admissions: {
+  title: "General consent at admission",
+  titleUr: "داخلے پر عمومی رضامندی",
+  purpose: "At the admissions desk during a shift, the officer prepares the general consent in the patient’s language, explains the need, estimated stay and cost, records the actual decision, and puts the signed paper on file. A prepared form or a printout alone never means consent was given. Urdu is a draft pending native and clinical review.",
+  purposeUr: "داخلہ ڈیسک پر افسر مریض کی زبان میں عمومی رضامندی تیار، ضرورت و متوقع قیام و خرچ سمجھا کر اصل فیصلہ درج، پھر دستخط شدہ کاغذ ریکارڈ میں رکھتا ہے۔ فارم یا پرنٹ اکیلے رضامندی دینا نہیں۔ اردو مقامی و طبی انسانی جائزے تک مسودہ۔",
+  steps: [
+    "Open Admissions Desk → General consent at admission. Consent work waiting is first: My patients and forms requests your work; overdue items are red and say their due time. Open prepared consent reuses the draft already there. Prepare for this admission opens a new draft only from the actual admission. Operation and anaesthesia work belongs to the treating clinical team; this page prepares and changes General forms only. Refresh consents rereads work, register, hospital forms, policy and the selected record. Events and resumed connections reread, never poll.",
+    "Find a consent or patient filters returned General records; Consent status to show rereads that state. Read this consent uses a Known consent reference from its actual record, never a guess. A patient’s name and MRN, age or birth date, allergy wording and returned deceased, temporary, medico-legal and dues flags remain visible. Empty allergy means not recorded. A merged identity is reconciled before writing; location is not identity. No matching rows is an empty search result, not a missing consent decision.",
+    "Prepare from an admission or its work item. Check Hospital general consent form and choose only a language supplied by that hospital form. Enter Need for admission (up to2000characters), Estimated stay in days (whole0–365), Estimated cost (nonnegative). Blank values may prepare a draft; Complete before decision lists what still needs explaining. Editing is Draft only and uses its version; changing the explanation or language requires a fresh print. A later change to the hospital template does not rewrite an already prepared text.",
+    "Read the prepared declaration expands the frozen text without changing it. Preview consent form reads the actual print payload. Print this consent form routes A4 to the mapped document printer; Save terminal consent PDF lays out any supplied language locally, English or Urdu. Download server consent PDF appears for left-to-right text; right-to-left text has no server PDF and uses the terminal. The hospital heading, PHC number, issue line, patient identity, frozen form text, explanation, decision, signature lines and professional stamps are retained. Explain, read aloud when needed, answer questions, ask the patient to explain back, and check the actual paper. A printer failure or cancelled save never repeats preparation or a decision.",
+    "Record consent given or Record informed refusal deliberately. Choose who actually decided, the signature or thumb impression, witness where the form/mark/verbal refusal requires one, interpreter and reading aloud, questions/answers and explanation back. Refusal uses the patient’s words; VerbalRefusal requires a witness. The hospital’s decision-maker descriptions and adult/child priorities are shown; effective age policy is not exposed, so this page never assumes18 or claims client-side eligibility. The server validates the actual relationship. CONSENT_SIGNER_INVALID keeps input and displays allowed details.",
+    "EmergencyNote is a registered doctor’s account of why treatment could not wait and nobody could consent, with the incapacity reason. Find the second registered doctor searches active PMDC staff only; choose the actual concurring doctor by name/registration, a different employee from the caller. Never type an ID or use a user ID. The backend enforces whether a second doctor is required and whether the taker is qualified. An emergency note needs no signed-paper scan. A form requiring a doctor/anaesthetist cannot be finalized by admissions staff; ask the clinical team after CONSENT_TAKER_NOT_AUTHORIZED.",
+    "Review consent action freezes the actual patient, action and input. Check the patient/language/action and actual decision/paper acknowledgements, then Confirm this consent action once. Back to consent input keeps data; Close consent draft asks before discarding. Preflight rereads actor, view, patient and original consent before any change. consent.updated or a refused state/version rereads without replacing typed input: Read latest consent and keep input resets the source and acknowledgement before another review. A decided consent is final: withdraw Given with a factual reason, then prepare another; cancel only a Draft entered in error. Neither deletes its history.",
+    "If a write reply is lost, keep the original draft/key and context. Idempotent preparation/withdraw/cancel can Retry original request with the identical payload/key within retention; never automatically. Versioned edit/sign/refuse and repeat-safe scan first read the exact consent; no automatic replay. Read current result and compare state/version/stamp, then Result reviewed; return to draft only after reconciliation. Outside retention, missing actor/source or still uncertain, ask IT. A confirmed action stays saved even if its next read or print fails.",
+    "For a decided General consent, Upload this consent scan uploads a nonempty PDF/JPEG/PNG as this patient’s Consent document, separately from the decision. Choose the returned document, Review scan attachment, check its patient/title and Confirm once. An upload saved but attachment failed is not a failed signature: use that same uploaded document. Unknown upload keeps its file/key and offers only original retry or patient-document inspection; never prepare/sign again. A later attachment replaces the scan link but history remains. Save attached signed paper downloads the authorized file. A scanner never types a document ID: select the actual returned row; Scan consent form barcode accepts the printed consent number and Enter opens its exact returned General-register row. It searches the latest1000 authorised rows; an unmatched/older code needs a known record reference. It never infers an ID or captures keys from another field.",
+    "F1 and visible Help explain the field/review and restore focus without losing input. English/Urdu and both themes share native keyboard/Settings zoom100–250%, reset100%. Service and permissions decide actions: records-only permits reads/prints and accepted corrections, no new consent; open_work continues existing stays. No category branching or offline write queue. Human fresh-data, clinical/native Urdu, role FAQ, physical printing and editor review remain pending; only a human signs the DEV portal review."
+  ],
+  stepsUr: [
+    "داخلہ ڈیسک سے داخلے پر عمومی رضامندی۔ منتظر کام پہلے؛ میرے مریض شرط، تاخیر سرخ و وقت سمیت۔ پہلے تیار مسودہ کھولیں؛ اسی داخلے سے نئی تیاری۔ آپریشن و بے ہوشی رضامندی متعلقہ طبی ٹیم کا کام، یہاں صرف عمومی فارم۔ تازہ کام، رجسٹر، فارم، پالیسی و منتخب ریکارڈ دوبارہ پڑھتا۔ واقعہ و رابطہ بحالی پر مطالعہ، پولنگ نہیں۔",
+    "رضامندی یا مریض تلاش واپس عمومی ریکارڈ محدود، حالت سرور سے دوبارہ۔ معلوم اصل ریکارڈ کا حوالہ پڑھیں، اندازہ نہیں۔ نام، ایم آر این، عمر یا پیدائش، حساسیت، وفات، عارضی، میڈیکو لیگل و بقایا علامات۔ خالی حساسیت درج نہیں۔ ضم شناخت ارسال سے پہلے درست، مقام شناخت نہیں۔ خالی تلاش رضامندی کے فیصلے کا ثبوت نہیں۔",
+    "داخلہ یا منتظر کام سے تیاری۔ ہسپتال کا عمومی فارم چیک و اسی کی دستیاب زبان چنیں۔ ضرورت2000حروف، قیام0تا365پورے دن، خرچ صفر یا زیادہ۔ خالی معلومات سے مسودہ بن سکتا؛ فیصلے سے پہلے کمی پوری و سمجھائیں۔ ترمیم صرف مسودہ و اصل ورژن؛ زبان یا وضاحت بدلے تو نیا پرنٹ۔ ہسپتال فارم کا بعد کا بدلاؤ پہلے تیار متن نہیں بدلتا۔",
+    "تیار شدہ اقرار کا متن کھولنے سے اصل محفوظ عبارت نظر آتی، بدلتی نہیں۔ اصل فارم کا جائزہ پڑھیں۔ اے فور مقررہ دستاویز پرنٹر؛ ٹرمینل پی ڈی ایف میں انگریزی یا اردو کی مقامی ترتیب۔ بائیں سے دائیں متن پر سرور پی ڈی ایف، دائیں سے بائیں ٹرمینل۔ ہسپتال، پی ایچ سی، اجرا، شناخت، اصل متن، وضاحت، فیصلہ، دستخط و مہر باقی۔ سمجھائیں، ضرورت پر پڑھیں، سوالات جواب و واپس سمجھانا، اصل کاغذ چیک۔ پرنٹر خرابی یا فائل منسوخ سے تیاری یا فیصلہ نہ دہرائیں۔",
+    "رضامندی دینے یا باخبر انکار کا واضح انتخاب۔ اصل فیصلہ کنندہ، دستخط یا انگوٹھا، فارم یا نشان یا زبانی انکار پر گواہ، مترجم و پڑھنا، سوال و جواب و واپس سمجھانا۔ انکار مریض کے الفاظ، زبانی پر گواہ۔ ہسپتال رشتے و بالغ/بچے ترجیح دکھتے؛ اصل عمر پالیسی دستیاب نہیں، یہاں18کا اندازہ یا اہلیت کی تصدیق نہیں۔ سرور اصل رشتہ چیک؛ انکار پر معلومات و اجازت کی تفصیل باقی۔",
+    "ہنگامی نوٹ رجسٹرڈ ڈاکٹر کی اصل وجہ کہ علاج کیوں نہ رکا و رضامندی والا کیوں نہیں، اور مریض کی معذوری۔ دوسرے ڈاکٹر کی تلاش صرف فعال پی ایم ڈی سی؛ نام و رجسٹریشن سے اصل الگ اتفاق کنندہ ملازم چنیں۔ آئی ڈی نہ ٹائپ، صارف آئی ڈی نہیں۔ سرور دوسرے ڈاکٹر و اہلیت کی شرط نافذ۔ ہنگامی نوٹ کو دستخط شدہ اسکین نہیں۔ ڈاکٹر یا بے ہوشی فارم داخلہ عملہ حتمی نہیں کر سکتا؛ انکار پر طبی ٹیم سے رابطہ۔",
+    "جائزہ اصل مریض، عمل و معلومات رکھتا۔ مریض، زبان، عمل و اصل فیصلہ/کاغذ کے نشان، پھر ایک تصدیق۔ واپس معلومات رکھے؛ مسودہ بند پوچھے۔ ارسال سے پہلے صارف، خدمت، مریض و اصل رضامندی دوبارہ۔ واقعہ یا حالت/ورژن انکار پر مطالعہ، ٹائپ شدہ معلومات نہیں بدلتی؛ تازہ پڑھ کر محفوظ معلومات و نیا نشان و جائزہ۔ حتمی رضامندی میں ترمیم نہیں؛ دی ہوئی وجہ سے واپس و نئی، غلط مسودہ ہی منسوخ۔ تاریخ حذف نہیں۔",
+    "جواب گم تو اصل مسودہ، کلید و مریض رکھیں۔ تیاری، واپسی، منسوخی کی اصل درخواست عین کلید و معلومات سے مدت میں واضح کوشش، خودکار نہیں۔ ورژن والی ترمیم، فیصلہ و اسکین پر پہلے عین ریکارڈ پڑھیں؛ خودکار ارسال نہیں۔ حالت، ورژن و مہر ملائیں پھر جائزہ شدہ مسودہ کھولیں۔ مدت یا شک میں آئی ٹی۔ تصدیق شدہ عمل بعد کی پڑھائی یا پرنٹ خرابی سے واپس نہیں ہوتا۔",
+    "حتمی عمومی رضامندی کی غیر خالی پی ڈی ایف، جے پیگ یا پی این جی الگ مریض کی رضامندی دستاویز اپ لوڈ۔ واپس اصل دستاویز چنیں، مریض و عنوان چیک، ربط کا جائزہ و ایک تصدیق۔ اپ لوڈ محفوظ مگر ربط ناکام، دستخط ناکام نہیں؛ وہی دستاویز۔ نامعلوم اپ لوڈ فائل و کلید رکھے، اصل کوشش یا دستاویز پڑتال؛ دوبارہ تیار/سائن نہیں۔ نیا ربط پہلے اسکین بدلتا، تاریخ باقی۔ منسلک کاغذ مجاز ڈاؤن لوڈ۔ اسکینر آئی ڈی نہیں لکھتا؛ اصل سطر چنیں و فارم کا بارکوڈ خانے میں اصل چھپا نمبر اور اینٹر، واپس رجسٹر کی عین سطر کھلے۔ تازہ1000مجاز ریکارڈ میں نہ ملے تو معلوم حوالہ پڑھیں۔ آئی ڈی کا اندازہ یا دوسرے خانے کے حروف نہیں۔",
+    "ایف ون و مدد خانے و جائزے کی رہنمائی اور محفوظ فوکس۔ انگریزی/اردو و دونوں تھیم، مشترک کی بورڈ و ترتیب زوم100تا250، ری سیٹ100۔ خدمت و اجازت اعمال؛ صرف ریکارڈ میں پڑھنا، پرنٹ و مجاز تصحیح، نئی رضامندی نہیں؛ ختم ہوتی خدمت میں موجودہ داخلے۔ زمرہ یا آف لائن ارسال نہیں۔ انسانی نئے ریکارڈ، طبی، مقامی اردو، کردار سوالات، اصل پرنٹ و تدوین باقی؛ صرف انسان پورٹل جائزہ سائن کرتا ہے۔"
+  ],
+  faq: [
+    [
+      "Does preparing or printing mean consent was given?",
+      "At the admissions desk during a shift, the officer prepares the general consent in the patient’s language, explains the need, estimated stay and cost, records the actual decision, and puts the signed paper on file. A prepared form or a printout alone never means consent was given. Urdu is a draft pending native and clinical review."
+    ],
+    [
+      "How do I find the correct task?",
+      "Open Admissions Desk → General consent at admission. Consent work waiting is first: My patients and forms requests your work; overdue items are red and say their due time. Open prepared consent reuses the draft already there. Prepare for this admission opens a new draft only from the actual admission. Operation and anaesthesia work belongs to the treating clinical team; this page prepares and changes General forms only. Refresh consents rereads work, register, hospital forms, policy and the selected record. Events and resumed connections reread, never poll."
+    ],
+    [
+      "Which language and explanation are needed?",
+      "Prepare from an admission or its work item. Check Hospital general consent form and choose only a language supplied by that hospital form. Enter Need for admission (up to2000characters), Estimated stay in days (whole0–365), Estimated cost (nonnegative). Blank values may prepare a draft; Complete before decision lists what still needs explaining. Editing is Draft only and uses its version; changing the explanation or language requires a fresh print. A later change to the hospital template does not rewrite an already prepared text."
+    ],
+    [
+      "Who decides when the patient cannot?",
+      "Record consent given or Record informed refusal deliberately. Choose who actually decided, the signature or thumb impression, witness where the form/mark/verbal refusal requires one, interpreter and reading aloud, questions/answers and explanation back. Refusal uses the patient’s words; VerbalRefusal requires a witness. The hospital’s decision-maker descriptions and adult/child priorities are shown; effective age policy is not exposed, so this page never assumes18 or claims client-side eligibility. The server validates the actual relationship. CONSENT_SIGNER_INVALID keeps input and displays allowed details."
+    ],
+    [
+      "How does an emergency note name its doctor?",
+      "EmergencyNote is a registered doctor’s account of why treatment could not wait and nobody could consent, with the incapacity reason. Find the second registered doctor searches active PMDC staff only; choose the actual concurring doctor by name/registration, a different employee from the caller. Never type an ID or use a user ID. The backend enforces whether a second doctor is required and whether the taker is qualified. An emergency note needs no signed-paper scan. A form requiring a doctor/anaesthetist cannot be finalized by admissions staff; ask the clinical team after CONSENT_TAKER_NOT_AUTHORIZED."
+    ],
+    [
+      "How do I correct or cancel a consent?",
+      "Review consent action freezes the actual patient, action and input. Check the patient/language/action and actual decision/paper acknowledgements, then Confirm this consent action once. Back to consent input keeps data; Close consent draft asks before discarding. Preflight rereads actor, view, patient and original consent before any change. consent.updated or a refused state/version rereads without replacing typed input: Read latest consent and keep input resets the source and acknowledgement before another review. A decided consent is final: withdraw Given with a factual reason, then prepare another; cancel only a Draft entered in error. Neither deletes its history."
+    ],
+    [
+      "What if the reply is lost?",
+      "If a write reply is lost, keep the original draft/key and context. Idempotent preparation/withdraw/cancel can Retry original request with the identical payload/key within retention; never automatically. Versioned edit/sign/refuse and repeat-safe scan first read the exact consent; no automatic replay. Read current result and compare state/version/stamp, then Result reviewed; return to draft only after reconciliation. Outside retention, missing actor/source or still uncertain, ask IT. A confirmed action stays saved even if its next read or print fails."
+    ],
+    [
+      "Why did upload not attach the scan?",
+      "For a decided General consent, Upload this consent scan uploads a nonempty PDF/JPEG/PNG as this patient’s Consent document, separately from the decision. Choose the returned document, Review scan attachment, check its patient/title and Confirm once. An upload saved but attachment failed is not a failed signature: use that same uploaded document. Unknown upload keeps its file/key and offers only original retry or patient-document inspection; never prepare/sign again. A later attachment replaces the scan link but history remains. Save attached signed paper downloads the authorized file. A scanner never types a document ID: select the actual returned row; Scan consent form barcode accepts the printed consent number and Enter opens its exact returned General-register row. It searches the latest1000 authorised rows; an unmatched/older code needs a known record reference. It never infers an ID or captures keys from another field."
+    ],
+    [
+      "How do I print Urdu and recover a printer failure?",
+      "Read the prepared declaration expands the frozen text without changing it. Preview consent form reads the actual print payload. Print this consent form routes A4 to the mapped document printer; Save terminal consent PDF lays out any supplied language locally, English or Urdu. Download server consent PDF appears for left-to-right text; right-to-left text has no server PDF and uses the terminal. The hospital heading, PHC number, issue line, patient identity, frozen form text, explanation, decision, signature lines and professional stamps are retained. Explain, read aloud when needed, answer questions, ask the patient to explain back, and check the actual paper. A printer failure or cancelled save never repeats preparation or a decision."
+    ]
+  ],
+  faqUr: [
+    [
+      "تیاری یا پرنٹ رضامندی دینا ہے؟",
+      "داخلہ ڈیسک پر افسر مریض کی زبان میں عمومی رضامندی تیار، ضرورت و متوقع قیام و خرچ سمجھا کر اصل فیصلہ درج، پھر دستخط شدہ کاغذ ریکارڈ میں رکھتا ہے۔ فارم یا پرنٹ اکیلے رضامندی دینا نہیں۔ اردو مقامی و طبی انسانی جائزے تک مسودہ۔"
+    ],
+    [
+      "صحیح کام کیسے ملے؟",
+      "داخلہ ڈیسک سے داخلے پر عمومی رضامندی۔ منتظر کام پہلے؛ میرے مریض شرط، تاخیر سرخ و وقت سمیت۔ پہلے تیار مسودہ کھولیں؛ اسی داخلے سے نئی تیاری۔ آپریشن و بے ہوشی رضامندی متعلقہ طبی ٹیم کا کام، یہاں صرف عمومی فارم۔ تازہ کام، رجسٹر، فارم، پالیسی و منتخب ریکارڈ دوبارہ پڑھتا۔ واقعہ و رابطہ بحالی پر مطالعہ، پولنگ نہیں۔"
+    ],
+    [
+      "کون سی زبان و وضاحت؟",
+      "داخلہ یا منتظر کام سے تیاری۔ ہسپتال کا عمومی فارم چیک و اسی کی دستیاب زبان چنیں۔ ضرورت2000حروف، قیام0تا365پورے دن، خرچ صفر یا زیادہ۔ خالی معلومات سے مسودہ بن سکتا؛ فیصلے سے پہلے کمی پوری و سمجھائیں۔ ترمیم صرف مسودہ و اصل ورژن؛ زبان یا وضاحت بدلے تو نیا پرنٹ۔ ہسپتال فارم کا بعد کا بدلاؤ پہلے تیار متن نہیں بدلتا۔"
+    ],
+    [
+      "مریض نہ کر سکے تو فیصلہ کون؟",
+      "رضامندی دینے یا باخبر انکار کا واضح انتخاب۔ اصل فیصلہ کنندہ، دستخط یا انگوٹھا، فارم یا نشان یا زبانی انکار پر گواہ، مترجم و پڑھنا، سوال و جواب و واپس سمجھانا۔ انکار مریض کے الفاظ، زبانی پر گواہ۔ ہسپتال رشتے و بالغ/بچے ترجیح دکھتے؛ اصل عمر پالیسی دستیاب نہیں، یہاں18کا اندازہ یا اہلیت کی تصدیق نہیں۔ سرور اصل رشتہ چیک؛ انکار پر معلومات و اجازت کی تفصیل باقی۔"
+    ],
+    [
+      "ہنگامی نوٹ میں ڈاکٹر کیسے چنیں؟",
+      "ہنگامی نوٹ رجسٹرڈ ڈاکٹر کی اصل وجہ کہ علاج کیوں نہ رکا و رضامندی والا کیوں نہیں، اور مریض کی معذوری۔ دوسرے ڈاکٹر کی تلاش صرف فعال پی ایم ڈی سی؛ نام و رجسٹریشن سے اصل الگ اتفاق کنندہ ملازم چنیں۔ آئی ڈی نہ ٹائپ، صارف آئی ڈی نہیں۔ سرور دوسرے ڈاکٹر و اہلیت کی شرط نافذ۔ ہنگامی نوٹ کو دستخط شدہ اسکین نہیں۔ ڈاکٹر یا بے ہوشی فارم داخلہ عملہ حتمی نہیں کر سکتا؛ انکار پر طبی ٹیم سے رابطہ۔"
+    ],
+    [
+      "رضامندی کی تصحیح و منسوخی؟",
+      "جائزہ اصل مریض، عمل و معلومات رکھتا۔ مریض، زبان، عمل و اصل فیصلہ/کاغذ کے نشان، پھر ایک تصدیق۔ واپس معلومات رکھے؛ مسودہ بند پوچھے۔ ارسال سے پہلے صارف، خدمت، مریض و اصل رضامندی دوبارہ۔ واقعہ یا حالت/ورژن انکار پر مطالعہ، ٹائپ شدہ معلومات نہیں بدلتی؛ تازہ پڑھ کر محفوظ معلومات و نیا نشان و جائزہ۔ حتمی رضامندی میں ترمیم نہیں؛ دی ہوئی وجہ سے واپس و نئی، غلط مسودہ ہی منسوخ۔ تاریخ حذف نہیں۔"
+    ],
+    [
+      "جواب گم ہو تو؟",
+      "جواب گم تو اصل مسودہ، کلید و مریض رکھیں۔ تیاری، واپسی، منسوخی کی اصل درخواست عین کلید و معلومات سے مدت میں واضح کوشش، خودکار نہیں۔ ورژن والی ترمیم، فیصلہ و اسکین پر پہلے عین ریکارڈ پڑھیں؛ خودکار ارسال نہیں۔ حالت، ورژن و مہر ملائیں پھر جائزہ شدہ مسودہ کھولیں۔ مدت یا شک میں آئی ٹی۔ تصدیق شدہ عمل بعد کی پڑھائی یا پرنٹ خرابی سے واپس نہیں ہوتا۔"
+    ],
+    [
+      "اپ لوڈ سے اسکین کیوں نہیں جڑا؟",
+      "حتمی عمومی رضامندی کی غیر خالی پی ڈی ایف، جے پیگ یا پی این جی الگ مریض کی رضامندی دستاویز اپ لوڈ۔ واپس اصل دستاویز چنیں، مریض و عنوان چیک، ربط کا جائزہ و ایک تصدیق۔ اپ لوڈ محفوظ مگر ربط ناکام، دستخط ناکام نہیں؛ وہی دستاویز۔ نامعلوم اپ لوڈ فائل و کلید رکھے، اصل کوشش یا دستاویز پڑتال؛ دوبارہ تیار/سائن نہیں۔ نیا ربط پہلے اسکین بدلتا، تاریخ باقی۔ منسلک کاغذ مجاز ڈاؤن لوڈ۔ اسکینر آئی ڈی نہیں لکھتا؛ اصل سطر چنیں و فارم کا بارکوڈ خانے میں اصل چھپا نمبر اور اینٹر، واپس رجسٹر کی عین سطر کھلے۔ تازہ1000مجاز ریکارڈ میں نہ ملے تو معلوم حوالہ پڑھیں۔ آئی ڈی کا اندازہ یا دوسرے خانے کے حروف نہیں۔"
+    ],
+    [
+      "اردو پرنٹ و پرنٹر کی بحالی؟",
+      "تیار شدہ اقرار کا متن کھولنے سے اصل محفوظ عبارت نظر آتی، بدلتی نہیں۔ اصل فارم کا جائزہ پڑھیں۔ اے فور مقررہ دستاویز پرنٹر؛ ٹرمینل پی ڈی ایف میں انگریزی یا اردو کی مقامی ترتیب۔ بائیں سے دائیں متن پر سرور پی ڈی ایف، دائیں سے بائیں ٹرمینل۔ ہسپتال، پی ایچ سی، اجرا، شناخت، اصل متن، وضاحت، فیصلہ، دستخط و مہر باقی۔ سمجھائیں، ضرورت پر پڑھیں، سوالات جواب و واپس سمجھانا، اصل کاغذ چیک۔ پرنٹر خرابی یا فائل منسوخ سے تیاری یا فیصلہ نہ دہرائیں۔"
+    ]
+  ]
+},
  wristbands_admissions: {
   title: "Identity wristbands",
   titleUr: "شناختی پٹیاں",

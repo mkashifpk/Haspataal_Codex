@@ -1,0 +1,1 @@
+import fs from 'node:fs';let s=fs.readFileSync('scripts/consents-ui-decision-continuation.mjs','utf8').replaceAll('artifacts/consents-ui-decision-continuation.json','artifacts/consents-ui-resume-stable.json').replaceAll('consents-decision-actor','consents-resume-stable-actor');fs.writeFileSync('scripts/consents-ui-resume-stable.mjs',s);
