@@ -693,7 +693,7 @@ export function CashShift({
                   "Count everything in the drawer, including the opening float.",
                 )}
               >
-                <input
+                <input data-field="declared_cash"
                   data-help="cash.close"
                   type="number"
                   min="0"

@@ -440,6 +440,7 @@ export type ApiErrorCode =
   | "WAIVER_NOT_ALLOWED"
   | "WAIVER_REFUND_ALREADY_DISPENSED"
   | "WAIVER_REFUND_EXCEEDS_WAIVER"
+  | "WARD_IN_USE"
   | "WORKSPACE_NOT_ALLOWED"
   | "WORK_ORDER_STATE_INVALID"
   | "WRISTBAND_EXISTS"
@@ -568,5 +569,6 @@ export interface ApiErrorDetails {
   TEMPORAL_OVERLAP: { constraint?: string };
   UNSUPPORTED_MEDIA_TYPE: { allowed?: unknown[] };
   VERSION_CONFLICT: { current_version?: number; expected_version?: number };
+  WARD_IN_USE: { beds_in_use?: unknown[]; waitlisted?: number };
   WORKSPACE_NOT_ALLOWED: { workspace?: string; allowed?: unknown[] };
 }

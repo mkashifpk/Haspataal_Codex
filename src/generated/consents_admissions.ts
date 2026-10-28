@@ -195,6 +195,8 @@ export interface ConsentOut {
   row_version: number;
   /** A draft: what the explanation still lacks before the decision */
   missing: string[];
+  /** Who may sign for this patient today; a decision dated earlier (decided_at) is checked on its own date */
+  who_decides: WhoDecidesOut;
 }
 
 /** The author stamp of a clinical entry (MSDS IMS 147), as the author's staff record stood when they signed it (SQL hms_author_stamp / hms_employee_stamp, migration 0013 [STP]). Show it under the entry on screen and print `text` under it on paper. */
@@ -210,6 +212,27 @@ export interface AuthorStampOut {
   at: string;
   /** The printed line: name, designation, registration, date and time */
   text: string;
+}
+
+/** Who may decide for this patient today, by the hospital's consent policy (MSDS 75): the rule the decision is checked with, so a frontend never classifies the patient or hardcodes the age of consent (backend issue #39). */
+export interface WhoDecidesOut {
+  /** The age of consent in years (setting consent_adult_age) */
+  adult_age: number;
+  /** patient_age is known and below adult_age. An unknown age counts as an adult, as the database's check does */
+  patient_is_minor: boolean;
+  /** false for a minor: a decision maker signs (signer DecisionMaker); signer Patient answers CONSENT_SIGNER_INVALID */
+  patient_may_sign: boolean;
+  /** The relationships allowed to decide for this patient, in the order to ask; any other signer_relationship answers CONSENT_SIGNER_INVALID */
+  decision_makers: DecisionMakerChoiceOut[];
+  /** mode EmergencyNote needs second_doctor_id: a doctor registered with the PMDC other than the caller (setting consent_emergency_second_doctor; GET /staff/lookup?license_type=PMDC) */
+  emergency_second_doctor: boolean;
+}
+
+export interface DecisionMakerChoiceOut {
+  relationship: "Guardian" | "Attorney" | "Spouse" | "Child" | "Parent" | "Sibling" | "OtherRelative" | "CareProvider";
+  description: string;
+  /** The order to ask for this patient, the lowest first */
+  priority: number;
 }
 
 export interface ConsentUpdateIn {

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { api, ApiError } from "../bridge";
+import { api, ApiError, getWithClock } from "../bridge";
 import { Empty, ErrorBox, Field, LoadState, Modal } from "../components";
 import { bilingual as t, tr } from "../i18n";
 import type { ClinicalUser } from "../clinical-context";
@@ -82,7 +82,15 @@ export function BedMatrix({
     setSyncing(true);
     setError(undefined);
     try {
-      const value = await beds.bedMatrix({ include_beds: true });
+      const references:string[]=[];
+      const read=async()=>{const reply=await getWithClock<beds.BedMatrixOut>('/beds/matrix?include_beds=true');if(reply.request_id)references.push(reply.request_id);return reply.data;};
+      let value = await read();
+      const hasOrphan = (m: beds.BedMatrixOut) => (m.beds || []).some(b => !m.wards.some(w => w.ward_id === b.ward_id));
+      // One defensive reread only. Never fabricate a ward or silently hide its bed.
+      if (hasOrphan(value)) {
+        value = await read();
+        if (hasOrphan(value)) throw Error(t("The matrix is inconsistent after two reads. Report these request references to the backend: ", "دو بار پڑھنے پر بھی فہرست متضاد ہے۔ یہ درخواست حوالے بیک اینڈ کو رپورٹ کریں: ")+references.join(', '));
+      }
       if (n === generation.current) {
         setMatrix(value);
         setPending(new Set());
@@ -303,7 +311,6 @@ export function BedMatrix({
   const shownWards = (!error ? matrix?.wards || [] : []).filter(
     (w) => !ward || String(w.ward_id) === ward,
   );
-  const unverifiedBeds = !error ? (matrix?.beds||[]).filter(b=>!matrix?.wards.some(w=>w.ward_id===b.ward_id)) : [];
   const matches = (b: beds.BedMatrixBedOut) =>
     (!state || b.current_state === state) &&
     (!find.trim() ||
@@ -420,7 +427,6 @@ export function BedMatrix({
       </p>
       <LoadState loading={loading} error={error} retry={() => void refresh()} />
       {!draft && feedback}
-      {unverifiedBeds.length>0&&<details className="notice" data-testid="unverified-beds"><summary data-help="beds.unverified">{unverifiedBeds.length} {t("beds need their ward verified", "بستروں کے وارڈ کی تصدیق چاہیے")}</summary><p>{t("These beds were returned without a ward summary. Service changes are unavailable until Admissions or IT verifies their ward. Refresh the matrix after it is corrected.", "یہ بستر وارڈ کی تفصیل کے بغیر آئے۔ داخلہ ڈیسک یا آئی ٹی کی وارڈ تصدیق تک خدمت بدلنا بند ہے۔ درستی کے بعد فہرست تازہ کریں۔")}</p><ul>{unverifiedBeds.map(b=><li key={b.bed_id}><bdi>{b.label} · #{b.bed_id}</bdi> · {label(b.current_state)}</li>)}</ul></details>}
       <fieldset disabled={blocked || !!draft}>
         <div className="bed-board-filters">
           <Field label={t("Ward to show", "دکھانے والا وارڈ")}>
@@ -440,7 +446,7 @@ export function BedMatrix({
             </select>
           </Field>
           <Field label={t("Bed state to show", "دکھانے والی بستر حالت")}>
-            <select
+            <select data-field="state"
               data-help="beds.filters"
               value={state}
               onChange={(e) => setState(e.target.value)}
@@ -753,8 +759,7 @@ export function BedMatrix({
           <ErrorBox error={draftError} />
           <fieldset disabled={blocked || !!review}>
             <Field label={t("Bed service reason", "بستر کی خدمت کی وجہ")}>
-              <textarea
-                data-help="beds.reason"
+              <textarea data-field="reason" data-help="beds.reason"
                 maxLength={300}
                 value={draft.reason}
                 onChange={(e) =>

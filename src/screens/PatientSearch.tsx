@@ -1178,7 +1178,7 @@ export function PatientSearch({
                 label={tr("Full name")}
                 hint={tr("Patient's official name")}
               >
-                <input data-help="patients.edit"
+                <input data-field="full_name" data-help="patients.edit"
                   type="text"
                   required
                   maxLength={200}
@@ -1190,7 +1190,7 @@ export function PatientSearch({
               </Field>
 
               <Field label={tr("Father / Husband name")}>
-                <input data-help="patients.edit"
+                <input data-field="father_or_husband_name" data-help="patients.edit"
                   type="text"
                   value={formFatherHusband}
                   onChange={(e) => setFormFatherHusband(e.target.value)}
@@ -1199,7 +1199,7 @@ export function PatientSearch({
               </Field>
 
               <Field label={tr("Gender")}>
-                <select data-help="patients.edit"
+                <select data-field="gender" data-help="patients.edit"
                   value={formGender}
                   onChange={(e) => setFormGender(e.target.value as any)}
                   disabled={editBusy}
@@ -1214,7 +1214,7 @@ export function PatientSearch({
               </Field>
 
               <Field label={tr("Age (Years)")}>
-                <input data-help="patients.edit"
+                <input data-field="age_years" data-help="patients.edit"
                   type="number"
                   min="0"
                   max="150"
@@ -1226,7 +1226,7 @@ export function PatientSearch({
               </Field>
 
               <Field label={tr("Date of birth")}>
-                <input data-help="patients.edit"
+                <input data-field="dob" data-help="patients.edit"
                   type="date"
                   value={formDob}
                   onChange={(e) => setFormDob(e.target.value)}
@@ -1235,7 +1235,7 @@ export function PatientSearch({
               </Field>
 
               <Field label={tr("Mobile phone")} hint={tr("e.g. 03001234567")}>
-                <input data-help="patients.edit"
+                <input data-field="mobile" data-help="patients.edit"
                   type="tel"
                   value={formMobile}
                   onChange={(e) => setFormMobile(e.target.value)}
@@ -1245,7 +1245,7 @@ export function PatientSearch({
               </Field>
 
               <Field label={tr("CNIC")} hint={tr("e.g. 35202-1234567-1")}>
-                <input data-help="patients.edit"
+                <input data-field="cnic" data-help="patients.edit"
                   type="text"
                   value={formCnic}
                   pattern="[0-9]{5}-?[0-9]{7}-?[0-9]"
@@ -1256,11 +1256,11 @@ export function PatientSearch({
               </Field>
 
               <Field label={t("UPMRN (optional)", "یونیورسل مریض نمبر (اختیاری)")} hint={t("Enter only an issued Universal Patient Medical Record Number.", "صرف پہلے سے جاری کردہ یونیورسل مریض نمبر درج کریں۔")}>
-                <input data-help="patients.edit" aria-label={t("UPMRN (optional)", "یونیورسل مریض نمبر (اختیاری)")} dir="ltr" value={formUpmrn} onChange={e => setFormUpmrn(e.target.value)} disabled={editBusy} maxLength={40} pattern={"[A-Za-z0-9][A-Za-z0-9\\/\\-]{3,39}"} />
+                <input data-field="upmrn" data-help="patients.edit" aria-label={t("UPMRN (optional)", "یونیورسل مریض نمبر (اختیاری)")} dir="ltr" value={formUpmrn} onChange={e => setFormUpmrn(e.target.value)} disabled={editBusy} maxLength={40} pattern={"[A-Za-z0-9][A-Za-z0-9\\/\\-]{3,39}"} />
               </Field>
 
               <Field label={tr("Blood group")}>
-                <select data-help="patients.edit"
+                <select data-field="blood_group" data-help="patients.edit"
                   value={formBloodGroup}
                   onChange={(e) => setFormBloodGroup(e.target.value)}
                   disabled={editBusy}
@@ -1278,7 +1278,7 @@ export function PatientSearch({
                 label={tr("Allergies")}
                 hint={tr("Known drug/food allergies")}
               >
-                <input data-help="patients.edit"
+                <input data-field="allergies" data-help="patients.edit"
                   type="text"
                   value={formAllergies}
                   onChange={(e) => setFormAllergies(e.target.value)}
@@ -1288,7 +1288,7 @@ export function PatientSearch({
               </Field>
 
               <Field label={tr("Billing category")}>
-                <select data-help="patients.edit"
+                <select data-field="billing_category" data-help="patients.edit"
                   value={formBillingCat}
                   onChange={(e) => setFormBillingCat(e.target.value as any)}
                   disabled={editBusy}
@@ -1301,7 +1301,7 @@ export function PatientSearch({
               {formBillingCat === "Panel" && (
                 <>
                   <Field label={tr("Panel ID")}>
-                    <select data-help="patients.edit"
+                    <select data-field="panel_id" data-help="patients.edit"
                       required
                       value={formPanelId}
                       onChange={(e) => setFormPanelId(e.target.value)}
@@ -1314,7 +1314,7 @@ export function PatientSearch({
                     <LoadState {...panels} retry={panels.reload}/>
                   </Field>
                   <Field label={tr("Panel Member #")}>
-                    <input data-help="patients.edit"
+                    <input data-field="panel_member_no" data-help="patients.edit"
                       type="text"
                       value={formPanelMemberNo}
                       onChange={(e) => setFormPanelMemberNo(e.target.value)}
@@ -1325,7 +1325,7 @@ export function PatientSearch({
               )}
 
               <Field label={tr("Address")}>
-                <input data-help="patients.edit"
+                <input data-field="address" data-help="patients.edit"
                   type="text"
                   value={formAddress}
                   onChange={(e) => setFormAddress(e.target.value)}
@@ -1334,7 +1334,7 @@ export function PatientSearch({
               </Field>
 
               <Field label={tr("Emergency contact name")}>
-                <input data-help="patients.edit"
+                <input data-field="emergency_contact_name" data-help="patients.edit"
                   type="text"
                   value={formEmergencyName}
                   onChange={(e) => setFormEmergencyName(e.target.value)}
@@ -1343,7 +1343,7 @@ export function PatientSearch({
               </Field>
 
               <Field label={tr("Emergency contact phone")}>
-                <input data-help="patients.edit"
+                <input data-field="emergency_contact_phone" data-help="patients.edit"
                   type="tel"
                   value={formEmergencyPhone}
                   onChange={(e) => setFormEmergencyPhone(e.target.value)}

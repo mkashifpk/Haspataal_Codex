@@ -1,7 +1,7 @@
 {
   "screen_id": "consents_admissions",
-  "contract_fingerprint": "58db76bf7d59ef6d9870",
-  "knowledge_revision": "51c8fe699d47d046",
+  "contract_fingerprint": "5f8bd8feecd1d68f7841",
+  "knowledge_revision": "893766fb0e066973",
   "delivery_gate": {
     "required": true,
     "status": "required",
@@ -1528,6 +1528,10 @@
           "type": "array",
           "title": "Missing",
           "description": "A draft: what the explanation still lacks before the decision"
+        },
+        "who_decides": {
+          "$ref": "#/components/schemas/WhoDecidesOut",
+          "description": "Who may sign for this patient today; a decision dated earlier (decided_at) is checked on its own date"
         }
       },
       "type": "object",
@@ -1598,7 +1602,8 @@
         "created_at",
         "created_by_name",
         "row_version",
-        "missing"
+        "missing",
+        "who_decides"
       ],
       "title": "ConsentOut"
     },
@@ -2440,6 +2445,40 @@
       ],
       "title": "ConsentWorklistItemOut"
     },
+    "DecisionMakerChoiceOut": {
+      "properties": {
+        "relationship": {
+          "type": "string",
+          "enum": [
+            "Guardian",
+            "Attorney",
+            "Spouse",
+            "Child",
+            "Parent",
+            "Sibling",
+            "OtherRelative",
+            "CareProvider"
+          ],
+          "title": "Relationship"
+        },
+        "description": {
+          "type": "string",
+          "title": "Description"
+        },
+        "priority": {
+          "type": "integer",
+          "title": "Priority",
+          "description": "The order to ask for this patient, the lowest first"
+        }
+      },
+      "type": "object",
+      "required": [
+        "relationship",
+        "description",
+        "priority"
+      ],
+      "title": "DecisionMakerChoiceOut"
+    },
     "DecisionMakerOut": {
       "properties": {
         "relationship": {
@@ -3018,6 +3057,48 @@
         "type"
       ],
       "title": "ValidationError"
+    },
+    "WhoDecidesOut": {
+      "properties": {
+        "adult_age": {
+          "type": "integer",
+          "title": "Adult Age",
+          "description": "The age of consent in years (setting consent_adult_age)"
+        },
+        "patient_is_minor": {
+          "type": "boolean",
+          "title": "Patient Is Minor",
+          "description": "patient_age is known and below adult_age. An unknown age counts as an adult, as the database's check does"
+        },
+        "patient_may_sign": {
+          "type": "boolean",
+          "title": "Patient May Sign",
+          "description": "false for a minor: a decision maker signs (signer DecisionMaker); signer Patient answers CONSENT_SIGNER_INVALID"
+        },
+        "decision_makers": {
+          "items": {
+            "$ref": "#/components/schemas/DecisionMakerChoiceOut"
+          },
+          "type": "array",
+          "title": "Decision Makers",
+          "description": "The relationships allowed to decide for this patient, in the order to ask; any other signer_relationship answers CONSENT_SIGNER_INVALID"
+        },
+        "emergency_second_doctor": {
+          "type": "boolean",
+          "title": "Emergency Second Doctor",
+          "description": "mode EmergencyNote needs second_doctor_id: a doctor registered with the PMDC other than the caller (setting consent_emergency_second_doctor; GET /staff/lookup?license_type=PMDC)"
+        }
+      },
+      "type": "object",
+      "required": [
+        "adult_age",
+        "patient_is_minor",
+        "patient_may_sign",
+        "decision_makers",
+        "emergency_second_doctor"
+      ],
+      "title": "WhoDecidesOut",
+      "description": "Who may decide for this patient today, by the hospital's consent policy (MSDS 75): the rule the decision is\nchecked with, so a frontend never classifies the patient or hardcodes the age of consent (backend issue #39)."
     }
   },
   "unknowns": []

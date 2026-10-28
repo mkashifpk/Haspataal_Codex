@@ -112,7 +112,7 @@ export function Settings({
                 try {await call("prefs-refresh");onPrefs();} catch(cause){setError(cause);} finally {setBusy(false);}
               }}>{tr("Reload preferences")}</button>}
               <Field label={tr("Language")}>
-                <select
+                <select data-field="language"
                   data-help="settings.display"
                   value={prefs.language}
                   disabled={busy}
@@ -123,7 +123,7 @@ export function Settings({
                 </select>
               </Field>
               <Field label={tr("Theme")}>
-                <select
+                <select data-field="theme"
                   data-help="settings.display"
                   value={prefs.theme}
                   disabled={busy}
@@ -139,7 +139,7 @@ export function Settings({
                 label={`${tr("Display size")} · ${prefs.ui_scale_pct}%`}
                 hint={tr("Ctrl/Cmd +, − and 0 use this same setting.")}
               >
-                <input
+                <input data-field="ui_scale_pct"
                   data-help="settings.zoom"
                   aria-label={tr("Display size")}
                   type="range"
@@ -162,7 +162,7 @@ export function Settings({
               </button>
               {user && (
                 <Field label={tr("Download a set of documents")}>
-                  <select
+                  <select data-field="pdf_download"
                     data-help="settings.downloads"
                     value={prefs.pdf_download}
                     disabled={busy}
@@ -273,7 +273,7 @@ function ReviewCode() {
   }
   return <div data-unsaved={code !== saved} data-write-pending={busy}>
     <Field label={tr("Review code")} hint={tr("DEV only. Enter the code when you start a review on the portal. It applies across all roles and windows until cleared or the app closes.")}>
-      <input data-help="settings.review-code" aria-label={tr("Review code")} dir="ltr" autoComplete="off" spellCheck={false}
+      <input data-field="code" data-help="settings.review-code" aria-label={tr("Review code")} dir="ltr" autoComplete="off" spellCheck={false}
         disabled={!ready || busy} value={code} onChange={event => setCode(event.target.value)} />
     </Field>
     <button data-help="settings.review-code" disabled={!ready || busy || code === saved} onClick={save}>{tr("Apply review code")}</button>
@@ -439,7 +439,7 @@ function Policy({ revision }: { revision: number }) {
               "Use the same format as the current value: text in quotes, a number, true/false, or a list.",
             )}
           >
-            <textarea
+            <textarea data-field="value"
               data-help="settings.policy"
               required
               disabled={busy || !!pending}
@@ -449,7 +449,7 @@ function Policy({ revision }: { revision: number }) {
           </Field>
           {selected.is_control && (
             <Field label={tr("Reason")}>
-              <textarea
+              <textarea data-field="reason"
                 data-help="settings.policy"
                 required
                 disabled={busy || !!pending}

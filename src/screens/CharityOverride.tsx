@@ -460,7 +460,7 @@ export function CharityOverride({
                       </select>
                     </Field>
                     <Field label={t("Assistance reason", "امداد کی وجہ")}>
-                      <textarea
+                      <textarea data-field="reason"
                         data-help="charity.form"
                         maxLength={500}
                         value={reason}
@@ -501,7 +501,7 @@ export function CharityOverride({
                           "شریک منظور کرنے والے افسر کا صارف نام",
                         )}
                       >
-                        <input
+                        <input data-field="signer"
                           data-help="charity.signer"
                           autoComplete="off"
                           value={signer}
@@ -539,7 +539,7 @@ export function CharityOverride({
             <Field
               label={t("Assistance request status", "امداد درخواست کی حالت")}
             >
-              <select
+              <select data-field="status"
                 data-help="charity.filters"
                 value={status}
                 onChange={(e) => setStatus(e.target.value as typeof status)}
@@ -900,7 +900,7 @@ export function CharityOverride({
                       "افسر کا شریک منظوری پاس ورڈ",
                     )}
                   >
-                    <input
+                    <input data-field="password"
                       data-help="charity.signer"
                       type="password"
                       autoComplete="off"

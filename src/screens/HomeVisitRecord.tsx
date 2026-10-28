@@ -464,7 +464,7 @@ function VisitForm({
                   "درخواست کا وقت (ہسپتال)",
                 )}
               >
-                <input
+                <input data-field="requested_at"
                   data-help="home.times"
                   type="datetime-local"
                   required
@@ -475,7 +475,7 @@ function VisitForm({
               <Field
                 label={t("Visit time (hospital time)", "دورے کا وقت (ہسپتال)")}
               >
-                <input
+                <input data-field="visited_at"
                   data-help="home.times"
                   type="datetime-local"
                   required
@@ -537,7 +537,7 @@ function VisitForm({
             </fieldset>
             {draft.examination_consent === "VerbalObtained" && (
               <Field label={t("Examination findings", "معائنے کے نتائج")}>
-                <textarea
+                <textarea data-field="examination"
                   data-help="home.consent"
                   maxLength={4000}
                   value={draft.examination || ""}
@@ -546,7 +546,7 @@ function VisitForm({
               </Field>
             )}
             <Field label={t("Actual outcome", "اصل نتیجہ")}>
-              <select
+              <select data-field="outcome"
                 data-help="home.outcome"
                 required
                 value={draft.outcome}
@@ -566,7 +566,7 @@ function VisitForm({
             </Field>
             {draft.outcome === "Referred" && (
               <Field label={t("Referred to", "کہاں حوالہ دیا")}>
-                <input
+                <input data-field="referred_to"
                   data-help="home.outcome"
                   required
                   maxLength={300}

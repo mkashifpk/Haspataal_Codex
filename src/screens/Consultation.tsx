@@ -25,6 +25,7 @@ import { StaffPicker } from "../StaffPicker";
 import { hasUnsavedChanges } from "../unsaved";
 import { hospitalTimeInput, hospitalTimeToUtc } from "../hospital-time";
 import * as emr from "../generated/consultation";
+import {bedMatrix} from '../generated/bed_matrix';
 import { listConsents } from "../generated/clinical_consents";
 import { consultationRequirements, consultationFieldMissing } from "../consultation-requirements";
 type Props = {
@@ -170,8 +171,10 @@ function ConsultationEditor({
     [admitNotes, setAdmitNotes] = useState(""),
     [admissionType, setAdmissionType] =
       useState<NonNullable<emr.AdmissionIn["admission_type"]>>("Standard"),
+    [requestedWard,setRequestedWard]=useState(''),
     [interval, setInterval] = useState(""),
     [actionDirty, setActionDirty] = useState(false);
+  const admissionWards=useLoad(()=>action==='admit'&&can('ipd.bed.view')?bedMatrix({include_beds:false}):Promise.resolve(undefined),[action,revision,user.permissions.join(',')]);
   function accept(value: emr.EncounterDetailOut) {
     setBase(value);
     setKind(value.encounter_type);
@@ -460,6 +463,7 @@ function ConsultationEditor({
     );
     setCarePlan(form.plan);
     setAdmitNotes("");
+    setRequestedWard('');
     setInterval("");
     setCorrectionText("");
     setCorrectionField("general");
@@ -542,7 +546,11 @@ function ConsultationEditor({
         provisional_diagnosis: admitDiagnosis.trim(),
         initial_care_plan: carePlan || null,
         notes: admitNotes || null,
+        requested_ward_id:requestedWard?Number(requestedWard):null,
       };
+      if(requestedWard&&!admissionWards.data?.wards.some(w=>String(w.ward_id)===requestedWard)){
+        setReadError(new Error(t('Choose an open ward from the current matrix, or leave the preference empty.','موجودہ فہرست سے کھلا وارڈ چنیں یا ترجیح خالی چھوڑ دیں۔')));return;
+      }
       if (interval) {
         const n = Number(interval);
         if (!Number.isInteger(n) || n < 15 || n > 1440) {
@@ -594,7 +602,7 @@ function ConsultationEditor({
         body: undefined,
       });
     }
-    write.start(command, preflight);
+    write.start(command, async()=>{await preflight();if(action==='admit'&&requestedWard){const current=await bedMatrix({include_beds:false});if(!current.wards.some(w=>String(w.ward_id)===requestedWard)){await admissionWards.reload();throw Error(t('The requested ward was closed. Your admission reason is kept; choose an open ward and review again.','مطلوبہ وارڈ بند ہوا۔ داخلے کی وجہ محفوظ؛ کھلا وارڈ چن کر دوبارہ جائزہ لیں۔'));}}});
   }
   async function print(mode: "print" | "local" | "server") {
     if (!base || base.status !== "Final" || printing) return;
@@ -803,7 +811,7 @@ function ConsultationEditor({
         )}</p>}
         <fieldset disabled={!editable}>
           <Field label={t("Note type", "نوٹ کی قسم")}>
-            <select
+            <select data-field="kind encounter_type"
               data-help="consultation.note"
               disabled={!editable || !!base}
               value={kind}
@@ -828,7 +836,7 @@ function ConsultationEditor({
           </Field>
           {(kind === "IPD" || kind === "CodeRed" || !!admission) && (
             <Field label={t("Admission", "داخلہ")}>
-              <select
+              <select data-field="admission_id"
                 data-help="consultation.note"
                 value={admission || ""}
                 disabled={!!base}
@@ -1004,7 +1012,7 @@ function ConsultationEditor({
                 </Field>
               ))}
               <Field label={t("Anaesthesia", "بے ہوشی")}>
-                <select
+                <select data-field="anaesthesia"
                   data-help="consultation.procedure"
                   value={procedure.anaesthesia || "None"}
                   onChange={(e) => {
@@ -1027,7 +1035,7 @@ function ConsultationEditor({
                   "رجسٹر کی دی گئی رضامندی (اختیاری ربط)",
                 )}
               >
-                <select
+                <select data-field="consent_id"
                   data-help="consultation.procedure"
                   value={procedure.consent_id || ""}
                   disabled={
@@ -1294,7 +1302,7 @@ function ConsultationEditor({
             {action === "correction" && (
               <>
                 <Field label={t("Correction field", "تصحیح کا خانہ")}>
-                  <select
+                  <select data-field="field"
                     data-help="consultation.correction"
                     value={correctionField}
                     onChange={(e) => {
@@ -1312,7 +1320,7 @@ function ConsultationEditor({
                   </select>
                 </Field>
                 <Field label={t("Correction text", "تصحیح کا متن")}>
-                  <textarea
+                  <textarea data-field="correction_text"
                     data-help="consultation.correction"
                     value={correctionText}
                     maxLength={10000}
@@ -1331,7 +1339,7 @@ function ConsultationEditor({
                   action === "admit" ? "داخلے کی وجہ" : "وجہ",
                 )}
               >
-                <textarea
+                <textarea data-field="reason correction_reason admission_reason"
                   data-help="consultation.action"
                   value={reason}
                   maxLength={action === "admit" ? 4000 : 1000}
@@ -1344,8 +1352,10 @@ function ConsultationEditor({
             )}
             {action === "admit" && (
               <>
+                <LoadState {...admissionWards} retry={admissionWards.reload}/>
+                <Field label={t('Requested open ward (optional)','مطلوبہ کھلا وارڈ، اختیاری')}><select data-help="consultation.admit" name="requested_ward_id" value={requestedWard} disabled={admissionWards.loading||!!admissionWards.error||!can('ipd.bed.view')} onChange={e=>{setRequestedWard(e.target.value);actionMark();}}><option value="">{t('No ward preference','وارڈ کی ترجیح نہیں')}</option>{admissionWards.data?.wards.map(w=><option key={w.ward_id} value={w.ward_id}>{w.name}</option>)}</select></Field>
                 <Field label={t("Provisional diagnosis", "ابتدائی تشخیص")}>
-                  <textarea
+                  <textarea data-field="provisional_diagnosis"
                     data-help="consultation.admit"
                     value={admitDiagnosis}
                     maxLength={1000}
@@ -1358,7 +1368,7 @@ function ConsultationEditor({
                 <Field
                   label={t("Initial care plan", "ابتدائی نگہداشت کا منصوبہ")}
                 >
-                  <textarea
+                  <textarea data-field="initial_care_plan"
                     data-help="consultation.admit"
                     value={carePlan}
                     maxLength={4000}
@@ -1369,7 +1379,7 @@ function ConsultationEditor({
                   />
                 </Field>
                 <Field label={t("Admissions desk notes", "داخلہ ڈیسک کے نوٹ")}>
-                  <textarea
+                  <textarea data-field="notes"
                     data-help="consultation.admit"
                     value={admitNotes}
                     maxLength={2000}
@@ -1380,7 +1390,7 @@ function ConsultationEditor({
                   />
                 </Field>
                 <Field label={t("Admission type", "داخلے کی قسم")}>
-                  <select
+                  <select data-field="admission_type"
                     data-help="consultation.admit"
                     value={admissionType}
                     onChange={(e) => {

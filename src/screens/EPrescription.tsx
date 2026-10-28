@@ -890,7 +890,7 @@ function PrescriptionEditor({
           <h2>{t("New prescription", "نیا نسخہ")}</h2>
           <fieldset disabled={disabled || !can("prescription.create")}>
             <Field label={t("Prescription destination", "نسخے کی منزل")}>
-              <select
+              <select data-field="destination"
                 data-help="rx.destination"
                 value={destination}
                 onChange={(e) => {
@@ -920,7 +920,7 @@ function PrescriptionEditor({
               </p>
             )}
             <Field label={t("Care context", "علاج کی جگہ")}>
-              <select
+              <select data-field="source"
                 data-help="rx.context"
                 value={source}
                 onChange={(e) => {
@@ -936,7 +936,7 @@ function PrescriptionEditor({
             </Field>
             {inpatient && (
               <Field label={t("Patient admission", "مریض کا داخلہ")}>
-                <select
+                <select data-field="admission_id"
                   data-help="rx.context"
                   value={admission}
                   onChange={(e) => {
@@ -1154,7 +1154,7 @@ function PrescriptionEditor({
                   </Field>
                 ))}
                 <Field label={t("Route", "دینے کا راستہ")}>
-                  <select
+                  <select data-field="route"
                     data-help="rx.directions"
                     value={l.route}
                     aria-invalid={missing(i, "route")}
@@ -1171,7 +1171,7 @@ function PrescriptionEditor({
                   </select>
                 </Field>
                 <Field label={t("Frequency", "خوراک کا وقفہ")}>
-                  <select
+                  <select data-field="frequency_code"
                     data-help="rx.directions"
                     value={l.frequency}
                     aria-invalid={missing(i, "frequency_code")}
@@ -1240,7 +1240,7 @@ function PrescriptionEditor({
                 )}
                 {inpatient && (
                   <label>
-                    <input
+                    <input data-field="self_administration"
                       type="checkbox"
                       data-help="rx.safety"
                       checked={l.self}
@@ -1268,7 +1268,7 @@ function PrescriptionEditor({
               </section>
             ))}
             <Field label={t("Prescription notes", "نسخے کے نوٹ")}>
-              <textarea
+              <textarea data-field="note notes"
                 data-help="rx.lines"
                 value={note}
                 maxLength={4000}
@@ -1336,7 +1336,7 @@ function PrescriptionEditor({
             <fieldset disabled={disabled} onChange={() => setActionDirty(true)}>
               {action === "cancel" ? (
                 <Field label={t("Cancellation reason", "منسوخی کی وجہ")}>
-                  <textarea
+                  <textarea data-field="reason"
                     data-help="rx.cancel"
                     value={reason}
                     minLength={3}
@@ -1347,7 +1347,7 @@ function PrescriptionEditor({
               ) : (
                 <>
                   <Field label={t("Handed to", "وصول کرنے والا")}>
-                    <select
+                    <select data-field="handed_to"
                       data-help="rx.handover"
                       value={handed}
                       onChange={(e) =>
@@ -1365,7 +1365,7 @@ function PrescriptionEditor({
                   </Field>
                   {handed === "Attendant" && (
                     <Field label={t("Attendant name", "تیماردار کا نام")}>
-                      <input
+                      <input data-field="attendant_name"
                         data-help="rx.handover"
                         value={attendant}
                         maxLength={120}
@@ -1374,7 +1374,7 @@ function PrescriptionEditor({
                     </Field>
                   )}
                   <Field label={t("Copy kept", "محفوظ کی گئی نقل")}>
-                    <select
+                    <select data-field="copy_kept"
                       data-help="rx.handover"
                       value={copy}
                       onChange={(e) => setCopy(e.target.value as typeof copy)}
@@ -1403,7 +1403,7 @@ function PrescriptionEditor({
                           "دستخط شدہ نسخے کی دستاویز",
                         )}
                       >
-                        <select
+                        <select data-field="document_id"
                           data-help="rx.handover"
                           value={documentId}
                           onChange={(e) => setDocumentId(e.target.value)}

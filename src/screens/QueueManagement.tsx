@@ -384,7 +384,7 @@ export function QueueManagement({
           {changedDuringReview && <p className="error" role="alert">{tr("The slip changed while this dialog was open. Close it and review the current status before another action.")}</p>}
           {action !== "reactivate" ? (
             <Field label={tr("Reason")}>
-              <textarea
+              <textarea data-field="reason"
                 data-help="queue.change"
                 minLength={3}
                 maxLength={500}

@@ -39,6 +39,8 @@ const { request, checkedRoot, LocalUploadError } = require("./transport.cjs");
 const { discover } = require("./discovery.cjs");
 const { validate, permissionAllows, matchOperation: findOperation } = require("./contract.cjs");
 const { createPreferenceQueue } = require("./preference-queue.cjs");
+const {preferenceBody}=require('./preference-body.cjs');
+const {mayReplayAfterRefresh}=require('./auth-replay.cjs');
 const { isDegradedHealthResponse } = require("./health-response.cjs");
 const { unseenEvent, simulatedLicenseEvent } = require("./event-cursor.cjs");
 const {
@@ -389,7 +391,10 @@ async function api(method, p, body, workspace, key, retried = false) {
     };
   if (!retried && !isCountedLabLabel(method, p) && r.status === 401 && r.body?.error?.code === "TOKEN_EXPIRED") {
     await refresh();
-    return api(method, p, body, workspace, key, true);
+    if(mayReplayAfterRefresh(r))return api(method, p, body, workspace, key, true);
+    const refusal=errorResult(r);
+    refusal.error.details={...refusal.error.details,session_refreshed:true};
+    return refusal;
   }
   if (["TOKEN_REVOKED", "REFRESH_TOKEN_REUSED"].includes(r.body?.error?.code))
     clearSession(r.body.error.message);
@@ -532,7 +537,7 @@ async function savePrefs(value, owner) {
       Math.min(250, Math.round(value.ui_scale_pct)),
     );
   if (auth) {
-    const r = await api("PUT", "/settings/me", value);
+    const r = await api("PUT", "/settings/me", preferenceBody(value));
     if (!r.ok) return r;
     if (owner !== preferenceContext)
       throw new Error("The session changed while saving preferences.");

@@ -164,6 +164,7 @@ export function checkHelp({
       "Login",
       "Settings",
       "ITConsole",
+      "ITWards",
       "Notifications",
       "Approvals",
       "Incidents",

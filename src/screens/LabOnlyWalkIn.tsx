@@ -644,7 +644,7 @@ export function LabOnlyWalkIn({
               </h2>
               <div className="form-grid">
                 <Field label={t("Full name", "پورا نام")}>
-                  <input
+                  <input data-field="name"
                     data-help="walkin.new"
                     value={name}
                     maxLength={200}
@@ -652,7 +652,7 @@ export function LabOnlyWalkIn({
                   />
                 </Field>
                 <Field label={t("Mobile", "موبائل")}>
-                  <input
+                  <input data-field="mobile"
                     data-help="walkin.new"
                     value={mobile}
                     onChange={(e) => setMobile(e.target.value)}
@@ -661,7 +661,7 @@ export function LabOnlyWalkIn({
                   />
                 </Field>
                 <Field label={t("Priority", "ترجیح")}>
-                  <select
+                  <select data-field="priority"
                     data-help="walkin.new"
                     value={priority}
                     onChange={(e) =>
@@ -690,7 +690,7 @@ export function LabOnlyWalkIn({
               <Field
                 label={t("Clinical notes (optional)", "طبی نوٹس (اختیاری)")}
               >
-                <textarea
+                <textarea data-field="notes"
                   data-help="walkin.new"
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
@@ -975,7 +975,7 @@ export function LabOnlyWalkIn({
                         "رقم (خالی = سرور کا مکمل بقایا)",
                       )}
                     >
-                      <input
+                      <input data-field="amount"
                         data-help="walkin.pay"
                         inputMode="decimal"
                         value={amount}
@@ -983,7 +983,7 @@ export function LabOnlyWalkIn({
                       />
                     </Field>
                     <Field label={t("Collection method", "وصولی کا طریقہ")}>
-                      <select
+                      <select data-field="method"
                         data-help="walkin.pay"
                         value={method}
                         onChange={(e) =>

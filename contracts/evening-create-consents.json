@@ -1,0 +1,1352 @@
+{
+  "method": "POST",
+  "path": "/api/v1/consents",
+  "summary": "Prepare a consent form",
+  "tags": [
+    "Consent"
+  ],
+  "permissions": [
+    "consent.record"
+  ],
+  "permissions_mode": "all",
+  "idempotency_key": true,
+  "description": "A draft on a form of the list (`form_code`), in the patient's language (`CONSENT_TEXT_MISSING` when the form has\nno text in it: `details.available`), for an admission (the general consent needs one), an operation, an ER visit or\nan OPD visit. Prefilled: from the operation, the procedure and the surgeon (the anaesthesia: the technique and the\nanaesthetist of the assessment); from the admission, the need for admission. `missing` lists what the explanation\nstill lacks. Then print it (`GET /consents/{consent_id}/print-payload`) and explain it.\nAn id in the request body that does not exist: `REFERENCE_NOT_FOUND` (details.field).\n\n`OT_BOOKING_STATE_INVALID`: the operation (`booking_id`) is cancelled or completed.\n\n**Required permission:** `consent.record`\n\n**Required permission:** `consent.record`",
+  "roles_allowed": [
+    "admissions_officer",
+    "anaesthetist",
+    "clinical_specialist",
+    "doctor",
+    "head_nurse",
+    "surgeon",
+    "triage_nurse",
+    "ward_nurse"
+  ],
+  "parameters": [
+    {
+      "name": "Idempotency-Key",
+      "in": "header",
+      "required": false,
+      "description": "Unique per logical action; retries return the first result",
+      "schema": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "description": "Unique per logical action; retries return the first result",
+        "title": "Idempotency-Key"
+      }
+    }
+  ],
+  "request_body": {
+    "title": "ConsentIn",
+    "properties": {
+      "procedure_name": {
+        "anyOf": [
+          {
+            "type": "string",
+            "maxLength": 500
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "title": "Procedure Name",
+        "examples": [
+          "Open appendicectomy"
+        ]
+      },
+      "performer_id": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "title": "Performer Id",
+        "description": "The employee who performs it (fills performer_name)"
+      },
+      "performer_name": {
+        "anyOf": [
+          {
+            "type": "string",
+            "maxLength": 300
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "title": "Performer Name",
+        "examples": [
+          "Dr Ahmed and the surgical team"
+        ]
+      },
+      "risks": {
+        "anyOf": [
+          {
+            "type": "string",
+            "maxLength": 4000
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "title": "Risks",
+        "examples": [
+          "Wound infection, bleeding, injury to the bowel, a hernia at the scar later; rarely a second operation"
+        ]
+      },
+      "benefits": {
+        "anyOf": [
+          {
+            "type": "string",
+            "maxLength": 4000
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "title": "Benefits",
+        "examples": [
+          "Removes the inflamed appendix before it bursts"
+        ]
+      },
+      "alternatives": {
+        "anyOf": [
+          {
+            "type": "string",
+            "maxLength": 4000
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "title": "Alternatives",
+        "examples": [
+          "Antibiotics alone (the appendicitis may come back); laparoscopic operation"
+        ]
+      },
+      "admission_need": {
+        "anyOf": [
+          {
+            "type": "string",
+            "maxLength": 2000
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "title": "Admission Need",
+        "description": "General consent: why the patient is admitted"
+      },
+      "estimated_days": {
+        "anyOf": [
+          {
+            "type": "integer",
+            "maximum": 365,
+            "minimum": 0
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "title": "Estimated Days",
+        "description": "General consent: the estimated stay"
+      },
+      "estimated_cost": {
+        "anyOf": [
+          {
+            "type": "number",
+            "minimum": 0
+          },
+          {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "title": "Estimated Cost",
+        "description": "General consent: the estimated cost (PKR)"
+      },
+      "form_code": {
+        "type": "string",
+        "title": "Form Code",
+        "description": "The form of the hospital's list (GET /consent-forms)",
+        "examples": [
+          "OPERATION"
+        ]
+      },
+      "language": {
+        "type": "string",
+        "enum": [
+          "English",
+          "Urdu",
+          "Punjabi",
+          "Saraiki",
+          "Pashto",
+          "Sindhi",
+          "Balochi"
+        ],
+        "title": "Language",
+        "description": "The language the patient understands; the form must have a text in it"
+      },
+      "patient_id": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "title": "Patient Id",
+        "description": "Default: the patient of the admission, operation or visit"
+      },
+      "admission_id": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "title": "Admission Id",
+        "description": "Required for the general consent; default: the operation's"
+      },
+      "booking_id": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "title": "Booking Id",
+        "description": "The operation (consents to the operation and to its anaesthesia)"
+      },
+      "er_visit_id": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "title": "Er Visit Id"
+      },
+      "ticket_id": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "title": "Ticket Id",
+        "description": "An OPD visit (a procedure in the clinic)"
+      }
+    },
+    "type": "object",
+    "required": [
+      "form_code",
+      "language"
+    ]
+  },
+  "request_content_type": "application/json",
+  "response_schema": {
+    "title": "Envelope[ConsentOut]",
+    "properties": {
+      "data": {
+        "title": "ConsentOut",
+        "properties": {
+          "consent_id": {
+            "type": "integer",
+            "title": "Consent Id"
+          },
+          "consent_number": {
+            "type": "string",
+            "title": "Consent Number"
+          },
+          "patient_id": {
+            "type": "integer",
+            "title": "Patient Id"
+          },
+          "mrn": {
+            "type": "string",
+            "title": "Mrn"
+          },
+          "patient_name": {
+            "type": "string",
+            "title": "Patient Name"
+          },
+          "gender": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "male",
+                  "female",
+                  "other",
+                  "unknown"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gender"
+          },
+          "father_or_husband_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Father Or Husband Name"
+          },
+          "patient_age": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Patient Age",
+            "description": "Today, in years (null: not known)"
+          },
+          "form_id": {
+            "type": "integer",
+            "title": "Form Id"
+          },
+          "form_code": {
+            "type": "string",
+            "title": "Form Code"
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "General",
+              "Procedure",
+              "Anaesthesia",
+              "Transfusion",
+              "HighRiskTreatment",
+              "AgainstMedicalAdvice",
+              "Other"
+            ],
+            "title": "Category"
+          },
+          "taken_by": {
+            "type": "string",
+            "enum": [
+              "AnyStaff",
+              "Doctor",
+              "Anaesthetist"
+            ],
+            "title": "Taken By"
+          },
+          "requires_witness": {
+            "type": "boolean",
+            "title": "Requires Witness"
+          },
+          "admission_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Admission Id"
+          },
+          "admission_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Admission Number"
+          },
+          "booking_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Booking Id"
+          },
+          "booking_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Booking Number"
+          },
+          "er_visit_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Er Visit Id"
+          },
+          "er_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Er Number"
+          },
+          "ticket_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ticket Id"
+          },
+          "ticket_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ticket Number"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "Draft",
+              "Given",
+              "Refused",
+              "Withdrawn",
+              "Cancelled"
+            ],
+            "title": "Status"
+          },
+          "language": {
+            "type": "string",
+            "enum": [
+              "English",
+              "Urdu",
+              "Punjabi",
+              "Saraiki",
+              "Pashto",
+              "Sindhi",
+              "Balochi"
+            ],
+            "title": "Language"
+          },
+          "direction": {
+            "type": "string",
+            "enum": [
+              "ltr",
+              "rtl"
+            ],
+            "title": "Direction"
+          },
+          "form_title": {
+            "type": "string",
+            "title": "Form Title",
+            "description": "The heading as printed for this patient"
+          },
+          "form_body": {
+            "type": "string",
+            "title": "Form Body",
+            "description": "The text as printed for this patient (later changes of the form never alter it)"
+          },
+          "procedure_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Procedure Name"
+          },
+          "performer_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Performer Id"
+          },
+          "performer_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Performer Name"
+          },
+          "risks": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Risks"
+          },
+          "benefits": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Benefits"
+          },
+          "alternatives": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Alternatives"
+          },
+          "admission_need": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Admission Need"
+          },
+          "estimated_days": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Estimated Days"
+          },
+          "estimated_cost": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Estimated Cost"
+          },
+          "interpreter_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Interpreter Name"
+          },
+          "read_to_patient": {
+            "type": "boolean",
+            "title": "Read To Patient"
+          },
+          "questions_answers": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Questions Answers"
+          },
+          "understanding_confirmed": {
+            "type": "boolean",
+            "title": "Understanding Confirmed"
+          },
+          "mode": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "Signed",
+                  "EmergencyNote",
+                  "VerbalRefusal"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mode"
+          },
+          "patient_capable": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Patient Capable"
+          },
+          "incapacity_reason": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "Minor",
+                  "Unconscious",
+                  "Confused",
+                  "MentalIllness",
+                  "Sedated",
+                  "Other"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Incapacity Reason"
+          },
+          "signer": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "Patient",
+                  "DecisionMaker"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Signer"
+          },
+          "signer_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Signer Name"
+          },
+          "signer_relationship": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "Guardian",
+                  "Attorney",
+                  "Spouse",
+                  "Child",
+                  "Parent",
+                  "Sibling",
+                  "OtherRelative",
+                  "CareProvider"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Signer Relationship"
+          },
+          "signer_cnic": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Signer Cnic"
+          },
+          "signer_phone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Signer Phone"
+          },
+          "signer_mark": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "Signature",
+                  "ThumbImpression"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Signer Mark"
+          },
+          "witness_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Witness Name"
+          },
+          "witness_role": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Witness Role"
+          },
+          "emergency_note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Emergency Note"
+          },
+          "second_doctor_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Second Doctor Id"
+          },
+          "second_doctor_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Second Doctor Name"
+          },
+          "refusal_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Refusal Reason"
+          },
+          "decided_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decided At"
+          },
+          "obtained_stamp": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AuthorStampOut"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The professional who explained and took it (MSDS 74 iii)"
+          },
+          "document_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Document Id",
+            "description": "The scan of the signed form (a patient document)"
+          },
+          "scanned_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scanned At"
+          },
+          "withdrawn_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Withdrawn At"
+          },
+          "withdrawal_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Withdrawal Reason"
+          },
+          "withdrawal_stamp": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AuthorStampOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "cancelled_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cancelled At"
+          },
+          "cancel_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cancel Reason"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "created_by_name": {
+            "type": "string",
+            "title": "Created By Name"
+          },
+          "row_version": {
+            "type": "integer",
+            "title": "Row Version"
+          },
+          "missing": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Missing",
+            "description": "A draft: what the explanation still lacks before the decision"
+          },
+          "who_decides": {
+            "$ref": "#/components/schemas/WhoDecidesOut",
+            "description": "Who may sign for this patient today; a decision dated earlier (decided_at) is checked on its own date"
+          }
+        },
+        "type": "object",
+        "required": [
+          "consent_id",
+          "consent_number",
+          "patient_id",
+          "mrn",
+          "patient_name",
+          "gender",
+          "father_or_husband_name",
+          "patient_age",
+          "form_id",
+          "form_code",
+          "category",
+          "taken_by",
+          "requires_witness",
+          "admission_id",
+          "admission_number",
+          "booking_id",
+          "booking_number",
+          "er_visit_id",
+          "er_number",
+          "ticket_id",
+          "ticket_number",
+          "status",
+          "language",
+          "direction",
+          "form_title",
+          "form_body",
+          "procedure_name",
+          "performer_id",
+          "performer_name",
+          "risks",
+          "benefits",
+          "alternatives",
+          "admission_need",
+          "estimated_days",
+          "estimated_cost",
+          "interpreter_name",
+          "read_to_patient",
+          "questions_answers",
+          "understanding_confirmed",
+          "mode",
+          "patient_capable",
+          "incapacity_reason",
+          "signer",
+          "signer_name",
+          "signer_relationship",
+          "signer_cnic",
+          "signer_phone",
+          "signer_mark",
+          "witness_name",
+          "witness_role",
+          "emergency_note",
+          "second_doctor_id",
+          "second_doctor_name",
+          "refusal_reason",
+          "decided_at",
+          "obtained_stamp",
+          "document_id",
+          "scanned_at",
+          "withdrawn_at",
+          "withdrawal_reason",
+          "withdrawal_stamp",
+          "cancelled_at",
+          "cancel_reason",
+          "created_at",
+          "created_by_name",
+          "row_version",
+          "missing",
+          "who_decides"
+        ]
+      },
+      "meta": {
+        "title": "Meta",
+        "properties": {
+          "server_time": {
+            "type": "string",
+            "title": "Server Time",
+            "description": "Server clock (UTC). Use it to detect terminal clock skew."
+          },
+          "page": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page"
+          },
+          "page_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page Size"
+          },
+          "total_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total Count"
+          },
+          "next_cursor": {
+            "title": "Next Cursor"
+          }
+        },
+        "type": "object",
+        "required": [
+          "server_time"
+        ]
+      },
+      "request_id": {
+        "type": "string",
+        "title": "Request Id"
+      }
+    },
+    "type": "object",
+    "required": [
+      "data",
+      "meta",
+      "request_id"
+    ]
+  },
+  "recorded_example": {
+    "request": {
+      "path": "/api/v1/consents",
+      "body": {
+        "form_code": "GENERAL",
+        "language": "Urdu",
+        "admission_id": 1,
+        "admission_need": "Pneumonia needing IV antibiotics and oxygen",
+        "estimated_days": 5,
+        "estimated_cost": "60000"
+      }
+    },
+    "response": {
+      "status": 201,
+      "body": {
+        "data": {
+          "consent_id": 1,
+          "consent_number": "CN-2026-000001",
+          "patient_id": 1,
+          "mrn": "MRN-2026-000001",
+          "patient_name": "Ali Khan",
+          "gender": "male",
+          "father_or_husband_name": null,
+          "patient_age": 40,
+          "form_id": 1,
+          "form_code": "GENERAL",
+          "category": "General",
+          "taken_by": "AnyStaff",
+          "requires_witness": false,
+          "admission_id": 1,
+          "admission_number": "ADM-2026-00001",
+          "booking_id": null,
+          "booking_number": null,
+          "er_visit_id": null,
+          "er_number": null,
+          "ticket_id": null,
+          "ticket_number": null,
+          "status": "Draft",
+          "language": "Urdu",
+          "form_title": "داخلے اور علاج کے لیے عمومی رضامندی",
+          "form_body": "میں اس ہسپتال میں داخل ہونے اور اپنے ڈاکٹروں کی تجویز کردہ ضروری معائنوں، ٹیسٹوں، نرسنگ نگہداشت اور علاج پر رضامند ہوں۔ کوئی آپریشن، بے ہوشی، خون لگانا یا کوئی اور خطرے والا طبی عمل مجھے الگ سے سمجھایا جائے گا اور میری الگ رضامندی کے بغیر نہیں کیا جائے گا۔\nمیرے داخلے کی ضرورت، اندازاً قیام کی مدت اور خرچ، جو نیچے درج ہیں، مجھے سمجھا دیے گئے ہیں۔ میں سمجھتا/سمجھتی ہوں کہ یہ اندازے ہیں جو میری حالت …",
+          "procedure_name": null,
+          "performer_id": null,
+          "performer_name": null,
+          "risks": null,
+          "benefits": null,
+          "alternatives": null,
+          "admission_need": "Pneumonia needing IV antibiotics and oxygen",
+          "estimated_days": 5,
+          "estimated_cost": 60000,
+          "interpreter_name": null,
+          "read_to_patient": false,
+          "questions_answers": null,
+          "understanding_confirmed": false,
+          "mode": null,
+          "patient_capable": null,
+          "incapacity_reason": null,
+          "signer": null,
+          "signer_name": null,
+          "signer_relationship": null,
+          "signer_cnic": null,
+          "signer_phone": null,
+          "signer_mark": null,
+          "witness_name": null,
+          "witness_role": null,
+          "emergency_note": null,
+          "second_doctor_id": null,
+          "second_doctor_name": null,
+          "refusal_reason": null,
+          "decided_at": null,
+          "obtained_stamp": null,
+          "document_id": null,
+          "scanned_at": null,
+          "withdrawn_at": null,
+          "withdrawal_reason": null,
+          "withdrawal_stamp": null,
+          "cancelled_at": null,
+          "cancel_reason": null,
+          "created_at": "2026-10-28T12:54:10.799036+00:00",
+          "created_by_name": "Dr Ahmed",
+          "row_version": 1,
+          "who_decides": {
+            "adult_age": 18,
+            "patient_is_minor": false,
+            "patient_may_sign": true,
+            "decision_makers": [
+              {
+                "relationship": "Guardian",
+                "description": "A guardian appointed by a court",
+                "priority": 1
+              },
+              {
+                "relationship": "Attorney",
+                "description": "A person the patient appointed in writing to decide for them",
+                "priority": 2
+              },
+              {
+                "relationship": "Spouse",
+                "description": "The husband or wife",
+                "priority": 3
+              }
+            ],
+            "emergency_second_doctor": true
+          },
+          "direction": "rtl",
+          "missing": []
+        },
+        "meta": {
+          "server_time": "2026-10-28T12:54:10.893338+00:00"
+        },
+        "request_id": "f0aea1a69ae3487c86a3d28e2600e577"
+      }
+    },
+    "errors_seen": [
+      "CONSENT_TEXT_MISSING",
+      "VALIDATION_ERROR"
+    ],
+    "events_emitted": [
+      "consent.updated",
+      "ot.clinical.updated"
+    ]
+  },
+  "errors": [
+    {
+      "code": "CONSENT_TEXT_MISSING",
+      "http_status": 422,
+      "message": "The form has no text in that language: add it, or choose another language.",
+      "retryable": false,
+      "category": "business",
+      "ui_action": "Show field errors from details.fields / the message."
+    },
+    {
+      "code": "OT_BOOKING_STATE_INVALID",
+      "http_status": 409,
+      "message": "Invalid OT booking state change.",
+      "retryable": false,
+      "category": "business",
+      "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+    },
+    {
+      "code": "REFERENCE_NOT_FOUND",
+      "http_status": 422,
+      "message": "A referenced record does not exist.",
+      "retryable": false,
+      "category": "request",
+      "ui_action": "Show field errors from details.fields / the message."
+    },
+    {
+      "code": "VALIDATION_ERROR",
+      "http_status": 422,
+      "message": "The request is invalid.",
+      "retryable": false,
+      "category": "request",
+      "ui_action": "Show field errors from details.fields / the message."
+    }
+  ],
+  "errors_seen_in_tests": [
+    "CONSENT_TEXT_MISSING",
+    "VALIDATION_ERROR"
+  ],
+  "used_by_screens": [
+    "consents_admissions",
+    "consents_ward",
+    "consents_triage",
+    "consents_doctor",
+    "consents_anaesthesia",
+    "pre_anaesthesia_clinic",
+    "surgical_record_surgeon"
+  ],
+  "used_by_workflows": [
+    "consent",
+    "emergency-department",
+    "surgical-care"
+  ],
+  "typescript_example": "// Prepare a consent form  (permissions: consent.record)\nexport const createConsents = (body) =>\n  api(\"POST\", `/consents`, body, { idempotent: true });   // api(): see get_guide('envelope-and-errors')",
+  "access": {
+    "authentication": "user",
+    "permissions": [
+      "consent.record"
+    ],
+    "permissions_mode": "all",
+    "who": "holders of consent.record",
+    "roles_allowed": [
+      "admissions_officer",
+      "anaesthetist",
+      "clinical_specialist",
+      "doctor",
+      "head_nurse",
+      "surgeon",
+      "triage_nurse",
+      "ward_nurse"
+    ]
+  },
+  "write_semantics": {
+    "protection": "idempotency_key",
+    "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+    "reconcile_with": "GET /consents",
+    "emits_events": [
+      "consent.updated",
+      "ot.clinical.updated"
+    ],
+    "prints": false,
+    "related_state_machine": null
+  },
+  "emits_events": [
+    "consent.updated",
+    "ot.clinical.updated"
+  ],
+  "list": null,
+  "cross_field_rules": {},
+  "errors_detail": [
+    {
+      "code": "CONSENT_TEXT_MISSING",
+      "http_status": 422,
+      "message": "The form has no text in that language: add it, or choose another language.",
+      "retryable": false,
+      "ui_action": "Show field errors from details.fields / the message.",
+      "source": [
+        "documented",
+        "seen_in_tests"
+      ],
+      "details_fields": [
+        "available",
+        "language"
+      ],
+      "details_from": "POST /api/v1/consents"
+    },
+    {
+      "code": "OT_BOOKING_STATE_INVALID",
+      "http_status": 409,
+      "message": "Invalid OT booking state change.",
+      "retryable": false,
+      "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+      "source": [
+        "documented"
+      ],
+      "details_fields": [],
+      "details_from": "POST /api/v1/ot/bookings/{booking_id}/safety-checks"
+    },
+    {
+      "code": "REFERENCE_NOT_FOUND",
+      "http_status": 422,
+      "message": "A referenced record does not exist.",
+      "retryable": false,
+      "ui_action": "Show field errors from details.fields / the message.",
+      "source": [
+        "documented"
+      ],
+      "details_fields": [
+        "ward_id"
+      ],
+      "details_from": "POST /api/v1/pharmacy/storage-checks"
+    },
+    {
+      "code": "VALIDATION_ERROR",
+      "http_status": 422,
+      "message": "The request is invalid.",
+      "retryable": false,
+      "ui_action": "Show field errors from details.fields / the message.",
+      "source": [
+        "documented",
+        "seen_in_tests"
+      ],
+      "details_fields": [],
+      "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+    }
+  ]
+}

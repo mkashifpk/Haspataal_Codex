@@ -443,7 +443,7 @@ function ReferralForm({
           <h2>{t("New external referral", "نیا بیرونی حوالہ")}</h2>
           <fieldset disabled={disabled} onChange={() => setDirty(true)}>
             <Field label={t("Referral source", "حوالے کا ماخذ")}>
-              <select
+              <select data-field="source"
                 data-help="referral.source"
                 value={source}
                 onChange={(e) => {
@@ -523,7 +523,7 @@ function ReferralForm({
             )}
             <LoadState {...encounters} retry={encounters.reload} />
             <Field label={t("Referral consultation note", "حوالے کا طبی نوٹ")}>
-              <select
+              <select data-field="encounter_id"
                 data-help="referral.summary"
                 value={noteId}
                 onChange={(e) => {
@@ -580,7 +580,7 @@ function ReferralForm({
                 "وصول کنندہ مرکز کا رابطہ",
               )}
             >
-              <select
+              <select data-field="destination_contact_id"
                 data-help="referral.destination"
                 value={contact}
                 onChange={(e) => setContact(e.target.value)}
@@ -617,7 +617,7 @@ function ReferralForm({
               </p>
             )}
             <label>
-              <input
+              <input data-field="at_patient_request"
                 type="checkbox"
                 data-help="referral.destination"
                 checked={patientRequest}
@@ -632,7 +632,7 @@ function ReferralForm({
                   "مریض کے چنے مرکز کا نام",
                 )}
               >
-                <input
+                <input data-field="name destination_name"
                   data-help="referral.destination"
                   value={name}
                   maxLength={200}
@@ -647,7 +647,7 @@ function ReferralForm({
                 "منزل کا شعبہ (اختیاری)",
               )}
             >
-              <input
+              <input data-field="destination_department"
                 data-help="referral.destination"
                 value={department}
                 maxLength={200}
@@ -655,7 +655,7 @@ function ReferralForm({
               />
             </Field>
             <Field label={t("Referral reason", "حوالے کی وجہ")}>
-              <textarea
+              <textarea data-field="reason"
                 data-help="referral.summary"
                 value={reason}
                 minLength={3}
@@ -664,7 +664,7 @@ function ReferralForm({
               />
             </Field>
             <Field label={t("Referral urgency", "حوالے کی ترجیح")}>
-              <select
+              <select data-field="urgency"
                 data-help="referral.summary"
                 value={urgency}
                 onChange={(e) => setUrgency(e.target.value)}
@@ -678,7 +678,7 @@ function ReferralForm({
               </select>
             </Field>
             <Field label={t("Referral clinical summary", "حوالے کا طبی خلاصہ")}>
-              <textarea
+              <textarea data-field="clinical_summary"
                 data-help="referral.summary"
                 value={summary}
                 minLength={3}
@@ -708,7 +708,7 @@ function ReferralForm({
                 "واقعی دیا ہوا علاج (اختیاری)",
               )}
             >
-              <textarea
+              <textarea data-field="treatment_given"
                 data-help="referral.summary"
                 value={treatment}
                 maxLength={4000}
@@ -716,7 +716,7 @@ function ReferralForm({
               />
             </Field>
             <Field label={t("Referral transport", "حوالے کی نقل و حمل")}>
-              <select
+              <select data-field="transport"
                 data-help="referral.transport"
                 value={transport}
                 onChange={(e) => setTransport(e.target.value)}
@@ -733,7 +733,7 @@ function ReferralForm({
             </Field>
             {transport === "WithStaff" && (
               <Field label={t("Escort name", "ساتھ جانے والے کا نام")}>
-                <input
+                <input data-field="escort escort_name"
                   data-help="referral.transport"
                   value={escort}
                   maxLength={200}
@@ -747,7 +747,7 @@ function ReferralForm({
                 "منتقلی میں نگہداشت (اختیاری)",
               )}
             >
-              <textarea
+              <textarea data-field="care_during_transfer"
                 data-help="referral.transport"
                 value={care}
                 maxLength={2000}

@@ -532,7 +532,7 @@ export function Receivables({
           <h2>{tr("Invoices and payment collection")}</h2>
           <div className="form-grid">
             <Field label={tr("Invoice status")}>
-              <select
+              <select data-field="status"
                 data-help="receivables.invoice"
                 value={invoiceStatus}
                 onChange={(e) => setInvoiceStatus(e.target.value)}
@@ -678,7 +678,7 @@ export function Receivables({
               </p>
               <div className="form-grid">
                 <Field label={tr("Settlement amount")}>
-                  <input
+                  <input data-field="amount"
                     data-help="receivables.settle"
                     type="number"
                     step="any"
@@ -690,7 +690,7 @@ export function Receivables({
                   />
                 </Field>
                 <Field label={tr("Payment method")}>
-                  <select
+                  <select data-field="method"
                     data-help="receivables.settle"
                     value={settleMethod}
                     onChange={(e) =>
@@ -705,7 +705,7 @@ export function Receivables({
                 </Field>
                 {settleMethod !== "Cash" && (
                   <Field label={tr("Transaction reference #")}>
-                    <input
+                    <input data-field="reference_no"
                       data-help="receivables.settle"
                       type="text"
                       value={settleRef}
@@ -785,7 +785,7 @@ export function Receivables({
               </p>
               <div className="form-grid">
                 <Field label={tr("Amount to write off")}>
-                  <input
+                  <input data-field="amount"
                     data-help="receivables.write_off"
                     type="number"
                     step="any"
@@ -797,7 +797,7 @@ export function Receivables({
                   />
                 </Field>
                 <Field label={tr("Reason for write-off (mandatory)")}>
-                  <textarea
+                  <textarea data-field="reason"
                     data-help="receivables.write_off"
                     value={writeOffReason}
                     onChange={(e) => setWriteOffReason(e.target.value)}
@@ -928,7 +928,7 @@ export function Receivables({
               </p>
               <div className="form-grid">
                 <Field label={tr("Amount to collect")}>
-                  <input
+                  <input data-field="amount"
                     data-help="receivables.payment"
                     type="number"
                     step="any"
@@ -940,7 +940,7 @@ export function Receivables({
                   />
                 </Field>
                 <Field label={tr("Payment method")}>
-                  <select
+                  <select data-field="method"
                     data-help="receivables.payment"
                     value={payMethod}
                     onChange={(e) => setPayMethod(e.target.value as "Cash" | "Card" | "BankTransfer")}
@@ -953,7 +953,7 @@ export function Receivables({
                 </Field>
                 {payMethod !== "Cash" && (
                   <Field label={tr("Reference number")}>
-                    <input
+                    <input data-field="reference_no"
                       data-help="receivables.payment"
                       type="text"
                       value={payRef}

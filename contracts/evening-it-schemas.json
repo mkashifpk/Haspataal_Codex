@@ -1,0 +1,4378 @@
+{
+  "screen_id": "it_console",
+  "contract_fingerprint": "5f8bd8feecd1d68f7841",
+  "knowledge_revision": "893766fb0e066973",
+  "delivery_gate": {
+    "required": true,
+    "status": "required",
+    "progress_reporting": {
+      "required": true,
+      "submit": "propose_progress",
+      "verify": "progress_proposals",
+      "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+    },
+    "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+    "compulsory": [
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+        "points": 2
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+        "points": 3
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+        "points": 2
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+        "points": 4
+      }
+    ],
+    "zoom": {
+      "min_pct": 100,
+      "max_pct": 250,
+      "reset_pct": 100,
+      "keys": [
+        "Ctrl + or Ctrl = (zoom in)",
+        "Ctrl - (zoom out)",
+        "Ctrl 0 (reset to 100 %)",
+        "Command on macOS"
+      ],
+      "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+    },
+    "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+    "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+  },
+  "schemas": {
+    "ActiveIn": {
+      "properties": {
+        "active": {
+          "type": "boolean",
+          "title": "Active"
+        },
+        "reason": {
+          "type": "string",
+          "maxLength": 300,
+          "minLength": 3,
+          "title": "Reason"
+        }
+      },
+      "type": "object",
+      "required": [
+        "active",
+        "reason"
+      ],
+      "title": "ActiveIn"
+    },
+    "AdminChangeRequestOut": {
+      "properties": {
+        "change_request_id": {
+          "type": "integer",
+          "title": "Change Request Id"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "Setting",
+            "UserRoles",
+            "RolePermissions"
+          ],
+          "title": "Kind"
+        },
+        "setting_key": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Setting Key"
+        },
+        "target_user_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Target User Id"
+        },
+        "target_role_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Target Role Code"
+        },
+        "requested_value": {
+          "title": "Requested Value"
+        },
+        "current_value": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Current Value"
+        },
+        "reason": {
+          "type": "string",
+          "title": "Reason"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "Pending",
+            "Applied",
+            "Rejected",
+            "Cancelled"
+          ],
+          "title": "Status"
+        },
+        "approval_request_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Approval Request Id"
+        },
+        "requested_by": {
+          "type": "integer",
+          "title": "Requested By"
+        },
+        "requested_by_name": {
+          "type": "string",
+          "title": "Requested By Name"
+        },
+        "requested_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Requested At"
+        },
+        "decided_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Decided At"
+        }
+      },
+      "type": "object",
+      "required": [
+        "change_request_id",
+        "kind",
+        "setting_key",
+        "target_user_id",
+        "target_role_code",
+        "requested_value",
+        "current_value",
+        "reason",
+        "status",
+        "approval_request_id",
+        "requested_by",
+        "requested_by_name",
+        "requested_at",
+        "decided_at"
+      ],
+      "title": "AdminChangeRequestOut"
+    },
+    "BadgeStationListItemOut": {
+      "properties": {
+        "station_id": {
+          "type": "string",
+          "title": "Station Id"
+        },
+        "label": {
+          "type": "string",
+          "title": "Label"
+        },
+        "device_type": {
+          "type": "string",
+          "enum": [
+            "RFIDReader",
+            "BarcodeScanner",
+            "BiometricTerminal"
+          ],
+          "title": "Device Type"
+        },
+        "location_type": {
+          "type": "string",
+          "enum": [
+            "Bed",
+            "Ward",
+            "Gate",
+            "OT",
+            "Pharmacy",
+            "Lab",
+            "StaffEntrance"
+          ],
+          "title": "Location Type"
+        },
+        "action_type": {
+          "type": "string",
+          "enum": [
+            "AttendancePunch",
+            "BedCleaned",
+            "SecurityPass",
+            "Generic"
+          ],
+          "title": "Action Type"
+        },
+        "ward_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ward Id"
+        },
+        "ward_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ward Name"
+        },
+        "bed_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Bed Id"
+        },
+        "bed_label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Bed Label"
+        },
+        "is_active": {
+          "type": "boolean",
+          "title": "Is Active"
+        },
+        "last_seen_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Last Seen At"
+        },
+        "has_key": {
+          "type": "boolean",
+          "title": "Has Key"
+        }
+      },
+      "type": "object",
+      "required": [
+        "station_id",
+        "label",
+        "device_type",
+        "location_type",
+        "action_type",
+        "ward_id",
+        "ward_name",
+        "bed_id",
+        "bed_label",
+        "is_active",
+        "last_seen_at",
+        "has_key"
+      ],
+      "title": "BadgeStationListItemOut"
+    },
+    "BadgeStationOut": {
+      "properties": {
+        "station_id": {
+          "type": "string",
+          "title": "Station Id"
+        },
+        "label": {
+          "type": "string",
+          "title": "Label"
+        },
+        "device_type": {
+          "type": "string",
+          "enum": [
+            "RFIDReader",
+            "BarcodeScanner",
+            "BiometricTerminal"
+          ],
+          "title": "Device Type"
+        },
+        "location_type": {
+          "type": "string",
+          "enum": [
+            "Bed",
+            "Ward",
+            "Gate",
+            "OT",
+            "Pharmacy",
+            "Lab",
+            "StaffEntrance"
+          ],
+          "title": "Location Type"
+        },
+        "action_type": {
+          "type": "string",
+          "enum": [
+            "AttendancePunch",
+            "BedCleaned",
+            "SecurityPass",
+            "Generic"
+          ],
+          "title": "Action Type"
+        },
+        "ward_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ward Id"
+        },
+        "bed_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Bed Id"
+        },
+        "is_active": {
+          "type": "boolean",
+          "title": "Is Active"
+        }
+      },
+      "type": "object",
+      "required": [
+        "station_id",
+        "label",
+        "device_type",
+        "location_type",
+        "action_type",
+        "ward_id",
+        "bed_id",
+        "is_active"
+      ],
+      "title": "BadgeStationOut"
+    },
+    "BedLabelOut": {
+      "properties": {
+        "bed_id": {
+          "type": "integer",
+          "title": "Bed Id"
+        },
+        "label": {
+          "type": "string",
+          "title": "Label"
+        },
+        "code": {
+          "type": "string",
+          "title": "Code",
+          "description": "What the sticker's QR code encodes"
+        },
+        "qr_svg": {
+          "type": "string",
+          "title": "Qr Svg"
+        }
+      },
+      "type": "object",
+      "required": [
+        "bed_id",
+        "label",
+        "code",
+        "qr_svg"
+      ],
+      "title": "BedLabelOut"
+    },
+    "BedLabelsOut": {
+      "properties": {
+        "document_type": {
+          "type": "string",
+          "enum": [
+            "autopsy_order",
+            "bed_labels",
+            "blood_component_label",
+            "blood_donation_labels",
+            "clinical_note",
+            "complaint_letter",
+            "complaints_notice",
+            "consent_form",
+            "cost_estimate",
+            "cssd_labels",
+            "death_certificate",
+            "discharge_summary",
+            "dispensing_label",
+            "dose_label",
+            "id_card",
+            "imaging_report",
+            "lab_label",
+            "lab_report",
+            "mlc_intimation",
+            "opd_slip",
+            "pharmacy_receipt",
+            "prescription",
+            "referral_slip",
+            "send_out_manifest",
+            "surgical_record",
+            "triage_algorithm",
+            "wristband"
+          ],
+          "title": "Document Type"
+        },
+        "printer_role": {
+          "type": "string",
+          "enum": [
+            "receipt",
+            "label",
+            "document",
+            "card"
+          ],
+          "title": "Printer Role"
+        },
+        "ward": {
+          "$ref": "#/components/schemas/LabelWardOut"
+        },
+        "labels": {
+          "items": {
+            "$ref": "#/components/schemas/BedLabelOut"
+          },
+          "type": "array",
+          "title": "Labels"
+        }
+      },
+      "type": "object",
+      "required": [
+        "document_type",
+        "printer_role",
+        "ward",
+        "labels"
+      ],
+      "title": "BedLabelsOut",
+      "description": "QR stickers for the beds of a ward (ward-level bed-cleaning stations)."
+    },
+    "BedOut": {
+      "properties": {
+        "bed_id": {
+          "type": "integer",
+          "title": "Bed Id"
+        },
+        "ward_id": {
+          "type": "integer",
+          "title": "Ward Id"
+        },
+        "label": {
+          "type": "string",
+          "title": "Label"
+        },
+        "current_state": {
+          "type": "string",
+          "enum": [
+            "Available",
+            "Reserved",
+            "Occupied",
+            "Dirty",
+            "Cleaning",
+            "OutOfService"
+          ],
+          "title": "Current State"
+        },
+        "state_changed_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "State Changed At"
+        },
+        "is_overflow_allowed": {
+          "type": "boolean",
+          "title": "Is Overflow Allowed"
+        },
+        "sort_order": {
+          "type": "integer",
+          "title": "Sort Order"
+        },
+        "is_active": {
+          "type": "boolean",
+          "title": "Is Active"
+        },
+        "row_version": {
+          "type": "integer",
+          "title": "Row Version"
+        }
+      },
+      "type": "object",
+      "required": [
+        "bed_id",
+        "ward_id",
+        "label",
+        "current_state",
+        "state_changed_at",
+        "is_overflow_allowed",
+        "sort_order",
+        "is_active",
+        "row_version"
+      ],
+      "title": "BedOut"
+    },
+    "BedsIn": {
+      "properties": {
+        "labels": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "maxItems": 200,
+          "minItems": 1,
+          "title": "Labels",
+          "examples": [
+            [
+              "B-1",
+              "B-2",
+              "B-3"
+            ]
+          ]
+        },
+        "is_overflow_allowed": {
+          "type": "boolean",
+          "title": "Is Overflow Allowed",
+          "default": false
+        }
+      },
+      "type": "object",
+      "required": [
+        "labels"
+      ],
+      "title": "BedsIn"
+    },
+    "Body_load_release_api_v1_icd_releases_post": {
+      "properties": {
+        "file": {
+          "type": "string",
+          "contentMediaType": "application/octet-stream",
+          "title": "File",
+          "description": "ClaML XML, WHO's ICD-11 simple tabulation (.zip / .txt), or a CSV / TSV with code and title columns"
+        },
+        "code_system": {
+          "type": "string",
+          "enum": [
+            "ICD-11",
+            "ICD-10"
+          ],
+          "title": "Code System"
+        },
+        "release_label": {
+          "type": "string",
+          "maxLength": 40,
+          "minLength": 2,
+          "title": "Release Label"
+        },
+        "language": {
+          "type": "string",
+          "pattern": "^[a-z]{2}$",
+          "title": "Language",
+          "default": "en"
+        },
+        "licence_note": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 1000
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Licence Note",
+          "description": "Required for ICD-10: the WHO licence the hospital holds"
+        },
+        "activate": {
+          "type": "boolean",
+          "title": "Activate",
+          "default": true
+        }
+      },
+      "type": "object",
+      "required": [
+        "file",
+        "code_system",
+        "release_label"
+      ],
+      "title": "Body_load_release_api_v1_icd_releases_post"
+    },
+    "ChangeRequestIn": {
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "Setting",
+            "UserRoles",
+            "RolePermissions"
+          ],
+          "title": "Kind"
+        },
+        "setting_key": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Setting Key"
+        },
+        "target_user_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Target User Id"
+        },
+        "target_role_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Target Role Code"
+        },
+        "requested_value": {
+          "title": "Requested Value",
+          "description": "Setting: the new value; UserRoles: role codes; RolePermissions: permission codes"
+        },
+        "reason": {
+          "type": "string",
+          "maxLength": 500,
+          "minLength": 3,
+          "title": "Reason"
+        }
+      },
+      "type": "object",
+      "required": [
+        "kind",
+        "requested_value",
+        "reason"
+      ],
+      "title": "ChangeRequestIn"
+    },
+    "DatabaseHealthOut": {
+      "properties": {
+        "db_bytes": {
+          "type": "integer",
+          "title": "Db Bytes"
+        },
+        "version": {
+          "type": "string",
+          "title": "Version"
+        },
+        "connections": {
+          "type": "integer",
+          "title": "Connections"
+        },
+        "max_connections": {
+          "type": "integer",
+          "title": "Max Connections"
+        },
+        "db_mb": {
+          "type": "number",
+          "title": "Db Mb"
+        },
+        "pool": {
+          "$ref": "#/components/schemas/PoolStatsOut"
+        }
+      },
+      "type": "object",
+      "required": [
+        "db_bytes",
+        "version",
+        "connections",
+        "max_connections",
+        "db_mb",
+        "pool"
+      ],
+      "title": "DatabaseHealthOut"
+    },
+    "DepartmentIn": {
+      "properties": {
+        "code": {
+          "type": "string",
+          "maxLength": 20,
+          "minLength": 2,
+          "title": "Code"
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 100,
+          "minLength": 2,
+          "title": "Name"
+        },
+        "is_clinical": {
+          "type": "boolean",
+          "title": "Is Clinical",
+          "default": false
+        },
+        "is_active": {
+          "type": "boolean",
+          "title": "Is Active",
+          "default": true
+        }
+      },
+      "type": "object",
+      "required": [
+        "code",
+        "name"
+      ],
+      "title": "DepartmentIn"
+    },
+    "DepartmentOut": {
+      "properties": {
+        "department_id": {
+          "type": "integer",
+          "title": "Department Id"
+        },
+        "code": {
+          "type": "string",
+          "title": "Code"
+        },
+        "name": {
+          "type": "string",
+          "title": "Name"
+        },
+        "is_clinical": {
+          "type": "boolean",
+          "title": "Is Clinical"
+        },
+        "is_active": {
+          "type": "boolean",
+          "title": "Is Active"
+        },
+        "row_version": {
+          "type": "integer",
+          "title": "Row Version"
+        }
+      },
+      "type": "object",
+      "required": [
+        "department_id",
+        "code",
+        "name",
+        "is_clinical",
+        "is_active",
+        "row_version"
+      ],
+      "title": "DepartmentOut"
+    },
+    "DiskUsageOut": {
+      "properties": {
+        "path": {
+          "type": "string",
+          "title": "Path"
+        },
+        "total_gb": {
+          "type": "number",
+          "title": "Total Gb"
+        },
+        "free_gb": {
+          "type": "number",
+          "title": "Free Gb"
+        },
+        "used_pct": {
+          "type": "number",
+          "title": "Used Pct"
+        }
+      },
+      "type": "object",
+      "required": [
+        "path",
+        "total_gb",
+        "free_gb",
+        "used_pct"
+      ],
+      "title": "DiskUsageOut"
+    },
+    "Envelope_AdminChangeRequestOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/AdminChangeRequestOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[AdminChangeRequestOut]"
+    },
+    "Envelope_BadgeStationOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/BadgeStationOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[BadgeStationOut]"
+    },
+    "Envelope_BedLabelsOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/BedLabelsOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[BedLabelsOut]"
+    },
+    "Envelope_DepartmentOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/DepartmentOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[DepartmentOut]"
+    },
+    "Envelope_FirstOwnerOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/FirstOwnerOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[FirstOwnerOut]"
+    },
+    "Envelope_FirstOwnerStatusOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/FirstOwnerStatusOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[FirstOwnerStatusOut]"
+    },
+    "Envelope_IcdReleaseLoadedOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/IcdReleaseLoadedOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[IcdReleaseLoadedOut]"
+    },
+    "Envelope_IcdReleasesOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/IcdReleasesOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[IcdReleasesOut]"
+    },
+    "Envelope_KillSwitchOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/KillSwitchOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[KillSwitchOut]"
+    },
+    "Envelope_PasswordResetOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/PasswordResetOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[PasswordResetOut]"
+    },
+    "Envelope_PrinterOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/PrinterOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[PrinterOut]"
+    },
+    "Envelope_ProvisionedUserOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/ProvisionedUserOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[ProvisionedUserOut]"
+    },
+    "Envelope_RoleMatrixOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/RoleMatrixOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[RoleMatrixOut]"
+    },
+    "Envelope_ServerHealthOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/ServerHealthOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[ServerHealthOut]"
+    },
+    "Envelope_SessionsRevokedOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/SessionsRevokedOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[SessionsRevokedOut]"
+    },
+    "Envelope_SettingRowOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/SettingRowOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[SettingRowOut]"
+    },
+    "Envelope_StationKeyOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/StationKeyOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[StationKeyOut]"
+    },
+    "Envelope_TerminalOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/TerminalOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[TerminalOut]"
+    },
+    "Envelope_TheaterOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/TheaterOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[TheaterOut]"
+    },
+    "Envelope_UserDetailOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/UserDetailOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[UserDetailOut]"
+    },
+    "Envelope_WardOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/WardOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[WardOut]"
+    },
+    "Envelope_list_AdminChangeRequestOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/AdminChangeRequestOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[AdminChangeRequestOut]]"
+    },
+    "Envelope_list_BadgeStationListItemOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/BadgeStationListItemOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[BadgeStationListItemOut]]"
+    },
+    "Envelope_list_BedOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/BedOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[BedOut]]"
+    },
+    "Envelope_list_DepartmentOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/DepartmentOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[DepartmentOut]]"
+    },
+    "Envelope_list_LoginEventOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/LoginEventOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[LoginEventOut]]"
+    },
+    "Envelope_list_PermissionOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/PermissionOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[PermissionOut]]"
+    },
+    "Envelope_list_PrinterOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/PrinterOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[PrinterOut]]"
+    },
+    "Envelope_list_ProvisioningQueueItemOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/ProvisioningQueueItemOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[ProvisioningQueueItemOut]]"
+    },
+    "Envelope_list_RoleOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/RoleOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[RoleOut]]"
+    },
+    "Envelope_list_SettingOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/SettingOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[SettingOut]]"
+    },
+    "Envelope_list_TerminalListItemOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/TerminalListItemOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[TerminalListItemOut]]"
+    },
+    "Envelope_list_UserListItemOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/UserListItemOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[UserListItemOut]]"
+    },
+    "Envelope_list_WardListItemOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/WardListItemOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[WardListItemOut]]"
+    },
+    "Envelope_list_str__": {
+      "properties": {
+        "data": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[str]]"
+    },
+    "FirstOwnerIn": {
+      "properties": {
+        "full_name": {
+          "type": "string",
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Full Name",
+          "examples": [
+            "Dr. Ayesha Malik"
+          ]
+        },
+        "cnic": {
+          "type": "string",
+          "pattern": "^[0-9]{5}-?[0-9]{7}-?[0-9]$",
+          "title": "Cnic",
+          "description": "Required of every member of staff (§6.1)",
+          "examples": [
+            "35202-1234567-1"
+          ]
+        },
+        "mobile": {
+          "type": "string",
+          "pattern": "^\\+?[0-9][0-9 -]{6,19}$",
+          "title": "Mobile",
+          "examples": [
+            "0300-1234567"
+          ]
+        },
+        "gender": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "male",
+                "female",
+                "other"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Gender"
+        },
+        "dob": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Dob"
+        },
+        "email": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 200
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Email"
+        },
+        "designation": {
+          "type": "string",
+          "maxLength": 100,
+          "minLength": 1,
+          "title": "Designation",
+          "default": "Owner"
+        },
+        "username": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-z0-9._-]{3,64}$"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Username",
+          "description": "Suggested from the name if omitted"
+        },
+        "roles": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "maxItems": 10,
+          "title": "Roles",
+          "description": "Roles besides owner (always given), e.g. ['hr_admin'] or, in a small clinic, ['hr_admin', 'doctor']; never super_admin or phc_inspector"
+        }
+      },
+      "type": "object",
+      "required": [
+        "full_name",
+        "cnic",
+        "mobile"
+      ],
+      "title": "FirstOwnerIn"
+    },
+    "FirstOwnerOut": {
+      "properties": {
+        "user_id": {
+          "type": "integer",
+          "title": "User Id"
+        },
+        "username": {
+          "type": "string",
+          "title": "Username"
+        },
+        "display_name": {
+          "type": "string",
+          "title": "Display Name"
+        },
+        "roles": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Roles"
+        },
+        "temporary_password": {
+          "type": "string",
+          "title": "Temporary Password",
+          "description": "Shown ONCE (print the slip); must be changed at the first login"
+        },
+        "must_change_password": {
+          "type": "boolean",
+          "title": "Must Change Password"
+        },
+        "employee_id": {
+          "type": "integer",
+          "title": "Employee Id"
+        },
+        "emp_number": {
+          "type": "string",
+          "title": "Emp Number"
+        }
+      },
+      "type": "object",
+      "required": [
+        "user_id",
+        "username",
+        "display_name",
+        "roles",
+        "temporary_password",
+        "must_change_password",
+        "employee_id",
+        "emp_number"
+      ],
+      "title": "FirstOwnerOut",
+      "description": "The first Owner's login (as POST /admin/users answers) and their new staff record."
+    },
+    "FirstOwnerStatusOut": {
+      "properties": {
+        "needed": {
+          "type": "boolean",
+          "title": "Needed",
+          "description": "True on a new installation until the first Owner exists (offered once)"
+        },
+        "explanation": {
+          "type": "string",
+          "title": "Explanation"
+        }
+      },
+      "type": "object",
+      "required": [
+        "needed",
+        "explanation"
+      ],
+      "title": "FirstOwnerStatusOut"
+    },
+    "HTTPValidationError": {
+      "properties": {
+        "detail": {
+          "items": {
+            "$ref": "#/components/schemas/ValidationError"
+          },
+          "type": "array",
+          "title": "Detail"
+        }
+      },
+      "type": "object",
+      "title": "HTTPValidationError"
+    },
+    "IcdReleaseLoadedOut": {
+      "properties": {
+        "coding_system": {
+          "type": "string",
+          "enum": [
+            "ICD-11",
+            "ICD-10"
+          ],
+          "title": "Coding System",
+          "description": "The classification doctors code in (setting icd_coding_system)"
+        },
+        "releases": {
+          "items": {
+            "$ref": "#/components/schemas/IcdReleaseOut"
+          },
+          "type": "array",
+          "title": "Releases"
+        },
+        "icd11_citation": {
+          "type": "string",
+          "title": "Icd11 Citation",
+          "description": "The attribution the ICD-11 licence requires on screens and reports that use it"
+        },
+        "loaded": {
+          "$ref": "#/components/schemas/IcdReleaseOut"
+        }
+      },
+      "type": "object",
+      "required": [
+        "coding_system",
+        "releases",
+        "icd11_citation",
+        "loaded"
+      ],
+      "title": "IcdReleaseLoadedOut"
+    },
+    "IcdReleaseOut": {
+      "properties": {
+        "release_id": {
+          "type": "integer",
+          "title": "Release Id"
+        },
+        "code_system": {
+          "type": "string",
+          "enum": [
+            "ICD-11",
+            "ICD-10"
+          ],
+          "title": "Code System"
+        },
+        "release_label": {
+          "type": "string",
+          "title": "Release Label",
+          "description": "e.g. \"2026-01\" (ICD-11) or \"2019\" (ICD-10)"
+        },
+        "language": {
+          "type": "string",
+          "title": "Language"
+        },
+        "source": {
+          "type": "string",
+          "enum": [
+            "Bundled",
+            "Imported"
+          ],
+          "title": "Source",
+          "description": "Bundled: shipped with the product (ICD-11); Imported: loaded by the hospital (its licensed ICD-10, or a newer ICD-11)"
+        },
+        "source_file": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Source File"
+        },
+        "source_sha256": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Source Sha256"
+        },
+        "licence_note": {
+          "type": "string",
+          "title": "Licence Note",
+          "description": "The licence the list is used under; show it where the list is used"
+        },
+        "code_count": {
+          "type": "integer",
+          "title": "Code Count",
+          "description": "Codable categories"
+        },
+        "is_active": {
+          "type": "boolean",
+          "title": "Is Active",
+          "description": "The list the picker searches and new codes are checked against"
+        },
+        "loaded_by": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Loaded By"
+        },
+        "loaded_by_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Loaded By Name"
+        },
+        "loaded_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Loaded At"
+        },
+        "row_version": {
+          "type": "integer",
+          "title": "Row Version"
+        }
+      },
+      "type": "object",
+      "required": [
+        "release_id",
+        "code_system",
+        "release_label",
+        "language",
+        "source",
+        "source_file",
+        "source_sha256",
+        "licence_note",
+        "code_count",
+        "is_active",
+        "loaded_by",
+        "loaded_by_name",
+        "loaded_at",
+        "row_version"
+      ],
+      "title": "IcdReleaseOut"
+    },
+    "IcdReleasesOut": {
+      "properties": {
+        "coding_system": {
+          "type": "string",
+          "enum": [
+            "ICD-11",
+            "ICD-10"
+          ],
+          "title": "Coding System",
+          "description": "The classification doctors code in (setting icd_coding_system)"
+        },
+        "releases": {
+          "items": {
+            "$ref": "#/components/schemas/IcdReleaseOut"
+          },
+          "type": "array",
+          "title": "Releases"
+        },
+        "icd11_citation": {
+          "type": "string",
+          "title": "Icd11 Citation",
+          "description": "The attribution the ICD-11 licence requires on screens and reports that use it"
+        }
+      },
+      "type": "object",
+      "required": [
+        "coding_system",
+        "releases",
+        "icd11_citation"
+      ],
+      "title": "IcdReleasesOut"
+    },
+    "JobStateOut": {
+      "properties": {
+        "job_type": {
+          "type": "string",
+          "title": "Job Type"
+        },
+        "last_finished_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Last Finished At"
+        },
+        "last_status": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Last Status"
+        },
+        "last_error": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Last Error"
+        }
+      },
+      "type": "object",
+      "required": [
+        "job_type",
+        "last_finished_at",
+        "last_status",
+        "last_error"
+      ],
+      "title": "JobStateOut"
+    },
+    "KillSwitchIn": {
+      "properties": {
+        "reason": {
+          "type": "string",
+          "maxLength": 500,
+          "minLength": 5,
+          "title": "Reason"
+        },
+        "confirm": {
+          "type": "string",
+          "const": "FORCE GLOBAL LOGOUT",
+          "title": "Confirm",
+          "description": "Type exactly \"FORCE GLOBAL LOGOUT\" (dangerous, emergency only)"
+        }
+      },
+      "type": "object",
+      "required": [
+        "reason",
+        "confirm"
+      ],
+      "title": "KillSwitchIn"
+    },
+    "KillSwitchOut": {
+      "properties": {
+        "new_epoch": {
+          "type": "integer",
+          "title": "New Epoch"
+        },
+        "effective_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Effective At"
+        }
+      },
+      "type": "object",
+      "required": [
+        "new_epoch",
+        "effective_at"
+      ],
+      "title": "KillSwitchOut"
+    },
+    "LabelWardOut": {
+      "properties": {
+        "ward_id": {
+          "type": "integer",
+          "title": "Ward Id"
+        },
+        "code": {
+          "type": "string",
+          "title": "Code"
+        },
+        "name": {
+          "type": "string",
+          "title": "Name"
+        }
+      },
+      "type": "object",
+      "required": [
+        "ward_id",
+        "code",
+        "name"
+      ],
+      "title": "LabelWardOut"
+    },
+    "LoginEventOut": {
+      "properties": {
+        "event_id": {
+          "type": "integer",
+          "title": "Event Id"
+        },
+        "user_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "User Id"
+        },
+        "username": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Username"
+        },
+        "ip": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ip"
+        },
+        "user_agent": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "User Agent"
+        },
+        "is_success": {
+          "type": "boolean",
+          "title": "Is Success"
+        },
+        "failure_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Failure Reason"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "At"
+        }
+      },
+      "type": "object",
+      "required": [
+        "event_id",
+        "user_id",
+        "username",
+        "ip",
+        "user_agent",
+        "is_success",
+        "failure_reason",
+        "at"
+      ],
+      "title": "LoginEventOut"
+    },
+    "MaintenanceIn": {
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "title": "Enabled"
+        },
+        "message": {
+          "type": "string",
+          "maxLength": 300,
+          "title": "Message",
+          "default": ""
+        }
+      },
+      "type": "object",
+      "required": [
+        "enabled"
+      ],
+      "title": "MaintenanceIn"
+    },
+    "MatrixRoleOut": {
+      "properties": {
+        "role_id": {
+          "type": "integer",
+          "title": "Role Id"
+        },
+        "code": {
+          "type": "string",
+          "title": "Code"
+        },
+        "name": {
+          "type": "string",
+          "title": "Name"
+        },
+        "workspace": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Workspace"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Description"
+        }
+      },
+      "type": "object",
+      "required": [
+        "role_id",
+        "code",
+        "name",
+        "workspace",
+        "description"
+      ],
+      "title": "MatrixRoleOut"
+    },
+    "Meta": {
+      "properties": {
+        "server_time": {
+          "type": "string",
+          "title": "Server Time",
+          "description": "Server clock (UTC). Use it to detect terminal clock skew."
+        },
+        "page": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Page"
+        },
+        "page_size": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Page Size"
+        },
+        "total_count": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Total Count"
+        },
+        "next_cursor": {
+          "title": "Next Cursor"
+        }
+      },
+      "type": "object",
+      "required": [
+        "server_time"
+      ],
+      "title": "Meta"
+    },
+    "PasswordResetOut": {
+      "properties": {
+        "user_id": {
+          "type": "integer",
+          "title": "User Id"
+        },
+        "temporary_password": {
+          "type": "string",
+          "title": "Temporary Password",
+          "description": "Shown ONCE; every session of the user has ended"
+        },
+        "must_change_password": {
+          "type": "boolean",
+          "title": "Must Change Password"
+        }
+      },
+      "type": "object",
+      "required": [
+        "user_id",
+        "temporary_password",
+        "must_change_password"
+      ],
+      "title": "PasswordResetOut"
+    },
+    "PermissionOut": {
+      "properties": {
+        "code": {
+          "type": "string",
+          "title": "Code",
+          "description": "domain.resource.action"
+        },
+        "module": {
+          "type": "string",
+          "title": "Module"
+        },
+        "description": {
+          "type": "string",
+          "title": "Description"
+        },
+        "is_sensitive": {
+          "type": "boolean",
+          "title": "Is Sensitive"
+        }
+      },
+      "type": "object",
+      "required": [
+        "code",
+        "module",
+        "description",
+        "is_sensitive"
+      ],
+      "title": "PermissionOut"
+    },
+    "PermissionsIn": {
+      "properties": {
+        "permission_codes": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Permission Codes"
+        }
+      },
+      "type": "object",
+      "required": [
+        "permission_codes"
+      ],
+      "title": "PermissionsIn"
+    },
+    "PoolStatsOut": {
+      "properties": {
+        "size": {
+          "type": "integer",
+          "title": "Size"
+        },
+        "idle": {
+          "type": "integer",
+          "title": "Idle"
+        },
+        "max": {
+          "type": "integer",
+          "title": "Max"
+        }
+      },
+      "type": "object",
+      "required": [
+        "size",
+        "idle",
+        "max"
+      ],
+      "title": "PoolStatsOut"
+    },
+    "PrinterIn": {
+      "properties": {
+        "name": {
+          "type": "string",
+          "maxLength": 100,
+          "minLength": 2,
+          "title": "Name",
+          "examples": [
+            "Lab Requisition Printer B"
+          ]
+        },
+        "printer_type": {
+          "type": "string",
+          "enum": [
+            "ThermalReceipt",
+            "BarcodeLabel",
+            "PVCCard",
+            "Laser",
+            "Other"
+          ],
+          "title": "Printer Type"
+        },
+        "connection": {
+          "type": "string",
+          "enum": [
+            "USB",
+            "Network",
+            "Shared",
+            "Bluetooth",
+            "Other"
+          ],
+          "title": "Connection"
+        },
+        "address": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Address",
+          "description": "OS printer name, \\\\PC\\Printer or 192.168.1.40:9100"
+        },
+        "paper_width_mm": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "maximum": 400,
+              "minimum": 30
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Paper Width Mm"
+        },
+        "driver": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Driver"
+        },
+        "is_active": {
+          "type": "boolean",
+          "title": "Is Active",
+          "default": true
+        }
+      },
+      "type": "object",
+      "required": [
+        "name",
+        "printer_type",
+        "connection"
+      ],
+      "title": "PrinterIn"
+    },
+    "PrinterOut": {
+      "properties": {
+        "printer_id": {
+          "type": "integer",
+          "title": "Printer Id"
+        },
+        "name": {
+          "type": "string",
+          "title": "Name"
+        },
+        "printer_type": {
+          "type": "string",
+          "enum": [
+            "ThermalReceipt",
+            "BarcodeLabel",
+            "PVCCard",
+            "Laser",
+            "Other"
+          ],
+          "title": "Printer Type"
+        },
+        "connection": {
+          "type": "string",
+          "enum": [
+            "USB",
+            "Network",
+            "Shared",
+            "Bluetooth",
+            "Other"
+          ],
+          "title": "Connection"
+        },
+        "address": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Address"
+        },
+        "paper_width_mm": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Paper Width Mm"
+        },
+        "driver": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Driver"
+        },
+        "is_active": {
+          "type": "boolean",
+          "title": "Is Active"
+        },
+        "row_version": {
+          "type": "integer",
+          "title": "Row Version"
+        }
+      },
+      "type": "object",
+      "required": [
+        "printer_id",
+        "name",
+        "printer_type",
+        "connection",
+        "address",
+        "paper_width_mm",
+        "driver",
+        "is_active",
+        "row_version"
+      ],
+      "title": "PrinterOut"
+    },
+    "ProvisionIn": {
+      "properties": {
+        "employee_id": {
+          "type": "integer",
+          "title": "Employee Id"
+        },
+        "username": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-z0-9._-]{3,64}$"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Username",
+          "description": "Suggested from the name if omitted"
+        },
+        "role_codes": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "minItems": 1,
+          "title": "Role Codes",
+          "description": "Multi-select checklist, e.g. ['clinical_specialist','hospital_admin']"
+        }
+      },
+      "type": "object",
+      "required": [
+        "employee_id",
+        "role_codes"
+      ],
+      "title": "ProvisionIn"
+    },
+    "ProvisionedUserOut": {
+      "properties": {
+        "user_id": {
+          "type": "integer",
+          "title": "User Id"
+        },
+        "username": {
+          "type": "string",
+          "title": "Username"
+        },
+        "display_name": {
+          "type": "string",
+          "title": "Display Name"
+        },
+        "roles": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Roles"
+        },
+        "temporary_password": {
+          "type": "string",
+          "title": "Temporary Password",
+          "description": "Shown ONCE (print the slip); must be changed at the first login"
+        },
+        "must_change_password": {
+          "type": "boolean",
+          "title": "Must Change Password"
+        }
+      },
+      "type": "object",
+      "required": [
+        "user_id",
+        "username",
+        "display_name",
+        "roles",
+        "temporary_password",
+        "must_change_password"
+      ],
+      "title": "ProvisionedUserOut"
+    },
+    "ProvisioningQueueItemOut": {
+      "properties": {
+        "employee_id": {
+          "type": "integer",
+          "title": "Employee Id"
+        },
+        "emp_number": {
+          "type": "string",
+          "title": "Emp Number"
+        },
+        "full_name": {
+          "type": "string",
+          "title": "Full Name"
+        },
+        "designation": {
+          "type": "string",
+          "title": "Designation"
+        },
+        "department_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Department Name"
+        },
+        "staff_category": {
+          "type": "string",
+          "enum": [
+            "Clinical",
+            "Nursing",
+            "Administrative",
+            "Technical",
+            "SupportZeroInterface",
+            "Visiting"
+          ],
+          "title": "Staff Category"
+        },
+        "is_clinical_staff": {
+          "type": "boolean",
+          "title": "Is Clinical Staff"
+        },
+        "contract_type": {
+          "type": "string",
+          "enum": [
+            "Permanent",
+            "Contract",
+            "Visiting"
+          ],
+          "title": "Contract Type"
+        },
+        "submitted_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Submitted At"
+        }
+      },
+      "type": "object",
+      "required": [
+        "employee_id",
+        "emp_number",
+        "full_name",
+        "designation",
+        "department_name",
+        "staff_category",
+        "is_clinical_staff",
+        "contract_type",
+        "submitted_at"
+      ],
+      "title": "ProvisioningQueueItemOut",
+      "description": "An employee HR submitted who still has no login."
+    },
+    "RealtimeStatsOut": {
+      "properties": {
+        "connections": {
+          "type": "integer",
+          "title": "Connections"
+        },
+        "listener_connected": {
+          "type": "boolean",
+          "title": "Listener Connected"
+        },
+        "last_event_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Last Event Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "connections",
+        "listener_connected",
+        "last_event_id"
+      ],
+      "title": "RealtimeStatsOut"
+    },
+    "RoleMatrixOut": {
+      "properties": {
+        "roles": {
+          "items": {
+            "$ref": "#/components/schemas/MatrixRoleOut"
+          },
+          "type": "array",
+          "title": "Roles"
+        },
+        "permissions": {
+          "items": {
+            "$ref": "#/components/schemas/PermissionOut"
+          },
+          "type": "array",
+          "title": "Permissions"
+        },
+        "matrix": {
+          "additionalProperties": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "type": "object",
+          "title": "Matrix",
+          "description": "Role code -> the permission codes it grants"
+        }
+      },
+      "type": "object",
+      "required": [
+        "roles",
+        "permissions",
+        "matrix"
+      ],
+      "title": "RoleMatrixOut"
+    },
+    "RoleOut": {
+      "properties": {
+        "code": {
+          "type": "string",
+          "title": "Code"
+        },
+        "name": {
+          "type": "string",
+          "title": "Name"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Description"
+        },
+        "workspace": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Workspace",
+          "description": "The workspace this role opens by default"
+        },
+        "permissions": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Permissions"
+        }
+      },
+      "type": "object",
+      "required": [
+        "code",
+        "name",
+        "description",
+        "workspace",
+        "permissions"
+      ],
+      "title": "RoleOut"
+    },
+    "RolesIn": {
+      "properties": {
+        "role_codes": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "minItems": 1,
+          "title": "Role Codes"
+        }
+      },
+      "type": "object",
+      "required": [
+        "role_codes"
+      ],
+      "title": "RolesIn"
+    },
+    "ServerHealthOut": {
+      "properties": {
+        "version": {
+          "type": "string",
+          "title": "Version"
+        },
+        "uptime_seconds": {
+          "type": "integer",
+          "title": "Uptime Seconds"
+        },
+        "cpu_pct": {
+          "type": "number",
+          "title": "Cpu Pct"
+        },
+        "ram_pct": {
+          "type": "number",
+          "title": "Ram Pct"
+        },
+        "ram_total_gb": {
+          "type": "number",
+          "title": "Ram Total Gb"
+        },
+        "disk": {
+          "anyOf": [
+            {
+              "$ref": "#/components/schemas/DiskUsageOut"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "db": {
+          "$ref": "#/components/schemas/DatabaseHealthOut"
+        },
+        "realtime": {
+          "anyOf": [
+            {
+              "$ref": "#/components/schemas/RealtimeStatsOut"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "workers": {
+          "items": {
+            "$ref": "#/components/schemas/WorkerHeartbeatOut"
+          },
+          "type": "array",
+          "title": "Workers"
+        },
+        "jobs": {
+          "items": {
+            "$ref": "#/components/schemas/JobStateOut"
+          },
+          "type": "array",
+          "title": "Jobs"
+        },
+        "last_backup": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Last Backup",
+          "description": "The backup status file as written by `hms backup`"
+        },
+        "maintenance_mode": {
+          "type": "boolean",
+          "title": "Maintenance Mode"
+        }
+      },
+      "type": "object",
+      "required": [
+        "version",
+        "uptime_seconds",
+        "cpu_pct",
+        "ram_pct",
+        "ram_total_gb",
+        "disk",
+        "db",
+        "realtime",
+        "workers",
+        "jobs",
+        "last_backup",
+        "maintenance_mode"
+      ],
+      "title": "ServerHealthOut",
+      "description": "Read-only server health (workflow section 9.4)."
+    },
+    "SessionsRevokedOut": {
+      "properties": {
+        "user_id": {
+          "type": "integer",
+          "title": "User Id"
+        },
+        "revoked": {
+          "type": "boolean",
+          "title": "Revoked"
+        }
+      },
+      "type": "object",
+      "required": [
+        "user_id",
+        "revoked"
+      ],
+      "title": "SessionsRevokedOut"
+    },
+    "SettingIn": {
+      "properties": {
+        "value": {
+          "title": "Value",
+          "description": "JSON value of the same type as the current one"
+        }
+      },
+      "type": "object",
+      "required": [
+        "value"
+      ],
+      "title": "SettingIn"
+    },
+    "SettingOut": {
+      "properties": {
+        "key": {
+          "type": "string",
+          "title": "Key"
+        },
+        "value": {
+          "title": "Value",
+          "description": "The setting's JSON value (number, boolean, text, list ...)"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Description"
+        },
+        "is_control": {
+          "type": "boolean",
+          "title": "Is Control",
+          "description": "A control setting: an Owner changes it or approves the change"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Updated At"
+        }
+      },
+      "type": "object",
+      "required": [
+        "key",
+        "value",
+        "description",
+        "is_control",
+        "updated_at"
+      ],
+      "title": "SettingOut"
+    },
+    "SettingRowOut": {
+      "properties": {
+        "key": {
+          "type": "string",
+          "title": "Key"
+        },
+        "value_jsonb": {
+          "title": "Value Jsonb",
+          "description": "The new JSON value"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Description"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Updated At"
+        },
+        "row_version": {
+          "type": "integer",
+          "title": "Row Version"
+        }
+      },
+      "type": "object",
+      "required": [
+        "key",
+        "value_jsonb",
+        "description",
+        "updated_at",
+        "row_version"
+      ],
+      "title": "SettingRowOut"
+    },
+    "StationIn": {
+      "properties": {
+        "station_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{2,64}$",
+          "title": "Station Id",
+          "examples": [
+            "WARD3-KIOSK",
+            "GATE-STAFF"
+          ]
+        },
+        "label": {
+          "type": "string",
+          "maxLength": 100,
+          "minLength": 2,
+          "title": "Label"
+        },
+        "device_type": {
+          "type": "string",
+          "enum": [
+            "RFIDReader",
+            "BarcodeScanner",
+            "BiometricTerminal"
+          ],
+          "title": "Device Type",
+          "description": "The hardware; the API is the same for all (BarcodeScanner = kiosk PC/tablet reading printed QR badges)",
+          "default": "RFIDReader"
+        },
+        "location_type": {
+          "type": "string",
+          "enum": [
+            "Bed",
+            "Ward",
+            "Gate",
+            "OT",
+            "Pharmacy",
+            "Lab",
+            "StaffEntrance"
+          ],
+          "title": "Location Type"
+        },
+        "action_type": {
+          "type": "string",
+          "enum": [
+            "AttendancePunch",
+            "BedCleaned",
+            "SecurityPass",
+            "Generic"
+          ],
+          "title": "Action Type"
+        },
+        "ward_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ward Id",
+          "description": "BedCleaned without bed_id: the ward whose bed QR stickers this kiosk scans"
+        },
+        "bed_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Bed Id",
+          "description": "BedCleaned: the bed this station hangs at (or leave empty for a ward kiosk)"
+        },
+        "is_active": {
+          "type": "boolean",
+          "title": "Is Active",
+          "default": true
+        }
+      },
+      "type": "object",
+      "required": [
+        "station_id",
+        "label",
+        "location_type",
+        "action_type"
+      ],
+      "title": "StationIn"
+    },
+    "StationKeyOut": {
+      "properties": {
+        "station_id": {
+          "type": "string",
+          "title": "Station Id"
+        },
+        "label": {
+          "type": "string",
+          "title": "Label"
+        },
+        "api_key": {
+          "type": "string",
+          "title": "Api Key",
+          "description": "Shown ONCE: configure it on the station"
+        },
+        "header": {
+          "type": "string",
+          "title": "Header",
+          "description": "The request header the station sends it in"
+        }
+      },
+      "type": "object",
+      "required": [
+        "station_id",
+        "label",
+        "api_key",
+        "header"
+      ],
+      "title": "StationKeyOut"
+    },
+    "TerminalIn": {
+      "properties": {
+        "mac": {
+          "type": "string",
+          "pattern": "^([0-9A-Fa-f]{2}[:-]){5}[0-9A-Fa-f]{2}$",
+          "title": "Mac",
+          "examples": [
+            "3C:52:82:1A:2B:3C"
+          ]
+        },
+        "ip": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ip",
+          "examples": [
+            "192.168.1.15"
+          ]
+        },
+        "hostname": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Hostname"
+        },
+        "location_label": {
+          "type": "string",
+          "maxLength": 100,
+          "minLength": 2,
+          "title": "Location Label",
+          "examples": [
+            "Lab Reception PC 2"
+          ]
+        },
+        "department_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Department Id"
+        },
+        "receipt_printer_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Receipt Printer Id"
+        },
+        "label_printer_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Label Printer Id"
+        },
+        "document_printer_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Document Printer Id"
+        },
+        "card_printer_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Card Printer Id"
+        },
+        "cash_node": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "MainReception",
+                "PharmacyCounter",
+                "LabReception",
+                "IPDBilling",
+                "EmergencyCounter",
+                "CashierDesk"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cash Node"
+        },
+        "is_active": {
+          "type": "boolean",
+          "title": "Is Active",
+          "default": true
+        }
+      },
+      "type": "object",
+      "required": [
+        "mac",
+        "location_label"
+      ],
+      "title": "TerminalIn"
+    },
+    "TerminalListItemOut": {
+      "properties": {
+        "terminal_id": {
+          "type": "integer",
+          "title": "Terminal Id"
+        },
+        "mac": {
+          "type": "string",
+          "title": "Mac"
+        },
+        "ip": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ip"
+        },
+        "hostname": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Hostname"
+        },
+        "location_label": {
+          "type": "string",
+          "title": "Location Label"
+        },
+        "department_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Department Id"
+        },
+        "receipt_printer_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Receipt Printer Id"
+        },
+        "label_printer_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Label Printer Id"
+        },
+        "document_printer_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Document Printer Id"
+        },
+        "card_printer_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Card Printer Id"
+        },
+        "cash_node": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "MainReception",
+                "PharmacyCounter",
+                "LabReception",
+                "IPDBilling",
+                "EmergencyCounter",
+                "CashierDesk"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cash Node"
+        },
+        "is_active": {
+          "type": "boolean",
+          "title": "Is Active"
+        },
+        "last_seen_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Last Seen At"
+        },
+        "row_version": {
+          "type": "integer",
+          "title": "Row Version"
+        },
+        "department_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Department Name"
+        },
+        "receipt_printer": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Receipt Printer"
+        },
+        "label_printer": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Label Printer"
+        },
+        "document_printer": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Document Printer"
+        },
+        "card_printer": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Card Printer"
+        }
+      },
+      "type": "object",
+      "required": [
+        "terminal_id",
+        "mac",
+        "ip",
+        "hostname",
+        "location_label",
+        "department_id",
+        "receipt_printer_id",
+        "label_printer_id",
+        "document_printer_id",
+        "card_printer_id",
+        "cash_node",
+        "is_active",
+        "last_seen_at",
+        "row_version",
+        "department_name",
+        "receipt_printer",
+        "label_printer",
+        "document_printer",
+        "card_printer"
+      ],
+      "title": "TerminalListItemOut"
+    },
+    "TerminalOut": {
+      "properties": {
+        "terminal_id": {
+          "type": "integer",
+          "title": "Terminal Id"
+        },
+        "mac": {
+          "type": "string",
+          "title": "Mac"
+        },
+        "ip": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ip"
+        },
+        "hostname": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Hostname"
+        },
+        "location_label": {
+          "type": "string",
+          "title": "Location Label"
+        },
+        "department_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Department Id"
+        },
+        "receipt_printer_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Receipt Printer Id"
+        },
+        "label_printer_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Label Printer Id"
+        },
+        "document_printer_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Document Printer Id"
+        },
+        "card_printer_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Card Printer Id"
+        },
+        "cash_node": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "MainReception",
+                "PharmacyCounter",
+                "LabReception",
+                "IPDBilling",
+                "EmergencyCounter",
+                "CashierDesk"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cash Node"
+        },
+        "is_active": {
+          "type": "boolean",
+          "title": "Is Active"
+        },
+        "last_seen_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Last Seen At"
+        },
+        "row_version": {
+          "type": "integer",
+          "title": "Row Version"
+        }
+      },
+      "type": "object",
+      "required": [
+        "terminal_id",
+        "mac",
+        "ip",
+        "hostname",
+        "location_label",
+        "department_id",
+        "receipt_printer_id",
+        "label_printer_id",
+        "document_printer_id",
+        "card_printer_id",
+        "cash_node",
+        "is_active",
+        "last_seen_at",
+        "row_version"
+      ],
+      "title": "TerminalOut"
+    },
+    "TheaterIn": {
+      "properties": {
+        "code": {
+          "type": "string",
+          "maxLength": 20,
+          "minLength": 2,
+          "title": "Code",
+          "examples": [
+            "OT1"
+          ]
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 100,
+          "minLength": 2,
+          "title": "Name",
+          "examples": [
+            "Main OT 1"
+          ]
+        },
+        "theater_type": {
+          "type": "string",
+          "title": "Theater Type",
+          "default": "General",
+          "examples": [
+            "General",
+            "Cardiac",
+            "Orthopedic"
+          ]
+        }
+      },
+      "type": "object",
+      "required": [
+        "code",
+        "name"
+      ],
+      "title": "TheaterIn"
+    },
+    "TheaterOut": {
+      "properties": {
+        "ot_id": {
+          "type": "integer",
+          "title": "Ot Id"
+        },
+        "code": {
+          "type": "string",
+          "title": "Code"
+        },
+        "name": {
+          "type": "string",
+          "title": "Name"
+        },
+        "theater_type": {
+          "type": "string",
+          "title": "Theater Type"
+        },
+        "current_state": {
+          "type": "string",
+          "enum": [
+            "Available",
+            "EmergencyHold",
+            "InSurgery",
+            "CleaningPrep",
+            "OutOfService"
+          ],
+          "title": "Current State"
+        },
+        "state_changed_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "State Changed At"
+        },
+        "is_active": {
+          "type": "boolean",
+          "title": "Is Active"
+        },
+        "row_version": {
+          "type": "integer",
+          "title": "Row Version"
+        }
+      },
+      "type": "object",
+      "required": [
+        "ot_id",
+        "code",
+        "name",
+        "theater_type",
+        "current_state",
+        "state_changed_at",
+        "is_active",
+        "row_version"
+      ],
+      "title": "TheaterOut"
+    },
+    "UserDetailOut": {
+      "properties": {
+        "user_id": {
+          "type": "integer",
+          "title": "User Id"
+        },
+        "username": {
+          "type": "string",
+          "title": "Username"
+        },
+        "display_name": {
+          "type": "string",
+          "title": "Display Name"
+        },
+        "employee_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Employee Id"
+        },
+        "emp_number": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Emp Number"
+        },
+        "designation": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Designation"
+        },
+        "is_active": {
+          "type": "boolean",
+          "title": "Is Active"
+        },
+        "must_change_pw": {
+          "type": "boolean",
+          "title": "Must Change Pw"
+        },
+        "is_service_account": {
+          "type": "boolean",
+          "title": "Is Service Account"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Created At"
+        },
+        "last_login_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Last Login At"
+        },
+        "last_login_ip": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Last Login Ip"
+        },
+        "failed_login_count": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Failed Login Count"
+        },
+        "locked_until": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Locked Until"
+        },
+        "roles": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Roles"
+        },
+        "active_sessions": {
+          "type": "integer",
+          "title": "Active Sessions"
+        }
+      },
+      "type": "object",
+      "required": [
+        "user_id",
+        "username",
+        "display_name",
+        "employee_id",
+        "emp_number",
+        "designation",
+        "is_active",
+        "must_change_pw",
+        "is_service_account",
+        "created_at",
+        "last_login_at",
+        "last_login_ip",
+        "failed_login_count",
+        "locked_until",
+        "roles",
+        "active_sessions"
+      ],
+      "title": "UserDetailOut",
+      "description": "A user with roles, lockout and session info."
+    },
+    "UserListItemOut": {
+      "properties": {
+        "user_id": {
+          "type": "integer",
+          "title": "User Id"
+        },
+        "username": {
+          "type": "string",
+          "title": "Username"
+        },
+        "display_name": {
+          "type": "string",
+          "title": "Display Name"
+        },
+        "employee_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Employee Id"
+        },
+        "is_active": {
+          "type": "boolean",
+          "title": "Is Active"
+        },
+        "must_change_pw": {
+          "type": "boolean",
+          "title": "Must Change Pw"
+        },
+        "last_login_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Last Login At"
+        },
+        "roles": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Roles"
+        }
+      },
+      "type": "object",
+      "required": [
+        "user_id",
+        "username",
+        "display_name",
+        "employee_id",
+        "is_active",
+        "must_change_pw",
+        "last_login_at",
+        "roles"
+      ],
+      "title": "UserListItemOut"
+    },
+    "ValidationError": {
+      "properties": {
+        "loc": {
+          "items": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ]
+          },
+          "type": "array",
+          "title": "Location"
+        },
+        "msg": {
+          "type": "string",
+          "title": "Message"
+        },
+        "type": {
+          "type": "string",
+          "title": "Error Type"
+        },
+        "input": {
+          "title": "Input"
+        },
+        "ctx": {
+          "type": "object",
+          "title": "Context"
+        }
+      },
+      "type": "object",
+      "required": [
+        "loc",
+        "msg",
+        "type"
+      ],
+      "title": "ValidationError"
+    },
+    "WardIn": {
+      "properties": {
+        "code": {
+          "type": "string",
+          "maxLength": 20,
+          "minLength": 2,
+          "title": "Code"
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 100,
+          "minLength": 2,
+          "title": "Name"
+        },
+        "ward_type": {
+          "type": "string",
+          "enum": [
+            "General",
+            "Private",
+            "SemiPrivate",
+            "ICU",
+            "CCU",
+            "NICU",
+            "Surgical",
+            "Pediatric",
+            "Maternity",
+            "Emergency",
+            "Isolation",
+            "Other"
+          ],
+          "title": "Ward Type"
+        },
+        "gender_restriction": {
+          "type": "string",
+          "enum": [
+            "male",
+            "female",
+            "any"
+          ],
+          "title": "Gender Restriction",
+          "default": "any"
+        },
+        "department_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Department Id"
+        },
+        "room_charge_service_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Room Charge Service Id",
+          "description": "Per bed-day charge (service catalog, category RoomCharge)"
+        },
+        "is_active": {
+          "type": "boolean",
+          "title": "Is Active",
+          "default": true
+        }
+      },
+      "type": "object",
+      "required": [
+        "code",
+        "name",
+        "ward_type"
+      ],
+      "title": "WardIn"
+    },
+    "WardListItemOut": {
+      "properties": {
+        "ward_id": {
+          "type": "integer",
+          "title": "Ward Id"
+        },
+        "code": {
+          "type": "string",
+          "title": "Code"
+        },
+        "name": {
+          "type": "string",
+          "title": "Name"
+        },
+        "ward_type": {
+          "type": "string",
+          "enum": [
+            "General",
+            "Private",
+            "SemiPrivate",
+            "ICU",
+            "CCU",
+            "NICU",
+            "Surgical",
+            "Pediatric",
+            "Maternity",
+            "Emergency",
+            "Isolation",
+            "Other"
+          ],
+          "title": "Ward Type"
+        },
+        "gender_restriction": {
+          "type": "string",
+          "enum": [
+            "male",
+            "female",
+            "any"
+          ],
+          "title": "Gender Restriction"
+        },
+        "department_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Department Id"
+        },
+        "room_charge_service_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Room Charge Service Id"
+        },
+        "is_active": {
+          "type": "boolean",
+          "title": "Is Active"
+        },
+        "row_version": {
+          "type": "integer",
+          "title": "Row Version"
+        },
+        "beds": {
+          "type": "integer",
+          "title": "Beds",
+          "description": "Its beds in service, whatever their state"
+        },
+        "beds_in_use": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Beds In Use",
+          "description": "The labels of its beds Reserved, Occupied, Dirty or Cleaning: a ward is closed only when this is empty and `waitlisted` is 0 (WARD_IN_USE)"
+        },
+        "waitlisted": {
+          "type": "integer",
+          "title": "Waitlisted",
+          "description": "Patients waiting for a bed of this ward"
+        }
+      },
+      "type": "object",
+      "required": [
+        "ward_id",
+        "code",
+        "name",
+        "ward_type",
+        "gender_restriction",
+        "department_id",
+        "room_charge_service_id",
+        "is_active",
+        "row_version",
+        "beds",
+        "beds_in_use",
+        "waitlisted"
+      ],
+      "title": "WardListItemOut",
+      "description": "A ward of the IT console's list, open or closed, with what stands in the way of closing it (decisions 55)."
+    },
+    "WardOut": {
+      "properties": {
+        "ward_id": {
+          "type": "integer",
+          "title": "Ward Id"
+        },
+        "code": {
+          "type": "string",
+          "title": "Code"
+        },
+        "name": {
+          "type": "string",
+          "title": "Name"
+        },
+        "ward_type": {
+          "type": "string",
+          "enum": [
+            "General",
+            "Private",
+            "SemiPrivate",
+            "ICU",
+            "CCU",
+            "NICU",
+            "Surgical",
+            "Pediatric",
+            "Maternity",
+            "Emergency",
+            "Isolation",
+            "Other"
+          ],
+          "title": "Ward Type"
+        },
+        "gender_restriction": {
+          "type": "string",
+          "enum": [
+            "male",
+            "female",
+            "any"
+          ],
+          "title": "Gender Restriction"
+        },
+        "department_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Department Id"
+        },
+        "room_charge_service_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Room Charge Service Id"
+        },
+        "is_active": {
+          "type": "boolean",
+          "title": "Is Active"
+        },
+        "row_version": {
+          "type": "integer",
+          "title": "Row Version"
+        }
+      },
+      "type": "object",
+      "required": [
+        "ward_id",
+        "code",
+        "name",
+        "ward_type",
+        "gender_restriction",
+        "department_id",
+        "room_charge_service_id",
+        "is_active",
+        "row_version"
+      ],
+      "title": "WardOut"
+    },
+    "WorkerHeartbeatOut": {
+      "properties": {
+        "worker_id": {
+          "type": "string",
+          "title": "Worker Id"
+        },
+        "hostname": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Hostname"
+        },
+        "is_leader": {
+          "type": "boolean",
+          "title": "Is Leader"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "Running",
+            "Stopping",
+            "Stopped",
+            "Failed"
+          ],
+          "title": "Status"
+        },
+        "last_heartbeat_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Last Heartbeat At"
+        },
+        "seconds_ago": {
+          "type": "integer",
+          "title": "Seconds Ago"
+        }
+      },
+      "type": "object",
+      "required": [
+        "worker_id",
+        "hostname",
+        "is_leader",
+        "status",
+        "last_heartbeat_at",
+        "seconds_ago"
+      ],
+      "title": "WorkerHeartbeatOut"
+    }
+  },
+  "unknowns": []
+}

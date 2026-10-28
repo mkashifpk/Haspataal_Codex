@@ -152,7 +152,7 @@ export function Approvals({
           />
           {tr("My requests")}
         </label>
-        <select
+        <select data-field="status"
           data-help="approval.filter"
           aria-label={tr("Approval status")}
           value={status}
@@ -220,7 +220,7 @@ export function Approvals({
               label={tr("Decision note")}
               hint={tr("A note is required when rejecting or cancelling.")}
             >
-              <textarea
+              <textarea data-field="note"
                 data-help="approval.review"
                 aria-label={tr("Decision note")}
                 disabled={busy || detailBusy}

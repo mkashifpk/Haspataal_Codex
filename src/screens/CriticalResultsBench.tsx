@@ -507,7 +507,7 @@ export function CriticalResultsBench({
           >
             <div className="form-grid">
               <Field label={t("Result status", "نتیجے کی حالت")}>
-                <select
+                <select data-field="status"
                   data-help="critical.filters"
                   value={status}
                   onChange={(e) => setStatus(e.target.value)}
@@ -844,7 +844,7 @@ export function CriticalResultsBench({
                   <fieldset disabled={!live}>
                     <div className="form-grid">
                       <Field label={t("Communication means", "اطلاع کا طریقہ")}>
-                        <select
+                        <select data-field="means"
                           data-help="critical.communication"
                           value={means}
                           onChange={(e) => {
@@ -896,7 +896,7 @@ export function CriticalResultsBench({
                         "وصول کنندہ کا نام اور عہدہ",
                       )}
                     >
-                      <input
+                      <input data-field="name"
                         data-help="critical.recipient"
                         value={name}
                         maxLength={200}
@@ -913,7 +913,7 @@ export function CriticalResultsBench({
                         "اطلاع کا نوٹ (اختیاری)",
                       )}
                     >
-                      <textarea
+                      <textarea data-field="note"
                         data-help="critical.communication"
                         value={note}
                         maxLength={1000}

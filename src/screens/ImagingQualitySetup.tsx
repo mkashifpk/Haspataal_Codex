@@ -776,7 +776,7 @@ export function ImagingQualitySetup({
             ) : (
               <>
                 <Field label={t("Finding name", "نتیجے کا نام")}>
-                  <input
+                  <input data-field="name"
                     data-help="imaging-setup.finding-fields"
                     maxLength={200}
                     value={name}
@@ -784,7 +784,7 @@ export function ImagingQualitySetup({
                   />
                 </Field>
                 <Field label={t("Finding modality", "نتیجے کا طریقہ")}>
-                  <select
+                  <select data-field="modality"
                     data-help="imaging-setup.finding-fields"
                     value={modality}
                     onChange={(e) => setModality(e.target.value)}
@@ -800,7 +800,7 @@ export function ImagingQualitySetup({
                   </select>
                 </Field>
                 <Field label={t("Description", "تفصیل")}>
-                  <textarea
+                  <textarea data-field="description"
                     data-help="imaging-setup.finding-fields"
                     maxLength={500}
                     value={description}
@@ -817,7 +817,7 @@ export function ImagingQualitySetup({
                 </Field>
                 {editor.before && (
                   <label>
-                    <input
+                    <input data-field="is_active"
                       data-help="imaging-setup.finding-active"
                       type="checkbox"
                       checked={active}

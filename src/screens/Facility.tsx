@@ -430,7 +430,7 @@ export function Facility({
                       <h2>{tr("Category on the licence")}</h2>
                       <div className="form-grid">
                         <Field label={tr("PHC category")}>
-                          <select
+                          <select data-field="billing_category"
                             data-help="facility.profile"
                             value={profile.category}
                             onChange={(e) => {
@@ -457,7 +457,7 @@ export function Facility({
                           </select>
                         </Field>
                         <Field label={tr("PHC registration / licence number")}>
-                          <input
+                          <input data-field="registration_number"
                             data-help="facility.profile"
                             required
                             maxLength={60}
@@ -471,7 +471,7 @@ export function Facility({
                           />
                         </Field>
                         <Field label={tr("Effective date")}>
-                          <input
+                          <input data-field="effective_from"
                             data-help="facility.profile"
                             type="date"
                             required
@@ -485,7 +485,7 @@ export function Facility({
                           />
                         </Field>
                         <Field label={tr("Licensed beds")}>
-                          <input
+                          <input data-field="licensed_beds"
                             data-help="facility.profile"
                             type="number"
                             min={0}
@@ -503,7 +503,7 @@ export function Facility({
                           />
                         </Field>
                         <Field label={tr("Licence document")}>
-                          <select
+                          <select data-field="licence_document_id"
                             data-help="facility.profile"
                             value={profile.licence_document_id ?? ""}
                             onChange={(e) =>
@@ -530,7 +530,7 @@ export function Facility({
                             "Reason if category differs from bed suggestion",
                           )}
                         >
-                          <textarea
+                          <textarea data-field="reason"
                             data-help="facility.profile"
                             maxLength={1000}
                             value={profile.reason || ""}
@@ -594,7 +594,7 @@ export function Facility({
                   </div>
                   <section className="card">
                     <Field label={tr("Reason for change")}>
-                      <textarea
+                      <textarea data-field="reason"
                         data-help="facility.services"
                         required
                         minLength={3}

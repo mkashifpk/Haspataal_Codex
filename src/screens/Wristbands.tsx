@@ -948,7 +948,7 @@ export function Wristbands({
                     )}
                   </p>
                   <Field label={t("Replacement reason", "پٹی بدلنے کی وجہ")}>
-                    <textarea
+                    <textarea data-field="reason"
                       data-help="bands.reason"
                       value={reason}
                       onChange={(e) => {

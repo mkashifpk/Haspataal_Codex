@@ -625,7 +625,7 @@ function Diagnostics({
         <h2>{t("Order context", "آرڈر کی جگہ")}</h2>
         <LoadState {...summary} retry={summary.reload} />
         <Field label={t("Diagnostic care context", "ٹیسٹ کے علاج کی جگہ")}>
-          <select
+          <select data-field="admission_id"
             data-help="diagnostics.context"
             disabled={disabled}
             value={admission}
@@ -645,7 +645,7 @@ function Diagnostics({
           </select>
         </Field>
         <Field label={t("Diagnostic priority", "ٹیسٹ کی ترجیح")}>
-          <select
+          <select data-field="priority"
             data-help="diagnostics.context"
             value={priority}
             disabled={disabled}
@@ -759,7 +759,7 @@ function Diagnostics({
               {t("Selected tests", "منتخب ٹیسٹ")}: {selectedTests.length} / 50
             </p>
             <Field label={t("Laboratory clinical notes", "لیب کی طبی معلومات")}>
-              <textarea
+              <textarea data-field="notes clinical_notes"
                 data-help="diagnostics.tests"
                 maxLength={2000}
                 value={notes}
@@ -798,7 +798,7 @@ function Diagnostics({
             onChange={() => setImagingDirty(true)}
           >
             <Field label={t("Imaging modality", "عکس کی قسم")}>
-              <select
+              <select data-field="modality"
                 data-help="diagnostics.imaging"
                 value={modality}
                 onChange={(e) => setModality(e.target.value)}
@@ -821,7 +821,7 @@ function Diagnostics({
               </select>
             </Field>
             <Field label={t("Body part / examination", "جسم کا حصہ / معائنہ")}>
-              <input
+              <input data-field="body_part"
                 data-help="diagnostics.imaging"
                 value={bodyPart}
                 maxLength={100}
@@ -829,7 +829,7 @@ function Diagnostics({
               />
             </Field>
             <Field label={t("Clinical indication", "طبی وجہ")}>
-              <textarea
+              <textarea data-field="indication clinical_indication"
                 data-help="diagnostics.imaging"
                 value={indication}
                 maxLength={2000}
@@ -837,7 +837,7 @@ function Diagnostics({
               />
             </Field>
             <Field label={t("Laterality", "سمت")}>
-              <select
+              <select data-field="laterality"
                 data-help="diagnostics.imaging"
                 value={side}
                 onChange={(e) => setSide(e.target.value)}
@@ -854,7 +854,7 @@ function Diagnostics({
             </Field>
             <LoadState {...tariff} retry={tariff.reload} />
             <Field label={t("Catalogued imaging service", "فہرست کی عکس خدمت")}>
-              <select
+              <select data-field="service service_id"
                 data-help="diagnostics.imaging"
                 value={service}
                 onChange={(e) => setService(e.target.value)}
@@ -878,7 +878,7 @@ function Diagnostics({
             {admission && (
               <>
                 <Field label={t("Patient transport", "مریض کی نقل و حمل")}>
-                  <select
+                  <select data-field="transport"
                     data-help="diagnostics.transport"
                     value={transport}
                     onChange={(e) => setTransport(e.target.value)}
@@ -900,7 +900,7 @@ function Diagnostics({
                   </select>
                 </Field>
                 <Field label={t("Escort", "ساتھ جانے والا")}>
-                  <select
+                  <select data-field="escort"
                     data-help="diagnostics.transport"
                     value={escort}
                     onChange={(e) => setEscort(e.target.value)}
@@ -1347,7 +1347,7 @@ function Diagnostics({
               <Field
                 label={t("Laboratory cancellation reason", "لیب منسوخی کی وجہ")}
               >
-                <textarea
+                <textarea data-field="reason"
                   data-help="diagnostics.cancel"
                   value={reason}
                   maxLength={1000}

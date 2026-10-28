@@ -529,7 +529,7 @@ export function ImagingOutsourced({
             </h2>
             <div className="form-grid">
               <Field label={t("Modality", "عکس کی قسم")}>
-                <select
+                <select data-field="modality"
                   data-help="outsourced.filters"
                   value={modality}
                   onChange={(e) => setModality(e.target.value)}
@@ -543,7 +543,7 @@ export function ImagingOutsourced({
                 </select>
               </Field>
               <Field label={t("Show work", "کام دکھائیں")}>
-                <select
+                <select data-field="mode"
                   data-help="outsourced.filters"
                   value={mode}
                   onChange={(e) => setMode(e.target.value)}
@@ -892,7 +892,7 @@ export function ImagingOutsourced({
                 <>
                   <LoadState {...partners} retry={partners.reload} />
                   <Field label={t("Imaging partner centre", "شریک عکس مرکز")}>
-                    <select
+                    <select data-field="partner_id"
                       data-help="outsourced.partner"
                       value={editor.partnerId}
                       onChange={(e) => field("partnerId", e.target.value)}
@@ -932,7 +932,7 @@ export function ImagingOutsourced({
                       "شریک کو بھیجنے کا نوٹ (اختیاری)",
                     )}
                   >
-                    <textarea
+                    <textarea data-field="note"
                       data-help="outsourced.send"
                       maxLength={500}
                       value={editor.note}
@@ -970,7 +970,7 @@ export function ImagingOutsourced({
                       "شریک رپورٹ وقت (اختیاری، ہسپتال وقت)",
                     )}
                   >
-                    <input
+                    <input data-field="reported_at"
                       data-help="outsourced.time"
                       type="datetime-local"
                       value={editor.reportedAt}

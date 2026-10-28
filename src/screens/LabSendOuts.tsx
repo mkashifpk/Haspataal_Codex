@@ -834,7 +834,7 @@ export function LabSendOuts({
                 </select>
               </Field>
               <Field label={t("Courier (optional)", "لے جانے والا (اختیاری)")}>
-                <input
+                <input data-field="courier"
                   data-help="sendout.courier"
                   value={courier}
                   maxLength={200}
@@ -889,7 +889,7 @@ export function LabSendOuts({
             <Field
               label={t("Dispatch note (optional)", "روانگی نوٹ (اختیاری)")}
             >
-              <textarea
+              <textarea data-field="note"
                 data-help="sendout.note"
                 value={note}
                 maxLength={500}
@@ -916,7 +916,7 @@ export function LabSendOuts({
             <h2>{t("Manifest register", "روانگی فہرست رجسٹر")}</h2>
             <div className="form-grid">
               <Field label={t("Filter by partner", "شریک کی چھانٹی")}>
-                <select
+                <select data-field="partner_id"
                   data-help="sendout.filters"
                   value={filterPartner}
                   onChange={(e) => setFilterPartner(e.target.value)}
@@ -1294,7 +1294,7 @@ export function LabSendOuts({
                       "شریک تشریح (اختیاری)",
                     )}
                   >
-                    <textarea
+                    <textarea data-field="interpretation"
                       data-help="sendout.interpretation"
                       maxLength={4000}
                       value={interpretation}
@@ -1326,7 +1326,7 @@ export function LabSendOuts({
                       "شریک مسترد نوٹ (اختیاری)",
                     )}
                   >
-                    <textarea
+                    <textarea data-field="note"
                       data-help="sendout.reject"
                       maxLength={500}
                       value={rejectionNote}

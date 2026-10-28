@@ -834,7 +834,7 @@ export function DutyRoster({
               {t("Open week", "ہفتہ کھولیں")}
             </button>
             <Field label={t("Filter ward", "وارڈ چھانٹیں")}>
-              <select
+              <select data-field="ward_id"
                 data-help="roster.filters"
                 value={ward}
                 onChange={(e) => setWard(e.target.value)}
@@ -850,7 +850,7 @@ export function DutyRoster({
               </select>
             </Field>
             <Field label={t("Filter department", "شعبہ چھانٹیں")}>
-              <select
+              <select data-field="department_id"
                 data-help="roster.filters"
                 value={department}
                 onChange={(e) => setDepartment(e.target.value)}
@@ -1411,7 +1411,7 @@ export function DutyRoster({
         <section className="card">
           <h2>{t("Duty swaps", "ڈیوٹی کے تبادلے")}</h2>
           <Field label={t("Swap status", "تبادلے کی حالت")}>
-            <select
+            <select data-field="status"
               data-help="roster.swaps"
               disabled={blocked}
               value={swapStatus}
@@ -1564,7 +1564,7 @@ export function DutyRoster({
           <fieldset disabled={blocked}>
             <div className="form-grid">
               <Field label={t("Duty employee", "ڈیوٹی کا ملازم")}>
-                <select
+                <select data-field="employee_id"
                   data-help="roster.entry"
                   disabled={!!form.original}
                   value={form.entry.employee_id}
@@ -1589,7 +1589,7 @@ export function DutyRoster({
                 </select>
               </Field>
               <Field label={t("Duty start date", "ڈیوٹی شروع ہونے کی تاریخ")}>
-                <input
+                <input data-field="roster_date"
                   data-help="roster.entry"
                   type="date"
                   value={form.entry.roster_date}
@@ -1602,7 +1602,7 @@ export function DutyRoster({
                 />
               </Field>
               <Field label={t("Duty shift", "ڈیوٹی کی شفٹ")}>
-                <select
+                <select data-field="shift_pattern_id"
                   data-help="roster.entry"
                   value={form.entry.shift_pattern_id}
                   onChange={(e) =>
@@ -1629,7 +1629,7 @@ export function DutyRoster({
                 </select>
               </Field>
               <Field label={t("Duty area", "ڈیوٹی کی جگہ")}>
-                <select
+                <select data-field="duty_area"
                   data-help="roster.location"
                   value={form.entry.duty_area}
                   onChange={(e) =>
@@ -1655,7 +1655,7 @@ export function DutyRoster({
               </Field>
               {form.entry.duty_area === "Ward" && (
                 <Field label={t("Duty ward", "ڈیوٹی کا وارڈ")}>
-                  <select
+                  <select data-field="ward_id"
                     data-help="roster.location"
                     value={form.entry.ward_id || ""}
                     onChange={(e) =>
@@ -1684,7 +1684,7 @@ export function DutyRoster({
                   "ڈیوٹی کا شعبہ (اختیاری)",
                 )}
               >
-                <select
+                <select data-field="department_id"
                   data-help="roster.location"
                   value={form.entry.department_id || ""}
                   onChange={(e) =>
@@ -1706,7 +1706,7 @@ export function DutyRoster({
                 </select>
               </Field>
               <Field label={t("Zone / bay", "زون / حصہ")}>
-                <input
+                <input data-field="zone_label"
                   data-help="roster.location"
                   maxLength={100}
                   value={form.entry.zone_label || ""}
@@ -1719,7 +1719,7 @@ export function DutyRoster({
                 />
               </Field>
               <Field label={t("Duty notes", "ڈیوٹی کے نوٹ")}>
-                <textarea
+                <textarea data-field="notes"
                   data-help="roster.entry"
                   maxLength={500}
                   value={form.entry.notes || ""}
@@ -1831,7 +1831,7 @@ export function DutyRoster({
             ),
           )}
           <Field label={t("Rotate pattern by days", "دنوں کے حساب سے گردش")}>
-            <input
+            <input data-field="rotate_days"
               data-help="roster.copy"
               type="number"
               min={0}
@@ -1920,7 +1920,7 @@ export function DutyRoster({
                 noteForm.swap?.covering_name}
           </p>
           <Field label={t("Decision reason / note", "فیصلے کی وجہ / نوٹ")}>
-            <textarea
+            <textarea data-field="note reason"
               data-help="roster.reason"
               maxLength={500}
               value={noteForm.note}
@@ -1986,7 +1986,7 @@ export function DutyRoster({
             )}
           </p>
           <Field label={t("Original duty", "اصل ڈیوٹی")}>
-            <select
+            <select data-field="roster_id"
               data-help="roster.record-swap"
               value={swapForm.roster_id}
               onChange={(e) =>
@@ -2011,7 +2011,7 @@ export function DutyRoster({
             </select>
           </Field>
           <Field label={t("Covering colleague", "متبادل ساتھی")}>
-            <select
+            <select data-field="covering_employee_id"
               data-help="roster.record-swap"
               value={swapForm.covering_employee_id}
               onChange={(e) =>
@@ -2045,7 +2045,7 @@ export function DutyRoster({
             </select>
           </Field>
           <Field label={t("Return duty (optional)", "بدلے کی ڈیوٹی (اختیاری)")}>
-            <select
+            <select data-field="return_roster_id"
               data-help="roster.record-swap"
               value={swapForm.return_roster_id}
               onChange={(e) =>
@@ -2071,7 +2071,7 @@ export function DutyRoster({
             </select>
           </Field>
           <Field label={t("Swap reason", "تبادلے کی وجہ")}>
-            <textarea
+            <textarea data-field="reason"
               data-help="roster.record-swap"
               maxLength={500}
               value={swapForm.reason}

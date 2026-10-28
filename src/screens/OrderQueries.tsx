@@ -512,7 +512,7 @@ export function OrderQueries({
                         </select>
                       </Field>
                       <Field label={t("Query reason", "سوال کی وجہ")}>
-                        <select
+                        <select data-field="reason"
                           data-help="queries.compose"
                           value={reason}
                           onChange={(e) => setReason(e.target.value)}
@@ -533,7 +533,7 @@ export function OrderQueries({
                           "معالج سے سوال",
                         )}
                       >
-                        <textarea
+                        <textarea data-field="question"
                           data-help="queries.compose"
                           value={question}
                           maxLength={1000}
@@ -563,7 +563,7 @@ export function OrderQueries({
           <h2>{t("Query register", "سوالات کا رجسٹر")}</h2>
           <div className="form-grid">
             <Field label={t("Query status", "سوال کی حالت")}>
-              <select
+              <select data-field="status"
                 data-help="queries.filters"
                 value={status}
                 onChange={(e) => setStatus(e.target.value)}
@@ -579,7 +579,7 @@ export function OrderQueries({
             <Field
               label={t("Filter prescription ID", "نسخہ شناختی نمبر کی چھانٹی")}
             >
-              <input
+              <input data-field="prescription_id"
                 data-help="queries.filters"
                 value={rxFilter}
                 onChange={(e) => setRxFilter(e.target.value)}
@@ -827,7 +827,7 @@ export function OrderQueries({
                 <bdi>{review.row.question}</bdi>
               </p>
               <Field label={t("Withdrawal reason", "واپسی کی وجہ")}>
-                <textarea
+                <textarea data-field="reason"
                   data-help="queries.withdraw"
                   value={review.reason}
                   maxLength={500}

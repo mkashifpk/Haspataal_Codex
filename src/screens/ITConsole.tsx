@@ -17,10 +17,12 @@ import {
   type WriteAttempt,
 } from "../write-attempt";
 import bundle from "../it-system-contract.json";
+import { ITWards } from './ITWards';
 
 const contract = bundle as any;
 const operation = (endpoint: string) =>
   contract.endpoints.find((e: any) => e.endpoint === endpoint);
+export const adminRequestBody=(endpoint:string,body:Record<string,unknown>)=>operation(endpoint)?.request_body?body:undefined;
 const permits = (endpoint: string, permissions: string[]) => {
   const access = operation(endpoint)?.access;
   if (!access) return false;
@@ -277,6 +279,7 @@ export function ITConsole({
         {tr("Reload system records")}
       </button>
       <ErrorBox error={error} />
+      {section === 'hardware' && <ITWards permissions={permissions} userId={userId} revision={revision}/>}
       {r.data
         ?.filter((x) => x.error)
         .map((x) => (
@@ -643,7 +646,7 @@ export function ITConsole({
               "{station_id}",
               encodeURIComponent(body.station_id),
             );
-            setConfirming(writeAttempt({ ...action, path, body }));
+            setConfirming(writeAttempt({ ...action, path, body:adminRequestBody(action.endpoint,body) }));
           }}
         />
       )}
@@ -768,7 +771,7 @@ export function ITConsole({
   );
 }
 
-function AdminForm({
+export function AdminForm({
   action,
   roles,
   permissionsList,
@@ -860,7 +863,7 @@ function AdminForm({
               <legend>{label}</legend>
               {options.map((option) => (
                 <label className="check" key={option.code}>
-                  <input
+                  <input data-field={key}
                     data-help="settings.it.access"
                     type="checkbox"
                     checked={(value || []).includes(option.code)}
@@ -900,7 +903,7 @@ function AdminForm({
             hint={raw.description ? tr(raw.description) : undefined}
           >
             {s.type === "boolean" ? (
-              <select
+              <select data-field={key}
                 data-help="settings.it.fields"
                 value={value === undefined ? "" : String(value)}
                 required={required}
@@ -920,7 +923,7 @@ function AdminForm({
                 <option value="false">{tr("No")}</option>
               </select>
             ) : s.enum || reference ? (
-              <select
+              <select data-field={key}
                 data-help="settings.it.fields"
                 value={value ?? ""}
                 required={required}
@@ -946,7 +949,7 @@ function AdminForm({
                 ))}
               </select>
             ) : (
-              <input
+              <input data-field={key}
                 data-help="settings.it.fields"
                 value={value ?? ""}
                 readOnly={readonly}

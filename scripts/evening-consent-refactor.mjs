@@ -1,0 +1,14 @@
+import fs from 'node:fs';import assert from 'node:assert/strict';
+const file='src/screens/ConsentsAdmissions.tsx';let s=fs.readFileSync(file,'utf8');
+s=s.replaceAll('policyDecisionMakers','consentDecisionMakers');
+s=s.replace(/  const policy = useLoad\([\s\S]*?\n  \);\r?\n/,'');
+s=s.replace('            policy.data || [],\n','').replace('            policy.data || [],\r\n','');
+s=s.replace(/\s*<LoadState \{\.\.\.policy\} retry=\{policy.reload\} \/>/,'');
+s=s.replace('<option value="Patient">','{draft.record?.who_decides.patient_may_sign && <option value="Patient">').replace('{t("Patient", "مریض")}\n                          </option>','{t("Patient", "مریض")}\n                          </option>}').replace('{t("Patient", "مریض")}\r\n                          </option>','{t("Patient", "مریض")}\r\n                          </option>}');
+const start=s.indexOf('                          <p className="notice">',s.indexOf('{draft.decision.signer === "DecisionMaker"'));
+const end=s.indexOf('                          <Field',start);assert(start>0&&end>start);s=s.slice(0,start)+s.slice(end);
+s=s.replace(/disabled=\{\s*locked \|\| !!policy.error \|\| policy.loading\s*\}/,'disabled={locked}');
+s=s.replace('consentDecisionMakers(policy.data || [])','consentDecisionMakers(draft.record!)');
+const a=s.indexOf('                                    {r.description}'),b=s.indexOf('                                  </option>',a);assert(a>0&&b>a);s=s.slice(0,a)+'                                    {r.description}\n'+s.slice(b);
+s=s.replace('                      <PMDCStaffPicker','                      {draft.record?.who_decides.emergency_second_doctor && <PMDCStaffPicker').replace('onSelect={(r) => decision("doctor", r)}\n                      />','onSelect={(r) => decision("doctor", r)}\n                      />}').replace('onSelect={(r) => decision("doctor", r)}\r\n                      />','onSelect={(r) => decision("doctor", r)}\r\n                      />}');
+assert(!s.includes('policy.data'));assert(!s.includes('listDecisionMakers'));fs.writeFileSync(file,s);

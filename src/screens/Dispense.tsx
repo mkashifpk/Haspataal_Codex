@@ -828,7 +828,7 @@ export function Dispense({
               ) : (
                 <>
                   <Field label={t("Payment mode", "ادائیگی کا طریقہ")}>
-                    <select
+                    <select data-field="mode payment_mode"
                       data-help="dispense.payment"
                       value={mode}
                       onChange={(e) => setMode(e.target.value as typeof mode)}
@@ -848,7 +848,7 @@ export function Dispense({
                   </Field>
                   {mode === "Card" && (
                     <Field label={t("Card reference", "کارڈ حوالہ")}>
-                      <input
+                      <input data-field="reference_no"
                         data-help="dispense.payment"
                         value={reference}
                         onChange={(e) => setReference(e.target.value)}
@@ -863,7 +863,7 @@ export function Dispense({
                         "منظور شدہ فلاحی درخواست نمبر",
                       )}
                     >
-                      <input
+                      <input data-field="charity_approval_id"
                         data-help="dispense.payment"
                         value={approval}
                         onChange={(e) => setApproval(e.target.value)}
@@ -1139,7 +1139,7 @@ export function Dispense({
                   <Field
                     label={t("Checker username", "جانچنے والے کا صارف نام")}
                   >
-                    <input
+                    <input data-field="checker_username"
                       data-help="dispense.checker"
                       autoComplete="off"
                       value={checker}
@@ -1150,7 +1150,7 @@ export function Dispense({
                   <Field
                     label={t("Checker password", "جانچنے والے کا پاس ورڈ")}
                   >
-                    <input
+                    <input data-field="password checker_password"
                       data-help="dispense.checker"
                       type="password"
                       autoComplete="off"
@@ -1164,7 +1164,7 @@ export function Dispense({
             </>
           ) : (
             <Field label={t("Reason / clearance note", "وجہ / کلیئرنس نوٹ")}>
-              <textarea
+              <textarea data-field="reason note"
                 data-help="dispense.confirm"
                 value={review.kind === "stop" ? review.reason : review.note}
                 maxLength={review.kind === "stop" ? 500 : 1000}

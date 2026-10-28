@@ -481,7 +481,7 @@ export function ImagingRepeats({
                 />
               </Field>
               <Field label={t("Modality", "عکس کی قسم")}>
-                <select
+                <select data-field="modality"
                   data-help="repeats.period"
                   value={modality}
                   onChange={(e) => setModality(e.target.value)}
@@ -757,7 +757,7 @@ export function ImagingRepeats({
           {!review ? (
             <fieldset disabled={blocked}>
               <Field label={t("Reason for repeat", "دوبارہ عکس کی وجہ")}>
-                <select
+                <select data-field="reason"
                   data-help="repeats.reason"
                   value={draft.reason}
                   onChange={(e) => field("reason", e.target.value)}
@@ -783,7 +783,7 @@ export function ImagingRepeats({
                   "دوبارہ ایکسپوژر کی تعداد (1–20)",
                 )}
               >
-                <input
+                <input data-field="exposures"
                   data-help="repeats.count"
                   inputMode="numeric"
                   value={draft.exposures}
@@ -800,7 +800,7 @@ export function ImagingRepeats({
                     : t("Repeat note (optional)", "دوبارہ عکس نوٹ (اختیاری)")
                 }
               >
-                <textarea
+                <textarea data-field="note"
                   data-help="repeats.note"
                   maxLength={500}
                   value={draft.note}

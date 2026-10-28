@@ -128,7 +128,7 @@ export function ReferralRegister({
             />
           </Field>
           <Field label={t("Referral status", "حوالے کی حالت")}>
-            <select
+            <select data-field="status"
               data-help="register.filters"
               value={status}
               onChange={(e) => setStatus(e.target.value)}

@@ -29,7 +29,7 @@ import {
   explanationBody,
   emptyDecision,
   decisionBody,
-  policyDecisionMakers,
+  consentDecisionMakers,
   type Explanation,
   type Decision,
   type ConsentAction,
@@ -128,10 +128,6 @@ export function ConsentsAdmissions({
   );
   const forms = useLoad(
     () => (access.read ? c.listForms() : Promise.resolve([])),
-    [revision, access.read],
-  );
-  const policy = useLoad(
-    () => (access.read ? c.listDecisionMakers() : Promise.resolve([])),
     [revision, access.read],
   );
   const stays = useLoad(
@@ -504,7 +500,6 @@ export function ConsentsAdmissions({
             r,
             d.decision,
             d.action as "sign" | "refuse",
-            policy.data || [],
             user.employee_id,
           );
           protection = "reconcile";
@@ -931,7 +926,7 @@ export function ConsentsAdmissions({
             />
           </Field>
           <Field label={t("Consent status to show", "دکھائی جانے والی حالت")}>
-            <select
+            <select data-field="status"
               data-help="consents.filters"
               value={status}
               onChange={(e) => setStatus(e.target.value)}
@@ -990,7 +985,7 @@ export function ConsentsAdmissions({
                 "رضامندی فارم کا بارکوڈ اسکین",
               )}
             >
-              <input
+              <input data-field="barcode"
                 data-help="consents.open"
                 dir="ltr"
                 value={barcode}
@@ -1037,7 +1032,6 @@ export function ConsentsAdmissions({
         </aside>
         <article className="card">
           <LoadState {...forms} retry={forms.reload} />
-          <LoadState {...policy} retry={policy.reload} />
           {(busy || syncing) && (
             <p role="status">
               {t(
@@ -1396,6 +1390,7 @@ export function ConsentsAdmissions({
                     )}
                   >
                     <select
+                      data-field="language"
                       data-help="consents.explanation"
                       disabled={locked}
                       value={draft.explanation.language}
@@ -1410,6 +1405,7 @@ export function ConsentsAdmissions({
                   </Field>
                   <Field label={t("Need for admission", "داخلے کی ضرورت")}>
                     <textarea
+                      data-field="admission_need"
                       data-help="consents.explanation"
                       disabled={locked}
                       maxLength={2000}
@@ -1422,6 +1418,7 @@ export function ConsentsAdmissions({
                     label={t("Estimated stay in days", "متوقع قیام دنوں میں")}
                   >
                     <input
+                      data-field="estimated_days"
                       data-help="consents.explanation"
                       disabled={locked}
                       inputMode="numeric"
@@ -1432,6 +1429,7 @@ export function ConsentsAdmissions({
                   </Field>
                   <Field label={t("Estimated cost", "متوقع خرچ")}>
                     <input
+                      data-field="estimated_cost"
                       data-help="consents.explanation"
                       disabled={locked}
                       inputMode="decimal"
@@ -1446,6 +1444,7 @@ export function ConsentsAdmissions({
                 <>
                   <Field label={t("Decision mode", "فیصلے کا طریقہ")}>
                     <select
+                      data-field="mode"
                       data-help="consents.decision"
                       disabled={locked}
                       value={draft.decision.mode}
@@ -1483,6 +1482,7 @@ export function ConsentsAdmissions({
                         label={t("Who made the decision", "فیصلہ کس نے کیا")}
                       >
                         <select
+                          data-field="signer"
                           data-help="consents.decision"
                           disabled={locked}
                           value={draft.decision.signer}
@@ -1491,9 +1491,11 @@ export function ConsentsAdmissions({
                           <option value="">
                             {t("Choose deliberately", "خود انتخاب کریں")}
                           </option>
-                          <option value="Patient">
-                            {t("Patient", "مریض")}
-                          </option>
+                          {draft.record?.who_decides.patient_may_sign && (
+                            <option value="Patient">
+                              {t("Patient", "مریض")}
+                            </option>
+                          )}
                           <option value="DecisionMaker">
                             {t(
                               "Decision maker for an incapable patient",
@@ -1506,6 +1508,7 @@ export function ConsentsAdmissions({
                         label={t("Signer’s name", "فیصلہ کرنے والے کا نام")}
                       >
                         <input
+                          data-field="signer_name"
                           data-help="consents.decision"
                           disabled={locked}
                           maxLength={200}
@@ -1517,12 +1520,6 @@ export function ConsentsAdmissions({
                       </Field>
                       {draft.decision.signer === "DecisionMaker" && (
                         <>
-                          <p className="notice">
-                            {t(
-                              "The effective age-of-consent policy cannot be read here. Both priorities are shown; ask the policy owner if unsure. The server checks the actual signer.",
-                              "عمر کی اصل پالیسی یہاں دستیاب نہیں۔ دونوں ترجیحات دکھتی ہیں؛ شک میں پالیسی نگران سے پوچھیں۔ اصل نمائندہ سرور چیک کرتا ہے۔",
-                            )}
-                          </p>
                           <Field
                             label={t(
                               "Relationship from hospital policy",
@@ -1530,10 +1527,9 @@ export function ConsentsAdmissions({
                             )}
                           >
                             <select
+                              data-field="signer_relationship"
                               data-help="consents.policy"
-                              disabled={
-                                locked || !!policy.error || policy.loading
-                              }
+                              disabled={locked}
                               value={draft.decision.signer_relationship}
                               onChange={(e) =>
                                 decision("signer_relationship", e.target.value)
@@ -1545,22 +1541,14 @@ export function ConsentsAdmissions({
                                   "اصل رشتہ منتخب کریں",
                                 )}
                               </option>
-                              {policyDecisionMakers(policy.data || []).map(
-                                (r) => (
-                                  <option
-                                    key={r.relationship}
-                                    value={r.relationship}
-                                  >
-                                    {r.description} ·{" "}
-                                    {t(
-                                      "Adult / child priority",
-                                      "بالغ و بچے کی ترجیح",
-                                    )}{" "}
-                                    {r.adult_priority ?? "—"} /{" "}
-                                    {r.minor_priority ?? "—"}
-                                  </option>
-                                ),
-                              )}
+                              {consentDecisionMakers(draft.record!).map((r) => (
+                                <option
+                                  key={r.relationship}
+                                  value={r.relationship}
+                                >
+                                  {r.description}
+                                </option>
+                              ))}
                             </select>
                           </Field>
                         </>
@@ -1572,6 +1560,7 @@ export function ConsentsAdmissions({
                         )}
                       >
                         <input
+                          data-field="signer_cnic"
                           data-help="consents.decision"
                           disabled={locked}
                           value={draft.decision.signer_cnic}
@@ -1587,6 +1576,7 @@ export function ConsentsAdmissions({
                         )}
                       >
                         <input
+                          data-field="signer_phone"
                           data-help="consents.decision"
                           disabled={locked}
                           maxLength={30}
@@ -1603,6 +1593,7 @@ export function ConsentsAdmissions({
                         )}
                       >
                         <select
+                          data-field="signer_mark"
                           data-help="consents.decision"
                           disabled={locked}
                           value={draft.decision.signer_mark}
@@ -1629,6 +1620,7 @@ export function ConsentsAdmissions({
                       )}
                     >
                       <select
+                        data-field="incapacity_reason"
                         data-help="consents.decision"
                         disabled={locked}
                         value={draft.decision.incapacity_reason}
@@ -1669,6 +1661,7 @@ export function ConsentsAdmissions({
                         )}
                       >
                         <textarea
+                          data-field="emergency_note"
                           data-help="consents.decision"
                           disabled={locked}
                           maxLength={4000}
@@ -1678,16 +1671,19 @@ export function ConsentsAdmissions({
                           }
                         />
                       </Field>
-                      <PMDCStaffPicker
-                        disabled={locked}
-                        value={draft.decision.doctor}
-                        onSelect={(r) => decision("doctor", r)}
-                      />
+                      {draft.record?.who_decides.emergency_second_doctor && (
+                        <PMDCStaffPicker
+                          disabled={locked}
+                          value={draft.decision.doctor}
+                          onSelect={(r) => decision("doctor", r)}
+                        />
+                      )}
                     </>
                   ) : (
                     <>
                       <Field label={t("Witness name", "گواہ کا نام")}>
                         <input
+                          data-field="witness_name"
                           data-help="consents.decision"
                           disabled={locked}
                           maxLength={200}
@@ -1699,6 +1695,7 @@ export function ConsentsAdmissions({
                       </Field>
                       <Field label={t("Witness role", "گواہ کا کردار")}>
                         <input
+                          data-field="witness_role"
                           data-help="consents.decision"
                           disabled={locked}
                           maxLength={200}
@@ -1715,6 +1712,7 @@ export function ConsentsAdmissions({
                         )}
                       >
                         <input
+                          data-field="interpreter_name"
                           data-help="consents.decision"
                           disabled={locked}
                           maxLength={200}
@@ -1725,7 +1723,7 @@ export function ConsentsAdmissions({
                         />
                       </Field>
                       <label>
-                        <input
+                        <input data-field="read_to_patient"
                           data-help="consents.decision"
                           type="checkbox"
                           disabled={locked}
@@ -1746,6 +1744,7 @@ export function ConsentsAdmissions({
                         )}
                       >
                         <textarea
+                          data-field="questions_answers"
                           data-help="consents.decision"
                           disabled={locked}
                           maxLength={4000}
@@ -1756,7 +1755,7 @@ export function ConsentsAdmissions({
                         />
                       </Field>
                       <label>
-                        <input
+                        <input data-field="understanding_confirmed"
                           data-help="consents.decision"
                           type="checkbox"
                           disabled={locked}
@@ -1783,6 +1782,7 @@ export function ConsentsAdmissions({
                       )}
                     >
                       <textarea
+                        data-field="refusal_reason"
                         data-help="consents.decision"
                         disabled={locked}
                         maxLength={2000}
@@ -1810,7 +1810,7 @@ export function ConsentsAdmissions({
               )}
               {["withdraw", "cancel"].includes(draft.action) && (
                 <Field label={t("Reason for this change", "اس تبدیلی کی وجہ")}>
-                  <textarea
+                  <textarea data-field="reason"
                     data-help="consents.reason"
                     disabled={locked}
                     maxLength={1000}

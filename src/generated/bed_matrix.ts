@@ -76,4 +76,3 @@ export function bedState(bed_id: number, body: BedStateIn): Promise<BedOut> {
 export function bedMatrix(query?: { include_beds?: boolean }): Promise<BedMatrixOut> {
   return api<BedMatrixOut>("GET", withQuery(`/beds/matrix`, query), undefined);
 }
-

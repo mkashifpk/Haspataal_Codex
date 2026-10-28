@@ -3,11 +3,8 @@
 import { api } from "./api";
 
 const withQuery = (path: string, q?: Record<string, unknown>) => {
-  const s = new URLSearchParams(
-    Object.entries(q ?? {})
-      .filter(([, v]) => v !== undefined && v !== null)
-      .map(([k, v]) => [k, String(v)]),
-  ).toString();
+  const s = new URLSearchParams(Object.entries(q ?? {}).filter(([, v]) => v !== undefined && v !== null)
+    .map(([k, v]) => [k, String(v)])).toString();
   return s ? `${path}?${s}` : path;
 };
 
@@ -66,19 +63,7 @@ export interface DepartmentIn {
 export interface WardIn {
   code: string;
   name: string;
-  ward_type:
-    | "General"
-    | "Private"
-    | "SemiPrivate"
-    | "ICU"
-    | "CCU"
-    | "NICU"
-    | "Surgical"
-    | "Pediatric"
-    | "Maternity"
-    | "Emergency"
-    | "Isolation"
-    | "Other";
+  ward_type: "General" | "Private" | "SemiPrivate" | "ICU" | "CCU" | "NICU" | "Surgical" | "Pediatric" | "Maternity" | "Emergency" | "Isolation" | "Other";
   gender_restriction?: "male" | "female" | "any";
   department_id?: number | null;
   /** Per bed-day charge (service catalog, category RoomCharge) */
@@ -90,19 +75,7 @@ export interface WardOut {
   ward_id: number;
   code: string;
   name: string;
-  ward_type:
-    | "General"
-    | "Private"
-    | "SemiPrivate"
-    | "ICU"
-    | "CCU"
-    | "NICU"
-    | "Surgical"
-    | "Pediatric"
-    | "Maternity"
-    | "Emergency"
-    | "Isolation"
-    | "Other";
+  ward_type: "General" | "Private" | "SemiPrivate" | "ICU" | "CCU" | "NICU" | "Surgical" | "Pediatric" | "Maternity" | "Emergency" | "Isolation" | "Other";
   gender_restriction: "male" | "female" | "any";
   department_id: number | null;
   room_charge_service_id: number | null;
@@ -112,8 +85,7 @@ export interface WardOut {
 
 export interface PrinterIn {
   name: string;
-  printer_type:
-    "ThermalReceipt" | "BarcodeLabel" | "PVCCard" | "Laser" | "Other";
+  printer_type: "ThermalReceipt" | "BarcodeLabel" | "PVCCard" | "Laser" | "Other";
   connection: "USB" | "Network" | "Shared" | "Bluetooth" | "Other";
   /** OS printer name, \\PC\Printer or 192.168.1.40:9100 */
   address?: string | null;
@@ -125,8 +97,7 @@ export interface PrinterIn {
 export interface PrinterOut {
   printer_id: number;
   name: string;
-  printer_type:
-    "ThermalReceipt" | "BarcodeLabel" | "PVCCard" | "Laser" | "Other";
+  printer_type: "ThermalReceipt" | "BarcodeLabel" | "PVCCard" | "Laser" | "Other";
   connection: "USB" | "Network" | "Shared" | "Bluetooth" | "Other";
   address: string | null;
   paper_width_mm: number | null;
@@ -145,14 +116,7 @@ export interface TerminalIn {
   label_printer_id?: number | null;
   document_printer_id?: number | null;
   card_printer_id?: number | null;
-  cash_node?:
-    | "MainReception"
-    | "PharmacyCounter"
-    | "LabReception"
-    | "IPDBilling"
-    | "EmergencyCounter"
-    | "CashierDesk"
-    | null;
+  cash_node?: "MainReception" | "PharmacyCounter" | "LabReception" | "IPDBilling" | "EmergencyCounter" | "CashierDesk" | null;
   is_active?: boolean;
 }
 
@@ -167,14 +131,7 @@ export interface TerminalOut {
   label_printer_id: number | null;
   document_printer_id: number | null;
   card_printer_id: number | null;
-  cash_node:
-    | "MainReception"
-    | "PharmacyCounter"
-    | "LabReception"
-    | "IPDBilling"
-    | "EmergencyCounter"
-    | "CashierDesk"
-    | null;
+  cash_node: "MainReception" | "PharmacyCounter" | "LabReception" | "IPDBilling" | "EmergencyCounter" | "CashierDesk" | null;
   is_active: boolean;
   last_seen_at: string | null;
   row_version: number;
@@ -204,13 +161,7 @@ export interface ProvisioningQueueItemOut {
   full_name: string;
   designation: string;
   department_name: string | null;
-  staff_category:
-    | "Clinical"
-    | "Nursing"
-    | "Administrative"
-    | "Technical"
-    | "SupportZeroInterface"
-    | "Visiting";
+  staff_category: "Clinical" | "Nursing" | "Administrative" | "Technical" | "SupportZeroInterface" | "Visiting";
   is_clinical_staff: boolean;
   contract_type: "Permanent" | "Contract" | "Visiting";
   submitted_at: string;
@@ -291,14 +242,7 @@ export interface TerminalListItemOut {
   label_printer_id: number | null;
   document_printer_id: number | null;
   card_printer_id: number | null;
-  cash_node:
-    | "MainReception"
-    | "PharmacyCounter"
-    | "LabReception"
-    | "IPDBilling"
-    | "EmergencyCounter"
-    | "CashierDesk"
-    | null;
+  cash_node: "MainReception" | "PharmacyCounter" | "LabReception" | "IPDBilling" | "EmergencyCounter" | "CashierDesk" | null;
   is_active: boolean;
   last_seen_at: string | null;
   row_version: number;
@@ -313,8 +257,7 @@ export interface BadgeStationListItemOut {
   station_id: string;
   label: string;
   device_type: "RFIDReader" | "BarcodeScanner" | "BiometricTerminal";
-  location_type:
-    "Bed" | "Ward" | "Gate" | "OT" | "Pharmacy" | "Lab" | "StaffEntrance";
+  location_type: "Bed" | "Ward" | "Gate" | "OT" | "Pharmacy" | "Lab" | "StaffEntrance";
   action_type: "AttendancePunch" | "BedCleaned" | "SecurityPass" | "Generic";
   ward_id: number | null;
   ward_name: string | null;
@@ -330,8 +273,7 @@ export interface StationIn {
   label: string;
   /** The hardware; the API is the same for all (BarcodeScanner = kiosk PC/tablet reading printed QR badges) */
   device_type?: "RFIDReader" | "BarcodeScanner" | "BiometricTerminal";
-  location_type:
-    "Bed" | "Ward" | "Gate" | "OT" | "Pharmacy" | "Lab" | "StaffEntrance";
+  location_type: "Bed" | "Ward" | "Gate" | "OT" | "Pharmacy" | "Lab" | "StaffEntrance";
   action_type: "AttendancePunch" | "BedCleaned" | "SecurityPass" | "Generic";
   /** BedCleaned without bed_id: the ward whose bed QR stickers this kiosk scans */
   ward_id?: number | null;
@@ -344,8 +286,7 @@ export interface BadgeStationOut {
   station_id: string;
   label: string;
   device_type: "RFIDReader" | "BarcodeScanner" | "BiometricTerminal";
-  location_type:
-    "Bed" | "Ward" | "Gate" | "OT" | "Pharmacy" | "Lab" | "StaffEntrance";
+  location_type: "Bed" | "Ward" | "Gate" | "OT" | "Pharmacy" | "Lab" | "StaffEntrance";
   action_type: "AttendancePunch" | "BedCleaned" | "SecurityPass" | "Generic";
   ward_id: number | null;
   bed_id: number | null;
@@ -363,34 +304,7 @@ export interface StationKeyOut {
 
 /** QR stickers for the beds of a ward (ward-level bed-cleaning stations). */
 export interface BedLabelsOut {
-  document_type:
-    | "autopsy_order"
-    | "bed_labels"
-    | "blood_component_label"
-    | "blood_donation_labels"
-    | "clinical_note"
-    | "complaint_letter"
-    | "complaints_notice"
-    | "consent_form"
-    | "cost_estimate"
-    | "cssd_labels"
-    | "death_certificate"
-    | "discharge_summary"
-    | "dispensing_label"
-    | "dose_label"
-    | "id_card"
-    | "imaging_report"
-    | "lab_label"
-    | "lab_report"
-    | "mlc_intimation"
-    | "opd_slip"
-    | "pharmacy_receipt"
-    | "prescription"
-    | "referral_slip"
-    | "send_out_manifest"
-    | "surgical_record"
-    | "triage_algorithm"
-    | "wristband";
+  document_type: "autopsy_order" | "bed_labels" | "blood_component_label" | "blood_donation_labels" | "clinical_note" | "complaint_letter" | "complaints_notice" | "consent_form" | "cost_estimate" | "cssd_labels" | "death_certificate" | "discharge_summary" | "dispensing_label" | "dose_label" | "id_card" | "imaging_report" | "lab_label" | "lab_report" | "mlc_intimation" | "opd_slip" | "pharmacy_receipt" | "prescription" | "referral_slip" | "send_out_manifest" | "surgical_record" | "triage_algorithm" | "wristband";
   printer_role: "receipt" | "label" | "document" | "card";
   ward: LabelWardOut;
   labels: BedLabelOut[];
@@ -520,18 +434,31 @@ export interface BedOut {
   bed_id: number;
   ward_id: number;
   label: string;
-  current_state:
-    | "Available"
-    | "Reserved"
-    | "Occupied"
-    | "Dirty"
-    | "Cleaning"
-    | "OutOfService";
+  current_state: "Available" | "Reserved" | "Occupied" | "Dirty" | "Cleaning" | "OutOfService";
   state_changed_at: string;
   is_overflow_allowed: boolean;
   sort_order: number;
   is_active: boolean;
   row_version: number;
+}
+
+/** A ward of the IT console's list, open or closed, with what stands in the way of closing it (decisions 55). */
+export interface WardListItemOut {
+  ward_id: number;
+  code: string;
+  name: string;
+  ward_type: "General" | "Private" | "SemiPrivate" | "ICU" | "CCU" | "NICU" | "Surgical" | "Pediatric" | "Maternity" | "Emergency" | "Isolation" | "Other";
+  gender_restriction: "male" | "female" | "any";
+  department_id: number | null;
+  room_charge_service_id: number | null;
+  is_active: boolean;
+  row_version: number;
+  /** Its beds in service, whatever their state */
+  beds: number;
+  /** The labels of its beds Reserved, Occupied, Dirty or Cleaning: a ward is closed only when this is empty and `waitlisted` is 0 (WARD_IN_USE) */
+  beds_in_use: string[];
+  /** Patients waiting for a bed of this ward */
+  waitlisted: number;
 }
 
 export interface TheaterIn {
@@ -545,12 +472,7 @@ export interface TheaterOut {
   code: string;
   name: string;
   theater_type: string;
-  current_state:
-    | "Available"
-    | "EmergencyHold"
-    | "InSurgery"
-    | "CleaningPrep"
-    | "OutOfService";
+  current_state: "Available" | "EmergencyHold" | "InSurgery" | "CleaningPrep" | "OutOfService";
   state_changed_at: string;
   is_active: boolean;
   row_version: number;
@@ -662,26 +584,13 @@ export function getUser(user_id: number): Promise<UserDetailOut> {
 }
 
 /** Log a user out everywhere — POST /api/v1/admin/users/{user_id}/revoke-sessions (who may call: holders of admin.user.manage). */
-export function revokeAdminUsersSessions(
-  user_id: number,
-): Promise<SessionsRevokedOut> {
-  return api<SessionsRevokedOut>(
-    "POST",
-    `/admin/users/${user_id}/revoke-sessions`,
-    undefined,
-  );
+export function revokeAdminUsersSessions(user_id: number): Promise<SessionsRevokedOut> {
+  return api<SessionsRevokedOut>("POST", `/admin/users/${user_id}/revoke-sessions`, undefined);
 }
 
 /** Login successes / failures (security review) — GET /api/v1/admin/login-events (who may call: holders of admin.audit.view or admin.user.manage). */
-export function loginEvents(query?: {
-  failures_only?: boolean;
-  limit?: number;
-}): Promise<LoginEventOut[]> {
-  return api<LoginEventOut[]>(
-    "GET",
-    withQuery(`/admin/login-events`, query),
-    undefined,
-  );
+export function loginEvents(query?: { failures_only?: boolean; limit?: number }): Promise<LoginEventOut[]> {
+  return api<LoginEventOut[]>("GET", withQuery(`/admin/login-events`, query), undefined);
 }
 
 /** Departments — GET /api/v1/admin/departments (who may call: any logged-in user). */
@@ -690,10 +599,7 @@ export function departments(): Promise<DepartmentOut[]> {
 }
 
 /** Update a department — PUT /api/v1/admin/departments/{department_id} (who may call: holders of admin.department.manage). */
-export function updateDepartment(
-  department_id: number,
-  body: DepartmentIn,
-): Promise<DepartmentOut> {
+export function updateDepartment(department_id: number, body: DepartmentIn): Promise<DepartmentOut> {
   return api<DepartmentOut>("PUT", `/admin/departments/${department_id}`, body);
 }
 
@@ -703,18 +609,12 @@ export function updateWard(ward_id: number, body: WardIn): Promise<WardOut> {
 }
 
 /** Update a printer — PUT /api/v1/admin/printers/{printer_id} (who may call: holders of admin.printer.manage). */
-export function updatePrinter(
-  printer_id: number,
-  body: PrinterIn,
-): Promise<PrinterOut> {
+export function updatePrinter(printer_id: number, body: PrinterIn): Promise<PrinterOut> {
   return api<PrinterOut>("PUT", `/admin/printers/${printer_id}`, body);
 }
 
 /** Update a terminal mapping — PUT /api/v1/admin/terminals/{terminal_id} (who may call: holders of admin.terminal.manage). */
-export function updateTerminal(
-  terminal_id: number,
-  body: TerminalIn,
-): Promise<TerminalOut> {
+export function updateTerminal(terminal_id: number, body: TerminalIn): Promise<TerminalOut> {
   return api<TerminalOut>("PUT", `/admin/terminals/${terminal_id}`, body);
 }
 
@@ -730,55 +630,31 @@ export function permissions(): Promise<PermissionOut[]> {
 
 /** Employees HR submitted, awaiting a login (pane 1) — GET /api/v1/admin/provisioning-queue (who may call: holders of admin.user.provision). */
 export function provisioningQueue(): Promise<ProvisioningQueueItemOut[]> {
-  return api<ProvisioningQueueItemOut[]>(
-    "GET",
-    `/admin/provisioning-queue`,
-    undefined,
-  );
+  return api<ProvisioningQueueItemOut[]>("GET", `/admin/provisioning-queue`, undefined);
 }
 
 /** Provision a login (temporary password shown ONCE) — POST /api/v1/admin/users (who may call: holders of admin.user.provision). */
-export function provisionAdminUsers(
-  body: ProvisionIn,
-): Promise<ProvisionedUserOut> {
+export function provisionAdminUsers(body: ProvisionIn): Promise<ProvisionedUserOut> {
   return api<ProvisionedUserOut>("POST", `/admin/users`, body);
 }
 
 /** Search users — GET /api/v1/admin/users (who may call: holders of admin.user.manage or admin.user.provision). */
-export function listUsers(query?: {
-  q?: string | null;
-  active?: boolean | null;
-  limit?: number;
-}): Promise<UserListItemOut[]> {
-  return api<UserListItemOut[]>(
-    "GET",
-    withQuery(`/admin/users`, query),
-    undefined,
-  );
+export function listUsers(query?: { q?: string | null; active?: boolean | null; limit?: number }): Promise<UserListItemOut[]> {
+  return api<UserListItemOut[]>("GET", withQuery(`/admin/users`, query), undefined);
 }
 
 /** Replace a user's roles (effective on the next request) — PUT /api/v1/admin/users/{user_id}/roles (who may call: holders of admin.user.manage). */
-export function setRoles(
-  user_id: number,
-  body: RolesIn,
-): Promise<UserDetailOut> {
+export function setRoles(user_id: number, body: RolesIn): Promise<UserDetailOut> {
   return api<UserDetailOut>("PUT", `/admin/users/${user_id}/roles`, body);
 }
 
 /** Issue a new temporary password (all sessions end) — POST /api/v1/admin/users/{user_id}/reset-password (who may call: holders of admin.user.manage). */
 export function resetPassword(user_id: number): Promise<PasswordResetOut> {
-  return api<PasswordResetOut>(
-    "POST",
-    `/admin/users/${user_id}/reset-password`,
-    undefined,
-  );
+  return api<PasswordResetOut>("POST", `/admin/users/${user_id}/reset-password`, undefined);
 }
 
 /** Deactivate (sessions revoked) / reactivate + unlock — POST /api/v1/admin/users/{user_id}/active (who may call: holders of admin.user.manage). */
-export function setActive(
-  user_id: number,
-  body: ActiveIn,
-): Promise<UserDetailOut> {
+export function setActive(user_id: number, body: ActiveIn): Promise<UserDetailOut> {
   return api<UserDetailOut>("POST", `/admin/users/${user_id}/active`, body);
 }
 
@@ -788,10 +664,7 @@ export function roleMatrix(): Promise<RoleMatrixOut> {
 }
 
 /** Replace a role's permissions (pushed live to all sessions) — PUT /api/v1/admin/roles/{role_code}/permissions (who may call: holders of admin.role_matrix.update). */
-export function setRolePermissions(
-  role_code: string,
-  body: PermissionsIn,
-): Promise<string[]> {
+export function setRolePermissions(role_code: string, body: PermissionsIn): Promise<string[]> {
   return api<string[]>("PUT", `/admin/roles/${role_code}/permissions`, body);
 }
 
@@ -802,9 +675,7 @@ export function terminals(): Promise<TerminalListItemOut[]> {
 
 /** Map a terminal (by MAC) to a location and its printers — POST /api/v1/admin/terminals (who may call: holders of admin.terminal.manage). */
 export function addTerminal(body: TerminalIn): Promise<TerminalOut> {
-  return api<TerminalOut>("POST", `/admin/terminals`, body, {
-    idempotent: true,
-  });
+  return api<TerminalOut>("POST", `/admin/terminals`, body, { idempotent: true });
 }
 
 /** Printers — GET /api/v1/admin/printers (who may call: holders of admin.printer.manage or admin.terminal.manage). */
@@ -819,41 +690,22 @@ export function addPrinter(body: PrinterIn): Promise<PrinterOut> {
 
 /** Badge stations: RFID readers, barcode-scanner kiosks, biometric terminals (last seen) — GET /api/v1/admin/badge-stations (who may call: holders of admin.badge_station.manage). */
 export function stations(): Promise<BadgeStationListItemOut[]> {
-  return api<BadgeStationListItemOut[]>(
-    "GET",
-    `/admin/badge-stations`,
-    undefined,
-  );
+  return api<BadgeStationListItemOut[]>("GET", `/admin/badge-stations`, undefined);
 }
 
 /** Register / update a badge station — PUT /api/v1/admin/badge-stations/{station_id} (who may call: holders of admin.badge_station.manage). */
-export function upsertStation(
-  station_id: string,
-  body: StationIn,
-): Promise<BadgeStationOut> {
-  return api<BadgeStationOut>(
-    "PUT",
-    `/admin/badge-stations/${station_id}`,
-    body,
-  );
+export function upsertStation(station_id: string, body: StationIn): Promise<BadgeStationOut> {
+  return api<BadgeStationOut>("PUT", `/admin/badge-stations/${station_id}`, body);
 }
 
 /** Issue a new station key (shown ONCE) — POST /api/v1/admin/badge-stations/{station_id}/rotate-key (who may call: holders of admin.badge_station.manage). */
 export function rotateKey(station_id: string): Promise<StationKeyOut> {
-  return api<StationKeyOut>(
-    "POST",
-    `/admin/badge-stations/${station_id}/rotate-key`,
-    undefined,
-  );
+  return api<StationKeyOut>("POST", `/admin/badge-stations/${station_id}/rotate-key`, undefined);
 }
 
 /** Bed QR stickers for ward-level bed-cleaning stations (label printer) — GET /api/v1/admin/wards/{ward_id}/bed-labels (who may call: holders of admin.badge_station.manage or admin.ward.manage). */
 export function bedLabels(ward_id: number): Promise<BedLabelsOut> {
-  return api<BedLabelsOut>(
-    "GET",
-    `/admin/wards/${ward_id}/bed-labels`,
-    undefined,
-  );
+  return api<BedLabelsOut>("GET", `/admin/wards/${ward_id}/bed-labels`, undefined);
 }
 
 /** CPU/RAM, DB pool, last backup, worker heartbeat (pane 4, read-only) — GET /api/v1/admin/server-health (who may call: holders of admin.server_health.view). */
@@ -867,10 +719,7 @@ export function settings(): Promise<SettingOut[]> {
 }
 
 /** Change a policy setting (type-checked, audited) — PUT /api/v1/admin/settings/{key} (who may call: holders of admin.settings.manage). */
-export function updateSetting(
-  key: string,
-  body: SettingIn,
-): Promise<SettingRowOut> {
+export function updateSetting(key: string, body: SettingIn): Promise<SettingRowOut> {
   return api<SettingRowOut>("PUT", `/admin/settings/${key}`, body);
 }
 
@@ -886,9 +735,7 @@ export function killSwitch(body: KillSwitchIn): Promise<KillSwitchOut> {
 
 /** Add a department — POST /api/v1/admin/departments (who may call: holders of admin.department.manage). */
 export function addDepartment(body: DepartmentIn): Promise<DepartmentOut> {
-  return api<DepartmentOut>("POST", `/admin/departments`, body, {
-    idempotent: true,
-  });
+  return api<DepartmentOut>("POST", `/admin/departments`, body, { idempotent: true });
 }
 
 /** Add a ward — POST /api/v1/admin/wards (who may call: holders of admin.ward.manage). */
@@ -898,9 +745,12 @@ export function addWard(body: WardIn): Promise<WardOut> {
 
 /** Add beds to a ward (bulk) — POST /api/v1/admin/wards/{ward_id}/beds (who may call: holders of admin.ward.manage). */
 export function addBeds(ward_id: number, body: BedsIn): Promise<BedOut[]> {
-  return api<BedOut[]>("POST", `/admin/wards/${ward_id}/beds`, body, {
-    idempotent: true,
-  });
+  return api<BedOut[]>("POST", `/admin/wards/${ward_id}/beds`, body, { idempotent: true });
+}
+
+/** Wards, open and closed — GET /api/v1/admin/wards (who may call: holders of admin.ward.manage). */
+export function listWards(): Promise<WardListItemOut[]> {
+  return api<WardListItemOut[]>("GET", `/admin/wards`, undefined);
 }
 
 /** Provision an operating theater (Super Admin) — POST /api/v1/ot/theaters (who may call: holders of ot.theater.provision). */
@@ -920,11 +770,7 @@ export function loadRelease(body: FormData): Promise<IcdReleaseLoadedOut> {
 
 /** Make a release the active list of its classification — POST /api/v1/icd/releases/{release_id}/activate (who may call: holders of icd.release.manage). */
 export function activate(release_id: number): Promise<IcdReleasesOut> {
-  return api<IcdReleasesOut>(
-    "POST",
-    `/icd/releases/${release_id}/activate`,
-    undefined,
-  );
+  return api<IcdReleasesOut>("POST", `/icd/releases/${release_id}/activate`, undefined);
 }
 
 /** Whether this installation still needs its first Owner — GET /api/v1/admin/first-owner (who may call: holders of admin.user.provision). */
@@ -938,33 +784,16 @@ export function createFirstOwner(body: FirstOwnerIn): Promise<FirstOwnerOut> {
 }
 
 /** Request a control-setting or privileged-access change (applied at once for an Owner) — POST /api/v1/admin/change-requests (who may call: admin.settings.manage for a setting, admin.user.manage for a user's roles, admin.role_matrix.update for a role's permissions (the service checks)). */
-export function createChangeRequest(
-  body: ChangeRequestIn,
-): Promise<AdminChangeRequestOut> {
-  return api<AdminChangeRequestOut>("POST", `/admin/change-requests`, body, {
-    idempotent: true,
-  });
+export function createChangeRequest(body: ChangeRequestIn): Promise<AdminChangeRequestOut> {
+  return api<AdminChangeRequestOut>("POST", `/admin/change-requests`, body, { idempotent: true });
 }
 
 /** Control-setting and privileged-access change requests — GET /api/v1/admin/change-requests (who may call: holders of admin.settings.manage or admin.user.manage or admin.role_matrix.update or approval.policy_change.approve or approval.privileged_access.approve). */
-export function listChangeRequests(query?: {
-  status?: string | null;
-  limit?: number;
-}): Promise<AdminChangeRequestOut[]> {
-  return api<AdminChangeRequestOut[]>(
-    "GET",
-    withQuery(`/admin/change-requests`, query),
-    undefined,
-  );
+export function listChangeRequests(query?: { status?: string | null; limit?: number }): Promise<AdminChangeRequestOut[]> {
+  return api<AdminChangeRequestOut[]>("GET", withQuery(`/admin/change-requests`, query), undefined);
 }
 
 /** One control-setting or privileged-access change request — GET /api/v1/admin/change-requests/{change_request_id} (who may call: holders of admin.settings.manage or admin.user.manage or admin.role_matrix.update or approval.policy_change.approve or approval.privileged_access.approve). */
-export function getChangeRequest(
-  change_request_id: number,
-): Promise<AdminChangeRequestOut> {
-  return api<AdminChangeRequestOut>(
-    "GET",
-    `/admin/change-requests/${change_request_id}`,
-    undefined,
-  );
+export function getChangeRequest(change_request_id: number): Promise<AdminChangeRequestOut> {
+  return api<AdminChangeRequestOut>("GET", `/admin/change-requests/${change_request_id}`, undefined);
 }

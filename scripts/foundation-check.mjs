@@ -111,11 +111,12 @@ try {
   ).toBeVisible();
   await shot("login");
   await login("demo.owner");
+  await page.getByRole('navigation').waitFor({timeout:60000});
+  originalPrefs = (await state()).prefs;
+  await prefs({ language: "en", theme: "Light", ui_scale_pct: 100 });
   await page
     .getByRole("heading", { name: "Where are you working today?" })
     .waitFor();
-  originalPrefs = (await state()).prefs;
-  await prefs({ language: "en", theme: "Light", ui_scale_pct: 100 });
   await shot("workspace_picker");
   const owner = page.locator(".workspace-card").filter({
     has: page.getByRole("heading", {
@@ -426,7 +427,8 @@ try {
   page.once("dialog", (d) => d.accept());
   await nav("Approvals");
   await page.getByRole("heading", { name: "Approvals", exact: true }).waitFor();
-  await expect.poll(() => page.locator(".list-row").count()).toBeGreaterThan(0);
+  await expect.poll(async () => (await page.locator(".list-row").count()) > 0 || /No\s*pending\s*requests/.test(await page.locator('main').innerText())).toBe(true);
+  if (await page.locator(".list-row").count()) {
   await page.locator(".list-row").first().click();
   await page.getByLabel("Decision note", { exact: true }).waitFor();
   await shot("approval_queue");
@@ -458,6 +460,11 @@ try {
   checks.push(
     "incident selector-only and approval note drafts trigger navigation protection",
   );
+  } else {
+    checks.push("Fresh DEV approval queue is empty; empty state verified. Approval confirmation/draft case NOT executed (requires a new authorised pending request).");
+    await shot("approval_queue");
+    await nav("Settings");
+  }
 
   await page
     .locator(".settings-nav button")

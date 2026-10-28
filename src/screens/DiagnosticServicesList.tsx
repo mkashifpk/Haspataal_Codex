@@ -215,7 +215,7 @@ export function DiagnosticServicesList({
               />
             </Field>
             <Field label={t("Where performed", "کہاں انجام ہوتا ہے")}>
-              <select
+              <select data-field="kind"
                 data-help="diagnostic-list.filter"
                 value={kind}
                 onChange={(e) => setKind(e.target.value)}

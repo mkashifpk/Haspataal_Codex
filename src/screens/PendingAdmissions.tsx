@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { api, ApiError } from "../bridge";
+import {validationFields} from '../validation-fields';
 import {
   Empty,
   ErrorBox,
@@ -241,7 +242,8 @@ export function PendingAdmissions({
         "DISCHARGE_STAGE_IMMUTABLE",
         "DISCHARGE_STAGE_OUT_OF_ORDER",
         "DISCHARGE_NOT_ALLOWED",
-      ].includes(write.error.response.error?.code || "")
+      ].includes(write.error.response.error?.code || "") ||
+      (write.error instanceof ApiError && validationFields(write.error.response.error).some(f=>f.field==='ward_id'))
     )
       setRevision((n) => n + 1);
   }, [write.error]);
@@ -396,8 +398,7 @@ export function PendingAdmissions({
       );
       if (
         editor.action === "waitlist" &&
-        !wards.some((w) => String(w.ward_id) === editor.form.ward) &&
-        String(editor.record.requested_ward_id) !== editor.form.ward
+        !wards.some((w) => String(w.ward_id) === editor.form.ward)
       )
         throw Error(
           t(
@@ -636,7 +637,7 @@ export function PendingAdmissions({
             </select>
           </Field>
           <Field label={t("Filter ward", "وارڈ کی شرط")}>
-            <select
+            <select data-field="ward_id"
               data-help="admission.filters"
               value={ward}
               onChange={(e) => setWard(e.target.value)}
@@ -1070,7 +1071,7 @@ export function PendingAdmissions({
               editor.action === "waitlist") && (
               <>
                 <Field label={t("Ward for this action", "اس عمل کا وارڈ")}>
-                  <select
+                  <select data-field="ward_id"
                     data-help="admission.beds"
                     value={editor.form.ward}
                     onChange={(e) => {
@@ -1104,18 +1105,13 @@ export function PendingAdmissions({
                         {w.name} · {w.available} {t("available", "دستیاب")}
                       </option>
                     ))}
-                    {!wards.length && editor.record.requested_ward_id && (
-                      <option value={editor.record.requested_ward_id}>
-                        {editor.record.requested_ward_name}
-                      </option>
-                    )}
                   </select>
                 </Field>
                 {editor.action !== "waitlist" ? (
                   <>
                     <LoadState {...matrix} retry={matrix.reload} />
                     <Field label={t("Available bed", "دستیاب بستر")}>
-                      <select
+                      <select data-field="bed_id"
                         data-help="admission.beds"
                         value={editor.form.bed}
                         onChange={(e) => field("bed", e.target.value)}
@@ -1149,7 +1145,7 @@ export function PendingAdmissions({
                   </>
                 ) : (
                   <Field label={t("Waitlist priority", "انتظار کی ترجیح")}>
-                    <input
+                    <input data-field="priority"
                       data-help="admission.waitlist"
                       inputMode="numeric"
                       value={editor.form.priority}
@@ -1169,7 +1165,7 @@ export function PendingAdmissions({
                     "تصدیق شدہ ادائیگی زمرہ",
                   )}
                 >
-                  <select
+                  <select data-field="billing_category"
                     data-help="admission.confirm-billing"
                     value={editor.form.category}
                     onChange={(e) =>
@@ -1184,7 +1180,7 @@ export function PendingAdmissions({
                   <>
                     <LoadState {...panels} retry={panels.reload} />
                     <Field label={t("Active panel", "فعال پینل")}>
-                      <select
+                      <select data-field="panel_id"
                         data-help="admission.confirm-billing"
                         value={editor.form.panel}
                         onChange={(e) => field("panel", e.target.value)}
@@ -1215,7 +1211,7 @@ export function PendingAdmissions({
                     : t("Cancellation reason", "منسوخی کی وجہ")
                 }
               >
-                <textarea
+                <textarea data-field="reason"
                   data-help="admission.reason"
                   maxLength={500}
                   value={editor.form.reason}
@@ -1232,7 +1228,7 @@ export function PendingAdmissions({
                   )}
                 </p>
                 <Field label={t("Final bill discount", "حتمی بل کی رعایت")}>
-                  <input
+                  <input data-field="discount"
                     data-help="admission.final-bill"
                     inputMode="decimal"
                     value={editor.form.discount}
@@ -1240,7 +1236,7 @@ export function PendingAdmissions({
                   />
                 </Field>
                 <Field label={t("Discount reason", "رعایت کی وجہ")}>
-                  <textarea
+                  <textarea data-field="discount_reason"
                     data-help="admission.final-bill"
                     value={editor.form.discountReason}
                     onChange={(e) => field("discountReason", e.target.value)}
@@ -1257,7 +1253,7 @@ export function PendingAdmissions({
                   )}
                 </p>
                 <Field label={t("Billing clearance note", "بل کلیئرنس نوٹ")}>
-                  <textarea
+                  <textarea data-field="note"
                     data-help="admission.clear"
                     maxLength={1000}
                     value={editor.form.note}

@@ -407,7 +407,7 @@ export function DoctorQueue({
                 </select>
               </Field>
               <Field label={tr("Re-route reason (3–500 characters)")}>
-                <textarea
+                <textarea data-field="reason"
                   data-help="doctorqueue.reroute"
                   value={reason}
                   minLength={3}

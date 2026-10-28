@@ -145,7 +145,7 @@ export function RegistrationActions({
             <fieldset disabled={busy || unknownOutcome}>
               <div className="form-grid">
                 <Field label={tr("Payment method")}>
-                  <select data-help="registration.actions"
+                  <select data-field="method" data-help="registration.actions"
                     aria-label={tr("Payment method")}
                     value={method}
                     onChange={(e) => setMethod(e.target.value as typeof method)}
@@ -159,7 +159,7 @@ export function RegistrationActions({
                   label={tr("Payment amount")}
                   hint={tr("Leave blank to collect the full amount due.")}
                 >
-                  <input data-help="registration.actions"
+                  <input data-field="amount" data-help="registration.actions"
                     aria-label={tr("Payment amount")}
                     type="number"
                     min="0.01"
@@ -169,7 +169,7 @@ export function RegistrationActions({
                   />
                 </Field>
                 <Field label={tr("Card / bank reference")}>
-                  <input data-help="registration.actions"
+                  <input data-field="reference_no" data-help="registration.actions"
                     aria-label={tr("Card / bank reference")}
                     maxLength={60}
                     value={reference}
@@ -207,7 +207,7 @@ export function RegistrationActions({
               <h3>{tr("Request VIP waiver")}</h3>
               <div className="form-grid">
                 <Field label={tr("Waiver percent")}>
-                  <input data-help="registration.actions"
+                  <input data-field="waiver_pct" data-help="registration.actions"
                     type="number"
                     min="0.01"
                     max="100"
@@ -218,7 +218,7 @@ export function RegistrationActions({
                   />
                 </Field>
                 <Field label={tr("Reason")}>
-                  <input data-help="registration.actions"
+                  <input data-field="reason" data-help="registration.actions"
                     minLength={3}
                     maxLength={1000}
                     required

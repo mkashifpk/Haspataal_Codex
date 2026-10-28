@@ -1,0 +1,2276 @@
+{
+  "overview": {
+    "product": "Haspataal HMS backend",
+    "version": "1.0.0",
+    "generated_at": "2026-10-28T15:16:59.584003+00:00",
+    "server_build": "2026-10-28T15:16:59.584003+00:00",
+    "server_build_means": "This DEV server's build (when its knowledge pack was built): a Fixed backend issue report is on this server when server_build is at or after its fixed_in.",
+    "api_base": "/api/v1",
+    "websocket": "/ws/v1/events",
+    "start_here": "get_build_roadmap() says what to build first, next and last; get_screen_bundle(screen_id) has everything to build one screen in one answer.",
+    "counts": {
+      "endpoints": 903,
+      "recorded_examples": 903,
+      "screens": 268,
+      "events": 72,
+      "error_codes": 445,
+      "workspaces": 30,
+      "state_machines": 33,
+      "build_phases": 12,
+      "scenarios": 12,
+      "open_decisions": 22,
+      "lessons": 9,
+      "msds_indicators": 601,
+      "cpsa_documents": 62,
+      "interview_questions": 83
+    },
+    "counts_explained": {
+      "endpoints_without_a_recorded_example": [],
+      "handbook_pages": "one per screen and workspace, including an operator job aid for the badge-station kiosk"
+    },
+    "delivery_gate": {
+      "required": true,
+      "status": "required",
+      "progress_reporting": {
+        "required": true,
+        "submit": "propose_progress",
+        "verify": "progress_proposals",
+        "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+      },
+      "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+      "compulsory": [
+        {
+          "id": "q:f1_help",
+          "label": "F1 contextual help",
+          "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+          "points": 2
+        },
+        {
+          "id": "q:role_faq",
+          "label": "Complete role-specific FAQs",
+          "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+          "points": 3
+        },
+        {
+          "id": "q:zoom",
+          "label": "Keyboard zoom: 100-250% only",
+          "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+          "points": 2
+        },
+        {
+          "id": "q:fresh_data",
+          "label": "Human review with newly created data",
+          "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+          "points": 4
+        }
+      ],
+      "zoom": {
+        "min_pct": 100,
+        "max_pct": 250,
+        "reset_pct": 100,
+        "keys": [
+          "Ctrl + or Ctrl = (zoom in)",
+          "Ctrl - (zoom out)",
+          "Ctrl 0 (reset to 100 %)",
+          "Command on macOS"
+        ],
+        "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+      },
+      "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+      "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+    },
+    "sandbox": {
+      "does": [
+        "real calls as demo accounts on the DEV server (sandbox_call)",
+        "the realtime events a demo account receives (sandbox_events)",
+        "named screen states made with real calls (sandbox_scenario), races included"
+      ],
+      "does_not": [
+        "simulated time (ticket expiry, escalations: wait, or test by hand)",
+        "fault injection (simulate network loss in your own client)",
+        "isolated runs: the demo data is shared by every developer, so scenarios tag their records SCN <run>"
+      ]
+    },
+    "workspaces": {
+      "reception": {
+        "label": "Reception & Front Desk",
+        "description": "Registration, returning-patient lookup, OPD slips, queue management, refunds/waivers, counter cash."
+      },
+      "doctor": {
+        "label": "Clinical OPD / IPD",
+        "description": "Live queue, EMR notes, e-prescriptions with live stock, lab/imaging orders, admissions, re-route."
+      },
+      "admissions": {
+        "label": "Admissions Desk",
+        "description": "Pending admissions, live bed matrix, bed allocation, waitlists, overflow."
+      },
+      "triage": {
+        "label": "ER / Triage",
+        "description": "Code Red one-click admit, trauma profiles, ER flowsheet, medico-legal cases, bodies awaiting handover."
+      },
+      "ward_nurse": {
+        "label": "Ward Nursing",
+        "description": "Assigned beds, vitals grid, MAR checklist, nursing notes, corrections."
+      },
+      "head_nurse": {
+        "label": "Head Nurse",
+        "description": "Nursing duty roster (drag & drop nurses onto beds per shift), roll call, supply indents, leave approvals."
+      },
+      "pharmacy": {
+        "label": "Pharmacy Counter",
+        "description": "Pending prescription queue, FEFO dispensing, partial dispensing, OTC mode, charity override."
+      },
+      "pharmacy_admin": {
+        "label": "Pharmacy Admin",
+        "description": "Batch intake, supplier invoices, low-stock/near-expiry widgets, profit, indent approval."
+      },
+      "lab_tech": {
+        "label": "Lab Technician",
+        "description": "Scanner-first sample processing, dynamic metric grid with live flagging, patient identification at collection, rejected samples, samples sent to partner laboratories, critical results to tell."
+      },
+      "lab_verifier": {
+        "label": "Lab Verifier",
+        "description": "Verify & publish results before doctors see them; tell the doctor every critical result."
+      },
+      "lab_admin": {
+        "label": "Lab Admin",
+        "description": "Test prices and turnaround, reagent inventory, BOM, profit & revenue share, partner laboratories, the lab's quality records (MSDS AAC 1-6)."
+      },
+      "radiology": {
+        "label": "Radiology",
+        "description": "Imaging worklist with the checks before the examination, PACS study linking, the radiologist's report and critical findings, outsourced examinations, repeated images, turnaround (MSDS AAC 7-14)."
+      },
+      "ot_admin": {
+        "label": "OT Admin",
+        "description": "OT request queue, calendar, intra-op consumables, the safety checklist, recovery, finalize & commission split."
+      },
+      "anaesthesia": {
+        "label": "Anaesthesia",
+        "description": "Pre-anaesthesia clinic, the anaesthesia record in the theatre, the sign in, recovery and its discharge, adverse events (MSDS COP 32-40)."
+      },
+      "ot_nurse": {
+        "label": "OT Nursing",
+        "description": "The surgical safety checklist, consumables, recovery observations and discharge (MSDS COP 37, 38, 44)."
+      },
+      "hr": {
+        "label": "HR Admin",
+        "description": "6-step onboarding wizard, documents, ID cards and staff badges, duty rosters, attendance, leave, payroll."
+      },
+      "finance_accountant": {
+        "label": "Accountant",
+        "description": "3-pane audit: shift reconciliation | approval queue | accounts payable."
+      },
+      "finance_cashier": {
+        "label": "Cashier",
+        "description": "Counter collections, dues settlement, cash-backs."
+      },
+      "billing_admin": {
+        "label": "Billing Admin",
+        "description": "Service catalogue, panels, discount ceilings, consultant contracts, waiver/credit approval."
+      },
+      "owner_dashboard": {
+        "label": "Owner / Hospital Admin",
+        "description": "Daily P&L flash, visited vs examined, risk & compliance, approvals."
+      },
+      "inspection": {
+        "label": "PHC Inspector (read-only)",
+        "description": "The Punjab Healthcare Commission's inspector, on a guest login for the days of the inspection (role phc_inspector, the one permission msds.inspect): the hospital's category, the MSDS indicators, the inspection pack and the web portal (CPSA) documents, all read-only; never a patient's chart, money, staff files or the hospital's internal preparation."
+      },
+      "ops_admin": {
+        "label": "Facility Operations",
+        "description": "Facility queues | command & control | live facility feed; utilities & overheads; support-staff duty roster and roll call."
+      },
+      "maintenance": {
+        "label": "Maintenance",
+        "description": "Work orders and assets; medical equipment, its maintenance and calibration."
+      },
+      "super_admin": {
+        "label": "Super Admin (IT)",
+        "description": "Provisioning queue | role matrix | terminal & printer mapping | server health | kill switch."
+      },
+      "zakat": {
+        "label": "Zakat Officer",
+        "description": "Charity approvals."
+      },
+      "quality": {
+        "label": "Quality & Medical Records",
+        "description": "The quarterly medical record review of the Punjab Healthcare Commission's MSDS (IMS-3): cycles, sample, panel, report, deficiencies, corrective and preventive actions; mortality statistics and the medico-legal register."
+      },
+      "infection_control": {
+        "label": "Infection Control",
+        "description": "Infection prevention and control (MSDS IPC 84-92, COP 50): infection cases, the wound surveillance after operations, rounds and audits, the waste log, the sterile supply's sets, sterilizers and recalls, the rates and the committee report."
+      },
+      "cssd": {
+        "label": "Sterile Supply (CSSD)",
+        "description": "The day's sterilizer tests, every load with its indicators and pack labels, the sterile stock and its issue to the wards and theatres (MSDS IPC 90-92)."
+      },
+      "self_service": {
+        "label": "My Workspace",
+        "description": "Own leave requests, balances, duties, attendance, issue reporting."
+      },
+      "badge_station": {
+        "label": "Badge station kiosk",
+        "description": "Not a user workspace: the full-screen page of a barcode-scanner badge station (no login; authenticated by the station's key)."
+      }
+    },
+    "guides": [
+      {
+        "slug": "getting-started",
+        "title": "Getting started",
+        "summary": "Architecture, base URLs, conventions and your first authenticated call in 10 minutes."
+      },
+      {
+        "slug": "authentication",
+        "title": "Authentication & sessions",
+        "summary": "Login, refresh-token rotation, forced password change, workspaces, permissions and the kill switch."
+      },
+      {
+        "slug": "envelope-and-errors",
+        "title": "Envelope & errors",
+        "summary": "The response envelope, the error model and exactly what the UI should do for each class of error."
+      },
+      {
+        "slug": "realtime",
+        "title": "Realtime (WebSocket)",
+        "summary": "One WebSocket per window keeps queues, beds, alerts and boards live — with guaranteed catch-up after reconnects."
+      },
+      {
+        "slug": "idempotency-and-concurrency",
+        "title": "Idempotency, concurrency & corrections",
+        "summary": "Safe retries for record creation, money and stock, optimistic locking with row_version, and append-only corrections."
+      },
+      {
+        "slug": "printing-and-hardware",
+        "title": "Printing & hardware",
+        "summary": "Receipt/label/document print payloads (wristbands and medicine labels too), the letterhead with the PHC number, sets of documents (PDFs only, one per click or one combined PDF by the user's preference), Urdu and right-to-left printouts (laid out by the terminal), terminal→printer mapping, barcode scanners (wristbands and medicines at the bedside), badge stations (RFID, printed QR, biometric) and ID cards."
+      },
+      {
+        "slug": "electron-integration",
+        "title": "Electron integration",
+        "summary": "Trusting the hospital CA, secure token storage, LAN diagnostics, zoom & Urdu, multi-window workspaces."
+      },
+      {
+        "slug": "lan-deployment",
+        "title": "LAN, TLS & environments",
+        "summary": "How the server is reached on the hospital network, ports, the CA download, and dev vs production."
+      },
+      {
+        "slug": "demo-data-and-testing",
+        "title": "Demo data & testing",
+        "summary": "A local backend with a realistic demo hospital, one login per role, recorded examples and the MCP sandbox."
+      },
+      {
+        "slug": "mcp-for-agents",
+        "title": "MCP server for coding agents",
+        "summary": "Connect Claude Code, Cursor or any MCP client so your agent knows every endpoint, payload, screen and rule, and can try requests on the DEV server."
+      },
+      {
+        "slug": "connecting-terminals",
+        "title": "Connecting terminals",
+        "summary": "How a desktop terminal finds the hospital server, trusts it once, remembers every address and survives outages during a shift — with Electron code."
+      },
+      {
+        "slug": "end-user-handbook",
+        "title": "The end-user handbook",
+        "summary": "Staff help delivered with every screen and workspace: purpose, every interaction and outcome, role-specific task FAQs, English and Urdu, offline search and permission-filtered access."
+      },
+      {
+        "slug": "connecting-your-coding-agent",
+        "title": "Connecting your coding agent",
+        "summary": "First access, registration, separate frontend implementations and project-local MCP connections on Windows, macOS and Linux."
+      },
+      {
+        "slug": "glossary",
+        "title": "Glossary",
+        "summary": "The hospital's words as the API uses them (MRN, ticket, token, queue entry, admission, MAR dose, requisition, sample, correction …), what identifies each and where its states come from."
+      },
+      {
+        "slug": "integrations",
+        "title": "Integrations",
+        "summary": "What Haspataal connects to and what it does not: the optional PACS (Orthanc), printers, barcode scanners, badge stations, the WHO code lists, the PHC's web portal; no HL7, FHIR or analyser interfaces."
+      },
+      {
+        "slug": "ui-quality",
+        "title": "Building UI with care",
+        "summary": "The terminal app's quality contract: staff context, approved patterns, complete journeys, explanatory handbooks and evidence before declaring work complete."
+      },
+      {
+        "slug": "workspace-review-checklist",
+        "title": "Human workspace acceptance checklist",
+        "summary": "Mandatory human review of each role's actual frontend, fresh-data CRUD, help and FAQs, bounded zoom, permissions, recovery and handovers before accepting completion."
+      },
+      {
+        "slug": "design-principles",
+        "title": "Design principles: a terminal with character",
+        "summary": "The vendor's point of view for the hospital terminal app, in ten principles from the structure to the last detail, so staff enjoy using it and it never slows their work in the busiest hour."
+      },
+      {
+        "slug": "terminal-installer",
+        "title": "The terminal installer: one self-contained setup EXE",
+        "summary": "How to ship the Windows terminal app as one setup EXE that installs with no internet, as the server's own setup does - everything inside, a free toolchain, a silent install for IT, releases the vendor signs and updates from the hospital's own server."
+      },
+      {
+        "slug": "reporting-backend-issues",
+        "title": "Reporting backend issues",
+        "summary": "When the backend is wrong, or lacks something your screens need, ask your coding agent to report it with report_backend_issue (or report it on the portal); the backend team answers every report."
+      }
+    ],
+    "lessons": [
+      {
+        "slug": "how-haspataal-works",
+        "title": "Lesson 1 · How Haspataal works"
+      },
+      {
+        "slug": "your-first-calls",
+        "title": "Lesson 2 · Your first calls"
+      },
+      {
+        "slug": "answers-and-errors",
+        "title": "Lesson 3 · Answers and errors"
+      },
+      {
+        "slug": "workspaces-and-permissions",
+        "title": "Lesson 4 · Workspaces and permissions"
+      },
+      {
+        "slug": "writing-safely",
+        "title": "Lesson 5 · Writing safely"
+      },
+      {
+        "slug": "live-updates",
+        "title": "Lesson 6 · Live updates"
+      },
+      {
+        "slug": "trusting-the-server",
+        "title": "Lesson 7 · Trusting the server on every platform"
+      },
+      {
+        "slug": "your-first-screen-with-your-agent",
+        "title": "Lesson 8 · Your first screen with your coding agent"
+      },
+      {
+        "slug": "reporting-progress-honestly",
+        "title": "Lesson 9 · Reporting progress honestly"
+      }
+    ],
+    "workflows": [
+      {
+        "slug": "blood-center",
+        "title": "Blood center",
+        "summary": "The hospital's own blood center under its PBTA licence - donors registered once for life, the doctor's assessment against the binding minimums, written consent, deferral and telling the donor why, the collection and the donor's reaction, every donation's five screens and its group, components in quarantine, the clearance, the release into the hospital blood bank by two people, discards, labels, the quarterly return and the registers."
+      },
+      {
+        "slug": "blood-transfusion",
+        "title": "Blood transfusion",
+        "summary": "The hospital blood bank from a licensed source to the bedside - sources, units received, the storage log, requests with the transfusion consent, compatibility tests, issue, the two-person bedside check within 30 minutes, observations, the end, reactions with their incident, discards and returns - and the registers and measures the PHC asks for."
+      },
+      {
+        "slug": "clinic-quality-and-education",
+        "title": "QA rounds, patient feedback and health education",
+        "summary": "The in-charge's recurring QA checklist signed and kept, its findings turned into corrective actions; patient feedback on the client satisfaction form with the person in charge's review; the health education materials and every patient guided."
+      },
+      {
+        "slug": "clinical-and-prescriptions",
+        "title": "Consultation, e-prescriptions & pharmacy dispensing",
+        "summary": "EMR notes with correction-only edits, formulary with live stock, FEFO partial dispensing, OTC, Zakat."
+      },
+      {
+        "slug": "complaints",
+        "title": "Complaints (MSDS)",
+        "summary": "The patients' and families' complaints - received in any way and given a tracking number, acknowledged within the hours the procedure sets with a contact person and a course of action, investigated with progress and extensions told, answered with the right to appeal, the appeal decided by someone independent, the actions that follow, the notice of the right to complain in English and Urdu, the written procedure, the monthly return and the statistics."
+      },
+      {
+        "slug": "consent",
+        "title": "Consent (MSDS)",
+        "summary": "The consent register - the general consent of every admission, the informed consents of operations, anaesthesia, transfusions, procedures and high-risk treatments in the patient's language, who decides for a patient who cannot, the doctor's emergency note, refusals and withdrawals, the scan of the signed form, and the written consent policy."
+      },
+      {
+        "slug": "cost-estimates-and-tariff",
+        "title": "Cost estimates, the tariff and ward transfers (MSDS)",
+        "summary": "The tariff every patient can see, the written uniform pricing policy, the cost estimate prepared from the tariff at admission and explained to the patient or the family in their language and signed, a move to another bed or ward (to and from the ICU) with the new estimate when the daily charge changes, the worklist of estimates due and the statistics (told in time, bills close to the estimates)."
+      },
+      {
+        "slug": "deaths-and-medico-legal-cases",
+        "title": "Deaths and medico-legal cases (MSDS)",
+        "summary": "The medico-legal case register with the police intimation and evidence, the death record with the WHO cause-of-death certificate and the handover of the body, the clinical autopsy, the death register and the mortality statistics."
+      },
+      {
+        "slug": "diagnostic-services",
+        "title": "Diagnostic services quality (MSDS)",
+        "summary": "The quality of the laboratory and imaging services - the patient identified when a sample is taken and before an examination, rejected samples, samples sent to partner laboratories under an MOU, turnaround targets with alerts and the MSDS score, critical results and priority diseases told at once, read back, acknowledged and escalated, the radiologist's report and critical findings, the checks before an examination (site and side, pregnancy, contrast under a doctor), outsourced examinations, repeated images, the statistics and the written lab and imaging policies."
+      },
+      {
+        "slug": "duty-rosters-and-attendance",
+        "title": "Duty rosters, roll call, badges & attendance",
+        "summary": "One duty roster for all staff with scoped planners (HR, Head Nurse, Ops), rest days rotating through a week that includes Sunday, the week check, duty swaps between colleagues, roll call where there is no badge station, attendance measured against the rostered shift, and badges that work with RFID, printed QR codes or biometrics."
+      },
+      {
+        "slug": "emergency-department",
+        "title": "The emergency department (MSDS)",
+        "summary": "The ER register, triage by clinical need with the hospital's written algorithm, the medico-legal checklist, the ER board with its waiting times, how each patient left, the staff on duty and on call, the triage scale and the ER statistics."
+      },
+      {
+        "slug": "external-referrals",
+        "title": "External referrals and the emergency contact list",
+        "summary": "Refer an outpatient or emergency patient to another facility with a letter kept in the record, the transport, the care on the way and the receiving facility's acknowledgement when our staff take the patient; the register of the past 12 months; one emergency and referral contact list, printed for display."
+      },
+      {
+        "slug": "facility-and-it",
+        "title": "Facility operations, badge stations & IT administration",
+        "summary": "Work orders to AP, overhead logging, zero-interface badge stations, provisioning, role matrix, terminal mapping, server health, kill switch."
+      },
+      {
+        "slug": "facility-compliance-equipment-drills",
+        "title": "Licences, equipment maintenance and mock drills (MSDS)",
+        "summary": "The compliance register (licences, registrations, inspection certificates, written plans and the laws that apply, each with its official, its scan, renewals and expiry alerts), the medical equipment inventory with its maintenance and calibration plans from the manufacturer's guidelines, every visit with its result and certificate, the schedule of what is due, the formal write-off, and the mock drills with their coverage by department and shift."
+      },
+      {
+        "slug": "facility-profile-and-services",
+        "title": "Facility settings: the PHC profile and the clinical services",
+        "summary": "What the establishment is: the PHC category on its licence (a clinic, or a hospital of Category II C, II B, II A or I), with the PHC number every printout carries and the date it took effect. What it runs: its clinical services. The establishment switches them on and off itself, in Settings, on the same installation, with no new EXE and no vendor, in either direction, through one previewed, all-or-nothing change. Every frontend reads which services are Active and hides the actions of the others."
+      },
+      {
+        "slug": "finance-and-owner",
+        "title": "Cash shifts, payables, receivables, owner dashboards & risk",
+        "summary": "Drawer-per-counter shifts with verified cash drops, AP/AR, live P&L from the ledger, heuristic risk review."
+      },
+      {
+        "slug": "home-visits-and-preventive-programmes",
+        "title": "Home visits and preventive programmes",
+        "summary": "Whether the establishment provides home visits, the notice for display either way and every visit made; the preventive programmes it offers, the list for display, each patient's enrolment and the services given from the programme's card."
+      },
+      {
+        "slug": "hr-and-payroll",
+        "title": "HR onboarding, IT provisioning, attendance, leave & payroll",
+        "summary": "6-step onboarding (no logins), separate IT provisioning, staff badges, attendance flags against the duty roster, weekly days off and the public holiday calendar, supervisor leave routing, one-click payroll."
+      },
+      {
+        "slug": "icd-coding",
+        "title": "ICD coding (disease classifications)",
+        "summary": "The WHO ICD-11 code list shipped with the server, a hospital's licensed ICD-10, the ICD picker in every coding screen, codes checked against the active list and sent with their titles, coded morbidity and mortality statistics."
+      },
+      {
+        "slug": "incidents-and-sentinel-events",
+        "title": "Incidents, sentinel events and the action register (MSDS)",
+        "summary": "Reporting incidents, adverse events and near misses without blame, the hospital's list of sentinel events, the review that classes a report and names the investigator, the analysis (a root cause analysis for a sentinel event), the corrective and preventive actions of the hospital-wide action register, the closure, the screening list of what the records show, the monthly return (nil included) and the statistics."
+      },
+      {
+        "slug": "infection-control",
+        "title": "Infection prevention and control (MSDS)",
+        "summary": "The sterile supply (sets and their shelf life, sterilizers, the daily Bowie-Dick test, loads released on their mechanical, chemical and biological indicators, pack labels, the issue and the use of each pack on a patient, recalls with the patients exposed), healthcare-associated infections reported and decided, the wound surveillance after operations with its rates by surgeon, procedure and theatre, the audits (hand hygiene by moment), the waste log, and the committee's report."
+      },
+      {
+        "slug": "inpatient-and-discharge",
+        "title": "Admission, beds, nursing & discharge",
+        "summary": "Live bed matrix, admission → bed allocation/waitlist/overflow, Code Red, flowsheet & MAR, strict discharge state machine."
+      },
+      {
+        "slug": "laboratory-and-radiology",
+        "title": "Laboratory & radiology",
+        "summary": "Order → pay → barcoded sample → scanner-first result grid → verification → publish to doctor; PACS linking."
+      },
+      {
+        "slug": "maternity-and-newborns",
+        "title": "Maternity and newborns",
+        "summary": "The hospital's list of high-risk obstetric cases (managed here or referred), its notice and how patients and referrers were told; obstetric risk assessments with the counselling and, in Category I and II A, the nutritional assessment; the newborn as a patient of its own, \"Baby of\" the mother, with its own band."
+      },
+      {
+        "slug": "medical-record-review",
+        "title": "Medical record review (MSDS IMS-3)",
+        "summary": "The quarterly review the Punjab Healthcare Commission requires - statistical sample, peer review against a checklist, deficiencies to the authors, corrective actions, the surveyor's report."
+      },
+      {
+        "slug": "medication-safety",
+        "title": "Medication safety (MSDS)",
+        "summary": "Medication safety - who may prescribe, verbal and telephone orders with the prescriber's countersignature, the pharmacist's queries on unclear orders, high-alert and look-alike medicines with a second person's check at the counter and at the bedside, identity wristbands and the checks before every dose, labels, batch recalls, expired ward stock, self-administration, the patient's own medicines, the written policy and the statistics."
+      },
+      {
+        "slug": "opd-reception",
+        "title": "OPD reception, queues & re-routing",
+        "summary": "Register → pay → token → live doctor queue; re-route, defer/reactivate, expiry; lab-only walk-ins."
+      },
+      {
+        "slug": "operating-theater",
+        "title": "Operating theater",
+        "summary": "Digital request queue, double-booking-proof scheduling, live board, consumable scanning, one-click settlement & commission split."
+      },
+      {
+        "slug": "personnel-records",
+        "title": "Personnel records (MSDS)",
+        "summary": "The personnel file of every member of staff - orientation in three parts, the job description signed by them and the in-charge, credentials verified with their primary source, the mandatory training and its compliance, performance appraisals on schedule (probation, annual, ad hoc) with development, the disciplinary background and the staff health record (confidential) - with the completeness report the surveyor samples, and each member of staff's own view."
+      },
+      {
+        "slug": "phc-inspection",
+        "title": "PHC inspection: category, readiness, the inspection pack, the web portal (CPSA) documents and the inspector's login",
+        "summary": "The establishment's Punjab Healthcare Commission category (a clinic, or Category II C, II B, II A or I), suggested from the beds and recorded by an admin in the facility settings with the PHC number every printout carries; the readiness for an inspection indicator by indicator with the hospital's own assessment; the inspection pack of policies, registers and reports as PDFs, one per click or one combined PDF by the user's preference (never a ZIP); who may write in the medical record and the written IMS policy; the web portal's 20 Critical Patient Safety Areas with the PHC's templates as published and every document filled from the records (PDF, Excel for the CPSA 1 lists), the declaration pre-filled, the uploads recorded and the services declared; the PHC inspector's read-only guest login for the days of the inspection."
+      },
+      {
+        "slug": "phc-interview-prep",
+        "title": "PHC inspection interviews: daily practice, mock interviews, model answers and readiness",
+        "summary": "The PHC's surveyors verify 72 compliance requirements of the MSDS by questioning staff. Every member of staff rehearses the questions of their own roles, in English or Urdu (a question of the day, flashcards rated Knew / Partly / Didn't know on a spaced schedule, progress, a printed pocket guide) with model answers that quote the hospital's own settings and records; supervisors run mock interviews whose gaps in practice become corrective actions; the quality officer adapts the answers to the hospital's SOPs, marks what does not apply and reads the readiness role by role. None of it is shown to the PHC's inspector."
+      },
+      {
+        "slug": "quality-indicators-and-committees",
+        "title": "Clinical quality indicators and committees (MSDS)",
+        "summary": "The clinical quality indicators counted from the records every month (patient assessment, the diagnostic services, invasive procedures, medicines, anaesthesia, blood, the medical records, outcomes and safety) against the hospital's own benchmarks, frozen monthly for the trend; the inpatient nutrition screening and nursing care plan they measure; the hospital's committees with their terms of reference, members, meetings, minutes approved by the chair and the actions decided."
+      },
+      {
+        "slug": "refunds-waivers-credit",
+        "title": "Refunds, VIP waivers & credit (Udhaar)",
+        "summary": "Every privileged money override is request → locked subject → approver → mandatory cash-back prompt."
+      },
+      {
+        "slug": "surgical-care",
+        "title": "Surgical care (MSDS)",
+        "summary": "The clinical record of an operation - clinical privileges, the surgeon's pre-operative note, the consents, the pre-anaesthesia assessment, the surgical safety checklist, the anaesthesia record, the operative note with the post-operative plan, recovery, the adverse events (reported as incidents), the statistics and the written theatre policy."
+      }
+    ],
+    "how_to_work": [
+      "get_build_roadmap() first: the phases, each screen's dependencies with their evidence, what is ready next for you (from your self-reported progress), sessions sized in rubric points",
+      "get_screen_bundle(screen_id) is the unit of work: rules with their rubric ids, endpoints with who may call them, fields, errors, what a lost answer means, realtime, states, test plan, handbook page, scenarios, recorded examples",
+      "sandbox_scenario(id) puts the demo data into a named screen state; sandbox_call runs one request as a demo account; sandbox_events shows the realtime events it caused",
+      "get_workflow_recipe(slug) lists the calls of a hospital workflow in order, with real payloads",
+      "get_endpoint(method, path) gives one contract in full; generate_typescript writes typed calls; validate_request checks a payload before you code it",
+      "screen_test_plan(id) lists what to test; what_changed after a backend update says what broke and which screens, rubric items and handbook pages to revisit",
+      "open_decisions lists what only people can decide (colours, sounds, alert tiers, masks...): never invent those values",
+      "The terminal's contract (provisioning, trust, sessions, windows, offline): the guides authentication, electron-integration and connecting-terminals",
+      "Progress needs human acceptance on the portal: propose_progress submits evidence, my_progress reads accepted claims; no tool records it",
+      "get_ui_quality_brief(screen_id=... or workspace=...): staff context, UI standards, screen handbooks, role FAQs, frontend coverage checks and human journey review; API tests alone are insufficient",
+      "Compulsory on every screen (delivery_gate.compulsory): F1 contextual Help, detailed FAQs for every role of the workspace, Ctrl/Cmd +/-/0 zoom bounded to 100-250 %, and a named human's review with newly created data (guide workspace-review-checklist, the workspace's own section and human_review.operations). Without them a workspace is not done",
+      "The PHC inspection: list_msds_indicators / get_msds_indicator explain the Punjab Healthcare Commission's standards a screen cites (MSDS COP 37, IMS 145 ...) and the inspection documents that evidence them; list_cpsa_documents / get_cpsa_document the web portal's CPSA documents and how each downloads (the PHC's template, the filled PDF or Excel)",
+      "The PHC inspection interviews: get_interview_prep_brief (what to build: practice, mock interviews, readiness), list_interview_questions(role, area) and get_interview_question(key)"
+    ],
+    "conventions": "# Getting started\n\nHaspataal is a **LAN-only backend for clinics and hospitals**. One server in the facility runs the API; every\nterminal (Electron desktop app, browser, tablet) talks to it over the facility's network. There is\nno cloud, no internet dependency and no recurring cost.\n\n```text\n Terminals (Electron / browser)                         Hospital server (Windows 11)\n ─────────────────────────────                          ────────────────────────────────────────────\n reception, wards, pharmacy,  ──HTTPS / WSS (LAN)──►  Caddy :443 ─► API :8100 ─► PostgreSQL\n lab, OT, finance, admin ...                           (TLS, hospital CA)   ▲          ▲ LISTEN/NOTIFY\n                                                                             │          │\n                                                              Worker (jobs, alerts)   Control Center :9000\n```\n\n## One complete terminal app for every facility profile\n\nThe same server software runs a general practitioner's, family physician's or specialist's **clinic** and the\nPunjab Healthcare Commission's hospital categories **II C, II B, II A and I**. A facility may start in any of these\nprofiles and change later, in either direction and as often as it needs, in its own Settings, on the same\ninstallation. It switches services on and off the same way: inpatient care, the emergency department, the theatre,\nthe pharmacy, the laboratory, imaging, the sterile supply, blood transfusion, the blood center, maternity, home visits,\npreventive programmes.\n\nSo **your terminal app is complete from its first release**: one build containing every workspace and every screen of\nthe catalogue, for every profile and every service. When the facility changes profile or switches a service on, it\nneeds nothing from you: no new build, no download, no feature flag, no update. What each user sees is decided at run\ntime by the server:\n\n* after login and on the event `establishment.changed`, read `GET /establishment`: its `views` list which workspaces and\n  screens to show now, and how (in full, with only the open work of a retiring service, as records, in setup, or\n  hidden); the menus redraw without a new login;\n* inside a screen, an operation that starts new work of a service carries `x-capability-gates` in the OpenAPI document:\n  hide it while that service is not Active;\n* never decide anything from the profile's category; the server's views already follow it.\n\nThe playbook *Facility profile and services* (§1 and its acceptance criteria) has the details. Progress on the frontend\nportal is measured against **every** screen of the catalogue, so an app that covers one profile or a few services is\nnever complete. Each implementation you register is expected to be such a complete app on its own (see *Connecting\nyour coding agent*).\n\n## Base URLs\n\n| Environment | REST base | WebSocket | Docs |\n|---|---|---|---|\n| Hospital (production) | `https://<server-name>/api/v1` | `wss://<server-name>/ws/v1/events` | none: `/docs` exists on DEV servers only (`https://<dev-server>/docs`) |\n| Developer machine | `http://127.0.0.1:8100/api/v1` | `ws://127.0.0.1:8100/ws/v1/events` | `http://127.0.0.1:8100/docs` |\n\nNever hard-code a server address: let the user (or IT) enter the server name once at first start\nand store it in the app's settings. Terminals must trust the hospital CA (see *LAN & TLS*).\n\n## Conventions (read once, rely on everywhere)\n\n* **Envelope** — every JSON response is `{\"data\": …, \"meta\": {\"server_time\": …}, \"request_id\": \"…\"}`.\n  Errors are `{\"error\": {\"code\", \"message\", \"details\", \"retryable\", \"retry_after_seconds\"}, \"request_id\"}`.\n* **Money & quantities** are JSON numbers (`1250.5`). **Timestamps** are ISO-8601 UTC\n  (`2026-09-23T04:12:09.123456+00:00`); display them in the hospital timezone (`GET /meta/settings` →\n  `hospital_timezone`). **Business dates** (`YYYY-MM-DD`) are already in hospital time.\n* **Permissions, not roles** — every operation lists the permissions it needs in OpenAPI\n  (`x-permissions`). Show/hide UI by permission (`GET /auth/me` → `permissions`), never by role name.\n* **Enums** — build dropdowns and badges from `GET /meta/enums` (introspected from database CHECK\n  constraints), not from hard-coded lists.\n* **Writes that move money or stock** accept an `Idempotency-Key` header. Send one per user click.\n* **Append-only records** (clinical notes, flowsheet, MAR, ledger, lab results) are never edited — the\n  API offers *correction* endpoints instead. Your UI must never show an \"Edit\" button for them.\n* **Separation of duties** is enforced server-side (a lab technician cannot take cash, a requester\n  cannot approve their own request). The UI should hide such actions, but the server is the guard.\n* **Sets of documents are PDFs, never a ZIP** (the PHC inspection pack). Follow the user's preference\n  `pdf_download` (`GET /auth/me` → `preferences`, changed in Settings → My settings with `PUT /settings/me`):\n  **Separate** (the default) = one download button per document, one click = one PDF; **Combined** = one button,\n  one click = one PDF holding them all. The answer of `GET /msds/inspection-pack` repeats it as `download_mode`\n  ([printing guide](06-printing-and-hardware.md#sets-of-documents-the-phc-inspection-pack)).\n\n## Your first calls\n\n```ts\nconst BASE = \"http://127.0.0.1:8100/api/v1\";\n\n// 1. Log in (demo data: `hms seed-dev`, password Demo-pass-2026)\nconst login = await fetch(`${BASE}/auth/login`, {\n  method: \"POST\",\n  headers: { \"Content-Type\": \"application/json\" },\n  body: JSON.stringify({ username: \"demo.reception\", password: \"Demo-pass-2026\" }),\n}).then((r) => r.json());\n\nconst token = login.data.access_token;        // 30 min, keep in memory\nconst me = login.data.user;                   // roles, permissions, workspaces, preferences\n\n// 2. Call anything with the bearer token\nconst hits = await fetch(`${BASE}/patients/search?q=0300`, {\n  headers: { Authorization: `Bearer ${token}` },\n}).then((r) => r.json());\nconsole.log(hits.data);\n```\n\n## Where to go next\n\n1. **Authentication & sessions** — refresh rotation, forced password change, workspaces.\n2. **Envelope & errors** — how to show every error correctly.\n3. **Realtime** — the WebSocket client every screen uses (queues, beds, alerts).\n4. **Idempotency & concurrency** — safe retries, optimistic locking.\n5. **Printing & hardware** — receipts, labels, ID cards, barcode scanners, badge stations.\n6. **Electron integration** — TLS pinning, secure storage, zoom, Urdu.\n7. **Workflows** — step-by-step API sequences for every hospital workflow.\n8. **Glossary** and **Integrations** — the hospital's words as the API uses them; what the server connects to and what\n   it does not.\n\n> **Using an AI coding agent?** Connect it to the Haspataal MCP server of the DEV server (`https://<dev-server>/mcp`)\n> or run it from your checkout (`hms mcp --transport stdio`). It answers \"which endpoint, with what payload\", \"what does\n> this error mean\", \"what must this screen do\", \"which screen do I build next\", writes typed TypeScript and tries\n> requests and scenarios on the DEV server's demo data. It exists in DEV builds only: see the *MCP server for coding\n> agents* guide.",
+    "contract_fingerprint": "5f8bd8feecd1d68f7841",
+    "knowledge_revision": "893766fb0e066973"
+  },
+  "changes": {
+    "since": {
+      "fingerprint": "58db76bf7d59ef6d9870",
+      "version": "1.0.0",
+      "generated_at": "2026-10-27T21:34:51.340676+00:00",
+      "first_seen_at": "2026-10-27T21:49:53.264419+00:00"
+    },
+    "current": "5f8bd8feecd1d68f7841",
+    "operations": {
+      "added": [
+        "GET /api/v1/admin/wards"
+      ],
+      "removed": [],
+      "changed": [
+        {
+          "operation": "GET /api/v1/consents/{consent_id}",
+          "what": [
+            "schemas"
+          ]
+        },
+        {
+          "operation": "GET /api/v1/consents/{consent_id}/print-payload",
+          "what": [
+            "schemas"
+          ]
+        },
+        {
+          "operation": "PATCH /api/v1/consents/{consent_id}",
+          "what": [
+            "schemas"
+          ]
+        },
+        {
+          "operation": "POST /api/v1/consents",
+          "what": [
+            "schemas"
+          ]
+        },
+        {
+          "operation": "POST /api/v1/consents/{consent_id}/cancel",
+          "what": [
+            "schemas"
+          ]
+        },
+        {
+          "operation": "POST /api/v1/consents/{consent_id}/refuse",
+          "what": [
+            "schemas"
+          ]
+        },
+        {
+          "operation": "POST /api/v1/consents/{consent_id}/scan",
+          "what": [
+            "schemas"
+          ]
+        },
+        {
+          "operation": "POST /api/v1/consents/{consent_id}/sign",
+          "what": [
+            "schemas"
+          ]
+        },
+        {
+          "operation": "POST /api/v1/consents/{consent_id}/withdraw",
+          "what": [
+            "schemas"
+          ]
+        }
+      ]
+    },
+    "schemas": {
+      "added": [
+        "DecisionMakerChoiceOut",
+        "Envelope_list_WardListItemOut__",
+        "WardListItemOut",
+        "WhoDecidesOut"
+      ],
+      "removed": [],
+      "changed": [
+        "ConsentOut"
+      ]
+    },
+    "events": {
+      "added": [],
+      "removed": [],
+      "changed": []
+    },
+    "errors": {
+      "added": [
+        "WARD_IN_USE"
+      ],
+      "removed": []
+    },
+    "screens": {
+      "added": [],
+      "removed": []
+    },
+    "enums": {
+      "added": [],
+      "removed": [],
+      "changed": []
+    },
+    "changes": [
+      {
+        "kind": "operation",
+        "what": "GET /api/v1/admin/wards",
+        "classification": "additive",
+        "why": "new"
+      },
+      {
+        "kind": "operation",
+        "what": "GET /api/v1/consents/{consent_id}",
+        "classification": "check",
+        "why": "changed schemas"
+      },
+      {
+        "kind": "operation",
+        "what": "GET /api/v1/consents/{consent_id}/print-payload",
+        "classification": "check",
+        "why": "changed schemas"
+      },
+      {
+        "kind": "operation",
+        "what": "PATCH /api/v1/consents/{consent_id}",
+        "classification": "check",
+        "why": "changed schemas"
+      },
+      {
+        "kind": "operation",
+        "what": "POST /api/v1/consents",
+        "classification": "check",
+        "why": "changed schemas"
+      },
+      {
+        "kind": "operation",
+        "what": "POST /api/v1/consents/{consent_id}/cancel",
+        "classification": "check",
+        "why": "changed schemas"
+      },
+      {
+        "kind": "operation",
+        "what": "POST /api/v1/consents/{consent_id}/refuse",
+        "classification": "check",
+        "why": "changed schemas"
+      },
+      {
+        "kind": "operation",
+        "what": "POST /api/v1/consents/{consent_id}/scan",
+        "classification": "check",
+        "why": "changed schemas"
+      },
+      {
+        "kind": "operation",
+        "what": "POST /api/v1/consents/{consent_id}/sign",
+        "classification": "check",
+        "why": "changed schemas"
+      },
+      {
+        "kind": "operation",
+        "what": "POST /api/v1/consents/{consent_id}/withdraw",
+        "classification": "check",
+        "why": "changed schemas"
+      },
+      {
+        "kind": "schema",
+        "what": "ConsentOut",
+        "classification": "check",
+        "why": "fields changed: compare get_schema with your types (regenerate them)"
+      },
+      {
+        "kind": "schema",
+        "what": "DecisionMakerChoiceOut",
+        "classification": "additive",
+        "why": "new"
+      },
+      {
+        "kind": "schema",
+        "what": "Envelope_list_WardListItemOut__",
+        "classification": "additive",
+        "why": "new"
+      },
+      {
+        "kind": "schema",
+        "what": "WardListItemOut",
+        "classification": "additive",
+        "why": "new"
+      },
+      {
+        "kind": "schema",
+        "what": "WhoDecidesOut",
+        "classification": "additive",
+        "why": "new"
+      }
+    ],
+    "breaking": false,
+    "needs_review": true,
+    "screens_touched": {
+      "bed_matrix": [
+        "rules: 1 new or reworded (their rubric items come back unticked), 0 gone"
+      ],
+      "consent_register": [
+        "an endpoint it calls changed"
+      ],
+      "consent_register_owner": [
+        "an endpoint it calls changed"
+      ],
+      "consents_admissions": [
+        "an endpoint it calls changed",
+        "rules: 1 new or reworded (their rubric items come back unticked), 0 gone"
+      ],
+      "consents_anaesthesia": [
+        "an endpoint it calls changed",
+        "rules: 1 new or reworded (their rubric items come back unticked), 0 gone"
+      ],
+      "consents_doctor": [
+        "an endpoint it calls changed",
+        "rules: 1 new or reworded (their rubric items come back unticked), 0 gone"
+      ],
+      "consents_triage": [
+        "an endpoint it calls changed",
+        "rules: 1 new or reworded (their rubric items come back unticked), 0 gone"
+      ],
+      "consents_ward": [
+        "an endpoint it calls changed",
+        "rules: 1 new or reworded (their rubric items come back unticked), 0 gone"
+      ],
+      "it_console": [
+        "its endpoints changed",
+        "rules: 1 new or reworded (their rubric items come back unticked), 0 gone"
+      ],
+      "pre_anaesthesia_clinic": [
+        "an endpoint it calls changed"
+      ],
+      "safety_checklist": [
+        "an endpoint it calls changed"
+      ],
+      "safety_checklist_admin": [
+        "an endpoint it calls changed"
+      ],
+      "safety_checklist_anaesthesia": [
+        "an endpoint it calls changed"
+      ],
+      "surgical_record_surgeon": [
+        "an endpoint it calls changed"
+      ]
+    },
+    "rubric_items_affected": {
+      "bed_matrix": {
+        "added": [
+          "rule:820908f0db"
+        ],
+        "removed": [],
+        "review": [],
+        "rule": "Added or reworded rules are unticked; review does not withdraw existing claims."
+      },
+      "consent_register": {
+        "added": [],
+        "removed": [],
+        "review": [
+          "ep:GET /consents/{consent_id}",
+          "ep:GET /consents/{consent_id}/print-payload"
+        ],
+        "rule": "Added or reworded rules are unticked; review does not withdraw existing claims."
+      },
+      "consent_register_owner": {
+        "added": [],
+        "removed": [],
+        "review": [
+          "ep:GET /consents/{consent_id}",
+          "ep:GET /consents/{consent_id}/print-payload"
+        ],
+        "rule": "Added or reworded rules are unticked; review does not withdraw existing claims."
+      },
+      "consents_admissions": {
+        "added": [
+          "rule:cb2f327ee7"
+        ],
+        "removed": [],
+        "review": [
+          "ep:GET /consents/{consent_id}",
+          "ep:GET /consents/{consent_id}/print-payload",
+          "ep:PATCH /consents/{consent_id}",
+          "ep:POST /consents",
+          "ep:POST /consents/{consent_id}/cancel",
+          "ep:POST /consents/{consent_id}/refuse",
+          "ep:POST /consents/{consent_id}/scan",
+          "ep:POST /consents/{consent_id}/sign",
+          "ep:POST /consents/{consent_id}/withdraw"
+        ],
+        "rule": "Added or reworded rules are unticked; review does not withdraw existing claims."
+      },
+      "consents_anaesthesia": {
+        "added": [
+          "rule:cb2f327ee7"
+        ],
+        "removed": [],
+        "review": [
+          "ep:GET /consents/{consent_id}",
+          "ep:GET /consents/{consent_id}/print-payload",
+          "ep:PATCH /consents/{consent_id}",
+          "ep:POST /consents",
+          "ep:POST /consents/{consent_id}/cancel",
+          "ep:POST /consents/{consent_id}/refuse",
+          "ep:POST /consents/{consent_id}/scan",
+          "ep:POST /consents/{consent_id}/sign",
+          "ep:POST /consents/{consent_id}/withdraw"
+        ],
+        "rule": "Added or reworded rules are unticked; review does not withdraw existing claims."
+      },
+      "consents_doctor": {
+        "added": [
+          "rule:cb2f327ee7"
+        ],
+        "removed": [],
+        "review": [
+          "ep:GET /consents/{consent_id}",
+          "ep:GET /consents/{consent_id}/print-payload",
+          "ep:PATCH /consents/{consent_id}",
+          "ep:POST /consents",
+          "ep:POST /consents/{consent_id}/cancel",
+          "ep:POST /consents/{consent_id}/refuse",
+          "ep:POST /consents/{consent_id}/scan",
+          "ep:POST /consents/{consent_id}/sign",
+          "ep:POST /consents/{consent_id}/withdraw"
+        ],
+        "rule": "Added or reworded rules are unticked; review does not withdraw existing claims."
+      },
+      "consents_triage": {
+        "added": [
+          "rule:cb2f327ee7"
+        ],
+        "removed": [],
+        "review": [
+          "ep:GET /consents/{consent_id}",
+          "ep:GET /consents/{consent_id}/print-payload",
+          "ep:PATCH /consents/{consent_id}",
+          "ep:POST /consents",
+          "ep:POST /consents/{consent_id}/cancel",
+          "ep:POST /consents/{consent_id}/refuse",
+          "ep:POST /consents/{consent_id}/scan",
+          "ep:POST /consents/{consent_id}/sign",
+          "ep:POST /consents/{consent_id}/withdraw"
+        ],
+        "rule": "Added or reworded rules are unticked; review does not withdraw existing claims."
+      },
+      "consents_ward": {
+        "added": [
+          "rule:cb2f327ee7"
+        ],
+        "removed": [],
+        "review": [
+          "ep:GET /consents/{consent_id}",
+          "ep:GET /consents/{consent_id}/print-payload",
+          "ep:PATCH /consents/{consent_id}",
+          "ep:POST /consents",
+          "ep:POST /consents/{consent_id}/cancel",
+          "ep:POST /consents/{consent_id}/refuse",
+          "ep:POST /consents/{consent_id}/scan",
+          "ep:POST /consents/{consent_id}/sign",
+          "ep:POST /consents/{consent_id}/withdraw"
+        ],
+        "rule": "Added or reworded rules are unticked; review does not withdraw existing claims."
+      },
+      "it_console": {
+        "added": [
+          "ep:GET /admin/wards",
+          "rule:d0dc21da29"
+        ],
+        "removed": [],
+        "review": [],
+        "rule": "Added or reworded rules are unticked; review does not withdraw existing claims."
+      },
+      "pre_anaesthesia_clinic": {
+        "added": [],
+        "removed": [],
+        "review": [
+          "ep:GET /consents/{consent_id}",
+          "ep:GET /consents/{consent_id}/print-payload",
+          "ep:PATCH /consents/{consent_id}",
+          "ep:POST /consents",
+          "ep:POST /consents/{consent_id}/cancel",
+          "ep:POST /consents/{consent_id}/refuse",
+          "ep:POST /consents/{consent_id}/scan",
+          "ep:POST /consents/{consent_id}/sign",
+          "ep:POST /consents/{consent_id}/withdraw"
+        ],
+        "rule": "Added or reworded rules are unticked; review does not withdraw existing claims."
+      },
+      "safety_checklist": {
+        "added": [],
+        "removed": [],
+        "review": [
+          "ep:GET /consents/{consent_id}"
+        ],
+        "rule": "Added or reworded rules are unticked; review does not withdraw existing claims."
+      },
+      "safety_checklist_admin": {
+        "added": [],
+        "removed": [],
+        "review": [
+          "ep:GET /consents/{consent_id}"
+        ],
+        "rule": "Added or reworded rules are unticked; review does not withdraw existing claims."
+      },
+      "safety_checklist_anaesthesia": {
+        "added": [],
+        "removed": [],
+        "review": [
+          "ep:GET /consents/{consent_id}"
+        ],
+        "rule": "Added or reworded rules are unticked; review does not withdraw existing claims."
+      },
+      "surgical_record_surgeon": {
+        "added": [],
+        "removed": [],
+        "review": [
+          "ep:GET /consents/{consent_id}",
+          "ep:GET /consents/{consent_id}/print-payload",
+          "ep:PATCH /consents/{consent_id}",
+          "ep:POST /consents",
+          "ep:POST /consents/{consent_id}/cancel",
+          "ep:POST /consents/{consent_id}/refuse",
+          "ep:POST /consents/{consent_id}/scan",
+          "ep:POST /consents/{consent_id}/sign",
+          "ep:POST /consents/{consent_id}/withdraw"
+        ],
+        "rule": "Added or reworded rules are unticked; review does not withdraw existing claims."
+      }
+    },
+    "handbook_pages_to_revise": [
+      "screens/bed_matrix",
+      "screens/consent_register",
+      "screens/consent_register_owner",
+      "screens/consents_admissions",
+      "screens/consents_anaesthesia",
+      "screens/consents_doctor",
+      "screens/consents_triage",
+      "screens/consents_ward",
+      "screens/it_console",
+      "screens/pre_anaesthesia_clinic",
+      "screens/safety_checklist",
+      "screens/safety_checklist_admin",
+      "screens/safety_checklist_anaesthesia",
+      "screens/surgical_record_surgeon"
+    ],
+    "note": null
+  },
+  "issues": [
+    {
+      "id": 39,
+      "developer_id": 1,
+      "implementation_id": 1,
+      "request_id": "consent-patient-policy-20261028-v1",
+      "source": "mcp",
+      "kind": "MissingWorkflow",
+      "severity": "Medium",
+      "title": "Consent picker lacks effective age policy or patient-specific allowed decision makers",
+      "actual": "GET /consent-decision-makers as demo.admissions returns adult_priority/minor_priority for each relationship, but neither that response, ConsentOut nor GET /meta/settings exposes effective consent_adult_age. GET /admin/settings is correctly403 for this account. Therefore the prescribed patient-specific adult/minor relationship picker cannot classify using hospital policy without hardcoding the seeded18. The emergency-second-doctor requirement is likewise admin-only, although backend validation can enforce it.",
+      "expected": "Provide a patient-specific allowed decision-maker response/effective patient group or expose the non-sensitive effective consent_adult_age to consent.view users. Ruleb7bacc1ffb and consent playbook section1/4 require adult_priority versus minor_priority using the hospital's configurable consent_adult_age, not a frontend18. Please also expose whether the second doctor is required if client validation is expected. No admin permission escalation requested; backend decision guards remain authoritative.",
+      "steps": "As demo.admissions GET /consent-decision-makers and /meta/settings; compare current schemas/ConsentOut with consent workflow1/4. GET /admin/settings confirms permission boundary. No need to change any setting or submit a consent to reproduce.",
+      "evidence": "Fresh28Oct server2026-10-27T21:34:51.340676+00:00/contract58db76bf7d59ef6d9870. Decision-maker200request5c6cb38cdac147a980b97be17c1a3e: both priority columns, no threshold/group. Public settings200request4b90cebad425439fb1bc975ef274b55d excludes consent_adult_age/consent_emergency_second_doctor. Admin settings403request0dc5cd778498422183d187224820fb37. Schemas independently match these responses. Own/all-other-open issues checked; no matching finding. Reads only, no policy or patient changed.",
+      "endpoint": "GET /consent-decision-makers",
+      "screen_id": "consents_admissions",
+      "workflow": "consent sections1/4; consents_admissions ruleb7bacc1ffb",
+      "build": "384b1a4 + General consent implementation working tree",
+      "backend_version": "1.0.0",
+      "reported_by": "Codex",
+      "status": "Fixed",
+      "response": "Confirmed, and thank you for stopping at the permission boundary. The picker could only have applied the hospital's policy by reading admin-only settings or hardcoding 18, and the patient's age by the server's rule (date of birth or the age on record, on the day of the decision) was not given either. Rather than expose the settings for the terminal to classify the patient, every consent now carries the server's own answer for its patient. From fixed_in on (compare overview's server_build with fixed_in): every consent answer (GET /consents/{consent_id}, POST /consents, PATCH, sign, refuse, withdraw, cancel, scan, and fields.consent of the print payload) has who_decides: adult_age (setting consent_adult_age), patient_is_minor (the patient's age is known and below it; an unknown age counts as an adult, as the database's check does), patient_may_sign (false for a minor: offer only a decision maker), decision_makers (only the relationships allowed for this patient, each with relationship, description and priority, in the order to ask) and emergency_second_doctor (an EmergencyNote needs second_doctor_id, a doctor registered with the PMDC other than the caller: GET /staff/lookup?license_type=PMDC, as in #30). It is computed by the same rule the decision is checked with, for today; a decision dated earlier (decided_at) is checked on its own date, and CONSENT_SIGNER_INVALID stays authoritative. GET /consent-decision-makers stays the policy's configuration list. The consent screens have a new UX rule (a new checklist item on each): who signs comes from who_decides; never classify the patient or hardcode an age. The consent playbook (section 1 step 4, section 4) says the same. Regenerate your types (ConsentOut gains who_decides: WhoDecidesOut with DecisionMakerChoiceOut) and re-read get_endpoint for GET /consents/{consent_id}. To check it as demo.admissions: prepare a general consent for a new synthetic adult (patient_may_sign true, Guardian first) and for a synthetic child under 18 (patient_may_sign false, Parent first, no Spouse); no setting needs to change. The same update changes a migration (backend issue #38), so the DEV server is reinstalled with fresh hospital data (your registry account stays).",
+      "triaged_by": "Faqeer Hussain",
+      "duplicate_of": null,
+      "fixed_in": "2026-10-28T15:16:59.584003+00:00",
+      "created_at": "2026-10-28T11:05:31+00:00",
+      "updated_at": "2026-10-28T15:34:08+00:00",
+      "username": "mkashif",
+      "developer_name": "Muhammad Kashif",
+      "implementation_name": "Codex",
+      "open": false
+    },
+    {
+      "id": 38,
+      "developer_id": 1,
+      "implementation_id": 1,
+      "request_id": "bed-matrix-orphan-ward-20261028-v1",
+      "source": "mcp",
+      "kind": "ContractMismatch",
+      "severity": "Medium",
+      "title": "Bed matrix returns beds of a deactivated ward but omits their ward summary",
+      "actual": "On owned fresh synthetic ward6, PUT /admin/wards/6 is_active:false succeeds200. GET /beds/matrix?include_beds=true then omits ward6 from wards/summary but still returns beds35,36,37 with ward_id6/current_stateAvailable. Clients cannot find the returned beds' ward name/counts or verify that ward for work. Other wards are unaffected.",
+      "expected": "Please either exclude the deactivated ward's beds consistently or document/return the ward metadata/status needed for these bed rows. Bed matrix's stated per-ward grid/counts should give a coherent ward context for each returned bed. Frontend will visibly mark missing ward summaries and disable service changes on unverified beds, not invent ward metadata or silently assume usable.",
+      "steps": "New DEMO-BED-MATRIX-1793180412926: demo.it created synthetic ward6/codeDBED3180413654 and beds35–37. All readiness changes were restored; own admission7cancelled. Confirm actual matrix all threeAvailable/noadmission, then PUT own ward6 with original body/is_activefalse. GET matrix include_bedstrue. No real bed/patient/ward edited. Do not replay completed cleanup writes.",
+      "evidence": "Ward deactivation200requestc55086cff6bf4b8b8c7b416b5e0a4112 row_version2/is_activefalse. Subsequent matrix200requestd35ac9a78bf34dbebca67b9a6e409058: wards5rows no6, beds still35–37ward6. Prior matrixb8998618d9e5462bb52ba7441c4c8c4b had6wards and all threeAvailable. Exact responses docs/bed-matrix-live-2026-10-28.json. Server2026-10-27T21:34:51.340676+00:00/contract58db76bf7d59ef6d9870. Own/all-open issues read;35–37differentfindings. No claim that an inactive-ward allocation was attempted.",
+      "endpoint": "GET /beds/matrix",
+      "screen_id": "bed_matrix",
+      "workflow": "inpatient-and-discharge / live bed matrix",
+      "build": "354abea + BedMatrix tested working tree",
+      "backend_version": "1.0.0",
+      "reported_by": "Codex",
+      "status": "Fixed",
+      "response": "Confirmed, and thank you for using a ward of your own. Checking it found more than the matrix: a ward could be closed with patients in its beds, and allocate-bed and overflow-override still reserved a closed ward's beds (the transfer and Code Red already refused them). The owner decided (decisions 55): a ward is closed only when empty, and a closed ward is out of the bed matrix. From fixed_in on (compare overview's server_build with fixed_in): (1) GET /beds/matrix lists the beds of the open wards only: every bed belongs to a ward in wards and summary, and a closed ward leaves with its beds and its counts. (2) PUT /admin/wards/{ward_id} with is_active false answers 409 WARD_IN_USE (new, not retryable) while a bed is Reserved, Occupied, Dirty or Cleaning or a patient waits on the ward's waitlist (details.beds_in_use: the bed labels, details.waitlisted), and nothing changes; the database enforces it. (3) A closed ward's beds take no patient: allocate-bed and overflow-override answer 409 BED_NO_LONGER_AVAILABLE with details.in_service false (re-read the matrix and pick another bed), the database refuses it too, and waitlisting a patient for a closed ward answers VALIDATION_ERROR (details.field ward_id). (4) GET /admin/wards (new, admin.ward.manage, in it_console) lists every ward, open and closed, with the fields PUT takes (send them all), beds, beds_in_use and waitlisted: the IT console had no list of wards, so a closed ward could not be found to reopen it; is_active true reopens it. bed_matrix and it_console each have a new UX rule (a new checklist item); the inpatient-and-discharge and facility-and-IT playbooks say the same. With this, a bed without its ward cannot appear: never invent ward metadata; if one ever does, re-fetch the matrix and report it. Regenerate your types (the error codes gain WARD_IN_USE; WardListItemOut is new). The same update changes a migration (backend issue #38), so the DEV server is reinstalled with fresh hospital data (your registry account stays) and your ward 6 is gone. To check it: as demo.it create a synthetic ward with two beds; as demo.admissions reserve one for a new synthetic admission; PUT the ward with is_active false answers WARD_IN_USE naming that bed; cancel the admission, and the close answers 200; GET /beds/matrix lists neither the ward nor its beds, GET /admin/wards lists it closed, and is_active true brings it back.",
+      "triaged_by": "Faqeer Hussain",
+      "duplicate_of": null,
+      "fixed_in": "2026-10-28T15:16:59.584003+00:00",
+      "created_at": "2026-10-28T10:05:23+00:00",
+      "updated_at": "2026-10-28T15:34:08+00:00",
+      "username": "mkashif",
+      "developer_name": "Muhammad Kashif",
+      "implementation_name": "Codex",
+      "open": false
+    },
+    {
+      "id": 37,
+      "developer_id": 1,
+      "implementation_id": 1,
+      "request_id": "bed-state-errors-20261028-v1",
+      "source": "mcp",
+      "kind": "Documentation",
+      "severity": "Low",
+      "title": "Bed-state endpoint omits its actual BED_STATE_INVALID and validation refusals",
+      "actual": "Current get_endpoint/errors and bed_matrix screen_test_plan list only FORBIDDEN. On fresh owned synthetic Reserved bed37, state OutOfService correctly returns409 BED_STATE_INVALID/nonretryable. Reason x on own Available bed35 returns422 VALIDATION_ERROR/nonretryable. Both are absent from endpoint errors, although the bed state machine and reason3–300 schema explain these valid refusals.",
+      "expected": "Document BED_STATE_INVALID409 and VALIDATION_ERROR422 in the endpoint/error details/test plan; UI should read current matrix and keep reason, no automatic retry. Guard itself is correct, consistent with rule d46fe09cb8 and fixed issue32's completeness sweep.",
+      "steps": "Create NEW synthetic ward/beds as demo.it; own ward6/beds35–37 here, labelsDEMO-BED-A/B/C. New scenario2f7273 created patient7/ticket7/admission7; reserve bed37 as demo.admissions. Intentionally POST /beds/37/state {state:OutOfService,reason:DEMO intentional refusal on own reserved bed}. Separately on own Available35 send reason x. Do not replay our completed keys/ids.",
+      "evidence": "Server2026-10-27T21:34:51.340676+00:00/contract58db76bf7d59ef6d9870. Reserved refusal requestbd3a9d9253b34e3a8544d13ea19d7e9e409BED_STATE_INVALID; invalidreason2875b374af2e4627b8ad66726fe2a649422VALIDATION_ERROR. Actual out-service200eba1ae74e7d2491c83c259a54a38450b v2; samekey replay e916f79e0fbd44649551efee0ef3d35a v2; back200ad5632088ec84ff698b444bd4a859da9 v3. Journaldocs/bed-matrix-live-2026-10-28.json, runDEMO-BED-MATRIX-1793180412926. Own/all-open issues checked;35/36unrelated. No real bed/patient/care/cleaning/money.",
+      "endpoint": "POST /beds/{bed_id}/state",
+      "screen_id": "bed_matrix",
+      "workflow": "inpatient-and-discharge / bed matrix section2.1",
+      "build": "354abea + BedMatrix working tree",
+      "backend_version": "1.0.0",
+      "reported_by": "Codex",
+      "status": "Fixed",
+      "response": "Confirmed, thank you for the exact requests on your own beds. BED_STATE_INVALID comes from the database's bed state machine, which the completeness sweep of #32 does not scan, and VALIDATION_ERROR from the request schema (state OutOfService or Available, reason 3-300 characters), which no list of an endpoint's errors read. From fixed_in on (compare overview's server_build with fixed_in): (1) POST /beds/{bed_id}/state has a description that names both: BED_STATE_INVALID (409, not retryable) when the bed cannot move to that state from where it is (a Reserved or Occupied bed is never taken out of service or made Available: release the reservation, or move or discharge the patient first); nothing changes, read GET /beds/matrix again, keep the reason typed and never retry. VALIDATION_ERROR (422, details.fields): a state other than the two, or a reason too short or too long; correct it. (2) Every endpoint whose OpenAPI declares a 422 (each one with a body or parameters to check, about 800) now lists VALIDATION_ERROR in get_endpoint's errors and screen_test_plan: handle it as guide 03 says (details.fields), so expect it in lists that did not show it. (3) A backend test makes both refusals (a reserved bed taken out of service, a one-letter reason), so the recorded example shows them as seen_in_tests too. The inpatient-and-discharge playbook's bed matrix section says the same. No rule or behaviour changed: your guard handling fits. Re-read get_endpoint for POST /beds/{bed_id}/state and screen_test_plan('bed_matrix').",
+      "triaged_by": "Faqeer Hussain",
+      "duplicate_of": null,
+      "fixed_in": "2026-10-28T15:16:59.584003+00:00",
+      "created_at": "2026-10-28T09:45:00+00:00",
+      "updated_at": "2026-10-28T15:34:08+00:00",
+      "username": "mkashif",
+      "developer_name": "Muhammad Kashif",
+      "implementation_name": "Codex",
+      "open": false
+    },
+    {
+      "id": 36,
+      "developer_id": 1,
+      "implementation_id": 1,
+      "request_id": "pending-admissions-state-errors-20261028-v1",
+      "source": "mcp",
+      "kind": "Documentation",
+      "severity": "Low",
+      "title": "Three admission allocation routes omit actual ADMISSION_STATE_INVALID from errors",
+      "actual": "Current waitlist/allocate-bed/overflow-override endpoint errors omit ADMISSION_STATE_INVALID, despite write_semantics.refused_with naming it. Fresh owned admission4 waitlist200 then repeat409 ADMISSION_STATE_INVALID; overflow200 then intentional overflow and allocate repeats both409 with same code. Guards behave correctly; this is knowledge/error-list completeness.",
+      "expected": "Name ADMISSION_STATE_INVALID409/nonretryable in all three endpoint descriptions/errors and screen_test_plan; reread original admission and preserve draft. Consistent with fixed issue32 sweep and each route's own write semantics.",
+      "steps": "NEW synthetic scenario e1e608 created patient5/ticket5/admission4. As demo.admissions waitlist actual ward4 priority1, intentional repeat; overflow actual available bed3/ward1 reason DEMO software-only cross-ward overflow test; intentional repeat overflow and allocate-bed on the same BedReserved admission. No automatic replay or real care. Do not rerun completed keys.",
+      "evidence": "Server2026-10-27T21:34:51.340676+00:00/contract58db76bf7d59ef6d9870. Waitlist repeat requestd5acbacb364040fda9cf7733e338ddbd; overflow repeatccb75494ecce4299a0ea17ca45f92d15; allocate repeatf81f94c39ddb4f4b911c7cfa1e84946d. Each409 ADMISSION_STATE_INVALID retryablefalse. Positive waitlist6027b6d5370143bd83a0c9d3e8d8e627, overflow67b22fab31344962a575eed38d19d5b8. Exact requests/results saved docs/pending-admissions-live-2026-10-28.json. Existing own/all-open reports checked; no matching admission error-list report.",
+      "endpoint": "POST /admissions/{admission_id}/waitlist",
+      "screen_id": "pending_admissions",
+      "workflow": "inpatient-and-discharge / standard admission",
+      "build": "3445cab + PendingAdmissions working tree",
+      "backend_version": "1.0.0",
+      "reported_by": "Codex",
+      "status": "Fixed",
+      "response": "Confirmed, thank you for testing each repeat on purpose. The guards were right; the three routes named ADMISSION_STATE_INVALID only in their x-repeat (write_semantics.refused_with), and get_endpoint's errors, screen_test_plan, the screen bundle, the handbook outline with its FAQ seed and the build order read only an endpoint's description and the codes seen in the backend's tests. From fixed_in on (compare overview's server_build with fixed_in): (1) the descriptions of POST /admissions/{admission_id}/allocate-bed, /overflow-override and /waitlist name it: 409, not retryable, when the admission is no longer AdmissionPending or Waitlisted (only an AdmissionPending one is waitlisted): another desk gave it a bed, it was cancelled, or a repeat after a lost answer. Nothing changes: read GET /admissions/{admission_id} again, show where it stands and keep what the user chose (the overflow's typed reason too); never retry. (2) Every list of an endpoint's errors now reads its x-repeat refusal too, through one reader, so 33 endpoints whose repeat refusal was named only there list it now (OPD queue reroute, approval reject and cancel, admission transfer and discharge, theatre start and completion, payroll paid and others): re-read get_endpoint for the screens you have built. (3) The backend's tests make the three refusals (a repeated waitlist; an overflow and an allocation of an admission that has its bed), so the recorded examples show them as seen_in_tests as well. (4) The portal's endpoint page shows the route's repeat rule (If repeated). The inpatient-and-discharge playbook (step 2) says the same. No rule, field or behaviour changed; your recovery fits as it is. Re-read get_endpoint for the three endpoints and screen_test_plan('pending_admissions').",
+      "triaged_by": "Faqeer Hussain",
+      "duplicate_of": null,
+      "fixed_in": "2026-10-28T15:16:59.584003+00:00",
+      "created_at": "2026-10-28T05:48:40+00:00",
+      "updated_at": "2026-10-28T15:34:08+00:00",
+      "username": "mkashif",
+      "developer_name": "Muhammad Kashif",
+      "implementation_name": "Codex",
+      "open": false
+    },
+    {
+      "id": 35,
+      "developer_id": 1,
+      "implementation_id": 1,
+      "request_id": "radiology-stale-link-example-20261028-v1",
+      "source": "mcp",
+      "kind": "Documentation",
+      "severity": "Low",
+      "title": "Link-study recorded example still sends removed study_instance_uid request field",
+      "actual": "Current get_endpoint and radiology_worklist bundle recorded_example.request.body still contains study_instance_uid:'9.9', although current LinkIn properties only includes orthanc_study_id and the endpoint explicitly forbids a request UID. Fresh get_endpoint reproduced this on 28Oct2026. No recorded example ID was sent to the API.",
+      "expected": "Regenerate the recorded request example without study_instance_uid; preserve response study_instance_uid from PACS. Real DEV positive link remains N/A under decision54.",
+      "steps": "Read get_endpoint POST /imaging/orders/{order_id}/link-study and compare request_body.properties with recorded_example.request.body. Same example appears in get_screen_bundle radiology_worklist max_chars200000. Do not send its example ID.",
+      "evidence": "server_build2026-10-27T21:34:51.340676+00:00; contract58db76bf7d59ef6d9870. Actual fresh absent-PACS refusal request4fb44144c0a94cd894ee486de19cc1c9, unchanged-order read6a36391193e64cffbfd1f643df364d29 both used owned synthetic order1 and body{}; no positive link claimed. Mismatch is knowledge example only.",
+      "endpoint": "POST /imaging/orders/{order_id}/link-study",
+      "screen_id": "radiology_worklist",
+      "workflow": "",
+      "build": "f5a178b + backend #30–34 alignment working tree",
+      "backend_version": "1.0.0",
+      "reported_by": "Codex",
+      "status": "Fixed",
+      "response": "Confirmed, and thank you for not sending the example's id. A backend test sends the removed study_instance_uid on purpose, to prove the server no longer believes it, and the recorder kept that call as the endpoint's example. The example check did not catch it: the request models ignore a field they do not declare, so JSON Schema passed it and the server answered 200 as if it had been read. From fixed_in on (compare overview's server_build with fixed_in): (1) the recorded example of POST /imaging/orders/{order_id}/link-study sends orthanc_study_id only; its response keeps study_instance_uid, which comes from the PACS. (2) The recorder never keeps a call that sends a field the request does not declare, and a backend test fails on any recorded example that does, nested fields included, so no other example can teach a removed field. (3) validate_request now names every body field the endpoint does not declare (\"not a field of this request (removed or misspelt?): the server ignores it\"), so a stale field in your own payload shows before you send it. No field, rule or behaviour changed: LinkIn is as #31 left it, and a successful link stays not applicable on DEV (decisions 54). Re-read get_endpoint for the endpoint and get_screen_bundle('radiology_worklist'); your absent-PACS check with {} is still the test on DEV.",
+      "triaged_by": "Faqeer Hussain",
+      "duplicate_of": null,
+      "fixed_in": "2026-10-28T15:16:59.584003+00:00",
+      "created_at": "2026-10-28T04:35:11+00:00",
+      "updated_at": "2026-10-28T15:34:08+00:00",
+      "username": "mkashif",
+      "developer_name": "Muhammad Kashif",
+      "implementation_name": "Codex",
+      "open": false
+    }
+  ],
+  "proposalStatuses": [
+    {
+      "id": 177,
+      "status": "pending",
+      "screen": "duty_roster",
+      "review_notes": null
+    },
+    {
+      "id": 166,
+      "status": "pending",
+      "screen": "diagnostic_services_list",
+      "review_notes": null
+    },
+    {
+      "id": 133,
+      "status": "pending",
+      "screen": "settings",
+      "review_notes": null
+    },
+    {
+      "id": 109,
+      "status": "pending",
+      "screen": "my_cash_shift",
+      "review_notes": null
+    },
+    {
+      "id": 187,
+      "status": "accepted",
+      "screen": "consents_admissions",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 186,
+      "status": "accepted",
+      "screen": "wristbands_admissions",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 185,
+      "status": "accepted",
+      "screen": "bed_matrix",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 184,
+      "status": "accepted",
+      "screen": "pending_admissions",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 183,
+      "status": "accepted",
+      "screen": "duty_roster",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 182,
+      "status": "accepted",
+      "screen": "dispense",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 181,
+      "status": "accepted",
+      "screen": "imaging_outsourced",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 180,
+      "status": "accepted",
+      "screen": "imaging_repeats",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 179,
+      "status": "accepted",
+      "screen": "radiology_worklist",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 178,
+      "status": "accepted",
+      "screen": "roll_call",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 176,
+      "status": "accepted",
+      "screen": "dispense",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 175,
+      "status": "accepted",
+      "screen": "imaging_repeats",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 174,
+      "status": "accepted",
+      "screen": "imaging_outsourced",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 173,
+      "status": "accepted",
+      "screen": "critical_results_radiology",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 172,
+      "status": "accepted",
+      "screen": "radiology_worklist",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 171,
+      "status": "accepted",
+      "screen": "lab_verification",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 170,
+      "status": "accepted",
+      "screen": "lab_only_walkin",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 169,
+      "status": "accepted",
+      "screen": "lab_bench",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 168,
+      "status": "accepted",
+      "screen": "facility_profile",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 167,
+      "status": "accepted",
+      "screen": "imaging_quality_setup",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 165,
+      "status": "accepted",
+      "screen": "lab_send_outs",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 164,
+      "status": "accepted",
+      "screen": "critical_results_doctor",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 163,
+      "status": "accepted",
+      "screen": "critical_results_verifier",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 162,
+      "status": "accepted",
+      "screen": "critical_results_bench",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 161,
+      "status": "accepted",
+      "screen": "lab_verification",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 160,
+      "status": "accepted",
+      "screen": "lab_verification",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 159,
+      "status": "accepted",
+      "screen": "lab_bench",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 158,
+      "status": "accepted",
+      "screen": "lab_only_walkin",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 157,
+      "status": "accepted",
+      "screen": "charity_override",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 156,
+      "status": "accepted",
+      "screen": "lab_bench",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 155,
+      "status": "accepted",
+      "screen": "lab_only_walkin",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 154,
+      "status": "accepted",
+      "screen": "my_cash_shift",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 153,
+      "status": "accepted",
+      "screen": "otc",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 152,
+      "status": "accepted",
+      "screen": "dispense",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 151,
+      "status": "accepted",
+      "screen": "charity_override",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 150,
+      "status": "accepted",
+      "screen": "otc",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 149,
+      "status": "accepted",
+      "screen": "dispense",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 148,
+      "status": "accepted",
+      "screen": "order_queries",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 147,
+      "status": "accepted",
+      "screen": "rx_queue",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 146,
+      "status": "accepted",
+      "screen": "dispense",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 145,
+      "status": "accepted",
+      "screen": "rx_queue",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 144,
+      "status": "accepted",
+      "screen": "registration",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 143,
+      "status": "accepted",
+      "screen": "app_shell",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 142,
+      "status": "accepted",
+      "screen": "patient_documents",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 141,
+      "status": "accepted",
+      "screen": "home_visit_record",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 140,
+      "status": "accepted",
+      "screen": "patient_programmes",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 139,
+      "status": "accepted",
+      "screen": "patient_education",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 138,
+      "status": "accepted",
+      "screen": "referral_register",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 137,
+      "status": "accepted",
+      "screen": "app_shell",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 136,
+      "status": "accepted",
+      "screen": "app_shell",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 135,
+      "status": "accepted",
+      "screen": "login",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 134,
+      "status": "accepted",
+      "screen": "my_cash_shift",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 132,
+      "status": "accepted",
+      "screen": "receivables",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 131,
+      "status": "accepted",
+      "screen": "icd_picker",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 130,
+      "status": "accepted",
+      "screen": "consultation",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 129,
+      "status": "accepted",
+      "screen": "refund_waiver_credit",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 128,
+      "status": "accepted",
+      "screen": "tariff_display",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 127,
+      "status": "accepted",
+      "screen": "eprescription",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 126,
+      "status": "accepted",
+      "screen": "patient_documents",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 125,
+      "status": "accepted",
+      "screen": "consultation",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 124,
+      "status": "accepted",
+      "screen": "doctor_queue",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 123,
+      "status": "accepted",
+      "screen": "lab_orders_results",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 122,
+      "status": "accepted",
+      "screen": "cash_back_prompts",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 121,
+      "status": "accepted",
+      "screen": "refund_waiver_credit",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 120,
+      "status": "accepted",
+      "screen": "registration",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 119,
+      "status": "accepted",
+      "screen": "external_referral",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 118,
+      "status": "accepted",
+      "screen": "patient_education",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 117,
+      "status": "accepted",
+      "screen": "patient_documents",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 116,
+      "status": "accepted",
+      "screen": "cash_back_prompts",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 115,
+      "status": "accepted",
+      "screen": "receivables",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 114,
+      "status": "accepted",
+      "screen": "patient_programmes",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 113,
+      "status": "accepted",
+      "screen": "patient_education",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 112,
+      "status": "accepted",
+      "screen": "external_referral",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 111,
+      "status": "accepted",
+      "screen": "home_visit_record",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 110,
+      "status": "accepted",
+      "screen": "patient_search",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 108,
+      "status": "accepted",
+      "screen": "workspace_picker",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 107,
+      "status": "accepted",
+      "screen": "app_shell",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 106,
+      "status": "accepted",
+      "screen": "workspace_picker",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 105,
+      "status": "accepted",
+      "screen": "app_shell",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 104,
+      "status": "accepted",
+      "screen": "workspace_picker",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 103,
+      "status": "accepted",
+      "screen": "patient_search",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 102,
+      "status": "accepted",
+      "screen": "registration",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 101,
+      "status": "accepted",
+      "screen": "home_visit_record",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 100,
+      "status": "accepted",
+      "screen": "patient_search",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 99,
+      "status": "accepted",
+      "screen": "registration",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 98,
+      "status": "accepted",
+      "screen": "consultation",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 97,
+      "status": "accepted",
+      "screen": "patient_documents",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 96,
+      "status": "accepted",
+      "screen": "consultation",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 95,
+      "status": "accepted",
+      "screen": "registration",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 94,
+      "status": "accepted",
+      "screen": "lab_orders_results",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 93,
+      "status": "accepted",
+      "screen": "cash_back_prompts",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 92,
+      "status": "accepted",
+      "screen": "refund_waiver_credit",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 91,
+      "status": "accepted",
+      "screen": "doctor_queue",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 90,
+      "status": "accepted",
+      "screen": "eprescription",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 89,
+      "status": "accepted",
+      "screen": "refund_waiver_credit",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 88,
+      "status": "accepted",
+      "screen": "icd_picker",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 87,
+      "status": "accepted",
+      "screen": "consultation",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 86,
+      "status": "accepted",
+      "screen": "icd_picker",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 85,
+      "status": "accepted",
+      "screen": "home_visit_record",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 84,
+      "status": "accepted",
+      "screen": "patient_programmes",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 83,
+      "status": "accepted",
+      "screen": "home_visit_record",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 82,
+      "status": "accepted",
+      "screen": "patient_programmes",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 81,
+      "status": "accepted",
+      "screen": "consultation",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 80,
+      "status": "accepted",
+      "screen": "home_visit_record",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 79,
+      "status": "accepted",
+      "screen": "patient_programmes",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 78,
+      "status": "accepted",
+      "screen": "patient_education",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 77,
+      "status": "accepted",
+      "screen": "referral_register",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 76,
+      "status": "accepted",
+      "screen": "external_referral",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 75,
+      "status": "accepted",
+      "screen": "lab_orders_results",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 74,
+      "status": "accepted",
+      "screen": "eprescription",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 73,
+      "status": "accepted",
+      "screen": "consultation",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 72,
+      "status": "accepted",
+      "screen": "icd_picker",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 71,
+      "status": "accepted",
+      "screen": "doctor_queue",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 70,
+      "status": "accepted",
+      "screen": "receivables",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 69,
+      "status": "accepted",
+      "screen": "receivables",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 68,
+      "status": "accepted",
+      "screen": "receivables",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 67,
+      "status": "accepted",
+      "screen": "tariff_display",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 66,
+      "status": "accepted",
+      "screen": "patient_documents",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 65,
+      "status": "accepted",
+      "screen": "cash_back_prompts",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 64,
+      "status": "accepted",
+      "screen": "refund_waiver_credit",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 63,
+      "status": "accepted",
+      "screen": "queue_management",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 62,
+      "status": "accepted",
+      "screen": "registration",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 61,
+      "status": "accepted",
+      "screen": "patient_search",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 60,
+      "status": "accepted",
+      "screen": "notifications",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 59,
+      "status": "accepted",
+      "screen": "app_shell",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 58,
+      "status": "accepted",
+      "screen": "login",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 57,
+      "status": "accepted",
+      "screen": "my_cash_shift",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 56,
+      "status": "accepted",
+      "screen": "cash_back_prompts",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 55,
+      "status": "accepted",
+      "screen": "refund_waiver_credit",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 54,
+      "status": "accepted",
+      "screen": "queue_management",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 53,
+      "status": "accepted",
+      "screen": "notifications",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 52,
+      "status": "accepted",
+      "screen": "notifications",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 51,
+      "status": "accepted",
+      "screen": "app_shell",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 50,
+      "status": "accepted",
+      "screen": "login",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 49,
+      "status": "accepted",
+      "screen": "settings",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 48,
+      "status": "accepted",
+      "screen": "it_console",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 47,
+      "status": "accepted",
+      "screen": "it_console",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 46,
+      "status": "accepted",
+      "screen": "settings",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 45,
+      "status": "accepted",
+      "screen": "workspace_picker",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 44,
+      "status": "accepted",
+      "screen": "facility_profile",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 43,
+      "status": "accepted",
+      "screen": "report_incident",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 42,
+      "status": "accepted",
+      "screen": "charity_approvals",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 41,
+      "status": "accepted",
+      "screen": "approval_queue",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 40,
+      "status": "accepted",
+      "screen": "help_center",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 39,
+      "status": "accepted",
+      "screen": "notifications",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 38,
+      "status": "accepted",
+      "screen": "settings",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 37,
+      "status": "accepted",
+      "screen": "app_shell",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 36,
+      "status": "accepted",
+      "screen": "login",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 35,
+      "status": "accepted",
+      "screen": "connect_server",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 34,
+      "status": "accepted",
+      "screen": "report_incident",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 33,
+      "status": "accepted",
+      "screen": "approval_queue",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 32,
+      "status": "accepted",
+      "screen": "settings",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 31,
+      "status": "accepted",
+      "screen": "app_shell",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 30,
+      "status": "accepted",
+      "screen": "login",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 29,
+      "status": "accepted",
+      "screen": "connect_server",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 28,
+      "status": "accepted",
+      "screen": "my_cash_shift",
+      "review_notes": "done"
+    },
+    {
+      "id": 27,
+      "status": "accepted",
+      "screen": "patient_search",
+      "review_notes": "done"
+    },
+    {
+      "id": 26,
+      "status": "accepted",
+      "screen": "registration",
+      "review_notes": "done"
+    },
+    {
+      "id": 25,
+      "status": "accepted",
+      "screen": "charity_approvals",
+      "review_notes": "Done"
+    },
+    {
+      "id": 24,
+      "status": "accepted",
+      "screen": "facility_profile",
+      "review_notes": "done"
+    },
+    {
+      "id": 23,
+      "status": "accepted",
+      "screen": "app_shell",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 22,
+      "status": "accepted",
+      "screen": "approval_queue",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 21,
+      "status": "accepted",
+      "screen": "notifications",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 20,
+      "status": "accepted",
+      "screen": "help_center",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 19,
+      "status": "accepted",
+      "screen": "settings",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 18,
+      "status": "accepted",
+      "screen": "workspace_picker",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 17,
+      "status": "accepted",
+      "screen": "login",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 16,
+      "status": "accepted",
+      "screen": "connect_server",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 15,
+      "status": "accepted",
+      "screen": "report_incident",
+      "review_notes": "I reviewed the identified build and approve the selected reported progress."
+    },
+    {
+      "id": 14,
+      "status": "returned",
+      "screen": "my_cash_shift",
+      "review_notes": "working"
+    },
+    {
+      "id": 13,
+      "status": "returned",
+      "screen": "patient_search",
+      "review_notes": "patients searching working correctly"
+    },
+    {
+      "id": 12,
+      "status": "returned",
+      "screen": "registration",
+      "review_notes": "registration form is working"
+    },
+    {
+      "id": 11,
+      "status": "returned",
+      "screen": "charity_approvals",
+      "review_notes": "working"
+    },
+    {
+      "id": 10,
+      "status": "returned",
+      "screen": "facility_profile",
+      "review_notes": "working"
+    },
+    {
+      "id": 9,
+      "status": "returned",
+      "screen": "app_shell",
+      "review_notes": "working"
+    },
+    {
+      "id": 8,
+      "status": "returned",
+      "screen": "approval_queue",
+      "review_notes": "working"
+    },
+    {
+      "id": 7,
+      "status": "returned",
+      "screen": "notifications",
+      "review_notes": "working"
+    },
+    {
+      "id": 6,
+      "status": "returned",
+      "screen": "help_center",
+      "review_notes": "working"
+    },
+    {
+      "id": 5,
+      "status": "returned",
+      "screen": "settings",
+      "review_notes": "working"
+    },
+    {
+      "id": 4,
+      "status": "returned",
+      "screen": "workspace_picker",
+      "review_notes": "working"
+    },
+    {
+      "id": 3,
+      "status": "returned",
+      "screen": "login",
+      "review_notes": "working"
+    },
+    {
+      "id": 2,
+      "status": "returned",
+      "screen": "connect_server",
+      "review_notes": "working"
+    },
+    {
+      "id": 1,
+      "status": "returned",
+      "screen": "report_incident",
+      "review_notes": "working"
+    }
+  ],
+  "human_reviews": []
+}

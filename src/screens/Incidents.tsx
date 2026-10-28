@@ -328,7 +328,7 @@ export function Incidents({
           <legend>{tr("What happened")}</legend>
           <div className="form-grid">
             <Field label={tr("Incident type")}>
-              <select
+              <select data-field="type_code"
                 data-help="incident.classify"
                 required
                 value={type}

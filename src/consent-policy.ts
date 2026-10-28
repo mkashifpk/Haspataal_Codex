@@ -5,7 +5,6 @@ import type {
   ConsentUpdateIn,
   ConsentSignIn,
   ConsentRefuseIn,
-  DecisionMakerOut,
 } from "./generated/consents_admissions";
 import type { StaffLookupOut } from "./generated/radiology_worklist";
 export type ConsentAction =
@@ -105,22 +104,21 @@ export const emptyDecision = (): Decision => ({
   refusal_reason: "",
   ack: false,
 });
-// The public API does not expose consent_adult_age: do not invent a fixed age cutoff.
-// Show BOTH returned priority columns; never infer the patient's group or claim
-// client-side eligibility. The database validates the actual relationship.
-export const policyDecisionMakers = (rows: DecisionMakerOut[]) =>
-  rows.filter((r) => r.adult_priority !== null || r.minor_priority !== null);
+// Only the patient's current consent supplies eligibility; never classify by age.
+export const consentDecisionMakers = (c: ConsentOut) =>
+  c.who_decides.decision_makers;
 export function decisionBody(
   c: ConsentOut,
   d: Decision,
   kind: "sign" | "refuse",
-  policy: DecisionMakerOut[],
   employee?: number | null,
 ): ConsentSignIn | ConsentRefuseIn {
   if (!consentActionAllowed(c, kind))
     throw Error(
       "This consent is final. Read it; withdraw a given consent and prepare a new one.",
     );
+  if (!c.who_decides)
+    throw Error("Read the current consent before choosing who decides.");
   if (!d.ack)
     throw Error("Confirm the actual decision and paper before recording it.");
   if (c.missing.length)
@@ -146,6 +144,10 @@ export function decisionBody(
     understanding_confirmed: d.understanding_confirmed,
   };
   if (d.mode === "EmergencyNote") {
+    if (c.who_decides.emergency_second_doctor && !d.doctor)
+      throw Error(
+        "Choose the second registered PMDC doctor required by this consent.",
+      );
     if (!d.incapacity_reason || d.emergency_note.trim().length < 3)
       throw Error(
         "Record why the patient cannot decide and why treatment cannot wait.",
@@ -169,11 +171,15 @@ export function decisionBody(
     };
   }
   if (!d.signer) throw Error("Deliberately choose who made the decision.");
+  if (d.signer === "Patient" && !c.who_decides.patient_may_sign)
+    throw Error(
+      "This consent requires an allowed decision maker. Keep the form and choose from its current list.",
+    );
   if (d.signer === "DecisionMaker") {
     if (
       !d.incapacity_reason ||
       !d.signer_name.trim() ||
-      !policyDecisionMakers(policy).some(
+      !consentDecisionMakers(c).some(
         (r) => r.relationship === d.signer_relationship,
       )
     )

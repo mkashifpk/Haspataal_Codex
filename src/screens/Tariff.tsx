@@ -44,7 +44,7 @@ export function Tariff({ revision }: { revision: number }) {
         <h2>{data.hospital_name}</h2>
         <p>{tr("Prices as of")}: <bdi>{data.as_of}</bdi> · {tr("Currency")}: <bdi>{data.currency}</bdi></p>
         <div className="form-grid">
-          <Field label={tr("Price category")}><select data-help="tariff.read" value={category} onChange={event => setCategory(event.target.value)}>
+          <Field label={tr("Price category")}><select data-field="billing_category" data-help="tariff.read" value={category} onChange={event => setCategory(event.target.value)}>
             <option value="all">{tr("All prices")}</option>
             {data.categories.map(c => <option key={c.category} value={`service:${c.category}`}>{tr(c.label)}</option>)}
             <option value="wards">{tr("Ward daily charges")}</option><option value="lab">{tr("Lab test prices")}</option>

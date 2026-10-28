@@ -299,7 +299,7 @@ function EducationForm({
           )}
           <fieldset disabled={disabled} onChange={() => setDirty(true)}>
             <Field label={t("Education topic", "رہنمائی کا موضوع")}>
-              <input
+              <input data-field="topic"
                 data-help="education.record"
                 value={topic}
                 minLength={3}
@@ -308,7 +308,7 @@ function EducationForm({
               />
             </Field>
             <Field label={t("Education method", "رہنمائی کا طریقہ")}>
-              <select
+              <select data-field="method"
                 data-help="education.record"
                 value={method}
                 onChange={(e) => setMethod(e.target.value)}
@@ -330,7 +330,7 @@ function EducationForm({
               </select>
             </Field>
             <Field label={t("Education given to", "رہنمائی لینے والا")}>
-              <select
+              <select data-field="given_to"
                 data-help="education.record"
                 value={givenTo}
                 onChange={(e) => setGivenTo(e.target.value)}
@@ -354,7 +354,7 @@ function EducationForm({
               {t("Refresh education materials", "رہنمائی مواد تازہ کریں")}
             </button>
             <Field label={t("Material actually used", "اصل استعمال شدہ مواد")}>
-              <select
+              <select data-field="material_id"
                 data-help="education.material"
                 disabled={!materialReady}
                 value={material}
@@ -403,7 +403,7 @@ function EducationForm({
             </p>
             <LoadState {...notes} retry={notes.reload} />
             <Field label={t("Education consultation", "رہنمائی کی طبی ملاقات")}>
-              <select
+              <select data-field="encounter_id"
                 data-help="education.encounter"
                 value={encounter}
                 onChange={(e) => setEncounter(e.target.value)}
@@ -432,7 +432,7 @@ function EducationForm({
                   : t("Education note (optional)", "رہنمائی کا نوٹ (اختیاری)")
               }
             >
-              <textarea
+              <textarea data-field="note"
                 data-help="education.record"
                 value={note}
                 maxLength={correction ? 850 : 1000}

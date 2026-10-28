@@ -709,7 +709,7 @@ export function LabBench({
         <section className="card">
           <h2>{t("Open worklist", "باقی کام کی فہرست")}</h2>
           <Field label={t("Worklist status", "کام کی حالت")}>
-            <select
+            <select data-field="status"
               data-help="bench.worklist"
               value={status}
               onChange={(e) => setStatus(e.target.value)}
@@ -866,7 +866,7 @@ export function LabBench({
                       "مریض کلائی پٹی بارکوڈ",
                     )}
                   >
-                    <input
+                    <input data-field="code"
                       data-help="bench.identity"
                       value={band}
                       maxLength={80}
@@ -1065,7 +1065,7 @@ export function LabBench({
                 )}
               </p>
               <Field label={t("Interpretation", "تشریح")}>
-                <textarea
+                <textarea data-field="interpretation"
                   data-help="bench.metrics"
                   value={interpretation}
                   maxLength={4000}
@@ -1080,7 +1080,7 @@ export function LabBench({
                   <Field
                     label={t("Partner report reference", "شریک رپورٹ حوالہ")}
                   >
-                    <input
+                    <input data-field="partner_report_ref"
                       data-help="bench.metrics"
                       value={partnerRef}
                       maxLength={100}
@@ -1123,7 +1123,7 @@ export function LabBench({
                 )}
               </h2>
               <Field label={t("Reason / rejection note", "وجہ / مسترد نوٹ")}>
-                <textarea
+                <textarea data-field="reason"
                   data-help="bench.reason"
                   value={reason}
                   maxLength={1000}

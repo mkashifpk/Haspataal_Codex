@@ -590,7 +590,7 @@ export function CriticalResultsDoctor({
             </p>
             <div className="form-grid">
               <Field label={t("Diagnostic source", "تشخیصی ماخذ")}>
-                <select
+                <select data-field="source"
                   data-help="critical-doctor.filters"
                   value={source}
                   onChange={(e) => setSource(e.target.value)}
@@ -603,7 +603,7 @@ export function CriticalResultsDoctor({
                 </select>
               </Field>
               <Field label={t("Result status", "نتیجے کی حالت")}>
-                <select
+                <select data-field="status"
                   data-help="critical-doctor.filters"
                   value={status}
                   onChange={(e) => setStatus(e.target.value)}

@@ -1,0 +1,330 @@
+{
+  "method": "POST",
+  "path": "/api/v1/wristbands",
+  "summary": "Print an identity wristband",
+  "tags": [
+    "Medication safety"
+  ],
+  "permissions": [
+    "patient.wristband.print"
+  ],
+  "permissions_mode": "all",
+  "idempotency_key": true,
+  "description": "For an admission or an ER visit (AAC 30, MOM 64): the band's print payload comes back (label printer: name, MRN\nbarcode and QR code, age and sex, the admission or ER number, ward and bed, allergies). A patient who already wears\none gets a replacement: `replacement_reason` required. `newborn_patient_id`: the band of a newborn rooming in with\nthe mother, on her admission (`VALIDATION_ERROR` for a baby not born in it).\nAn id in the request body that does not exist: `REFERENCE_NOT_FOUND` (details.field).\n\n**Required permission:** `patient.wristband.print`\n\n**Required permission:** `patient.wristband.print`",
+  "roles_allowed": [
+    "admissions_officer",
+    "head_nurse",
+    "triage_nurse",
+    "ward_nurse"
+  ],
+  "parameters": [
+    {
+      "name": "Idempotency-Key",
+      "in": "header",
+      "required": false,
+      "description": "Unique per logical action; retries return the first result",
+      "schema": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "description": "Unique per logical action; retries return the first result",
+        "title": "Idempotency-Key"
+      }
+    }
+  ],
+  "request_body": {
+    "title": "WristbandIn",
+    "properties": {
+      "admission_id": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "title": "Admission Id"
+      },
+      "er_visit_id": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "title": "Er Visit Id"
+      },
+      "replacement_reason": {
+        "anyOf": [
+          {
+            "type": "string",
+            "maxLength": 300
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "title": "Replacement Reason",
+        "description": "Required when the patient already wears a band: why a new one"
+      },
+      "newborn_patient_id": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "title": "Newborn Patient Id",
+        "description": "A newborn rooming in with the mother: its own band on her admission (the baby registered with POST /maternity/newborns)"
+      }
+    },
+    "type": "object"
+  },
+  "request_content_type": "application/json",
+  "response_schema": {
+    "title": "Envelope[WristbandIssuedOut]",
+    "properties": {
+      "data": {
+        "title": "WristbandIssuedOut",
+        "properties": {
+          "wristband": {
+            "$ref": "#/components/schemas/WristbandOut"
+          },
+          "print": {
+            "$ref": "#/components/schemas/PrintOut_WristbandFieldsOut_"
+          }
+        },
+        "type": "object",
+        "required": [
+          "wristband",
+          "print"
+        ]
+      },
+      "meta": {
+        "title": "Meta",
+        "properties": {
+          "server_time": {
+            "type": "string",
+            "title": "Server Time",
+            "description": "Server clock (UTC). Use it to detect terminal clock skew."
+          },
+          "page": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page"
+          },
+          "page_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page Size"
+          },
+          "total_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total Count"
+          },
+          "next_cursor": {
+            "title": "Next Cursor"
+          }
+        },
+        "type": "object",
+        "required": [
+          "server_time"
+        ]
+      },
+      "request_id": {
+        "type": "string",
+        "title": "Request Id"
+      }
+    },
+    "type": "object",
+    "required": [
+      "data",
+      "meta",
+      "request_id"
+    ]
+  },
+  "recorded_example": {
+    "request": {
+      "path": "/api/v1/wristbands",
+      "body": {
+        "admission_id": 1
+      }
+    },
+    "response": {
+      "status": 201,
+      "body": {
+        "data": {
+          "wristband": {
+            "wristband_id": 1,
+            "patient_id": 1,
+            "admission_id": 1,
+            "er_visit_id": null,
+            "reason": "Admission",
+            "replacement_reason": null,
+            "issued_by": 7,
+            "issued_by_name": "u92786ebbd8",
+            "issued_at": "2026-09-30T15:01:47.456237+00:00",
+            "replaced_at": null,
+            "is_current": true,
+            "row_version": 1,
+            "patient_name": "Ali Khan",
+            "mrn": "MRN-2026-000001",
+            "admission_number": "ADM-2026-00001",
+            "er_number": null
+          },
+          "print": {
+            "document_type": "wristband",
+            "printer_role": "label",
+            "paper_width_mm": 25,
+            "fields": {
+              "wristband_id": 1,
+              "hospital_name": "Haspataal Hospital",
+              "patient_name": "Ali Khan",
+              "father_or_husband_name": null,
+              "mrn": "MRN-2026-000001",
+              "gender": "male",
+              "age": "40y",
+              "dob": null,
+              "admission_number": "ADM-2026-00001",
+              "er_number": null,
+              "ward_name": "General Ward",
+              "bed_label": "GW-1",
+              "allergies": null,
+              "blood_group": null,
+              "issued_at": "2026-09-30T15:01:47.456237+00:00"
+            },
+            "text": "Haspataal Hospital\nALI KHAN\nMRN-2026-000001 M 40y\nADM-2026-00001 General Ward GW-1\n",
+            "barcode_svg": "<svg version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" width=\"53.840mm\" height=\"14.411mm\">\r\n    <!--Autogenerated with python-barcode 0.16.1-->\r\n    <g id=\"barcode_group\">\r\n        <rect width=\"100%\" height=\"100%\" style=\"fill:white\"/>\r\n        <rect x=\"2.000mm\" y=\"1.000mm\" width=\"0.560mm\" height=\"8.000mm\" style=\"fill:black;\"/>\r\n        <rect x=\"2.840mm\" y=\"1.000mm\" width=\"0.280mm\" height=\"8.000mm\" …",
+            "qr_svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"87\" height=\"87\" class=\"segno\"><path transform=\"scale(3)\" class=\"qrline\" stroke=\"#000\" d=\"M2 2.5h7m2 0h3m1 0h3m2 0h7m-25 1h1m5 0h1m1 0h2m3 0h3m2 0h1m5 0h1m-25 1h1m1 0h3m1 0h1m5 0h3m3 0h1m1 0h3m1 0h1m-25 1h1m1 0h3m1 0h1m1 0h3m1 0h1m1 0h3m1 0h1m1 0h3m1 0h1m-25 1h1m1 0h3m1 0h1m1 0h1m1 0h1m2 0h1m1 0h1m2 0h1m1 0h3m1 0h1m-25 1h1m5 0h1m2 0h1m2 0h3m1 0h1m1 0h1…",
+            "pdf_url": null
+          }
+        },
+        "meta": {
+          "server_time": "2026-09-30T15:01:47.546135+00:00"
+        },
+        "request_id": "d16ac8a53c884f6eb756003c03c7bd6b"
+      }
+    },
+    "errors_seen": [
+      "VALIDATION_ERROR"
+    ],
+    "events_emitted": []
+  },
+  "errors": [
+    {
+      "code": "REFERENCE_NOT_FOUND",
+      "http_status": 422,
+      "message": "A referenced record does not exist.",
+      "retryable": false,
+      "category": "request",
+      "ui_action": "Show field errors from details.fields / the message."
+    },
+    {
+      "code": "VALIDATION_ERROR",
+      "http_status": 422,
+      "message": "The request is invalid.",
+      "retryable": false,
+      "category": "request",
+      "ui_action": "Show field errors from details.fields / the message."
+    }
+  ],
+  "errors_seen_in_tests": [
+    "VALIDATION_ERROR"
+  ],
+  "used_by_screens": [
+    "wristbands_admissions",
+    "wristbands_ward",
+    "wristbands_er",
+    "newborn_registration"
+  ],
+  "used_by_workflows": [
+    "emergency-department",
+    "inpatient-and-discharge",
+    "maternity-and-newborns",
+    "medication-safety"
+  ],
+  "typescript_example": "// Print an identity wristband  (permissions: patient.wristband.print)\nexport const issueWristband = (body) =>\n  api(\"POST\", `/wristbands`, body, { idempotent: true });   // api(): see get_guide('envelope-and-errors')",
+  "access": {
+    "authentication": "user",
+    "permissions": [
+      "patient.wristband.print"
+    ],
+    "permissions_mode": "all",
+    "who": "holders of patient.wristband.print",
+    "roles_allowed": [
+      "admissions_officer",
+      "head_nurse",
+      "triage_nurse",
+      "ward_nurse"
+    ]
+  },
+  "write_semantics": {
+    "protection": "idempotency_key",
+    "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+    "reconcile_with": "GET /wristbands",
+    "emits_events": [],
+    "prints": false,
+    "related_state_machine": null
+  },
+  "emits_events": [],
+  "list": null,
+  "cross_field_rules": {},
+  "errors_detail": [
+    {
+      "code": "REFERENCE_NOT_FOUND",
+      "http_status": 422,
+      "message": "A referenced record does not exist.",
+      "retryable": false,
+      "ui_action": "Show field errors from details.fields / the message.",
+      "source": [
+        "documented"
+      ],
+      "details_fields": [
+        "ward_id"
+      ],
+      "details_from": "POST /api/v1/pharmacy/storage-checks"
+    },
+    {
+      "code": "VALIDATION_ERROR",
+      "http_status": 422,
+      "message": "The request is invalid.",
+      "retryable": false,
+      "ui_action": "Show field errors from details.fields / the message.",
+      "source": [
+        "documented",
+        "seen_in_tests"
+      ],
+      "details_fields": [],
+      "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+    }
+  ]
+}

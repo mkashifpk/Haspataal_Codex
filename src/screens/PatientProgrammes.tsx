@@ -458,7 +458,7 @@ function ProgrammePatient({
             onChange={() => setDirty(true)}
           >
             <Field label={t("Offered programme", "دیا جانے والا پروگرام")}>
-              <select
+              <select data-field="programme_id"
                 data-help="programme.enrol"
                 disabled={!catalogueReady}
                 value={programme}
@@ -502,7 +502,7 @@ function ProgrammePatient({
                 "پروگرام کا کارڈ / رجسٹر نمبر",
               )}
             >
-              <input
+              <input data-field="card_number"
                 data-help="programme.enrol"
                 value={card}
                 maxLength={100}
@@ -734,7 +734,7 @@ function ProgrammePatient({
                       "پروگرام کارڈ کی خدمت",
                     )}
                   >
-                    <select
+                    <select data-field="service"
                       data-help="programme.entry"
                       value={service}
                       aria-invalid={invalid.includes("service")}
@@ -768,7 +768,7 @@ function ProgrammePatient({
                       "بیچ (ویکسین / دوائی، جہاں لازم)",
                     )}
                   >
-                    <input
+                    <input data-field="batch_number"
                       data-help="programme.entry"
                       value={batch}
                       maxLength={100}
@@ -781,7 +781,7 @@ function ProgrammePatient({
                       "کارڈ کے عین مطابق اگلی تاریخ (اختیاری)",
                     )}
                   >
-                    <input
+                    <input data-field="next_due_on"
                       data-help="programme.entry"
                       type="date"
                       value={next}
@@ -800,7 +800,7 @@ function ProgrammePatient({
                 <Field
                   label={t("Close with outcome", "نتیجے کے ساتھ بند کریں")}
                 >
-                  <select
+                  <select data-field="status"
                     data-help="programme.close"
                     value={end}
                     onChange={(e) => setEnd(e.target.value)}
@@ -832,7 +832,7 @@ function ProgrammePatient({
                       )
                 }
               >
-                <textarea
+                <textarea data-field="note"
                   data-help="programme.action"
                   value={note}
                   maxLength={1000}
@@ -939,7 +939,7 @@ function DueList({
             />
           </Field>
           <Field label={t("Due programme filter", "اگلی خدمت کا پروگرام فلٹر")}>
-            <select
+            <select data-field="programme_id"
               data-help="programme.due"
               value={programme}
               onChange={(e) => {

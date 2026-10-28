@@ -707,7 +707,7 @@ export function RadiologyWorklist({
             <h2>{t("Examinations to perform", "کرنے کے معائنے")}</h2>
             <div className="form-grid">
               <Field label={t("Examination status", "معائنہ حالت")}>
-                <select
+                <select data-field="status"
                   data-help="radiology.filter"
                   value={status}
                   onChange={(e) => setStatus(e.target.value)}
@@ -725,7 +725,7 @@ export function RadiologyWorklist({
                 </select>
               </Field>
               <Field label={t("Modality", "عکس طریقہ")}>
-                <select
+                <select data-field="modality"
                   data-help="radiology.filter"
                   value={modality}
                   onChange={(e) => setModality(e.target.value)}
@@ -1155,7 +1155,7 @@ export function RadiologyWorklist({
                         "مریض کی پٹی بارکوڈ",
                       )}
                     >
-                      <input
+                      <input data-field="code"
                         data-help="radiology.band"
                         autoFocus
                         maxLength={80}
@@ -1212,7 +1212,7 @@ export function RadiologyWorklist({
                 <Field
                   label={t("Identity / emergency note", "شناخت / ہنگامی نوٹ")}
                 >
-                  <textarea
+                  <textarea data-field="identity_note"
                     data-help="radiology.identity"
                     maxLength={300}
                     value={editor.form.identityNote}
@@ -1220,7 +1220,7 @@ export function RadiologyWorklist({
                   />
                 </Field>
                 <label>
-                  <input
+                  <input data-field="site"
                     data-help="radiology.site"
                     type="checkbox"
                     checked={editor.form.site}
@@ -1260,7 +1260,7 @@ export function RadiologyWorklist({
                         "حمل کا فیصلہ اور ذمہ دار معالج",
                       )}
                     >
-                      <textarea
+                      <textarea data-field="pregnancy_note"
                         data-help="radiology.pregnancy"
                         maxLength={500}
                         value={editor.form.pregnancyNote}
@@ -1273,7 +1273,7 @@ export function RadiologyWorklist({
             )}
             {editor.action === "Cancelled" && (
               <Field label={t("Cancellation reason", "منسوخی کی وجہ")}>
-                <textarea
+                <textarea data-field="reason"
                   data-help="radiology.cancel"
                   autoFocus
                   maxLength={1000}
@@ -1311,7 +1311,7 @@ export function RadiologyWorklist({
                         "کانٹراسٹ دوا، مقدار اور راستہ",
                       )}
                     >
-                      <textarea
+                      <textarea data-field="contrast"
                         data-help="radiology.contrast"
                         maxLength={300}
                         value={editor.form.contrast}

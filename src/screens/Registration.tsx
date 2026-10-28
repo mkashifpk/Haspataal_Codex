@@ -503,7 +503,7 @@ export function Registration({
               {mode === "new" ? (
                 <div className="form-grid">
                   <Field label={tr("Full name")}>
-                    <input data-help="registration.intake"
+                    <input data-field="name full_name" data-help="registration.intake"
                       aria-label={tr("Full name")}
                       value={name}
                       onChange={(e) => setName(e.target.value)}
@@ -512,7 +512,7 @@ export function Registration({
                     />
                   </Field>
                   <Field label={tr("Gender")}>
-                    <select data-help="registration.intake"
+                    <select data-field="gender" data-help="registration.intake"
                       aria-label={tr("Gender")}
                       value={gender}
                       onChange={(e) =>
@@ -533,7 +533,7 @@ export function Registration({
                     label={tr("Age in years")}
                     hint={tr("Enter age or date of birth.")}
                   >
-                    <input data-help="registration.intake"
+                    <input data-field="age_years" data-help="registration.intake"
                       aria-label={tr("Age in years")}
                       type="number"
                       min="0"
@@ -546,7 +546,7 @@ export function Registration({
                     />
                   </Field>
                   <Field label={tr("Date of birth")}>
-                    <input data-help="registration.intake"
+                    <input data-field="dob" data-help="registration.intake"
                       aria-label={tr("Date of birth")}
                       type="date"
                       max={new Date().toISOString().slice(0, 10)}
@@ -558,7 +558,7 @@ export function Registration({
                     />
                   </Field>
                   <Field label={tr("Mobile")}>
-                    <input data-help="registration.intake"
+                    <input data-field="mobile" data-help="registration.intake"
                       aria-label={tr("Mobile")}
                       type="tel"
                       value={mobile}
@@ -568,7 +568,7 @@ export function Registration({
                     />
                   </Field>
                   <Field label={tr("CNIC (optional)")}>
-                    <input data-help="registration.intake"
+                    <input data-field="cnic" data-help="registration.intake"
                       aria-label={tr("CNIC (optional)")}
                       value={cnic}
                       onChange={(e) => setCnic(e.target.value)}
@@ -576,7 +576,7 @@ export function Registration({
                     />
                   </Field>
                   <Field label={t("UPMRN (optional)", "یونیورسل مریض نمبر (اختیاری)")} hint={t("Enter only an issued Universal Patient Medical Record Number.", "صرف پہلے سے جاری کردہ یونیورسل مریض نمبر درج کریں۔")}>
-                    <input data-help="registration.intake" aria-label={t("UPMRN (optional)", "یونیورسل مریض نمبر (اختیاری)")} dir="ltr" value={upmrn} onChange={e => setUpmrn(e.target.value)} maxLength={40} pattern={"[A-Za-z0-9][A-Za-z0-9\\/\\-]{3,39}"} />
+                    <input data-field="upmrn" data-help="registration.intake" aria-label={t("UPMRN (optional)", "یونیورسل مریض نمبر (اختیاری)")} dir="ltr" value={upmrn} onChange={e => setUpmrn(e.target.value)} maxLength={40} pattern={"[A-Za-z0-9][A-Za-z0-9\\/\\-]{3,39}"} />
                   </Field>
                 </div>
               ) : (
@@ -711,7 +711,7 @@ export function Registration({
                       </Field>
                     ))}
                     <Field label={tr("Blood group")}>
-                      <select data-help="registration.intake"
+                      <select data-field="blood_group" data-help="registration.intake"
                         aria-label={tr("Blood group")}
                         value={extras.blood_group || ""}
                         onChange={(e) =>
@@ -739,7 +739,7 @@ export function Registration({
                       </select>
                     </Field>
                     <Field label={tr("Billing category")}>
-                      <select data-help="registration.intake"
+                      <select data-field="billing_category" data-help="registration.intake"
                         aria-label={tr("Billing category")}
                         value={billing}
                         onChange={(e) =>
@@ -763,7 +763,7 @@ export function Registration({
                             </p>
                           )}
                         <Field label={tr("Panel")}>
-                          <select data-help="registration.intake"
+                          <select data-field="panel_id" data-help="registration.intake"
                             aria-label={tr("Panel")}
                             required
                             value={panelId}
@@ -780,7 +780,7 @@ export function Registration({
                           </select>
                         </Field>
                         <Field label={tr("Panel member number")}>
-                          <input data-help="registration.intake"
+                          <input data-field="panel_member_no" data-help="registration.intake"
                             value={member}
                             maxLength={50}
                             onChange={(e) => setMember(e.target.value)}
@@ -835,7 +835,7 @@ export function Registration({
                       </select>
                     </Field>
                     <Field label={tr("Visit source")}>
-                      <select data-help="registration.intake"
+                      <select data-field="source" data-help="registration.intake"
                         aria-label={tr("Visit source")}
                         value={source}
                         onChange={(e) =>
@@ -869,7 +869,7 @@ export function Registration({
                     )}
                   <div className="form-grid">
                     <Field label={tr("Discount amount")}>
-                      <input data-help="registration.intake"
+                      <input data-field="discount discount_amount" data-help="registration.intake"
                         type="number"
                         min="0"
                         step="0.01"
@@ -878,7 +878,7 @@ export function Registration({
                       />
                     </Field>
                     <Field label={tr("Discount reason")}>
-                      <input data-help="registration.intake"
+                      <input data-field="discount_reason" data-help="registration.intake"
                         value={discountReason}
                         maxLength={300}
                         required={Number(discount) > 0}
@@ -888,7 +888,7 @@ export function Registration({
                   </div>
                   {source === "Emergency" && (
                     <label>
-                      <input data-help="registration.intake"
+                      <input data-field="emergency_bypass" data-help="registration.intake"
                         type="checkbox"
                         checked={bypass}
                         onChange={(e) => setBypass(e.target.checked)}
@@ -900,7 +900,7 @@ export function Registration({
                   )}
                   {user.permissions.includes("opd.ticket.ar_override") && (
                     <Field label={tr("Outstanding dues override reason")}>
-                      <input data-help="registration.intake"
+                      <input data-field="ar_override_reason" data-help="registration.intake"
                         maxLength={300}
                         value={override}
                         onChange={(e) => setOverride(e.target.value)}
@@ -922,7 +922,7 @@ export function Registration({
                   {payNow && (
                     <div className="form-grid">
                       <Field label={tr("Payment method")}>
-                        <select data-help="registration.intake"
+                        <select data-field="method" data-help="registration.intake"
                           value={payMethod}
                           onChange={(e) =>
                             setPayMethod(e.target.value as typeof payMethod)
@@ -934,7 +934,7 @@ export function Registration({
                         </select>
                       </Field>
                       <Field label={tr("Card / bank reference")}>
-                        <input data-help="registration.intake"
+                        <input data-field="reference_no" data-help="registration.intake"
                           required={payMethod !== "Cash"}
                           maxLength={60}
                           value={payReference}

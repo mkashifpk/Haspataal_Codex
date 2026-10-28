@@ -1,0 +1,1 @@
+const {app,BrowserWindow}=require('electron');const path=require('node:path');app.whenReady().then(()=>{const w=new BrowserWindow({show:false,webPreferences:{sandbox:true,contextIsolation:true,nodeIntegration:false}});w.loadFile(path.resolve('artifacts/admin-component/index.html'));});

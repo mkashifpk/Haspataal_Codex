@@ -558,7 +558,7 @@ export function OTCMode({
                 <Field
                   label={t("Scan product barcode", "دوا کا بارکوڈ اسکین کریں")}
                 >
-                  <input
+                  <input data-field="barcode"
                     ref={scanner}
                     data-help="otc.scan"
                     value={barcode}
@@ -769,7 +769,7 @@ export function OTCMode({
                     t("Sale quantity", "فروخت کی مقدار") + ` #${l.drug.drug_id}`
                   }
                 >
-                  <input
+                  <input data-field="qty"
                     data-help="otc.quantity"
                     inputMode="decimal"
                     value={l.qty}
@@ -800,7 +800,7 @@ export function OTCMode({
               <Field
                 label={t("Customer name (optional)", "گاہک کا نام (اختیاری)")}
               >
-                <input
+                <input data-field="name"
                   data-help="otc.customer"
                   maxLength={100}
                   value={name}
@@ -813,7 +813,7 @@ export function OTCMode({
                   "گاہک کا موبائل (اختیاری)",
                 )}
               >
-                <input
+                <input data-field="mobile"
                   data-help="otc.customer"
                   maxLength={30}
                   value={mobile}
@@ -823,7 +823,7 @@ export function OTCMode({
               <Field
                 label={t("OTC payment method", "او ٹی سی ادائیگی کا طریقہ")}
               >
-                <select
+                <select data-field="method"
                   data-help="otc.payment"
                   value={method}
                   onChange={(e) => setMethod(e.target.value as "Cash" | "Card")}

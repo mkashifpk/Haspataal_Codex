@@ -194,7 +194,7 @@ export function RefundRequests({
               >
                 <fieldset disabled={blocked || !!review}>
                   <Field label={tr("Request type")}>
-                    <select
+                    <select data-field="kind"
                       data-help="requests.form"
                       value={kind}
                       onChange={(e) => {
@@ -218,7 +218,7 @@ export function RefundRequests({
                   {kind && (
                     <>
                       <Field label={tr("Reason")}>
-                        <textarea
+                        <textarea data-field="reason note"
                           data-help="requests.form"
                           value={reason}
                           minLength={3}
@@ -234,7 +234,7 @@ export function RefundRequests({
                       {kind === "refund-request" && (
                         <>
                           <Field label={tr("Refund reason")}>
-                            <select
+                            <select data-field="reason_code"
                               data-help="requests.form"
                               value={reasonCode}
                               onChange={(e) =>
@@ -265,7 +265,7 @@ export function RefundRequests({
                               "Leave blank to request the remaining refundable amount.",
                             )}
                           >
-                            <input
+                            <input data-field="amount"
                               data-help="requests.form"
                               inputMode="decimal"
                               value={amount}
@@ -276,7 +276,7 @@ export function RefundRequests({
                       )}
                       {kind === "vip-waiver-request" && (
                         <Field label={tr("Waiver percentage")}>
-                          <input
+                          <input data-field="waiver_pct"
                             data-help="requests.form"
                             inputMode="decimal"
                             value={pct}
@@ -299,7 +299,7 @@ export function RefundRequests({
                             )}
                           </p>
                           <Field label={tr("Amount paid now")}>
-                            <input
+                            <input data-field="amount_paid_now"
                               data-help="requests.form"
                               inputMode="decimal"
                               value={paidNow}
@@ -307,7 +307,7 @@ export function RefundRequests({
                             />
                           </Field>
                           <Field label={tr("Payment method")}>
-                            <select
+                            <select data-field="method"
                               data-help="requests.form"
                               value={method}
                               onChange={(e) =>
@@ -322,7 +322,7 @@ export function RefundRequests({
                             </select>
                           </Field>
                           <Field label={tr("Due date (optional)")}>
-                            <input
+                            <input data-field="due_date"
                               data-help="requests.form"
                               type="date"
                               value={due}
