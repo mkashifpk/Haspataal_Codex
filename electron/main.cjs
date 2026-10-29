@@ -968,6 +968,22 @@ ipcMain.handle("terminal", async (event, action, args = {}) => {
       if (played) shell.beep();
       return {ok:true,data:{played}};
     }
+    if (action === "print-estimate") {
+      if(!Number.isSafeInteger(args.estimateId)||args.estimateId<1||!Number.isSafeInteger(args.expectedVersion))throw new Error('Invalid estimate reference');
+      const actor=auth?.user.user_id,workspace=windows.get(win.id);
+      const [record,payload,est]=await Promise.all([api('GET','/cost-estimates/'+args.estimateId,undefined,workspace),api('GET','/cost-estimates/'+args.estimateId+'/print-payload',undefined,workspace),api('GET','/establishment',undefined,workspace)]);
+      if(!record.ok)return record;if(!payload.ok)return payload;if(!est.ok)return est;
+      if(!['full','open_work','records'].includes(est.data.views.screens.find(s=>s.screen_id==='cost_estimates_admissions')?.view))throw new Error('The estimate records view is unavailable');
+      const f=require('./estimate-print.cjs').assertEstimate(payload.data,args.estimateId);
+      if(record.data.row_version!==args.expectedVersion||f.estimate.row_version!==args.expectedVersion||record.data.patient_id!==f.estimate.patient_id||record.data.mrn!==f.estimate.mrn)throw new Error('The estimate changed. Read it before printing.');
+      const terminal=await api('GET','/terminals/whoami');if(!terminal.ok)return terminal;
+      if(!actor||actor!==auth?.user.user_id||workspace!==windows.get(win.id))throw new Error('The session changed before estimate printing');
+      const tariff=await api('GET','/tariff',undefined,workspace);if(!tariff.ok)return tariff;
+      if(actor!==auth?.user.user_id||workspace!==windows.get(win.id))throw new Error('The session changed before estimate printing');
+      const printed=await require('./estimate-print.cjs').printEstimate({...payload.data,currency:tariff.data.currency},terminal.data,{owner:win,pdf:!!args.pdf,language:prefs.language});
+      if(printed.bytes){const target=await dialog.showSaveDialog(win,{defaultPath:'Estimate-'+record.data.estimate_number+'.pdf',filters:[{name:'PDF',extensions:['pdf']}]});if(!target.canceled)fs.writeFileSync(target.filePath,printed.bytes);return{ok:true,data:{saved:!target.canceled}};}
+      return{ok:true,data:printed};
+    }
     if (action === "print-consent") {
       if(!Number.isSafeInteger(args.consentId)||args.consentId<1||!Number.isSafeInteger(args.expectedVersion))throw Error('Invalid consent reference');
       const actor=auth?.user.user_id,workspace=windows.get(win.id);
@@ -1121,7 +1137,7 @@ ipcMain.handle("terminal", async (event, action, args = {}) => {
       return await api("GET", "/meta/handbook", undefined, undefined);
     }
     if (action === "clinical-pdf") {
-      if (typeof args.path !== "string" || !/^(?:\/(?:clinical-encounters|referrals)\/[1-9]\d*\/pdf|\/(?:lab\/requisitions|imaging\/orders)\/[1-9]\d*\/report\/pdf|\/consents\/[1-9]\d*\/pdf|\/preventive-programmes\/list\/pdf|\/home-visits\/notice\/pdf|\/diagnostics\/(?:services|imaging-policy)\/pdf)$/.test(args.path)) throw new Error("Clinical download not permitted");
+      if (typeof args.path !== "string" || !/^(?:\/(?:clinical-encounters|referrals)\/[1-9]\d*\/pdf|\/(?:lab\/requisitions|imaging\/orders)\/[1-9]\d*\/report\/pdf|\/(?:consents|cost-estimates)\/[1-9]\d*\/pdf|\/preventive-programmes\/list\/pdf|\/home-visits\/notice\/pdf|\/diagnostics\/(?:services|imaging-policy)\/pdf)$/.test(args.path)) throw new Error("Clinical download not permitted");
       const op=matchOperation("GET",args.path);
       if(!op || !auth || !permissionAllows(op,auth.user)) throw new Error("You do not have permission to download this document");
       if(Date.now()>auth.expires-60000)await refresh();

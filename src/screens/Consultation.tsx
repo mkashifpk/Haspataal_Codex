@@ -1,4 +1,5 @@
-import { useState } from "react";
+import {validationFields} from '../validation-fields';
+import { useEffect, useState } from "react";
 import { api, ApiError, call } from "../bridge";
 import { bilingual as t, tr } from "../i18n";
 import {
@@ -236,6 +237,7 @@ function ConsultationEditor({
     (!!base && !procedureDirty);
   const rawError =
     write.error instanceof ApiError ? write.error.response.error : undefined;
+  useEffect(()=>{const error=write.error instanceof ApiError?write.error.response.error:undefined;if(action==='admit'&&error?.code==='VALIDATION_ERROR'&&validationFields(error).some(f=>f.field.split('.').at(-1)==='requested_ward_id'))void admissionWards.reload();},[write.error]);
   const missing = Array.isArray(rawError?.details?.missing)
     ? rawError.details.missing.filter((value): value is string => typeof value === "string")
     : [];
@@ -1353,7 +1355,7 @@ function ConsultationEditor({
             {action === "admit" && (
               <>
                 <LoadState {...admissionWards} retry={admissionWards.reload}/>
-                <Field label={t('Requested open ward (optional)','مطلوبہ کھلا وارڈ، اختیاری')}><select data-help="consultation.admit" name="requested_ward_id" value={requestedWard} disabled={admissionWards.loading||!!admissionWards.error||!can('ipd.bed.view')} onChange={e=>{setRequestedWard(e.target.value);actionMark();}}><option value="">{t('No ward preference','وارڈ کی ترجیح نہیں')}</option>{admissionWards.data?.wards.map(w=><option key={w.ward_id} value={w.ward_id}>{w.name}</option>)}</select></Field>
+                <Field label={t('Requested open ward (optional)','مطلوبہ کھلا وارڈ، اختیاری')}><select data-help="consultation.admit" name="requested_ward_id" value={requestedWard} disabled={admissionWards.loading||!!admissionWards.error||!can('ipd.bed.view')} onChange={e=>{setRequestedWard(e.target.value);actionMark();}}><option value="">{t('No ward preference','وارڈ کی ترجیح نہیں')}</option>{admissionWards.data?.wards.map(w=><option key={w.ward_id} value={w.ward_id}>{w.name} · {t("Available beds","دستیاب بستر")}: {w.available} · {t("Gender","جنس")}: {w.gender_restriction}</option>)}</select></Field>
                 <Field label={t("Provisional diagnosis", "ابتدائی تشخیص")}>
                   <textarea data-field="provisional_diagnosis"
                     data-help="consultation.admit"

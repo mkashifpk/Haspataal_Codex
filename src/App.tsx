@@ -1,3 +1,4 @@
+import { CostEstimates } from './screens/CostEstimates';
 import { useCallback, useEffect, useRef, useState } from "react";
 import { api, call, resetRequests } from "./bridge";
 import type { MeOut, LicenseStatusOut, HealthOut } from "./generated/login";
@@ -63,6 +64,7 @@ import { createMetadataFlight } from "./metadata-flight";
 import { createBootstrapSeed } from "./bootstrap-seed";
 type WorkspaceSnapshot = {establishment:EstablishmentOut;settings:any;me:MeOut;permittedWorkspaces:MeOut["workspaces"]};
 const labels: Record<string, [string, string, string]> = {
+ cost_estimates_admissions: ["Cost estimates","متوقع اخراجات","₨"],
  consents_admissions: ["General consent at admission","داخلے پر عمومی رضامندی","▤"],
  wristbands_admissions: ["Identity wristbands","شناختی پٹیاں","▤"],
   bed_matrix: ["Live bed matrix", "بستروں کی تازہ صورت حال", "▦"],
@@ -129,6 +131,7 @@ const labels: Record<string, [string, string, string]> = {
 };
 const frontDeskScreens = new Set([
   'roll_call',
+  'cost_estimates_admissions',
   'consents_admissions',
   'wristbands_admissions',
   'bed_matrix',
@@ -782,6 +785,7 @@ export function App() {
     'lab_send_outs',
     'imaging_quality_setup',
     'roll_call',
+  'cost_estimates_admissions',
   'consents_admissions',
   'wristbands_admissions',
   'bed_matrix',
@@ -834,7 +838,7 @@ export function App() {
         )))) &&
       est?.views.screens.find((v) => v.screen_id === id)?.view !== "hidden" &&
       (id !== "imaging_quality_setup" || ["full","open_work","records"].includes(est?.views.screens.find(v=>v.screen_id===id)?.view || "")) &&
-      (!["consents_admissions","wristbands_admissions","bed_matrix","pending_admissions","imaging_repeats","imaging_outsourced","critical_results_radiology","radiology_worklist","rx_queue","dispense","order_queries","otc","charity_override","lab_only_walkin","lab_bench","lab_send_outs","lab_verification","critical_results_bench","critical_results_verifier","critical_results_doctor"].includes(id) || ["full", "open_work", "records"].includes(est?.views.screens.find(v => v.screen_id === id)?.view || "")),
+      (!["cost_estimates_admissions","consents_admissions","wristbands_admissions","bed_matrix","pending_admissions","imaging_repeats","imaging_outsourced","critical_results_radiology","radiology_worklist","rx_queue","dispense","order_queries","otc","charity_override","lab_only_walkin","lab_bench","lab_send_outs","lab_verification","critical_results_bench","critical_results_verifier","critical_results_doctor"].includes(id) || ["full", "open_work", "records"].includes(est?.views.screens.find(v => v.screen_id === id)?.view || "")),
   );
   const view = est?.views.workspaces.find(
     (v) => v.workspace === workspace,
@@ -1196,6 +1200,7 @@ export function App() {
               {screen === 'imaging_quality_setup' && est && <ImagingQualitySetup key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} fromFacility={imagingSetupEntry}/>}
               {screen === 'diagnostic_services_list' && <DiagnosticServicesList key={user.user_id} user={user} connected={connected} stream={stream}/>}
               {screen === 'lab_send_outs' && est && <LabSendOuts key={user.user_id} user={user} connected={connected} stream={stream} establishment={est} timeZone={meta?.hospital_timezone}/>}
+              {screen === 'cost_estimates_admissions' && est && <CostEstimates key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone}/>}
               {screen === 'consents_admissions' && est && <ConsentsAdmissions key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone}/>}
               {screen === 'wristbands_admissions' && est && <Wristbands key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone}/>}
               {screen === 'bed_matrix' && est && <BedMatrix key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone} onAdmission={nav.includes("pending_admissions")?id=>{if(navigate("pending_admissions"))setBedAdmissionEntry({userId:user.user_id,admissionId:id})}:undefined}/>}

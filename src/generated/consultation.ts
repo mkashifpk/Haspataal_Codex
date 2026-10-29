@@ -483,6 +483,7 @@ export interface AdmissionIn {
   patient_id?: number | null;
   /** OPD visit the admission comes from */
   ticket_id?: number | null;
+  /** The ward the doctor asks for (optional): an open ward of GET /beds/matrix; none leaves it to the admissions desk */
   requested_ward_id?: number | null;
   /** Defaults to the requesting doctor */
   primary_doctor_id?: number | null;
@@ -572,6 +573,48 @@ export interface AdmissionInvoiceOut {
   gross_total: number;
   net_payable: number | null;
   amount_paid: number;
+}
+
+export interface BedMatrixOut {
+  wards: WardOccupancyOut[];
+  /** Ward name -> available beds */
+  summary: Record<string, number>;
+  /** Only with include_beds=true */
+  beds?: BedMatrixBedOut[] | null;
+}
+
+/** A ward's bed counts (view v_bed_matrix). */
+export interface WardOccupancyOut {
+  ward_id: number;
+  code: string;
+  name: string;
+  ward_type: "General" | "Private" | "SemiPrivate" | "ICU" | "CCU" | "NICU" | "Surgical" | "Pediatric" | "Maternity" | "Emergency" | "Isolation" | "Other";
+  gender_restriction: "male" | "female" | "any";
+  total_beds: number;
+  available: number;
+  reserved: number;
+  occupied: number;
+  /** Beds being cleaned or waiting for discharge clearance */
+  turnover: number;
+  out_of_service: number;
+}
+
+export interface BedMatrixBedOut {
+  bed_id: number;
+  ward_id: number;
+  label: string;
+  current_state: "Available" | "Reserved" | "Occupied" | "Dirty" | "Cleaning" | "OutOfService";
+  state_changed_at: string;
+  is_overflow_allowed: boolean;
+  admission_id: number | null;
+  /** Only with with_patients=true */
+  patient_name: string | null;
+  /** Only with with_patients=true */
+  mrn: string | null;
+  admission_status: "AdmissionPending" | "Waitlisted" | "BedReserved" | "CodeRedActive" | "Admitted" | "DischargeInProgress" | "Discharged" | "Cancelled" | null;
+  is_overflow: boolean | null;
+  /** The discharge stage the patient in this bed waits for */
+  discharge_blocked_on: string | null;
 }
 
 export interface PrintOut_ClinicalNotePrintFieldsOut_ {
@@ -775,6 +818,11 @@ export function postconsultWaiver(ticket_id: number, body: PostConsultWaiverIn):
 /** Doctor: Admit Patient (→ Admission_Pending) — POST /api/v1/admissions (who may call: holders of ipd.admission.request). */
 export function requestAdmission(body: AdmissionIn): Promise<AdmissionDetailOut> {
   return api<AdmissionDetailOut>("POST", `/admissions`, body, { idempotent: true });
+}
+
+/** Live bed matrix (counts per ward + optional bed list) — GET /api/v1/beds/matrix (who may call: holders of ipd.bed.view). */
+export function bedMatrix(query?: { include_beds?: boolean }): Promise<BedMatrixOut> {
+  return api<BedMatrixOut>("GET", withQuery(`/beds/matrix`, query), undefined);
 }
 
 /** Printable clinical note with the author's stamp — GET /api/v1/clinical-encounters/{encounter_id}/print-payload (who may call: holders of clinical.encounter.view). */

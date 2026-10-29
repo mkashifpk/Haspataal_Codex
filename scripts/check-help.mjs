@@ -211,6 +211,7 @@ export function checkHelp({
       "BedMatrix",
       "Wristbands",
       "ConsentsAdmissions",
+      "CostEstimates",
       "ConsentScanUpload",
       "LabVerification",
       "CriticalResultsBench",

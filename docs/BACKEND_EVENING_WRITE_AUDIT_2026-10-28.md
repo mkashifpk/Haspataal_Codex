@@ -136,3 +136,7 @@ Baseline558a013 → a1f559f knowledge build2026-10-28T15:16:59.584003+00:00. The
 | consents_admissions | POST /patients/{patient_id}/documents | — | Yes: visible code/details; input kept; no automatic retry. |
 
 The standalone IT console is currently the Settings system sections, with a new ward panel in Hardware. Department/theatre provisioning and ICD import metadata do not mean those independent journeys are shipped. Other consent workspace aliases are not built; Admissions is the signing flow changed here. Named human acceptance, all-role/service-transition/global IT emergency cases remain pending; never run global logout/maintenance against other developers to manufacture a test pass.
+
+## 29 October continuation
+
+The complete original54-screen audit above remains historical evidence for a1f559f. New screen55 cost_estimates_admissions adds POST /cost-estimates (ADMISSION_STATE_INVALID, FORBIDDEN, REFERENCE_NOT_FOUND, VALIDATION_ERROR), POST /cost-estimates/{estimate_id}/explain and /cancel (ESTIMATE_STATE_INVALID, VALIDATION_ERROR). Shared code-based exact-state reads and field messages, retained input, explicit original-key replay only;11actual continuation bodies validate. Cost estimates are not medicine dispensing or payment. Current consultation issue40 adds no code; VALIDATION_ERROR/details.field requested_ward_id now refreshes wards while keeping input, tested by actual422 followed by optionalnone201. See COST_ESTIMATES_REVIEW_2026-10-29.md for scope/evidence and pending full-plan/human gates.
