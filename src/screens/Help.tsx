@@ -351,7 +351,10 @@ export function Help({
                 {foundationJourney.title[lang]}
               </h1>
               <p className="notice">
-                {t(
+                {selectedWorkspace.code === "ward_nurse" ? t(
+                  "Ward Nursing: the delivered bed, vitals, education and assessment tasks below follow your current permissions. Later tasks and named human acceptance remain pending.",
+                  "وارڈ نرسنگ: نیچے فراہم کردہ بستر، پیمائش، رہنمائی اور جائزہ کام موجودہ اجازت کے مطابق ہیں۔ بعد کے کام اور نامزد انسانی قبولیت باقی ہیں۔",
+                ) : t(
                   "Scope: the eleven Phase 1 screens, including the permitted System (IT) parts of Settings. Later clinical, financial and other IT workspace journeys remain outside this guide. Available tasks follow your combined permissions; a role name never grants an action.",
                   "دائرہ: پہلے مرحلے کے گیارہ صفحات اور ترتیبات کے مجاز نظام (آئی ٹی) حصے۔ بعد کے طبی، مالی اور دیگر آئی ٹی کام رہنما سے باہر ہیں۔ کام موجودہ مجموعی اجازت پر ہیں؛ کردار کا نام خود اجازت نہیں دیتا۔",
                 )}
@@ -363,7 +366,10 @@ export function Help({
                 <section key={role}>
                   <h2 dir="auto">{role}</h2>
                   <p>
-                    {t(
+                    {selectedWorkspace.code === "ward_nurse" ? t(
+                      "Follow the ward journey above and the task-specific FAQs below. Verify the patient for each entry, preserve original records, and hand over a refusal or missing plan to the responsible team. A read-only permission never grants recording or administration.",
+                      "اوپر وارڈ کا طریقہ اور نیچے ہر کام کے سوالات پڑھیں۔ ہر اندراج میں مریض ملائیں، اصل ریکارڈ رکھیں، انکار یا غائب منصوبہ متعلقہ ٹیم کو دیں۔ صرف پڑھنے کی اجازت اندراج یا دوا دینے کی اجازت نہیں۔",
+                    ) : t(
                       "For this role, use the granted foundation task index below. Requesters track My requests; eligible approvers review and confirm decisions; establishment managers use Facility only when offered. A read-only account reads fresh records from an authorized upstream colleague and does not create or decide them.",
                       "اس کردار میں نیچے دیے مجاز بنیادی کام کریں۔ درخواست کنندہ اپنی درخواستیں دیکھے؛ مجاز منظوری دینے والا جائزہ اور تصدیق کرے؛ ہسپتال منتظم کو حصہ ملے تب ہی استعمال کرے۔ صرف پڑھنے والا مجاز ساتھی کے نئے ریکارڈ دیکھے، خود نہ بنائے یا فیصلہ کرے۔",
                     )}
@@ -408,6 +414,13 @@ export function Help({
                 <section key={id}>
                   <h3>{ur ? help[id].titleUr : help[id].title}</h3>
                   {instructions(id, true)}
+                  {selectedWorkspace.code === "ward_nurse" && ["my_beds", "vitals_tracker", "patient_education_ward", "nursing_assessment"].includes(id) &&
+                    (ur ? help[id].faqUr : help[id].faq).map(([question, answer]) => (
+                      <section key={question}>
+                        <h4>{question}</h4>
+                        <p>{answer}</p>
+                      </section>
+                    ))}
                   {faq(id)}
                   <button data-help="help.links" onClick={() => open(id)}>
                     {t(
@@ -430,7 +443,10 @@ export function Help({
                 )}
               </h2>
               <p>
-                {t(
+                {selectedWorkspace.code === "ward_nurse" ? t(
+                  "With an authorized demo account, open an admission newly created through the app. Verify identity and bed, record a synthetic observation and nursing note, then append a reasoned correction and verify both originals remain. Review the actual interval and postoperative plan when available. Check a refused or uncertain write retains its input and cannot duplicate a record. Follow the permitted education and assessment handovers and return to the same bed. Test F1 from a field and confirmation, English/Urdu and both native zoom bounds. A named human records the new IDs, results and translation corrections and signs the review on the portal; agent checks do not complete this gate.",
+                  "مجاز ڈیمو اکاؤنٹ سے ایپ میں نیا بنا داخلہ کھولیں۔ شناخت اور بستر چیک، فرضی پیمائش اور نرسنگ نوٹ درج، پھر وجہ سمیت الگ تصحیح اور دونوں اصل اندراج دیکھیں۔ اصل وقفہ اور دستیاب آپریشن منصوبہ پڑھیں۔ انکار یا نامعلوم ارسال میں معلومات محفوظ اور نقل نہ بننا چیک کریں۔ مجاز رہنمائی و جائزہ حوالگی سے اسی بستر پر واپس آئیں۔ خانے اور تصدیق سے ایف ون، اردو و انگریزی اور اصل کی بورڈ سائز کی دونوں حدیں چیک کریں۔ نامزد انسان نئے نمبر، نتائج اور ترجمہ اصلاحات درج کرکے پورٹل پر جائزہ دستخط کرے؛ ایجنٹ جانچ یہ شرط پوری نہیں کرتی۔",
+                ) : t(
                   "Create a fresh synthetic incident through the app using an authorized demo account; note its returned number, reopen it in My reports and verify all values. Read a fresh notification or approval raised by the authorized upstream role. An eligible approver decides with requester and reviewer present; the requester verifies the outcome or a permitted withdrawal. Change a display preference, sign in again to check persistence, then restore it. Test F1 from a field and dialog, both zoom bounds and reset. Verify refusal of editing/deleting append-only reports and denied decisions. Record new IDs, actual outcomes, reviewer name and Urdu corrections; seeded browsing and agent tests do not pass this human journey.",
                   "مجاز ڈیمو اکاؤنٹ سے ایپ میں نیا فرضی واقعہ بنائیں، نمبر لکھیں، میری رپورٹیں میں کھول کر قدریں چیک کریں۔ مجاز کردار کی نئی اطلاع یا منظوری پڑھیں۔ مجاز فرد درخواست کنندہ اور جائزہ لینے والے کی موجودگی میں فیصلہ کرے؛ بھیجنے والا نتیجہ یا مجاز واپسی چیک کرے۔ ذاتی ترتیب بدل کر دوبارہ لاگ اِن سے برقرار ہونا دیکھیں، پھر بحال کریں۔ خانے اور مکالمے سے F1، دونوں سائز حدیں اور معمول آزمائیں۔ ناقابل ترمیم رپورٹ میں ترمیم/حذف اور ممنوع فیصلے کا انکار دیکھیں۔ نئے نمبر، اصل نتائج، جائزہ لینے والے کا نام اور اردو اصلاحات لکھیں؛ پرانے ریکارڈ یا ایجنٹ جانچ انسانی کامیابی نہیں۔",
                 )}

@@ -1,0 +1,3289 @@
+{
+  "GET /admissions/{admission_id}/flowsheet": {
+    "method": "GET",
+    "path": "/api/v1/admissions/{admission_id}/flowsheet",
+    "summary": "Vitals grid, nursing notes, schedule & next due time",
+    "tags": [
+      "IPD"
+    ],
+    "permissions": [
+      "ipd.flowsheet.view"
+    ],
+    "permissions_mode": "all",
+    "idempotency_key": false,
+    "description": "**Required permission:** `ipd.flowsheet.view`\n\n**Required permission:** `ipd.flowsheet.view`",
+    "roles_allowed": [
+      "anaesthetist",
+      "clinical_specialist",
+      "doctor",
+      "head_nurse",
+      "surgeon",
+      "triage_nurse",
+      "ward_nurse"
+    ],
+    "parameters": [
+      {
+        "name": "admission_id",
+        "in": "path",
+        "required": true,
+        "description": "",
+        "schema": {
+          "type": "integer",
+          "title": "Admission Id"
+        }
+      }
+    ],
+    "request_body": null,
+    "request_content_type": null,
+    "response_schema": {
+      "title": "Envelope[FlowsheetOut]",
+      "properties": {
+        "data": {
+          "title": "FlowsheetOut",
+          "properties": {
+            "vitals": {
+              "items": {
+                "$ref": "#/components/schemas/FlowsheetVitalsOut"
+              },
+              "type": "array",
+              "title": "Vitals",
+              "description": "Oldest first; corrections are separate entries"
+            },
+            "nursing_notes": {
+              "items": {
+                "$ref": "#/components/schemas/FlowsheetNoteOut"
+              },
+              "type": "array",
+              "title": "Nursing Notes"
+            },
+            "schedule": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/VitalsScheduleOut"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "next_vitals_due_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Next Vitals Due At"
+            },
+            "is_overdue": {
+              "type": "boolean",
+              "title": "Is Overdue"
+            }
+          },
+          "type": "object",
+          "required": [
+            "vitals",
+            "nursing_notes",
+            "schedule",
+            "next_vitals_due_at",
+            "is_overdue"
+          ]
+        },
+        "meta": {
+          "title": "Meta",
+          "properties": {
+            "server_time": {
+              "type": "string",
+              "title": "Server Time",
+              "description": "Server clock (UTC). Use it to detect terminal clock skew."
+            },
+            "page": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Page"
+            },
+            "page_size": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Page Size"
+            },
+            "total_count": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Total Count"
+            },
+            "next_cursor": {
+              "title": "Next Cursor"
+            }
+          },
+          "type": "object",
+          "required": [
+            "server_time"
+          ]
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ]
+    },
+    "recorded_example": {
+      "request": {
+        "path": "/api/v1/admissions/1/flowsheet"
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": {
+            "vitals": [
+              {
+                "entry_id": 1,
+                "admission_id": 1,
+                "patient_id": 1,
+                "bp_systolic": 120,
+                "bp_diastolic": 80,
+                "heart_rate": 88,
+                "temp_c": 38.4,
+                "spo2": 95,
+                "respiratory_rate": null,
+                "pain_score": null,
+                "blood_glucose": null,
+                "notes": null,
+                "observed_at": "2026-09-27T17:38:29.062250+00:00",
+                "recorded_by": 7,
+                "recorded_at": "2026-09-27T17:38:29.062250+00:00",
+                "is_correction": false,
+                "corrects_entry_id": null,
+                "correction_reason": null,
+                "recorded_by_name": "uefbb36b24c"
+              },
+              {
+                "entry_id": 2,
+                "admission_id": 1,
+                "patient_id": 1,
+                "bp_systolic": 125,
+                "bp_diastolic": 80,
+                "heart_rate": 88,
+                "temp_c": 38.4,
+                "spo2": 95,
+                "respiratory_rate": null,
+                "pain_score": null,
+                "blood_glucose": null,
+                "notes": null,
+                "observed_at": "2026-09-27T17:38:29.094072+00:00",
+                "recorded_by": 7,
+                "recorded_at": "2026-09-27T17:38:29.094072+00:00",
+                "is_correction": true,
+                "corrects_entry_id": 1,
+                "correction_reason": "misread cuff",
+                "recorded_by_name": "uefbb36b24c"
+              }
+            ],
+            "nursing_notes": [],
+            "schedule": {
+              "schedule_id": 1,
+              "admission_id": 1,
+              "interval_minutes": 240,
+              "start_at": "2026-09-27T17:38:28.972277+00:00",
+              "end_at": null,
+              "is_active": true,
+              "last_alerted_at": null,
+              "created_by": 6,
+              "row_version": 1
+            },
+            "next_vitals_due_at": "2026-09-27T21:38:29.094072+00:00",
+            "is_overdue": false
+          },
+          "meta": {
+            "server_time": "2026-09-27T17:38:29.160015+00:00"
+          },
+          "request_id": "ebb60c13ddf44d59bf840bb3ed2fffa3"
+        }
+      }
+    },
+    "errors": [
+      {
+        "code": "VALIDATION_ERROR",
+        "http_status": 422,
+        "message": "The request is invalid.",
+        "retryable": false,
+        "category": "request",
+        "ui_action": "Show field errors from details.fields / the message."
+      }
+    ],
+    "errors_seen_in_tests": [],
+    "used_by_screens": [
+      "doctor_inpatients",
+      "vitals_tracker"
+    ],
+    "used_by_workflows": [],
+    "typescript_example": "// Vitals grid, nursing notes, schedule & next due time  (permissions: ipd.flowsheet.view)\nexport const flowsheet = (admission_id) =>\n  api(\"GET\", `/admissions/${admission_id}/flowsheet`, undefined);   // api(): see get_guide('envelope-and-errors')",
+    "access": {
+      "authentication": "user",
+      "permissions": [
+        "ipd.flowsheet.view"
+      ],
+      "permissions_mode": "all",
+      "who": "holders of ipd.flowsheet.view",
+      "roles_allowed": [
+        "anaesthetist",
+        "clinical_specialist",
+        "doctor",
+        "head_nurse",
+        "surgeon",
+        "triage_nurse",
+        "ward_nurse"
+      ]
+    },
+    "write_semantics": null,
+    "emits_events": [],
+    "list": {
+      "returns": "object",
+      "paging": [],
+      "search": [],
+      "filters": [],
+      "note": null
+    },
+    "cross_field_rules": {},
+    "errors_detail": [
+      {
+        "code": "VALIDATION_ERROR",
+        "http_status": 422,
+        "message": "The request is invalid.",
+        "retryable": false,
+        "ui_action": "Show field errors from details.fields / the message.",
+        "source": [
+          "documented"
+        ],
+        "details_fields": [],
+        "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+      }
+    ]
+  },
+  "POST /admissions/{admission_id}/flowsheet/vitals": {
+    "method": "POST",
+    "path": "/api/v1/admissions/{admission_id}/flowsheet/vitals",
+    "summary": "Commit Flowsheet Entry: vitals",
+    "tags": [
+      "IPD"
+    ],
+    "permissions": [
+      "ipd.flowsheet.record"
+    ],
+    "permissions_mode": "all",
+    "idempotency_key": true,
+    "description": "Append-only and attributed to the logged-in nurse (medico-legal record).\n\n`ADMISSION_STATE_INVALID`: the patient is not in the hospital (the admission is not Admitted, DischargeInProgress\nor CodeRedActive).\n\n**Required permission:** `ipd.flowsheet.record`\n\n**Required permission:** `ipd.flowsheet.record`",
+    "roles_allowed": [
+      "head_nurse",
+      "triage_nurse",
+      "ward_nurse"
+    ],
+    "parameters": [
+      {
+        "name": "admission_id",
+        "in": "path",
+        "required": true,
+        "description": "",
+        "schema": {
+          "type": "integer",
+          "title": "Admission Id"
+        }
+      },
+      {
+        "name": "Idempotency-Key",
+        "in": "header",
+        "required": false,
+        "description": "Unique per logical action; retries return the first result",
+        "schema": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Unique per logical action; retries return the first result",
+          "title": "Idempotency-Key"
+        }
+      }
+    ],
+    "request_body": {
+      "title": "VitalsIn",
+      "properties": {
+        "bp_systolic": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "maximum": 300,
+              "minimum": 30
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Bp Systolic"
+        },
+        "bp_diastolic": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "maximum": 200,
+              "minimum": 10
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Bp Diastolic"
+        },
+        "heart_rate": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "maximum": 300,
+              "minimum": 10
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Heart Rate"
+        },
+        "temp_c": {
+          "anyOf": [
+            {
+              "type": "number",
+              "maximum": 45,
+              "minimum": 25
+            },
+            {
+              "type": "string",
+              "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Temp C"
+        },
+        "spo2": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 30
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Spo2"
+        },
+        "respiratory_rate": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "maximum": 80,
+              "minimum": 2
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Respiratory Rate"
+        },
+        "pain_score": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "maximum": 10,
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Pain Score"
+        },
+        "blood_glucose": {
+          "anyOf": [
+            {
+              "type": "number",
+              "maximum": 1000,
+              "minimum": 10
+            },
+            {
+              "type": "string",
+              "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Blood Glucose"
+        },
+        "notes": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 2000
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Notes"
+        },
+        "observed_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Observed At",
+          "description": "When measured (defaults to now)"
+        }
+      },
+      "type": "object"
+    },
+    "request_content_type": "application/json",
+    "response_schema": {
+      "title": "Envelope[VitalsEntryOut]",
+      "properties": {
+        "data": {
+          "title": "VitalsEntryOut",
+          "properties": {
+            "entry_id": {
+              "type": "integer",
+              "title": "Entry Id"
+            },
+            "admission_id": {
+              "type": "integer",
+              "title": "Admission Id"
+            },
+            "patient_id": {
+              "type": "integer",
+              "title": "Patient Id"
+            },
+            "bp_systolic": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Bp Systolic"
+            },
+            "bp_diastolic": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Bp Diastolic"
+            },
+            "heart_rate": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Heart Rate"
+            },
+            "temp_c": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Temp C"
+            },
+            "spo2": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Spo2"
+            },
+            "respiratory_rate": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Respiratory Rate"
+            },
+            "pain_score": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Pain Score"
+            },
+            "blood_glucose": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Blood Glucose"
+            },
+            "notes": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Notes"
+            },
+            "observed_at": {
+              "type": "string",
+              "format": "date-time",
+              "title": "Observed At"
+            },
+            "recorded_by": {
+              "type": "integer",
+              "title": "Recorded By"
+            },
+            "recorded_at": {
+              "type": "string",
+              "format": "date-time",
+              "title": "Recorded At"
+            },
+            "is_correction": {
+              "type": "boolean",
+              "title": "Is Correction"
+            },
+            "corrects_entry_id": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Corrects Entry Id"
+            },
+            "correction_reason": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Correction Reason"
+            }
+          },
+          "type": "object",
+          "required": [
+            "entry_id",
+            "admission_id",
+            "patient_id",
+            "bp_systolic",
+            "bp_diastolic",
+            "heart_rate",
+            "temp_c",
+            "spo2",
+            "respiratory_rate",
+            "pain_score",
+            "blood_glucose",
+            "notes",
+            "observed_at",
+            "recorded_by",
+            "recorded_at",
+            "is_correction",
+            "corrects_entry_id",
+            "correction_reason"
+          ]
+        },
+        "meta": {
+          "title": "Meta",
+          "properties": {
+            "server_time": {
+              "type": "string",
+              "title": "Server Time",
+              "description": "Server clock (UTC). Use it to detect terminal clock skew."
+            },
+            "page": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Page"
+            },
+            "page_size": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Page Size"
+            },
+            "total_count": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Total Count"
+            },
+            "next_cursor": {
+              "title": "Next Cursor"
+            }
+          },
+          "type": "object",
+          "required": [
+            "server_time"
+          ]
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ]
+    },
+    "recorded_example": {
+      "request": {
+        "path": "/api/v1/admissions/1/flowsheet/vitals",
+        "body": {
+          "bp_systolic": 120,
+          "bp_diastolic": 80,
+          "heart_rate": 88,
+          "temp_c": 38.4,
+          "spo2": 95
+        }
+      },
+      "response": {
+        "status": 201,
+        "body": {
+          "data": {
+            "entry_id": 1,
+            "admission_id": 1,
+            "patient_id": 1,
+            "bp_systolic": 120,
+            "bp_diastolic": 80,
+            "heart_rate": 88,
+            "temp_c": 38.4,
+            "spo2": 95,
+            "respiratory_rate": null,
+            "pain_score": null,
+            "blood_glucose": null,
+            "notes": null,
+            "observed_at": "2026-09-27T17:38:29.062250+00:00",
+            "recorded_by": 7,
+            "recorded_at": "2026-09-27T17:38:29.062250+00:00",
+            "is_correction": false,
+            "corrects_entry_id": null,
+            "correction_reason": null
+          },
+          "meta": {
+            "server_time": "2026-09-27T17:38:29.084771+00:00"
+          },
+          "request_id": "1e07f5fa3f544991b4e30a3697f9abb5"
+        }
+      },
+      "events_emitted": []
+    },
+    "errors": [
+      {
+        "code": "ADMISSION_STATE_INVALID",
+        "http_status": 409,
+        "message": "The admission cannot move to that state.",
+        "retryable": false,
+        "category": "business",
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      },
+      {
+        "code": "VALIDATION_ERROR",
+        "http_status": 422,
+        "message": "The request is invalid.",
+        "retryable": false,
+        "category": "request",
+        "ui_action": "Show field errors from details.fields / the message."
+      }
+    ],
+    "errors_seen_in_tests": [],
+    "used_by_screens": [
+      "vitals_tracker"
+    ],
+    "used_by_workflows": [
+      "inpatient-and-discharge"
+    ],
+    "typescript_example": "// Commit Flowsheet Entry: vitals  (permissions: ipd.flowsheet.record)\nexport const addVitals = (admission_id, body) =>\n  api(\"POST\", `/admissions/${admission_id}/flowsheet/vitals`, body, { idempotent: true });   // api(): see get_guide('envelope-and-errors')",
+    "access": {
+      "authentication": "user",
+      "permissions": [
+        "ipd.flowsheet.record"
+      ],
+      "permissions_mode": "all",
+      "who": "holders of ipd.flowsheet.record",
+      "roles_allowed": [
+        "head_nurse",
+        "triage_nurse",
+        "ward_nurse"
+      ]
+    },
+    "write_semantics": {
+      "protection": "idempotency_key",
+      "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+      "reconcile_with": "GET /admissions/{admission_id}/flowsheet",
+      "emits_events": [],
+      "prints": false,
+      "related_state_machine": null
+    },
+    "emits_events": [],
+    "list": null,
+    "cross_field_rules": {},
+    "errors_detail": [
+      {
+        "code": "ADMISSION_STATE_INVALID",
+        "http_status": 409,
+        "message": "The admission cannot move to that state.",
+        "retryable": false,
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+        "source": [
+          "documented"
+        ],
+        "details_fields": [],
+        "details_from": "POST /api/v1/admissions/{admission_id}/admit"
+      },
+      {
+        "code": "VALIDATION_ERROR",
+        "http_status": 422,
+        "message": "The request is invalid.",
+        "retryable": false,
+        "ui_action": "Show field errors from details.fields / the message.",
+        "source": [
+          "documented"
+        ],
+        "details_fields": [],
+        "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+      }
+    ]
+  },
+  "POST /admissions/{admission_id}/flowsheet/vitals/{entry_id}/correction": {
+    "method": "POST",
+    "path": "/api/v1/admissions/{admission_id}/flowsheet/vitals/{entry_id}/correction",
+    "summary": "Visible correction entry for a vitals row",
+    "tags": [
+      "IPD"
+    ],
+    "permissions": [
+      "ipd.flowsheet.record"
+    ],
+    "permissions_mode": "all",
+    "idempotency_key": true,
+    "description": "`FLOWSHEET_CORRECTION_INVALID`: the entry corrected is not a vitals entry of this admission.\n\n**Required permission:** `ipd.flowsheet.record`\n\n**Required permission:** `ipd.flowsheet.record`",
+    "roles_allowed": [
+      "head_nurse",
+      "triage_nurse",
+      "ward_nurse"
+    ],
+    "parameters": [
+      {
+        "name": "admission_id",
+        "in": "path",
+        "required": true,
+        "description": "",
+        "schema": {
+          "type": "integer",
+          "title": "Admission Id"
+        }
+      },
+      {
+        "name": "entry_id",
+        "in": "path",
+        "required": true,
+        "description": "",
+        "schema": {
+          "type": "integer",
+          "title": "Entry Id"
+        }
+      },
+      {
+        "name": "Idempotency-Key",
+        "in": "header",
+        "required": false,
+        "description": "Unique per logical action; retries return the first result",
+        "schema": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Unique per logical action; retries return the first result",
+          "title": "Idempotency-Key"
+        }
+      }
+    ],
+    "request_body": {
+      "title": "VitalsCorrectionIn",
+      "properties": {
+        "bp_systolic": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "maximum": 300,
+              "minimum": 30
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Bp Systolic"
+        },
+        "bp_diastolic": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "maximum": 200,
+              "minimum": 10
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Bp Diastolic"
+        },
+        "heart_rate": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "maximum": 300,
+              "minimum": 10
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Heart Rate"
+        },
+        "temp_c": {
+          "anyOf": [
+            {
+              "type": "number",
+              "maximum": 45,
+              "minimum": 25
+            },
+            {
+              "type": "string",
+              "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Temp C"
+        },
+        "spo2": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 30
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Spo2"
+        },
+        "respiratory_rate": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "maximum": 80,
+              "minimum": 2
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Respiratory Rate"
+        },
+        "pain_score": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "maximum": 10,
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Pain Score"
+        },
+        "blood_glucose": {
+          "anyOf": [
+            {
+              "type": "number",
+              "maximum": 1000,
+              "minimum": 10
+            },
+            {
+              "type": "string",
+              "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Blood Glucose"
+        },
+        "notes": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 2000
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Notes"
+        },
+        "observed_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Observed At",
+          "description": "When measured (defaults to now)"
+        },
+        "correction_reason": {
+          "type": "string",
+          "maxLength": 500,
+          "minLength": 3,
+          "title": "Correction Reason"
+        }
+      },
+      "type": "object",
+      "required": [
+        "correction_reason"
+      ]
+    },
+    "request_content_type": "application/json",
+    "response_schema": {
+      "title": "Envelope[VitalsEntryOut]",
+      "properties": {
+        "data": {
+          "title": "VitalsEntryOut",
+          "properties": {
+            "entry_id": {
+              "type": "integer",
+              "title": "Entry Id"
+            },
+            "admission_id": {
+              "type": "integer",
+              "title": "Admission Id"
+            },
+            "patient_id": {
+              "type": "integer",
+              "title": "Patient Id"
+            },
+            "bp_systolic": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Bp Systolic"
+            },
+            "bp_diastolic": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Bp Diastolic"
+            },
+            "heart_rate": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Heart Rate"
+            },
+            "temp_c": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Temp C"
+            },
+            "spo2": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Spo2"
+            },
+            "respiratory_rate": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Respiratory Rate"
+            },
+            "pain_score": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Pain Score"
+            },
+            "blood_glucose": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Blood Glucose"
+            },
+            "notes": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Notes"
+            },
+            "observed_at": {
+              "type": "string",
+              "format": "date-time",
+              "title": "Observed At"
+            },
+            "recorded_by": {
+              "type": "integer",
+              "title": "Recorded By"
+            },
+            "recorded_at": {
+              "type": "string",
+              "format": "date-time",
+              "title": "Recorded At"
+            },
+            "is_correction": {
+              "type": "boolean",
+              "title": "Is Correction"
+            },
+            "corrects_entry_id": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Corrects Entry Id"
+            },
+            "correction_reason": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Correction Reason"
+            }
+          },
+          "type": "object",
+          "required": [
+            "entry_id",
+            "admission_id",
+            "patient_id",
+            "bp_systolic",
+            "bp_diastolic",
+            "heart_rate",
+            "temp_c",
+            "spo2",
+            "respiratory_rate",
+            "pain_score",
+            "blood_glucose",
+            "notes",
+            "observed_at",
+            "recorded_by",
+            "recorded_at",
+            "is_correction",
+            "corrects_entry_id",
+            "correction_reason"
+          ]
+        },
+        "meta": {
+          "title": "Meta",
+          "properties": {
+            "server_time": {
+              "type": "string",
+              "title": "Server Time",
+              "description": "Server clock (UTC). Use it to detect terminal clock skew."
+            },
+            "page": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Page"
+            },
+            "page_size": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Page Size"
+            },
+            "total_count": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Total Count"
+            },
+            "next_cursor": {
+              "title": "Next Cursor"
+            }
+          },
+          "type": "object",
+          "required": [
+            "server_time"
+          ]
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ]
+    },
+    "recorded_example": {
+      "request": {
+        "path": "/api/v1/admissions/1/flowsheet/vitals/1/correction",
+        "body": {
+          "bp_systolic": 125,
+          "bp_diastolic": 80,
+          "heart_rate": 88,
+          "temp_c": 38.4,
+          "spo2": 95,
+          "correction_reason": "misread cuff"
+        }
+      },
+      "response": {
+        "status": 201,
+        "body": {
+          "data": {
+            "entry_id": 2,
+            "admission_id": 1,
+            "patient_id": 1,
+            "bp_systolic": 125,
+            "bp_diastolic": 80,
+            "heart_rate": 88,
+            "temp_c": 38.4,
+            "spo2": 95,
+            "respiratory_rate": null,
+            "pain_score": null,
+            "blood_glucose": null,
+            "notes": null,
+            "observed_at": "2026-09-27T17:38:29.094072+00:00",
+            "recorded_by": 7,
+            "recorded_at": "2026-09-27T17:38:29.094072+00:00",
+            "is_correction": true,
+            "corrects_entry_id": 1,
+            "correction_reason": "misread cuff"
+          },
+          "meta": {
+            "server_time": "2026-09-27T17:38:29.121947+00:00"
+          },
+          "request_id": "cdd633536bb64ebeb46e8de384bf44b1"
+        }
+      },
+      "events_emitted": []
+    },
+    "errors": [
+      {
+        "code": "FLOWSHEET_CORRECTION_INVALID",
+        "http_status": 422,
+        "message": "A correction must refer to an entry of the same admission.",
+        "retryable": false,
+        "category": "business",
+        "ui_action": "Show field errors from details.fields / the message."
+      },
+      {
+        "code": "VALIDATION_ERROR",
+        "http_status": 422,
+        "message": "The request is invalid.",
+        "retryable": false,
+        "category": "request",
+        "ui_action": "Show field errors from details.fields / the message."
+      }
+    ],
+    "errors_seen_in_tests": [],
+    "used_by_screens": [
+      "vitals_tracker"
+    ],
+    "used_by_workflows": [],
+    "typescript_example": "// Visible correction entry for a vitals row  (permissions: ipd.flowsheet.record)\nexport const correctVitals = (admission_id, entry_id, body) =>\n  api(\"POST\", `/admissions/${admission_id}/flowsheet/vitals/${entry_id}/correction`, body, { idempotent: true });   // api(): see get_guide('envelope-and-errors')",
+    "access": {
+      "authentication": "user",
+      "permissions": [
+        "ipd.flowsheet.record"
+      ],
+      "permissions_mode": "all",
+      "who": "holders of ipd.flowsheet.record",
+      "roles_allowed": [
+        "head_nurse",
+        "triage_nurse",
+        "ward_nurse"
+      ]
+    },
+    "write_semantics": {
+      "protection": "idempotency_key",
+      "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+      "reconcile_with": "GET /admissions/{admission_id}/flowsheet",
+      "emits_events": [],
+      "prints": false,
+      "related_state_machine": null
+    },
+    "emits_events": [],
+    "list": null,
+    "cross_field_rules": {},
+    "errors_detail": [
+      {
+        "code": "FLOWSHEET_CORRECTION_INVALID",
+        "http_status": 422,
+        "message": "A correction must refer to an entry of the same admission.",
+        "retryable": false,
+        "ui_action": "Show field errors from details.fields / the message.",
+        "source": [
+          "documented"
+        ],
+        "details_fields": [],
+        "details_from": "POST /api/v1/admissions/{admission_id}/flowsheet/nursing-notes/{note_id}/correction"
+      },
+      {
+        "code": "VALIDATION_ERROR",
+        "http_status": 422,
+        "message": "The request is invalid.",
+        "retryable": false,
+        "ui_action": "Show field errors from details.fields / the message.",
+        "source": [
+          "documented"
+        ],
+        "details_fields": [],
+        "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+      }
+    ]
+  },
+  "POST /admissions/{admission_id}/flowsheet/nursing-notes": {
+    "method": "POST",
+    "path": "/api/v1/admissions/{admission_id}/flowsheet/nursing-notes",
+    "summary": "Commit a nursing note",
+    "tags": [
+      "IPD"
+    ],
+    "permissions": [
+      "ipd.flowsheet.record"
+    ],
+    "permissions_mode": "all",
+    "idempotency_key": true,
+    "description": "**Required permission:** `ipd.flowsheet.record`\n\n**Required permission:** `ipd.flowsheet.record`",
+    "roles_allowed": [
+      "head_nurse",
+      "triage_nurse",
+      "ward_nurse"
+    ],
+    "parameters": [
+      {
+        "name": "admission_id",
+        "in": "path",
+        "required": true,
+        "description": "",
+        "schema": {
+          "type": "integer",
+          "title": "Admission Id"
+        }
+      },
+      {
+        "name": "Idempotency-Key",
+        "in": "header",
+        "required": false,
+        "description": "Unique per logical action; retries return the first result",
+        "schema": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Unique per logical action; retries return the first result",
+          "title": "Idempotency-Key"
+        }
+      }
+    ],
+    "request_body": {
+      "title": "NursingNoteIn",
+      "properties": {
+        "note_text": {
+          "type": "string",
+          "maxLength": 10000,
+          "minLength": 1,
+          "title": "Note Text"
+        },
+        "observed_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Observed At"
+        }
+      },
+      "type": "object",
+      "required": [
+        "note_text"
+      ]
+    },
+    "request_content_type": "application/json",
+    "response_schema": {
+      "title": "Envelope[NursingNoteOut]",
+      "properties": {
+        "data": {
+          "title": "NursingNoteOut",
+          "properties": {
+            "note_id": {
+              "type": "integer",
+              "title": "Note Id"
+            },
+            "admission_id": {
+              "type": "integer",
+              "title": "Admission Id"
+            },
+            "patient_id": {
+              "type": "integer",
+              "title": "Patient Id"
+            },
+            "note_text": {
+              "type": "string",
+              "title": "Note Text"
+            },
+            "observed_at": {
+              "type": "string",
+              "format": "date-time",
+              "title": "Observed At"
+            },
+            "authored_by": {
+              "type": "integer",
+              "title": "Authored By"
+            },
+            "authored_at": {
+              "type": "string",
+              "format": "date-time",
+              "title": "Authored At"
+            },
+            "is_correction": {
+              "type": "boolean",
+              "title": "Is Correction"
+            },
+            "corrects_note_id": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Corrects Note Id"
+            },
+            "correction_reason": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Correction Reason"
+            }
+          },
+          "type": "object",
+          "required": [
+            "note_id",
+            "admission_id",
+            "patient_id",
+            "note_text",
+            "observed_at",
+            "authored_by",
+            "authored_at",
+            "is_correction",
+            "corrects_note_id",
+            "correction_reason"
+          ]
+        },
+        "meta": {
+          "title": "Meta",
+          "properties": {
+            "server_time": {
+              "type": "string",
+              "title": "Server Time",
+              "description": "Server clock (UTC). Use it to detect terminal clock skew."
+            },
+            "page": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Page"
+            },
+            "page_size": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Page Size"
+            },
+            "total_count": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Total Count"
+            },
+            "next_cursor": {
+              "title": "Next Cursor"
+            }
+          },
+          "type": "object",
+          "required": [
+            "server_time"
+          ]
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ]
+    },
+    "recorded_example": {
+      "request": {
+        "path": "/api/v1/admissions/1/flowsheet/nursing-notes",
+        "body": {
+          "note_text": "Comfortable, sleeping"
+        }
+      },
+      "response": {
+        "status": 201,
+        "body": {
+          "data": {
+            "note_id": 1,
+            "admission_id": 1,
+            "patient_id": 1,
+            "note_text": "Comfortable, sleeping",
+            "observed_at": "2026-09-27T17:38:44.827692+00:00",
+            "authored_by": 7,
+            "authored_at": "2026-09-27T17:38:44.827692+00:00",
+            "is_correction": false,
+            "corrects_note_id": null,
+            "correction_reason": null
+          },
+          "meta": {
+            "server_time": "2026-09-27T17:38:44.833390+00:00"
+          },
+          "request_id": "609823b01eac4e5aa0d389e536712375"
+        }
+      },
+      "events_emitted": []
+    },
+    "errors": [
+      {
+        "code": "VALIDATION_ERROR",
+        "http_status": 422,
+        "message": "The request is invalid.",
+        "retryable": false,
+        "category": "request",
+        "ui_action": "Show field errors from details.fields / the message."
+      }
+    ],
+    "errors_seen_in_tests": [],
+    "used_by_screens": [
+      "vitals_tracker"
+    ],
+    "used_by_workflows": [],
+    "typescript_example": "// Commit a nursing note  (permissions: ipd.flowsheet.record)\nexport const addNote = (admission_id, body) =>\n  api(\"POST\", `/admissions/${admission_id}/flowsheet/nursing-notes`, body, { idempotent: true });   // api(): see get_guide('envelope-and-errors')",
+    "access": {
+      "authentication": "user",
+      "permissions": [
+        "ipd.flowsheet.record"
+      ],
+      "permissions_mode": "all",
+      "who": "holders of ipd.flowsheet.record",
+      "roles_allowed": [
+        "head_nurse",
+        "triage_nurse",
+        "ward_nurse"
+      ]
+    },
+    "write_semantics": {
+      "protection": "idempotency_key",
+      "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+      "reconcile_with": "GET /admissions/{admission_id}/flowsheet",
+      "emits_events": [],
+      "prints": false,
+      "related_state_machine": null
+    },
+    "emits_events": [],
+    "list": null,
+    "cross_field_rules": {},
+    "errors_detail": [
+      {
+        "code": "VALIDATION_ERROR",
+        "http_status": 422,
+        "message": "The request is invalid.",
+        "retryable": false,
+        "ui_action": "Show field errors from details.fields / the message.",
+        "source": [
+          "documented"
+        ],
+        "details_fields": [],
+        "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+      }
+    ]
+  },
+  "POST /admissions/{admission_id}/flowsheet/nursing-notes/{note_id}/correction": {
+    "method": "POST",
+    "path": "/api/v1/admissions/{admission_id}/flowsheet/nursing-notes/{note_id}/correction",
+    "summary": "Visible correction entry for a nursing note",
+    "tags": [
+      "IPD"
+    ],
+    "permissions": [
+      "ipd.flowsheet.record"
+    ],
+    "permissions_mode": "all",
+    "idempotency_key": true,
+    "description": "`FLOWSHEET_CORRECTION_INVALID`: a correction must refer to an entry of the same admission.\n\n**Required permission:** `ipd.flowsheet.record`\n\n**Required permission:** `ipd.flowsheet.record`",
+    "roles_allowed": [
+      "head_nurse",
+      "triage_nurse",
+      "ward_nurse"
+    ],
+    "parameters": [
+      {
+        "name": "admission_id",
+        "in": "path",
+        "required": true,
+        "description": "",
+        "schema": {
+          "type": "integer",
+          "title": "Admission Id"
+        }
+      },
+      {
+        "name": "note_id",
+        "in": "path",
+        "required": true,
+        "description": "",
+        "schema": {
+          "type": "integer",
+          "title": "Note Id"
+        }
+      },
+      {
+        "name": "Idempotency-Key",
+        "in": "header",
+        "required": false,
+        "description": "Unique per logical action; retries return the first result",
+        "schema": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Unique per logical action; retries return the first result",
+          "title": "Idempotency-Key"
+        }
+      }
+    ],
+    "request_body": {
+      "title": "NoteCorrectionIn",
+      "properties": {
+        "note_text": {
+          "type": "string",
+          "maxLength": 10000,
+          "minLength": 1,
+          "title": "Note Text"
+        },
+        "observed_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Observed At"
+        },
+        "correction_reason": {
+          "type": "string",
+          "maxLength": 500,
+          "minLength": 3,
+          "title": "Correction Reason"
+        }
+      },
+      "type": "object",
+      "required": [
+        "note_text",
+        "correction_reason"
+      ]
+    },
+    "request_content_type": "application/json",
+    "response_schema": {
+      "title": "Envelope[NursingNoteOut]",
+      "properties": {
+        "data": {
+          "title": "NursingNoteOut",
+          "properties": {
+            "note_id": {
+              "type": "integer",
+              "title": "Note Id"
+            },
+            "admission_id": {
+              "type": "integer",
+              "title": "Admission Id"
+            },
+            "patient_id": {
+              "type": "integer",
+              "title": "Patient Id"
+            },
+            "note_text": {
+              "type": "string",
+              "title": "Note Text"
+            },
+            "observed_at": {
+              "type": "string",
+              "format": "date-time",
+              "title": "Observed At"
+            },
+            "authored_by": {
+              "type": "integer",
+              "title": "Authored By"
+            },
+            "authored_at": {
+              "type": "string",
+              "format": "date-time",
+              "title": "Authored At"
+            },
+            "is_correction": {
+              "type": "boolean",
+              "title": "Is Correction"
+            },
+            "corrects_note_id": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Corrects Note Id"
+            },
+            "correction_reason": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Correction Reason"
+            }
+          },
+          "type": "object",
+          "required": [
+            "note_id",
+            "admission_id",
+            "patient_id",
+            "note_text",
+            "observed_at",
+            "authored_by",
+            "authored_at",
+            "is_correction",
+            "corrects_note_id",
+            "correction_reason"
+          ]
+        },
+        "meta": {
+          "title": "Meta",
+          "properties": {
+            "server_time": {
+              "type": "string",
+              "title": "Server Time",
+              "description": "Server clock (UTC). Use it to detect terminal clock skew."
+            },
+            "page": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Page"
+            },
+            "page_size": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Page Size"
+            },
+            "total_count": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Total Count"
+            },
+            "next_cursor": {
+              "title": "Next Cursor"
+            }
+          },
+          "type": "object",
+          "required": [
+            "server_time"
+          ]
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ]
+    },
+    "recorded_example": {
+      "request": {
+        "path": "/api/v1/admissions/1/flowsheet/nursing-notes/1/correction",
+        "body": {
+          "note_text": "Comfortable, mild pain",
+          "correction_reason": "incomplete"
+        }
+      },
+      "response": {
+        "status": 201,
+        "body": {
+          "data": {
+            "note_id": 2,
+            "admission_id": 1,
+            "patient_id": 1,
+            "note_text": "Comfortable, mild pain",
+            "observed_at": "2026-09-27T17:38:44.837327+00:00",
+            "authored_by": 7,
+            "authored_at": "2026-09-27T17:38:44.837327+00:00",
+            "is_correction": true,
+            "corrects_note_id": 1,
+            "correction_reason": "incomplete"
+          },
+          "meta": {
+            "server_time": "2026-09-27T17:38:44.840048+00:00"
+          },
+          "request_id": "414f60e7c7d04a9c94e0facf71a819c7"
+        }
+      },
+      "errors_seen": [
+        "FLOWSHEET_CORRECTION_INVALID"
+      ],
+      "events_emitted": []
+    },
+    "errors": [
+      {
+        "code": "FLOWSHEET_CORRECTION_INVALID",
+        "http_status": 422,
+        "message": "A correction must refer to an entry of the same admission.",
+        "retryable": false,
+        "category": "business",
+        "ui_action": "Show field errors from details.fields / the message."
+      },
+      {
+        "code": "VALIDATION_ERROR",
+        "http_status": 422,
+        "message": "The request is invalid.",
+        "retryable": false,
+        "category": "request",
+        "ui_action": "Show field errors from details.fields / the message."
+      }
+    ],
+    "errors_seen_in_tests": [
+      "FLOWSHEET_CORRECTION_INVALID"
+    ],
+    "used_by_screens": [
+      "vitals_tracker"
+    ],
+    "used_by_workflows": [],
+    "typescript_example": "// Visible correction entry for a nursing note  (permissions: ipd.flowsheet.record)\nexport const correctNote = (admission_id, note_id, body) =>\n  api(\"POST\", `/admissions/${admission_id}/flowsheet/nursing-notes/${note_id}/correction`, body, { idempotent: true });   // api(): see get_guide('envelope-and-errors')",
+    "access": {
+      "authentication": "user",
+      "permissions": [
+        "ipd.flowsheet.record"
+      ],
+      "permissions_mode": "all",
+      "who": "holders of ipd.flowsheet.record",
+      "roles_allowed": [
+        "head_nurse",
+        "triage_nurse",
+        "ward_nurse"
+      ]
+    },
+    "write_semantics": {
+      "protection": "idempotency_key",
+      "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+      "reconcile_with": "GET /admissions/{admission_id}/flowsheet",
+      "emits_events": [],
+      "prints": false,
+      "related_state_machine": null
+    },
+    "emits_events": [],
+    "list": null,
+    "cross_field_rules": {},
+    "errors_detail": [
+      {
+        "code": "FLOWSHEET_CORRECTION_INVALID",
+        "http_status": 422,
+        "message": "A correction must refer to an entry of the same admission.",
+        "retryable": false,
+        "ui_action": "Show field errors from details.fields / the message.",
+        "source": [
+          "documented",
+          "seen_in_tests"
+        ],
+        "details_fields": [],
+        "details_from": "POST /api/v1/admissions/{admission_id}/flowsheet/nursing-notes/{note_id}/correction"
+      },
+      {
+        "code": "VALIDATION_ERROR",
+        "http_status": 422,
+        "message": "The request is invalid.",
+        "retryable": false,
+        "ui_action": "Show field errors from details.fields / the message.",
+        "source": [
+          "documented"
+        ],
+        "details_fields": [],
+        "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+      }
+    ]
+  },
+  "PUT /admissions/{admission_id}/flowsheet/vitals-schedule": {
+    "method": "PUT",
+    "path": "/api/v1/admissions/{admission_id}/flowsheet/vitals-schedule",
+    "summary": "Set the mandated vitals interval",
+    "tags": [
+      "IPD"
+    ],
+    "permissions": [
+      "ipd.flowsheet.record",
+      "ipd.admission.request"
+    ],
+    "permissions_mode": "any",
+    "idempotency_key": false,
+    "description": "**Required permission:** `ipd.flowsheet.record OR ipd.admission.request`\n\n**Required permission:** `ipd.flowsheet.record OR ipd.admission.request`",
+    "roles_allowed": [
+      "anaesthetist",
+      "clinical_specialist",
+      "doctor",
+      "head_nurse",
+      "surgeon",
+      "triage_nurse",
+      "ward_nurse"
+    ],
+    "parameters": [
+      {
+        "name": "admission_id",
+        "in": "path",
+        "required": true,
+        "description": "",
+        "schema": {
+          "type": "integer",
+          "title": "Admission Id"
+        }
+      }
+    ],
+    "request_body": {
+      "title": "VitalsScheduleIn",
+      "properties": {
+        "interval_minutes": {
+          "type": "integer",
+          "maximum": 1440,
+          "minimum": 15,
+          "title": "Interval Minutes"
+        }
+      },
+      "type": "object",
+      "required": [
+        "interval_minutes"
+      ]
+    },
+    "request_content_type": "application/json",
+    "response_schema": {
+      "title": "Envelope[VitalsScheduleOut]",
+      "properties": {
+        "data": {
+          "title": "VitalsScheduleOut",
+          "properties": {
+            "schedule_id": {
+              "type": "integer",
+              "title": "Schedule Id"
+            },
+            "admission_id": {
+              "type": "integer",
+              "title": "Admission Id"
+            },
+            "interval_minutes": {
+              "type": "integer",
+              "title": "Interval Minutes"
+            },
+            "start_at": {
+              "type": "string",
+              "format": "date-time",
+              "title": "Start At"
+            },
+            "end_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "End At"
+            },
+            "is_active": {
+              "type": "boolean",
+              "title": "Is Active"
+            },
+            "last_alerted_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Last Alerted At"
+            },
+            "created_by": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Created By"
+            },
+            "row_version": {
+              "type": "integer",
+              "title": "Row Version"
+            }
+          },
+          "type": "object",
+          "required": [
+            "schedule_id",
+            "admission_id",
+            "interval_minutes",
+            "start_at",
+            "end_at",
+            "is_active",
+            "last_alerted_at",
+            "created_by",
+            "row_version"
+          ]
+        },
+        "meta": {
+          "title": "Meta",
+          "properties": {
+            "server_time": {
+              "type": "string",
+              "title": "Server Time",
+              "description": "Server clock (UTC). Use it to detect terminal clock skew."
+            },
+            "page": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Page"
+            },
+            "page_size": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Page Size"
+            },
+            "total_count": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Total Count"
+            },
+            "next_cursor": {
+              "title": "Next Cursor"
+            }
+          },
+          "type": "object",
+          "required": [
+            "server_time"
+          ]
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ]
+    },
+    "recorded_example": {
+      "request": {
+        "path": "/api/v1/admissions/1/flowsheet/vitals-schedule",
+        "body": {
+          "interval_minutes": 60
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": {
+            "schedule_id": 3,
+            "admission_id": 1,
+            "interval_minutes": 60,
+            "start_at": "2026-09-27T17:38:44.990385+00:00",
+            "end_at": null,
+            "is_active": true,
+            "last_alerted_at": null,
+            "created_by": 7,
+            "row_version": 1
+          },
+          "meta": {
+            "server_time": "2026-09-27T17:38:44.996396+00:00"
+          },
+          "request_id": "0bf7232a2f2b4d199b975447c9706a57"
+        }
+      },
+      "events_emitted": []
+    },
+    "errors": [
+      {
+        "code": "VALIDATION_ERROR",
+        "http_status": 422,
+        "message": "The request is invalid.",
+        "retryable": false,
+        "category": "request",
+        "ui_action": "Show field errors from details.fields / the message."
+      }
+    ],
+    "errors_seen_in_tests": [],
+    "used_by_screens": [
+      "vitals_tracker"
+    ],
+    "used_by_workflows": [],
+    "typescript_example": "// Set the mandated vitals interval  (permissions: ipd.flowsheet.record, ipd.admission.request)\nexport const vitalsSchedule = (admission_id, body) =>\n  api(\"PUT\", `/admissions/${admission_id}/flowsheet/vitals-schedule`, body);   // api(): see get_guide('envelope-and-errors')",
+    "access": {
+      "authentication": "user",
+      "permissions": [
+        "ipd.flowsheet.record",
+        "ipd.admission.request"
+      ],
+      "permissions_mode": "any",
+      "who": "holders of ipd.flowsheet.record or ipd.admission.request",
+      "roles_allowed": [
+        "anaesthetist",
+        "clinical_specialist",
+        "doctor",
+        "head_nurse",
+        "surgeon",
+        "triage_nurse",
+        "ward_nurse"
+      ]
+    },
+    "write_semantics": {
+      "protection": "replace",
+      "on_lost_answer": "Unversioned PUT: re-read before resubmitting. A retry may overwrite intervening edits and repeat history, timestamps or events; the HTTP method alone is not replay protection. Never retry automatically.",
+      "reconcile_with": "GET /admissions/{admission_id}/flowsheet",
+      "emits_events": [],
+      "prints": false,
+      "related_state_machine": null
+    },
+    "emits_events": [],
+    "list": null,
+    "cross_field_rules": {},
+    "errors_detail": [
+      {
+        "code": "VALIDATION_ERROR",
+        "http_status": 422,
+        "message": "The request is invalid.",
+        "retryable": false,
+        "ui_action": "Show field errors from details.fields / the message.",
+        "source": [
+          "documented"
+        ],
+        "details_fields": [],
+        "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+      }
+    ]
+  },
+  "GET /ot/clinical-worklist": {
+    "method": "GET",
+    "path": "/api/v1/ot/clinical-worklist",
+    "summary": "Operations whose surgical record needs work",
+    "tags": [
+      "Surgical care"
+    ],
+    "permissions": [
+      "ot.clinical.view"
+    ],
+    "permissions_mode": "all",
+    "idempotency_key": false,
+    "description": "Operations coming up in `days` days, under way, or over with the record still incomplete; each with every part\nof the record and `next_step`. The anaesthetist's pre-anaesthesia clinic and the surgeon's list (`mine`: the\noperations the caller operates or anaesthetizes). With `admission_id`: every operation of that stay, complete or\nnot (the ward opens the post-operative plan from it). Refresh on `ot.clinical.updated` and `ot.booking.updated`.\n\n**Required permission:** `ot.clinical.view`\n\n**Required permission:** `ot.clinical.view`",
+    "roles_allowed": [
+      "anaesthetist",
+      "clinical_specialist",
+      "doctor",
+      "head_nurse",
+      "ot_admin",
+      "ot_nurse",
+      "surgeon",
+      "ward_nurse"
+    ],
+    "parameters": [
+      {
+        "name": "mine",
+        "in": "query",
+        "required": false,
+        "description": "",
+        "schema": {
+          "type": "boolean",
+          "default": false,
+          "title": "Mine"
+        }
+      },
+      {
+        "name": "days",
+        "in": "query",
+        "required": false,
+        "description": "",
+        "schema": {
+          "type": "integer",
+          "maximum": 60,
+          "minimum": 0,
+          "default": 7,
+          "title": "Days"
+        }
+      },
+      {
+        "name": "admission_id",
+        "in": "query",
+        "required": false,
+        "description": "",
+        "schema": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Admission Id"
+        }
+      }
+    ],
+    "request_body": null,
+    "request_content_type": null,
+    "response_schema": {
+      "title": "Envelope[list[SurgicalWorklistItemOut]]",
+      "properties": {
+        "data": {
+          "items": {
+            "title": "SurgicalWorklistItemOut",
+            "properties": {
+              "booking_id": {
+                "type": "integer",
+                "title": "Booking Id"
+              },
+              "booking_number": {
+                "type": "string",
+                "title": "Booking Number"
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "Requested",
+                  "Scheduled",
+                  "InProgress",
+                  "Cleaning",
+                  "Completed",
+                  "Cancelled",
+                  "EmergencyHold"
+                ],
+                "title": "Status"
+              },
+              "booking_type": {
+                "type": "string",
+                "enum": [
+                  "Scheduled",
+                  "Emergency",
+                  "CodeRed"
+                ],
+                "title": "Booking Type"
+              },
+              "procedure_name": {
+                "type": "string",
+                "title": "Procedure Name"
+              },
+              "anesthesia_type": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Anesthesia Type"
+              },
+              "scheduled_start": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Scheduled Start"
+              },
+              "actual_start": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Actual Start"
+              },
+              "actual_end": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Actual End"
+              },
+              "primary_surgeon_id": {
+                "type": "integer",
+                "title": "Primary Surgeon Id"
+              },
+              "surgeon_name": {
+                "type": "string",
+                "title": "Surgeon Name"
+              },
+              "ot_name": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Ot Name"
+              },
+              "patient_id": {
+                "type": "integer",
+                "title": "Patient Id"
+              },
+              "mrn": {
+                "type": "string",
+                "title": "Mrn"
+              },
+              "patient_name": {
+                "type": "string",
+                "title": "Patient Name"
+              },
+              "needs_anaesthetist": {
+                "type": "boolean",
+                "title": "Needs Anaesthetist"
+              },
+              "anaesthesia_decision": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "Fit",
+                      "FitWithConditions",
+                      "NotFit",
+                      "Deferred"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Anaesthesia Decision"
+              },
+              "anaesthetist_id": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Anaesthetist Id"
+              },
+              "parts": {
+                "items": {
+                  "$ref": "#/components/schemas/RecordPartOut"
+                },
+                "type": "array",
+                "title": "Parts"
+              },
+              "next_step": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Next Step"
+              }
+            },
+            "type": "object",
+            "required": [
+              "booking_id",
+              "booking_number",
+              "status",
+              "booking_type",
+              "procedure_name",
+              "anesthesia_type",
+              "scheduled_start",
+              "actual_start",
+              "actual_end",
+              "primary_surgeon_id",
+              "surgeon_name",
+              "ot_name",
+              "patient_id",
+              "mrn",
+              "patient_name",
+              "needs_anaesthetist",
+              "anaesthesia_decision",
+              "anaesthetist_id",
+              "parts",
+              "next_step"
+            ]
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "title": "Meta",
+          "properties": {
+            "server_time": {
+              "type": "string",
+              "title": "Server Time",
+              "description": "Server clock (UTC). Use it to detect terminal clock skew."
+            },
+            "page": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Page"
+            },
+            "page_size": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Page Size"
+            },
+            "total_count": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Total Count"
+            },
+            "next_cursor": {
+              "title": "Next Cursor"
+            }
+          },
+          "type": "object",
+          "required": [
+            "server_time"
+          ]
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ]
+    },
+    "recorded_example": {
+      "request": {
+        "path": "/api/v1/ot/clinical-worklist",
+        "query": {
+          "mine": true
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": [
+            {
+              "booking_id": 1,
+              "booking_number": "OT-2026-00001",
+              "status": "Cleaning",
+              "booking_type": "Scheduled",
+              "procedure_name": "Appendectomy",
+              "anesthesia_type": "General",
+              "scheduled_start": "2026-10-01T09:00:00+00:00",
+              "actual_start": "2026-09-30T09:04:27.990684+00:00",
+              "actual_end": "2026-09-30T09:04:28.126713+00:00",
+              "primary_surgeon_id": 12,
+              "surgeon_name": "Dr Tariq",
+              "ot_name": "Main OT 1",
+              "patient_id": 2,
+              "mrn": "MRN-2026-000002",
+              "patient_name": "Ali Khan",
+              "needs_anaesthetist": true,
+              "anaesthesia_decision": "Fit",
+              "anaesthetist_id": 17,
+              "parts": [
+                {
+                  "part": "PreOpNote",
+                  "label": "Pre-operative note",
+                  "state": "Final"
+                },
+                {
+                  "part": "PreAnaesthesia",
+                  "label": "Pre-anaesthesia assessment",
+                  "state": "Final"
+                },
+                {
+                  "part": "SignIn",
+                  "label": "Sign in",
+                  "state": "Final"
+                }
+              ],
+              "next_step": null
+            }
+          ],
+          "meta": {
+            "server_time": "2026-09-30T09:04:28.386268+00:00"
+          },
+          "request_id": "f39e46d40d17427280146fef0d8c86c0"
+        }
+      }
+    },
+    "errors": [
+      {
+        "code": "VALIDATION_ERROR",
+        "http_status": 422,
+        "message": "The request is invalid.",
+        "retryable": false,
+        "category": "request",
+        "ui_action": "Show field errors from details.fields / the message."
+      }
+    ],
+    "errors_seen_in_tests": [],
+    "used_by_screens": [
+      "vitals_tracker",
+      "safety_checklist",
+      "safety_checklist_admin",
+      "safety_checklist_anaesthesia",
+      "pre_anaesthesia_clinic",
+      "surgical_record_surgeon"
+    ],
+    "used_by_workflows": [
+      "inpatient-and-discharge",
+      "surgical-care"
+    ],
+    "typescript_example": "// Operations whose surgical record needs work  (permissions: ot.clinical.view)\nexport const worklistOtClinical = () =>\n  api(\"GET\", `/ot/clinical-worklist`, undefined);   // api(): see get_guide('envelope-and-errors')",
+    "access": {
+      "authentication": "user",
+      "permissions": [
+        "ot.clinical.view"
+      ],
+      "permissions_mode": "all",
+      "who": "holders of ot.clinical.view",
+      "roles_allowed": [
+        "anaesthetist",
+        "clinical_specialist",
+        "doctor",
+        "head_nurse",
+        "ot_admin",
+        "ot_nurse",
+        "surgeon",
+        "ward_nurse"
+      ]
+    },
+    "write_semantics": null,
+    "emits_events": [],
+    "list": {
+      "returns": "list",
+      "paging": [],
+      "search": [],
+      "filters": [
+        {
+          "name": "mine",
+          "required": false,
+          "type": "boolean",
+          "default": false
+        },
+        {
+          "name": "days",
+          "required": false,
+          "type": "integer",
+          "default": 7,
+          "minimum": 0,
+          "maximum": 60
+        },
+        {
+          "name": "admission_id",
+          "required": false,
+          "type": "integer"
+        }
+      ],
+      "note": null
+    },
+    "cross_field_rules": {},
+    "errors_detail": [
+      {
+        "code": "VALIDATION_ERROR",
+        "http_status": 422,
+        "message": "The request is invalid.",
+        "retryable": false,
+        "ui_action": "Show field errors from details.fields / the message.",
+        "source": [
+          "documented"
+        ],
+        "details_fields": [],
+        "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+      }
+    ]
+  },
+  "GET /ot/bookings/{booking_id}/surgical-record": {
+    "method": "GET",
+    "path": "/api/v1/ot/bookings/{booking_id}/surgical-record",
+    "summary": "The surgical record of an operation",
+    "tags": [
+      "Surgical care"
+    ],
+    "permissions": [
+      "ot.clinical.view"
+    ],
+    "permissions_mode": "all",
+    "idempotency_key": false,
+    "description": "Every part in order with where it stands (`parts`) and `next_step`: the pre-operative note, the pre-anaesthesia\nassessments, the pauses of the checklist, the anaesthesia record with its chart (and `chart_gaps`), the operative\nnote and post-operative plan, recovery, the adverse events and the corrections. Drafts list what signing still\nneeds (`missing`). Reading it is logged as a patient-data access.\n\n**Required permission:** `ot.clinical.view`\n\n**Required permission:** `ot.clinical.view`",
+    "roles_allowed": [
+      "anaesthetist",
+      "clinical_specialist",
+      "doctor",
+      "head_nurse",
+      "ot_admin",
+      "ot_nurse",
+      "surgeon",
+      "ward_nurse"
+    ],
+    "parameters": [
+      {
+        "name": "booking_id",
+        "in": "path",
+        "required": true,
+        "description": "",
+        "schema": {
+          "type": "integer",
+          "title": "Booking Id"
+        }
+      }
+    ],
+    "request_body": null,
+    "request_content_type": null,
+    "response_schema": {
+      "title": "Envelope[SurgicalRecordOut]",
+      "properties": {
+        "data": {
+          "title": "SurgicalRecordOut",
+          "properties": {
+            "booking": {
+              "$ref": "#/components/schemas/SurgicalBookingOut"
+            },
+            "parts": {
+              "items": {
+                "$ref": "#/components/schemas/RecordPartOut"
+              },
+              "type": "array",
+              "title": "Parts",
+              "description": "Every part in order and where it stands"
+            },
+            "next_step": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Next Step",
+              "description": "What to do next; null when the record is complete"
+            },
+            "pre_op_note": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/PreOpNoteOut"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "consents": {
+              "items": {
+                "$ref": "#/components/schemas/ConsentBriefOut"
+              },
+              "type": "array",
+              "title": "Consents",
+              "description": "The consents of the operation (the consent register): to the operation and to the anaesthesia, given before the sign in"
+            },
+            "pre_anaesthesia": {
+              "items": {
+                "$ref": "#/components/schemas/PreAnaesthesiaOut"
+              },
+              "type": "array",
+              "title": "Pre Anaesthesia",
+              "description": "Every assessment, the latest last"
+            },
+            "checklist": {
+              "items": {
+                "$ref": "#/components/schemas/SafetyCheckOut"
+              },
+              "type": "array",
+              "title": "Checklist",
+              "description": "The pauses recorded, in order"
+            },
+            "anaesthesia_record": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/AnaesthesiaRecordOut"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "operative_note": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/OperativeNoteOut"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "recovery": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/RecoveryStayOut"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "adverse_events": {
+              "items": {
+                "$ref": "#/components/schemas/TheatreIncidentOut"
+              },
+              "type": "array",
+              "title": "Adverse Events",
+              "description": "The incidents reported against the operation"
+            },
+            "corrections": {
+              "items": {
+                "$ref": "#/components/schemas/SurgicalCorrectionOut"
+              },
+              "type": "array",
+              "title": "Corrections"
+            }
+          },
+          "type": "object",
+          "required": [
+            "booking",
+            "parts",
+            "next_step",
+            "pre_op_note",
+            "consents",
+            "pre_anaesthesia",
+            "checklist",
+            "anaesthesia_record",
+            "operative_note",
+            "recovery",
+            "adverse_events",
+            "corrections"
+          ]
+        },
+        "meta": {
+          "title": "Meta",
+          "properties": {
+            "server_time": {
+              "type": "string",
+              "title": "Server Time",
+              "description": "Server clock (UTC). Use it to detect terminal clock skew."
+            },
+            "page": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Page"
+            },
+            "page_size": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Page Size"
+            },
+            "total_count": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Total Count"
+            },
+            "next_cursor": {
+              "title": "Next Cursor"
+            }
+          },
+          "type": "object",
+          "required": [
+            "server_time"
+          ]
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ]
+    },
+    "recorded_example": {
+      "request": {
+        "path": "/api/v1/ot/bookings/1/surgical-record"
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": {
+            "booking": {
+              "booking_id": 1,
+              "booking_number": "OT-2026-00001",
+              "status": "Scheduled",
+              "booking_type": "Scheduled",
+              "procedure_name": "Appendectomy",
+              "anesthesia_type": "General",
+              "patient_id": 1,
+              "admission_id": null,
+              "primary_surgeon_id": 7,
+              "surgeon_name": "Dr Tariq",
+              "ot_id": 1,
+              "ot_name": "Main OT 1",
+              "scheduled_start": "2026-10-01T09:00:00+00:00",
+              "scheduled_end": "2026-10-01T10:30:00+00:00",
+              "actual_start": null,
+              "actual_end": null,
+              "mrn": "MRN-2026-000001",
+              "patient_name": "Ali Khan",
+              "gender": "male",
+              "age_years": 40,
+              "admission_number": null,
+              "needs_anaesthetist": true
+            },
+            "parts": [
+              {
+                "part": "PreOpNote",
+                "label": "Pre-operative note",
+                "state": "Draft"
+              },
+              {
+                "part": "OperationConsent",
+                "label": "Consent to the operation",
+                "state": "Missing"
+              },
+              {
+                "part": "PreAnaesthesia",
+                "label": "Pre-anaesthesia assessment",
+                "state": "Final"
+              }
+            ],
+            "next_step": "Take the patient's consent to the operation",
+            "pre_op_note": {
+              "booking_id": 1,
+              "history_examination": "Right iliac fossa pain for 2 days, fever; tender at McBurney's point, guarding",
+              "provisional_diagnosis": "Acute appendicitis",
+              "icd_codes": [],
+              "icd_terms": [],
+              "operation_plan": "Open appendicectomy",
+              "laterality": "Right",
+              "recorded_at": "2026-09-30T09:54:24.367340+00:00",
+              "author_stamp": {
+                "at": "2026-09-30T09:54:24.36734+00:00",
+                "name": "Dr Tariq",
+                "text": "Dr Tariq, Doctor, PMDC PMDC-49102, 30-Sep-2026 14:54",
+                "user_id": 7,
+                "designation": "Doctor",
+                "employee_id": 7,
+                "registration": "PMDC PMDC-49102"
+              },
+              "row_version": 1
+            },
+            "consents": [
+              {
+                "consent_id": 1,
+                "consent_number": "CN-2026-000001",
+                "patient_id": 1,
+                "mrn": "MRN-2026-000001",
+                "patient_name": "Ali Khan",
+                "form_code": "OPERATION",
+                "form_title": "Consent for an operation",
+                "category": "Procedure",
+                "status": "Withdrawn",
+                "language": "English",
+                "admission_id": null,
+                "admission_number": null,
+                "booking_id": 1,
+                "booking_number": "OT-2026-00001",
+                "procedure_name": "Appendectomy",
+                "mode": "Signed",
+                "signer": "Patient",
+                "signer_name": "Ali Khan",
+                "signer_relationship": null,
+                "decided_at": "2026-09-30T09:54:24.285248+00:00",
+                "obtained_by_name": "Dr Tariq",
+                "document_id": null,
+                "scanned_at": null,
+                "created_at": "2026-09-30T09:54:24.189128+00:00"
+              },
+              {
+                "consent_id": 2,
+                "consent_number": "CN-2026-000002",
+                "patient_id": 1,
+                "mrn": "MRN-2026-000001",
+                "patient_name": "Ali Khan",
+                "form_code": "ANAESTHESIA",
+                "form_title": "Consent for anaesthesia",
+                "category": "Anaesthesia",
+                "status": "Given",
+                "language": "English",
+                "admission_id": null,
+                "admission_number": null,
+                "booking_id": 1,
+                "booking_number": "OT-2026-00001",
+                "procedure_name": "Anaesthesia for Appendectomy",
+                "mode": "Signed",
+                "signer": "DecisionMaker",
+                "signer_name": "Amina Bibi",
+                "signer_relationship": "Spouse",
+                "decided_at": "2026-09-30T09:54:24.354025+00:00",
+                "obtained_by_name": "Dr Asma Anaes",
+                "document_id": null,
+                "scanned_at": null,
+                "created_at": "2026-09-30T09:54:24.317282+00:00"
+              }
+            ],
+            "pre_anaesthesia": [
+              {
+                "pac_id": 1,
+                "booking_id": 1,
+                "patient_id": 1,
+                "status": "Final",
+                "history": "No previous operations; no chronic illness",
+                "medications": "None",
+                "allergies": "None known",
+                "examination": "Chest clear, heart sounds normal",
+                "airway_mallampati": 2,
+                "airway_notes": null,
+                "investigations": null,
+                "heart_rate": 96,
+                "bp_systolic": 124,
+                "bp_diastolic": 78,
+                "spo2": 98,
+                "weight_kg": 70,
+                "asa_class": 1,
+                "asa_emergency": true,
+                "risks": "Full stomach: aspiration risk",
+                "planned_technique": "General",
+                "plan": "Rapid sequence induction, ETT, IV paracetamol and morphine",
+                "premedication": null,
+                "fasting_instructions": null,
+                "decision": "Fit",
+                "decision_note": null,
+                "created_by": 12,
+                "created_at": "2026-09-30T09:54:24.405711+00:00",
+                "signed_by": 12,
+                "signed_at": "2026-09-30T09:54:24.423263+00:00",
+                "author_stamp": {
+                  "at": "2026-09-30T09:54:24.423263+00:00",
+                  "name": "Dr Asma Anaes",
+                  "text": "Dr Asma Anaes, Doctor, PMDC PMDC-58013, 30-Sep-2026 14:54",
+                  "user_id": 12,
+                  "designation": "Doctor",
+                  "employee_id": 12,
+                  "registration": "PMDC PMDC-58013"
+                },
+                "row_version": 2,
+                "missing": []
+              }
+            ],
+            "checklist": [],
+            "anaesthesia_record": null,
+            "operative_note": null,
+            "recovery": null,
+            "adverse_events": [],
+            "corrections": []
+          },
+          "meta": {
+            "server_time": "2026-09-30T09:54:24.459207+00:00"
+          },
+          "request_id": "151a8df5510b4dbab3bc18ba02822ffe"
+        }
+      }
+    },
+    "errors": [
+      {
+        "code": "VALIDATION_ERROR",
+        "http_status": 422,
+        "message": "The request is invalid.",
+        "retryable": false,
+        "category": "request",
+        "ui_action": "Show field errors from details.fields / the message."
+      }
+    ],
+    "errors_seen_in_tests": [],
+    "used_by_screens": [
+      "vitals_tracker",
+      "safety_checklist",
+      "safety_checklist_admin",
+      "safety_checklist_anaesthesia",
+      "recovery_board",
+      "recovery_board_admin",
+      "recovery_board_anaesthesia",
+      "pre_anaesthesia_clinic",
+      "anaesthesia_record",
+      "surgical_record_surgeon"
+    ],
+    "used_by_workflows": [
+      "inpatient-and-discharge",
+      "operating-theater",
+      "surgical-care"
+    ],
+    "typescript_example": "// The surgical record of an operation  (permissions: ot.clinical.view)\nexport const getRecord = (booking_id) =>\n  api(\"GET\", `/ot/bookings/${booking_id}/surgical-record`, undefined);   // api(): see get_guide('envelope-and-errors')",
+    "access": {
+      "authentication": "user",
+      "permissions": [
+        "ot.clinical.view"
+      ],
+      "permissions_mode": "all",
+      "who": "holders of ot.clinical.view",
+      "roles_allowed": [
+        "anaesthetist",
+        "clinical_specialist",
+        "doctor",
+        "head_nurse",
+        "ot_admin",
+        "ot_nurse",
+        "surgeon",
+        "ward_nurse"
+      ]
+    },
+    "write_semantics": null,
+    "emits_events": [],
+    "list": {
+      "returns": "object",
+      "paging": [],
+      "search": [],
+      "filters": [],
+      "note": null
+    },
+    "cross_field_rules": {},
+    "errors_detail": [
+      {
+        "code": "VALIDATION_ERROR",
+        "http_status": 422,
+        "message": "The request is invalid.",
+        "retryable": false,
+        "ui_action": "Show field errors from details.fields / the message.",
+        "source": [
+          "documented"
+        ],
+        "details_fields": [],
+        "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+      }
+    ]
+  }
+}

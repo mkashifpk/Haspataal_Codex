@@ -1,0 +1,42 @@
+// Fresh synthetic DEV records only. An existing journal must be reconciled before rerun.
+import fs from 'node:fs';import assert from 'node:assert/strict';
+import {session,expect,help,capture} from './clinical-test-kit.mjs';
+const name=process.argv[2]||'vitals62-check',file=`artifacts/${name}.json`;
+assert(!fs.existsSync(file),'Reconcile the previous write journal; never repeat with a new key');
+const f=JSON.parse(fs.readFileSync('docs/vitals62/scenario-result.json')).saved;
+const j={passed:false,intents:[]},save=()=>fs.writeFileSync(file,JSON.stringify(j,null,2));save();let s;
+try{
+ s=await session(name+'-nurse','demo.nurse');const p=s.p;p.on('dialog',d=>d.accept());
+ await s.nav('Vitals flowsheet');await p.getByText('Other permitted live admissions',{exact:true}).click();
+ await p.getByLabel('Find permitted admission',{exact:true}).fill(f.mrn);await p.getByRole('button').filter({hasText:f.mrn}).click();
+ await expect(p.locator('main h2').first()).toContainText(f.mrn);
+ const button=n=>p.getByRole('button',{name:n,exact:true}),field=n=>p.getByLabel(n,{exact:true});
+ await expect(button('Record vitals')).toBeEnabled();await expect(p.locator('main')).toContainText('No vitals recorded.');
+ await help(s,button('Record vitals'),'Vitals flowsheet');
+ const intent=action=>{j.intents.push({action,admission_id:f.admission_id,at:new Date().toISOString()});save();};
+ const review=async()=>{await field('I verified this patient and the actual observation').check();await button('Review flowsheet entry').click();await expect(p.getByRole('dialog')).toContainText(f.mrn);};
+ const confirm=async()=>{await button('Confirm this flowsheet entry once').click();};
+ const trace=async()=>{j.trace=await s.trace();save();return j.trace.requests;};
+ intent('Record one synthetic observation; deliberately lose its real201 reply then replay original key');
+ await button('Record vitals').click();
+ for(const [label,value] of [['Systolic BP','120'],['Diastolic BP','80'],['Heart rate','70'],['Temperature °C','36.5'],['SpO₂ %','98'],['Respiratory rate','16'],['Pain score','0'],['Blood glucose','90']])await field(label).fill(value);
+ await field('Vitals notes (optional)').fill('DEMO software-only reading; no actual observation');await review();await help(s,button('Confirm this flowsheet entry once'),'Vitals flowsheet');
+ await s.fault({failPath:`/admissions/${f.admission_id}/flowsheet/vitals`,failMethod:'POST',once:true});await confirm();
+ await expect(button('Retry original request')).toBeVisible();await expect(field('Heart rate')).toBeDisabled();await button('Retry original request').click();
+ await expect(button('Record vitals')).toBeEnabled();await expect(p.getByRole('button',{name:/^Correct vitals #/})).toHaveCount(1);
+ let writes=(await trace()).filter(r=>r.method==='POST'&&r.path.endsWith('/flowsheet/vitals'));assert.equal(writes.length,2);assert.equal(writes[0].status,201);assert.equal(writes[1].key,writes[0].key);assert.equal(writes[1].result.data.entry_id,writes[0].result.data.entry_id);assert.equal(writes[0].body.pain_score,0);
+ j.entry_id=writes[0].result.data.entry_id;save();s.pass('real201 lost reply, same-key replay, one observation and zero pain');
+ intent('Correct own observation; preserve original observed timestamp');await button('Correct vitals #'+j.entry_id).click();await field('Heart rate').fill('72');await field('Correction reason').fill('DEMO correction test only');await review();await confirm();
+ await expect(p.getByRole('button',{name:/^Correct vitals #/})).toHaveCount(2);await expect(p.locator('.vitals-grid del')).toHaveCount(8);let correction=(await trace()).find(r=>r.method==='POST'&&r.path.endsWith(`/vitals/${j.entry_id}/correction`));assert.equal(correction.status,201);assert.equal(correction.body.observed_at,writes[0].result.data.observed_at);s.pass('actual vital correction201, original retained/struck, reason and recorded author/time');
+ intent('Record one software-only nursing note');await button('Record nursing note').click();await field('Nursing note text').fill('DEMO test record; no nursing care was performed');await review();await confirm();await expect(p.getByRole('button',{name:/^Correct nursing note #/})).toHaveCount(1);
+ let note=(await trace()).find(r=>r.method==='POST'&&r.path.endsWith('/flowsheet/nursing-notes'));assert.equal(note.status,201);j.note_id=note.result.data.note_id;save();
+ intent('Correct own synthetic nursing note');await button('Correct nursing note #'+j.note_id).click();await field('Nursing note text').fill('DEMO corrected test text; no care was performed');await field('Correction reason').fill('DEMO note correction only');await review();await confirm();await expect(p.getByRole('button',{name:/^Correct nursing note #/})).toHaveCount(2);await expect(p.locator('article del')).toHaveText('DEMO test record; no nursing care was performed');
+ let ncor=(await trace()).find(r=>r.method==='POST'&&r.path.endsWith(`/nursing-notes/${j.note_id}/correction`));assert.equal(ncor.status,201);const flow=await s.native('api',{method:'GET',path:`/admissions/${f.admission_id}/flowsheet`});for(const n of flow.nursing_notes){assert(n.author_stamp.text.includes('PNC'));await expect(p.locator('main')).toContainText(n.author_stamp.text);}s.pass('note and correction201, frozen PNC stamps, originals retained');
+ j.original_interval=flow.schedule?.interval_minutes;save();assert(j.original_interval);
+ intent('Replace interval with60; lose real200 reply; GET reconcile without replay');await button('Change vitals interval').click();await field('Vitals interval (minutes)').fill('60');await review();await s.fault({failPath:'/flowsheet/vitals-schedule',failMethod:'PUT',once:true});await confirm();await expect(button('Read current result')).toBeVisible();await expect(button('Retry original request')).toHaveCount(0);await button('Read current result').click();await button('Result reviewed; return to draft').click();await button('Read latest flowsheet and keep input').click();await expect(field('Vitals interval (minutes)')).toBeEnabled();await expect(field('Vitals interval (minutes)')).toHaveValue('60');await button('Close flowsheet draft').click();
+ const puts=(await trace()).filter(r=>r.method==='PUT'&&r.path.endsWith('/vitals-schedule'));assert.equal(puts.length,1);assert.equal(puts[0].status,200);assert.deepEqual(puts[0].body,{interval_minutes:60});s.pass('unversioned schedule200 lost reply, GET-only reconciliation, no duplicate PUT');
+ intent('Restore the captured original interval');await button('Change vitals interval').click();await field('Vitals interval (minutes)').fill(String(j.original_interval));await review();await confirm();await expect(button('Record vitals')).toBeEnabled();j.interval_restored=(await s.native('api',{method:'GET',path:`/admissions/${f.admission_id}/flowsheet`})).schedule.interval_minutes===j.original_interval;save();assert(j.interval_restored);
+ intent('Invalid10001-character note, server422; no new record');await button('Record nursing note').click();await field('Nursing note text').evaluate(e=>e.removeAttribute('maxlength'));await field('Nursing note text').fill('X'.repeat(10001));await review();await confirm();await expect(p.locator('main')).toContainText('VALIDATION_ERROR');await expect(field('Nursing note text')).toHaveValue('X'.repeat(10001));await expect(field('Nursing note text')).toHaveAttribute('aria-invalid','true');await button('Close flowsheet draft').click();s.pass('actual422 field-specific hint, typed note retained, no success');
+ await capture(s,'vitals_tracker');s.pass('EN/UR Light and DarkHighContrast at100/250%, no document overflow');
+ await help(s,button('Refresh flowsheet'),'Vitals flowsheet');j.final=await s.native('api',{method:'GET',path:`/admissions/${f.admission_id}/flowsheet`});await trace();j.passed=true;save();
+}catch(e){j.error=e.stack;try{j.trace=await s?.trace();j.ui=await s?.p.locator('body').innerText();await s?.p.screenshot({path:`artifacts/${name}-failure.png`});}catch{}save();console.error(e.stack);process.exitCode=1;}finally{if(s)await s.close();j.finished=new Date().toISOString();save();}

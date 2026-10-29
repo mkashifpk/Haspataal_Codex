@@ -1,0 +1,16 @@
+{
+  "implementation_id": 1,
+  "request_id": "vitals62-operative-state-errors-20261029-1",
+  "title": "Operative-note endpoint omits actual OT_BOOKING_STATE_INVALID refusal",
+  "kind": "ContractMismatch",
+  "severity": "Medium",
+  "agent": "Codex",
+  "build": "Vitals62 development index-3QRls3ug, baseline6437320",
+  "screen_id": "vitals_tracker",
+  "endpoint": "PUT /api/v1/ot/bookings/{booking_id}/operative-note",
+  "workflow": "surgical-care / operative-note draft",
+  "actual": "On a fresh Requested booking, PUT operative-note returns409 OT_BOOKING_STATE_INVALID retryable=false. get_endpoint errors lists only OT_RECORD_FINAL and VALIDATION_ERROR. The state refusal is sensible but absent from the authoritative error list.",
+  "expected": "Include OT_BOOKING_STATE_INVALID in errors and document allowed booking states. Per the backend error sweep guidance, report actual nonlisted refusals so frontend clients can handle by code; do not weaken the state rule.",
+  "steps": "Fresh sandbox_scenario ipd.admission_pending run cf0456 -> patient15/admission16. Own ward14/bed46 admitted. demo.surgeon POST /ot/bookings patient_id15 admission_id16 procedure_name DEMO software-only plan display test anesthesia_type None, no service_id ->201 booking1 statusRequested requestca592fb1862640c893db75cfef97e880. PUT /ot/bookings/1/operative-note with validated DEMO-only monitoring/plan fields ->409; no actual care/medicine/operation was performed.",
+  "evidence": "Request bd661437707745beb1532fef193e03ec response code OT_BOOKING_STATE_INVALID message \"The operative note is written once the operation has started, as a draft\", details{},retryablefalse. validate_request validtrue. Full nonsecret request/result in docs/vitals62/plan-intent.json and plan-result.json. Serverbuild2026-10-28T21:29:45.848402+00:00 contracte90ba541e495d6487532."
+}

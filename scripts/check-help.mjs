@@ -217,6 +217,7 @@ export function checkHelp({
       "MyBeds",
       "WardEducation",
       "NursingAssessment",
+      "VitalsFlowsheet",
       "ConsentScanUpload",
       "LabVerification",
       "CriticalResultsBench",

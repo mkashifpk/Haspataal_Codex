@@ -19,7 +19,7 @@ export type WardContext = PatientContext & {
   revision: number;
   admission: AdmissionDetailOut;
   view: string;
-  preflight: (permission: string) => Promise<void>;
+  preflight: (permission: string, allowRecordsCorrection?: boolean) => Promise<void>;
 };
 export type WardProps = {
   user: ClinicalUser;
@@ -124,7 +124,7 @@ export function WardAdmission({
         )}
       </Empty>
     );
-  async function preflight(permission: string) {
+  async function preflight(permission: string, allowRecordsCorrection=false) {
     if (!admission || !patient) throw Error("Read patient identity first");
     const [a, p, actor, est] = await Promise.all([
       getAdmission(admission.admission_id),
@@ -142,7 +142,7 @@ export function WardAdmission({
       p.patient_id !== patient.patient_id ||
       actor.user_id !== user.user_id ||
       !actor.permissions.includes(permission) ||
-      !["full", "open_work"].includes(current || "")
+      !["full", "open_work", ...(allowRecordsCorrection?['records']:[])].includes(current || "")
     )
       throw Error(
         t(
@@ -294,8 +294,8 @@ export function WardAdmission({
               <p className="notice">
                 {view === "records"
                   ? t(
-                      "Records only; recording is unavailable.",
-                      "صرف ریکارڈ؛ اندراج دستیاب نہیں۔",
+                      "Records only; only permitted corrections remain available.",
+                      "صرف ریکارڈ؛ صرف مجاز تصحیح دستیاب ہے۔",
                     )
                   : t(
                       "No new admissions from now on. Continue existing ward work.",

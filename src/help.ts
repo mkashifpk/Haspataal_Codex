@@ -10,6 +10,110 @@ export type HelpPage = {
   faqUr: [string, string][];
 };
 export const help: Record<string, HelpPage> = {
+ vitals_tracker: {
+  title: "Vitals flowsheet",
+  titleUr: "حیاتیاتی پیمائش کا چارٹ",
+  purpose: "The ward nurse at a round verifies the patient, records observations and notes, makes visible corrections and follows the recorded monitoring plan. Urdu is a draft pending native review.",
+  purposeUr: "معائنے پر نرس مریض چیک کرکے پیمائش و نوٹ درج کرے، نمایاں تصحیح کرے اور اصل نگرانی منصوبہ پڑھے۔ اردو انسانی جائزے تک مسودہ۔",
+  steps: [
+    "At each ward round, open Vitals flowsheet from My beds this shift or Ward Nursing, choose the actual admission and verify name/MRN, age/date of birth, flags and ward/bed. Refresh flowsheet rereads the record. No readings means none recorded; a failed read stays an error. The server supplies next vitals due and Overdue, not a local alarm threshold. Readings are oldest first; empty measurements remain Not recorded, and pain0 is a real zero. Each reading shows who recorded it and when.",
+    "Record vitals starts an empty draft. Enter only actual measured values: systolic30–300, diastolic10–200, pulse10–300, temperature25–45°C, SpO₂30–100%, respiratory2–80, pain0–10, glucose10–1000. Whole numbers except temperature/glucose. Leave unmeasured fields empty; do not enter0 for missing values. At least one measured value is needed by this form. Vitals notes optional, up to2000characters. Live, verified identity, current admission, permission and a writable service are required; no edit/delete on saved entries.",
+    "Record nursing note accepts the actual text,1–10000characters. The saved record shows observed time and the frozen author_stamp.text with name, designation, PNC registration and signing time. It records documentation, never gives medicine or creates a clinical order. The original note remains when corrected.",
+    "Observation time choice defaults to Server time when saved for a new entry. Enter actual hospital date and time uses the hospital timezone shown, not the laptop timezone; unavailable/ambiguous times are refused locally. Corrections default to Keep original observed time. Choose server time deliberately only when appropriate. Review shows the exact UTC request. Never backdate a real observation or guess the time.",
+    "Correct vitals or Correct nursing note chooses that returned original record, pre-fills its actual values and retains its observation time. Supply a correction reason3–500characters and review every copied fact. The server appends a NEW row: originals with a later correction are struck through, all corrections/reasons/authors remain visible. No typed source id and no overwriting. Permitted corrections remain available in Records view, while new entries and scheduling are unavailable.",
+    "Change vitals interval shows the actual existing interval; enter a whole15–1440minutes. It needs flowsheet-record or admission-request permission. Review compares the loaded schedule with a fresh read; a change keeps your typed interval and stops the review. This PUT has no server version or idempotent replay protection: no expected_version or invented fields are sent. After an uncertain answer read/reconcile; never retry it automatically. Signed postoperative instructions may set the interval; compare the current server schedule.",
+    "Postoperative plan lists the actual operations of this stay, including complete records. Choose a returned booking to read its record; admission/patient identity must match. Read monitoring and interval, medicines, wound care, drains/catheters, positioning, nutrition, fluid balance, referrals and transfusion instructions, signer and separate corrections. Draft operative notes are labelled Draft; ask the surgical team before treating them as signed instructions. No operation or no operative note is an honest empty state. This screen performs no operation, signs no surgical record and never guesses a plan.",
+    "Check I verified this patient and the actual observation, then Review flowsheet entry. Confirm this flowsheet entry once freezes identity/body and rereads patient, permissions, service and correction source before sending once. Back to flowsheet input retains values; Close flowsheet draft asks before discarding. Failed validation shows fields and keeps input. Confirmed response is the only saved result; a later read failure never repeats the write.",
+    "ADMISSION_STATE_INVALID rereads admission/flowsheet and shows current state, input kept. FLOWSHEET_CORRECTION_INVALID rereads the record; never guess a replacement source. Read latest flowsheet and keep input adopts the current schedule for comparison and resets acknowledgement, preserving typed values. A lost append reply locks exact key/body/actor/navigation: explicit Retry original request only within24hours, no new key. Schedule PUT never offers replay; Read current result, compare interval/history, then return to the draft and reread before a new review. Events/reconnect refresh without polling and invalidate review; no automatic write retry/offline queue. F1 preserves text/focus, shared keyboard/Settings zoom100–250% and EN/UR apply. Human Urdu/editor/fresh-data review remains required."
+  ],
+  stepsUr: [
+    "ہر وارڈ معائنے میں میرے بستر یا وارڈ نرسنگ سے چارٹ کھولیں، اصل داخلہ چن کر نام، ایم آر این، عمر یا پیدائش، علامات اور بستر چیک کریں۔ تازہ چارٹ دوبارہ پڑھے۔ خالی یعنی درج نہیں؛ ناکام پڑھائی غلطی ہے۔ اگلا وقت و تاخیر سرور سے، مقامی حد نہیں۔ پرانے اندراج پہلے؛ خالی پیمائش درج نہیں، درد0اصل صفر۔ ہر سطر مصنف ووقت دکھائے۔",
+    "پیمائش درج کریں خالی مسودہ۔ صرف اصل ناپی قدر: اوپر فشار30تا300، نیچے10تا200، نبض10تا300، درجہ25تا45°C، آکسیجن30تا100، تنفس2تا80، درد0تا10، گلوکوز10تا1000۔ درجہ وگلوکوز کے سوا پورے عدد۔ نہ ناپی قدر خالی، غائب کے لیے0نہیں۔ اس فارم میں کم ازکم ایک پیمائش۔ اختیاری نوٹ2000حروف۔ اصل شناخت، جاری داخلہ، اجازت، قابل تحریرخدمت و رابطہ لازم؛ محفوظ اندراج میں ترمیم/حذف نہیں۔",
+    "نرسنگ نوٹ اصل متن1تا10000حروف۔ محفوظ ریکارڈ میں مشاہدہ وقت اور مصنف کی اصل مہر، نام، عہدہ، پی این سی ووقت۔ یہ دستاویز ہے، دوا یا طبی حکم نہیں۔ تصحیح پر اصل نوٹ برقرار۔",
+    "نیا اندراج محفوظ ہونے پر سرور وقت لیتا ہے۔ اصل وقت درج کریں ہسپتال کے دکھائے علاقے سے، لیپ ٹاپ سے نہیں؛ نامعلوم یا مبہم وقت مقامی طور پررکے۔ تصحیح اصل مشاہدہ وقت رکھتی ہے؛ مناسب ہو تو شعوری سرور وقت چنیں۔ جائزہ اصل یوٹی سی درخواست دکھائے۔ حقیقی پیمائش کا وقت اندازہ یا غلط پچھلا وقت نہ لکھیں۔",
+    "پیمائش یا نوٹ کی تصحیح اصل واپس آئی سطر چنتی، اصل قدریں ووقت لیتی ہے۔ وجہ3تا500حروف اور ہر نقل بات چیک کریں۔ سرور نئی سطر بڑھائے؛ تصحیح شدہ اصل پر لکیر، تمام تصحیح، وجہ و مصنف نظر آئیں۔ اصل آئی ڈی ٹائپ یا پرانا تبدیل نہیں۔ صرف ریکارڈ خدمت میں مجاز تصحیح، نئے اندراج وشیڈول بند۔",
+    "پیمائش وقفہ بدلیں اصل وقفہ دکھائے؛ پورے15تا1440منٹ۔ اندراج یا داخلہ درخواست کی اجازت لازم۔ جائزہ تازہ شیڈول ملائے؛ تبدیلی پر لکھا وقفہ محفوظ اور جائزہ رکے۔ اس ارسال میں سرور نسخہ یا دوبارہ بھیجنے کی حفاظت نہیں؛ فرضی خانے نہیں بھیجے جاتے۔ نامعلوم جواب پر پڑھ کرملائیں، خود نہ دہرائیں۔ دستخط شدہ آپریشن منصوبہ وقفہ مقرر کرسکتا ہے؛ اصل سرور شیڈول چیک کریں۔",
+    "آپریشن کے بعد منصوبہ اسی داخلے کے اصل آپریشن، مکمل ریکارڈ سمیت۔ اصل بکنگ چنیں؛ داخلہ ومریض ملنا لازم۔ نگرانی ووقفہ، دوائیں، زخم، ڈرین، پوزیشن، غذا، سیال، حوالے و انتقال خون، مصنف و الگ تصحیح پڑھیں۔ مسودہ نوٹ واضح ہے؛ دستخط شدہ ہدایت ماننے سے پہلے ٹیم سے پوچھیں۔ آپریشن یا نوٹ نہ ہو تو صاف بتایا جائے۔ یہ سکرین آپریشن یا دستخط نہیں کرتی، منصوبہ فرض نہیں۔",
+    "مریض واصل مشاہدہ چیک کا نشان، پھر چارٹ جائزہ۔ ایک بار تصدیق اصل شناخت ومعلومات منجمد کرکے مریض، اجازت، خدمت واصل تصحیح سطر پھر پڑھے اور ایک بار بھیجے۔ واپس معلومات رکھے، بند پر چھوڑنے کی تصدیق۔ خانے کی غلطی معلومات رکھے۔ صرف مصدقہ جواب محفوظ نتیجہ، بعدکی خرابی ارسال نہیں دہراتی۔",
+    "داخلہ حالت انکار پر اصل داخلہ وچارٹ پڑھیں، لکھا محفوظ۔ تصحیح اصل نہ ملے تو تازہ پڑھیں، متبادل آئی ڈی اندازہ نہیں۔ تازہ چارٹ و معلومات رکھیں موجودہ شیڈول ملانے کے لیے لے، تصدیق نشان ہٹائے مگر قدریں محفوظ۔ گم اضافے جواب پر اصل کلید، معلومات، صارف و جگہ مقفل؛24گھنٹے میں واضح اصل دوبارہ، نئی کلید نہیں۔ شیڈول دوبارہ نہیں؛ موجودہ نتیجہ، وقفہ وتاریخ ملائیں، مسودے پر واپس اور نئے جائزے سے پہلے تازہ پڑھیں۔ واقعہ/بحالی بغیر پولنگ تازہ وجائزہ روکے؛ خودکارارسال یا آف لائن قطار نہیں۔ ایف ون متن/فوکس رکھے، مشترک زوم100تا250ودو زبان۔ انسانی اردو، مدیر و نئےریکارڈ جائزہ لازم۔"
+  ],
+  faq: [
+    [
+      "How do I find the correct stay and know when observations are due?",
+      "At each ward round, open Vitals flowsheet from My beds this shift or Ward Nursing, choose the actual admission and verify name/MRN, age/date of birth, flags and ward/bed. Refresh flowsheet rereads the record. No readings means none recorded; a failed read stays an error. The server supplies next vitals due and Overdue, not a local alarm threshold. Readings are oldest first; empty measurements remain Not recorded, and pain0 is a real zero. Each reading shows who recorded it and when."
+    ],
+    [
+      "How do I record measured values without inventing a missing reading?",
+      "Record vitals starts an empty draft. Enter only actual measured values: systolic30–300, diastolic10–200, pulse10–300, temperature25–45°C, SpO₂30–100%, respiratory2–80, pain0–10, glucose10–1000. Whole numbers except temperature/glucose. Leave unmeasured fields empty; do not enter0 for missing values. At least one measured value is needed by this form. Vitals notes optional, up to2000characters. Live, verified identity, current admission, permission and a writable service are required; no edit/delete on saved entries."
+    ],
+    [
+      "What belongs in a nursing note, and whose registration is shown?",
+      "Record nursing note accepts the actual text,1–10000characters. The saved record shows observed time and the frozen author_stamp.text with name, designation, PNC registration and signing time. It records documentation, never gives medicine or creates a clinical order. The original note remains when corrected."
+    ],
+    [
+      "Which observation time should I choose for a new entry or correction?",
+      "Observation time choice defaults to Server time when saved for a new entry. Enter actual hospital date and time uses the hospital timezone shown, not the laptop timezone; unavailable/ambiguous times are refused locally. Corrections default to Keep original observed time. Choose server time deliberately only when appropriate. Review shows the exact UTC request. Never backdate a real observation or guess the time."
+    ],
+    [
+      "How do I correct a saved entry while keeping its original visible?",
+      "Correct vitals or Correct nursing note chooses that returned original record, pre-fills its actual values and retains its observation time. Supply a correction reason3–500characters and review every copied fact. The server appends a NEW row: originals with a later correction are struck through, all corrections/reasons/authors remain visible. No typed source id and no overwriting. Permitted corrections remain available in Records view, while new entries and scheduling are unavailable."
+    ],
+    [
+      "Who may change the interval, and what if another terminal changes it?",
+      "Change vitals interval shows the actual existing interval; enter a whole15–1440minutes. It needs flowsheet-record or admission-request permission. Review compares the loaded schedule with a fresh read; a change keeps your typed interval and stops the review. This PUT has no server version or idempotent replay protection: no expected_version or invented fields are sent. After an uncertain answer read/reconcile; never retry it automatically. Signed postoperative instructions may set the interval; compare the current server schedule."
+    ],
+    [
+      "Where do postoperative instructions and the monitoring interval come from?",
+      "Postoperative plan lists the actual operations of this stay, including complete records. Choose a returned booking to read its record; admission/patient identity must match. Read monitoring and interval, medicines, wound care, drains/catheters, positioning, nutrition, fluid balance, referrals and transfusion instructions, signer and separate corrections. Draft operative notes are labelled Draft; ask the surgical team before treating them as signed instructions. No operation or no operative note is an honest empty state. This screen performs no operation, signs no surgical record and never guesses a plan."
+    ],
+    [
+      "How do I review, return to input, or safely change patient?",
+      "Check I verified this patient and the actual observation, then Review flowsheet entry. Confirm this flowsheet entry once freezes identity/body and rereads patient, permissions, service and correction source before sending once. Back to flowsheet input retains values; Close flowsheet draft asks before discarding. Failed validation shows fields and keeps input. Confirmed response is the only saved result; a later read failure never repeats the write."
+    ],
+    [
+      "What should I do after a refusal, lost reply or overdue alert?",
+      "ADMISSION_STATE_INVALID rereads admission/flowsheet and shows current state, input kept. FLOWSHEET_CORRECTION_INVALID rereads the record; never guess a replacement source. Read latest flowsheet and keep input adopts the current schedule for comparison and resets acknowledgement, preserving typed values. A lost append reply locks exact key/body/actor/navigation: explicit Retry original request only within24hours, no new key. Schedule PUT never offers replay; Read current result, compare interval/history, then return to the draft and reread before a new review. Events/reconnect refresh without polling and invalidate review; no automatic write retry/offline queue. F1 preserves text/focus, shared keyboard/Settings zoom100–250% and EN/UR apply. Human Urdu/editor/fresh-data review remains required."
+    ]
+  ],
+  faqUr: [
+    [
+      "درست داخلہ اور پیمائش کا مقرر وقت کیسے دیکھوں؟",
+      "ہر وارڈ معائنے میں میرے بستر یا وارڈ نرسنگ سے چارٹ کھولیں، اصل داخلہ چن کر نام، ایم آر این، عمر یا پیدائش، علامات اور بستر چیک کریں۔ تازہ چارٹ دوبارہ پڑھے۔ خالی یعنی درج نہیں؛ ناکام پڑھائی غلطی ہے۔ اگلا وقت و تاخیر سرور سے، مقامی حد نہیں۔ پرانے اندراج پہلے؛ خالی پیمائش درج نہیں، درد0اصل صفر۔ ہر سطر مصنف ووقت دکھائے۔"
+    ],
+    [
+      "غائب پیمائش گھڑے بغیر اصل اعداد کیسے درج کروں؟",
+      "پیمائش درج کریں خالی مسودہ۔ صرف اصل ناپی قدر: اوپر فشار30تا300، نیچے10تا200، نبض10تا300، درجہ25تا45°C، آکسیجن30تا100، تنفس2تا80، درد0تا10، گلوکوز10تا1000۔ درجہ وگلوکوز کے سوا پورے عدد۔ نہ ناپی قدر خالی، غائب کے لیے0نہیں۔ اس فارم میں کم ازکم ایک پیمائش۔ اختیاری نوٹ2000حروف۔ اصل شناخت، جاری داخلہ، اجازت، قابل تحریرخدمت و رابطہ لازم؛ محفوظ اندراج میں ترمیم/حذف نہیں۔"
+    ],
+    [
+      "نرسنگ نوٹ میں کیا لکھوں اور کس کی رجسٹریشن دکھتی ہے؟",
+      "نرسنگ نوٹ اصل متن1تا10000حروف۔ محفوظ ریکارڈ میں مشاہدہ وقت اور مصنف کی اصل مہر، نام، عہدہ، پی این سی ووقت۔ یہ دستاویز ہے، دوا یا طبی حکم نہیں۔ تصحیح پر اصل نوٹ برقرار۔"
+    ],
+    [
+      "نئے یا تصحیح اندراج کا کون سا وقت چنوں؟",
+      "نیا اندراج محفوظ ہونے پر سرور وقت لیتا ہے۔ اصل وقت درج کریں ہسپتال کے دکھائے علاقے سے، لیپ ٹاپ سے نہیں؛ نامعلوم یا مبہم وقت مقامی طور پررکے۔ تصحیح اصل مشاہدہ وقت رکھتی ہے؛ مناسب ہو تو شعوری سرور وقت چنیں۔ جائزہ اصل یوٹی سی درخواست دکھائے۔ حقیقی پیمائش کا وقت اندازہ یا غلط پچھلا وقت نہ لکھیں۔"
+    ],
+    [
+      "اصل محفوظ رکھتے ہوئے درج اندراج کی تصحیح کیسے کروں؟",
+      "پیمائش یا نوٹ کی تصحیح اصل واپس آئی سطر چنتی، اصل قدریں ووقت لیتی ہے۔ وجہ3تا500حروف اور ہر نقل بات چیک کریں۔ سرور نئی سطر بڑھائے؛ تصحیح شدہ اصل پر لکیر، تمام تصحیح، وجہ و مصنف نظر آئیں۔ اصل آئی ڈی ٹائپ یا پرانا تبدیل نہیں۔ صرف ریکارڈ خدمت میں مجاز تصحیح، نئے اندراج وشیڈول بند۔"
+    ],
+    [
+      "وقفہ کون بدل سکتا ہے اور دوسری جگہ تبدیلی ہو تو کیا کروں؟",
+      "پیمائش وقفہ بدلیں اصل وقفہ دکھائے؛ پورے15تا1440منٹ۔ اندراج یا داخلہ درخواست کی اجازت لازم۔ جائزہ تازہ شیڈول ملائے؛ تبدیلی پر لکھا وقفہ محفوظ اور جائزہ رکے۔ اس ارسال میں سرور نسخہ یا دوبارہ بھیجنے کی حفاظت نہیں؛ فرضی خانے نہیں بھیجے جاتے۔ نامعلوم جواب پر پڑھ کرملائیں، خود نہ دہرائیں۔ دستخط شدہ آپریشن منصوبہ وقفہ مقرر کرسکتا ہے؛ اصل سرور شیڈول چیک کریں۔"
+    ],
+    [
+      "آپریشن کے بعد ہدایات اور نگرانی وقفہ کہاں سے آتے ہیں؟",
+      "آپریشن کے بعد منصوبہ اسی داخلے کے اصل آپریشن، مکمل ریکارڈ سمیت۔ اصل بکنگ چنیں؛ داخلہ ومریض ملنا لازم۔ نگرانی ووقفہ، دوائیں، زخم، ڈرین، پوزیشن، غذا، سیال، حوالے و انتقال خون، مصنف و الگ تصحیح پڑھیں۔ مسودہ نوٹ واضح ہے؛ دستخط شدہ ہدایت ماننے سے پہلے ٹیم سے پوچھیں۔ آپریشن یا نوٹ نہ ہو تو صاف بتایا جائے۔ یہ سکرین آپریشن یا دستخط نہیں کرتی، منصوبہ فرض نہیں۔"
+    ],
+    [
+      "جائزہ، معلومات پر واپسی یا مریض محفوظ طور پر کیسے بدلوں؟",
+      "مریض واصل مشاہدہ چیک کا نشان، پھر چارٹ جائزہ۔ ایک بار تصدیق اصل شناخت ومعلومات منجمد کرکے مریض، اجازت، خدمت واصل تصحیح سطر پھر پڑھے اور ایک بار بھیجے۔ واپس معلومات رکھے، بند پر چھوڑنے کی تصدیق۔ خانے کی غلطی معلومات رکھے۔ صرف مصدقہ جواب محفوظ نتیجہ، بعدکی خرابی ارسال نہیں دہراتی۔"
+    ],
+    [
+      "انکار، گم جواب یا تاخیر کی اطلاع پر کیا کروں؟",
+      "داخلہ حالت انکار پر اصل داخلہ وچارٹ پڑھیں، لکھا محفوظ۔ تصحیح اصل نہ ملے تو تازہ پڑھیں، متبادل آئی ڈی اندازہ نہیں۔ تازہ چارٹ و معلومات رکھیں موجودہ شیڈول ملانے کے لیے لے، تصدیق نشان ہٹائے مگر قدریں محفوظ۔ گم اضافے جواب پر اصل کلید، معلومات، صارف و جگہ مقفل؛24گھنٹے میں واضح اصل دوبارہ، نئی کلید نہیں۔ شیڈول دوبارہ نہیں؛ موجودہ نتیجہ، وقفہ وتاریخ ملائیں، مسودے پر واپس اور نئے جائزے سے پہلے تازہ پڑھیں۔ واقعہ/بحالی بغیر پولنگ تازہ وجائزہ روکے؛ خودکارارسال یا آف لائن قطار نہیں۔ ایف ون متن/فوکس رکھے، مشترک زوم100تا250ودو زبان۔ انسانی اردو، مدیر و نئےریکارڈ جائزہ لازم۔"
+    ]
+  ]
+},
 patient_education_ward: {
   title: "Ward health education",
   titleUr: "وارڈ میں صحت کی رہنمائی",

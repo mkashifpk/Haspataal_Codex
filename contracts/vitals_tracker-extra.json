@@ -1,0 +1,4784 @@
+{
+  "screen_id": "vitals_tracker",
+  "contract_fingerprint": "e90ba541e495d6487532",
+  "knowledge_revision": "e9e3dbb61b873e01",
+  "delivery_gate": {
+    "required": true,
+    "status": "required",
+    "progress_reporting": {
+      "required": true,
+      "submit": "propose_progress",
+      "verify": "progress_proposals",
+      "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+    },
+    "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+    "compulsory": [
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+        "points": 2
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+        "points": 3
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+        "points": 2
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+        "points": 4
+      }
+    ],
+    "zoom": {
+      "min_pct": 100,
+      "max_pct": 250,
+      "reset_pct": 100,
+      "keys": [
+        "Ctrl + or Ctrl = (zoom in)",
+        "Ctrl - (zoom out)",
+        "Ctrl 0 (reset to 100 %)",
+        "Command on macOS"
+      ],
+      "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+    },
+    "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+    "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+  },
+  "schemas": {
+    "AnaesthesiaEventOut": {
+      "properties": {
+        "entry_id": {
+          "type": "integer",
+          "title": "Entry Id"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "At"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "Drug",
+            "Fluid",
+            "Blood",
+            "Event"
+          ],
+          "title": "Kind"
+        },
+        "description": {
+          "type": "string",
+          "title": "Description"
+        },
+        "dose": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Dose"
+        },
+        "route": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Route"
+        },
+        "recorded_by_name": {
+          "type": "string",
+          "title": "Recorded By Name"
+        }
+      },
+      "type": "object",
+      "required": [
+        "entry_id",
+        "at",
+        "kind",
+        "description",
+        "dose",
+        "route",
+        "recorded_by_name"
+      ],
+      "title": "AnaesthesiaEventOut"
+    },
+    "AnaesthesiaRecordOut": {
+      "properties": {
+        "record_id": {
+          "type": "integer",
+          "title": "Record Id"
+        },
+        "booking_id": {
+          "type": "integer",
+          "title": "Booking Id"
+        },
+        "patient_id": {
+          "type": "integer",
+          "title": "Patient Id"
+        },
+        "anaesthetist_id": {
+          "type": "integer",
+          "title": "Anaesthetist Id"
+        },
+        "anaesthetist_name": {
+          "type": "string",
+          "title": "Anaesthetist Name"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "Draft",
+            "Final"
+          ],
+          "title": "Status"
+        },
+        "pre_induction_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Pre Induction At"
+        },
+        "pre_induction_heart_rate": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Pre Induction Heart Rate"
+        },
+        "pre_induction_bp_systolic": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Pre Induction Bp Systolic"
+        },
+        "pre_induction_bp_diastolic": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Pre Induction Bp Diastolic"
+        },
+        "pre_induction_spo2": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Pre Induction Spo2"
+        },
+        "pre_induction_findings": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Pre Induction Findings"
+        },
+        "plan_changed": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Plan Changed"
+        },
+        "plan_change": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Plan Change"
+        },
+        "technique": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "General",
+                "Spinal",
+                "Epidural",
+                "Regional",
+                "Sedation",
+                "Local"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Technique"
+        },
+        "airway_device": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "None",
+                "FaceMask",
+                "NasalCannula",
+                "LMA",
+                "EndotrachealTube",
+                "Tracheostomy"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Airway Device"
+        },
+        "airway_details": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Airway Details"
+        },
+        "induction_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Induction At"
+        },
+        "incision_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Incision At"
+        },
+        "surgery_end_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Surgery End At"
+        },
+        "anaesthesia_end_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Anaesthesia End At"
+        },
+        "fluids": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Fluids"
+        },
+        "blood_loss_ml": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Blood Loss Ml"
+        },
+        "urine_output_ml": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Urine Output Ml"
+        },
+        "complications": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Complications"
+        },
+        "handover_note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Handover Note"
+        },
+        "created_by": {
+          "type": "integer",
+          "title": "Created By"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Created At"
+        },
+        "signed_by": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Signed By"
+        },
+        "signed_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Signed At"
+        },
+        "author_stamp": {
+          "anyOf": [
+            {
+              "$ref": "#/components/schemas/AuthorStampOut"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "row_version": {
+          "type": "integer",
+          "title": "Row Version"
+        },
+        "vitals": {
+          "items": {
+            "$ref": "#/components/schemas/AnaesthesiaVitalOut"
+          },
+          "type": "array",
+          "title": "Vitals"
+        },
+        "events": {
+          "items": {
+            "$ref": "#/components/schemas/AnaesthesiaEventOut"
+          },
+          "type": "array",
+          "title": "Events"
+        },
+        "chart_gaps": {
+          "items": {
+            "$ref": "#/components/schemas/ChartGapOut"
+          },
+          "type": "array",
+          "title": "Chart Gaps",
+          "description": "Stretches without a reading longer than ot_anaesthesia_chart_minutes, from the induction to the end"
+        },
+        "missing": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Missing",
+          "description": "A draft: what signing still needs"
+        }
+      },
+      "type": "object",
+      "required": [
+        "record_id",
+        "booking_id",
+        "patient_id",
+        "anaesthetist_id",
+        "anaesthetist_name",
+        "status",
+        "pre_induction_at",
+        "pre_induction_heart_rate",
+        "pre_induction_bp_systolic",
+        "pre_induction_bp_diastolic",
+        "pre_induction_spo2",
+        "pre_induction_findings",
+        "plan_changed",
+        "plan_change",
+        "technique",
+        "airway_device",
+        "airway_details",
+        "induction_at",
+        "incision_at",
+        "surgery_end_at",
+        "anaesthesia_end_at",
+        "fluids",
+        "blood_loss_ml",
+        "urine_output_ml",
+        "complications",
+        "handover_note",
+        "created_by",
+        "created_at",
+        "signed_by",
+        "signed_at",
+        "author_stamp",
+        "row_version",
+        "vitals",
+        "events",
+        "chart_gaps",
+        "missing"
+      ],
+      "title": "AnaesthesiaRecordOut"
+    },
+    "AnaesthesiaVitalOut": {
+      "properties": {
+        "vital_id": {
+          "type": "integer",
+          "title": "Vital Id"
+        },
+        "recorded_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Recorded At"
+        },
+        "heart_rate": {
+          "type": "integer",
+          "title": "Heart Rate"
+        },
+        "rhythm": {
+          "type": "string",
+          "enum": [
+            "Sinus",
+            "SinusTachycardia",
+            "SinusBradycardia",
+            "AtrialFibrillation",
+            "OtherArrhythmia",
+            "Paced"
+          ],
+          "title": "Rhythm"
+        },
+        "bp_systolic": {
+          "type": "integer",
+          "title": "Bp Systolic"
+        },
+        "bp_diastolic": {
+          "type": "integer",
+          "title": "Bp Diastolic"
+        },
+        "respiratory_rate": {
+          "type": "integer",
+          "title": "Respiratory Rate"
+        },
+        "spo2": {
+          "type": "integer",
+          "title": "Spo2"
+        },
+        "etco2": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Etco2"
+        },
+        "temp_c": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Temp C"
+        },
+        "airway_patent": {
+          "type": "boolean",
+          "title": "Airway Patent"
+        },
+        "note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Note"
+        },
+        "recorded_by_name": {
+          "type": "string",
+          "title": "Recorded By Name"
+        }
+      },
+      "type": "object",
+      "required": [
+        "vital_id",
+        "recorded_at",
+        "heart_rate",
+        "rhythm",
+        "bp_systolic",
+        "bp_diastolic",
+        "respiratory_rate",
+        "spo2",
+        "etco2",
+        "temp_c",
+        "airway_patent",
+        "note",
+        "recorded_by_name"
+      ],
+      "title": "AnaesthesiaVitalOut"
+    },
+    "AuthorStampOut": {
+      "properties": {
+        "employee_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Employee Id"
+        },
+        "user_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "User Id"
+        },
+        "name": {
+          "type": "string",
+          "title": "Name"
+        },
+        "designation": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Designation",
+          "description": "Designation and specialty, e.g. \"Medical Officer, General Medicine\""
+        },
+        "registration": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Registration",
+          "description": "Council registration, e.g. \"PMDC 12345-P\" or \"PNC 67890\""
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "At",
+          "description": "When the entry was signed, reported or verified"
+        },
+        "text": {
+          "type": "string",
+          "title": "Text",
+          "description": "The printed line: name, designation, registration, date and time"
+        }
+      },
+      "type": "object",
+      "required": [
+        "employee_id",
+        "user_id",
+        "name",
+        "designation",
+        "registration",
+        "at",
+        "text"
+      ],
+      "title": "AuthorStampOut",
+      "description": "The author stamp of a clinical entry (MSDS IMS 147), as the author's staff record stood when they signed it\n(SQL hms_author_stamp / hms_employee_stamp, migration 0013 [STP]). Show it under the entry on screen and print\n`text` under it on paper."
+    },
+    "ChartGapOut": {
+      "properties": {
+        "from_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "From At"
+        },
+        "to_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "To At"
+        },
+        "minutes": {
+          "type": "integer",
+          "title": "Minutes"
+        }
+      },
+      "type": "object",
+      "required": [
+        "from_at",
+        "to_at",
+        "minutes"
+      ],
+      "title": "ChartGapOut"
+    },
+    "ChecklistAnswerOut": {
+      "properties": {
+        "item_id": {
+          "type": "integer",
+          "title": "Item Id"
+        },
+        "prompt": {
+          "type": "string",
+          "title": "Prompt"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "Confirm",
+            "Question"
+          ],
+          "title": "Kind"
+        },
+        "reference": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Reference"
+        },
+        "answer": {
+          "type": "string",
+          "enum": [
+            "Yes",
+            "No",
+            "NotApplicable"
+          ],
+          "title": "Answer"
+        },
+        "note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Note"
+        }
+      },
+      "type": "object",
+      "required": [
+        "item_id",
+        "prompt",
+        "kind",
+        "reference",
+        "answer",
+        "note"
+      ],
+      "title": "ChecklistAnswerOut"
+    },
+    "ConsentBriefOut": {
+      "properties": {
+        "consent_id": {
+          "type": "integer",
+          "title": "Consent Id"
+        },
+        "consent_number": {
+          "type": "string",
+          "title": "Consent Number"
+        },
+        "patient_id": {
+          "type": "integer",
+          "title": "Patient Id"
+        },
+        "mrn": {
+          "type": "string",
+          "title": "Mrn"
+        },
+        "patient_name": {
+          "type": "string",
+          "title": "Patient Name"
+        },
+        "form_code": {
+          "type": "string",
+          "title": "Form Code"
+        },
+        "form_title": {
+          "type": "string",
+          "title": "Form Title"
+        },
+        "category": {
+          "type": "string",
+          "enum": [
+            "General",
+            "Procedure",
+            "Anaesthesia",
+            "Transfusion",
+            "HighRiskTreatment",
+            "AgainstMedicalAdvice",
+            "Other"
+          ],
+          "title": "Category"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "Draft",
+            "Given",
+            "Refused",
+            "Withdrawn",
+            "Cancelled"
+          ],
+          "title": "Status"
+        },
+        "language": {
+          "type": "string",
+          "enum": [
+            "English",
+            "Urdu",
+            "Punjabi",
+            "Saraiki",
+            "Pashto",
+            "Sindhi",
+            "Balochi"
+          ],
+          "title": "Language"
+        },
+        "admission_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Admission Id"
+        },
+        "admission_number": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Admission Number"
+        },
+        "booking_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Booking Id"
+        },
+        "booking_number": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Booking Number"
+        },
+        "procedure_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Procedure Name"
+        },
+        "mode": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "Signed",
+                "EmergencyNote",
+                "VerbalRefusal"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Mode"
+        },
+        "signer": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "Patient",
+                "DecisionMaker"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Signer"
+        },
+        "signer_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Signer Name"
+        },
+        "signer_relationship": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "Guardian",
+                "Attorney",
+                "Spouse",
+                "Child",
+                "Parent",
+                "Sibling",
+                "OtherRelative",
+                "CareProvider"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Signer Relationship"
+        },
+        "decided_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Decided At"
+        },
+        "obtained_by_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Obtained By Name"
+        },
+        "document_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Document Id"
+        },
+        "scanned_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Scanned At"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Created At"
+        }
+      },
+      "type": "object",
+      "required": [
+        "consent_id",
+        "consent_number",
+        "patient_id",
+        "mrn",
+        "patient_name",
+        "form_code",
+        "form_title",
+        "category",
+        "status",
+        "language",
+        "admission_id",
+        "admission_number",
+        "booking_id",
+        "booking_number",
+        "procedure_name",
+        "mode",
+        "signer",
+        "signer_name",
+        "signer_relationship",
+        "decided_at",
+        "obtained_by_name",
+        "document_id",
+        "scanned_at",
+        "created_at"
+      ],
+      "title": "ConsentBriefOut"
+    },
+    "Envelope_FlowsheetOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/FlowsheetOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[FlowsheetOut]"
+    },
+    "Envelope_NursingNoteOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/NursingNoteOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[NursingNoteOut]"
+    },
+    "Envelope_SurgicalRecordOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/SurgicalRecordOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[SurgicalRecordOut]"
+    },
+    "Envelope_VitalsEntryOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/VitalsEntryOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[VitalsEntryOut]"
+    },
+    "Envelope_VitalsScheduleOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/VitalsScheduleOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[VitalsScheduleOut]"
+    },
+    "Envelope_list_SurgicalWorklistItemOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/SurgicalWorklistItemOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[SurgicalWorklistItemOut]]"
+    },
+    "FlowsheetNoteOut": {
+      "properties": {
+        "note_id": {
+          "type": "integer",
+          "title": "Note Id"
+        },
+        "admission_id": {
+          "type": "integer",
+          "title": "Admission Id"
+        },
+        "patient_id": {
+          "type": "integer",
+          "title": "Patient Id"
+        },
+        "note_text": {
+          "type": "string",
+          "title": "Note Text"
+        },
+        "observed_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Observed At"
+        },
+        "authored_by": {
+          "type": "integer",
+          "title": "Authored By"
+        },
+        "authored_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Authored At"
+        },
+        "is_correction": {
+          "type": "boolean",
+          "title": "Is Correction"
+        },
+        "corrects_note_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Corrects Note Id"
+        },
+        "correction_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Correction Reason"
+        },
+        "authored_by_name": {
+          "type": "string",
+          "title": "Authored By Name"
+        },
+        "author_stamp": {
+          "$ref": "#/components/schemas/AuthorStampOut",
+          "description": "The nurse's stamp: name, designation, PNC number, time (MSDS 147)"
+        }
+      },
+      "type": "object",
+      "required": [
+        "note_id",
+        "admission_id",
+        "patient_id",
+        "note_text",
+        "observed_at",
+        "authored_by",
+        "authored_at",
+        "is_correction",
+        "corrects_note_id",
+        "correction_reason",
+        "authored_by_name",
+        "author_stamp"
+      ],
+      "title": "FlowsheetNoteOut"
+    },
+    "FlowsheetOut": {
+      "properties": {
+        "vitals": {
+          "items": {
+            "$ref": "#/components/schemas/FlowsheetVitalsOut"
+          },
+          "type": "array",
+          "title": "Vitals",
+          "description": "Oldest first; corrections are separate entries"
+        },
+        "nursing_notes": {
+          "items": {
+            "$ref": "#/components/schemas/FlowsheetNoteOut"
+          },
+          "type": "array",
+          "title": "Nursing Notes"
+        },
+        "schedule": {
+          "anyOf": [
+            {
+              "$ref": "#/components/schemas/VitalsScheduleOut"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "next_vitals_due_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Next Vitals Due At"
+        },
+        "is_overdue": {
+          "type": "boolean",
+          "title": "Is Overdue"
+        }
+      },
+      "type": "object",
+      "required": [
+        "vitals",
+        "nursing_notes",
+        "schedule",
+        "next_vitals_due_at",
+        "is_overdue"
+      ],
+      "title": "FlowsheetOut"
+    },
+    "FlowsheetVitalsOut": {
+      "properties": {
+        "entry_id": {
+          "type": "integer",
+          "title": "Entry Id"
+        },
+        "admission_id": {
+          "type": "integer",
+          "title": "Admission Id"
+        },
+        "patient_id": {
+          "type": "integer",
+          "title": "Patient Id"
+        },
+        "bp_systolic": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Bp Systolic"
+        },
+        "bp_diastolic": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Bp Diastolic"
+        },
+        "heart_rate": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Heart Rate"
+        },
+        "temp_c": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Temp C"
+        },
+        "spo2": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Spo2"
+        },
+        "respiratory_rate": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Respiratory Rate"
+        },
+        "pain_score": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Pain Score"
+        },
+        "blood_glucose": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Blood Glucose"
+        },
+        "notes": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Notes"
+        },
+        "observed_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Observed At"
+        },
+        "recorded_by": {
+          "type": "integer",
+          "title": "Recorded By"
+        },
+        "recorded_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Recorded At"
+        },
+        "is_correction": {
+          "type": "boolean",
+          "title": "Is Correction"
+        },
+        "corrects_entry_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Corrects Entry Id"
+        },
+        "correction_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Correction Reason"
+        },
+        "recorded_by_name": {
+          "type": "string",
+          "title": "Recorded By Name"
+        }
+      },
+      "type": "object",
+      "required": [
+        "entry_id",
+        "admission_id",
+        "patient_id",
+        "bp_systolic",
+        "bp_diastolic",
+        "heart_rate",
+        "temp_c",
+        "spo2",
+        "respiratory_rate",
+        "pain_score",
+        "blood_glucose",
+        "notes",
+        "observed_at",
+        "recorded_by",
+        "recorded_at",
+        "is_correction",
+        "corrects_entry_id",
+        "correction_reason",
+        "recorded_by_name"
+      ],
+      "title": "FlowsheetVitalsOut"
+    },
+    "HTTPValidationError": {
+      "properties": {
+        "detail": {
+          "items": {
+            "$ref": "#/components/schemas/ValidationError"
+          },
+          "type": "array",
+          "title": "Detail"
+        }
+      },
+      "type": "object",
+      "title": "HTTPValidationError"
+    },
+    "IcdTermOut": {
+      "properties": {
+        "code": {
+          "type": "string",
+          "title": "Code"
+        },
+        "system": {
+          "type": "string",
+          "enum": [
+            "ICD-11",
+            "ICD-10"
+          ],
+          "title": "System"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Title"
+        },
+        "uri": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Uri",
+          "description": "ICD-11: the WHO URI of the entity (null for ICD-10)"
+        }
+      },
+      "type": "object",
+      "required": [
+        "code",
+        "system",
+        "title",
+        "uri"
+      ],
+      "title": "IcdTermOut",
+      "description": "A code as stored in a record, with its title and WHO URI from the code list (the ICD-11 licence asks for code,\ntitle and URI together wherever codes are sent). `title` is null only for a code no list has."
+    },
+    "Meta": {
+      "properties": {
+        "server_time": {
+          "type": "string",
+          "title": "Server Time",
+          "description": "Server clock (UTC). Use it to detect terminal clock skew."
+        },
+        "page": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Page"
+        },
+        "page_size": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Page Size"
+        },
+        "total_count": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Total Count"
+        },
+        "next_cursor": {
+          "title": "Next Cursor"
+        }
+      },
+      "type": "object",
+      "required": [
+        "server_time"
+      ],
+      "title": "Meta"
+    },
+    "NoteCorrectionIn": {
+      "properties": {
+        "note_text": {
+          "type": "string",
+          "maxLength": 10000,
+          "minLength": 1,
+          "title": "Note Text"
+        },
+        "observed_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Observed At"
+        },
+        "correction_reason": {
+          "type": "string",
+          "maxLength": 500,
+          "minLength": 3,
+          "title": "Correction Reason"
+        }
+      },
+      "type": "object",
+      "required": [
+        "note_text",
+        "correction_reason"
+      ],
+      "title": "NoteCorrectionIn"
+    },
+    "NursingNoteIn": {
+      "properties": {
+        "note_text": {
+          "type": "string",
+          "maxLength": 10000,
+          "minLength": 1,
+          "title": "Note Text"
+        },
+        "observed_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Observed At"
+        }
+      },
+      "type": "object",
+      "required": [
+        "note_text"
+      ],
+      "title": "NursingNoteIn"
+    },
+    "NursingNoteOut": {
+      "properties": {
+        "note_id": {
+          "type": "integer",
+          "title": "Note Id"
+        },
+        "admission_id": {
+          "type": "integer",
+          "title": "Admission Id"
+        },
+        "patient_id": {
+          "type": "integer",
+          "title": "Patient Id"
+        },
+        "note_text": {
+          "type": "string",
+          "title": "Note Text"
+        },
+        "observed_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Observed At"
+        },
+        "authored_by": {
+          "type": "integer",
+          "title": "Authored By"
+        },
+        "authored_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Authored At"
+        },
+        "is_correction": {
+          "type": "boolean",
+          "title": "Is Correction"
+        },
+        "corrects_note_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Corrects Note Id"
+        },
+        "correction_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Correction Reason"
+        }
+      },
+      "type": "object",
+      "required": [
+        "note_id",
+        "admission_id",
+        "patient_id",
+        "note_text",
+        "observed_at",
+        "authored_by",
+        "authored_at",
+        "is_correction",
+        "corrects_note_id",
+        "correction_reason"
+      ],
+      "title": "NursingNoteOut"
+    },
+    "OperativeNoteOut": {
+      "properties": {
+        "note_id": {
+          "type": "integer",
+          "title": "Note Id"
+        },
+        "booking_id": {
+          "type": "integer",
+          "title": "Booking Id"
+        },
+        "patient_id": {
+          "type": "integer",
+          "title": "Patient Id"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "Draft",
+            "Final"
+          ],
+          "title": "Status"
+        },
+        "surgeon_id": {
+          "type": "integer",
+          "title": "Surgeon Id"
+        },
+        "surgeon_name": {
+          "type": "string",
+          "title": "Surgeon Name"
+        },
+        "assistant_ids": {
+          "items": {
+            "type": "integer"
+          },
+          "type": "array",
+          "title": "Assistant Ids"
+        },
+        "assistant_names": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Assistant Names"
+        },
+        "anaesthetist_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Anaesthetist Id"
+        },
+        "anaesthetist_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Anaesthetist Name"
+        },
+        "anaesthesia_type": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "General",
+                "Spinal",
+                "Epidural",
+                "Regional",
+                "Sedation",
+                "Local",
+                "None"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Anaesthesia Type"
+        },
+        "pre_op_diagnosis": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Pre Op Diagnosis"
+        },
+        "post_op_diagnosis": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Post Op Diagnosis"
+        },
+        "icd_codes": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Icd Codes"
+        },
+        "icd_terms": {
+          "items": {
+            "$ref": "#/components/schemas/IcdTermOut"
+          },
+          "type": "array",
+          "title": "Icd Terms"
+        },
+        "procedure_performed": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Procedure Performed"
+        },
+        "incision": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Incision"
+        },
+        "findings": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Findings"
+        },
+        "procedure_details": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Procedure Details"
+        },
+        "specimens": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Specimens"
+        },
+        "histopathology_sent": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Histopathology Sent"
+        },
+        "blood_loss_ml": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Blood Loss Ml"
+        },
+        "transfusion": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Transfusion"
+        },
+        "implants": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Implants"
+        },
+        "implant_left": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Implant Left"
+        },
+        "wound_class": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "Clean",
+                "CleanContaminated",
+                "Contaminated",
+                "Dirty"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Wound Class"
+        },
+        "drains": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Drains"
+        },
+        "closure": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Closure"
+        },
+        "unexpected_events": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Unexpected Events"
+        },
+        "condition_at_end": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "Stable",
+                "Satisfactory",
+                "Guarded",
+                "Critical"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Condition At End"
+        },
+        "monitoring": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Monitoring"
+        },
+        "monitoring_interval_minutes": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Monitoring Interval Minutes"
+        },
+        "medications": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Medications"
+        },
+        "wound_care": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Wound Care"
+        },
+        "drains_catheters": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Drains Catheters"
+        },
+        "positioning": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Positioning"
+        },
+        "nutrition": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Nutrition"
+        },
+        "referrals": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Referrals"
+        },
+        "fluid_balance": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Fluid Balance"
+        },
+        "transfusion_instructions": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Transfusion Instructions"
+        },
+        "created_by": {
+          "type": "integer",
+          "title": "Created By"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Created At"
+        },
+        "signed_by": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Signed By"
+        },
+        "signed_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Signed At"
+        },
+        "author_stamp": {
+          "anyOf": [
+            {
+              "$ref": "#/components/schemas/AuthorStampOut"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "row_version": {
+          "type": "integer",
+          "title": "Row Version"
+        },
+        "missing": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Missing",
+          "description": "A draft: what signing still needs"
+        }
+      },
+      "type": "object",
+      "required": [
+        "note_id",
+        "booking_id",
+        "patient_id",
+        "status",
+        "surgeon_id",
+        "surgeon_name",
+        "assistant_ids",
+        "assistant_names",
+        "anaesthetist_id",
+        "anaesthetist_name",
+        "anaesthesia_type",
+        "pre_op_diagnosis",
+        "post_op_diagnosis",
+        "icd_codes",
+        "icd_terms",
+        "procedure_performed",
+        "incision",
+        "findings",
+        "procedure_details",
+        "specimens",
+        "histopathology_sent",
+        "blood_loss_ml",
+        "transfusion",
+        "implants",
+        "implant_left",
+        "wound_class",
+        "drains",
+        "closure",
+        "unexpected_events",
+        "condition_at_end",
+        "monitoring",
+        "monitoring_interval_minutes",
+        "medications",
+        "wound_care",
+        "drains_catheters",
+        "positioning",
+        "nutrition",
+        "referrals",
+        "fluid_balance",
+        "transfusion_instructions",
+        "created_by",
+        "created_at",
+        "signed_by",
+        "signed_at",
+        "author_stamp",
+        "row_version",
+        "missing"
+      ],
+      "title": "OperativeNoteOut"
+    },
+    "PreAnaesthesiaOut": {
+      "properties": {
+        "pac_id": {
+          "type": "integer",
+          "title": "Pac Id"
+        },
+        "booking_id": {
+          "type": "integer",
+          "title": "Booking Id"
+        },
+        "patient_id": {
+          "type": "integer",
+          "title": "Patient Id"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "Draft",
+            "Final"
+          ],
+          "title": "Status"
+        },
+        "history": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "History"
+        },
+        "medications": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Medications"
+        },
+        "allergies": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Allergies"
+        },
+        "examination": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Examination"
+        },
+        "airway_mallampati": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Airway Mallampati"
+        },
+        "airway_notes": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Airway Notes"
+        },
+        "investigations": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Investigations"
+        },
+        "heart_rate": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Heart Rate"
+        },
+        "bp_systolic": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Bp Systolic"
+        },
+        "bp_diastolic": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Bp Diastolic"
+        },
+        "spo2": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Spo2"
+        },
+        "weight_kg": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Weight Kg"
+        },
+        "asa_class": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Asa Class"
+        },
+        "asa_emergency": {
+          "type": "boolean",
+          "title": "Asa Emergency"
+        },
+        "risks": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Risks"
+        },
+        "planned_technique": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "General",
+                "Spinal",
+                "Epidural",
+                "Regional",
+                "Sedation",
+                "Local"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Planned Technique"
+        },
+        "plan": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Plan"
+        },
+        "premedication": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Premedication"
+        },
+        "fasting_instructions": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Fasting Instructions"
+        },
+        "decision": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "Fit",
+                "FitWithConditions",
+                "NotFit",
+                "Deferred"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Decision"
+        },
+        "decision_note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Decision Note"
+        },
+        "created_by": {
+          "type": "integer",
+          "title": "Created By"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Created At"
+        },
+        "signed_by": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Signed By"
+        },
+        "signed_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Signed At"
+        },
+        "author_stamp": {
+          "anyOf": [
+            {
+              "$ref": "#/components/schemas/AuthorStampOut"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "row_version": {
+          "type": "integer",
+          "title": "Row Version"
+        },
+        "missing": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Missing",
+          "description": "A draft: what signing still needs"
+        }
+      },
+      "type": "object",
+      "required": [
+        "pac_id",
+        "booking_id",
+        "patient_id",
+        "status",
+        "history",
+        "medications",
+        "allergies",
+        "examination",
+        "airway_mallampati",
+        "airway_notes",
+        "investigations",
+        "heart_rate",
+        "bp_systolic",
+        "bp_diastolic",
+        "spo2",
+        "weight_kg",
+        "asa_class",
+        "asa_emergency",
+        "risks",
+        "planned_technique",
+        "plan",
+        "premedication",
+        "fasting_instructions",
+        "decision",
+        "decision_note",
+        "created_by",
+        "created_at",
+        "signed_by",
+        "signed_at",
+        "author_stamp",
+        "row_version",
+        "missing"
+      ],
+      "title": "PreAnaesthesiaOut"
+    },
+    "PreOpNoteOut": {
+      "properties": {
+        "booking_id": {
+          "type": "integer",
+          "title": "Booking Id"
+        },
+        "history_examination": {
+          "type": "string",
+          "title": "History Examination"
+        },
+        "provisional_diagnosis": {
+          "type": "string",
+          "title": "Provisional Diagnosis"
+        },
+        "icd_codes": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Icd Codes"
+        },
+        "icd_terms": {
+          "items": {
+            "$ref": "#/components/schemas/IcdTermOut"
+          },
+          "type": "array",
+          "title": "Icd Terms"
+        },
+        "operation_plan": {
+          "type": "string",
+          "title": "Operation Plan"
+        },
+        "laterality": {
+          "type": "string",
+          "enum": [
+            "Left",
+            "Right",
+            "Bilateral",
+            "NotApplicable"
+          ],
+          "title": "Laterality"
+        },
+        "recorded_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Recorded At"
+        },
+        "author_stamp": {
+          "$ref": "#/components/schemas/AuthorStampOut"
+        },
+        "row_version": {
+          "type": "integer",
+          "title": "Row Version"
+        }
+      },
+      "type": "object",
+      "required": [
+        "booking_id",
+        "history_examination",
+        "provisional_diagnosis",
+        "icd_codes",
+        "icd_terms",
+        "operation_plan",
+        "laterality",
+        "recorded_at",
+        "author_stamp",
+        "row_version"
+      ],
+      "title": "PreOpNoteOut"
+    },
+    "RecordPartOut": {
+      "properties": {
+        "part": {
+          "type": "string",
+          "enum": [
+            "PreOpNote",
+            "OperationConsent",
+            "PreAnaesthesia",
+            "AnaesthesiaConsent",
+            "SignIn",
+            "TimeOut",
+            "SignOut",
+            "AnaesthesiaRecord",
+            "OperativeNote",
+            "Recovery"
+          ],
+          "title": "Part"
+        },
+        "label": {
+          "type": "string",
+          "title": "Label"
+        },
+        "state": {
+          "type": "string",
+          "enum": [
+            "Missing",
+            "Draft",
+            "Final",
+            "NotNeeded"
+          ],
+          "title": "State"
+        }
+      },
+      "type": "object",
+      "required": [
+        "part",
+        "label",
+        "state"
+      ],
+      "title": "RecordPartOut"
+    },
+    "RecoveryObservationOut": {
+      "properties": {
+        "observation_id": {
+          "type": "integer",
+          "title": "Observation Id"
+        },
+        "recorded_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Recorded At"
+        },
+        "heart_rate": {
+          "type": "integer",
+          "title": "Heart Rate"
+        },
+        "bp_systolic": {
+          "type": "integer",
+          "title": "Bp Systolic"
+        },
+        "bp_diastolic": {
+          "type": "integer",
+          "title": "Bp Diastolic"
+        },
+        "respiratory_rate": {
+          "type": "integer",
+          "title": "Respiratory Rate"
+        },
+        "spo2": {
+          "type": "integer",
+          "title": "Spo2"
+        },
+        "airway": {
+          "type": "string",
+          "enum": [
+            "Patent",
+            "Supported",
+            "Obstructed"
+          ],
+          "title": "Airway"
+        },
+        "consciousness": {
+          "type": "string",
+          "enum": [
+            "Alert",
+            "Voice",
+            "Pain",
+            "Unresponsive"
+          ],
+          "title": "Consciousness"
+        },
+        "pain_score": {
+          "type": "integer",
+          "title": "Pain Score"
+        },
+        "temp_c": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Temp C"
+        },
+        "nausea_vomiting": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Nausea Vomiting"
+        },
+        "note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Note"
+        },
+        "recorded_by_name": {
+          "type": "string",
+          "title": "Recorded By Name"
+        }
+      },
+      "type": "object",
+      "required": [
+        "observation_id",
+        "recorded_at",
+        "heart_rate",
+        "bp_systolic",
+        "bp_diastolic",
+        "respiratory_rate",
+        "spo2",
+        "airway",
+        "consciousness",
+        "pain_score",
+        "temp_c",
+        "nausea_vomiting",
+        "note",
+        "recorded_by_name"
+      ],
+      "title": "RecoveryObservationOut"
+    },
+    "RecoveryStayOut": {
+      "properties": {
+        "recovery_id": {
+          "type": "integer",
+          "title": "Recovery Id"
+        },
+        "booking_id": {
+          "type": "integer",
+          "title": "Booking Id"
+        },
+        "patient_id": {
+          "type": "integer",
+          "title": "Patient Id"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "InRecovery",
+            "Discharged"
+          ],
+          "title": "Status"
+        },
+        "arrived_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Arrived At"
+        },
+        "opened_by": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Opened By"
+        },
+        "discharged_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Discharged At"
+        },
+        "destination": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "Ward",
+                "ICU",
+                "HDU",
+                "Home",
+                "ReturnedToTheatre",
+                "Died"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Destination"
+        },
+        "score_activity": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Score Activity"
+        },
+        "score_respiration": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Score Respiration"
+        },
+        "score_circulation": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Score Circulation"
+        },
+        "score_consciousness": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Score Consciousness"
+        },
+        "score_spo2": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Score Spo2"
+        },
+        "score_total": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Score Total"
+        },
+        "pain_score": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Pain Score"
+        },
+        "criteria_met": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Criteria Met",
+          "description": "Set by the database at discharge from the settings ot_recovery_min_score and ot_recovery_max_pain"
+        },
+        "override_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Override Reason"
+        },
+        "shifting_note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Shifting Note"
+        },
+        "discharged_by": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Discharged By"
+        },
+        "discharge_stamp": {
+          "anyOf": [
+            {
+              "$ref": "#/components/schemas/AuthorStampOut"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "row_version": {
+          "type": "integer",
+          "title": "Row Version"
+        },
+        "observations": {
+          "items": {
+            "$ref": "#/components/schemas/RecoveryObservationOut"
+          },
+          "type": "array",
+          "title": "Observations"
+        }
+      },
+      "type": "object",
+      "required": [
+        "recovery_id",
+        "booking_id",
+        "patient_id",
+        "status",
+        "arrived_at",
+        "opened_by",
+        "discharged_at",
+        "destination",
+        "score_activity",
+        "score_respiration",
+        "score_circulation",
+        "score_consciousness",
+        "score_spo2",
+        "score_total",
+        "pain_score",
+        "criteria_met",
+        "override_reason",
+        "shifting_note",
+        "discharged_by",
+        "discharge_stamp",
+        "row_version",
+        "observations"
+      ],
+      "title": "RecoveryStayOut"
+    },
+    "SafetyCheckOut": {
+      "properties": {
+        "check_id": {
+          "type": "integer",
+          "title": "Check Id"
+        },
+        "phase": {
+          "type": "string",
+          "enum": [
+            "SignIn",
+            "TimeOut",
+            "SignOut"
+          ],
+          "title": "Phase"
+        },
+        "answers": {
+          "items": {
+            "$ref": "#/components/schemas/ChecklistAnswerOut"
+          },
+          "type": "array",
+          "title": "Answers",
+          "description": "Every item as it read when the pause was recorded"
+        },
+        "team": {
+          "items": {
+            "$ref": "#/components/schemas/TeamMemberOut"
+          },
+          "type": "array",
+          "title": "Team",
+          "description": "The time out: the team that agreed"
+        },
+        "note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Note"
+        },
+        "identity_check": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "WristbandScan",
+                "TwoIdentifiers",
+                "EmergencyOverride"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Identity Check",
+          "description": "The sign in: how the patient was identified before the anaesthetic (MSDS COP 37)"
+        },
+        "identity_note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Identity Note"
+        },
+        "completed_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Completed At"
+        },
+        "author_stamp": {
+          "$ref": "#/components/schemas/AuthorStampOut"
+        }
+      },
+      "type": "object",
+      "required": [
+        "check_id",
+        "phase",
+        "answers",
+        "team",
+        "note",
+        "identity_check",
+        "identity_note",
+        "completed_at",
+        "author_stamp"
+      ],
+      "title": "SafetyCheckOut"
+    },
+    "SurgicalBookingOut": {
+      "properties": {
+        "booking_id": {
+          "type": "integer",
+          "title": "Booking Id"
+        },
+        "booking_number": {
+          "type": "string",
+          "title": "Booking Number"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "Requested",
+            "Scheduled",
+            "InProgress",
+            "Cleaning",
+            "Completed",
+            "Cancelled",
+            "EmergencyHold"
+          ],
+          "title": "Status"
+        },
+        "booking_type": {
+          "type": "string",
+          "enum": [
+            "Scheduled",
+            "Emergency",
+            "CodeRed"
+          ],
+          "title": "Booking Type"
+        },
+        "procedure_name": {
+          "type": "string",
+          "title": "Procedure Name"
+        },
+        "anesthesia_type": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Anesthesia Type"
+        },
+        "patient_id": {
+          "type": "integer",
+          "title": "Patient Id"
+        },
+        "admission_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Admission Id"
+        },
+        "primary_surgeon_id": {
+          "type": "integer",
+          "title": "Primary Surgeon Id"
+        },
+        "surgeon_name": {
+          "type": "string",
+          "title": "Surgeon Name"
+        },
+        "ot_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ot Id"
+        },
+        "ot_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ot Name"
+        },
+        "scheduled_start": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Scheduled Start"
+        },
+        "scheduled_end": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Scheduled End"
+        },
+        "actual_start": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Actual Start"
+        },
+        "actual_end": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Actual End"
+        },
+        "mrn": {
+          "type": "string",
+          "title": "Mrn"
+        },
+        "patient_name": {
+          "type": "string",
+          "title": "Patient Name"
+        },
+        "gender": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Gender"
+        },
+        "age_years": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Age Years"
+        },
+        "admission_number": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Admission Number"
+        },
+        "needs_anaesthetist": {
+          "type": "boolean",
+          "title": "Needs Anaesthetist",
+          "description": "False only for an operation under local anaesthesia (or none) by the surgeon with no anaesthetist involved: no assessment, anaesthesia record or recovery stay is then required"
+        }
+      },
+      "type": "object",
+      "required": [
+        "booking_id",
+        "booking_number",
+        "status",
+        "booking_type",
+        "procedure_name",
+        "anesthesia_type",
+        "patient_id",
+        "admission_id",
+        "primary_surgeon_id",
+        "surgeon_name",
+        "ot_id",
+        "ot_name",
+        "scheduled_start",
+        "scheduled_end",
+        "actual_start",
+        "actual_end",
+        "mrn",
+        "patient_name",
+        "gender",
+        "age_years",
+        "admission_number",
+        "needs_anaesthetist"
+      ],
+      "title": "SurgicalBookingOut"
+    },
+    "SurgicalCorrectionOut": {
+      "properties": {
+        "correction_id": {
+          "type": "integer",
+          "title": "Correction Id"
+        },
+        "record": {
+          "type": "string",
+          "enum": [
+            "PreOpNote",
+            "PreAnaesthesia",
+            "SafetyChecklist",
+            "AnaesthesiaRecord",
+            "OperativeNote",
+            "Recovery"
+          ],
+          "title": "Record"
+        },
+        "correction_text": {
+          "type": "string",
+          "title": "Correction Text"
+        },
+        "correction_reason": {
+          "type": "string",
+          "title": "Correction Reason"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Created At"
+        },
+        "author_stamp": {
+          "$ref": "#/components/schemas/AuthorStampOut"
+        }
+      },
+      "type": "object",
+      "required": [
+        "correction_id",
+        "record",
+        "correction_text",
+        "correction_reason",
+        "created_at",
+        "author_stamp"
+      ],
+      "title": "SurgicalCorrectionOut"
+    },
+    "SurgicalRecordOut": {
+      "properties": {
+        "booking": {
+          "$ref": "#/components/schemas/SurgicalBookingOut"
+        },
+        "parts": {
+          "items": {
+            "$ref": "#/components/schemas/RecordPartOut"
+          },
+          "type": "array",
+          "title": "Parts",
+          "description": "Every part in order and where it stands"
+        },
+        "next_step": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Next Step",
+          "description": "What to do next; null when the record is complete"
+        },
+        "pre_op_note": {
+          "anyOf": [
+            {
+              "$ref": "#/components/schemas/PreOpNoteOut"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "consents": {
+          "items": {
+            "$ref": "#/components/schemas/ConsentBriefOut"
+          },
+          "type": "array",
+          "title": "Consents",
+          "description": "The consents of the operation (the consent register): to the operation and to the anaesthesia, given before the sign in"
+        },
+        "pre_anaesthesia": {
+          "items": {
+            "$ref": "#/components/schemas/PreAnaesthesiaOut"
+          },
+          "type": "array",
+          "title": "Pre Anaesthesia",
+          "description": "Every assessment, the latest last"
+        },
+        "checklist": {
+          "items": {
+            "$ref": "#/components/schemas/SafetyCheckOut"
+          },
+          "type": "array",
+          "title": "Checklist",
+          "description": "The pauses recorded, in order"
+        },
+        "anaesthesia_record": {
+          "anyOf": [
+            {
+              "$ref": "#/components/schemas/AnaesthesiaRecordOut"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "operative_note": {
+          "anyOf": [
+            {
+              "$ref": "#/components/schemas/OperativeNoteOut"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "recovery": {
+          "anyOf": [
+            {
+              "$ref": "#/components/schemas/RecoveryStayOut"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "adverse_events": {
+          "items": {
+            "$ref": "#/components/schemas/TheatreIncidentOut"
+          },
+          "type": "array",
+          "title": "Adverse Events",
+          "description": "The incidents reported against the operation"
+        },
+        "corrections": {
+          "items": {
+            "$ref": "#/components/schemas/SurgicalCorrectionOut"
+          },
+          "type": "array",
+          "title": "Corrections"
+        }
+      },
+      "type": "object",
+      "required": [
+        "booking",
+        "parts",
+        "next_step",
+        "pre_op_note",
+        "consents",
+        "pre_anaesthesia",
+        "checklist",
+        "anaesthesia_record",
+        "operative_note",
+        "recovery",
+        "adverse_events",
+        "corrections"
+      ],
+      "title": "SurgicalRecordOut"
+    },
+    "SurgicalWorklistItemOut": {
+      "properties": {
+        "booking_id": {
+          "type": "integer",
+          "title": "Booking Id"
+        },
+        "booking_number": {
+          "type": "string",
+          "title": "Booking Number"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "Requested",
+            "Scheduled",
+            "InProgress",
+            "Cleaning",
+            "Completed",
+            "Cancelled",
+            "EmergencyHold"
+          ],
+          "title": "Status"
+        },
+        "booking_type": {
+          "type": "string",
+          "enum": [
+            "Scheduled",
+            "Emergency",
+            "CodeRed"
+          ],
+          "title": "Booking Type"
+        },
+        "procedure_name": {
+          "type": "string",
+          "title": "Procedure Name"
+        },
+        "anesthesia_type": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Anesthesia Type"
+        },
+        "scheduled_start": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Scheduled Start"
+        },
+        "actual_start": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Actual Start"
+        },
+        "actual_end": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Actual End"
+        },
+        "primary_surgeon_id": {
+          "type": "integer",
+          "title": "Primary Surgeon Id"
+        },
+        "surgeon_name": {
+          "type": "string",
+          "title": "Surgeon Name"
+        },
+        "ot_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ot Name"
+        },
+        "patient_id": {
+          "type": "integer",
+          "title": "Patient Id"
+        },
+        "mrn": {
+          "type": "string",
+          "title": "Mrn"
+        },
+        "patient_name": {
+          "type": "string",
+          "title": "Patient Name"
+        },
+        "needs_anaesthetist": {
+          "type": "boolean",
+          "title": "Needs Anaesthetist"
+        },
+        "anaesthesia_decision": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "Fit",
+                "FitWithConditions",
+                "NotFit",
+                "Deferred"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Anaesthesia Decision"
+        },
+        "anaesthetist_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Anaesthetist Id"
+        },
+        "parts": {
+          "items": {
+            "$ref": "#/components/schemas/RecordPartOut"
+          },
+          "type": "array",
+          "title": "Parts"
+        },
+        "next_step": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Next Step"
+        }
+      },
+      "type": "object",
+      "required": [
+        "booking_id",
+        "booking_number",
+        "status",
+        "booking_type",
+        "procedure_name",
+        "anesthesia_type",
+        "scheduled_start",
+        "actual_start",
+        "actual_end",
+        "primary_surgeon_id",
+        "surgeon_name",
+        "ot_name",
+        "patient_id",
+        "mrn",
+        "patient_name",
+        "needs_anaesthetist",
+        "anaesthesia_decision",
+        "anaesthetist_id",
+        "parts",
+        "next_step"
+      ],
+      "title": "SurgicalWorklistItemOut"
+    },
+    "TeamMemberOut": {
+      "properties": {
+        "employee_id": {
+          "type": "integer",
+          "title": "Employee Id"
+        },
+        "role_in_ot": {
+          "type": "string",
+          "enum": [
+            "PrimarySurgeon",
+            "AssistantSurgeon",
+            "Anesthetist",
+            "ScrubNurse",
+            "CirculatingNurse",
+            "Other"
+          ],
+          "title": "Role In Ot"
+        },
+        "name": {
+          "type": "string",
+          "title": "Name"
+        }
+      },
+      "type": "object",
+      "required": [
+        "employee_id",
+        "role_in_ot",
+        "name"
+      ],
+      "title": "TeamMemberOut"
+    },
+    "TheatreIncidentOut": {
+      "properties": {
+        "incident_id": {
+          "type": "integer",
+          "title": "Incident Id"
+        },
+        "incident_number": {
+          "type": "string",
+          "title": "Incident Number"
+        },
+        "type_code": {
+          "type": "string",
+          "title": "Type Code"
+        },
+        "type_name": {
+          "type": "string",
+          "title": "Type Name"
+        },
+        "area": {
+          "type": "string",
+          "enum": [
+            "Clinical",
+            "Medication",
+            "Anaesthesia",
+            "Surgery",
+            "Diagnostics",
+            "Transfusion",
+            "Infection",
+            "MotherAndBaby",
+            "Behaviour",
+            "Facility",
+            "Occupational"
+          ],
+          "title": "Area"
+        },
+        "harm": {
+          "type": "string",
+          "enum": [
+            "NoHarm",
+            "Mild",
+            "Moderate",
+            "Severe",
+            "Death"
+          ],
+          "title": "Harm"
+        },
+        "is_sentinel": {
+          "type": "boolean",
+          "title": "Is Sentinel"
+        },
+        "ot_phase": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "BeforeInduction",
+                "Induction",
+                "Maintenance",
+                "Emergence",
+                "Recovery",
+                "AfterRecovery"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ot Phase"
+        },
+        "occurred_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Occurred At"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "Reported",
+            "UnderReview",
+            "Analysed",
+            "Closed",
+            "Withdrawn"
+          ],
+          "title": "Status"
+        }
+      },
+      "type": "object",
+      "required": [
+        "incident_id",
+        "incident_number",
+        "type_code",
+        "type_name",
+        "area",
+        "harm",
+        "is_sentinel",
+        "ot_phase",
+        "occurred_at",
+        "status"
+      ],
+      "title": "TheatreIncidentOut",
+      "description": "An adverse event of the operation: an incident of the Anaesthesia or Surgery area (GET /incidents/{incident_id})."
+    },
+    "ValidationError": {
+      "properties": {
+        "loc": {
+          "items": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ]
+          },
+          "type": "array",
+          "title": "Location"
+        },
+        "msg": {
+          "type": "string",
+          "title": "Message"
+        },
+        "type": {
+          "type": "string",
+          "title": "Error Type"
+        },
+        "input": {
+          "title": "Input"
+        },
+        "ctx": {
+          "type": "object",
+          "title": "Context"
+        }
+      },
+      "type": "object",
+      "required": [
+        "loc",
+        "msg",
+        "type"
+      ],
+      "title": "ValidationError"
+    },
+    "VitalsCorrectionIn": {
+      "properties": {
+        "bp_systolic": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "maximum": 300,
+              "minimum": 30
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Bp Systolic"
+        },
+        "bp_diastolic": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "maximum": 200,
+              "minimum": 10
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Bp Diastolic"
+        },
+        "heart_rate": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "maximum": 300,
+              "minimum": 10
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Heart Rate"
+        },
+        "temp_c": {
+          "anyOf": [
+            {
+              "type": "number",
+              "maximum": 45,
+              "minimum": 25
+            },
+            {
+              "type": "string",
+              "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Temp C"
+        },
+        "spo2": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 30
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Spo2"
+        },
+        "respiratory_rate": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "maximum": 80,
+              "minimum": 2
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Respiratory Rate"
+        },
+        "pain_score": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "maximum": 10,
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Pain Score"
+        },
+        "blood_glucose": {
+          "anyOf": [
+            {
+              "type": "number",
+              "maximum": 1000,
+              "minimum": 10
+            },
+            {
+              "type": "string",
+              "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Blood Glucose"
+        },
+        "notes": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 2000
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Notes"
+        },
+        "observed_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Observed At",
+          "description": "When measured (defaults to now)"
+        },
+        "correction_reason": {
+          "type": "string",
+          "maxLength": 500,
+          "minLength": 3,
+          "title": "Correction Reason"
+        }
+      },
+      "type": "object",
+      "required": [
+        "correction_reason"
+      ],
+      "title": "VitalsCorrectionIn"
+    },
+    "VitalsEntryOut": {
+      "properties": {
+        "entry_id": {
+          "type": "integer",
+          "title": "Entry Id"
+        },
+        "admission_id": {
+          "type": "integer",
+          "title": "Admission Id"
+        },
+        "patient_id": {
+          "type": "integer",
+          "title": "Patient Id"
+        },
+        "bp_systolic": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Bp Systolic"
+        },
+        "bp_diastolic": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Bp Diastolic"
+        },
+        "heart_rate": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Heart Rate"
+        },
+        "temp_c": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Temp C"
+        },
+        "spo2": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Spo2"
+        },
+        "respiratory_rate": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Respiratory Rate"
+        },
+        "pain_score": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Pain Score"
+        },
+        "blood_glucose": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Blood Glucose"
+        },
+        "notes": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Notes"
+        },
+        "observed_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Observed At"
+        },
+        "recorded_by": {
+          "type": "integer",
+          "title": "Recorded By"
+        },
+        "recorded_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Recorded At"
+        },
+        "is_correction": {
+          "type": "boolean",
+          "title": "Is Correction"
+        },
+        "corrects_entry_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Corrects Entry Id"
+        },
+        "correction_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Correction Reason"
+        }
+      },
+      "type": "object",
+      "required": [
+        "entry_id",
+        "admission_id",
+        "patient_id",
+        "bp_systolic",
+        "bp_diastolic",
+        "heart_rate",
+        "temp_c",
+        "spo2",
+        "respiratory_rate",
+        "pain_score",
+        "blood_glucose",
+        "notes",
+        "observed_at",
+        "recorded_by",
+        "recorded_at",
+        "is_correction",
+        "corrects_entry_id",
+        "correction_reason"
+      ],
+      "title": "VitalsEntryOut"
+    },
+    "VitalsIn": {
+      "properties": {
+        "bp_systolic": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "maximum": 300,
+              "minimum": 30
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Bp Systolic"
+        },
+        "bp_diastolic": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "maximum": 200,
+              "minimum": 10
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Bp Diastolic"
+        },
+        "heart_rate": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "maximum": 300,
+              "minimum": 10
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Heart Rate"
+        },
+        "temp_c": {
+          "anyOf": [
+            {
+              "type": "number",
+              "maximum": 45,
+              "minimum": 25
+            },
+            {
+              "type": "string",
+              "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Temp C"
+        },
+        "spo2": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 30
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Spo2"
+        },
+        "respiratory_rate": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "maximum": 80,
+              "minimum": 2
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Respiratory Rate"
+        },
+        "pain_score": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "maximum": 10,
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Pain Score"
+        },
+        "blood_glucose": {
+          "anyOf": [
+            {
+              "type": "number",
+              "maximum": 1000,
+              "minimum": 10
+            },
+            {
+              "type": "string",
+              "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Blood Glucose"
+        },
+        "notes": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 2000
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Notes"
+        },
+        "observed_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Observed At",
+          "description": "When measured (defaults to now)"
+        }
+      },
+      "type": "object",
+      "title": "VitalsIn"
+    },
+    "VitalsScheduleIn": {
+      "properties": {
+        "interval_minutes": {
+          "type": "integer",
+          "maximum": 1440,
+          "minimum": 15,
+          "title": "Interval Minutes"
+        }
+      },
+      "type": "object",
+      "required": [
+        "interval_minutes"
+      ],
+      "title": "VitalsScheduleIn"
+    },
+    "VitalsScheduleOut": {
+      "properties": {
+        "schedule_id": {
+          "type": "integer",
+          "title": "Schedule Id"
+        },
+        "admission_id": {
+          "type": "integer",
+          "title": "Admission Id"
+        },
+        "interval_minutes": {
+          "type": "integer",
+          "title": "Interval Minutes"
+        },
+        "start_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Start At"
+        },
+        "end_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "End At"
+        },
+        "is_active": {
+          "type": "boolean",
+          "title": "Is Active"
+        },
+        "last_alerted_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Last Alerted At"
+        },
+        "created_by": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Created By"
+        },
+        "row_version": {
+          "type": "integer",
+          "title": "Row Version"
+        }
+      },
+      "type": "object",
+      "required": [
+        "schedule_id",
+        "admission_id",
+        "interval_minutes",
+        "start_at",
+        "end_at",
+        "is_active",
+        "last_alerted_at",
+        "created_by",
+        "row_version"
+      ],
+      "title": "VitalsScheduleOut"
+    }
+  },
+  "examples": {
+    "GET /admissions/{admission_id}/flowsheet": {
+      "request": {
+        "path": "/api/v1/admissions/1/flowsheet"
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": {
+            "vitals": [
+              {
+                "entry_id": 1,
+                "admission_id": 1,
+                "patient_id": 1,
+                "bp_systolic": 120,
+                "bp_diastolic": 80,
+                "heart_rate": 88,
+                "temp_c": 38.4,
+                "spo2": 95,
+                "respiratory_rate": null,
+                "pain_score": null,
+                "blood_glucose": null,
+                "notes": null,
+                "observed_at": "2026-09-27T17:38:29.062250+00:00",
+                "recorded_by": 7,
+                "recorded_at": "2026-09-27T17:38:29.062250+00:00",
+                "is_correction": false,
+                "corrects_entry_id": null,
+                "correction_reason": null,
+                "recorded_by_name": "uefbb36b24c"
+              },
+              {
+                "entry_id": 2,
+                "admission_id": 1,
+                "patient_id": 1,
+                "bp_systolic": 125,
+                "bp_diastolic": 80,
+                "heart_rate": 88,
+                "temp_c": 38.4,
+                "spo2": 95,
+                "respiratory_rate": null,
+                "pain_score": null,
+                "blood_glucose": null,
+                "notes": null,
+                "observed_at": "2026-09-27T17:38:29.094072+00:00",
+                "recorded_by": 7,
+                "recorded_at": "2026-09-27T17:38:29.094072+00:00",
+                "is_correction": true,
+                "corrects_entry_id": 1,
+                "correction_reason": "misread cuff",
+                "recorded_by_name": "uefbb36b24c"
+              }
+            ],
+            "nursing_notes": [],
+            "schedule": {
+              "schedule_id": 1,
+              "admission_id": 1,
+              "interval_minutes": 240,
+              "start_at": "2026-09-27T17:38:28.972277+00:00",
+              "end_at": null,
+              "is_active": true,
+              "last_alerted_at": null,
+              "created_by": 6,
+              "row_version": 1
+            },
+            "next_vitals_due_at": "2026-09-27T21:38:29.094072+00:00",
+            "is_overdue": false
+          },
+          "meta": {
+            "server_time": "2026-09-27T17:38:29.160015+00:00"
+          },
+          "request_id": "ebb60c13ddf44d59bf840bb3ed2fffa3"
+        }
+      }
+    },
+    "POST /admissions/{admission_id}/flowsheet/vitals": {
+      "request": {
+        "path": "/api/v1/admissions/1/flowsheet/vitals",
+        "body": {
+          "bp_systolic": 120,
+          "bp_diastolic": 80,
+          "heart_rate": 88,
+          "temp_c": 38.4,
+          "spo2": 95
+        }
+      },
+      "response": {
+        "status": 201,
+        "body": {
+          "data": {
+            "entry_id": 1,
+            "admission_id": 1,
+            "patient_id": 1,
+            "bp_systolic": 120,
+            "bp_diastolic": 80,
+            "heart_rate": 88,
+            "temp_c": 38.4,
+            "spo2": 95,
+            "respiratory_rate": null,
+            "pain_score": null,
+            "blood_glucose": null,
+            "notes": null,
+            "observed_at": "2026-09-27T17:38:29.062250+00:00",
+            "recorded_by": 7,
+            "recorded_at": "2026-09-27T17:38:29.062250+00:00",
+            "is_correction": false,
+            "corrects_entry_id": null,
+            "correction_reason": null
+          },
+          "meta": {
+            "server_time": "2026-09-27T17:38:29.084771+00:00"
+          },
+          "request_id": "1e07f5fa3f544991b4e30a3697f9abb5"
+        }
+      }
+    },
+    "POST /admissions/{admission_id}/flowsheet/vitals/{entry_id}/correction": {
+      "request": {
+        "path": "/api/v1/admissions/1/flowsheet/vitals/1/correction",
+        "body": {
+          "bp_systolic": 125,
+          "bp_diastolic": 80,
+          "heart_rate": 88,
+          "temp_c": 38.4,
+          "spo2": 95,
+          "correction_reason": "misread cuff"
+        }
+      },
+      "response": {
+        "status": 201,
+        "body": {
+          "data": {
+            "entry_id": 2,
+            "admission_id": 1,
+            "patient_id": 1,
+            "bp_systolic": 125,
+            "bp_diastolic": 80,
+            "heart_rate": 88,
+            "temp_c": 38.4,
+            "spo2": 95,
+            "respiratory_rate": null,
+            "pain_score": null,
+            "blood_glucose": null,
+            "notes": null,
+            "observed_at": "2026-09-27T17:38:29.094072+00:00",
+            "recorded_by": 7,
+            "recorded_at": "2026-09-27T17:38:29.094072+00:00",
+            "is_correction": true,
+            "corrects_entry_id": 1,
+            "correction_reason": "misread cuff"
+          },
+          "meta": {
+            "server_time": "2026-09-27T17:38:29.121947+00:00"
+          },
+          "request_id": "cdd633536bb64ebeb46e8de384bf44b1"
+        }
+      }
+    },
+    "POST /admissions/{admission_id}/flowsheet/nursing-notes": {
+      "request": {
+        "path": "/api/v1/admissions/1/flowsheet/nursing-notes",
+        "body": {
+          "note_text": "Comfortable, sleeping"
+        }
+      },
+      "response": {
+        "status": 201,
+        "body": {
+          "data": {
+            "note_id": 1,
+            "admission_id": 1,
+            "patient_id": 1,
+            "note_text": "Comfortable, sleeping",
+            "observed_at": "2026-09-27T17:38:44.827692+00:00",
+            "authored_by": 7,
+            "authored_at": "2026-09-27T17:38:44.827692+00:00",
+            "is_correction": false,
+            "corrects_note_id": null,
+            "correction_reason": null
+          },
+          "meta": {
+            "server_time": "2026-09-27T17:38:44.833390+00:00"
+          },
+          "request_id": "609823b01eac4e5aa0d389e536712375"
+        }
+      }
+    },
+    "POST /admissions/{admission_id}/flowsheet/nursing-notes/{note_id}/correction": {
+      "request": {
+        "path": "/api/v1/admissions/1/flowsheet/nursing-notes/1/correction",
+        "body": {
+          "note_text": "Comfortable, mild pain",
+          "correction_reason": "incomplete"
+        }
+      },
+      "response": {
+        "status": 201,
+        "body": {
+          "data": {
+            "note_id": 2,
+            "admission_id": 1,
+            "patient_id": 1,
+            "note_text": "Comfortable, mild pain",
+            "observed_at": "2026-09-27T17:38:44.837327+00:00",
+            "authored_by": 7,
+            "authored_at": "2026-09-27T17:38:44.837327+00:00",
+            "is_correction": true,
+            "corrects_note_id": 1,
+            "correction_reason": "incomplete"
+          },
+          "meta": {
+            "server_time": "2026-09-27T17:38:44.840048+00:00"
+          },
+          "request_id": "414f60e7c7d04a9c94e0facf71a819c7"
+        }
+      }
+    },
+    "PUT /admissions/{admission_id}/flowsheet/vitals-schedule": {
+      "request": {
+        "path": "/api/v1/admissions/1/flowsheet/vitals-schedule",
+        "body": {
+          "interval_minutes": 60
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": {
+            "schedule_id": 3,
+            "admission_id": 1,
+            "interval_minutes": 60,
+            "start_at": "2026-09-27T17:38:44.990385+00:00",
+            "end_at": null,
+            "is_active": true,
+            "last_alerted_at": null,
+            "created_by": 7,
+            "row_version": 1
+          },
+          "meta": {
+            "server_time": "2026-09-27T17:38:44.996396+00:00"
+          },
+          "request_id": "0bf7232a2f2b4d199b975447c9706a57"
+        }
+      }
+    },
+    "GET /ot/clinical-worklist": {
+      "request": {
+        "path": "/api/v1/ot/clinical-worklist",
+        "query": {
+          "mine": true
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": [
+            {
+              "booking_id": 1,
+              "booking_number": "OT-2026-00001",
+              "status": "Cleaning",
+              "booking_type": "Scheduled",
+              "procedure_name": "Appendectomy",
+              "anesthesia_type": "General",
+              "scheduled_start": "2026-10-01T09:00:00+00:00",
+              "actual_start": "2026-09-30T09:04:27.990684+00:00",
+              "actual_end": "2026-09-30T09:04:28.126713+00:00",
+              "primary_surgeon_id": 12,
+              "surgeon_name": "Dr Tariq",
+              "ot_name": "Main OT 1",
+              "patient_id": 2,
+              "mrn": "MRN-2026-000002",
+              "patient_name": "Ali Khan",
+              "needs_anaesthetist": true,
+              "anaesthesia_decision": "Fit",
+              "anaesthetist_id": 17,
+              "parts": [
+                {
+                  "part": "PreOpNote",
+                  "label": "Pre-operative note",
+                  "state": "Final"
+                },
+                {
+                  "part": "PreAnaesthesia",
+                  "label": "Pre-anaesthesia assessment",
+                  "state": "Final"
+                },
+                {
+                  "part": "SignIn",
+                  "label": "Sign in",
+                  "state": "Final"
+                }
+              ],
+              "next_step": null
+            }
+          ],
+          "meta": {
+            "server_time": "2026-09-30T09:04:28.386268+00:00"
+          },
+          "request_id": "f39e46d40d17427280146fef0d8c86c0"
+        }
+      }
+    },
+    "GET /ot/bookings/{booking_id}/surgical-record": {
+      "request": {
+        "path": "/api/v1/ot/bookings/1/surgical-record"
+      },
+      "response": {
+        "status": 200,
+        "body_preview": "{\"status\": 200, \"body\": {\"data\": {\"booking\": {\"booking_id\": 1, \"booking_number\": \"OT-2026-00001\", \"status\": \"Scheduled\", \"booking_type\": \"Scheduled\", \"procedure_name\": \"Appendectomy\", \"anesthesia_type\": \"General\", \"patient_id\": 1, \"admission_id\": null, \"primary_surgeon_id\": 7, \"surgeon_name\": \"Dr Tariq\", \"ot_id\": 1, \"ot_name\": \"Main OT 1\", \"scheduled_start\": \"2026-10-01T09:00:00+00:00\", \"scheduled_end\": \"2026-10-01T10:30:00+00:00\", \"actual_start\": null, \"actual_end\": null, \"mrn\": \"MRN-2026-000001\", \"patient_name\": \"Ali Khan\", \"gender\": \"male\", \"age_years\": 40, \"admission_number\": null, \"needs_anaesthetist\": true}, \"parts\": [{\"part\": \"PreOpNote\", \"label\": \"Pre-operative note\", \"state\": \"Draft\"}, {\"part\": \"OperationConsent\", \"label\": \"Consent to the operation\", \"state\": \"Missing\"}, {\"part\": \"PreAnaesthesia\", \"label\": \"Pre-anaesthesia assessment\", \"state\": \"Final\"}], \"next_step\": \"Take the patient's consent to the operation\", \"pre_op_note\": {\"booking_id\": 1, \"history_examination\": \"Right iliac fossa pain for 2 days, fever; tender at McBurney's point, guarding\", \"provisional_diagnosis\": \"Acute appendicitis\", \"icd_codes\": [], \"icd_terms\": [], \"operation_plan\": \"Open appendicectomy\", \"laterality\": \"Right\", \"recorded_at\": \"2026-09-30T09:54:24.367340+00:00\", \"author_stamp\": {\"at\": \"2026-09-30T09:54:24.36734+00:00\", \"name\": \"Dr Tariq\", \"text\": \"Dr Tariq, Doctor, PMDC PMDC-49102, 30-Sep-2026 14:54\", \"user_id\": 7, \"designation\": \"Doctor\", \"employee_id\": 7, \"registration\": \"PMDC PMDC-491…"
+      }
+    }
+  },
+  "unknowns": []
+}
