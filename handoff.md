@@ -2,7 +2,7 @@
 Last updated: 29 October 2026, Codex/functions, Asia/Karachi.
 
 ## Current task and status
-User requested the next screen after MCP returned. Phase 4 screen 56, cost_estimates_billing (billing_admin), is implemented and its permitted core verified. Screen 57 has not started. Baseline clean main at 5f5d54a; implementation/evidence ready for commit. Pending command: stage/audit/commit screen 56, save/submit partial progress payload and verify receipt. No business operation or test command running; no uncertain writes remain.
+User requested the next screen after MCP returned. Phase 4 screen 56, cost_estimates_billing (billing_admin), is implemented and its permitted core verified. Screen 57 has not started. Implementation committed at 645af30 (baseline 5f5d54a). Proposal 195 submitted and verified pending: 12 tested partial Billing items, awaiting human review on /docs -> My progress. Reporting receipts and checkpoint committed with the implementation; no pending command or uncommitted implementation work. No business operation or test command running; no uncertain writes remain.
 
 ## Delivered and verified
 Shared src/screens/CostEstimates.tsx supports Billing routing, permissions, native print scope, real patient search before admission and identity confirmation/preflight; Admissions retains its service view. Helpers src/estimate-access.ts and electron/estimate-access.cjs; App, bilingual help/FAQs/task mappings/media and tests updated.
@@ -23,4 +23,4 @@ Earlier owned patient 3/admission 3/bed 35 Occupied/zero Draft invoice, ward 6 o
 ## Evidence, environment and next action
 Review docs/BILLING_COST_ESTIMATES_REVIEW_2026-10-29.md; compact journals/request IDs/validation/cleanup/issues docs/billing56/; contracts billing56-* and cost_estimates_billing.json. Historical audits docs/BACKEND_EVENING_REVIEW_2026-10-28.md, BACKEND_EVENING_WRITE_AUDIT_2026-10-28.md, COST_ESTIMATES_REVIEW_2026-10-29.md.
 DEV https://hms-dev.netbird.cloud; authorized configuration in ignored .dev-terminal.json/.codex/config.toml/local profiles/CA. Never commit credentials/encrypted sessions. PowerShell/Node/Electron, bundled Python/Poppler. No agents spawned.
-Next: commit implementation, submit/verify partial proposal with tested commit, record proposal ID and awaiting human review on /docs -> My progress. Manual: Billing -> Cost estimates with NEW app-created synthetic patient; prepare, total/deposit/billed, preview/PDF, explain/cancel, F1/Urdu/zoom. Ward changes await issue 41. Nothing else in progress.
+Next implementation: roadmap screen 57 explain_estimate, after reading its current bundle/quality/design/handbook and reconciling issue 41. Screen 56 proposal 195 is awaiting human review on /docs -> My progress; no unchanged claims resubmitted. Manual: Billing -> Cost estimates with NEW app-created synthetic patient; prepare, total/deposit/billed, preview/PDF, explain/cancel, F1/Urdu/zoom. Ward changes await issue 41. Nothing else in progress.
