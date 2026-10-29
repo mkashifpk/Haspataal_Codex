@@ -113,7 +113,7 @@ export async function session(name, account = "demo.doctor") {
     j.original_preferences = s.original;
     save();
     await s.prefs({ language: "en", theme: "Light", ui_scale_pct: 100 });
-    await app.evaluate(({ BrowserWindow }, name) => {
+    await app.evaluate(({ BrowserWindow, app: electronApp }, name) => {
       const fs = process.getBuiltinModule("fs"),
         https = process.getBuiltinModule("https"),
         original = https.request;
@@ -204,7 +204,7 @@ export async function session(name, account = "demo.doctor") {
             try {
               a.body = JSON.parse(Buffer.concat(body).toString());
               // A second person's co-signing credentials never enter test journals.
-              for (const field of ["checker_password", "checker_username", "approver_password", "approver_username"]) if(field in a.body)a.body[field]="[REDACTED]";
+              for (const field of ["checker_password", "checker_username", "second_checker_password", "second_checker_username", "approver_password", "approver_username"]) if(field in a.body)a.body[field]="[REDACTED]";
             } catch {}
             a.key = req.getHeader("Idempotency-Key");
             persist();
@@ -213,12 +213,15 @@ export async function session(name, account = "demo.doctor") {
         }
         return req;
       };
-      for (const win of BrowserWindow.getAllWindows())
+      const cancelPrint = win => {
         win.webContents.print = (_, cb) => {
           t.prints++;
           persist();
           cb(false, "TEST: user cancelled handbook printing");
         };
+      };
+      for (const win of BrowserWindow.getAllWindows()) cancelPrint(win);
+      electronApp.on('browser-window-created',(_,win)=>cancelPrint(win));
     }, name);
     j.renderer = await p.locator('script[type="module"]').getAttribute("src");
     save();

@@ -218,6 +218,8 @@ export function checkHelp({
       "WardEducation",
       "NursingAssessment",
       "VitalsFlowsheet",
+      "MedicationAdministration",
+      "VerbalOrders",
       "ConsentScanUpload",
       "LabVerification",
       "CriticalResultsBench",

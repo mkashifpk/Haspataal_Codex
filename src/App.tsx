@@ -1,3 +1,5 @@
+import { MedicationAdministration } from './screens/MedicationAdministration';
+import { VerbalOrders } from './screens/VerbalOrders';
 import { VitalsFlowsheet } from './screens/VitalsFlowsheet';
 import { DoctorInpatients } from './screens/DoctorInpatients';
 import { CostEstimates } from './screens/CostEstimates';
@@ -70,6 +72,8 @@ import { createBootstrapSeed } from "./bootstrap-seed";
 type WorkspaceSnapshot = {establishment:EstablishmentOut;settings:any;me:MeOut;permittedWorkspaces:MeOut["workspaces"]};
 const labels: Record<string, [string, string, string]> = {
  patient_education_ward: ["Ward health education","وارڈ میں صحت کی رہنمائی","◉"],
+ mar: ["Medication administration record","دوا دینے کا ریکارڈ","▤"],
+ verbal_orders_ward: ["Verbal and telephone orders","زبانی اور ٹیلی فون احکام","▤"],
  vitals_tracker: ["Vitals flowsheet","حیاتیاتی پیمائش کا چارٹ","▤"],
  nursing_assessment: ["Nursing assessment and care plan","نرسنگ جائزہ و نگہداشت منصوبہ","▤"],
  my_beds: ["My beds this shift","اس شفٹ میں میرے بستر","▤"],
@@ -146,6 +150,8 @@ const frontDeskScreens = new Set([
   'cost_estimates_billing',
   'explain_estimate',
   'patient_education_ward',
+  'mar',
+  'verbal_orders_ward',
   'vitals_tracker',
   'nursing_assessment',
   'my_beds',
@@ -810,6 +816,8 @@ export function App() {
   'cost_estimates_billing',
   'explain_estimate',
   'patient_education_ward',
+  'mar',
+  'verbal_orders_ward',
   'vitals_tracker',
   'nursing_assessment',
   'my_beds',
@@ -867,7 +875,7 @@ export function App() {
         )))) &&
       est?.views.screens.find((v) => v.screen_id === id)?.view !== "hidden" &&
       (id !== "imaging_quality_setup" || ["full","open_work","records"].includes(est?.views.screens.find(v=>v.screen_id===id)?.view || "")) &&
-      (!["vitals_tracker","patient_education_ward","nursing_assessment","my_beds","doctor_inpatients","cost_estimates_admissions","consents_admissions","wristbands_admissions","bed_matrix","pending_admissions","imaging_repeats","imaging_outsourced","critical_results_radiology","radiology_worklist","rx_queue","dispense","order_queries","otc","charity_override","lab_only_walkin","lab_bench","lab_send_outs","lab_verification","critical_results_bench","critical_results_verifier","critical_results_doctor"].includes(id) || ["full", "open_work", "records"].includes(est?.views.screens.find(v => v.screen_id === id)?.view || "")),
+      (!["mar","verbal_orders_ward","vitals_tracker","patient_education_ward","nursing_assessment","my_beds","doctor_inpatients","cost_estimates_admissions","consents_admissions","wristbands_admissions","bed_matrix","pending_admissions","imaging_repeats","imaging_outsourced","critical_results_radiology","radiology_worklist","rx_queue","dispense","order_queries","otc","charity_override","lab_only_walkin","lab_bench","lab_send_outs","lab_verification","critical_results_bench","critical_results_verifier","critical_results_doctor"].includes(id) || ["full", "open_work", "records"].includes(est?.views.screens.find(v => v.screen_id === id)?.view || "")),
   );
   const view = est?.views.workspaces.find(
     (v) => v.workspace === workspace,
@@ -1231,6 +1239,8 @@ export function App() {
               {screen === 'lab_send_outs' && est && <LabSendOuts key={user.user_id} user={user} connected={connected} stream={stream} establishment={est} timeZone={meta?.hospital_timezone}/>}
               {screen === 'my_beds' && est && <MyBeds key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone} initialAdmissionId={wardAdmissionEntry?.userId===user.user_id?wardAdmissionEntry.admissionId:undefined} availableScreens={nav} onRoute={(next,id)=>{if(nav.includes(next)&&navigate(next))setWardAdmissionEntry({userId:user.user_id,admissionId:id});}}/>}
               {screen === 'patient_education_ward' && est && <WardEducation key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone} initialAdmissionId={wardAdmissionEntry?.userId===user.user_id?wardAdmissionEntry.admissionId:undefined} onBack={id=>{if(navigate('my_beds'))setWardAdmissionEntry({userId:user.user_id,admissionId:id});}}/>}
+              {screen === 'mar' && est && <MedicationAdministration key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone} initialAdmissionId={wardAdmissionEntry?.userId===user.user_id?wardAdmissionEntry.admissionId:undefined} onBack={id=>{if(navigate('my_beds'))setWardAdmissionEntry({userId:user.user_id,admissionId:id});}}/>}
+              {screen === 'verbal_orders_ward' && est && <VerbalOrders key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone} initialAdmissionId={wardAdmissionEntry?.userId===user.user_id?wardAdmissionEntry.admissionId:undefined} onBack={id=>{if(navigate('my_beds'))setWardAdmissionEntry({userId:user.user_id,admissionId:id});}}/>}
               {screen === 'vitals_tracker' && est && <VitalsFlowsheet key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone} initialAdmissionId={wardAdmissionEntry?.userId===user.user_id?wardAdmissionEntry.admissionId:undefined} onBack={id=>{if(navigate('my_beds'))setWardAdmissionEntry({userId:user.user_id,admissionId:id});}}/>}
               {screen === 'nursing_assessment' && est && <NursingAssessment key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone} initialAdmissionId={wardAdmissionEntry?.userId===user.user_id?wardAdmissionEntry.admissionId:undefined} onBack={id=>{if(navigate('my_beds'))setWardAdmissionEntry({userId:user.user_id,admissionId:id});}}/>}
               {screen === 'doctor_inpatients' && est && <DoctorInpatients key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone} availableScreens={nav} initialAdmissionId={doctorAdmissionEntry?.userId===user.user_id?doctorAdmissionEntry.admissionId:undefined} onRoute={(next,id)=>{if(nav.includes(next)&&navigate(next)){setDoctorAdmissionEntry({userId:user.user_id,admissionId:id});if(next==='explain_estimate')setEstimateAdmissionEntry({userId:user.user_id,admissionId:id});}}}/>}

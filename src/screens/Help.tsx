@@ -352,8 +352,8 @@ export function Help({
               </h1>
               <p className="notice">
                 {selectedWorkspace.code === "ward_nurse" ? t(
-                  "Ward Nursing: the delivered bed, vitals, education and assessment tasks below follow your current permissions. Later tasks and named human acceptance remain pending.",
-                  "وارڈ نرسنگ: نیچے فراہم کردہ بستر، پیمائش، رہنمائی اور جائزہ کام موجودہ اجازت کے مطابق ہیں۔ بعد کے کام اور نامزد انسانی قبولیت باقی ہیں۔",
+                  "Ward Nursing: the delivered bed, vitals, medication record, verbal orders, education and assessment tasks below follow your current permissions. Later tasks and named human acceptance remain pending.",
+                  "وارڈ نرسنگ: نیچے فراہم کردہ بستر، پیمائش، دوا ریکارڈ، زبانی احکام، رہنمائی اور جائزہ کام موجودہ اجازت کے مطابق ہیں۔ بعد کے کام اور نامزد انسانی قبولیت باقی ہیں۔",
                 ) : t(
                   "Scope: the eleven Phase 1 screens, including the permitted System (IT) parts of Settings. Later clinical, financial and other IT workspace journeys remain outside this guide. Available tasks follow your combined permissions; a role name never grants an action.",
                   "دائرہ: پہلے مرحلے کے گیارہ صفحات اور ترتیبات کے مجاز نظام (آئی ٹی) حصے۔ بعد کے طبی، مالی اور دیگر آئی ٹی کام رہنما سے باہر ہیں۔ کام موجودہ مجموعی اجازت پر ہیں؛ کردار کا نام خود اجازت نہیں دیتا۔",
@@ -414,7 +414,7 @@ export function Help({
                 <section key={id}>
                   <h3>{ur ? help[id].titleUr : help[id].title}</h3>
                   {instructions(id, true)}
-                  {selectedWorkspace.code === "ward_nurse" && ["my_beds", "vitals_tracker", "patient_education_ward", "nursing_assessment"].includes(id) &&
+                  {selectedWorkspace.code === "ward_nurse" && ["my_beds", "mar", "verbal_orders_ward", "vitals_tracker", "patient_education_ward", "nursing_assessment"].includes(id) &&
                     (ur ? help[id].faqUr : help[id].faq).map(([question, answer]) => (
                       <section key={question}>
                         <h4>{question}</h4>

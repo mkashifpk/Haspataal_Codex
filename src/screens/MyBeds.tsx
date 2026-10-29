@@ -753,7 +753,7 @@ export function MyBeds({
                     )}
                 </>
               )}
-              {identity&&onRoute&&<div className="actions">{(['patient_education_ward','nursing_assessment','vitals_tracker'] as const).filter(s=>availableScreens.includes(s)).map(s=><button data-help="mybeds.handover" key={s} disabled={locked||!live} onClick={()=>{if(leave())onRoute(s,bed.admission_id!);}}>{s==='vitals_tracker'?t('Vitals flowsheet','حیاتیاتی پیمائش کا چارٹ'):s==='patient_education_ward'?t('Ward health education','وارڈ میں صحت کی رہنمائی'):t('Nursing assessment and care plan','نرسنگ جائزہ و نگہداشت منصوبہ')}</button>)}</div>}
+              {identity&&onRoute&&<div className="actions">{(['patient_education_ward','nursing_assessment','vitals_tracker','mar','verbal_orders_ward'] as const).filter(s=>availableScreens.includes(s)).map(s=><button data-help="mybeds.handover" key={s} disabled={locked||!live} onClick={()=>{if(leave())onRoute(s,bed.admission_id!);}}>{s==='mar'?t('Medication administration record','دوا دینے کا ریکارڈ'):s==='verbal_orders_ward'?t('Verbal and telephone orders','زبانی اور ٹیلی فون احکام'):s==='vitals_tracker'?t('Vitals flowsheet','حیاتیاتی پیمائش کا چارٹ'):s==='patient_education_ward'?t('Ward health education','وارڈ میں صحت کی رہنمائی'):t('Nursing assessment and care plan','نرسنگ جائزہ و نگہداشت منصوبہ')}</button>)}</div>}
               {canCleanMyBed(bed, view, permissions) && (
                 <button
                   data-help="mybeds.clean"

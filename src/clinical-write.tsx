@@ -45,6 +45,7 @@ export function useClinicalWrite(
     a: WriteAttempt<ClinicalCommand>,
     prepare?: () => Promise<void>,
     retrying = false,
+    transientBody?: Record<string, unknown>,
   ) {
     if (flight.current) return;
     flight.current = true;
@@ -82,7 +83,7 @@ export function useClinicalWrite(
           ),
         );
       posted = true;
-      const result = await api(a.body.method, a.body.path, a.body.body, {
+      const result = await api(a.body.method, a.body.path, transientBody ? { ...(a.body.body as object), ...transientBody } : a.body.body, {
         key: a.key,
         reconcilePath: a.body.reconcilePath,
       });
@@ -100,6 +101,7 @@ export function useClinicalWrite(
       if (confirmed || (!retrying && (!posted || definiteWriteRefusal(e))))
         hold(undefined);
     } finally {
+      if (transientBody) for (const key of Object.keys(transientBody)) delete transientBody[key];
       flight.current = false;
       setBusy(false);
     }
@@ -116,11 +118,14 @@ export function useClinicalWrite(
     start: (
       command: Omit<ClinicalCommand, "scope" | "actor">,
       prepare?: () => Promise<void>,
+      transientBody?: Record<string, unknown>,
     ) => {
       if (!flight.current && !attemptRef.current && !hasBlockingWrite(Array.from(document.querySelectorAll('[data-write-pending="true"]')).map(node => node.closest('[data-independent-upload-patient]')?.getAttribute('data-independent-upload-patient') ?? null), command.independentUploadPatientId))
         void send(
           writeAttempt({ ...command, scope, actor: user.user_id }),
           prepare,
+          false,
+          transientBody,
         );
     },
     retry: () => {

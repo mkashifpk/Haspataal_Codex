@@ -67,6 +67,7 @@ let connected = false,
 const windows = new Map(),
   streams = new Map();
 const clinicalViewers = new Set();
+const doseLabels = require('./dose-label-cache.cjs').createDoseLabelCache();
 function closeClinicalViewers() {
   for (const viewer of clinicalViewers) if(!viewer.isDestroyed()) viewer.destroy();
   clinicalViewers.clear();
@@ -876,13 +877,26 @@ ipcMain.handle("terminal", async (event, action, args = {}) => {
         )
       )
         throw new Error("Use the dedicated session action");
-      return await api(
+      const requestActor = auth?.user.user_id;
+      const response = await api(
         args.method,
         args.path,
         args.body,
         windows.get(win.id),
         args.key,
       );
+      if (response.ok && args.method === 'POST' && /^\/mar\/\d+\/prepare$/.test(args.path) && requestActor && requestActor === auth?.user.user_id) doseLabels.remember(win,requestActor,args.path,response.data);
+      return response;
+    }
+    if (action === 'print-dose-label') {
+      const actor=auth?.user.user_id;
+      if(!actor || !Number.isSafeInteger(args.marId) || args.marId<=0)throw Error('Sign in and select a recorded preparation label');
+      const current=await api('GET','/auth/me');if(!current.ok)return current;
+      if(current.data.user_id!==actor||!current.data.permissions.some(p=>['ipd.mar.view','ipd.mar.administer'].includes(p)))throw Error('Dose-label viewing permission changed. Ask the responsible team.');
+      const payload=doseLabels.read(win,actor,args.marId);
+      const terminal=await api('GET','/terminals/whoami');if(!terminal.ok)return terminal;
+      if(actor!==auth?.user.user_id)throw Error('The session changed before label printing');
+      return {ok:true,data:await require('./opd-print.cjs').printSlip(payload,terminal.data,{owner:win,pdf:false})};
     }
     if (action === "patient-file") {
       if (!Number.isSafeInteger(args.documentId) || args.documentId <= 0)
@@ -1318,6 +1332,7 @@ ipcMain.handle("terminal", async (event, action, args = {}) => {
       return { ok: true };
     }
     if (action === "logout") {
+      doseLabels.clear(win);
       if (logoutPending)
         throw new Error("Sign-out is already pending. Wait for the result.");
       if (credentialFlight)
