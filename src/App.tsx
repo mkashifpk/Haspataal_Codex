@@ -1,3 +1,4 @@
+import { DoctorInpatients } from './screens/DoctorInpatients';
 import { CostEstimates } from './screens/CostEstimates';
 import { useCallback, useEffect, useRef, useState } from "react";
 import { api, call, resetRequests } from "./bridge";
@@ -64,6 +65,7 @@ import { createMetadataFlight } from "./metadata-flight";
 import { createBootstrapSeed } from "./bootstrap-seed";
 type WorkspaceSnapshot = {establishment:EstablishmentOut;settings:any;me:MeOut;permittedWorkspaces:MeOut["workspaces"]};
 const labels: Record<string, [string, string, string]> = {
+ doctor_inpatients: ["Inpatient rounds & discharge","داخل مریضوں کا معائنہ و ڈسچارج","▤"],
  explain_estimate: ["Explain a cost estimate","تخمینہ سمجھائیں","₨"],
  cost_estimates_billing: ["Cost estimates","متوقع اخراجات","₨"],
  cost_estimates_admissions: ["Cost estimates","متوقع اخراجات","₨"],
@@ -135,6 +137,7 @@ const frontDeskScreens = new Set([
   'roll_call',
   'cost_estimates_billing',
   'explain_estimate',
+  'doctor_inpatients',
   'cost_estimates_admissions',
   'consents_admissions',
   'wristbands_admissions',
@@ -624,6 +627,8 @@ export function App() {
       setLogoutBusy(false);
     }
   }
+  const [doctorAdmissionEntry,setDoctorAdmissionEntry]=useState<{userId:number;admissionId:number}>();
+  const [estimateAdmissionEntry,setEstimateAdmissionEntry]=useState<{userId:number;admissionId:number}>();
   const [bedAdmissionEntry,setBedAdmissionEntry]=useState<{userId:number;admissionId:number}>();
   const [imagingSetupEntry, setImagingSetupEntry] = useState(false);
   const facilitySetupScope = !!user && user.permissions.includes('establishment.manage') && user.permissions.includes('diagnostics.setup.manage') && (screen === 'facility_profile' || (screen === 'imaging_quality_setup' && imagingSetupEntry));
@@ -791,6 +796,7 @@ export function App() {
     'roll_call',
   'cost_estimates_billing',
   'explain_estimate',
+  'doctor_inpatients',
   'cost_estimates_admissions',
   'consents_admissions',
   'wristbands_admissions',
@@ -844,7 +850,7 @@ export function App() {
         )))) &&
       est?.views.screens.find((v) => v.screen_id === id)?.view !== "hidden" &&
       (id !== "imaging_quality_setup" || ["full","open_work","records"].includes(est?.views.screens.find(v=>v.screen_id===id)?.view || "")) &&
-      (!["cost_estimates_admissions","consents_admissions","wristbands_admissions","bed_matrix","pending_admissions","imaging_repeats","imaging_outsourced","critical_results_radiology","radiology_worklist","rx_queue","dispense","order_queries","otc","charity_override","lab_only_walkin","lab_bench","lab_send_outs","lab_verification","critical_results_bench","critical_results_verifier","critical_results_doctor"].includes(id) || ["full", "open_work", "records"].includes(est?.views.screens.find(v => v.screen_id === id)?.view || "")),
+      (!["doctor_inpatients","cost_estimates_admissions","consents_admissions","wristbands_admissions","bed_matrix","pending_admissions","imaging_repeats","imaging_outsourced","critical_results_radiology","radiology_worklist","rx_queue","dispense","order_queries","otc","charity_override","lab_only_walkin","lab_bench","lab_send_outs","lab_verification","critical_results_bench","critical_results_verifier","critical_results_doctor"].includes(id) || ["full", "open_work", "records"].includes(est?.views.screens.find(v => v.screen_id === id)?.view || "")),
   );
   const view = est?.views.workspaces.find(
     (v) => v.workspace === workspace,
@@ -1206,7 +1212,8 @@ export function App() {
               {screen === 'imaging_quality_setup' && est && <ImagingQualitySetup key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} fromFacility={imagingSetupEntry}/>}
               {screen === 'diagnostic_services_list' && <DiagnosticServicesList key={user.user_id} user={user} connected={connected} stream={stream}/>}
               {screen === 'lab_send_outs' && est && <LabSendOuts key={user.user_id} user={user} connected={connected} stream={stream} establishment={est} timeZone={meta?.hospital_timezone}/>}
-              {screen === 'explain_estimate' && est && <CostEstimates key={user.user_id+'explain'} screenId="explain_estimate" user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone}/>}
+              {screen === 'doctor_inpatients' && est && <DoctorInpatients key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone} availableScreens={nav} initialAdmissionId={doctorAdmissionEntry?.userId===user.user_id?doctorAdmissionEntry.admissionId:undefined} onRoute={(next,id)=>{if(nav.includes(next)&&navigate(next)){setDoctorAdmissionEntry({userId:user.user_id,admissionId:id});if(next==='explain_estimate')setEstimateAdmissionEntry({userId:user.user_id,admissionId:id});}}}/>}
+              {screen === 'explain_estimate' && est && <CostEstimates key={user.user_id+'explain'} screenId="explain_estimate" initialAdmissionId={estimateAdmissionEntry?.userId===user.user_id?estimateAdmissionEntry.admissionId:undefined} onAdmission={nav.includes("doctor_inpatients")?id=>{if(navigate("doctor_inpatients"))setDoctorAdmissionEntry({userId:user.user_id,admissionId:id})}:undefined} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone}/>}
               {screen === 'cost_estimates_billing' && est && <CostEstimates key={user.user_id+'billing'} screenId="cost_estimates_billing" user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone}/>}
               {screen === 'cost_estimates_admissions' && est && <CostEstimates key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone}/>}
               {screen === 'consents_admissions' && est && <ConsentsAdmissions key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone}/>}

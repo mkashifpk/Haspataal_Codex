@@ -1,0 +1,16 @@
+{
+  "implementation_id": 1,
+  "agent": "Codex",
+  "kind": "Bug",
+  "severity": "Medium",
+  "title": "Nurse-created Code Red sets the triage nurse as the admission's primary doctor",
+  "actual": "Fresh Code Red created as demo.triage returns primary_doctor_id 9 and primary_doctor_name Nadia (Triage Nurse). The same incorrect clinician attribution persists when a doctor rereads the admission. The triage account is allowed to create a Code Red, but creating it does not make the nurse the treating doctor.",
+  "expected": "Keep the actual treating-doctor attribution accurate: leave it unassigned until a clinician is designated, or apply the documented clinician assignment rule. Please clarify the supported handover/assignment API if one exists. Do not require the frontend to invent a doctor or silently replace the server's primary_doctor_name. doctor_inpatients presents the admission's actual treating doctor.",
+  "steps": "On current DEV, create own synthetic General ward9 and beds38/39. Scenario opd.new_patient_paid run bdaba7 creates patient8. As demo.triage POST /admissions/code-red with patient_id8,ward_id9,ward_type:null,needs_ot:false and DEMO note. GET /admissions/9 as demo.doctor; compare the primary_doctor fields with the triage account and nurse lookup.",
+  "evidence": "CodeRed201 request9d097383318a4c3c80c91d7cac8aaec2; own patient8/MRN-2026-000008/admission9/bed38. Response primary_doctor_id9, primary_doctor_name Nadia (Triage Nurse), statusCodeRedActive. Follow-up read and actor/PNC lookup request IDs saved in docs/inpatients58/primary-doctor-evidence.json. No real patient/care/medicine/money, no guessed doctor reassignment. Server2026-10-28T21:29:45.848402+00:00/contracte90ba541e495d6487532. GETadmission request5154ada67dbc4842b8999bb31fb6d994; auth/me e93090fb52414b97a646f390a0199181; nurse lookup d3916ce23f034bad892a8a0c268ff2ab.",
+  "endpoint": "POST /admissions/code-red",
+  "screen_id": "doctor_inpatients",
+  "workflow": "inpatient-and-discharge Code Red -> doctor rounds",
+  "build": "1278175 + DoctorInpatients58 WIP",
+  "request_id": "codex-inpatients58-triage-primary-doctor-20261029-v1"
+}

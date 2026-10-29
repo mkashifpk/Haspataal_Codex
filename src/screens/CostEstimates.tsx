@@ -41,8 +41,10 @@ export function CostEstimates({
   stream,
   timeZone,
   screenId = "cost_estimates_admissions",
+  initialAdmissionId, onAdmission,
 }: {
   screenId?: EstimateScreenId;
+  initialAdmissionId?: number; onAdmission?: (id:number)=>void;
   user: ClinicalUser;
   establishment: EstablishmentOut;
   connected: boolean;
@@ -57,6 +59,7 @@ export function CostEstimates({
       ["estimate.view", "estimate.prepare", "estimate.explain"].some(can),
     workView = view === "full" || view === "open_work",
     live = connected && stream === "Live";
+  const [chartAdmission, setChartAdmission] = useState(initialAdmissionId);
   const [admissionScope, setAdmissionScope] = useState<{admission_id:number; patient_name:string;mrn:string;admission_number:string} >();
   const [revision, setRevision] = useState(0),
     [status, setStatus] = useState(""),
@@ -104,11 +107,11 @@ export function CostEstimates({
       read
         ? e.listEstimates({
             limit: 1000,
-            admission_id: explanationOnly ? admissionScope?.admission_id : undefined,
+            admission_id: explanationOnly ? (admissionScope?.admission_id || chartAdmission) : undefined,
             status: status ? (status as e.EstimateOut["status"]) : undefined,
           })
         : Promise.resolve([]),
-    [read, revision, status, admissionScope?.admission_id],
+    [read, revision, status, admissionScope?.admission_id, chartAdmission],
   );
   const tariff = useLoad(
     () => (read && !explanationOnly ? e.getTariff() : Promise.resolve(undefined)),
@@ -587,8 +590,9 @@ export function CostEstimates({
       </div>
       {explanationOnly && <section className="notice" data-help="explanation.context">
         <p>{t("Choose an admission from work waiting or open an estimate in the register. Explain only the selected patient's Draft estimate; ask Admissions or Billing to prepare or correct it.","منتظر داخلہ یا رجسٹر کا تخمینہ چنیں۔ منتخب مریض کا صرف مسودہ سمجھائیں؛ تیاری یا تصحیح کے لیے داخلہ یا بلنگ سے کہیں۔")}</p>
-        {admissionScope && <><strong>{admissionScope.patient_name} · <bdi>{admissionScope.mrn}</bdi> · {admissionScope.admission_number}</strong><button data-help="explanation.context" disabled={locked} onClick={()=>{if(leave()){setDraft(undefined);setRecord(undefined);setAdmissionScope(undefined);}}}>{t("Show all estimate records","تمام تخمینے دکھائیں")}</button></>}
+        {admissionScope && <><strong>{admissionScope.patient_name} · <bdi>{admissionScope.mrn}</bdi> · {admissionScope.admission_number}</strong><button data-help="explanation.context" disabled={locked} onClick={()=>{if(leave()){setDraft(undefined);setRecord(undefined);setAdmissionScope(undefined);setChartAdmission(undefined);}}}>{t("Show all estimate records","تمام تخمینے دکھائیں")}</button></>}
       </section>}
+      {explanationOnly && chartAdmission && <p data-help="explanation.context">{t("Opened from the selected inpatient chart. Choose an estimate below.","منتخب داخلے کے چارٹ سے کھولا گیا۔ نیچے تخمینہ چنیں۔")} <button data-help="explanation.context" disabled={locked} onClick={()=>{if(leave())onAdmission?.(admissionScope?.admission_id||chartAdmission);}}>{t("Return to inpatient chart","داخلے کے چارٹ پر واپس")}</button>{!admissionScope&&<button data-help="explanation.context" disabled={locked} onClick={()=>{if(leave()){setDraft(undefined);setRecord(undefined);setAdmissionScope(undefined);setChartAdmission(undefined);}}}>{t("Show all estimate records","تمام تخمینے دکھائیں")}</button>}</p>}
       <ErrorBox error={error} />
       <ErrorBox error={write.error} />
       {(notice || (!draft && write.notice)) && (

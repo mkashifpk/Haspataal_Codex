@@ -212,6 +212,7 @@ export function checkHelp({
       "Wristbands",
       "ConsentsAdmissions",
       "CostEstimates",
+      "DoctorInpatients",
       "ConsentScanUpload",
       "LabVerification",
       "CriticalResultsBench",
