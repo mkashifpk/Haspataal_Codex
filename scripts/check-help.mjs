@@ -213,6 +213,7 @@ export function checkHelp({
       "ConsentsAdmissions",
       "CostEstimates",
       "DoctorInpatients",
+      "MyBeds",
       "ConsentScanUpload",
       "LabVerification",
       "CriticalResultsBench",

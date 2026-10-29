@@ -10,6 +10,90 @@ export type HelpPage = {
   faqUr: [string, string][];
 };
 export const help: Record<string, HelpPage> = {
+ my_beds: {
+  title: "My beds this shift",
+  titleUr: "اس شفٹ میں میرے بستر",
+  purpose: "For a ward nurse beginning a round: identify the current duty and patient, prioritise server-confirmed due work, read/print signed discharge instructions and confirm completed bed cleaning safely. Urdu is a draft awaiting native review.",
+  purposeUr: "معائنہ شروع کرنے والی وارڈ نرس اصل ڈیوٹی و مریض چیک کرے، سرور کے واجب کام پہلے دیکھے، دستخط شدہ ڈسچارج ہدایات پڑھے و چھاپے اور مکمل صفائی محفوظ درج کرے۔ اردو مقامی جائزے تک مسودہ۔",
+  steps: [
+    "At the start of a ward round, the nurse opens Ward Nursing → My beds this shift. Refresh my beds reads only the signed-in person’s rostered beds and duties. A night duty remains until it ends, with the date on My duties; this page applies no midnight cutoff. No beds means ask the head nurse to check your duty and its assigned beds. Find in my beds filters returned name/MRN/ward/bed/shift/zone locally; no matches keeps the selected context. Loading and failed reads never establish an empty ward.",
+    "Choose an actual returned bed. Check the ward, bed, shift and zone, then name and MRN with age/date of birth and flags. Bed location is never patient identity. Allergies empty means Not recorded. Merged or unverified patient context blocks summary actions; a death flag means no new orders. Vitals overdue and next due come from the server’s flowsheet, never a locally guessed interval; last vitals and doses due next hour come from My beds. Overdue vitals first, then beds with due doses. Failed schedule reads stay visible, not silently labelled safe. Recording vitals and doses is a later ward-chart task, not a button that records care here.",
+    "For the selected patient, Read signed discharge summary loads the server’s signed record, medicines, follow-up and every correction with author/time. DISCHARGE_SUMMARY_NOT_FINAL means ask the authorised doctor to sign it; do not print a draft or substitute an example. Print signed summary (A4) rechecks this current duty, admission, patient and summary version in the secure terminal and uses its document printer. Save signed summary PDF downloads the server’s PDF separately; cancelling the save creates no file. Explain the signed instructions and corrections to the patient/family; the app never claims that conversation happened just because it printed. Printer/download failure keeps the clinical record intact; retry the document action only. No discharge or bed release occurs.",
+    "Bed cleaned is offered only for your returned Dirty or Cleaning bed, permission, full/open-work service and Live connection. It confirms completed cleaning where no badge station recorded it; never bypass other discharge stages or invent physical cleaning. Check exact ward/bed and current patient/location. I verified this bed and that cleaning was completed is required. The screen does not assign a cleaner a login. Records-only service hides cleaning; staff without the permission cannot confirm.",
+    "Find cleaner (optional) needs 2–80 characters; Find staff queries the real staff lookup. Choose a returned full name, employee number and designation; only that employee_id is sent. Never type or guess an id. Changing search clears the selected cleaner; Clear optional cleaner omits the field. No named cleaner sends an empty body and attributes your confirmation to you. No results is not permission to fabricate a person. A referenced staff refusal keeps the form and lets you choose again.",
+    "Review cleaning confirmation freezes exact bed and optional cleaner. Confirm this cleaning once rereads the rostered bed, session permissions and service view before one idempotent POST. Back to cleaning input keeps values; Close cleaning draft asks before discarding. BedCleaned means server made it Available; BedCleaningRecorded means cleaning recorded but remaining clearance keeps it locked; NoAction is not a state change. Read the server result, never show local success first. New events or a changed duty invalidate the review without discarding input.",
+    "State refusals refresh your current beds and keep the draft; Read current beds and keep input adopts the returned bed and requires acknowledgement again. Field errors remain beside the fields when supplied. During submission, unknown result or a document action, navigation is blocked. A lost cleaning reply keeps exact key/body/actor; Retry original request is explicit and uses that same key/body only within24hours. Read current beds is read-only and cannot prove the original result; it does not unlock a replacement confirmation. Outside retention ask IT. No automatic write retry, offline queue or invented undo. Realtime vitals/medication/roster/bed events and reconnect refresh without polling. F1, visible help and shared keyboard/Settings100–250% zoom preserve context. Urdu and fresh-data/device/editor acceptance remain human-owned."
+  ],
+  stepsUr: [
+    "معائنے کے آغاز پر نرس وارڈ نرسنگ سے اس شفٹ میں میرے بستر کھولے۔ تازہ کریں صرف موجودہ شخص کے مقرر بستر و ڈیوٹیاں پڑھے۔ رات کی ڈیوٹی اختتام تک، اصل تاریخ میری ڈیوٹیوں میں؛ آدھی رات پر ختم نہیں۔ بستر نہ ہوں تو ہیڈ نرس سے ڈیوٹی و مقرر بستر چیک کرائیں۔ تلاش اصل نام، ایم آر این، وارڈ، بستر، شفٹ یا حصے کا مقامی فلٹر ہے؛ نتیجہ نہ ہو تو منتخب مریض رہتا ہے۔ لوڈنگ یا ناکامی خالی وارڈ کا ثبوت نہیں۔",
+    "اصل بستر چنیں۔ وارڈ، بستر، شفٹ و حصہ، پھر نام و ایم آر این، عمر یا پیدائش و علامات چیک کریں۔ بستر مریض کی شناخت نہیں۔ خالی الرجی درج نہیں۔ ضم یا نامکمل شناخت پر خلاصہ کے عمل بند؛ وفات پر نئے احکامات نہیں۔ پیمائش کی تاخیر و اگلا وقت سرور چارٹ سے، اندازے کی مدت نہیں؛ آخری پیمائش و اگلے گھنٹے کی خوراکیں بستر فہرست سے۔ تاخیر پہلے پھر واجب خوراک۔ شیڈول کی غلطی نمایاں ہے، محفوظ نہیں کہی جاتی۔ پیمائش و دوا کا اندراج آئندہ مجاز وارڈ چارٹ میں، یہاں طبی اندراج نہیں۔",
+    "منتخب مریض کے لیے دستخط شدہ خلاصہ پڑھیں اصل دستخط، دوائیں، ہدایات و ہر تصحیح مصنف و وقت کے ساتھ دکھاتا ہے۔ خلاصہ حتمی نہ ہو تو مجاز ڈاکٹر سے دستخط کرائیں؛ مسودہ یا مثال نہ چھاپیں۔ اے فور پرنٹ محفوظ ٹرمینل میں اصل ڈیوٹی، داخلہ، مریض و خلاصے کا نسخہ پھر چیک کرکے دستاویز پرنٹر استعمال کرے۔ پی ڈی ایف سرور سے الگ ڈاؤن لوڈ، منسوخی پر فائل نہیں۔ اصل ہدایات و تصحیحات خاندان کو سمجھائیں؛ پرنٹ گفتگو کا ثبوت نہیں۔ ناکامی پر صرف دستاویز دوبارہ لیں، طبی عمل یا ڈسچارج نہیں۔ بستر خالی نہیں ہوتا۔",
+    "بستر صاف ہو گیا صرف اپنی فہرست کے صفائی طلب یا صفائی جاری بستر، اجازت، جاری یا باقی کام کی خدمت اور رابطے پر۔ جہاں بیج اسٹیشن نے درج نہ کیا ہو مکمل صفائی کی تصدیق ہے؛ دوسرے ڈسچارج مراحل یا حقیقی صفائی فرض نہیں۔ اصل وارڈ، بستر، مریض و جگہ چیک کریں۔ بستر و مکمل صفائی کی تصدیق والا نشان لازم۔ صفائی والے کو لاگ اِن نہیں دیا جاتا۔ صرف ریکارڈ خدمت یا اجازت نہ ہو تو تصدیق نہیں۔",
+    "اختیاری صفائی والا تلاش میں 2تا80حروف؛ عملہ تلاش کریں اصل فہرست پڑھے۔ اصل پورا نام، ملازم نمبر و عہدہ چنیں؛ صرف اسی ملازم کا حوالہ جائے۔ شناختی نمبر لکھیں یا اندازہ نہ لگائیں۔ تلاش بدلنے سے منتخب نام ہٹے؛ ہٹانے پر خانہ ارسال نہیں۔ نام نہ ہو تو خالی معلومات، تصدیق آپ کی۔ نتیجہ نہ ہو تو فرضی شخص نہیں۔ سرور حوالہ رد کرے تو معلومات رہتی ہیں، پھر چنیں۔",
+    "صفائی کا جائزہ عین بستر و اختیاری شخص منجمد کرے۔ ایک بار تصدیق اصل مقرر بستر، صارف کی اجازت و خدمت دوبارہ پڑھ کر ایک محفوظ ارسال کرے۔ واپس معلومات رکھے؛ مسودہ بند پر چھوڑنے کی تصدیق۔ سرور دستیاب کرے تو صفائی مکمل، صفائی درج مگر مراحل باقی ہوں تو بستر مقفل، کوئی عمل نہ ہو تو حالت نہیں بدلی۔ پہلے سرور کا نتیجہ، مقامی کامیابی نہیں۔ واقعہ یا ڈیوٹی تبدیلی پر جائزہ رکے، معلومات رہتی ہیں۔",
+    "حالت کا انکار موجودہ بستر تازہ کرے، مسودہ رہتا ہے؛ موجودہ پڑھ کر معلومات رکھنے پر اصل بستر آئے اور تصدیق پھر لازم۔ سرور خانے کی غلطی دے تو خانے کے پاس۔ ارسال، نامعلوم نتیجہ یا دستاویز کے دوران جگہ بدلنا بند۔ گم صفائی جواب پر عین کلید، معلومات و صارف؛ واضح دوبارہ ارسال وہی کلید و معلومات24گھنٹے تک۔ موجودہ بستر پڑھنا صرف پڑھتا، اصل نتیجے یا متبادل تصدیق کا ثبوت نہیں۔ مدت گزرے تو آئی ٹی۔ خودکار ارسال، آف لائن قطار یا فرضی واپسی نہیں۔ پیمائش، دوا، ڈیوٹی، بستر و رابطہ واقعات بغیر پولنگ تازہ کریں۔ ایف ون، مدد و مشترک کی بورڈ/ترتیب100تا250زوم معلومات رکھیں۔ اردو، نئے ریکارڈ، آلات و مدیر کا قبول انسانی ہے۔"
+  ],
+  faq: [
+    [
+      "Why is last night still listed?",
+      "At the start of a ward round, the nurse opens Ward Nursing → My beds this shift. Refresh my beds reads only the signed-in person’s rostered beds and duties. A night duty remains until it ends, with the date on My duties; this page applies no midnight cutoff. No beds means ask the head nurse to check your duty and its assigned beds. Find in my beds filters returned name/MRN/ward/bed/shift/zone locally; no matches keeps the selected context. Loading and failed reads never establish an empty ward."
+    ],
+    [
+      "How do I identify the patient and prioritise work?",
+      "Choose an actual returned bed. Check the ward, bed, shift and zone, then name and MRN with age/date of birth and flags. Bed location is never patient identity. Allergies empty means Not recorded. Merged or unverified patient context blocks summary actions; a death flag means no new orders. Vitals overdue and next due come from the server’s flowsheet, never a locally guessed interval; last vitals and doses due next hour come from My beds. Overdue vitals first, then beds with due doses. Failed schedule reads stay visible, not silently labelled safe. Recording vitals and doses is a later ward-chart task, not a button that records care here."
+    ],
+    [
+      "How do I give the signed discharge instructions?",
+      "For the selected patient, Read signed discharge summary loads the server’s signed record, medicines, follow-up and every correction with author/time. DISCHARGE_SUMMARY_NOT_FINAL means ask the authorised doctor to sign it; do not print a draft or substitute an example. Print signed summary (A4) rechecks this current duty, admission, patient and summary version in the secure terminal and uses its document printer. Save signed summary PDF downloads the server’s PDF separately; cancelling the save creates no file. Explain the signed instructions and corrections to the patient/family; the app never claims that conversation happened just because it printed. Printer/download failure keeps the clinical record intact; retry the document action only. No discharge or bed release occurs."
+    ],
+    [
+      "When may I say Bed cleaned?",
+      "Bed cleaned is offered only for your returned Dirty or Cleaning bed, permission, full/open-work service and Live connection. It confirms completed cleaning where no badge station recorded it; never bypass other discharge stages or invent physical cleaning. Check exact ward/bed and current patient/location. I verified this bed and that cleaning was completed is required. The screen does not assign a cleaner a login. Records-only service hides cleaning; staff without the permission cannot confirm."
+    ],
+    [
+      "How do I name the cleaner?",
+      "Find cleaner (optional) needs 2–80 characters; Find staff queries the real staff lookup. Choose a returned full name, employee number and designation; only that employee_id is sent. Never type or guess an id. Changing search clears the selected cleaner; Clear optional cleaner omits the field. No named cleaner sends an empty body and attributes your confirmation to you. No results is not permission to fabricate a person. A referenced staff refusal keeps the form and lets you choose again."
+    ],
+    [
+      "What do confirmation and its outcomes mean?",
+      "Review cleaning confirmation freezes exact bed and optional cleaner. Confirm this cleaning once rereads the rostered bed, session permissions and service view before one idempotent POST. Back to cleaning input keeps values; Close cleaning draft asks before discarding. BedCleaned means server made it Available; BedCleaningRecorded means cleaning recorded but remaining clearance keeps it locked; NoAction is not a state change. Read the server result, never show local success first. New events or a changed duty invalidate the review without discarding input."
+    ],
+    [
+      "What if a reply, duty, connection or printer fails?",
+      "State refusals refresh your current beds and keep the draft; Read current beds and keep input adopts the returned bed and requires acknowledgement again. Field errors remain beside the fields when supplied. During submission, unknown result or a document action, navigation is blocked. A lost cleaning reply keeps exact key/body/actor; Retry original request is explicit and uses that same key/body only within24hours. Read current beds is read-only and cannot prove the original result; it does not unlock a replacement confirmation. Outside retention ask IT. No automatic write retry, offline queue or invented undo. Realtime vitals/medication/roster/bed events and reconnect refresh without polling. F1, visible help and shared keyboard/Settings100–250% zoom preserve context. Urdu and fresh-data/device/editor acceptance remain human-owned."
+    ]
+  ],
+  faqUr: [
+    [
+      "رات کی ڈیوٹی اب تک کیوں ہے؟",
+      "معائنے کے آغاز پر نرس وارڈ نرسنگ سے اس شفٹ میں میرے بستر کھولے۔ تازہ کریں صرف موجودہ شخص کے مقرر بستر و ڈیوٹیاں پڑھے۔ رات کی ڈیوٹی اختتام تک، اصل تاریخ میری ڈیوٹیوں میں؛ آدھی رات پر ختم نہیں۔ بستر نہ ہوں تو ہیڈ نرس سے ڈیوٹی و مقرر بستر چیک کرائیں۔ تلاش اصل نام، ایم آر این، وارڈ، بستر، شفٹ یا حصے کا مقامی فلٹر ہے؛ نتیجہ نہ ہو تو منتخب مریض رہتا ہے۔ لوڈنگ یا ناکامی خالی وارڈ کا ثبوت نہیں۔"
+    ],
+    [
+      "مریض و پہلے کام کیسے چیک کروں؟",
+      "اصل بستر چنیں۔ وارڈ، بستر، شفٹ و حصہ، پھر نام و ایم آر این، عمر یا پیدائش و علامات چیک کریں۔ بستر مریض کی شناخت نہیں۔ خالی الرجی درج نہیں۔ ضم یا نامکمل شناخت پر خلاصہ کے عمل بند؛ وفات پر نئے احکامات نہیں۔ پیمائش کی تاخیر و اگلا وقت سرور چارٹ سے، اندازے کی مدت نہیں؛ آخری پیمائش و اگلے گھنٹے کی خوراکیں بستر فہرست سے۔ تاخیر پہلے پھر واجب خوراک۔ شیڈول کی غلطی نمایاں ہے، محفوظ نہیں کہی جاتی۔ پیمائش و دوا کا اندراج آئندہ مجاز وارڈ چارٹ میں، یہاں طبی اندراج نہیں۔"
+    ],
+    [
+      "دستخط شدہ ہدایات کیسے دوں؟",
+      "منتخب مریض کے لیے دستخط شدہ خلاصہ پڑھیں اصل دستخط، دوائیں، ہدایات و ہر تصحیح مصنف و وقت کے ساتھ دکھاتا ہے۔ خلاصہ حتمی نہ ہو تو مجاز ڈاکٹر سے دستخط کرائیں؛ مسودہ یا مثال نہ چھاپیں۔ اے فور پرنٹ محفوظ ٹرمینل میں اصل ڈیوٹی، داخلہ، مریض و خلاصے کا نسخہ پھر چیک کرکے دستاویز پرنٹر استعمال کرے۔ پی ڈی ایف سرور سے الگ ڈاؤن لوڈ، منسوخی پر فائل نہیں۔ اصل ہدایات و تصحیحات خاندان کو سمجھائیں؛ پرنٹ گفتگو کا ثبوت نہیں۔ ناکامی پر صرف دستاویز دوبارہ لیں، طبی عمل یا ڈسچارج نہیں۔ بستر خالی نہیں ہوتا۔"
+    ],
+    [
+      "بستر صاف ہو گیا کب کہوں؟",
+      "بستر صاف ہو گیا صرف اپنی فہرست کے صفائی طلب یا صفائی جاری بستر، اجازت، جاری یا باقی کام کی خدمت اور رابطے پر۔ جہاں بیج اسٹیشن نے درج نہ کیا ہو مکمل صفائی کی تصدیق ہے؛ دوسرے ڈسچارج مراحل یا حقیقی صفائی فرض نہیں۔ اصل وارڈ، بستر، مریض و جگہ چیک کریں۔ بستر و مکمل صفائی کی تصدیق والا نشان لازم۔ صفائی والے کو لاگ اِن نہیں دیا جاتا۔ صرف ریکارڈ خدمت یا اجازت نہ ہو تو تصدیق نہیں۔"
+    ],
+    [
+      "صفائی والا کیسے چنوں؟",
+      "اختیاری صفائی والا تلاش میں 2تا80حروف؛ عملہ تلاش کریں اصل فہرست پڑھے۔ اصل پورا نام، ملازم نمبر و عہدہ چنیں؛ صرف اسی ملازم کا حوالہ جائے۔ شناختی نمبر لکھیں یا اندازہ نہ لگائیں۔ تلاش بدلنے سے منتخب نام ہٹے؛ ہٹانے پر خانہ ارسال نہیں۔ نام نہ ہو تو خالی معلومات، تصدیق آپ کی۔ نتیجہ نہ ہو تو فرضی شخص نہیں۔ سرور حوالہ رد کرے تو معلومات رہتی ہیں، پھر چنیں۔"
+    ],
+    [
+      "تصدیق و نتیجے کا مطلب؟",
+      "صفائی کا جائزہ عین بستر و اختیاری شخص منجمد کرے۔ ایک بار تصدیق اصل مقرر بستر، صارف کی اجازت و خدمت دوبارہ پڑھ کر ایک محفوظ ارسال کرے۔ واپس معلومات رکھے؛ مسودہ بند پر چھوڑنے کی تصدیق۔ سرور دستیاب کرے تو صفائی مکمل، صفائی درج مگر مراحل باقی ہوں تو بستر مقفل، کوئی عمل نہ ہو تو حالت نہیں بدلی۔ پہلے سرور کا نتیجہ، مقامی کامیابی نہیں۔ واقعہ یا ڈیوٹی تبدیلی پر جائزہ رکے، معلومات رہتی ہیں۔"
+    ],
+    [
+      "جواب، ڈیوٹی، رابطہ یا پرنٹر خراب ہو تو؟",
+      "حالت کا انکار موجودہ بستر تازہ کرے، مسودہ رہتا ہے؛ موجودہ پڑھ کر معلومات رکھنے پر اصل بستر آئے اور تصدیق پھر لازم۔ سرور خانے کی غلطی دے تو خانے کے پاس۔ ارسال، نامعلوم نتیجہ یا دستاویز کے دوران جگہ بدلنا بند۔ گم صفائی جواب پر عین کلید، معلومات و صارف؛ واضح دوبارہ ارسال وہی کلید و معلومات24گھنٹے تک۔ موجودہ بستر پڑھنا صرف پڑھتا، اصل نتیجے یا متبادل تصدیق کا ثبوت نہیں۔ مدت گزرے تو آئی ٹی۔ خودکار ارسال، آف لائن قطار یا فرضی واپسی نہیں۔ پیمائش، دوا، ڈیوٹی، بستر و رابطہ واقعات بغیر پولنگ تازہ کریں۔ ایف ون، مدد و مشترک کی بورڈ/ترتیب100تا250زوم معلومات رکھیں۔ اردو، نئے ریکارڈ، آلات و مدیر کا قبول انسانی ہے۔"
+    ]
+  ]
+},
  doctor_inpatients: {
   title: "Inpatient rounds & discharge",
   titleUr: "داخل مریضوں کا معائنہ و ڈسچارج",

@@ -1,0 +1,288 @@
+{
+  "method": "GET",
+  "path": "/api/v1/admissions/{admission_id}/flowsheet",
+  "summary": "Vitals grid, nursing notes, schedule & next due time",
+  "tags": [
+    "IPD"
+  ],
+  "permissions": [
+    "ipd.flowsheet.view"
+  ],
+  "permissions_mode": "all",
+  "idempotency_key": false,
+  "description": "**Required permission:** `ipd.flowsheet.view`\n\n**Required permission:** `ipd.flowsheet.view`",
+  "roles_allowed": [
+    "anaesthetist",
+    "clinical_specialist",
+    "doctor",
+    "head_nurse",
+    "surgeon",
+    "triage_nurse",
+    "ward_nurse"
+  ],
+  "parameters": [
+    {
+      "name": "admission_id",
+      "in": "path",
+      "required": true,
+      "description": "",
+      "schema": {
+        "type": "integer",
+        "title": "Admission Id"
+      }
+    }
+  ],
+  "request_body": null,
+  "request_content_type": null,
+  "response_schema": {
+    "title": "Envelope[FlowsheetOut]",
+    "properties": {
+      "data": {
+        "title": "FlowsheetOut",
+        "properties": {
+          "vitals": {
+            "items": {
+              "$ref": "#/components/schemas/FlowsheetVitalsOut"
+            },
+            "type": "array",
+            "title": "Vitals",
+            "description": "Oldest first; corrections are separate entries"
+          },
+          "nursing_notes": {
+            "items": {
+              "$ref": "#/components/schemas/FlowsheetNoteOut"
+            },
+            "type": "array",
+            "title": "Nursing Notes"
+          },
+          "schedule": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/VitalsScheduleOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "next_vitals_due_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Vitals Due At"
+          },
+          "is_overdue": {
+            "type": "boolean",
+            "title": "Is Overdue"
+          }
+        },
+        "type": "object",
+        "required": [
+          "vitals",
+          "nursing_notes",
+          "schedule",
+          "next_vitals_due_at",
+          "is_overdue"
+        ]
+      },
+      "meta": {
+        "title": "Meta",
+        "properties": {
+          "server_time": {
+            "type": "string",
+            "title": "Server Time",
+            "description": "Server clock (UTC). Use it to detect terminal clock skew."
+          },
+          "page": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page"
+          },
+          "page_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page Size"
+          },
+          "total_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total Count"
+          },
+          "next_cursor": {
+            "title": "Next Cursor"
+          }
+        },
+        "type": "object",
+        "required": [
+          "server_time"
+        ]
+      },
+      "request_id": {
+        "type": "string",
+        "title": "Request Id"
+      }
+    },
+    "type": "object",
+    "required": [
+      "data",
+      "meta",
+      "request_id"
+    ]
+  },
+  "recorded_example": {
+    "request": {
+      "path": "/api/v1/admissions/1/flowsheet"
+    },
+    "response": {
+      "status": 200,
+      "body": {
+        "data": {
+          "vitals": [
+            {
+              "entry_id": 1,
+              "admission_id": 1,
+              "patient_id": 1,
+              "bp_systolic": 120,
+              "bp_diastolic": 80,
+              "heart_rate": 88,
+              "temp_c": 38.4,
+              "spo2": 95,
+              "respiratory_rate": null,
+              "pain_score": null,
+              "blood_glucose": null,
+              "notes": null,
+              "observed_at": "2026-09-27T17:38:29.062250+00:00",
+              "recorded_by": 7,
+              "recorded_at": "2026-09-27T17:38:29.062250+00:00",
+              "is_correction": false,
+              "corrects_entry_id": null,
+              "correction_reason": null,
+              "recorded_by_name": "uefbb36b24c"
+            },
+            {
+              "entry_id": 2,
+              "admission_id": 1,
+              "patient_id": 1,
+              "bp_systolic": 125,
+              "bp_diastolic": 80,
+              "heart_rate": 88,
+              "temp_c": 38.4,
+              "spo2": 95,
+              "respiratory_rate": null,
+              "pain_score": null,
+              "blood_glucose": null,
+              "notes": null,
+              "observed_at": "2026-09-27T17:38:29.094072+00:00",
+              "recorded_by": 7,
+              "recorded_at": "2026-09-27T17:38:29.094072+00:00",
+              "is_correction": true,
+              "corrects_entry_id": 1,
+              "correction_reason": "misread cuff",
+              "recorded_by_name": "uefbb36b24c"
+            }
+          ],
+          "nursing_notes": [],
+          "schedule": {
+            "schedule_id": 1,
+            "admission_id": 1,
+            "interval_minutes": 240,
+            "start_at": "2026-09-27T17:38:28.972277+00:00",
+            "end_at": null,
+            "is_active": true,
+            "last_alerted_at": null,
+            "created_by": 6,
+            "row_version": 1
+          },
+          "next_vitals_due_at": "2026-09-27T21:38:29.094072+00:00",
+          "is_overdue": false
+        },
+        "meta": {
+          "server_time": "2026-09-27T17:38:29.160015+00:00"
+        },
+        "request_id": "ebb60c13ddf44d59bf840bb3ed2fffa3"
+      }
+    }
+  },
+  "errors": [
+    {
+      "code": "VALIDATION_ERROR",
+      "http_status": 422,
+      "message": "The request is invalid.",
+      "retryable": false,
+      "category": "request",
+      "ui_action": "Show field errors from details.fields / the message."
+    }
+  ],
+  "errors_seen_in_tests": [],
+  "used_by_screens": [
+    "doctor_inpatients",
+    "vitals_tracker"
+  ],
+  "used_by_workflows": [],
+  "typescript_example": "// Vitals grid, nursing notes, schedule & next due time  (permissions: ipd.flowsheet.view)\nexport const flowsheet = (admission_id) =>\n  api(\"GET\", `/admissions/${admission_id}/flowsheet`, undefined);   // api(): see get_guide('envelope-and-errors')",
+  "access": {
+    "authentication": "user",
+    "permissions": [
+      "ipd.flowsheet.view"
+    ],
+    "permissions_mode": "all",
+    "who": "holders of ipd.flowsheet.view",
+    "roles_allowed": [
+      "anaesthetist",
+      "clinical_specialist",
+      "doctor",
+      "head_nurse",
+      "surgeon",
+      "triage_nurse",
+      "ward_nurse"
+    ]
+  },
+  "write_semantics": null,
+  "emits_events": [],
+  "list": {
+    "returns": "object",
+    "paging": [],
+    "search": [],
+    "filters": [],
+    "note": null
+  },
+  "cross_field_rules": {},
+  "errors_detail": [
+    {
+      "code": "VALIDATION_ERROR",
+      "http_status": 422,
+      "message": "The request is invalid.",
+      "retryable": false,
+      "ui_action": "Show field errors from details.fields / the message.",
+      "source": [
+        "documented"
+      ],
+      "details_fields": [],
+      "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+    }
+  ]
+}

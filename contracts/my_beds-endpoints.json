@@ -1,0 +1,2065 @@
+{
+  "GET /ipd/my-beds": {
+    "method": "GET",
+    "path": "/api/v1/ipd/my-beds",
+    "summary": "Ward nurse: my rostered beds this shift (doses due, last vitals)",
+    "tags": [
+      "IPD"
+    ],
+    "permissions": [
+      "ipd.flowsheet.record"
+    ],
+    "permissions_mode": "all",
+    "idempotency_key": false,
+    "description": "**Required permission:** `ipd.flowsheet.record`\n\n**Required permission:** `ipd.flowsheet.record`",
+    "roles_allowed": [
+      "head_nurse",
+      "triage_nurse",
+      "ward_nurse"
+    ],
+    "parameters": [],
+    "request_body": null,
+    "request_content_type": null,
+    "response_schema": {
+      "title": "Envelope[list[MyBedOut]]",
+      "properties": {
+        "data": {
+          "items": {
+            "title": "MyBedOut",
+            "properties": {
+              "roster_id": {
+                "type": "integer",
+                "title": "Roster Id"
+              },
+              "shift_name": {
+                "type": "string",
+                "title": "Shift Name"
+              },
+              "start_time": {
+                "type": "string",
+                "format": "time",
+                "title": "Start Time"
+              },
+              "end_time": {
+                "type": "string",
+                "format": "time",
+                "title": "End Time"
+              },
+              "zone_label": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Zone Label"
+              },
+              "ward_id": {
+                "type": "integer",
+                "title": "Ward Id"
+              },
+              "ward_name": {
+                "type": "string",
+                "title": "Ward Name"
+              },
+              "bed_id": {
+                "type": "integer",
+                "title": "Bed Id"
+              },
+              "bed_label": {
+                "type": "string",
+                "title": "Bed Label"
+              },
+              "current_state": {
+                "type": "string",
+                "enum": [
+                  "Available",
+                  "Reserved",
+                  "Occupied",
+                  "Dirty",
+                  "Cleaning",
+                  "OutOfService"
+                ],
+                "title": "Current State"
+              },
+              "admission_id": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Admission Id"
+              },
+              "patient_name": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Patient Name"
+              },
+              "mrn": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Mrn"
+              },
+              "doses_due_next_hour": {
+                "type": "integer",
+                "title": "Doses Due Next Hour"
+              },
+              "last_vitals_at": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Last Vitals At"
+              }
+            },
+            "type": "object",
+            "required": [
+              "roster_id",
+              "shift_name",
+              "start_time",
+              "end_time",
+              "zone_label",
+              "ward_id",
+              "ward_name",
+              "bed_id",
+              "bed_label",
+              "current_state",
+              "admission_id",
+              "patient_name",
+              "mrn",
+              "doses_due_next_hour",
+              "last_vitals_at"
+            ],
+            "description": "A bed of the nurse's ward duty today (or of last night's shift until it ends)."
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "title": "Meta",
+          "properties": {
+            "server_time": {
+              "type": "string",
+              "title": "Server Time",
+              "description": "Server clock (UTC). Use it to detect terminal clock skew."
+            },
+            "page": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Page"
+            },
+            "page_size": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Page Size"
+            },
+            "total_count": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Total Count"
+            },
+            "next_cursor": {
+              "title": "Next Cursor"
+            }
+          },
+          "type": "object",
+          "required": [
+            "server_time"
+          ]
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ]
+    },
+    "recorded_example": {
+      "request": {
+        "path": "/api/v1/ipd/my-beds"
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": [
+            {
+              "roster_id": 1,
+              "shift_name": "Morning",
+              "start_time": "08:00:00",
+              "end_time": "14:00:00",
+              "zone_label": "Bay A",
+              "ward_id": 2,
+              "ward_name": "General Ward",
+              "bed_id": 2,
+              "bed_label": "GW-1",
+              "current_state": "Occupied",
+              "admission_id": 1,
+              "patient_name": "Ali Khan",
+              "mrn": "MRN-2026-000001",
+              "doses_due_next_hour": 0,
+              "last_vitals_at": null
+            }
+          ],
+          "meta": {
+            "server_time": "2026-09-27T17:38:45.129587+00:00"
+          },
+          "request_id": "4f69b404383d443fb0e32455d6565ea4"
+        }
+      },
+      "errors_seen": [
+        "PASSWORD_CHANGE_REQUIRED"
+      ]
+    },
+    "errors": [
+      {
+        "code": "PASSWORD_CHANGE_REQUIRED",
+        "http_status": 403,
+        "message": "You must change your temporary password first.",
+        "retryable": false,
+        "category": "auth",
+        "ui_action": "Explain and hide the action (check x-permissions)."
+      }
+    ],
+    "errors_seen_in_tests": [
+      "PASSWORD_CHANGE_REQUIRED"
+    ],
+    "used_by_screens": [
+      "my_beds"
+    ],
+    "used_by_workflows": [
+      "duty-rosters-and-attendance",
+      "inpatient-and-discharge"
+    ],
+    "typescript_example": "// Ward nurse: my rostered beds this shift (doses due, last vitals)  (permissions: ipd.flowsheet.record)\nexport const myBeds = () =>\n  api(\"GET\", `/ipd/my-beds`, undefined);   // api(): see get_guide('envelope-and-errors')",
+    "access": {
+      "authentication": "user",
+      "permissions": [
+        "ipd.flowsheet.record"
+      ],
+      "permissions_mode": "all",
+      "who": "holders of ipd.flowsheet.record",
+      "roles_allowed": [
+        "head_nurse",
+        "triage_nurse",
+        "ward_nurse"
+      ]
+    },
+    "write_semantics": null,
+    "emits_events": [],
+    "list": {
+      "returns": "list",
+      "paging": [],
+      "search": [],
+      "filters": [],
+      "note": null
+    },
+    "cross_field_rules": {},
+    "errors_detail": [
+      {
+        "code": "PASSWORD_CHANGE_REQUIRED",
+        "http_status": 403,
+        "message": "You must change your temporary password first.",
+        "retryable": false,
+        "ui_action": "Explain and hide the action (check x-permissions).",
+        "source": [
+          "seen_in_tests"
+        ],
+        "details_fields": [],
+        "details_from": "GET /api/v1/auth/workspaces"
+      }
+    ]
+  },
+  "GET /self/roster": {
+    "method": "GET",
+    "path": "/api/v1/self/roster",
+    "summary": "My duties (two weeks from today by default)",
+    "tags": [
+      "Duty Rosters"
+    ],
+    "permissions": [
+      "self.profile.view"
+    ],
+    "permissions_mode": "all",
+    "idempotency_key": false,
+    "description": "Without `date_from`, last night's shift stays in the list until it ends (a shift belongs to the date it\nstarts).\n\n**Required permission:** `self.profile.view`\n\n**Required permission:** `self.profile.view`",
+    "roles_allowed": [
+      "accountant",
+      "admissions_officer",
+      "anaesthetist",
+      "billing_admin",
+      "cashier",
+      "clinic_director",
+      "clinical_specialist",
+      "cssd_technician",
+      "doctor",
+      "employee_self",
+      "head_nurse",
+      "hospital_admin",
+      "hospital_director",
+      "hr_admin",
+      "ipc_nurse",
+      "lab_admin",
+      "lab_technician",
+      "lab_verifier",
+      "maintenance_admin",
+      "ops_admin",
+      "ot_admin",
+      "ot_nurse",
+      "owner",
+      "pharmacist",
+      "pharmacy_admin",
+      "quality_officer",
+      "radiographer",
+      "radiologist",
+      "receptionist",
+      "super_admin",
+      "surgeon",
+      "triage_nurse",
+      "ward_nurse",
+      "zakat_officer"
+    ],
+    "parameters": [
+      {
+        "name": "date_from",
+        "in": "query",
+        "required": false,
+        "description": "",
+        "schema": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Date From"
+        }
+      },
+      {
+        "name": "date_to",
+        "in": "query",
+        "required": false,
+        "description": "",
+        "schema": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Date To"
+        }
+      }
+    ],
+    "request_body": null,
+    "request_content_type": null,
+    "response_schema": {
+      "title": "Envelope[list[RosterEntryOut]]",
+      "properties": {
+        "data": {
+          "items": {
+            "title": "RosterEntryOut",
+            "properties": {
+              "roster_id": {
+                "type": "integer",
+                "title": "Roster Id"
+              },
+              "employee_id": {
+                "type": "integer",
+                "title": "Employee Id"
+              },
+              "emp_number": {
+                "type": "string",
+                "title": "Emp Number"
+              },
+              "full_name": {
+                "type": "string",
+                "title": "Full Name"
+              },
+              "designation": {
+                "type": "string",
+                "title": "Designation"
+              },
+              "staff_category": {
+                "type": "string",
+                "enum": [
+                  "Clinical",
+                  "Nursing",
+                  "Administrative",
+                  "Technical",
+                  "SupportZeroInterface",
+                  "Visiting"
+                ],
+                "title": "Staff Category"
+              },
+              "roster_date": {
+                "type": "string",
+                "format": "date",
+                "title": "Roster Date"
+              },
+              "shift_pattern_id": {
+                "type": "integer",
+                "title": "Shift Pattern Id"
+              },
+              "shift_name": {
+                "type": "string",
+                "title": "Shift Name"
+              },
+              "start_time": {
+                "type": "string",
+                "format": "time",
+                "title": "Start Time"
+              },
+              "end_time": {
+                "type": "string",
+                "format": "time",
+                "title": "End Time"
+              },
+              "duty_area": {
+                "type": "string",
+                "enum": [
+                  "Ward",
+                  "Department",
+                  "Emergency",
+                  "OT",
+                  "Facility",
+                  "Other"
+                ],
+                "title": "Duty Area"
+              },
+              "ward_id": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Ward Id"
+              },
+              "ward_name": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Ward Name"
+              },
+              "department_id": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Department Id"
+              },
+              "department_name": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Department Name"
+              },
+              "zone_label": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Zone Label"
+              },
+              "is_on_call": {
+                "type": "boolean",
+                "title": "Is On Call"
+              },
+              "notes": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Notes"
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "Active",
+                  "Cancelled"
+                ],
+                "title": "Status"
+              },
+              "cancel_reason": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Cancel Reason"
+              },
+              "swap_id": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Swap Id",
+                "description": "Taken over from a colleague through this approved duty swap"
+              },
+              "row_version": {
+                "type": "integer",
+                "title": "Row Version"
+              },
+              "bed_ids": {
+                "items": {
+                  "type": "integer"
+                },
+                "type": "array",
+                "title": "Bed Ids",
+                "description": "The beds of a ward duty (the nurse's \"my beds\")"
+              }
+            },
+            "type": "object",
+            "required": [
+              "roster_id",
+              "employee_id",
+              "emp_number",
+              "full_name",
+              "designation",
+              "staff_category",
+              "roster_date",
+              "shift_pattern_id",
+              "shift_name",
+              "start_time",
+              "end_time",
+              "duty_area",
+              "ward_id",
+              "ward_name",
+              "department_id",
+              "department_name",
+              "zone_label",
+              "is_on_call",
+              "notes",
+              "status",
+              "cancel_reason",
+              "swap_id",
+              "row_version",
+              "bed_ids"
+            ],
+            "description": "One rostered duty (service.ENTRY_COLS). A night shift belongs to the date it starts."
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "title": "Meta",
+          "properties": {
+            "server_time": {
+              "type": "string",
+              "title": "Server Time",
+              "description": "Server clock (UTC). Use it to detect terminal clock skew."
+            },
+            "page": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Page"
+            },
+            "page_size": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Page Size"
+            },
+            "total_count": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Total Count"
+            },
+            "next_cursor": {
+              "title": "Next Cursor"
+            }
+          },
+          "type": "object",
+          "required": [
+            "server_time"
+          ]
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ]
+    },
+    "recorded_example": {
+      "request": {
+        "path": "/api/v1/self/roster"
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": [
+            {
+              "roster_id": 5,
+              "employee_id": 1,
+              "emp_number": "EMP-2026-0001",
+              "full_name": "Nurse Amna",
+              "designation": "Officer",
+              "staff_category": "Nursing",
+              "roster_date": "2026-10-02",
+              "shift_pattern_id": 2,
+              "shift_name": "Evening",
+              "start_time": "14:00:00",
+              "end_time": "20:00:00",
+              "duty_area": "Ward",
+              "ward_id": 1,
+              "ward_name": "Roster Ward",
+              "department_id": null,
+              "department_name": null,
+              "zone_label": null,
+              "is_on_call": false,
+              "notes": null,
+              "status": "Active",
+              "cancel_reason": null,
+              "swap_id": 1,
+              "row_version": 1,
+              "bed_ids": []
+            }
+          ],
+          "meta": {
+            "server_time": "2026-09-29T02:40:41.599318+00:00"
+          },
+          "request_id": "5c305e9719de4fc0a201e0efb960e802"
+        }
+      }
+    },
+    "errors": [
+      {
+        "code": "VALIDATION_ERROR",
+        "http_status": 422,
+        "message": "The request is invalid.",
+        "retryable": false,
+        "category": "request",
+        "ui_action": "Show field errors from details.fields / the message."
+      }
+    ],
+    "errors_seen_in_tests": [],
+    "used_by_screens": [
+      "my_beds",
+      "self_service"
+    ],
+    "used_by_workflows": [
+      "duty-rosters-and-attendance"
+    ],
+    "typescript_example": "// My duties (two weeks from today by default)  (permissions: self.profile.view)\nexport const myDuties = () =>\n  api(\"GET\", `/self/roster`, undefined);   // api(): see get_guide('envelope-and-errors')",
+    "access": {
+      "authentication": "user",
+      "permissions": [
+        "self.profile.view"
+      ],
+      "permissions_mode": "all",
+      "who": "holders of self.profile.view",
+      "roles_allowed": [
+        "accountant",
+        "admissions_officer",
+        "anaesthetist",
+        "billing_admin",
+        "cashier",
+        "clinic_director",
+        "clinical_specialist",
+        "cssd_technician",
+        "doctor",
+        "employee_self",
+        "head_nurse",
+        "hospital_admin",
+        "hospital_director",
+        "hr_admin",
+        "ipc_nurse",
+        "lab_admin",
+        "lab_technician",
+        "lab_verifier",
+        "maintenance_admin",
+        "ops_admin",
+        "ot_admin",
+        "ot_nurse",
+        "owner",
+        "pharmacist",
+        "pharmacy_admin",
+        "quality_officer",
+        "radiographer",
+        "radiologist",
+        "receptionist",
+        "super_admin",
+        "surgeon",
+        "triage_nurse",
+        "ward_nurse",
+        "zakat_officer"
+      ]
+    },
+    "write_semantics": null,
+    "emits_events": [],
+    "list": {
+      "returns": "list",
+      "paging": [],
+      "search": [],
+      "filters": [
+        {
+          "name": "date_from",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "name": "date_to",
+          "required": false,
+          "type": "string"
+        }
+      ],
+      "note": null
+    },
+    "cross_field_rules": {},
+    "errors_detail": [
+      {
+        "code": "VALIDATION_ERROR",
+        "http_status": 422,
+        "message": "The request is invalid.",
+        "retryable": false,
+        "ui_action": "Show field errors from details.fields / the message.",
+        "source": [
+          "documented"
+        ],
+        "details_fields": [],
+        "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+      }
+    ]
+  },
+  "POST /beds/{bed_id}/mark-cleaned": {
+    "method": "POST",
+    "path": "/api/v1/beds/{bed_id}/mark-cleaned",
+    "summary": "Confirm a bed was cleaned (where no badge station records it)",
+    "tags": [
+      "IPD"
+    ],
+    "permissions": [
+      "ipd.bed.mark_cleaned"
+    ],
+    "permissions_mode": "all",
+    "idempotency_key": true,
+    "description": "For wards without a badge station: the ward nurse, head nurse or ops admin confirms the cleaning and may\nname the cleaner (`cleaned_by_employee_id`), who never uses a screen (workflow §6.8). Same rules as a badge\nscan: the bed becomes Available, or stays locked until discharge billing clears (`BedCleaningRecorded`).\nAn id in the request body that does not exist: `REFERENCE_NOT_FOUND` (details.field).\n\n**Required permission:** `ipd.bed.mark_cleaned`\n\n**Required permission:** `ipd.bed.mark_cleaned`",
+    "roles_allowed": [
+      "head_nurse",
+      "ops_admin",
+      "ward_nurse"
+    ],
+    "parameters": [
+      {
+        "name": "bed_id",
+        "in": "path",
+        "required": true,
+        "description": "",
+        "schema": {
+          "type": "integer",
+          "title": "Bed Id"
+        }
+      },
+      {
+        "name": "Idempotency-Key",
+        "in": "header",
+        "required": false,
+        "description": "Unique per logical action; retries return the first result",
+        "schema": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Unique per logical action; retries return the first result",
+          "title": "Idempotency-Key"
+        }
+      }
+    ],
+    "request_body": {
+      "anyOf": [
+        {
+          "title": "CleanedIn",
+          "properties": {
+            "cleaned_by_employee_id": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cleaned By Employee Id",
+              "description": "The sweeper / janitor who cleaned the bed (optional)"
+            }
+          },
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Body"
+    },
+    "request_content_type": "application/json",
+    "response_schema": {
+      "title": "Envelope[BedCleaningOut]",
+      "properties": {
+        "data": {
+          "title": "BedCleaningOut",
+          "properties": {
+            "outcome": {
+              "type": "string",
+              "enum": [
+                "BedCleaned",
+                "BedCleaningRecorded",
+                "NoAction"
+              ],
+              "title": "Outcome",
+              "description": "BedCleaningRecorded: the cleaning is recorded; the bed waits for its discharge clearance"
+            },
+            "bed_id": {
+              "type": "integer",
+              "title": "Bed Id"
+            },
+            "admission_id": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Admission Id"
+            },
+            "detail": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Detail"
+            }
+          },
+          "type": "object",
+          "required": [
+            "outcome",
+            "bed_id",
+            "admission_id"
+          ],
+          "description": "What a cleaning confirmation (badge scan or button) did."
+        },
+        "meta": {
+          "title": "Meta",
+          "properties": {
+            "server_time": {
+              "type": "string",
+              "title": "Server Time",
+              "description": "Server clock (UTC). Use it to detect terminal clock skew."
+            },
+            "page": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Page"
+            },
+            "page_size": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Page Size"
+            },
+            "total_count": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Total Count"
+            },
+            "next_cursor": {
+              "title": "Next Cursor"
+            }
+          },
+          "type": "object",
+          "required": [
+            "server_time"
+          ]
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ]
+    },
+    "recorded_example": {
+      "request": {
+        "path": "/api/v1/beds/2/mark-cleaned"
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": {
+            "outcome": "BedCleaned",
+            "bed_id": 2,
+            "admission_id": 1
+          },
+          "meta": {
+            "server_time": "2026-09-27T17:38:34.638651+00:00"
+          },
+          "request_id": "6bf4c821f7a84cdc8a092ec410f73502"
+        }
+      },
+      "events_emitted": [
+        "admission.discharge.stage_changed",
+        "bed.state_changed",
+        "bed.waitlist.notification"
+      ]
+    },
+    "errors": [
+      {
+        "code": "REFERENCE_NOT_FOUND",
+        "http_status": 422,
+        "message": "A referenced record does not exist.",
+        "retryable": false,
+        "category": "request",
+        "ui_action": "Show field errors from details.fields / the message."
+      },
+      {
+        "code": "VALIDATION_ERROR",
+        "http_status": 422,
+        "message": "The request is invalid.",
+        "retryable": false,
+        "category": "request",
+        "ui_action": "Show field errors from details.fields / the message."
+      }
+    ],
+    "errors_seen_in_tests": [],
+    "used_by_screens": [
+      "my_beds",
+      "ops_console"
+    ],
+    "used_by_workflows": [
+      "duty-rosters-and-attendance",
+      "inpatient-and-discharge"
+    ],
+    "typescript_example": "// Confirm a bed was cleaned (where no badge station records it)  (permissions: ipd.bed.mark_cleaned)\nexport const markCleaned = (bed_id, body) =>\n  api(\"POST\", `/beds/${bed_id}/mark-cleaned`, body, { idempotent: true });   // api(): see get_guide('envelope-and-errors')",
+    "access": {
+      "authentication": "user",
+      "permissions": [
+        "ipd.bed.mark_cleaned"
+      ],
+      "permissions_mode": "all",
+      "who": "holders of ipd.bed.mark_cleaned",
+      "roles_allowed": [
+        "head_nurse",
+        "ops_admin",
+        "ward_nurse"
+      ]
+    },
+    "write_semantics": {
+      "protection": "idempotency_key",
+      "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+      "reconcile_with": null,
+      "emits_events": [
+        "admission.discharge.stage_changed",
+        "bed.state_changed",
+        "bed.waitlist.notification"
+      ],
+      "prints": false,
+      "related_state_machine": "bed"
+    },
+    "emits_events": [
+      "admission.discharge.stage_changed",
+      "bed.state_changed",
+      "bed.waitlist.notification"
+    ],
+    "list": null,
+    "cross_field_rules": {},
+    "errors_detail": [
+      {
+        "code": "REFERENCE_NOT_FOUND",
+        "http_status": 422,
+        "message": "A referenced record does not exist.",
+        "retryable": false,
+        "ui_action": "Show field errors from details.fields / the message.",
+        "source": [
+          "documented"
+        ],
+        "details_fields": [
+          "ward_id"
+        ],
+        "details_from": "POST /api/v1/pharmacy/storage-checks"
+      },
+      {
+        "code": "VALIDATION_ERROR",
+        "http_status": 422,
+        "message": "The request is invalid.",
+        "retryable": false,
+        "ui_action": "Show field errors from details.fields / the message.",
+        "source": [
+          "documented"
+        ],
+        "details_fields": [],
+        "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+      }
+    ]
+  },
+  "GET /admissions/{admission_id}/discharge-summary/print-payload": {
+    "method": "GET",
+    "path": "/api/v1/admissions/{admission_id}/discharge-summary/print-payload",
+    "summary": "Printable discharge summary, or referral slip for a transfer",
+    "tags": [
+      "IPD"
+    ],
+    "permissions": [
+      "ipd.discharge.initiate",
+      "clinical.encounter.view",
+      "patient.emr.view"
+    ],
+    "permissions_mode": "any",
+    "idempotency_key": false,
+    "description": "A4 (`printer_role` document). `document_type` is `referral_slip` when the patient was transferred (MSDS 151), else\n`discharge_summary`. Signed summaries only (`DISCHARGE_SUMMARY_NOT_FINAL`). `pdf_url` downloads the same as a PDF.\n\n**Required permission:** `ipd.discharge.initiate OR clinical.encounter.view OR patient.emr.view`\n\n**Required permission:** `ipd.discharge.initiate OR clinical.encounter.view OR patient.emr.view`",
+    "roles_allowed": [
+      "anaesthetist",
+      "clinical_specialist",
+      "doctor",
+      "head_nurse",
+      "radiologist",
+      "surgeon",
+      "ward_nurse"
+    ],
+    "parameters": [
+      {
+        "name": "admission_id",
+        "in": "path",
+        "required": true,
+        "description": "",
+        "schema": {
+          "type": "integer",
+          "title": "Admission Id"
+        }
+      }
+    ],
+    "request_body": null,
+    "request_content_type": null,
+    "response_schema": {
+      "title": "Envelope[PrintOut[DischargeSummaryPrintFieldsOut]]",
+      "properties": {
+        "data": {
+          "title": "PrintOut[DischargeSummaryPrintFieldsOut]",
+          "properties": {
+            "document_type": {
+              "type": "string",
+              "enum": [
+                "autopsy_order",
+                "bed_labels",
+                "blood_component_label",
+                "blood_donation_labels",
+                "clinical_note",
+                "complaint_letter",
+                "complaints_notice",
+                "consent_form",
+                "cost_estimate",
+                "cssd_labels",
+                "death_certificate",
+                "discharge_summary",
+                "dispensing_label",
+                "dose_label",
+                "id_card",
+                "imaging_report",
+                "lab_label",
+                "lab_report",
+                "mlc_intimation",
+                "opd_slip",
+                "pharmacy_receipt",
+                "prescription",
+                "referral_slip",
+                "send_out_manifest",
+                "surgical_record",
+                "triage_algorithm",
+                "wristband"
+              ],
+              "title": "Document Type"
+            },
+            "printer_role": {
+              "type": "string",
+              "enum": [
+                "receipt",
+                "label",
+                "document",
+                "card"
+              ],
+              "title": "Printer Role",
+              "description": "Which printer of the terminal to use (GET /api/v1/terminals/whoami)"
+            },
+            "paper_width_mm": {
+              "type": "integer",
+              "title": "Paper Width Mm"
+            },
+            "fields": {
+              "$ref": "#/components/schemas/DischargeSummaryPrintFieldsOut",
+              "description": "The document's data, for frontends that render their own layout"
+            },
+            "text": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Text",
+              "description": "Pre-formatted monospace text (48 columns) for ESC/POS printers, as is"
+            },
+            "barcode_svg": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Barcode Svg"
+            },
+            "qr_svg": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Qr Svg"
+            },
+            "pdf_url": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Pdf Url"
+            }
+          },
+          "type": "object",
+          "required": [
+            "document_type",
+            "printer_role",
+            "paper_width_mm",
+            "fields",
+            "text",
+            "barcode_svg",
+            "qr_svg",
+            "pdf_url"
+          ]
+        },
+        "meta": {
+          "title": "Meta",
+          "properties": {
+            "server_time": {
+              "type": "string",
+              "title": "Server Time",
+              "description": "Server clock (UTC). Use it to detect terminal clock skew."
+            },
+            "page": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Page"
+            },
+            "page_size": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Page Size"
+            },
+            "total_count": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Total Count"
+            },
+            "next_cursor": {
+              "title": "Next Cursor"
+            }
+          },
+          "type": "object",
+          "required": [
+            "server_time"
+          ]
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ]
+    },
+    "recorded_example": {
+      "request": {
+        "path": "/api/v1/admissions/1/discharge-summary/print-payload"
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": {
+            "document_type": "discharge_summary",
+            "printer_role": "document",
+            "paper_width_mm": 210,
+            "fields": {
+              "hospital": {
+                "name": "Haspataal Hospital",
+                "address": "",
+                "phone": "",
+                "phc_number": "",
+                "issue_line": "Issued 14-Oct-2026 15:38; this copy printed 14-Oct-2026 15:38"
+              },
+              "title": "DISCHARGE SUMMARY",
+              "admission": {
+                "admission_id": 1,
+                "admission_number": "ADM-2026-00001",
+                "admission_status": "Admitted",
+                "admission_type": "Standard",
+                "patient_id": 1,
+                "mrn": "MRN-2026-000001",
+                "patient_name": "Ali Khan",
+                "gender": "male",
+                "age_years": 40,
+                "dob": null,
+                "requested_at": "2026-10-14T10:38:26.460181+00:00",
+                "admitted_at": "2026-10-14T10:38:26.495594+00:00",
+                "discharged_at": null,
+                "ward_name": "General Ward",
+                "bed_label": "GW-1",
+                "primary_doctor_name": "Dr Ahmed",
+                "admission_reason": "Fever and productive cough for 5 days, SpO2 91% on air",
+                "provisional_diagnosis": "Community-acquired pneumonia"
+              },
+              "summary": {
+                "summary_id": 1,
+                "admission_id": 1,
+                "patient_id": 1,
+                "outcome": "Home",
+                "condition_at_discharge": "Improved",
+                "reason_for_admission": "Fever and productive cough for 5 days, SpO2 91% on air",
+                "final_diagnosis": "Right lower lobe pneumonia",
+                "icd_codes": [
+                  "CA40.Z"
+                ],
+                "significant_findings": "Chest X-ray: right lower lobe consolidation",
+                "procedures_and_treatment": "IV ceftriaxone for 5 days, oxygen for 2 days",
+                "response_to_treatment": "Afebrile from day 3, off oxygen on day 2",
+                "discharge_medications": "Amoxicillin-clavulanate 625 mg TDS for 5 days",
+                "follow_up_instructions": "OPD review in one week; return at once if breathless",
+                "follow_up_date": "2026-12-01",
+                "receiving_hospital": null,
+                "transfer_reason": null,
+                "transfer_arrangements": null,
+                "outcome_note": null,
+                "status": "Final",
+                "created_by": 1,
+                "created_by_name": "Dr Ahmed",
+                "created_at": "2026-10-14T10:38:26.781771+00:00",
+                "signed_by": 1,
+                "signed_at": "2026-10-14T10:38:26.829819+00:00",
+                "signer_name": "Dr Ahmed",
+                "signer_designation": "Doctor",
+                "signer_license": "PMDC PMDC-46468",
+                "row_version": 3,
+                "icd_terms": [
+                  {
+                    "uri": "http://id.who.int/icd/release/11/mms/142052508/unspecified",
+                    "code": "CA40.Z",
+                    "title": "Pneumonia, organism unspecified",
+                    "system": "ICD-11"
+                  }
+                ]
+              },
+              "corrections": [
+                {
+                  "correction_id": 1,
+                  "field": "discharge_medications",
+                  "correction_text": "Amoxicillin-clavulanate 625 mg BD, not TDS",
+                  "correction_reason": "Dose misread",
+                  "corrected_by_name": "Dr Ahmed",
+                  "created_at": "2026-10-14T10:38:26.854081+00:00"
+                }
+              ]
+            },
+            "text": "                                    Haspataal Hospital\n                                 Issued 14-Oct-2026 15:38\n                           this copy printed 14-Oct-2026 15:38\n                                    DISCHARGE SUMMARY\n------------------------------------------------------------------------------------------\nPatient                                                     Ali Khan (MRN MRN-2…",
+            "barcode_svg": "<svg version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" width=\"56.920mm\" height=\"18.411mm\">\r\n    <!--Autogenerated with python-barcode 0.16.1-->\r\n    <g id=\"barcode_group\">\r\n        <rect width=\"100%\" height=\"100%\" style=\"fill:white\"/>\r\n        <rect x=\"2.000mm\" y=\"1.000mm\" width=\"0.560mm\" height=\"12.000mm\" style=\"fill:black;\"/>\r\n        <rect x=\"2.840mm\" y=\"1.000mm\" width=\"0.280mm\" height=\"12.000mm…",
+            "qr_svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"116\" height=\"116\" class=\"segno\"><path transform=\"scale(4)\" class=\"qrline\" stroke=\"#000\" d=\"M2 2.5h7m1 0h1m1 0h2m1 0h1m1 0h1m2 0h7m-25 1h1m5 0h1m2 0h5m4 0h1m5 0h1m-25 1h1m1 0h3m1 0h1m4 0h2m2 0h1m2 0h1m1 0h3m1 0h1m-25 1h1m1 0h3m1 0h1m1 0h1m1 0h1m5 0h1m1 0h1m1 0h3m1 0h1m-25 1h1m1 0h3m1 0h1m1 0h5m1 0h1m1 0h1m1 0h1m1 0h3m1 0h1m-25 1h1m5 0h1m1 0h1m1 0h2m2 0…",
+            "pdf_url": "/api/v1/admissions/1/discharge-summary/pdf"
+          },
+          "meta": {
+            "server_time": "2026-10-14T10:38:26.879222+00:00"
+          },
+          "request_id": "46a61bed6b64472b81ff848aed372ae4"
+        }
+      },
+      "errors_seen": [
+        "DISCHARGE_SUMMARY_NOT_FINAL"
+      ]
+    },
+    "errors": [
+      {
+        "code": "DISCHARGE_SUMMARY_NOT_FINAL",
+        "http_status": 409,
+        "message": "The discharge summary is not signed yet.",
+        "retryable": false,
+        "category": "business",
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      },
+      {
+        "code": "VALIDATION_ERROR",
+        "http_status": 422,
+        "message": "The request is invalid.",
+        "retryable": false,
+        "category": "request",
+        "ui_action": "Show field errors from details.fields / the message."
+      }
+    ],
+    "errors_seen_in_tests": [
+      "DISCHARGE_SUMMARY_NOT_FINAL"
+    ],
+    "used_by_screens": [
+      "discharge_summary",
+      "my_beds"
+    ],
+    "used_by_workflows": [
+      "inpatient-and-discharge"
+    ],
+    "typescript_example": "// Printable discharge summary, or referral slip for a transfer  (permissions: ipd.discharge.initiate, clinical.encounter.view, patient.emr.view)\nexport const dischargeSummaryPrint = (admission_id) =>\n  api(\"GET\", `/admissions/${admission_id}/discharge-summary/print-payload`, undefined);   // api(): see get_guide('envelope-and-errors')",
+    "access": {
+      "authentication": "user",
+      "permissions": [
+        "ipd.discharge.initiate",
+        "clinical.encounter.view",
+        "patient.emr.view"
+      ],
+      "permissions_mode": "any",
+      "who": "holders of ipd.discharge.initiate or clinical.encounter.view or patient.emr.view",
+      "roles_allowed": [
+        "anaesthetist",
+        "clinical_specialist",
+        "doctor",
+        "head_nurse",
+        "radiologist",
+        "surgeon",
+        "ward_nurse"
+      ]
+    },
+    "write_semantics": null,
+    "emits_events": [],
+    "list": {
+      "returns": "object",
+      "paging": [],
+      "search": [],
+      "filters": [],
+      "note": null
+    },
+    "cross_field_rules": {},
+    "errors_detail": [
+      {
+        "code": "DISCHARGE_SUMMARY_NOT_FINAL",
+        "http_status": 409,
+        "message": "The discharge summary is not signed yet.",
+        "retryable": false,
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+        "source": [
+          "documented",
+          "seen_in_tests"
+        ],
+        "details_fields": [],
+        "details_from": "GET /api/v1/admissions/{admission_id}/discharge-summary/print-payload"
+      },
+      {
+        "code": "VALIDATION_ERROR",
+        "http_status": 422,
+        "message": "The request is invalid.",
+        "retryable": false,
+        "ui_action": "Show field errors from details.fields / the message.",
+        "source": [
+          "documented"
+        ],
+        "details_fields": [],
+        "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+      }
+    ]
+  },
+  "GET /admissions/{admission_id}/discharge-summary/pdf": {
+    "method": "GET",
+    "path": "/api/v1/admissions/{admission_id}/discharge-summary/pdf",
+    "summary": "The signed discharge summary as a PDF",
+    "tags": [
+      "IPD"
+    ],
+    "permissions": [
+      "ipd.discharge.initiate",
+      "clinical.encounter.view",
+      "patient.emr.view"
+    ],
+    "permissions_mode": "any",
+    "idempotency_key": false,
+    "description": "`DISCHARGE_SUMMARY_NOT_FINAL`: only a signed summary prints.\n\n**Required permission:** `ipd.discharge.initiate OR clinical.encounter.view OR patient.emr.view`\n\n**Required permission:** `ipd.discharge.initiate OR clinical.encounter.view OR patient.emr.view`",
+    "roles_allowed": [
+      "anaesthetist",
+      "clinical_specialist",
+      "doctor",
+      "head_nurse",
+      "radiologist",
+      "surgeon",
+      "ward_nurse"
+    ],
+    "parameters": [
+      {
+        "name": "admission_id",
+        "in": "path",
+        "required": true,
+        "description": "",
+        "schema": {
+          "type": "integer",
+          "title": "Admission Id"
+        }
+      }
+    ],
+    "request_body": null,
+    "request_content_type": null,
+    "response_schema": "not JSON (a file download): see the description",
+    "recorded_example": {
+      "request": {
+        "path": "/api/v1/admissions/1/discharge-summary/pdf"
+      },
+      "response": {
+        "status": 200,
+        "content_type": "application/pdf",
+        "bytes": 3141
+      }
+    },
+    "errors": [
+      {
+        "code": "DISCHARGE_SUMMARY_NOT_FINAL",
+        "http_status": 409,
+        "message": "The discharge summary is not signed yet.",
+        "retryable": false,
+        "category": "business",
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      },
+      {
+        "code": "VALIDATION_ERROR",
+        "http_status": 422,
+        "message": "The request is invalid.",
+        "retryable": false,
+        "category": "request",
+        "ui_action": "Show field errors from details.fields / the message."
+      }
+    ],
+    "errors_seen_in_tests": [],
+    "used_by_screens": [
+      "discharge_summary",
+      "my_beds"
+    ],
+    "used_by_workflows": [
+      "inpatient-and-discharge"
+    ],
+    "typescript_example": "// The signed discharge summary as a PDF  (permissions: ipd.discharge.initiate, clinical.encounter.view, patient.emr.view)\nexport const dischargeSummaryPdf = (admission_id) =>\n  api(\"GET\", `/admissions/${admission_id}/discharge-summary/pdf`, undefined);   // api(): see get_guide('envelope-and-errors')",
+    "access": {
+      "authentication": "user",
+      "permissions": [
+        "ipd.discharge.initiate",
+        "clinical.encounter.view",
+        "patient.emr.view"
+      ],
+      "permissions_mode": "any",
+      "who": "holders of ipd.discharge.initiate or clinical.encounter.view or patient.emr.view",
+      "roles_allowed": [
+        "anaesthetist",
+        "clinical_specialist",
+        "doctor",
+        "head_nurse",
+        "radiologist",
+        "surgeon",
+        "ward_nurse"
+      ]
+    },
+    "write_semantics": null,
+    "emits_events": [],
+    "list": {
+      "returns": "file",
+      "paging": [],
+      "search": [],
+      "filters": [],
+      "note": null
+    },
+    "cross_field_rules": {},
+    "errors_detail": [
+      {
+        "code": "DISCHARGE_SUMMARY_NOT_FINAL",
+        "http_status": 409,
+        "message": "The discharge summary is not signed yet.",
+        "retryable": false,
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+        "source": [
+          "documented"
+        ],
+        "details_fields": [],
+        "details_from": "GET /api/v1/admissions/{admission_id}/discharge-summary/print-payload"
+      },
+      {
+        "code": "VALIDATION_ERROR",
+        "http_status": 422,
+        "message": "The request is invalid.",
+        "retryable": false,
+        "ui_action": "Show field errors from details.fields / the message.",
+        "source": [
+          "documented"
+        ],
+        "details_fields": [],
+        "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+      }
+    ]
+  },
+  "GET /staff/lookup": {
+    "method": "GET",
+    "path": "/api/v1/staff/lookup",
+    "summary": "Find a staff member for a form (badge facts only)",
+    "tags": [
+      "HR",
+      "HR"
+    ],
+    "permissions": [],
+    "permissions_mode": "all",
+    "idempotency_key": false,
+    "access": {
+      "authentication": "user",
+      "permissions": [],
+      "permissions_mode": "all",
+      "who": "any logged-in user"
+    },
+    "description": "The picker for every form that names a staff member: the affected staff of an incident report, the assistant of\na procedure, the person who cleaned a bed, the employee a work order is assigned to, a member of staff registering\nas a patient (`linked_employee_id`), a theatre team member or a visiting consultant. Active employees only, at most\n20, best matches first (a name that starts with `q`). Only what their badge shows: id, number, name, designation and\ndepartment, and their council registration as every author stamp prints it (`license_type`, `registration`, e.g.\n\"PMDC 12345-P\"); the staff directory with contact details stays with HR (`GET /hr/employees`).\n\nA form that must name a registered doctor sends `license_type=PMDC`: only the clinical staff registered with the\nPMDC, their number on file, e.g. the doctor present when contrast is given (`contrast_doctor_id` of\n`POST /imaging/orders/{order_id}/status`) or the second doctor of an emergency consent (`second_doctor_id`).\n`PNC` lists the registered nurses. Every id here is an `employee_id`, never a `user_id`. `VALIDATION_ERROR`: `q`\nshorter than 2 characters, or a `license_type` other than PMDC or PNC.",
+    "roles_allowed": [],
+    "parameters": [
+      {
+        "name": "q",
+        "in": "query",
+        "required": true,
+        "description": "Part of the name, or the start of the employee number",
+        "schema": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 80,
+          "description": "Part of the name, or the start of the employee number",
+          "title": "Q"
+        }
+      },
+      {
+        "name": "department_id",
+        "in": "query",
+        "required": false,
+        "description": "Only this department",
+        "schema": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Only this department",
+          "title": "Department Id"
+        }
+      },
+      {
+        "name": "license_type",
+        "in": "query",
+        "required": false,
+        "description": "Only clinical staff registered with this council, their number on file: PMDC for a doctor (the doctor present at contrast, a second doctor)",
+        "schema": {
+          "anyOf": [
+            {
+              "enum": [
+                "PMDC",
+                "PNC"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Only clinical staff registered with this council, their number on file: PMDC for a doctor (the doctor present at contrast, a second doctor)",
+          "title": "License Type"
+        }
+      },
+      {
+        "name": "limit",
+        "in": "query",
+        "required": false,
+        "description": "",
+        "schema": {
+          "type": "integer",
+          "maximum": 20,
+          "minimum": 1,
+          "default": 20,
+          "title": "Limit"
+        }
+      }
+    ],
+    "request_body": null,
+    "request_content_type": null,
+    "response_schema": {
+      "title": "Envelope[list[StaffLookupOut]]",
+      "properties": {
+        "data": {
+          "items": {
+            "title": "StaffLookupOut",
+            "properties": {
+              "employee_id": {
+                "type": "integer",
+                "title": "Employee Id",
+                "description": "The id a form's staff field takes (contrast_doctor_id, employee_id, ...)"
+              },
+              "emp_number": {
+                "type": "string",
+                "title": "Emp Number"
+              },
+              "full_name": {
+                "type": "string",
+                "title": "Full Name"
+              },
+              "designation": {
+                "type": "string",
+                "title": "Designation"
+              },
+              "department_name": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Department Name"
+              },
+              "license_type": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "PMDC",
+                      "PNC",
+                      "Other"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "License Type",
+                "description": "The council they are registered with (PMDC: a doctor or dentist; PNC: a nurse); null: none"
+              },
+              "registration": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Registration",
+                "description": "As their stamp prints it, e.g. \"PMDC 12345-P\"; null: no number on file"
+              }
+            },
+            "type": "object",
+            "required": [
+              "employee_id",
+              "emp_number",
+              "full_name",
+              "designation",
+              "department_name",
+              "license_type",
+              "registration"
+            ],
+            "description": "One active staff member as a picker shows them (GET /staff/lookup): the facts on their badge and the registration\ntheir stamp prints, nothing else."
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "title": "Meta",
+          "properties": {
+            "server_time": {
+              "type": "string",
+              "title": "Server Time",
+              "description": "Server clock (UTC). Use it to detect terminal clock skew."
+            },
+            "page": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Page"
+            },
+            "page_size": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Page Size"
+            },
+            "total_count": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Total Count"
+            },
+            "next_cursor": {
+              "title": "Next Cursor"
+            }
+          },
+          "type": "object",
+          "required": [
+            "server_time"
+          ]
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ]
+    },
+    "recorded_example": {
+      "request": {
+        "path": "/api/v1/staff/lookup",
+        "query": {
+          "q": "sana look"
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": [
+            {
+              "employee_id": 2,
+              "emp_number": "EMP-2026-0002",
+              "full_name": "Sana Lookuptest",
+              "designation": "Officer",
+              "department_name": null,
+              "license_type": "PNC",
+              "registration": "PNC PNC-8403"
+            }
+          ],
+          "meta": {
+            "server_time": "2026-10-27T15:29:53.668901+00:00"
+          },
+          "request_id": "4e2ee3a40faa41c195bc2aa08edaa30b"
+        }
+      },
+      "errors_seen": [
+        "UNAUTHENTICATED",
+        "VALIDATION_ERROR"
+      ]
+    },
+    "errors": [
+      {
+        "code": "UNAUTHENTICATED",
+        "http_status": 401,
+        "message": "Authentication is required.",
+        "retryable": false,
+        "category": "auth",
+        "ui_action": "Refresh the token once; if that fails return to login."
+      },
+      {
+        "code": "VALIDATION_ERROR",
+        "http_status": 422,
+        "message": "The request is invalid.",
+        "retryable": false,
+        "category": "request",
+        "ui_action": "Show field errors from details.fields / the message."
+      }
+    ],
+    "errors_seen_in_tests": [
+      "UNAUTHENTICATED",
+      "VALIDATION_ERROR"
+    ],
+    "used_by_screens": [
+      "report_incident",
+      "registration",
+      "consultation",
+      "my_beds",
+      "lab_admin",
+      "radiology_worklist",
+      "ot_settlement",
+      "safety_checklist",
+      "safety_checklist_admin",
+      "safety_checklist_anaesthesia",
+      "recovery_board",
+      "recovery_board_admin",
+      "recovery_board_anaesthesia",
+      "anaesthesia_record",
+      "surgical_record_surgeon",
+      "billing_admin",
+      "complaints_register",
+      "appraisals_hr",
+      "appraise_staff_head_nurse",
+      "appraise_staff_doctor",
+      "incident_screening",
+      "ops_console"
+    ],
+    "used_by_workflows": [
+      "clinical-and-prescriptions",
+      "consent",
+      "diagnostic-services",
+      "duty-rosters-and-attendance",
+      "facility-and-it",
+      "incidents-and-sentinel-events",
+      "inpatient-and-discharge",
+      "laboratory-and-radiology",
+      "opd-reception",
+      "operating-theater",
+      "personnel-records"
+    ],
+    "typescript_example": "// Find a staff member for a form (badge facts only)  (permissions: any logged-in user)\nexport const lookupStaff = () =>\n  api(\"GET\", `/staff/lookup`, undefined);   // api(): see get_guide('envelope-and-errors')",
+    "write_semantics": null,
+    "emits_events": [],
+    "list": {
+      "returns": "list",
+      "paging": [
+        {
+          "name": "limit",
+          "required": false,
+          "type": "integer",
+          "default": 20,
+          "minimum": 1,
+          "maximum": 20
+        }
+      ],
+      "search": [
+        {
+          "name": "q",
+          "required": true,
+          "type": "string",
+          "min_length": 2,
+          "description": "Part of the name, or the start of the employee number"
+        }
+      ],
+      "filters": [
+        {
+          "name": "department_id",
+          "required": false,
+          "type": "integer",
+          "description": "Only this department"
+        },
+        {
+          "name": "license_type",
+          "required": false,
+          "type": "string",
+          "enum": [
+            "PMDC",
+            "PNC"
+          ],
+          "description": "Only clinical staff registered with this council, their number on file: PMDC for a doctor (the doctor present at contrast, a second doctor)"
+        }
+      ],
+      "note": "Lists are bounded by `limit` (no cursor paging): ask for what the screen shows, filter on the server."
+    },
+    "cross_field_rules": {},
+    "errors_detail": [
+      {
+        "code": "UNAUTHENTICATED",
+        "http_status": 401,
+        "message": "Authentication is required.",
+        "retryable": false,
+        "ui_action": "Refresh the token once; if that fails return to login.",
+        "source": [
+          "seen_in_tests"
+        ],
+        "details_fields": [],
+        "details_from": "GET /api/v1/settings/sections"
+      },
+      {
+        "code": "VALIDATION_ERROR",
+        "http_status": 422,
+        "message": "The request is invalid.",
+        "retryable": false,
+        "ui_action": "Show field errors from details.fields / the message.",
+        "source": [
+          "documented",
+          "seen_in_tests"
+        ],
+        "details_fields": [],
+        "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+      }
+    ]
+  }
+}

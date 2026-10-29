@@ -968,6 +968,17 @@ ipcMain.handle("terminal", async (event, action, args = {}) => {
       if (played) shell.beep();
       return {ok:true,data:{played}};
     }
+    if (action === "print-discharge-summary") {
+      if(!Number.isSafeInteger(args.admissionId)||args.admissionId<1||!Number.isSafeInteger(args.bedId)||!Number.isSafeInteger(args.rosterId)||!Number.isSafeInteger(args.patientId)||!Number.isSafeInteger(args.expectedVersion)||typeof args.mrn!=='string')throw Error('Invalid summary reference');
+      const actor=auth?.user.user_id,workspace=windows.get(win.id);
+      const [mine,payload,est]=await Promise.all([api('GET','/ipd/my-beds',undefined,workspace),api('GET',`/admissions/${args.admissionId}/discharge-summary/print-payload`,undefined,workspace),api('GET','/establishment',undefined,workspace)]);
+      if(!mine.ok)return mine;if(!payload.ok)return payload;if(!est.ok)return est;
+      if(!['full','open_work','records'].includes(est.data.views.screens.find(s=>s.screen_id==='my_beds')?.view)||!mine.data.some(b=>b.bed_id===args.bedId&&b.roster_id===args.rosterId&&b.admission_id===args.admissionId&&b.mrn===args.mrn))throw Error('The duty or admission changed. Read before printing.');
+      require('./discharge-summary-print.cjs').assertSummary(payload.data,args.admissionId,args.patientId,args.mrn,args.expectedVersion);
+      const terminal=await api('GET','/terminals/whoami');if(!terminal.ok)return terminal;
+      if(!actor||actor!==auth?.user.user_id||workspace!==windows.get(win.id))throw Error('The session changed before printing');
+      return {ok:true,data:await require('./discharge-summary-print.cjs').printSummary(payload.data,terminal.data,{owner:win,pdf:false,language:prefs.language})};
+    }
     if (action === "print-estimate") {
       if(!Number.isSafeInteger(args.estimateId)||args.estimateId<1||!Number.isSafeInteger(args.expectedVersion))throw new Error('Invalid estimate reference');
       const actor=auth?.user.user_id,workspace=windows.get(win.id),screenId=args.screenId||'cost_estimates_admissions';
@@ -1138,7 +1149,7 @@ ipcMain.handle("terminal", async (event, action, args = {}) => {
       return await api("GET", "/meta/handbook", undefined, undefined);
     }
     if (action === "clinical-pdf") {
-      if (typeof args.path !== "string" || !/^(?:\/(?:clinical-encounters|referrals)\/[1-9]\d*\/pdf|\/(?:lab\/requisitions|imaging\/orders)\/[1-9]\d*\/report\/pdf|\/(?:consents|cost-estimates)\/[1-9]\d*\/pdf|\/preventive-programmes\/list\/pdf|\/home-visits\/notice\/pdf|\/diagnostics\/(?:services|imaging-policy)\/pdf)$/.test(args.path)) throw new Error("Clinical download not permitted");
+      if (typeof args.path !== "string" || !/^(?:\/(?:clinical-encounters|referrals)\/[1-9]\d*\/pdf|\/(?:lab\/requisitions|imaging\/orders)\/[1-9]\d*\/report\/pdf|\/(?:consents|cost-estimates)\/[1-9]\d*\/pdf|\/admissions\/[1-9]\d*\/discharge-summary\/pdf|\/preventive-programmes\/list\/pdf|\/home-visits\/notice\/pdf|\/diagnostics\/(?:services|imaging-policy)\/pdf)$/.test(args.path)) throw new Error("Clinical download not permitted");
       const op=matchOperation("GET",args.path);
       if(!op || !auth || !permissionAllows(op,auth.user)) throw new Error("You do not have permission to download this document");
       if(Date.now()>auth.expires-60000)await refresh();
