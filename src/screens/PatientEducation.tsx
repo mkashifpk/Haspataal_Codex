@@ -18,6 +18,8 @@ type Props = {
   readOnly: boolean;
   connected: boolean;
   timeZone?: string;
+  screenId?: string;
+  beforeSave?: () => Promise<void>;
 };
 export function PatientEducation(props: Props) {
   return (
@@ -33,13 +35,15 @@ export function PatientEducation(props: Props) {
     </section>
   );
 }
-function EducationForm({
+export function EducationForm({
   ctx,
   user,
   revision,
   readOnly,
   connected,
   timeZone,
+  screenId = 'patient_education',
+  beforeSave,
 }: Props & { ctx: PatientContext }) {
   const canGive = user.permissions.includes("education.give"),
     canRead = canGive || user.permissions.includes("education.manage");
@@ -92,7 +96,7 @@ function EducationForm({
   }, [notes.data, ctx.ticket?.ticket_id]);
   const write = useClinicalWrite(
     user,
-    `education:${ctx.patient.patient_id}`,
+    `${screenId}:education:${ctx.patient.patient_id}`,
     async () => {
       clear();
       setBefore(undefined);
@@ -224,6 +228,7 @@ function EducationForm({
           reconcilePath: `/patients/${ctx.patient.patient_id}/education?limit=100`,
         },
         async () => {
+          if(beforeSave)await beforeSave();
           const [patient, me] = await Promise.all([
             api<any>("GET", `/patients/${ctx.patient.patient_id}`),
             api<any>("GET", "/auth/me"),

@@ -1,0 +1,613 @@
+{
+  "screen_id": "nursing_assessment",
+  "contract_fingerprint": "e90ba541e495d6487532",
+  "knowledge_revision": "e9e3dbb61b873e01",
+  "delivery_gate": {
+    "required": true,
+    "status": "required",
+    "progress_reporting": {
+      "required": true,
+      "submit": "propose_progress",
+      "verify": "progress_proposals",
+      "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+    },
+    "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+    "compulsory": [
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+        "points": 2
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+        "points": 3
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+        "points": 2
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+        "points": 4
+      }
+    ],
+    "zoom": {
+      "min_pct": 100,
+      "max_pct": 250,
+      "reset_pct": 100,
+      "keys": [
+        "Ctrl + or Ctrl = (zoom in)",
+        "Ctrl - (zoom out)",
+        "Ctrl 0 (reset to 100 %)",
+        "Command on macOS"
+      ],
+      "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+    },
+    "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+    "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+  },
+  "schemas": {
+    "AuthorStampOut": {
+      "properties": {
+        "employee_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Employee Id"
+        },
+        "user_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "User Id"
+        },
+        "name": {
+          "type": "string",
+          "title": "Name"
+        },
+        "designation": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Designation",
+          "description": "Designation and specialty, e.g. \"Medical Officer, General Medicine\""
+        },
+        "registration": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Registration",
+          "description": "Council registration, e.g. \"PMDC 12345-P\" or \"PNC 67890\""
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "At",
+          "description": "When the entry was signed, reported or verified"
+        },
+        "text": {
+          "type": "string",
+          "title": "Text",
+          "description": "The printed line: name, designation, registration, date and time"
+        }
+      },
+      "type": "object",
+      "required": [
+        "employee_id",
+        "user_id",
+        "name",
+        "designation",
+        "registration",
+        "at",
+        "text"
+      ],
+      "title": "AuthorStampOut",
+      "description": "The author stamp of a clinical entry (MSDS IMS 147), as the author's staff record stood when they signed it\n(SQL hms_author_stamp / hms_employee_stamp, migration 0013 [STP]). Show it under the entry on screen and print\n`text` under it on paper."
+    },
+    "Envelope_NursingAssessmentOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/NursingAssessmentOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[NursingAssessmentOut]"
+    },
+    "HTTPValidationError": {
+      "properties": {
+        "detail": {
+          "items": {
+            "$ref": "#/components/schemas/ValidationError"
+          },
+          "type": "array",
+          "title": "Detail"
+        }
+      },
+      "type": "object",
+      "title": "HTTPValidationError"
+    },
+    "Meta": {
+      "properties": {
+        "server_time": {
+          "type": "string",
+          "title": "Server Time",
+          "description": "Server clock (UTC). Use it to detect terminal clock skew."
+        },
+        "page": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Page"
+        },
+        "page_size": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Page Size"
+        },
+        "total_count": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Total Count"
+        },
+        "next_cursor": {
+          "title": "Next Cursor"
+        }
+      },
+      "type": "object",
+      "required": [
+        "server_time"
+      ],
+      "title": "Meta"
+    },
+    "NursingAssessmentOut": {
+      "properties": {
+        "admission_id": {
+          "type": "integer",
+          "title": "Admission Id"
+        },
+        "admitted_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Admitted At"
+        },
+        "nutrition_screenings": {
+          "items": {
+            "$ref": "#/components/schemas/NutritionScreeningOut"
+          },
+          "type": "array",
+          "title": "Nutrition Screenings"
+        },
+        "latest_risk": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "Low",
+                "Medium",
+                "High"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Latest Risk"
+        },
+        "screening_overdue": {
+          "type": "boolean",
+          "title": "Screening Overdue",
+          "description": "Not screened within nutrition_screening_hours of admission"
+        },
+        "care_plan": {
+          "anyOf": [
+            {
+              "$ref": "#/components/schemas/NursingCarePlanOut"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "care_plan_overdue": {
+          "type": "boolean",
+          "title": "Care Plan Overdue",
+          "description": "No care plan within nursing_care_plan_hours of admission"
+        }
+      },
+      "type": "object",
+      "required": [
+        "admission_id",
+        "admitted_at",
+        "nutrition_screenings",
+        "latest_risk",
+        "screening_overdue",
+        "care_plan",
+        "care_plan_overdue"
+      ],
+      "title": "NursingAssessmentOut"
+    },
+    "NursingCarePlanIn": {
+      "properties": {
+        "problems": {
+          "type": "string",
+          "maxLength": 4000,
+          "minLength": 3,
+          "title": "Problems",
+          "description": "The nursing diagnoses"
+        },
+        "goals": {
+          "type": "string",
+          "maxLength": 4000,
+          "minLength": 3,
+          "title": "Goals"
+        },
+        "interventions": {
+          "type": "string",
+          "maxLength": 4000,
+          "minLength": 3,
+          "title": "Interventions"
+        },
+        "evaluation": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 4000
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Evaluation",
+          "description": "How the patient responded, at each review"
+        },
+        "expected_version": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Expected Version",
+          "description": "Optimistic concurrency: the row_version you loaded"
+        }
+      },
+      "type": "object",
+      "required": [
+        "problems",
+        "goals",
+        "interventions"
+      ],
+      "title": "NursingCarePlanIn"
+    },
+    "NursingCarePlanOut": {
+      "properties": {
+        "care_plan_id": {
+          "type": "integer",
+          "title": "Care Plan Id"
+        },
+        "problems": {
+          "type": "string",
+          "title": "Problems"
+        },
+        "goals": {
+          "type": "string",
+          "title": "Goals"
+        },
+        "interventions": {
+          "type": "string",
+          "title": "Interventions"
+        },
+        "evaluation": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Evaluation"
+        },
+        "written_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Written At"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Updated At"
+        },
+        "author_stamp": {
+          "$ref": "#/components/schemas/AuthorStampOut",
+          "description": "Of the last update"
+        },
+        "row_version": {
+          "type": "integer",
+          "title": "Row Version"
+        }
+      },
+      "type": "object",
+      "required": [
+        "care_plan_id",
+        "problems",
+        "goals",
+        "interventions",
+        "evaluation",
+        "written_at",
+        "updated_at",
+        "author_stamp",
+        "row_version"
+      ],
+      "title": "NursingCarePlanOut",
+      "description": "The nursing care plan (MSDS CQI 99 d); every version is kept."
+    },
+    "NutritionScreeningIn": {
+      "properties": {
+        "weight_kg": {
+          "anyOf": [
+            {
+              "type": "number",
+              "maximum": 400,
+              "minimum": 0.5
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Weight Kg"
+        },
+        "height_cm": {
+          "anyOf": [
+            {
+              "type": "number",
+              "maximum": 250,
+              "minimum": 30
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Height Cm"
+        },
+        "bmi_score": {
+          "type": "integer",
+          "maximum": 2,
+          "minimum": 0,
+          "title": "Bmi Score",
+          "description": "Body mass index: over 20 = 0, 18.5-20 = 1, under 18.5 = 2"
+        },
+        "weight_loss_score": {
+          "type": "integer",
+          "maximum": 2,
+          "minimum": 0,
+          "title": "Weight Loss Score",
+          "description": "Unplanned weight loss in 3-6 months: under 5 % = 0, 5-10 % = 1, over 10 % = 2"
+        },
+        "acute_disease_score": {
+          "type": "integer",
+          "maximum": 2,
+          "minimum": 0,
+          "title": "Acute Disease Score",
+          "description": "Acutely ill with no intake for over 5 days: 2, else 0"
+        },
+        "plan": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 2000
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Plan",
+          "description": "Needed for a medium or high risk"
+        }
+      },
+      "type": "object",
+      "required": [
+        "bmi_score",
+        "weight_loss_score",
+        "acute_disease_score"
+      ],
+      "title": "NutritionScreeningIn"
+    },
+    "NutritionScreeningOut": {
+      "properties": {
+        "screening_id": {
+          "type": "integer",
+          "title": "Screening Id"
+        },
+        "screened_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Screened At"
+        },
+        "weight_kg": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Weight Kg"
+        },
+        "height_cm": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Height Cm"
+        },
+        "bmi_score": {
+          "type": "integer",
+          "title": "Bmi Score"
+        },
+        "weight_loss_score": {
+          "type": "integer",
+          "title": "Weight Loss Score"
+        },
+        "acute_disease_score": {
+          "type": "integer",
+          "title": "Acute Disease Score"
+        },
+        "total_score": {
+          "type": "integer",
+          "title": "Total Score"
+        },
+        "risk": {
+          "type": "string",
+          "enum": [
+            "Low",
+            "Medium",
+            "High"
+          ],
+          "title": "Risk"
+        },
+        "plan": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Plan"
+        },
+        "author_stamp": {
+          "$ref": "#/components/schemas/AuthorStampOut"
+        }
+      },
+      "type": "object",
+      "required": [
+        "screening_id",
+        "screened_at",
+        "weight_kg",
+        "height_cm",
+        "bmi_score",
+        "weight_loss_score",
+        "acute_disease_score",
+        "total_score",
+        "risk",
+        "plan",
+        "author_stamp"
+      ],
+      "title": "NutritionScreeningOut",
+      "description": "A nutrition screening (MSDS CQI 99 c): the three scores of the Malnutrition Universal Screening Tool."
+    },
+    "ValidationError": {
+      "properties": {
+        "loc": {
+          "items": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ]
+          },
+          "type": "array",
+          "title": "Location"
+        },
+        "msg": {
+          "type": "string",
+          "title": "Message"
+        },
+        "type": {
+          "type": "string",
+          "title": "Error Type"
+        },
+        "input": {
+          "title": "Input"
+        },
+        "ctx": {
+          "type": "object",
+          "title": "Context"
+        }
+      },
+      "type": "object",
+      "required": [
+        "loc",
+        "msg",
+        "type"
+      ],
+      "title": "ValidationError"
+    }
+  },
+  "unknowns": []
+}

@@ -1,0 +1,1193 @@
+{
+  "POST /patients/{patient_id}/education": {
+    "method": "POST",
+    "path": "/api/v1/patients/{patient_id}/education",
+    "summary": "Record health education given",
+    "tags": [
+      "Health education"
+    ],
+    "permissions": [
+      "education.give"
+    ],
+    "permissions_mode": "all",
+    "idempotency_key": true,
+    "description": "The topic, how the patient or the attendant was guided and the material used; signed with the author's stamp and\nnever edited (record a correct one after a wrong one). `NOT_FOUND` for an unknown patient or consultation;\n`VALIDATION_ERROR` for a consultation of another patient, or a leaflet or video without its material;\n`REFERENCE_NOT_FOUND` for an unknown or retired material.\n\n**Required permission:** `education.give`\n\n**Required permission:** `education.give`",
+    "roles_allowed": [
+      "clinical_specialist",
+      "doctor",
+      "head_nurse",
+      "pharmacist",
+      "triage_nurse",
+      "ward_nurse"
+    ],
+    "parameters": [
+      {
+        "name": "patient_id",
+        "in": "path",
+        "required": true,
+        "description": "",
+        "schema": {
+          "type": "integer",
+          "title": "Patient Id"
+        }
+      },
+      {
+        "name": "Idempotency-Key",
+        "in": "header",
+        "required": false,
+        "description": "Unique per logical action; retries return the first result",
+        "schema": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Unique per logical action; retries return the first result",
+          "title": "Idempotency-Key"
+        }
+      }
+    ],
+    "request_body": {
+      "title": "EducationIn",
+      "properties": {
+        "topic": {
+          "type": "string",
+          "maxLength": 300,
+          "minLength": 3,
+          "title": "Topic",
+          "examples": [
+            "Hand washing before meals"
+          ]
+        },
+        "method": {
+          "type": "string",
+          "enum": [
+            "Verbal",
+            "Leaflet",
+            "WrittenInstructions",
+            "Demonstration",
+            "Video"
+          ],
+          "title": "Method"
+        },
+        "given_to": {
+          "type": "string",
+          "enum": [
+            "Patient",
+            "Attendant",
+            "Both"
+          ],
+          "title": "Given To"
+        },
+        "material_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Material Id",
+          "description": "Required for Leaflet and Video; any active material otherwise"
+        },
+        "encounter_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Encounter Id",
+          "description": "The consultation it was part of"
+        },
+        "note": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 1000
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Note"
+        }
+      },
+      "type": "object",
+      "required": [
+        "topic",
+        "method",
+        "given_to"
+      ]
+    },
+    "request_content_type": "application/json",
+    "response_schema": {
+      "title": "Envelope[EducationOut]",
+      "properties": {
+        "data": {
+          "title": "EducationOut",
+          "properties": {
+            "education_id": {
+              "type": "integer",
+              "title": "Education Id"
+            },
+            "patient_id": {
+              "type": "integer",
+              "title": "Patient Id"
+            },
+            "mrn": {
+              "type": "string",
+              "title": "Mrn"
+            },
+            "patient_name": {
+              "type": "string",
+              "title": "Patient Name"
+            },
+            "encounter_id": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Encounter Id"
+            },
+            "topic": {
+              "type": "string",
+              "title": "Topic"
+            },
+            "method": {
+              "type": "string",
+              "enum": [
+                "Verbal",
+                "Leaflet",
+                "WrittenInstructions",
+                "Demonstration",
+                "Video"
+              ],
+              "title": "Method"
+            },
+            "material_id": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Material Id"
+            },
+            "material_title": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Material Title"
+            },
+            "given_to": {
+              "type": "string",
+              "enum": [
+                "Patient",
+                "Attendant",
+                "Both"
+              ],
+              "title": "Given To"
+            },
+            "note": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Note"
+            },
+            "given_by": {
+              "type": "integer",
+              "title": "Given By"
+            },
+            "given_by_name": {
+              "type": "string",
+              "title": "Given By Name"
+            },
+            "given_by_stamp": {
+              "$ref": "#/components/schemas/AuthorStampOut"
+            },
+            "given_at": {
+              "type": "string",
+              "format": "date-time",
+              "title": "Given At"
+            }
+          },
+          "type": "object",
+          "required": [
+            "education_id",
+            "patient_id",
+            "mrn",
+            "patient_name",
+            "encounter_id",
+            "topic",
+            "method",
+            "material_id",
+            "material_title",
+            "given_to",
+            "note",
+            "given_by",
+            "given_by_name",
+            "given_by_stamp",
+            "given_at"
+          ]
+        },
+        "meta": {
+          "title": "Meta",
+          "properties": {
+            "server_time": {
+              "type": "string",
+              "title": "Server Time",
+              "description": "Server clock (UTC). Use it to detect terminal clock skew."
+            },
+            "page": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Page"
+            },
+            "page_size": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Page Size"
+            },
+            "total_count": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Total Count"
+            },
+            "next_cursor": {
+              "title": "Next Cursor"
+            }
+          },
+          "type": "object",
+          "required": [
+            "server_time"
+          ]
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ]
+    },
+    "recorded_example": {
+      "request": {
+        "path": "/api/v1/patients/1/education",
+        "body": {
+          "topic": "Plenty of fluids",
+          "method": "Verbal",
+          "given_to": "Patient",
+          "encounter_id": 1
+        }
+      },
+      "response": {
+        "status": 201,
+        "body": {
+          "data": {
+            "education_id": 1,
+            "patient_id": 1,
+            "mrn": "MRN-2026-000001",
+            "patient_name": "Ali Khan",
+            "encounter_id": 1,
+            "topic": "Plenty of fluids",
+            "method": "Verbal",
+            "material_id": null,
+            "material_title": null,
+            "given_to": "Patient",
+            "note": null,
+            "given_by": 1,
+            "given_by_name": "Dr Ahmed",
+            "given_by_stamp": {
+              "at": "2026-10-14T10:55:39.999421+00:00",
+              "name": "Dr Ahmed",
+              "text": "Dr Ahmed, Doctor, PMDC PMDC-13459, 14-Oct-2026 15:55",
+              "user_id": 1,
+              "designation": "Doctor",
+              "employee_id": 1,
+              "registration": "PMDC PMDC-13459"
+            },
+            "given_at": "2026-10-14T10:55:39.999421+00:00"
+          },
+          "meta": {
+            "server_time": "2026-10-14T10:55:40.019899+00:00"
+          },
+          "request_id": "a3378e61dd954652a1b18dc4eda46463"
+        }
+      },
+      "errors_seen": [
+        "REFERENCE_NOT_FOUND",
+        "VALIDATION_ERROR"
+      ],
+      "events_emitted": []
+    },
+    "errors": [
+      {
+        "code": "NOT_FOUND",
+        "http_status": 404,
+        "message": "The requested resource was not found.",
+        "retryable": false,
+        "category": "request",
+        "ui_action": "Say 'not found'; refresh the list."
+      },
+      {
+        "code": "REFERENCE_NOT_FOUND",
+        "http_status": 422,
+        "message": "A referenced record does not exist.",
+        "retryable": false,
+        "category": "request",
+        "ui_action": "Show field errors from details.fields / the message."
+      },
+      {
+        "code": "VALIDATION_ERROR",
+        "http_status": 422,
+        "message": "The request is invalid.",
+        "retryable": false,
+        "category": "request",
+        "ui_action": "Show field errors from details.fields / the message."
+      }
+    ],
+    "errors_seen_in_tests": [
+      "REFERENCE_NOT_FOUND",
+      "VALIDATION_ERROR"
+    ],
+    "used_by_screens": [
+      "patient_education",
+      "patient_education_ward"
+    ],
+    "used_by_workflows": [
+      "clinic-quality-and-education"
+    ],
+    "typescript_example": "// Record health education given  (permissions: education.give)\nexport const recordPatientsEducation = (patient_id, body) =>\n  api(\"POST\", `/patients/${patient_id}/education`, body, { idempotent: true });   // api(): see get_guide('envelope-and-errors')",
+    "access": {
+      "authentication": "user",
+      "permissions": [
+        "education.give"
+      ],
+      "permissions_mode": "all",
+      "who": "holders of education.give",
+      "roles_allowed": [
+        "clinical_specialist",
+        "doctor",
+        "head_nurse",
+        "pharmacist",
+        "triage_nurse",
+        "ward_nurse"
+      ]
+    },
+    "write_semantics": {
+      "protection": "idempotency_key",
+      "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+      "reconcile_with": "GET /patients/{patient_id}/education",
+      "emits_events": [],
+      "prints": false,
+      "related_state_machine": null
+    },
+    "emits_events": [],
+    "list": null,
+    "cross_field_rules": {},
+    "errors_detail": [
+      {
+        "code": "NOT_FOUND",
+        "http_status": 404,
+        "message": "The requested resource was not found.",
+        "retryable": false,
+        "ui_action": "Say 'not found'; refresh the list.",
+        "source": [
+          "documented"
+        ],
+        "details_fields": [
+          "resource"
+        ],
+        "details_from": "PUT /api/v1/admin/printers/{printer_id}"
+      },
+      {
+        "code": "REFERENCE_NOT_FOUND",
+        "http_status": 422,
+        "message": "A referenced record does not exist.",
+        "retryable": false,
+        "ui_action": "Show field errors from details.fields / the message.",
+        "source": [
+          "documented",
+          "seen_in_tests"
+        ],
+        "details_fields": [
+          "ward_id"
+        ],
+        "details_from": "POST /api/v1/pharmacy/storage-checks"
+      },
+      {
+        "code": "VALIDATION_ERROR",
+        "http_status": 422,
+        "message": "The request is invalid.",
+        "retryable": false,
+        "ui_action": "Show field errors from details.fields / the message.",
+        "source": [
+          "documented",
+          "seen_in_tests"
+        ],
+        "details_fields": [],
+        "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+      }
+    ]
+  },
+  "GET /patients/{patient_id}/education": {
+    "method": "GET",
+    "path": "/api/v1/patients/{patient_id}/education",
+    "summary": "The education a patient was given",
+    "tags": [
+      "Health education"
+    ],
+    "permissions": [
+      "education.give",
+      "education.manage"
+    ],
+    "permissions_mode": "any",
+    "idempotency_key": false,
+    "description": "Newest first; the read is logged as access to the patient's record. `NOT_FOUND`. Continue with the last\neducation_id as `before_id` until an empty page.\n\n**Required permission:** `education.give OR education.manage`\n\n**Required permission:** `education.give OR education.manage`",
+    "roles_allowed": [
+      "clinic_director",
+      "clinical_specialist",
+      "doctor",
+      "head_nurse",
+      "hospital_admin",
+      "hospital_director",
+      "owner",
+      "pharmacist",
+      "quality_officer",
+      "triage_nurse",
+      "ward_nurse"
+    ],
+    "parameters": [
+      {
+        "name": "patient_id",
+        "in": "path",
+        "required": true,
+        "description": "",
+        "schema": {
+          "type": "integer",
+          "title": "Patient Id"
+        }
+      },
+      {
+        "name": "limit",
+        "in": "query",
+        "required": false,
+        "description": "",
+        "schema": {
+          "type": "integer",
+          "maximum": 1000,
+          "minimum": 1,
+          "default": 100,
+          "title": "Limit"
+        }
+      },
+      {
+        "name": "before_id",
+        "in": "query",
+        "required": false,
+        "description": "",
+        "schema": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 1
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Before Id"
+        }
+      }
+    ],
+    "request_body": null,
+    "request_content_type": null,
+    "response_schema": {
+      "title": "Envelope[list[EducationOut]]",
+      "properties": {
+        "data": {
+          "items": {
+            "title": "EducationOut",
+            "properties": {
+              "education_id": {
+                "type": "integer",
+                "title": "Education Id"
+              },
+              "patient_id": {
+                "type": "integer",
+                "title": "Patient Id"
+              },
+              "mrn": {
+                "type": "string",
+                "title": "Mrn"
+              },
+              "patient_name": {
+                "type": "string",
+                "title": "Patient Name"
+              },
+              "encounter_id": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Encounter Id"
+              },
+              "topic": {
+                "type": "string",
+                "title": "Topic"
+              },
+              "method": {
+                "type": "string",
+                "enum": [
+                  "Verbal",
+                  "Leaflet",
+                  "WrittenInstructions",
+                  "Demonstration",
+                  "Video"
+                ],
+                "title": "Method"
+              },
+              "material_id": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Material Id"
+              },
+              "material_title": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Material Title"
+              },
+              "given_to": {
+                "type": "string",
+                "enum": [
+                  "Patient",
+                  "Attendant",
+                  "Both"
+                ],
+                "title": "Given To"
+              },
+              "note": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Note"
+              },
+              "given_by": {
+                "type": "integer",
+                "title": "Given By"
+              },
+              "given_by_name": {
+                "type": "string",
+                "title": "Given By Name"
+              },
+              "given_by_stamp": {
+                "$ref": "#/components/schemas/AuthorStampOut"
+              },
+              "given_at": {
+                "type": "string",
+                "format": "date-time",
+                "title": "Given At"
+              }
+            },
+            "type": "object",
+            "required": [
+              "education_id",
+              "patient_id",
+              "mrn",
+              "patient_name",
+              "encounter_id",
+              "topic",
+              "method",
+              "material_id",
+              "material_title",
+              "given_to",
+              "note",
+              "given_by",
+              "given_by_name",
+              "given_by_stamp",
+              "given_at"
+            ]
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "title": "Meta",
+          "properties": {
+            "server_time": {
+              "type": "string",
+              "title": "Server Time",
+              "description": "Server clock (UTC). Use it to detect terminal clock skew."
+            },
+            "page": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Page"
+            },
+            "page_size": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Page Size"
+            },
+            "total_count": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Total Count"
+            },
+            "next_cursor": {
+              "title": "Next Cursor"
+            }
+          },
+          "type": "object",
+          "required": [
+            "server_time"
+          ]
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ]
+    },
+    "recorded_example": {
+      "request": {
+        "path": "/api/v1/patients/1/education"
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": [
+            {
+              "education_id": 2,
+              "patient_id": 1,
+              "mrn": "MRN-2026-000001",
+              "patient_name": "Ali Khan",
+              "encounter_id": null,
+              "topic": "Plenty of fluids and paracetamol only",
+              "method": "Verbal",
+              "material_id": null,
+              "material_title": null,
+              "given_to": "Attendant",
+              "note": null,
+              "given_by": 1,
+              "given_by_name": "Dr Ahmed",
+              "given_by_stamp": {
+                "at": "2026-10-14T11:26:46.893423+00:00",
+                "name": "Dr Ahmed",
+                "text": "Dr Ahmed, Doctor, PMDC PMDC-37977, 14-Oct-2026 16:26",
+                "user_id": 1,
+                "designation": "Doctor",
+                "employee_id": 1,
+                "registration": "PMDC PMDC-37977"
+              },
+              "given_at": "2026-10-14T11:26:46.893423+00:00"
+            },
+            {
+              "education_id": 1,
+              "patient_id": 1,
+              "mrn": "MRN-2026-000001",
+              "patient_name": "Ali Khan",
+              "encounter_id": 1,
+              "topic": "Dengue prevention",
+              "method": "Leaflet",
+              "material_id": 1,
+              "material_title": "Dengue: clean standing water",
+              "given_to": "Both",
+              "note": null,
+              "given_by": 1,
+              "given_by_name": "Dr Ahmed",
+              "given_by_stamp": {
+                "at": "2026-10-14T11:26:46.873269+00:00",
+                "name": "Dr Ahmed",
+                "text": "Dr Ahmed, Doctor, PMDC PMDC-37977, 14-Oct-2026 16:26",
+                "user_id": 1,
+                "designation": "Doctor",
+                "employee_id": 1,
+                "registration": "PMDC PMDC-37977"
+              },
+              "given_at": "2026-10-14T11:26:46.873269+00:00"
+            }
+          ],
+          "meta": {
+            "server_time": "2026-10-14T11:26:46.916779+00:00"
+          },
+          "request_id": "87fa231565ac4eaf94eaf85af8bccae5"
+        }
+      }
+    },
+    "errors": [
+      {
+        "code": "NOT_FOUND",
+        "http_status": 404,
+        "message": "The requested resource was not found.",
+        "retryable": false,
+        "category": "request",
+        "ui_action": "Say 'not found'; refresh the list."
+      },
+      {
+        "code": "VALIDATION_ERROR",
+        "http_status": 422,
+        "message": "The request is invalid.",
+        "retryable": false,
+        "category": "request",
+        "ui_action": "Show field errors from details.fields / the message."
+      }
+    ],
+    "errors_seen_in_tests": [],
+    "used_by_screens": [
+      "patient_education",
+      "patient_education_ward"
+    ],
+    "used_by_workflows": [
+      "clinic-quality-and-education"
+    ],
+    "typescript_example": "// The education a patient was given  (permissions: education.give, education.manage)\nexport const forPatientPatientsEducation = (patient_id) =>\n  api(\"GET\", `/patients/${patient_id}/education`, undefined);   // api(): see get_guide('envelope-and-errors')",
+    "access": {
+      "authentication": "user",
+      "permissions": [
+        "education.give",
+        "education.manage"
+      ],
+      "permissions_mode": "any",
+      "who": "holders of education.give or education.manage",
+      "roles_allowed": [
+        "clinic_director",
+        "clinical_specialist",
+        "doctor",
+        "head_nurse",
+        "hospital_admin",
+        "hospital_director",
+        "owner",
+        "pharmacist",
+        "quality_officer",
+        "triage_nurse",
+        "ward_nurse"
+      ]
+    },
+    "write_semantics": null,
+    "emits_events": [],
+    "list": {
+      "returns": "list",
+      "paging": [
+        {
+          "name": "limit",
+          "required": false,
+          "type": "integer",
+          "default": 100,
+          "minimum": 1,
+          "maximum": 1000
+        }
+      ],
+      "search": [],
+      "filters": [
+        {
+          "name": "before_id",
+          "required": false,
+          "type": "integer",
+          "minimum": 1
+        }
+      ],
+      "note": "Lists are bounded by `limit` (no cursor paging): ask for what the screen shows, filter on the server."
+    },
+    "cross_field_rules": {},
+    "errors_detail": [
+      {
+        "code": "NOT_FOUND",
+        "http_status": 404,
+        "message": "The requested resource was not found.",
+        "retryable": false,
+        "ui_action": "Say 'not found'; refresh the list.",
+        "source": [
+          "documented"
+        ],
+        "details_fields": [
+          "resource"
+        ],
+        "details_from": "PUT /api/v1/admin/printers/{printer_id}"
+      },
+      {
+        "code": "VALIDATION_ERROR",
+        "http_status": 422,
+        "message": "The request is invalid.",
+        "retryable": false,
+        "ui_action": "Show field errors from details.fields / the message.",
+        "source": [
+          "documented"
+        ],
+        "details_fields": [],
+        "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+      }
+    ]
+  },
+  "GET /education/materials": {
+    "method": "GET",
+    "path": "/api/v1/education/materials",
+    "summary": "The education materials",
+    "tags": [
+      "Health education"
+    ],
+    "permissions": [
+      "education.give",
+      "education.manage",
+      "msds.view"
+    ],
+    "permissions_mode": "any",
+    "idempotency_key": false,
+    "description": "Posters, leaflets, booklets and videos the establishment displays or hands out, by topic.\n\n**Required permission:** `education.give OR education.manage OR msds.view`\n\n**Required permission:** `education.give OR education.manage OR msds.view`",
+    "roles_allowed": [
+      "clinic_director",
+      "clinical_specialist",
+      "doctor",
+      "head_nurse",
+      "hospital_admin",
+      "hospital_director",
+      "owner",
+      "pharmacist",
+      "quality_officer",
+      "triage_nurse",
+      "ward_nurse"
+    ],
+    "parameters": [
+      {
+        "name": "include_inactive",
+        "in": "query",
+        "required": false,
+        "description": "",
+        "schema": {
+          "type": "boolean",
+          "default": false,
+          "title": "Include Inactive"
+        }
+      }
+    ],
+    "request_body": null,
+    "request_content_type": null,
+    "response_schema": {
+      "title": "Envelope[list[MaterialOut]]",
+      "properties": {
+        "data": {
+          "items": {
+            "title": "MaterialOut",
+            "properties": {
+              "material_id": {
+                "type": "integer",
+                "title": "Material Id"
+              },
+              "title": {
+                "type": "string",
+                "title": "Title"
+              },
+              "topic": {
+                "type": "string",
+                "title": "Topic"
+              },
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "Poster",
+                  "Leaflet",
+                  "Booklet",
+                  "Video",
+                  "Other"
+                ],
+                "title": "Kind"
+              },
+              "language": {
+                "type": "string",
+                "enum": [
+                  "Urdu",
+                  "English",
+                  "Punjabi",
+                  "Other"
+                ],
+                "title": "Language"
+              },
+              "displayed_at": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Displayed At"
+              },
+              "is_active": {
+                "type": "boolean",
+                "title": "Is Active"
+              },
+              "row_version": {
+                "type": "integer",
+                "title": "Row Version"
+              }
+            },
+            "type": "object",
+            "required": [
+              "material_id",
+              "title",
+              "topic",
+              "kind",
+              "language",
+              "displayed_at",
+              "is_active",
+              "row_version"
+            ]
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "title": "Meta",
+          "properties": {
+            "server_time": {
+              "type": "string",
+              "title": "Server Time",
+              "description": "Server clock (UTC). Use it to detect terminal clock skew."
+            },
+            "page": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Page"
+            },
+            "page_size": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Page Size"
+            },
+            "total_count": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Total Count"
+            },
+            "next_cursor": {
+              "title": "Next Cursor"
+            }
+          },
+          "type": "object",
+          "required": [
+            "server_time"
+          ]
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ]
+    },
+    "recorded_example": {
+      "request": {
+        "path": "/api/v1/education/materials"
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": [
+            {
+              "material_id": 1,
+              "title": "Dengue: clean standing water",
+              "topic": "Dengue prevention",
+              "kind": "Leaflet",
+              "language": "Urdu",
+              "displayed_at": "Waiting area rack",
+              "is_active": true,
+              "row_version": 1
+            }
+          ],
+          "meta": {
+            "server_time": "2026-10-14T11:26:46.582181+00:00"
+          },
+          "request_id": "6bff3115911847a593c56ae7a9bb8feb"
+        }
+      }
+    },
+    "errors": [
+      {
+        "code": "VALIDATION_ERROR",
+        "http_status": 422,
+        "message": "The request is invalid.",
+        "retryable": false,
+        "category": "request",
+        "ui_action": "Show field errors from details.fields / the message."
+      }
+    ],
+    "errors_seen_in_tests": [],
+    "used_by_screens": [
+      "patient_education",
+      "patient_education_ward",
+      "education_materials"
+    ],
+    "used_by_workflows": [
+      "clinic-quality-and-education"
+    ],
+    "typescript_example": "// The education materials  (permissions: education.give, education.manage, msds.view)\nexport const listMaterials = () =>\n  api(\"GET\", `/education/materials`, undefined);   // api(): see get_guide('envelope-and-errors')",
+    "access": {
+      "authentication": "user",
+      "permissions": [
+        "education.give",
+        "education.manage",
+        "msds.view"
+      ],
+      "permissions_mode": "any",
+      "who": "holders of education.give or education.manage or msds.view",
+      "roles_allowed": [
+        "clinic_director",
+        "clinical_specialist",
+        "doctor",
+        "head_nurse",
+        "hospital_admin",
+        "hospital_director",
+        "owner",
+        "pharmacist",
+        "quality_officer",
+        "triage_nurse",
+        "ward_nurse"
+      ]
+    },
+    "write_semantics": null,
+    "emits_events": [],
+    "list": {
+      "returns": "list",
+      "paging": [],
+      "search": [],
+      "filters": [
+        {
+          "name": "include_inactive",
+          "required": false,
+          "type": "boolean",
+          "default": false
+        }
+      ],
+      "note": null
+    },
+    "cross_field_rules": {},
+    "errors_detail": [
+      {
+        "code": "VALIDATION_ERROR",
+        "http_status": 422,
+        "message": "The request is invalid.",
+        "retryable": false,
+        "ui_action": "Show field errors from details.fields / the message.",
+        "source": [
+          "documented"
+        ],
+        "details_fields": [],
+        "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+      }
+    ]
+  }
+}

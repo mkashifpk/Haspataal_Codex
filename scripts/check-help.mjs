@@ -159,6 +159,7 @@ export function checkHelp({
     "src/clinical-write.tsx",
     "src/clinical-patient.tsx",
     "src/referral-record.tsx",
+    "src/ward-admission.tsx",
     ...[
       "Connection",
       "Login",
@@ -214,6 +215,8 @@ export function checkHelp({
       "CostEstimates",
       "DoctorInpatients",
       "MyBeds",
+      "WardEducation",
+      "NursingAssessment",
       "ConsentScanUpload",
       "LabVerification",
       "CriticalResultsBench",

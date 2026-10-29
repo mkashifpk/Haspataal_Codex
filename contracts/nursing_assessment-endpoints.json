@@ -1,0 +1,1105 @@
+{
+  "GET /admissions/{admission_id}/nursing-assessment": {
+    "method": "GET",
+    "path": "/api/v1/admissions/{admission_id}/nursing-assessment",
+    "summary": "The nursing assessment: nutrition screenings and the nursing care plan",
+    "tags": [
+      "IPD"
+    ],
+    "permissions": [
+      "ipd.flowsheet.view",
+      "ipd.nursing_assessment.record"
+    ],
+    "permissions_mode": "any",
+    "idempotency_key": false,
+    "description": "MSDS CQI 99 c, d: every screening with its risk, the care plan as it stands; `screening_overdue` and\n`care_plan_overdue` in red when the first day has passed without them.\n\n**Required permission:** `ipd.flowsheet.view OR ipd.nursing_assessment.record`\n\n**Required permission:** `ipd.flowsheet.view OR ipd.nursing_assessment.record`",
+    "roles_allowed": [
+      "anaesthetist",
+      "clinical_specialist",
+      "doctor",
+      "head_nurse",
+      "surgeon",
+      "triage_nurse",
+      "ward_nurse"
+    ],
+    "parameters": [
+      {
+        "name": "admission_id",
+        "in": "path",
+        "required": true,
+        "description": "",
+        "schema": {
+          "type": "integer",
+          "title": "Admission Id"
+        }
+      }
+    ],
+    "request_body": null,
+    "request_content_type": null,
+    "response_schema": {
+      "title": "Envelope[NursingAssessmentOut]",
+      "properties": {
+        "data": {
+          "title": "NursingAssessmentOut",
+          "properties": {
+            "admission_id": {
+              "type": "integer",
+              "title": "Admission Id"
+            },
+            "admitted_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Admitted At"
+            },
+            "nutrition_screenings": {
+              "items": {
+                "$ref": "#/components/schemas/NutritionScreeningOut"
+              },
+              "type": "array",
+              "title": "Nutrition Screenings"
+            },
+            "latest_risk": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "enum": [
+                    "Low",
+                    "Medium",
+                    "High"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Latest Risk"
+            },
+            "screening_overdue": {
+              "type": "boolean",
+              "title": "Screening Overdue",
+              "description": "Not screened within nutrition_screening_hours of admission"
+            },
+            "care_plan": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/NursingCarePlanOut"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "care_plan_overdue": {
+              "type": "boolean",
+              "title": "Care Plan Overdue",
+              "description": "No care plan within nursing_care_plan_hours of admission"
+            }
+          },
+          "type": "object",
+          "required": [
+            "admission_id",
+            "admitted_at",
+            "nutrition_screenings",
+            "latest_risk",
+            "screening_overdue",
+            "care_plan",
+            "care_plan_overdue"
+          ]
+        },
+        "meta": {
+          "title": "Meta",
+          "properties": {
+            "server_time": {
+              "type": "string",
+              "title": "Server Time",
+              "description": "Server clock (UTC). Use it to detect terminal clock skew."
+            },
+            "page": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Page"
+            },
+            "page_size": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Page Size"
+            },
+            "total_count": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Total Count"
+            },
+            "next_cursor": {
+              "title": "Next Cursor"
+            }
+          },
+          "type": "object",
+          "required": [
+            "server_time"
+          ]
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ]
+    },
+    "recorded_example": {
+      "request": {
+        "path": "/api/v1/admissions/1/nursing-assessment"
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": {
+            "admission_id": 1,
+            "admitted_at": "2026-10-01T07:32:22.158089+00:00",
+            "nutrition_screenings": [
+              {
+                "screening_id": 2,
+                "screened_at": "2026-10-01T07:32:22.212036+00:00",
+                "weight_kg": 41,
+                "height_cm": 160,
+                "bmi_score": 2,
+                "weight_loss_score": 1,
+                "acute_disease_score": 0,
+                "total_score": 3,
+                "risk": "High",
+                "plan": "Dietitian referral today; food and fluid chart",
+                "author_stamp": {
+                  "at": "2026-10-01T07:32:22.212036+00:00",
+                  "name": "Staff 28081",
+                  "text": "Staff 28081, Officer, PNC PNC-28081, 01-Oct-2026 12:32",
+                  "user_id": 7,
+                  "designation": "Officer",
+                  "employee_id": 7,
+                  "registration": "PNC PNC-28081"
+                }
+              }
+            ],
+            "latest_risk": "High",
+            "screening_overdue": false,
+            "care_plan": {
+              "care_plan_id": 1,
+              "problems": "Malnutrition risk; pressure area risk",
+              "goals": "No weight loss this week; skin intact",
+              "interventions": "Weigh twice a week, 2-hourly turning, high-protein supplements",
+              "evaluation": "Eating half the meals",
+              "written_at": "2026-10-01T07:32:22.229497+00:00",
+              "updated_at": "2026-10-01T07:32:22.251763+00:00",
+              "author_stamp": {
+                "at": "2026-10-01T07:32:22.251763+00:00",
+                "name": "Staff 28081",
+                "text": "Staff 28081, Officer, PNC PNC-28081, 01-Oct-2026 12:32",
+                "user_id": 7,
+                "designation": "Officer",
+                "employee_id": 7,
+                "registration": "PNC PNC-28081"
+              },
+              "row_version": 2
+            },
+            "care_plan_overdue": false
+          },
+          "meta": {
+            "server_time": "2026-10-01T07:32:22.267208+00:00"
+          },
+          "request_id": "7cded0a273a246189c7916beecc4b8a9"
+        }
+      }
+    },
+    "errors": [
+      {
+        "code": "VALIDATION_ERROR",
+        "http_status": 422,
+        "message": "The request is invalid.",
+        "retryable": false,
+        "category": "request",
+        "ui_action": "Show field errors from details.fields / the message."
+      }
+    ],
+    "errors_seen_in_tests": [],
+    "used_by_screens": [
+      "nursing_assessment"
+    ],
+    "used_by_workflows": [
+      "inpatient-and-discharge",
+      "quality-indicators-and-committees"
+    ],
+    "typescript_example": "// The nursing assessment: nutrition screenings and the nursing care plan  (permissions: ipd.flowsheet.view, ipd.nursing_assessment.record)\nexport const nursingAssessmentView = (admission_id) =>\n  api(\"GET\", `/admissions/${admission_id}/nursing-assessment`, undefined);   // api(): see get_guide('envelope-and-errors')",
+    "access": {
+      "authentication": "user",
+      "permissions": [
+        "ipd.flowsheet.view",
+        "ipd.nursing_assessment.record"
+      ],
+      "permissions_mode": "any",
+      "who": "holders of ipd.flowsheet.view or ipd.nursing_assessment.record",
+      "roles_allowed": [
+        "anaesthetist",
+        "clinical_specialist",
+        "doctor",
+        "head_nurse",
+        "surgeon",
+        "triage_nurse",
+        "ward_nurse"
+      ]
+    },
+    "write_semantics": null,
+    "emits_events": [],
+    "list": {
+      "returns": "object",
+      "paging": [],
+      "search": [],
+      "filters": [],
+      "note": null
+    },
+    "cross_field_rules": {},
+    "errors_detail": [
+      {
+        "code": "VALIDATION_ERROR",
+        "http_status": 422,
+        "message": "The request is invalid.",
+        "retryable": false,
+        "ui_action": "Show field errors from details.fields / the message.",
+        "source": [
+          "documented"
+        ],
+        "details_fields": [],
+        "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+      }
+    ]
+  },
+  "POST /admissions/{admission_id}/nutrition-screenings": {
+    "method": "POST",
+    "path": "/api/v1/admissions/{admission_id}/nutrition-screenings",
+    "summary": "Screen an inpatient for nutrition",
+    "tags": [
+      "IPD"
+    ],
+    "permissions": [
+      "ipd.nursing_assessment.record"
+    ],
+    "permissions_mode": "all",
+    "idempotency_key": true,
+    "description": "The three scores (0-2 each) give the risk: Low 0, Medium 1, High 2 or more; Medium and High need the plan\n(`VALIDATION_ERROR`). Within `nutrition_screening_hours` of admission, and again when the condition changes.\n\n**Required permission:** `ipd.nursing_assessment.record`\n\n**Required permission:** `ipd.nursing_assessment.record`",
+    "roles_allowed": [
+      "head_nurse",
+      "triage_nurse",
+      "ward_nurse"
+    ],
+    "parameters": [
+      {
+        "name": "admission_id",
+        "in": "path",
+        "required": true,
+        "description": "",
+        "schema": {
+          "type": "integer",
+          "title": "Admission Id"
+        }
+      },
+      {
+        "name": "Idempotency-Key",
+        "in": "header",
+        "required": false,
+        "description": "Unique per logical action; retries return the first result",
+        "schema": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Unique per logical action; retries return the first result",
+          "title": "Idempotency-Key"
+        }
+      }
+    ],
+    "request_body": {
+      "title": "NutritionScreeningIn",
+      "properties": {
+        "weight_kg": {
+          "anyOf": [
+            {
+              "type": "number",
+              "maximum": 400,
+              "minimum": 0.5
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Weight Kg"
+        },
+        "height_cm": {
+          "anyOf": [
+            {
+              "type": "number",
+              "maximum": 250,
+              "minimum": 30
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Height Cm"
+        },
+        "bmi_score": {
+          "type": "integer",
+          "maximum": 2,
+          "minimum": 0,
+          "title": "Bmi Score",
+          "description": "Body mass index: over 20 = 0, 18.5-20 = 1, under 18.5 = 2"
+        },
+        "weight_loss_score": {
+          "type": "integer",
+          "maximum": 2,
+          "minimum": 0,
+          "title": "Weight Loss Score",
+          "description": "Unplanned weight loss in 3-6 months: under 5 % = 0, 5-10 % = 1, over 10 % = 2"
+        },
+        "acute_disease_score": {
+          "type": "integer",
+          "maximum": 2,
+          "minimum": 0,
+          "title": "Acute Disease Score",
+          "description": "Acutely ill with no intake for over 5 days: 2, else 0"
+        },
+        "plan": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 2000
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Plan",
+          "description": "Needed for a medium or high risk"
+        }
+      },
+      "type": "object",
+      "required": [
+        "bmi_score",
+        "weight_loss_score",
+        "acute_disease_score"
+      ]
+    },
+    "request_content_type": "application/json",
+    "response_schema": {
+      "title": "Envelope[NursingAssessmentOut]",
+      "properties": {
+        "data": {
+          "title": "NursingAssessmentOut",
+          "properties": {
+            "admission_id": {
+              "type": "integer",
+              "title": "Admission Id"
+            },
+            "admitted_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Admitted At"
+            },
+            "nutrition_screenings": {
+              "items": {
+                "$ref": "#/components/schemas/NutritionScreeningOut"
+              },
+              "type": "array",
+              "title": "Nutrition Screenings"
+            },
+            "latest_risk": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "enum": [
+                    "Low",
+                    "Medium",
+                    "High"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Latest Risk"
+            },
+            "screening_overdue": {
+              "type": "boolean",
+              "title": "Screening Overdue",
+              "description": "Not screened within nutrition_screening_hours of admission"
+            },
+            "care_plan": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/NursingCarePlanOut"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "care_plan_overdue": {
+              "type": "boolean",
+              "title": "Care Plan Overdue",
+              "description": "No care plan within nursing_care_plan_hours of admission"
+            }
+          },
+          "type": "object",
+          "required": [
+            "admission_id",
+            "admitted_at",
+            "nutrition_screenings",
+            "latest_risk",
+            "screening_overdue",
+            "care_plan",
+            "care_plan_overdue"
+          ]
+        },
+        "meta": {
+          "title": "Meta",
+          "properties": {
+            "server_time": {
+              "type": "string",
+              "title": "Server Time",
+              "description": "Server clock (UTC). Use it to detect terminal clock skew."
+            },
+            "page": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Page"
+            },
+            "page_size": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Page Size"
+            },
+            "total_count": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Total Count"
+            },
+            "next_cursor": {
+              "title": "Next Cursor"
+            }
+          },
+          "type": "object",
+          "required": [
+            "server_time"
+          ]
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ]
+    },
+    "recorded_example": {
+      "request": {
+        "path": "/api/v1/admissions/1/nutrition-screenings",
+        "body": {
+          "weight_kg": 64,
+          "height_cm": 170,
+          "bmi_score": 0,
+          "weight_loss_score": 0,
+          "acute_disease_score": 0
+        }
+      },
+      "response": {
+        "status": 201,
+        "body": {
+          "data": {
+            "admission_id": 1,
+            "admitted_at": "2026-10-01T07:31:22.570867+00:00",
+            "nutrition_screenings": [
+              {
+                "screening_id": 1,
+                "screened_at": "2026-10-01T07:31:22.721255+00:00",
+                "weight_kg": 64,
+                "height_cm": 170,
+                "bmi_score": 0,
+                "weight_loss_score": 0,
+                "acute_disease_score": 0,
+                "total_score": 0,
+                "risk": "Low",
+                "plan": null,
+                "author_stamp": {
+                  "at": "2026-10-01T07:31:22.721255+00:00",
+                  "name": "Staff 16359",
+                  "text": "Staff 16359, Officer, PNC PNC-16359, 01-Oct-2026 12:31",
+                  "user_id": 10,
+                  "designation": "Officer",
+                  "employee_id": 10,
+                  "registration": "PNC PNC-16359"
+                }
+              }
+            ],
+            "latest_risk": "Low",
+            "screening_overdue": false,
+            "care_plan": null,
+            "care_plan_overdue": false
+          },
+          "meta": {
+            "server_time": "2026-10-01T07:31:22.732657+00:00"
+          },
+          "request_id": "c74865862d894f8397208cb879508128"
+        }
+      },
+      "errors_seen": [
+        "FORBIDDEN",
+        "VALIDATION_ERROR"
+      ],
+      "events_emitted": []
+    },
+    "errors": [
+      {
+        "code": "FORBIDDEN",
+        "http_status": 403,
+        "message": "You do not have permission to do this.",
+        "retryable": false,
+        "category": "auth",
+        "ui_action": "Explain and hide the action (check x-permissions)."
+      },
+      {
+        "code": "VALIDATION_ERROR",
+        "http_status": 422,
+        "message": "The request is invalid.",
+        "retryable": false,
+        "category": "request",
+        "ui_action": "Show field errors from details.fields / the message."
+      }
+    ],
+    "errors_seen_in_tests": [
+      "FORBIDDEN",
+      "VALIDATION_ERROR"
+    ],
+    "used_by_screens": [
+      "nursing_assessment"
+    ],
+    "used_by_workflows": [
+      "inpatient-and-discharge",
+      "quality-indicators-and-committees"
+    ],
+    "typescript_example": "// Screen an inpatient for nutrition  (permissions: ipd.nursing_assessment.record)\nexport const nutritionScreening = (admission_id, body) =>\n  api(\"POST\", `/admissions/${admission_id}/nutrition-screenings`, body, { idempotent: true });   // api(): see get_guide('envelope-and-errors')",
+    "access": {
+      "authentication": "user",
+      "permissions": [
+        "ipd.nursing_assessment.record"
+      ],
+      "permissions_mode": "all",
+      "who": "holders of ipd.nursing_assessment.record",
+      "roles_allowed": [
+        "head_nurse",
+        "triage_nurse",
+        "ward_nurse"
+      ]
+    },
+    "write_semantics": {
+      "protection": "idempotency_key",
+      "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+      "reconcile_with": "GET /admissions/{admission_id}",
+      "emits_events": [],
+      "prints": false,
+      "related_state_machine": null
+    },
+    "emits_events": [],
+    "list": null,
+    "cross_field_rules": {},
+    "errors_detail": [
+      {
+        "code": "FORBIDDEN",
+        "http_status": 403,
+        "message": "You do not have permission to do this.",
+        "retryable": false,
+        "ui_action": "Explain and hide the action (check x-permissions).",
+        "source": [
+          "seen_in_tests"
+        ],
+        "details_fields": [
+          "any_of",
+          "required"
+        ],
+        "details_from": "POST /api/v1/admin/departments"
+      },
+      {
+        "code": "VALIDATION_ERROR",
+        "http_status": 422,
+        "message": "The request is invalid.",
+        "retryable": false,
+        "ui_action": "Show field errors from details.fields / the message.",
+        "source": [
+          "documented",
+          "seen_in_tests"
+        ],
+        "details_fields": [],
+        "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+      }
+    ]
+  },
+  "PUT /admissions/{admission_id}/nursing-care-plan": {
+    "method": "PUT",
+    "path": "/api/v1/admissions/{admission_id}/nursing-care-plan",
+    "summary": "Write or update the nursing care plan",
+    "tags": [
+      "IPD"
+    ],
+    "permissions": [
+      "ipd.nursing_assessment.record"
+    ],
+    "permissions_mode": "all",
+    "idempotency_key": false,
+    "description": "The problems, the goals, the interventions and the evaluation; every version is kept (send row_version as\n`expected_version` when updating). While the patient is in the hospital (`ADMISSION_STATE_INVALID`).\n\n`VERSION_CONFLICT`: the plan changed since you read it (`details.current_version`): reload it, show what changed,\nthen save again.\n\n**Required permission:** `ipd.nursing_assessment.record`\n\n**Required permission:** `ipd.nursing_assessment.record`",
+    "roles_allowed": [
+      "head_nurse",
+      "triage_nurse",
+      "ward_nurse"
+    ],
+    "parameters": [
+      {
+        "name": "admission_id",
+        "in": "path",
+        "required": true,
+        "description": "",
+        "schema": {
+          "type": "integer",
+          "title": "Admission Id"
+        }
+      }
+    ],
+    "request_body": {
+      "title": "NursingCarePlanIn",
+      "properties": {
+        "problems": {
+          "type": "string",
+          "maxLength": 4000,
+          "minLength": 3,
+          "title": "Problems",
+          "description": "The nursing diagnoses"
+        },
+        "goals": {
+          "type": "string",
+          "maxLength": 4000,
+          "minLength": 3,
+          "title": "Goals"
+        },
+        "interventions": {
+          "type": "string",
+          "maxLength": 4000,
+          "minLength": 3,
+          "title": "Interventions"
+        },
+        "evaluation": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 4000
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Evaluation",
+          "description": "How the patient responded, at each review"
+        },
+        "expected_version": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Expected Version",
+          "description": "Optimistic concurrency: the row_version you loaded"
+        }
+      },
+      "type": "object",
+      "required": [
+        "problems",
+        "goals",
+        "interventions"
+      ]
+    },
+    "request_content_type": "application/json",
+    "response_schema": {
+      "title": "Envelope[NursingAssessmentOut]",
+      "properties": {
+        "data": {
+          "title": "NursingAssessmentOut",
+          "properties": {
+            "admission_id": {
+              "type": "integer",
+              "title": "Admission Id"
+            },
+            "admitted_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Admitted At"
+            },
+            "nutrition_screenings": {
+              "items": {
+                "$ref": "#/components/schemas/NutritionScreeningOut"
+              },
+              "type": "array",
+              "title": "Nutrition Screenings"
+            },
+            "latest_risk": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "enum": [
+                    "Low",
+                    "Medium",
+                    "High"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Latest Risk"
+            },
+            "screening_overdue": {
+              "type": "boolean",
+              "title": "Screening Overdue",
+              "description": "Not screened within nutrition_screening_hours of admission"
+            },
+            "care_plan": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/NursingCarePlanOut"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "care_plan_overdue": {
+              "type": "boolean",
+              "title": "Care Plan Overdue",
+              "description": "No care plan within nursing_care_plan_hours of admission"
+            }
+          },
+          "type": "object",
+          "required": [
+            "admission_id",
+            "admitted_at",
+            "nutrition_screenings",
+            "latest_risk",
+            "screening_overdue",
+            "care_plan",
+            "care_plan_overdue"
+          ]
+        },
+        "meta": {
+          "title": "Meta",
+          "properties": {
+            "server_time": {
+              "type": "string",
+              "title": "Server Time",
+              "description": "Server clock (UTC). Use it to detect terminal clock skew."
+            },
+            "page": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Page"
+            },
+            "page_size": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Page Size"
+            },
+            "total_count": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Total Count"
+            },
+            "next_cursor": {
+              "title": "Next Cursor"
+            }
+          },
+          "type": "object",
+          "required": [
+            "server_time"
+          ]
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ]
+    },
+    "recorded_example": {
+      "request": {
+        "path": "/api/v1/admissions/1/nursing-care-plan",
+        "body": {
+          "problems": "Impaired gas exchange; fever",
+          "goals": "SpO2 above 94 % on room air within 48 hours",
+          "interventions": "Oxygen by nasal cannula, 4-hourly observations, tepid sponging"
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": {
+            "admission_id": 1,
+            "admitted_at": "2026-10-01T07:31:22.570867+00:00",
+            "nutrition_screenings": [
+              {
+                "screening_id": 1,
+                "screened_at": "2026-10-01T07:31:22.721255+00:00",
+                "weight_kg": 64,
+                "height_cm": 170,
+                "bmi_score": 0,
+                "weight_loss_score": 0,
+                "acute_disease_score": 0,
+                "total_score": 0,
+                "risk": "Low",
+                "plan": null,
+                "author_stamp": {
+                  "at": "2026-10-01T07:31:22.721255+00:00",
+                  "name": "Staff 16359",
+                  "text": "Staff 16359, Officer, PNC PNC-16359, 01-Oct-2026 12:31",
+                  "user_id": 10,
+                  "designation": "Officer",
+                  "employee_id": 10,
+                  "registration": "PNC PNC-16359"
+                }
+              }
+            ],
+            "latest_risk": "Low",
+            "screening_overdue": false,
+            "care_plan": {
+              "care_plan_id": 1,
+              "problems": "Impaired gas exchange; fever",
+              "goals": "SpO2 above 94 % on room air within 48 hours",
+              "interventions": "Oxygen by nasal cannula, 4-hourly observations, tepid sponging",
+              "evaluation": null,
+              "written_at": "2026-10-01T07:31:22.737330+00:00",
+              "updated_at": "2026-10-01T07:31:22.737330+00:00",
+              "author_stamp": {
+                "at": "2026-10-01T07:31:22.73733+00:00",
+                "name": "Staff 16359",
+                "text": "Staff 16359, Officer, PNC PNC-16359, 01-Oct-2026 12:31",
+                "user_id": 10,
+                "designation": "Officer",
+                "employee_id": 10,
+                "registration": "PNC PNC-16359"
+              },
+              "row_version": 1
+            },
+            "care_plan_overdue": false
+          },
+          "meta": {
+            "server_time": "2026-10-01T07:31:22.741971+00:00"
+          },
+          "request_id": "42f896e94a64464e98beca6242af1b4d"
+        }
+      },
+      "errors_seen": [
+        "VERSION_CONFLICT"
+      ],
+      "events_emitted": []
+    },
+    "errors": [
+      {
+        "code": "ADMISSION_STATE_INVALID",
+        "http_status": 409,
+        "message": "The admission cannot move to that state.",
+        "retryable": false,
+        "category": "business",
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      },
+      {
+        "code": "VALIDATION_ERROR",
+        "http_status": 422,
+        "message": "The request is invalid.",
+        "retryable": false,
+        "category": "request",
+        "ui_action": "Show field errors from details.fields / the message."
+      },
+      {
+        "code": "VERSION_CONFLICT",
+        "http_status": 409,
+        "message": "The record was changed by someone else; reload and try again.",
+        "retryable": false,
+        "category": "request",
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      }
+    ],
+    "errors_seen_in_tests": [
+      "VERSION_CONFLICT"
+    ],
+    "used_by_screens": [
+      "nursing_assessment"
+    ],
+    "used_by_workflows": [
+      "inpatient-and-discharge",
+      "quality-indicators-and-committees"
+    ],
+    "typescript_example": "// Write or update the nursing care plan  (permissions: ipd.nursing_assessment.record)\nexport const nursingCarePlan = (admission_id, body) =>\n  api(\"PUT\", `/admissions/${admission_id}/nursing-care-plan`, body);   // api(): see get_guide('envelope-and-errors')",
+    "access": {
+      "authentication": "user",
+      "permissions": [
+        "ipd.nursing_assessment.record"
+      ],
+      "permissions_mode": "all",
+      "who": "holders of ipd.nursing_assessment.record",
+      "roles_allowed": [
+        "head_nurse",
+        "triage_nurse",
+        "ward_nurse"
+      ]
+    },
+    "write_semantics": {
+      "protection": "version_check",
+      "on_lost_answer": "Send expected_version from the record you edited. If the first call advances that version, a repeat with the old version is refused (VERSION_CONFLICT or a final-state error). Omitting this optional field gives no version protection. Re-read the record and let the user decide; never retry automatically.",
+      "reconcile_with": "GET /admissions/{admission_id}",
+      "emits_events": [],
+      "prints": false,
+      "related_state_machine": null
+    },
+    "emits_events": [],
+    "list": null,
+    "cross_field_rules": {},
+    "errors_detail": [
+      {
+        "code": "ADMISSION_STATE_INVALID",
+        "http_status": 409,
+        "message": "The admission cannot move to that state.",
+        "retryable": false,
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+        "source": [
+          "documented"
+        ],
+        "details_fields": [],
+        "details_from": "POST /api/v1/admissions/{admission_id}/admit"
+      },
+      {
+        "code": "VALIDATION_ERROR",
+        "http_status": 422,
+        "message": "The request is invalid.",
+        "retryable": false,
+        "ui_action": "Show field errors from details.fields / the message.",
+        "source": [
+          "documented"
+        ],
+        "details_fields": [],
+        "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+      },
+      {
+        "code": "VERSION_CONFLICT",
+        "http_status": 409,
+        "message": "The record was changed by someone else; reload and try again.",
+        "retryable": false,
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+        "source": [
+          "documented",
+          "seen_in_tests"
+        ],
+        "details_fields": [
+          "current_version",
+          "expected_version"
+        ],
+        "details_from": "PATCH /api/v1/finance/service-catalog/{service_id}"
+      }
+    ]
+  }
+}

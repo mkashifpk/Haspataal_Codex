@@ -36,12 +36,18 @@ export function MyBeds({
   connected,
   stream,
   timeZone,
+  initialAdmissionId,
+  availableScreens = [],
+  onRoute,
 }: {
   user: ClinicalUser;
   establishment: EstablishmentOut;
   connected: boolean;
   stream: string;
   timeZone?: string;
+  initialAdmissionId?: number;
+  availableScreens?: string[];
+  onRoute?: (screen:string,admissionId:number)=>void;
 }) {
   const permissions = user.permissions,
     can = (p: string) => permissions.includes(p),
@@ -70,6 +76,7 @@ export function MyBeds({
     [readable, tick],
   );
   const duties = useLoad(
+    // The backend keeps last night's duty until it ends.
     () =>
       readable && can("self.profile.view") ? a.myDuties() : Promise.resolve([]),
     [readable, tick],
@@ -129,6 +136,7 @@ export function MyBeds({
     !person.merged_into_id &&
     admission.mrn === bed?.mrn &&
     admission.patient_id === person.patient_id;
+  useEffect(()=>{if(initialAdmissionId&&!key){const b=rows.data?.find(b=>b.admission_id===initialAdmissionId);if(b)setKey(myBedKey(b));}},[initialAdmissionId,rows.data,key]);
   const staff = useLoad(
     () =>
       draft && searchQ.length >= 2
@@ -745,6 +753,7 @@ export function MyBeds({
                     )}
                 </>
               )}
+              {identity&&onRoute&&<div className="actions">{(['patient_education_ward','nursing_assessment'] as const).filter(s=>availableScreens.includes(s)).map(s=><button data-help="mybeds.handover" key={s} disabled={locked||!live} onClick={()=>{if(leave())onRoute(s,bed.admission_id!);}}>{s==='patient_education_ward'?t('Ward health education','وارڈ میں صحت کی رہنمائی'):t('Nursing assessment and care plan','نرسنگ جائزہ و نگہداشت منصوبہ')}</button>)}</div>}
               {canCleanMyBed(bed, view, permissions) && (
                 <button
                   data-help="mybeds.clean"

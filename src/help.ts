@@ -10,6 +10,168 @@ export type HelpPage = {
   faqUr: [string, string][];
 };
 export const help: Record<string, HelpPage> = {
+patient_education_ward: {
+  title: "Ward health education",
+  titleUr: "وارڈ میں صحت کی رہنمائی",
+  purpose: "For the ward nurse after actual guidance: select the current admission and patient, record who received which guidance and keep the signed history. Urdu is a draft pending native review.",
+  purposeUr: "اصل رہنمائی کے بعد وارڈ نرس جاری داخلہ و مریض چن کر رہنمائی، وصول کنندہ اور دستخط شدہ تاریخ درج کرے۔ اردو مقامی جائزے تک مسودہ۔",
+  steps: [
+    "From My beds this shift choose the actual patient, then Ward health education or Nursing assessment and care plan. Return to my beds restores that admission. Choose a ward patient lists actual rostered beds; Other permitted live admissions lists authorised server results and Find permitted admission filters locally. No typed patient/employee ids or assumed bed identity. Check name/MRN, age/date of birth, ward/bed, actual admission state and all flags. Refresh ward patient rereads without submitting. Switching patient asks before discarding unsent work and is blocked for an unknown write. Records-only hides recording; service and permission are rechecked before submission.",
+    "Ward education is the patient’s education record, not an admission-specific new contract. No admission_id is sent. A consultation can be linked only if this account may read its actual returned encounter; no encounter is invented for a ward round.",
+    "Open Health education from Consultation or the permitted workspace. Select the actual OPD slip/queue or Find patient without an OPD slip. Check name/MRN/age and current allergy/death/MLC/temp/merge/outstanding flags. A merged result pauses writing until deliberate master selection; unknown writes block context changes.",
+    "Read Education already recorded: topic, actual date/time, method, recipient, material, encounter, note and author's stamp. Reads are logged patient-record access. Older/Newer education entries use real100row cursors; continue until an empty page. A failed read is not an empty history.",
+    "Enter the actual Education topic and choose method Verbal/Leaflet/Written instructions/Demonstration/Video and recipient Patient/Attendant/Both. None is preselected. Choose Material actually used; Leaflet and Video require a real active material. Inspect the catalogue's title/topic/kind/language/location, never invent a file or play link.",
+    "Link Education consultation to the actual encounter if guidance was part of that consultation. A single unambiguous final note from the opened visit is linked automatically; otherwise choose deliberately or leave unlinked for guidance outside consultation. Note is optional for an ordinary entry. Review the actual clinical facts before Save education record.",
+    "Save once. The original actor/patient/key/body is frozen and double clicks cannot duplicate. Unknown replies lock draft/navigation for identical-key recovery within24hours; patient history is read-only reconciliation. A confirmed write has a real education ID and stamp; a later read failure does not repeat it.",
+    "Saved entries cannot be edited/deleted. Record a corrective entry for #ID starts a separate draft, preserves the original, copies facts for review and requires an explanatory note referencing that original. Retired materials must be replaced by an actual active resource used. Clear/new entry asks before discarding unsent changes and saves nothing.",
+    "F1 retains input/focus, both languages/themes and Settings/keyboard share100–250%zoom. Help can print this guide. No education certificate, material file download or patient-record print endpoint exists here; use the hospital's actual supplied resources. Named human fresh-data role journeys, native Urdu/editor and actual material use still need review."
+  ],
+  stepsUr: [
+    "میرے بستر سے اصل مریض چن کر وارڈ رہنمائی یا نرسنگ جائزہ کھولیں؛ واپسی وہی داخلہ رکھتی ہے۔ وارڈ مریض میں اصل مقرر بستر، دیگر مجاز جاری داخلے میں سرور کی اصل سطور اور تلاش مقامی فلٹر۔ مریض یا عملے کی آئی ڈی نہ لکھیں، بستر شناخت نہیں۔ نام و ایم آر این، عمر یا پیدائش، وارڈ، اصل داخلہ حالت و علامات چیک کریں۔ تازہ صرف پڑھتا ہے۔ مریض بدلنے سے پہلے مسودہ چھوڑنے پر پوچھے، نامعلوم ارسال پر جگہ بدلنا بند۔ صرف ریکارڈ پر اندراج بند؛ ارسال سے پہلے خدمت و اجازت پھر چیک۔",
+    "وارڈ رہنمائی مریض کا ریکارڈ ہے، نئے داخلہ خاص معاہدے کی جگہ نہیں۔admission_idارسال نہیں۔ ملاقات صرف اس اکاؤنٹ کے مجاز اصل نتیجے سے منسلک؛ وارڈمعائنے کی فرضی ملاقات نہیں۔",
+    "معائنے یا مجاز جگہ سے صحت کی رہنمائی کھولیں۔ اصل پرچی/قطار یا بغیر پرچی مریض تلاش۔ نام، ایم آر این، عمر، الرجی، وفات، قانونی، عارضی، انضمام و بقایا چیک۔ ضم شناخت پر اصل مریض خود چننے تک لکھائی رکے؛ نامعلوم عمل پر جگہ بدلنا بند۔",
+    "پہلے درج موضوع، اصل وقت، طریقہ، وصول کنندہ، مواد، ملاقات، نوٹ و مہر پڑھیں۔ مریض ریکارڈ کی رسائی درج ہے۔ پرانے/نئے100سطروں کے اصل نمبر، خالی صفحے تک؛ خرابی خالی تاریخ نہیں۔",
+    "اصل موضوع اور زبانی/پرچہ/تحریری/مظاہرہ/ویڈیو، مریض/تیماردار/دونوں خود چنیں؛ پہلے انتخاب نہیں۔ اصل فعال مواد؛ پرچہ و ویڈیو کو لازم۔ عنوان، موضوع، قسم، زبان و جگہ پڑھیں، فرضی فائل یا ویڈیو ربط نہیں۔",
+    "معائنے کا حصہ ہو تو اصل ملاقات منسلک۔ کھلی ملاقات کا ایک واضح حتمی نوٹ خود منسلک؛ ورنہ خود چنیں یا الگ رہنمائی پر غیر منسلک۔ عام نوٹ اختیاری۔ اصل باتیں چیک کرکے محفوظ۔",
+    "ایک بار محفوظ؛ اصل صارف، مریض، نمبر و مواد مقفل، دو کلک دوہرا نہیں۔ گم جواب پر24گھنٹے میں اصل کوشش؛ تاریخ صرف پڑھ کر چیک۔ مصدقہ اصل نمبر و مہر؛ بعد کی خرابی نہیں دہراتی۔",
+    "محفوظ اندراج نہیں بدل/حذف۔ اصل نمبر کے لیے نیا اصلاحی مسودہ، اصل برقرار، نقل باتیں چیک و حوالہ وضاحت لازم۔ بند مواد کا اصل فعال بدل چنیں۔ صاف/نیا غیر ارسال مسودہ چھوڑنے سے پہلے پوچھتا، کچھ محفوظ نہیں۔",
+    "ایف۱مسودہ/فوکس، دونوں زبان/تھیم و ترتیب/کلید100تا250فیصد ایک زوم۔ مدد سے رہنما پرنٹ۔ یہاں سرٹیفکیٹ، مواد کی فائل یا مریض ریکارڈ پرنٹ کا معاہدہ نہیں؛ اصل ہسپتال وسائل لیں۔ نام زد انسانی کردار، اردو/مدیر و اصل مواد استعمال کا جائزہ باقی۔"
+  ],
+  faq: [
+    [
+      "How do I start from my ward patient?",
+      "From My beds this shift choose the actual patient, then Ward health education or Nursing assessment and care plan. Return to my beds restores that admission. Choose a ward patient lists actual rostered beds; Other permitted live admissions lists authorised server results and Find permitted admission filters locally. No typed patient/employee ids or assumed bed identity. Check name/MRN, age/date of birth, ward/bed, actual admission state and all flags. Refresh ward patient rereads without submitting. Switching patient asks before discarding unsent work and is blocked for an unknown write. Records-only hides recording; service and permission are rechecked before submission."
+    ],
+    [
+      "Who records education and who maintains materials?",
+      "Doctors/clinical specialists, triage/ward/head nurses and pharmacists need education.give. A role label alone grants nothing. Quality/setup staff with education.manage maintain the separate catalogue/register; permitted read-only users inspect signed history without Save/correction controls. The same patient identifiers and permission checks apply to every job."
+    ],
+    [
+      "Why is material required or unavailable?",
+      "Leaflet and Video need the actual active resource used. Read its title, topic, kind, language and displayed location. Empty or retired material is not a missing success to fill with a fake record; ask authorized quality staff. The catalogue supplies metadata, not media bytes or a fabricated download link."
+    ],
+    [
+      "Should I link the note or record outside a consultation?",
+      "When part of a consultation link its actual encounter so the record is in context; an unambiguous final note of the opened visit is selected, otherwise choose deliberately. For guidance outside consultation, patient-only with no linked encounter is explicit. Another patient's or cancelled encounter is refused; selecting does not create/sign a clinical note."
+    ],
+    [
+      "Can I correct a mistake?",
+      "Use Record a corrective entry for the actual ID. It makes a new signed education entry whose note references the original and explains the correction; the original is never edited/deleted. Review every copied field and any material availability. No unsupported undo or backdated author stamp is invented."
+    ],
+    [
+      "What if Save fails or I need paper?",
+      "Read the exact error/reference. Correct definite validation refusals while keeping the draft. Unknown saves retain the same actor/key/body for safe retry within24hours and patient history for reconciliation; do not create a replacement after a lost response. No education certificate/material-download endpoint is specified; use the actual supplied leaflet/video and print Help's guide if needed."
+    ],
+    [
+      "What must the manual reviewer verify?",
+      "Create new synthetic entries for real supported methods/recipients/materials through the UI, retrieve/history-page them, append a correction and confirm originals/stamps stay. Test missing/retired material, wrong encounter/permission refusal, unknown reply without duplicates, direct patient and consultation context, F1/draft/focus, both languages/themes250% and actual resource use. Record IDs/results in the role's worksheet. A real clinician/language owner/editor signs their own review; automation never claims education given to a real patient."
+    ]
+  ],
+  faqUr: [
+    [
+      "وارڈ مریض سے کیسے شروع کروں؟",
+      "میرے بستر سے اصل مریض چن کر وارڈ رہنمائی یا نرسنگ جائزہ کھولیں؛ واپسی وہی داخلہ رکھتی ہے۔ وارڈ مریض میں اصل مقرر بستر، دیگر مجاز جاری داخلے میں سرور کی اصل سطور اور تلاش مقامی فلٹر۔ مریض یا عملے کی آئی ڈی نہ لکھیں، بستر شناخت نہیں۔ نام و ایم آر این، عمر یا پیدائش، وارڈ، اصل داخلہ حالت و علامات چیک کریں۔ تازہ صرف پڑھتا ہے۔ مریض بدلنے سے پہلے مسودہ چھوڑنے پر پوچھے، نامعلوم ارسال پر جگہ بدلنا بند۔ صرف ریکارڈ پر اندراج بند؛ ارسال سے پہلے خدمت و اجازت پھر چیک۔"
+    ],
+    [
+      "کون رہنمائی اور مواد درج کرتا ہے؟",
+      "ڈاکٹر/ماہر، ٹرائیج/وارڈ/ہیڈ نرس و فارماسسٹ کو اصل رہنمائی اجازت لازم؛ صرف کردار کا نام نہیں۔ مجاز کوالٹی/ترتیب الگ مواد فہرست و رجسٹر؛ صرف پڑھنے والے مہر پڑھتے، محفوظ/تصحیح نہیں۔ ہر کردار کو وہی شناخت و اجازت چیک۔"
+    ],
+    [
+      "مواد لازم یا دستیاب کیوں نہیں؟",
+      "پرچے و ویڈیو کو اصل فعال ذریعہ لازم۔ عنوان، موضوع، قسم، زبان و جگہ پڑھیں۔ خالی/بند مواد پر فرضی ریکارڈ نہیں؛ مجاز کوالٹی سے کہیں۔ فہرست معلومات دیتی، میڈیا فائل یا فرضی ربط نہیں۔"
+    ],
+    [
+      "ملاقات منسلک یا الگ درج کروں؟",
+      "معائنے کا حصہ ہو تو اصل ملاقات، واضح اسی پرچی کا حتمی نوٹ خود ورنہ خود انتخاب۔ باہر کی رہنمائی میں صرف مریض غیر منسلک واضح۔ دوسرے مریض/منسوخ ملاقات منع؛ انتخاب نوٹ بنانا/حتمی کرنا نہیں۔"
+    ],
+    [
+      "غلطی کی تصحیح ہو سکتی ہے؟",
+      "اصل نمبر پر اصلاحی اندراج لیں۔ نیا مہر والا ریکارڈ اصل حوالہ و وضاحت رکھے؛ اصل نہیں بدل/حذف۔ ہر نقل خانہ اور مواد دستیابی چیک کریں۔ فرضی واپسی یا پچھلی تاریخ کی مہر نہیں۔"
+    ],
+    [
+      "محفوظ ناکام یا کاغذ چاہیے تو؟",
+      "اصل خرابی/حوالہ پڑھیں۔ قطعی انکار مسودہ رکھ کر درست۔ گم جواب پر24گھنٹے اصل صارف/کلید/مواد کی کوشش اور تاریخ سے چیک؛ متبادل نہیں۔ سرٹیفکیٹ/مواد فائل کا معاہدہ نہیں؛ اصل پرچہ/ویڈیو یا مدد کا رہنما پرنٹ لیں۔"
+    ],
+    [
+      "انسانی جائزہ کیا چیک کرے؟",
+      "نئے فرضی مجاز طریقے، وصول کنندہ/مواد، تاریخ، اصلاح اور اصل مہر برقرار چیک۔ گم/بند مواد، غلط ملاقات/اجازت، عدم تکرار، براہ راست و معائنہ شناخت، ایف۱، دونوں زبان/تھیم250فیصد و اصل مواد استعمال۔ نمبر/نتیجہ کردار کی شیٹ میں؛ اصل معالج/اردو/مدیر خود جائزہ دیں، خودکار ٹیسٹ حقیقی مریض کو رہنمائی کا دعویٰ نہیں۔"
+    ]
+  ]
+},
+nursing_assessment: {
+  title: "Nursing assessment and care plan",
+  titleUr: "نرسنگ جائزہ و نگہداشت منصوبہ",
+  purpose: "At admission and each review, the ward nurse identifies the actual stay, records nutrition risk and maintains a version-protected nursing plan. Urdu is a draft pending native review.",
+  purposeUr: "داخلے و ہر جائزے پر وارڈ نرس اصل مریض و داخلہ چیک کرکے غذائی خطرہ اور محفوظ نسخے کا نرسنگ منصوبہ درج کرے۔ اردو مسودہ ہے۔",
+  steps: [
+    "From My beds this shift choose the actual patient, then Ward health education or Nursing assessment and care plan. Return to my beds restores that admission. Choose a ward patient lists actual rostered beds; Other permitted live admissions lists authorised server results and Find permitted admission filters locally. No typed patient/employee ids or assumed bed identity. Check name/MRN, age/date of birth, ward/bed, actual admission state and all flags. Refresh ward patient rereads without submitting. Switching patient asks before discarding unsent work and is blocked for an unknown write. Records-only hides recording; service and permission are rechecked before submission.",
+    "At admission and each nursing review, use the bed/patient card to read screening_overdue and care_plan_overdue from the server, in red with text when overdue. No locally calculated first-day deadline. No screening or plan means not recorded, not low risk or a completed review. History shows each actual screening, total/risk/measurements/plan and author stamp. F1 from a field or review preserves input/focus. English/Urdu, both themes and shared keyboard/Settings zoom100–250% apply; native Urdu/human fresh-data/editor review remain pending.",
+    "New nutrition screening starts a blank assessment, never preselects the patient’s clinical scores. Weight0.5–400kg and height30–250cm are optional. When both are entered the BMI and its score are suggested; Use suggested BMI score is deliberate, not a clinical decision made for you. BMI over20 scores0,18.5–20 scores1,under18.5 scores2. Choose unplanned weight-loss score for the last3–6months (<5%=0,5–10%=1,>10%=2); acute illness with no intake over5days scores2, otherwise0. The three actual scores preview Low0,Medium1,High2+. Medium/High requires the actual Nutrition plan (up to2000characters), such as a food chart or dietitian handover; saving never orders food or a referral. Server risk and author stamp are authoritative. Screenings append and are never edited or deleted; add a new assessment when the condition changes.",
+    "Write / review nursing care plan opens current Problems, Goals, Interventions and optional Review evaluation. Required fields need3–4000characters each; evaluation up to4000. Add the observed response at every review. Editing version is the server row_version; every update sends it as expected_version, never a guessed value. A new plan has no loaded version and sends null. Saved versions are retained by the server; this endpoint shows only the current version, not an invented history. Cancel the unsent draft without changing the recorded plan.",
+    "Check I checked this patient and the actual nursing assessment, then Review assessment entry. The dialog freezes the exact patient/admission and body. Confirm this assessment once rereads identity, permissions, service and the care-plan version before sending once. Back to assessment input retains values; Close assessment draft asks before discarding. Confirmed response shows server risk/current plan/stamp; later reading failure does not undo or repeat the write. No local success, automatic write retry, offline queue or unsupported delete.",
+    "VERSION_CONFLICT or a changed preflight keeps all typed input, refreshes the current plan and blocks the old review. Compare the current version above, then Read latest assessment and keep input explicitly adopts that returned version without replacing your text and unchecks acknowledgement; review again deliberately. ADMISSION_STATE_INVALID rereads admission and assessment and displays current status; never resend automatically. VALIDATION_ERROR shows field details. A lost screening reply locks the original idempotency key/body; Retry original request only within24hours. A lost care-plan update is never replayed: Read current result, compare version/fields and return to the retained draft; read/adopt current version before a new review. Outside retention or ambiguous results ask IT."
+  ],
+  stepsUr: [
+    "میرے بستر سے اصل مریض چن کر وارڈ رہنمائی یا نرسنگ جائزہ کھولیں؛ واپسی وہی داخلہ رکھتی ہے۔ وارڈ مریض میں اصل مقرر بستر، دیگر مجاز جاری داخلے میں سرور کی اصل سطور اور تلاش مقامی فلٹر۔ مریض یا عملے کی آئی ڈی نہ لکھیں، بستر شناخت نہیں۔ نام و ایم آر این، عمر یا پیدائش، وارڈ، اصل داخلہ حالت و علامات چیک کریں۔ تازہ صرف پڑھتا ہے۔ مریض بدلنے سے پہلے مسودہ چھوڑنے پر پوچھے، نامعلوم ارسال پر جگہ بدلنا بند۔ صرف ریکارڈ پر اندراج بند؛ ارسال سے پہلے خدمت و اجازت پھر چیک۔",
+    "داخلے و ہرنرسنگ جائزے پر بستر و مریض کے کارڈ میں سرور کی غذائی و منصوبہ تاخیر سرخ متن سے پڑھیں۔ پہلا دن مقامی حساب نہیں۔ جائزہ یا منصوبہ نہ ہو تو درج نہیں، کمخطرہ یا مکمل جائزہ نہیں۔ تاریخ میں اصل پیمائش، کل، خطرہ، منصوبہ و مہر۔ ایف ون خانے یا جائزے میں معلومات و فوکس رکھے۔ دونوں زبان، تھیم و مشترک کی بورڈترتیب100تا250زوم؛ اردو، نئےریکارڈ و مدیر کا انسانی جائزہ باقی۔",
+    "نیا غذائی جائزہ خالی، طبی اسکور پہلے منتخب نہیں۔ اختیاری وزن0.5تا400کلو اور قد30تا250سینٹی میٹر۔ دونوں ہوں تو بی ایم آئی و اسکور کی تجویز؛ تجویز والا بٹن شعوری انتخاب، طبی فیصلہ خود نہیں۔ بی ایم آئی20سے زیادہ0،18.5تا20پر1،18.5سے کم2۔ پچھلے3تا6ماہ بلاارادہ وزن نقصان5فیصدسے کم0،5تا10پر1،10سے زیادہ2۔ شدیدبیماری میں5دن سے زیادہ غذا نہ لی تو2 ورنہ0۔ کل0کم،1درمیانہ،2یازیادہ بلندخطرہ۔ درمیانے یا بلند پر اصل غذائی منصوبہ2000حروف، غذا چارٹ یا ماہر کو حوالہ؛ محفوظ کرنا غذا یا حوالہ کا حکم نہیں۔ اصل خطرہ و مہر سرور سے۔ جائزہ اضافہ ہے، ترمیم یا حذف نہیں؛ حالت بدلے تو نیاجائزہ۔",
+    "نرسنگ منصوبہ لکھیں یا جائزہ موجودہ مسائل، مقاصد، اقدامات و اختیاری نتیجہ کھولتا ہے۔ لازم خانے ہرایک3تا4000حروف، نتیجہ4000تک۔ ہرجائزے میں اصل ردعمل لکھیں۔ زیرترمیم نسخہ سرور کا، اسی کوexpected_versionبھیجیں؛ اندازہ نہیں۔ نئے منصوبے کا نسخہ نہیں،nullجاتا ہے۔ سرور پر پچھلے نسخے محفوظ، یہ راستہ صرف موجودہ دکھاتا ہے، فرضی تاریخ نہیں۔ غیرارسال مسودہ بندکرنے سے اصل نہیں بدلتا۔",
+    "مریض و اصل جائزہ چیک والا نشان، پھر اندراج کا جائزہ۔ مکالمہ عین مریض، داخلہ و معلومات منجمد کرتا ہے۔ ایک بار تصدیق اصل شناخت، اجازت، خدمت و منصوبے کا نسخہ پھر پڑھ کر بھیجے۔ واپس معلومات رکھے؛ بندکرنے پر چھوڑنے کی تصدیق۔ مصدقہ جواب اصل خطرہ، منصوبہ و مہر دکھائے؛ بعدکی پڑھائی کی خرابی ارسال نہیں دہراتی۔ مقامی کامیابی، خودکارارسال، آف لائن قطار یا غیرمجازحذف نہیں۔",
+    "نسخے کا ٹکراؤ یا پہلے چیک میں تبدیلی پر تمام لکھا محفوظ، موجودہ منصوبہ تازہ اور پراناجائزہ بند۔ اوپر کا نسخہ ملائیں، پھر تازہ جائزہ پڑھیں و معلومات رکھیں اصل نیا نسخہ لے مگر متن نہ بدلے، تصدیق کا نشان ہٹے؛ شعوری نیاجائزہ لیں۔ داخلہ حالت انکار پر داخلہ و جائزہ پڑھ کر موجودہ حالت دکھائے، خود نہ بھیجے۔ خانے کی غلطی تفصیل کے ساتھ۔ گم غذائی جواب پر اصل محفوظ کلید و معلومات مقفل،24گھنٹے میں اصل دوبارہ۔ گم منصوبہ ترمیم دوبارہ نہیں؛ موجودہ نتیجہ پڑھ کر نسخہ و خانے ملائیں، مسودے پر واپس، نیاجائزہ سے پہلے تازہ نسخہ لیں۔ مدتگزرے یا شک ہو تو آئی ٹی۔"
+  ],
+  faq: [
+    [
+      "How do I choose the correct stay?",
+      "From My beds this shift choose the actual patient, then Ward health education or Nursing assessment and care plan. Return to my beds restores that admission. Choose a ward patient lists actual rostered beds; Other permitted live admissions lists authorised server results and Find permitted admission filters locally. No typed patient/employee ids or assumed bed identity. Check name/MRN, age/date of birth, ward/bed, actual admission state and all flags. Refresh ward patient rereads without submitting. Switching patient asks before discarding unsent work and is blocked for an unknown write. Records-only hides recording; service and permission are rechecked before submission."
+    ],
+    [
+      "What do the overdue flags and history mean?",
+      "At admission and each nursing review, use the bed/patient card to read screening_overdue and care_plan_overdue from the server, in red with text when overdue. No locally calculated first-day deadline. No screening or plan means not recorded, not low risk or a completed review. History shows each actual screening, total/risk/measurements/plan and author stamp. F1 from a field or review preserves input/focus. English/Urdu, both themes and shared keyboard/Settings zoom100–250% apply; native Urdu/human fresh-data/editor review remain pending."
+    ],
+    [
+      "How do I record nutrition risk?",
+      "New nutrition screening starts a blank assessment, never preselects the patient’s clinical scores. Weight0.5–400kg and height30–250cm are optional. When both are entered the BMI and its score are suggested; Use suggested BMI score is deliberate, not a clinical decision made for you. BMI over20 scores0,18.5–20 scores1,under18.5 scores2. Choose unplanned weight-loss score for the last3–6months (<5%=0,5–10%=1,>10%=2); acute illness with no intake over5days scores2, otherwise0. The three actual scores preview Low0,Medium1,High2+. Medium/High requires the actual Nutrition plan (up to2000characters), such as a food chart or dietitian handover; saving never orders food or a referral. Server risk and author stamp are authoritative. Screenings append and are never edited or deleted; add a new assessment when the condition changes."
+    ],
+    [
+      "How do I review the nursing plan?",
+      "Write / review nursing care plan opens current Problems, Goals, Interventions and optional Review evaluation. Required fields need3–4000characters each; evaluation up to4000. Add the observed response at every review. Editing version is the server row_version; every update sends it as expected_version, never a guessed value. A new plan has no loaded version and sends null. Saved versions are retained by the server; this endpoint shows only the current version, not an invented history. Cancel the unsent draft without changing the recorded plan."
+    ],
+    [
+      "How do I confirm or cancel a draft?",
+      "Check I checked this patient and the actual nursing assessment, then Review assessment entry. The dialog freezes the exact patient/admission and body. Confirm this assessment once rereads identity, permissions, service and the care-plan version before sending once. Back to assessment input retains values; Close assessment draft asks before discarding. Confirmed response shows server risk/current plan/stamp; later reading failure does not undo or repeat the write. No local success, automatic write retry, offline queue or unsupported delete."
+    ],
+    [
+      "What if a version, state or connection changes?",
+      "VERSION_CONFLICT or a changed preflight keeps all typed input, refreshes the current plan and blocks the old review. Compare the current version above, then Read latest assessment and keep input explicitly adopts that returned version without replacing your text and unchecks acknowledgement; review again deliberately. ADMISSION_STATE_INVALID rereads admission and assessment and displays current status; never resend automatically. VALIDATION_ERROR shows field details. A lost screening reply locks the original idempotency key/body; Retry original request only within24hours. A lost care-plan update is never replayed: Read current result, compare version/fields and return to the retained draft; read/adopt current version before a new review. Outside retention or ambiguous results ask IT."
+    ]
+  ],
+  faqUr: [
+    [
+      "اصل داخلہ کیسے چنوں؟",
+      "میرے بستر سے اصل مریض چن کر وارڈ رہنمائی یا نرسنگ جائزہ کھولیں؛ واپسی وہی داخلہ رکھتی ہے۔ وارڈ مریض میں اصل مقرر بستر، دیگر مجاز جاری داخلے میں سرور کی اصل سطور اور تلاش مقامی فلٹر۔ مریض یا عملے کی آئی ڈی نہ لکھیں، بستر شناخت نہیں۔ نام و ایم آر این، عمر یا پیدائش، وارڈ، اصل داخلہ حالت و علامات چیک کریں۔ تازہ صرف پڑھتا ہے۔ مریض بدلنے سے پہلے مسودہ چھوڑنے پر پوچھے، نامعلوم ارسال پر جگہ بدلنا بند۔ صرف ریکارڈ پر اندراج بند؛ ارسال سے پہلے خدمت و اجازت پھر چیک۔"
+    ],
+    [
+      "تاخیر و تاریخ کا مطلب؟",
+      "داخلے و ہرنرسنگ جائزے پر بستر و مریض کے کارڈ میں سرور کی غذائی و منصوبہ تاخیر سرخ متن سے پڑھیں۔ پہلا دن مقامی حساب نہیں۔ جائزہ یا منصوبہ نہ ہو تو درج نہیں، کمخطرہ یا مکمل جائزہ نہیں۔ تاریخ میں اصل پیمائش، کل، خطرہ، منصوبہ و مہر۔ ایف ون خانے یا جائزے میں معلومات و فوکس رکھے۔ دونوں زبان، تھیم و مشترک کی بورڈترتیب100تا250زوم؛ اردو، نئےریکارڈ و مدیر کا انسانی جائزہ باقی۔"
+    ],
+    [
+      "غذائی خطرہ کیسے درج کروں؟",
+      "نیا غذائی جائزہ خالی، طبی اسکور پہلے منتخب نہیں۔ اختیاری وزن0.5تا400کلو اور قد30تا250سینٹی میٹر۔ دونوں ہوں تو بی ایم آئی و اسکور کی تجویز؛ تجویز والا بٹن شعوری انتخاب، طبی فیصلہ خود نہیں۔ بی ایم آئی20سے زیادہ0،18.5تا20پر1،18.5سے کم2۔ پچھلے3تا6ماہ بلاارادہ وزن نقصان5فیصدسے کم0،5تا10پر1،10سے زیادہ2۔ شدیدبیماری میں5دن سے زیادہ غذا نہ لی تو2 ورنہ0۔ کل0کم،1درمیانہ،2یازیادہ بلندخطرہ۔ درمیانے یا بلند پر اصل غذائی منصوبہ2000حروف، غذا چارٹ یا ماہر کو حوالہ؛ محفوظ کرنا غذا یا حوالہ کا حکم نہیں۔ اصل خطرہ و مہر سرور سے۔ جائزہ اضافہ ہے، ترمیم یا حذف نہیں؛ حالت بدلے تو نیاجائزہ۔"
+    ],
+    [
+      "نرسنگ منصوبہ کیسے چیک کروں؟",
+      "نرسنگ منصوبہ لکھیں یا جائزہ موجودہ مسائل، مقاصد، اقدامات و اختیاری نتیجہ کھولتا ہے۔ لازم خانے ہرایک3تا4000حروف، نتیجہ4000تک۔ ہرجائزے میں اصل ردعمل لکھیں۔ زیرترمیم نسخہ سرور کا، اسی کوexpected_versionبھیجیں؛ اندازہ نہیں۔ نئے منصوبے کا نسخہ نہیں،nullجاتا ہے۔ سرور پر پچھلے نسخے محفوظ، یہ راستہ صرف موجودہ دکھاتا ہے، فرضی تاریخ نہیں۔ غیرارسال مسودہ بندکرنے سے اصل نہیں بدلتا۔"
+    ],
+    [
+      "مسودہ تصدیق یا بند کیسے؟",
+      "مریض و اصل جائزہ چیک والا نشان، پھر اندراج کا جائزہ۔ مکالمہ عین مریض، داخلہ و معلومات منجمد کرتا ہے۔ ایک بار تصدیق اصل شناخت، اجازت، خدمت و منصوبے کا نسخہ پھر پڑھ کر بھیجے۔ واپس معلومات رکھے؛ بندکرنے پر چھوڑنے کی تصدیق۔ مصدقہ جواب اصل خطرہ، منصوبہ و مہر دکھائے؛ بعدکی پڑھائی کی خرابی ارسال نہیں دہراتی۔ مقامی کامیابی، خودکارارسال، آف لائن قطار یا غیرمجازحذف نہیں۔"
+    ],
+    [
+      "نسخہ،حالت یارابطہ بدلےتو؟",
+      "نسخے کا ٹکراؤ یا پہلے چیک میں تبدیلی پر تمام لکھا محفوظ، موجودہ منصوبہ تازہ اور پراناجائزہ بند۔ اوپر کا نسخہ ملائیں، پھر تازہ جائزہ پڑھیں و معلومات رکھیں اصل نیا نسخہ لے مگر متن نہ بدلے، تصدیق کا نشان ہٹے؛ شعوری نیاجائزہ لیں۔ داخلہ حالت انکار پر داخلہ و جائزہ پڑھ کر موجودہ حالت دکھائے، خود نہ بھیجے۔ خانے کی غلطی تفصیل کے ساتھ۔ گم غذائی جواب پر اصل محفوظ کلید و معلومات مقفل،24گھنٹے میں اصل دوبارہ۔ گم منصوبہ ترمیم دوبارہ نہیں؛ موجودہ نتیجہ پڑھ کر نسخہ و خانے ملائیں، مسودے پر واپس، نیاجائزہ سے پہلے تازہ نسخہ لیں۔ مدتگزرے یا شک ہو تو آئی ٹی۔"
+    ]
+  ]
+},
  my_beds: {
   title: "My beds this shift",
   titleUr: "اس شفٹ میں میرے بستر",

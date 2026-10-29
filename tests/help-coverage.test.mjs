@@ -34,7 +34,7 @@ test("separately authored registration help must retain its Urdu title", () => {
 });
 test("all delivered controls, tasks, role guides and FAQ seeds have bilingual help", () => {
   const result = checkHelp({ media: false });
-  assert.equal(result.screens, 59);
+  assert.equal(result.screens, 61);
   assert(result.controls > 90);
   assert.equal(result.workspaceGuides, 30);
 });
@@ -132,3 +132,5 @@ test('Repeat register cannot ship an unmapped clinical confirmation',()=>{assert
 test("Roll Call cannot ship an unmapped attendance confirmation",()=>{assert.throws(()=>checkHelp({media:false,read:file=>file==="src/screens/RollCall.tsx"?read(file).replace('data-help="rollcall.confirm"',''):read(file)}),/missing\/broken control help mapping/)});
 
 test("My beds cannot ship an unmapped cleaning review",()=>{assert.throws(()=>checkHelp({media:false,read:file=>file==="src/screens/MyBeds.tsx"?read(file).replace('data-help="mybeds.review"',''):read(file)}),/missing\/broken control help mapping/)});
+test('Ward assessment cannot ship an unmapped review control',()=>{assert.throws(()=>checkHelp({media:false,read:file=>file==='src/screens/NursingAssessment.tsx'?read(file).replace('data-help="assessment.review"',''):read(file)}),/missing\/broken control help mapping/)});
+test('Ward patient handover cannot ship an unmapped context control',()=>{assert.throws(()=>checkHelp({media:false,read:file=>file==='src/ward-admission.tsx'?read(file).replace('data-help="ward.context"',''):read(file)}),/missing\/broken control help mapping/)});
