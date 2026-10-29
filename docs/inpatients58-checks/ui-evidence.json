@@ -1,0 +1,88 @@
+{
+  "populated": {
+    "passed": true,
+    "finished": "2026-10-29T13:59:14.399Z",
+    "requests": [
+      {
+        "method": "POST",
+        "path": "/api/v1/admissions/10/discharge",
+        "body": {
+          "note": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+        },
+        "status": 422,
+        "request_id": "53c36d86d96949afa77129353aa4492a",
+        "error": {
+          "code": "VALIDATION_ERROR",
+          "message": "The request is invalid.",
+          "details": {
+            "fields": [
+              {
+                "field": "note",
+                "message": "String should have at most 1000 characters",
+                "type": "string_too_long"
+              }
+            ]
+          },
+          "retryable": false,
+          "retry_after_seconds": null
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/admissions/10/discharge",
+        "body": {
+          "note": "DEMO keep this note when general consent is absent"
+        },
+        "status": 409,
+        "request_id": "e50499a1a6b14039b68519813b25373c",
+        "error": {
+          "code": "CONSENT_REQUIRED",
+          "message": "Record the general consent of this admission (or the doctor's emergency note) first (MSDS 72)",
+          "details": {},
+          "retryable": false,
+          "retry_after_seconds": null
+        }
+      }
+    ],
+    "checks": [
+      "Two real vitals rows with correction and zero pain",
+      "Two real MAR rows Held and Refused correction; no administered dose",
+      "Original/corrected nursing notes and PNC author stamps",
+      "F1 from known reference with focus return",
+      "English/Urdu both themes at 250 percent no horizontal overflow",
+      "Actual422 note validation hint/aria-invalid and retained input",
+      "Actual409 CONSENT_REQUIRED note retained, no retry",
+      "Actor preferences restored and signed out"
+    ]
+  },
+  "concurrent": {
+    "passed": false,
+    "limitation": "UI assertion timed out during delayed recovery reads; actual server statuses only are verified. No complete UI race pass claimed.",
+    "primary": [
+      {
+        "method": "POST",
+        "path": "/api/v1/admissions/10/discharge",
+        "body": {
+          "note": "DEMO retain primary note after another terminal discharges"
+        },
+        "status": 409,
+        "request_id": "f0406c0012ee4b9fb5498d2746bcc2a5",
+        "error": {
+          "code": "DISCHARGE_NOT_ALLOWED",
+          "message": "Admission is DischargeInProgress",
+          "details": {},
+          "retryable": false,
+          "retry_after_seconds": null
+        }
+      }
+    ],
+    "other": [
+      {
+        "path": "/api/v1/admissions/10/discharge",
+        "status": 200,
+        "request_id": "ce17d8453051488b8decfafcdc5db140"
+      }
+    ],
+    "finished": "2026-10-29T14:08:42.308Z"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "implementation_id": 1,
+  "agent": "Codex",
+  "kind": "MissingWorkflow",
+  "severity": "Medium",
+  "title": "Doctor inpatient screen cannot receive its listed vitals.due event",
+  "actual": "doctor_inpatients lists/subscribes to vitals.due, but that event's audience is ipd.flowsheet.record. demo.doctor holds ipd.flowsheet.view and ipd.admission.view, not ipd.flowsheet.record. With two real live clients on the same new synthetic admission, nurse received vitals.due event243 while doctor did not. Both received admission.overflow_assigned241, so the Doctor's connection was active.",
+  "expected": "Deliver the inpatient screen's due-vitals refresh signal to authorised doctor/flowsheet viewers as promised by its bundle, or correct the screen contract and define its supported refresh mechanism. Do not grant doctors nurse recording permission or require frontend polling/guessed alerts. The server remains the source of overdue/due status.",
+  "steps": "Fresh scenario b6c881 patient9/admission10, own ward10/beds40–41. Open real demo.doctor and demo.nurse terminal sessions before the event. Overflow-assign/admit10 to own40. Record synthetic past observations (API observed_at), then PUT vitals-schedule interval_minutes15. Worker emits actual event243: nurse sees it, doctor does not. No clock simulation or real care. See independent real client journals.",
+  "evidence": "Doctor auth/me20042b9652279374106b02d961fc2699483 lacks record permission; get_event vitals.due audience ipd.flowsheet.record; get_screen_bundle doctor_inpatients lists it. Overflow200f392ac0cee95439c97eff7553bc47b16 emitted241 to BOTH clients. Schedule200d4762545342a406ba462617524c5f1c1; overdue flowsheet20034eca5511a1744e8878f431fbbb28450. Nurse actual vitals.due243 at2026-10-29T13:44:42.989899+00:00, admission10; Doctor list stays overflow241 only. docs/inpatients58-checks/vitals-audience-evidence.json records exact facts; full original artifacts/inpatients58-checks-watch*.json. Server2026-10-28T21:29:45.848402+00:00/contracte90ba541e495d6487532. No stock/real medicine/care/money or guessed alerts.",
+  "endpoint": "GET /admissions/{admission_id}/flowsheet",
+  "screen_id": "doctor_inpatients",
+  "workflow": "inpatient-and-discharge §2.5; vitals.due",
+  "build": "c4bc177 / index-Biyh4T_R.js",
+  "request_id": "codex-inpatients58-vitals-viewer-audience-20261029-v1"
+}

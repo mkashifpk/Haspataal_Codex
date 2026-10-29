@@ -1,0 +1,49 @@
+{
+  "doctor_auth": {
+    "request_id": "42b9652279374106b02d961fc2699483",
+    "permissions": [
+      "ipd.admission.code_red",
+      "ipd.admission.request",
+      "ipd.admission.view",
+      "ipd.bed.view",
+      "ipd.discharge.initiate",
+      "ipd.flowsheet.view",
+      "ipd.mar.view"
+    ]
+  },
+  "event_contract": {
+    "event_type": "vitals.due",
+    "description": "Vitals are due/overdue for an admission.",
+    "audience": "permission ipd.flowsheet.record",
+    "payload_fields": {
+      "admission_id": "int",
+      "patient_name": "str",
+      "bed_label": "str",
+      "due_at": "datetime",
+      "overdue_minutes": "int"
+    },
+    "priority": "normal",
+    "workflow": "§2.5",
+    "presentation": null,
+    "subscribed_by_screens": [
+      "doctor_inpatients",
+      "my_beds",
+      "vitals_tracker"
+    ],
+    "protocol": "WS /ws/v1/events: send {type:'auth', access_token, resume_from, topics}; get_guide('realtime')",
+    "emitted_by_operations": [],
+    "emitted_in_code": [
+      "haspataal.worker.jobs:ipd_vitals_due"
+    ],
+    "rereads_by_id": [
+      "GET /admissions/{admission_id}",
+      "GET /admissions/{admission_id}/discharge-status",
+      "GET /admissions/{admission_id}/discharge-summary/pdf",
+      "GET /admissions/{admission_id}/discharge-summary/print-payload",
+      "GET /admissions/{admission_id}/flowsheet",
+      "GET /admissions/{admission_id}/mar"
+    ],
+    "rereads_by_id_means": "the subscribing screens' reads of one record whose id the payload carries",
+    "note": "emitted_by_operations: seen in the tests; emitted_in_code: every place that emits it (worker jobs and database triggers included). Treat the payload as a hint and re-read what it names."
+  }
+}
