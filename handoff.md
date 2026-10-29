@@ -2,7 +2,7 @@
 Last updated: 29 October 2026, Codex/functions, Asia/Karachi.
 
 ## Current task / Git
-User requested next screen. Phase 4 screen 57 explain_estimate (Doctor) implemented with tested partial scope; screen 58 doctor_inpatients not started. Baseline clean f120827; source/evidence ready to commit. Pending command: stage, secret audit and commit; save/submit partial proposal with tested commit then verify progress_proposals. No business/test command running, no uncertain writes.
+User requested next screen. Phase 4 screen 57 explain_estimate (Doctor) implemented with tested partial scope; screen 58 doctor_inpatients not started. Implementation committed fe3ff75 (baseline f120827). Partial proposal196 (7items) submitted and verified pending, awaiting human review on /docs -> My progress. No pending command or uncommitted implementation work; reporting receipts/checkpoint saved in follow-up commit. No business/test command running, no uncertain writes.
 Prior screen56 implementation645af30, proposal195 verified pending. Prior proposals188–194 also pending; do not duplicate unchanged claims. No human reviews.
 
 ## Delivered files / verification
@@ -14,7 +14,7 @@ Raw Doctor repeat409ESTIMATE_STATE_INVALID c69de0240f4d4b9f8edd45656259f031; Cas
 
 ## Backend / acceptance limits
 Server2026-10-28T21:29:45.848402+00:00, contracte90ba541e495d6487532, knowledgee9e3dbb61b873e01, rubric6b013592c628, implementation1. Issue41New stillnoanswer29Oct: Billing GETtransfers403fa45fdfac23e4387a6f8ed3dff9478b8, requires ipd.admission.view; no guessedtransfer/permissionbypass. No new backendfinding57. Prior35–40 fixes and audit docs retained.
-Propose only five tested endpoints + safe writes + handbook. Full chart-origin rule/deep link waits for screen58; fullplan/allrole/service/busyhour/editor/physicalprinter/nativeUrdu/namedhumanfresh-data gates pending. No Review code entered, review signed or selfapproval. Successful PACSlink remains DEVlimitation decision54.
+Proposal196 contains only five tested endpoints + safe writes + handbook; verified awaiting human review on /docs -> My progress. Full chart-origin rule/deep link waits for screen58; fullplan/allrole/service/busyhour/editor/physicalprinter/nativeUrdu/namedhumanfresh-data gates pending. No Review code entered, review signed or selfapproval. Successful PACSlink remains DEVlimitation decision54.
 
 ## Synthetic state / no replay
 New scenario1f1e4f: patient7 MRN-2026-000007, ticket6, admission8 originallyPending. Fresh estimates7/8 total125/deposit62/billed0 actual server values. Doctor explain7 actual01f8be0c9d7243abae3ff6d43ae1ae67, samekey replay83120b2befcc41ddb6ef729e284d5592. Secondterminalcancel8confirmed; both7/8 nowCancelled. Own admission8 rereadPending then cancelled200b5789160843a4de18a7cdd158c225c58; explained7 cleanup200f2536cfd17b849daa89e4548b788c0a1. Historical synthetic visit remains, no fake refund/arrival/bed/care/medicine/signature. Never rerun archived scripts/keys.
@@ -23,4 +23,4 @@ Prior56scenarioae4ad2 patient6/ticket5/admission7Cancelled and quotes5/6Cancelle
 ## Evidence / environment / next
 docs/EXPLAIN_ESTIMATE_REVIEW_2026-10-29.md, docs/explain57/ (intents/results/validation/compacthonestUIaudit), contracts/explain_estimate.json and explain57-*.json. Full ignored artifacts retain actual journals/PDFs; public/handbook/explain_estimate-{en,ur}.png are real UI captures.
 DEV https://hms-dev.netbird.cloud; local authorised configuration in ignored .dev-terminal.json/.codex/config.toml/profiles/CA. No secrets copied, no agents spawned. PowerShell/Node/Electron, bundled Poppler/Python.
-Next: finish commit/proposal reporting, then next user-requested development is58Doctorinpatients and chart handover. Manual reviewer: NEW app-created admission/estimate, Doctor explanation identity/paper/recipient/language/notes/stamp/finalhistory, F1insideform/review, Urdu/RTL/zoom/physicalprint; human starts/signs own portal review. Nothing else in progress.
+Next user-requested development is58Doctorinpatients and chart handover; begin with current roadmap/bundle/quality/design/handbook and issue answers. Manual reviewer: NEW app-created admission/estimate, Doctor explanation identity/paper/recipient/language/notes/stamp/finalhistory, F1insideform/review, Urdu/RTL/zoom/physicalprint; human starts/signs own portal review. Nothing else in progress.
