@@ -1,5 +1,12 @@
-# Haspataal checkpoint — screen55 and issue40 committed
+# Haspataal checkpoint — next-screen request waiting for DEV connectivity
 Last update: 29 October 2026, Codex/functions, Asia/Karachi.
+
+## Active request — 29 October
+User asks to build the next screen after cost_estimates_admissions55. Takeover verified clean main at eb94555 (source e782761); read this file, AGENTS.md and recent commits. No next screen selected or implementation started: current MCP roadmap/contracts are required before choosing it.
+
+Startup overview/my_progress/progress_proposals/my_backend_issues/connecting-your-coding-agent calls attempted; MCP transport failed sending HTTPS to https://hms-dev.netbird.cloud/mcp. A separate overview retry confirmed the same failure. Direct read-only GET /health/live using the configured local CA timed out after8012ms (HTTP000); Windows NetBird service is Running. No evidence of a backend business defect or changed contracts; do not fabricate a backend issue report. No business writes, new IDs/keys/cursors, proposals or implementation edits this turn. Prior test results below are historical, not rerun. No new item is ready to propose.
+
+Exact next action once DEV is reachable: repeat mandatory startup reads and feedback, get_build_roadmap with the55 implemented screens (src/foundation-task-map.json), select its next dependency-ready screen, then fetch its bundle/omitted sections, quality/design/handbook, endpoint contracts/types/validation before implementation. Do not assume a screen name or replay archived scenario scripts. Nothing running or uncertain; only this documentation checkpoint changed.
 
 ## Current request and Git
 User resumed after fresh DEV reinstall; audit/fix reports35–39, fresh tests, commit/propose only changed tested items, then continue checkpoint screen55. Original pause commit558a013 was clean and verified. Source d734c77 committed the original refresh; e782761 committed screen55 and issue40 continuation on main. No uncommitted implementation, uncertain writes or running commands. Reporting receipts/checkpoint are the only final documentation commit.
