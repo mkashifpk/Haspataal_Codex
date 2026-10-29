@@ -49,6 +49,7 @@ export function CostEstimates({
   stream: string;
   timeZone?: string;
 }) {
+  const explanationOnly = screenId === "explain_estimate";
   const can = (p: string) => user.permissions.includes(p),
     view = estimateView(screenId, establishment),
     read =
@@ -56,6 +57,7 @@ export function CostEstimates({
       ["estimate.view", "estimate.prepare", "estimate.explain"].some(can),
     workView = view === "full" || view === "open_work",
     live = connected && stream === "Live";
+  const [admissionScope, setAdmissionScope] = useState<{admission_id:number; patient_name:string;mrn:string;admission_number:string} >();
   const [revision, setRevision] = useState(0),
     [status, setStatus] = useState(""),
     [search, setSearch] = useState(""),
@@ -102,25 +104,26 @@ export function CostEstimates({
       read
         ? e.listEstimates({
             limit: 1000,
+            admission_id: explanationOnly ? admissionScope?.admission_id : undefined,
             status: status ? (status as e.EstimateOut["status"]) : undefined,
           })
         : Promise.resolve([]),
-    [read, revision, status],
+    [read, revision, status, admissionScope?.admission_id],
   );
   const tariff = useLoad(
-    () => (read ? e.getTariff() : Promise.resolve(undefined)),
+    () => (read && !explanationOnly ? e.getTariff() : Promise.resolve(undefined)),
     [read, revision],
   );
   const stays = useLoad(
     () =>
-      read && can("ipd.admission.view")
+      read && !explanationOnly && can("ipd.admission.view")
         ? listAdmissions()
         : Promise.resolve([]),
     [read, revision],
   );
   const transfers = useLoad(
     () =>
-      draft?.admissionId && can("ipd.admission.view")
+      !explanationOnly && draft?.admissionId && can("ipd.admission.view")
         ? e.listTransfers(draft.admissionId)
         : Promise.resolve([]),
     [draft?.admissionId, revision],
@@ -199,7 +202,15 @@ export function CostEstimates({
     setPreview(undefined);
     try {
       const value = await e.getEstimate(id);
-      if (n === generation.current) setRecord(value);
+      if (n === generation.current) {
+        setRecord(value);
+        // A known reference can select another patient's record. Keep the
+        // displayed admission context tied to that returned record too.
+        if (explanationOnly) setAdmissionScope(value.admission_id ? {
+          admission_id: value.admission_id, patient_name: value.patient_name,
+          mrn: value.mrn, admission_number: value.admission_number || "",
+        } : undefined);
+      }
     } catch (err) {
       if (n === generation.current) {
         setRecord(undefined);
@@ -264,6 +275,7 @@ export function CostEstimates({
     source?: e.EstimateDetailOut,
     subject?: Draft["subject"],
   ) {
+    if (explanationOnly && kind !== "explain") return;
     if (!leave()) return;
     write.clearError();
     setError(undefined);
@@ -525,7 +537,7 @@ export function CostEstimates({
       data-unsaved={!!draft}
       data-write-pending={write.blocked}
     >
-      <h1>{t("Cost estimates", "متوقع اخراجات")}</h1>
+      <h1>{explanationOnly ? t("Explain a cost estimate", "تخمینہ سمجھائیں") : t("Cost estimates", "متوقع اخراجات")}</h1>
       <p>
         {t(
           "Explain the expected cost from the hospital tariff. An estimate does not collect payment.",
@@ -539,7 +551,7 @@ export function CostEstimates({
       )}
       <div className="actions">
         <button
-          data-help="estimates.read"
+          data-help={explanationOnly ? "explanation.read" : "estimates.read"}
           disabled={locked}
           onClick={() => {
             setRevision((n) => n + 1);
@@ -550,14 +562,14 @@ export function CostEstimates({
         </button>
         <Field label={t("Find estimate or patient", "تخمینہ یا مریض تلاش")}>
           <input
-            data-help="estimates.read"
+            data-help={explanationOnly ? "explanation.read" : "estimates.read"}
             value={search}
             onChange={(v) => setSearch(v.target.value)}
           />
         </Field>
         <Field label={t("Estimate status", "تخمینے کی حالت")}>
           <select
-            data-help="estimates.read"
+            data-help={explanationOnly ? "explanation.read" : "estimates.read"}
             value={status}
             onChange={(v) => setStatus(v.target.value)}
           >
@@ -573,6 +585,10 @@ export function CostEstimates({
           </select>
         </Field>
       </div>
+      {explanationOnly && <section className="notice" data-help="explanation.context">
+        <p>{t("Choose an admission from work waiting or open an estimate in the register. Explain only the selected patient's Draft estimate; ask Admissions or Billing to prepare or correct it.","منتظر داخلہ یا رجسٹر کا تخمینہ چنیں۔ منتخب مریض کا صرف مسودہ سمجھائیں؛ تیاری یا تصحیح کے لیے داخلہ یا بلنگ سے کہیں۔")}</p>
+        {admissionScope && <><strong>{admissionScope.patient_name} · <bdi>{admissionScope.mrn}</bdi> · {admissionScope.admission_number}</strong><button data-help="explanation.context" disabled={locked} onClick={()=>{if(leave()){setDraft(undefined);setRecord(undefined);setAdmissionScope(undefined);}}}>{t("Show all estimate records","تمام تخمینے دکھائیں")}</button></>}
+      </section>}
       <ErrorBox error={error} />
       <ErrorBox error={write.error} />
       {(notice || (!draft && write.notice)) && (
@@ -588,12 +604,12 @@ export function CostEstimates({
           </p>
           <code>{write.attempt.key}</code>
           {canRetryWrite(write.attempt) && (
-            <button data-help="estimates.recovery" onClick={write.retry}>
+            <button data-help={explanationOnly ? "explanation.recovery" : "estimates.recovery"} onClick={write.retry}>
               {t("Retry original request", "اصل درخواست کی دوبارہ کوشش")}
             </button>
           )}
           <button
-            data-help="estimates.recovery"
+            data-help={explanationOnly ? "explanation.recovery" : "estimates.recovery"}
             onClick={() => void write.inspect()}
           >
             {t("Read current result", "موجودہ نتیجہ پڑھیں")}
@@ -644,7 +660,8 @@ export function CostEstimates({
                       )}
                     </p>
                   )}
-                  {workView && can("estimate.prepare") && (
+                  {explanationOnly && <button data-help="explanation.context" disabled={locked} onClick={()=>{if(leave()){setDraft(undefined);setRecord(undefined);setAdmissionScope(w);setStatus("");setSearch("");}}}>{t("Read admission estimates","داخلے کے تخمینے پڑھیں")}</button>}
+                  {!explanationOnly && workView && can("estimate.prepare") && (
                     <button
                       data-help="estimates.prepare"
                       disabled={
@@ -673,6 +690,7 @@ export function CostEstimates({
               ))}
           <h2>{t("Estimate register", "تخمینہ رجسٹر")}</h2>
           <LoadState {...list} retry={list.reload} />
+          {!list.loading&&!list.error&&list.data?.filter(r=>match(r.patient_name,r.mrn,r.estimate_number)).length===0&&<p>{t("No estimates match. Clear the filter, or ask Admissions or Billing to prepare one.","کوئی تخمینہ نہیں ملا۔ فلٹر ہٹائیں یا داخلہ/بلنگ سے تیاری کا کہیں۔")}</p>}
           {!list.loading &&
             !list.error &&
             list.data
@@ -680,7 +698,7 @@ export function CostEstimates({
               .map((r) => (
                 <button
                   className="list-row"
-                  data-help="estimates.read"
+                  data-help={explanationOnly ? "explanation.read" : "estimates.read"}
                   disabled={locked}
                   key={r.estimate_id}
                   onClick={() => {
@@ -698,14 +716,14 @@ export function CostEstimates({
               ))}
           <Field label={t("Known estimate reference", "معلوم تخمینہ حوالہ")}>
             <input
-              data-help="estimates.read"
+              data-help={explanationOnly ? "explanation.read" : "estimates.read"}
               inputMode="numeric"
               value={known}
               onChange={(v) => setKnown(v.target.value)}
             />
           </Field>
           <button
-            data-help="estimates.read"
+            data-help={explanationOnly ? "explanation.read" : "estimates.read"}
             disabled={locked || !/^\d+$/.test(known) || Number(known) < 1}
             onClick={() => {
               if (leave()) {
@@ -770,6 +788,7 @@ export function CostEstimates({
                   ))}
                 </tbody>
               </table>
+              {explanationOnly && record.admission_id && <button data-help="explanation.context" disabled={locked} onClick={()=>{if(leave()){setDraft(undefined);setAdmissionScope({admission_id:record.admission_id!,patient_name:record.patient_name,mrn:record.mrn,admission_number:record.admission_number||""});setStatus("");}}}>{t("Read this admission history","اس داخلے کی تاریخ پڑھیں")}</button>}
               <p>{record.payment_terms}</p>
               <p>{record.note}</p>
               <p>
@@ -782,6 +801,8 @@ export function CostEstimates({
                   {time(record.explained_at)}
                 </p>
               )}
+              {record.explain_stamp && <p>{record.explain_stamp.text}</p>}
+              {record.status !== "Draft" && explanationOnly && <p>{t("This explanation is final. Ask Admissions or Billing for a new estimate or a reasoned correction; the history remains.","یہ وضاحت حتمی ہے۔ نئے تخمینے یا وجہ والی تصحیح کے لیے داخلہ یا بلنگ سے کہیں؛ تاریخ باقی رہے گی۔")}</p>}
               {record.cancel_reason && <p>{record.cancel_reason}</p>}
               {record.superseded_by && (
                 <p>
@@ -794,7 +815,7 @@ export function CostEstimates({
                   (kind, i) => (
                     <button
                       key={kind}
-                      data-help="estimates.print"
+                      data-help={explanationOnly ? "explanation.print" : "estimates.print"}
                       disabled={locked}
                       onClick={() => void paper(kind)}
                     >
@@ -820,7 +841,7 @@ export function CostEstimates({
                   record.status === "Draft" &&
                   can("estimate.explain") && (
                     <button
-                      data-help="estimates.explain"
+                      data-help={explanationOnly ? "explanation.explain" : "estimates.explain"}
                       disabled={locked}
                       onClick={() =>
                         begin("explain", record.admission_id, undefined, record)
@@ -829,7 +850,7 @@ export function CostEstimates({
                       {t("Mark explained", "سمجھایا گیا درج کریں")}
                     </button>
                   )}
-                {workView &&
+                {!explanationOnly && workView &&
                   live &&
                   ["Draft", "Explained"].includes(record.status) &&
                   can("estimate.prepare") && (
@@ -843,7 +864,7 @@ export function CostEstimates({
                       {t("Cancel estimate", "تخمینہ منسوخ")}
                     </button>
                   )}
-                {workView && live && can("estimate.prepare") && (
+                {!explanationOnly && workView && live && can("estimate.prepare") && (
                   <button
                     data-help="estimates.prepare"
                     disabled={locked}
@@ -857,7 +878,7 @@ export function CostEstimates({
               </div>
             </>
           )}
-          {workView && can("estimate.prepare") && can("ipd.admission.view") && (
+          {!explanationOnly && workView && can("estimate.prepare") && can("ipd.admission.view") && (
             <>
               <h2>
                 {t(
@@ -1375,7 +1396,7 @@ export function CostEstimates({
               <>
                 <Field label={t("Who heard the estimate", "تخمینہ کس نے سنا")}>
                   <input
-                    data-help="estimates.explain"
+                    data-help={explanationOnly ? "explanation.explain" : "estimates.explain"}
                     data-field="explained_to"
                     minLength={2}
                     maxLength={200}
@@ -1392,7 +1413,7 @@ export function CostEstimates({
                 </Field>
                 <Field label={t("Relationship to patient", "مریض سے رشتہ")}>
                   <select
-                    data-help="estimates.explain"
+                    data-help={explanationOnly ? "explanation.explain" : "estimates.explain"}
                     data-field="explained_relation"
                     value={draft.explain.explained_relation}
                     onChange={(v) =>
@@ -1418,7 +1439,7 @@ export function CostEstimates({
                 </Field>
                 <Field label={t("Language explained in", "سمجھانے کی زبان")}>
                   <select
-                    data-help="estimates.explain"
+                    data-help={explanationOnly ? "explanation.explain" : "estimates.explain"}
                     data-field="language"
                     value={draft.explain.language}
                     onChange={(v) =>
@@ -1450,7 +1471,7 @@ export function CostEstimates({
                   )}
                 >
                   <textarea
-                    data-help="estimates.explain"
+                    data-help={explanationOnly ? "explanation.explain" : "estimates.explain"}
                     data-field="note"
                     maxLength={2000}
                     value={draft.explain.note ?? ""}
@@ -1463,7 +1484,7 @@ export function CostEstimates({
                 </Field>
                 <label>
                   <input
-                    data-help="estimates.explain"
+                    data-help={explanationOnly ? "explanation.explain" : "estimates.explain"}
                     type="checkbox"
                     checked={draft.explain.acknowledged}
                     onChange={(v) =>
@@ -1500,7 +1521,7 @@ export function CostEstimates({
             )}
             <label>
               <input
-                data-help="estimates.review"
+                data-help={explanationOnly ? "explanation.review" : "estimates.review"}
                 type="checkbox"
                 checked={draft.ack}
                 onChange={(v) => mutate({ ack: v.target.checked })}
@@ -1512,14 +1533,14 @@ export function CostEstimates({
             </label>
             <div className="actions">
               <button
-                data-help="estimates.review"
+                data-help={explanationOnly ? "explanation.review" : "estimates.review"}
                 disabled={!live || stale}
                 onClick={() => void reviewDraft()}
               >
                 {t("Review estimate action", "تخمینے کا جائزہ")}
               </button>
               <button
-                data-help="estimates.recovery"
+                data-help={explanationOnly ? "explanation.recovery" : "estimates.recovery"}
                 onClick={async () => {
                   setError(undefined);
                   try {
@@ -1539,7 +1560,7 @@ export function CostEstimates({
                 {t("Read latest and keep input", "تازہ پڑھیں و معلومات رکھیں")}
               </button>
               <button
-                data-help="estimates.review"
+                data-help={explanationOnly ? "explanation.review" : "estimates.review"}
                 onClick={() => {
                   if (leave()) {
                     setDraft(undefined);
@@ -1566,14 +1587,14 @@ export function CostEstimates({
           </p>
           <Details value={review} />
           <button
-            data-help="estimates.confirm"
+            data-help={explanationOnly ? "explanation.confirm" : "estimates.confirm"}
             disabled={locked || !live || stale}
             onClick={submit}
           >
             {t("Confirm this estimate action", "یہ تخمینہ عمل تصدیق")}
           </button>
           <button
-            data-help="estimates.confirm"
+            data-help={explanationOnly ? "explanation.confirm" : "estimates.confirm"}
             disabled={locked}
             onClick={() => setReview(undefined)}
           >

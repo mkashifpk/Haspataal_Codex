@@ -3,6 +3,11 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import { checkHelp } from "../scripts/check-help.mjs";
 const read = (file) => fs.readFileSync(file, "utf8");
+
+test('shared estimate help validates both branches and rejects unknown runtime guides', () => {
+  for (const change of [s => s.replace('"explanation.confirm" : "estimates.confirm"', '"missing.confirm" : "estimates.confirm"'), s => s.replace('explanationOnly ? "explanation.confirm" : "estimates.confirm"', 'screenId')])
+    assert.throws(() => checkHelp({media:false,read:file => file === 'src/screens/CostEstimates.tsx' ? change(read(file)) : read(file)}), /missing\/broken control help mapping/);
+});
 test('Duty Roster cannot ship an unmapped scheduling confirmation',()=>{
  assert.throws(()=>checkHelp({media:false,read:file=>file==='src/screens/DutyRoster.tsx'?read(file).replace('data-help="roster.confirm"',''):read(file)}),/missing\/broken control help mapping/);
 });
@@ -29,7 +34,7 @@ test("separately authored registration help must retain its Urdu title", () => {
 });
 test("all delivered controls, tasks, role guides and FAQ seeds have bilingual help", () => {
   const result = checkHelp({ media: false });
-  assert.equal(result.screens, 56);
+  assert.equal(result.screens, 57);
   assert(result.controls > 90);
   assert.equal(result.workspaceGuides, 30);
 });

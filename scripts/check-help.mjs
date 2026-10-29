@@ -233,19 +233,26 @@ export function checkHelp({
           n.name.name,
         )
       ) {
-        const key = n.attributes.find(
+        const value = n.attributes.find(
           (a) => a.type === "JSXAttribute" && a.name.name === "data-help",
-        )?.value?.value;
+        )?.value;
+        // A shared component may select between finite, authored screen guides.
+        // Validate every possible branch; arbitrary runtime mappings still fail.
+        const keysOf = (v) => v?.type === 'StringLiteral' ? [v.value]
+          : v?.type === 'JSXExpressionContainer' ? keysOf(v.expression)
+          : v?.type === 'ConditionalExpression' ? [...keysOf(v.consequent), ...keysOf(v.alternate)]
+          : [undefined];
+        const keys = keysOf(value);
         assert(
-          key && controlGuides[key],
+          keys.length && keys.every(key => key && controlGuides[key]),
           `${file}:${n.loc.start.line} ${n.name.name}: missing/broken control help mapping`,
         );
-        used.add(key);
+        keys.forEach(key => used.add(key));
         inventory.push({
           file,
           line: n.loc.start.line,
           control: n.name.name,
-          help: key,
+          help: keys.length === 1 ? keys[0] : keys,
         });
       }
       for (const [k, v] of Object.entries(n))

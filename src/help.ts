@@ -10,6 +10,59 @@ export type HelpPage = {
   faqUr: [string, string][];
 };
 export const help: Record<string, HelpPage> = {
+ explain_estimate: {
+  title: "Explain a cost estimate",
+  titleUr: "تخمینہ سمجھائیں",
+  purpose: "At a family discussion, the doctor, clinical specialist or surgeon reviews the selected patient’s prepared estimate, explains it in their language and records the factual signed-paper acknowledgement. Success is a server-confirmed explanation with its author stamp. Urdu is a draft awaiting native review.",
+  purposeUr: "خاندان سے گفتگو میں ڈاکٹر، ماہر یا سرجن منتخب مریض کا تیار تخمینہ اس کی زبان میں سمجھا کر اصل دستخط کا اندراج کرتا ہے۔ کامیابی سرور کی مصنف مہر والی وضاحت ہے۔ اردو مقامی جائزے تک مسودہ۔",
+  steps: [
+    "Open Doctor → Explain a cost estimate. The doctor, clinical specialist or surgeon checks the selected patient name, MRN and admission before talking to the family. This records an explanation, never payment or treatment.",
+    "Estimates to explain lists admissions waiting for an explanation. Read admission estimates loads only that admission’s records. If none exists, ask Admissions or Billing to prepare it. Read this admission history filters the selected record’s admission; Show all estimate records clears that context. Never type an admission id.",
+    "Find estimate or patient filters the latest 1000 register records locally by name, MRN or estimate number; Estimate status filters on the server. Choose the returned row, or use Known estimate reference and Read this estimate. Refresh cost estimates rereads server data. No matches means check the filters or ask the preparing desk.",
+    "Verify the original lines, total, deposit, billed so far and payment terms. Preview estimate form shows the server’s bilingual notes and signature lines. Print estimate or Save terminal estimate PDF uses the current language and checked record version, A4. Download English server PDF saves the original file. Inspect paper and obtain the real signature or thumb impression separately; this app does not sign for anyone. A print failure never repeats an explanation.",
+    "Only a Draft estimate offers Mark explained to someone with permission while Live. Who heard the estimate is 2–200 characters. Choose Relationship to patient and Language explained in; Questions / deposit agreement is optional, up to 2000 characters. Tick the actual signed-paper statement only when true, then check the patient/action statement and Review estimate action. Confirm this estimate action sends once. Back keeps the unsent form; Close estimate draft asks before discarding.",
+    "Explained, Superseded and Cancelled records are read-only here. The server’s explanation stamp and history remain. Ask Admissions or Billing for a new estimate or reasoned correction; this screen never prepares, cancels, deletes or edits a final explanation.",
+    "A state refusal rereads the exact estimate, shows its current status and keeps what you typed. Field errors appear beside fields. Read latest and keep input requires checking the patient again; it does not make a non-Draft record editable. On a lost reply keep the original request; explicit Retry original request replays the same key/body within retention. No automatic retry or replacement. Reconnect or transferred-admission refresh stops a stale review. F1 preserves form/focus; English/Urdu and keyboard/Settings zoom 100–250% are shared. Urdu, physical printing and named human review remain pending."
+  ],
+  stepsUr: [
+    "ڈاکٹر سے تخمینہ سمجھائیں کھولیں۔ ڈاکٹر، ماہر یا سرجن خاندان سے گفتگو سے پہلے مریض کا نام، ایم آر این و داخلہ چیک کرے۔ یہ وضاحت کا اندراج ہے، ادائیگی یا علاج نہیں۔",
+    "سمجھانے والے تخمینوں میں منتظر داخلے ہیں۔ داخلے کے تخمینے پڑھیں صرف اسی داخلے کا ریکارڈ لاتا ہے۔ تخمینہ نہ ہو تو داخلہ یا بلنگ سے تیار کرائیں۔ اس داخلے کی تاریخ پڑھیں منتخب داخلہ فلٹر کرے، تمام تخمینے دکھائیں اسے ہٹائے۔ داخلہ آئی ڈی ٹائپ نہ کریں۔",
+    "تخمینہ یا مریض تلاش تازہ 1000 رجسٹر ریکارڈ میں نام، ایم آر این یا تخمینہ نمبر سے مقامی تلاش؛ حالت سرور پر فلٹر۔ اصل سطر چنیں یا معلوم تخمینہ حوالہ سے یہ تخمینہ پڑھیں۔ اخراجات تازہ کریں سرور پڑھتا ہے۔ نتیجہ نہ ملے تو فلٹر دیکھیں یا تیاری والے ڈیسک سے کہیں۔",
+    "اصل مد، کل، پیشگی رقم، اب تک بل و شرائط دیکھیں۔ تخمینہ فارم دیکھیں اصل دو زبان نوٹس و دستخط سطریں لاتا ہے۔ پرنٹ یا ٹرمینل پی ڈی ایف موجودہ زبان، اے فور و ورژن چیک سے؛ سرور انگریزی پی ڈی ایف اصل فائل۔ اصل کاغذ و دستخط/انگوٹھا الگ لیں؛ ایپ کسی کی جگہ دستخط نہیں۔ پرنٹ خرابی سے وضاحت نہ دہرائیں۔",
+    "صرف مسودہ، جاری رابطہ و اجازت پر سمجھایا گیا درج کریں آتا ہے۔ سننے والا 2تا200حروف، مریض سے رشتہ و زبان چنیں؛ سوالات/پیشگی اتفاق اختیاری 2000حروف۔ اصل کاغذ کا نشان صرف سچ ہونے پر، پھر مریض/عمل نشان اور جائزہ۔ ایک تصدیق ارسال کرے۔ واپس غیر ارسال معلومات رکھتا ہے؛ مسودہ بند کرنے سے پہلے پوچھتا ہے۔",
+    "سمجھایا، نئے سے بدلا یا منسوخ ریکارڈ یہاں صرف پڑھنے کا ہے۔ سرور کی مصنف مہر و تاریخ باقی۔ نیا تخمینہ یا وجہ والی تصحیح داخلہ یا بلنگ سے؛ یہاں تیاری، منسوخی، حذف یا حتمی وضاحت کی ترمیم نہیں۔",
+    "حالت انکار پر عین تخمینہ پڑھیں، موجودہ حالت و لکھی معلومات برقرار۔ غلطی خانے کے پاس۔ تازہ پڑھیں و معلومات رکھیں کے بعد مریض دوبارہ چیک لازم؛ غیر مسودہ قابل ترمیم نہیں ہوتا۔ جواب گم تو اصل درخواست رکھیں، واضح اصل کوشش وقت کے اندر وہی کلید و معلومات۔ خودکار کوشش یا متبادل نہیں۔ رابطہ بحالی یا منتقلی پر پرانا جائزہ رکتا ہے۔ ایف ون معلومات و فوکس رکھتا، دو زبان و زوم100تا250مشترک۔ اردو، کاغذ و نامزد انسانی جائزہ باقی۔"
+  ],
+  faq: [
+    [
+      "Doctor: how do I explain a prepared admission estimate?",
+      "Estimates to explain lists admissions waiting for an explanation. Read admission estimates loads only that admission’s records. If none exists, ask Admissions or Billing to prepare it. Read this admission history filters the selected record’s admission; Show all estimate records clears that context. Never type an admission id. Verify the original lines, total, deposit, billed so far and payment terms. Preview estimate form shows the server’s bilingual notes and signature lines. Print estimate or Save terminal estimate PDF uses the current language and checked record version, A4. Download English server PDF saves the original file. Inspect paper and obtain the real signature or thumb impression separately; this app does not sign for anyone. A print failure never repeats an explanation. Only a Draft estimate offers Mark explained to someone with permission while Live. Who heard the estimate is 2–200 characters. Choose Relationship to patient and Language used; Questions / deposit agreement is optional, up to 2000 characters. Tick the actual signed-paper statement only when true, then check the patient/action statement and Review estimate action. Confirm this estimate action sends once. Back keeps the unsent form; Close estimate draft asks before discarding."
+    ],
+    [
+      "Clinical specialist or surgeon: can I change the cost or final explanation?",
+      "Explained, Superseded and Cancelled records are read-only here. The server’s explanation stamp and history remain. Ask Admissions or Billing for a new estimate or reasoned correction; this screen never prepares, cancels, deletes or edits a final explanation."
+    ],
+    [
+      "What if another terminal changes the estimate or the reply is lost?",
+      "A state refusal rereads the exact estimate, shows its current status and keeps what you typed. Field errors appear beside fields. Read latest and keep input requires checking the patient again; it does not make a non-Draft record editable. On a lost reply keep the original request; explicit Retry original request replays the same key/body within retention. No automatic retry or replacement. Reconnect or transferred-admission refresh stops a stale review. F1 preserves form/focus; English/Urdu and keyboard/Settings zoom 100–250% are shared. Urdu, physical printing and named human review remain pending."
+    ]
+  ],
+  faqUr: [
+    [
+      "ڈاکٹر: داخلے کا تیار تخمینہ کیسے سمجھاؤں؟",
+      "سمجھانے والے تخمینوں میں منتظر داخلے ہیں۔ داخلے کے تخمینے پڑھیں صرف اسی داخلے کا ریکارڈ لاتا ہے۔ تخمینہ نہ ہو تو داخلہ یا بلنگ سے تیار کرائیں۔ اس داخلے کی تاریخ پڑھیں منتخب داخلہ فلٹر کرے، تمام تخمینے دکھائیں اسے ہٹائے۔ داخلہ آئی ڈی ٹائپ نہ کریں۔ اصل مد، کل، پیشگی رقم، اب تک بل و شرائط دیکھیں۔ تخمینہ فارم دیکھیں اصل دو زبان نوٹس و دستخط سطریں لاتا ہے۔ پرنٹ یا ٹرمینل پی ڈی ایف موجودہ زبان، اے فور و ورژن چیک سے؛ سرور انگریزی پی ڈی ایف اصل فائل۔ اصل کاغذ و دستخط/انگوٹھا الگ لیں؛ ایپ کسی کی جگہ دستخط نہیں۔ پرنٹ خرابی سے وضاحت نہ دہرائیں۔ صرف مسودہ، جاری رابطہ و اجازت پر سمجھایا گیا درج کریں آتا ہے۔ سننے والا 2تا200حروف، مریض سے رشتہ و زبان چنیں؛ سوالات/پیشگی اتفاق اختیاری 2000حروف۔ اصل کاغذ کا نشان صرف سچ ہونے پر، پھر مریض/عمل نشان اور جائزہ۔ ایک تصدیق ارسال کرے۔ واپس غیر ارسال معلومات رکھتا ہے؛ مسودہ بند کرنے سے پہلے پوچھتا ہے۔"
+    ],
+    [
+      "ماہر یا سرجن: خرچ یا حتمی وضاحت بدل سکتا ہوں؟",
+      "سمجھایا، نئے سے بدلا یا منسوخ ریکارڈ یہاں صرف پڑھنے کا ہے۔ سرور کی مصنف مہر و تاریخ باقی۔ نیا تخمینہ یا وجہ والی تصحیح داخلہ یا بلنگ سے؛ یہاں تیاری، منسوخی، حذف یا حتمی وضاحت کی ترمیم نہیں۔"
+    ],
+    [
+      "دوسرے ٹرمینل پر تبدیلی یا جواب گم ہو؟",
+      "حالت انکار پر عین تخمینہ پڑھیں، موجودہ حالت و لکھی معلومات برقرار۔ غلطی خانے کے پاس۔ تازہ پڑھیں و معلومات رکھیں کے بعد مریض دوبارہ چیک لازم؛ غیر مسودہ قابل ترمیم نہیں ہوتا۔ جواب گم تو اصل درخواست رکھیں، واضح اصل کوشش وقت کے اندر وہی کلید و معلومات۔ خودکار کوشش یا متبادل نہیں۔ رابطہ بحالی یا منتقلی پر پرانا جائزہ رکتا ہے۔ ایف ون معلومات و فوکس رکھتا، دو زبان و زوم100تا250مشترک۔ اردو، کاغذ و نامزد انسانی جائزہ باقی۔"
+    ]
+  ]
+},
+
  cost_estimates_billing: {
   title: "Cost estimates",
   titleUr: "متوقع اخراجات",

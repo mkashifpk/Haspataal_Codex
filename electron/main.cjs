@@ -971,7 +971,7 @@ ipcMain.handle("terminal", async (event, action, args = {}) => {
     if (action === "print-estimate") {
       if(!Number.isSafeInteger(args.estimateId)||args.estimateId<1||!Number.isSafeInteger(args.expectedVersion))throw new Error('Invalid estimate reference');
       const actor=auth?.user.user_id,workspace=windows.get(win.id),screenId=args.screenId||'cost_estimates_admissions';
-      if(!['cost_estimates_admissions','cost_estimates_billing'].includes(screenId))throw Error('Invalid estimate workspace');
+      if(!['cost_estimates_admissions','cost_estimates_billing','explain_estimate'].includes(screenId))throw Error('Invalid estimate workspace');
       const [record,payload,est]=await Promise.all([api('GET','/cost-estimates/'+args.estimateId,undefined,workspace),api('GET','/cost-estimates/'+args.estimateId+'/print-payload',undefined,workspace),api('GET','/establishment',undefined,workspace)]);
       if(!record.ok)return record;if(!payload.ok)return payload;if(!est.ok)return est;
       if(!['full','open_work','records'].includes(require('./estimate-access.cjs').estimateView(screenId,est.data)))throw new Error('The estimate records view is unavailable');
