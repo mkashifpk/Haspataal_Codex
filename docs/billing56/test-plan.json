@@ -1,0 +1,1080 @@
+{
+  "screen": "cost_estimates_billing",
+  "title": "Cost estimates",
+  "cases": [
+    {
+      "id": "case:GET /cost-estimates/worklist",
+      "call": "GET /api/v1/cost-estimates/worklist",
+      "summary": "Estimates to explain: new admissions and changes of ward",
+      "happy_path": {
+        "as_one_of": [
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier",
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer",
+          "surgeon"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/cost-estimates/worklist"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "kind": "Admission",
+                  "admission_id": 1,
+                  "admission_number": "ADM-2026-00001",
+                  "patient_id": 1,
+                  "mrn": "MRN-2026-000001",
+                  "patient_name": "Ali Khan",
+                  "ward_name": "General Ward",
+                  "transfer_id": null,
+                  "since": "2026-10-01T07:15:43.073097+00:00",
+                  "overdue": false,
+                  "detail": null
+                }
+              ],
+              "meta": {
+                "server_time": "2026-10-01T07:15:43.186066+00:00"
+              },
+              "request_id": "fcd8a73c2f9d4dfeaae1e4ffa46a7255"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "cssd_technician",
+          "employee_self",
+          "hr_admin",
+          "ipc_nurse"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": []
+    },
+    {
+      "id": "case:POST /cost-estimates",
+      "call": "POST /api/v1/cost-estimates",
+      "summary": "Prepare a cost estimate",
+      "happy_path": {
+        "as_one_of": [
+          "admissions_officer",
+          "billing_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/cost-estimates",
+            "body": {
+              "admission_id": 1,
+              "reason": "Admission",
+              "expected_days": 5,
+              "services": [
+                {
+                  "service_id": 4
+                }
+              ],
+              "allowances": [
+                {
+                  "kind": "Medicines",
+                  "description": "Antibiotics and IV fluids for 5 days",
+                  "amount": 10000
+                }
+              ]
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "estimate_id": 1,
+                "estimate_number": "EST-2026-00001",
+                "patient_id": 1,
+                "mrn": "MRN-2026-000001",
+                "patient_name": "Ali Khan",
+                "admission_id": 1,
+                "admission_number": "ADM-2026-00001",
+                "transfer_id": null,
+                "reason": "Admission",
+                "ward_id": 2,
+                "ward_name": "General Ward",
+                "expected_days": 5,
+                "total": 33000,
+                "deposit": 16500,
+                "payment_terms": "Payment in cash, by card or by bank transfer at the cash counters. Inpatients pay a deposit at admission and settle the bill before they leave; patients of a panel are billed to the panel by its agreement.",
+                "note": null,
+                "status": "Draft",
+                "prepared_by_name": "u6a98fd085c",
+                "prepared_at": "2026-10-01T07:15:43.192249+00:00",
+                "explained_at": null,
+                "explained_by_name": null,
+                "explained_to": null,
+                "explained_relation": null,
+                "language": null,
+                "acknowledged": null,
+                "explain_stamp": null,
+                "superseded_by": null,
+                "cancel_reason": null,
+                "row_version": 2,
+                "billed_so_far": 0,
+                "lines": [
+                  {
+                    "line_id": 1,
+                    "kind": "BedDays",
+                    "service_id": 2,
+                    "description": "General Ward: bed-days",
+                    "quantity": 5,
+                    "unit_price": 3000,
+                    "amount": 15000
+                  },
+                  {
+                    "line_id": 2,
+                    "kind": "Procedure",
+                    "service_id": 4,
+                    "description": "Chest tube insertion",
+                    "quantity": 1,
+                    "unit_price": 8000,
+                    "amount": 8000
+                  },
+                  {
+                    "line_id": 3,
+                    "kind": "Medicines",
+                    "service_id": null,
+                    "description": "Antibiotics and IV fluids for 5 days",
+                    "quantity": 1,
+                    "unit_price": 10000,
+                    "amount": 10000
+                  }
+                ]
+              },
+              "meta": {
+                "server_time": "2026-10-01T07:15:43.214945+00:00"
+              },
+              "request_id": "a334d16e08d34826b642a841c1c008ba"
+            }
+          },
+          "errors_seen": [
+            "FORBIDDEN",
+            "VALIDATION_ERROR"
+          ],
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "anaesthetist",
+          "cashier",
+          "clinic_director",
+          "clinical_specialist"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "ADMISSION_STATE_INVALID",
+        "FORBIDDEN",
+        "REFERENCE_NOT_FOUND",
+        "VALIDATION_ERROR"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:GET /cost-estimates",
+      "call": "GET /api/v1/cost-estimates",
+      "summary": "Cost estimates",
+      "happy_path": {
+        "as_one_of": [
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier",
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer",
+          "surgeon"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/cost-estimates",
+            "query": {
+              "admission_id": 1
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "estimate_id": 2,
+                  "estimate_number": "EST-2026-00002",
+                  "patient_id": 1,
+                  "mrn": "MRN-2026-000001",
+                  "patient_name": "Ali Khan",
+                  "admission_id": 1,
+                  "admission_number": "ADM-2026-00001",
+                  "transfer_id": 1,
+                  "reason": "ChangeOfWard",
+                  "ward_id": 1,
+                  "ward_name": "ICU",
+                  "expected_days": 3,
+                  "total": 42000,
+                  "deposit": 20000,
+                  "payment_terms": "Payment in cash, by card or by bank transfer at the cash counters. Inpatients pay a deposit at admission and settle the bill before they leave; patients of a panel are billed to the panel by its agreement.",
+                  "note": null,
+                  "status": "Explained",
+                  "prepared_by_name": "u6a98fd085c",
+                  "prepared_at": "2026-10-01T07:15:43.333281+00:00",
+                  "explained_at": "2026-10-01T07:15:43.347638+00:00",
+                  "explained_by_name": "u6a98fd085c",
+                  "explained_to": "Mr Aslam",
+                  "explained_relation": "Relative",
+                  "language": "Punjabi",
+                  "acknowledged": true,
+                  "explain_stamp": {
+                    "at": "2026-10-01T07:15:43.347638+00:00",
+                    "name": "Staff 9139",
+                    "text": "Staff 9139, Officer, 01-Oct-2026 12:15",
+                    "user_id": 6,
+                    "designation": "Officer",
+                    "employee_id": 6,
+                    "registration": null
+                  },
+                  "superseded_by": null,
+                  "cancel_reason": null,
+                  "row_version": 3,
+                  "billed_so_far": 0
+                },
+                {
+                  "estimate_id": 1,
+                  "estimate_number": "EST-2026-00001",
+                  "patient_id": 1,
+                  "mrn": "MRN-2026-000001",
+                  "patient_name": "Ali Khan",
+                  "admission_id": 1,
+                  "admission_number": "ADM-2026-00001",
+                  "transfer_id": null,
+                  "reason": "Admission",
+                  "ward_id": 2,
+                  "ward_name": "General Ward",
+                  "expected_days": 5,
+                  "total": 33000,
+                  "deposit": 16500,
+                  "payment_terms": "Payment in cash, by card or by bank transfer at the cash counters. Inpatients pay a deposit at admission and settle the bill before they leave; patients of a panel are billed to the panel by its agreement.",
+                  "note": null,
+                  "status": "Superseded",
+                  "prepared_by_name": "u6a98fd085c",
+                  "prepared_at": "2026-10-01T07:15:43.192249+00:00",
+                  "explained_at": "2026-10-01T07:15:43.233144+00:00",
+                  "explained_by_name": "Dr Ahmed",
+                  "explained_to": "Mr Aslam",
+                  "explained_relation": "Relative",
+                  "language": "Urdu",
+                  "acknowledged": true,
+                  "explain_stamp": {
+                    "at": "2026-10-01T07:15:43.233144+00:00",
+                    "name": "Dr Ahmed",
+                    "text": "Dr Ahmed, Doctor, PMDC PMDC-11003, 01-Oct-2026 12:15",
+                    "user_id": 1,
+                    "designation": "Doctor",
+                    "employee_id": 1,
+                    "registration": "PMDC PMDC-11003"
+                  },
+                  "superseded_by": 2,
+                  "cancel_reason": null,
+                  "row_version": 4,
+                  "billed_so_far": 0
+                }
+              ],
+              "meta": {
+                "server_time": "2026-10-01T07:15:43.412538+00:00"
+              },
+              "request_id": "e404131ff2334d9bb405790f538e5222"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "cssd_technician",
+          "employee_self",
+          "hr_admin",
+          "ipc_nurse"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /cost-estimates/{estimate_id}",
+      "call": "GET /api/v1/cost-estimates/{estimate_id}",
+      "summary": "One cost estimate",
+      "happy_path": {
+        "as_one_of": [
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier",
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer",
+          "surgeon"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/cost-estimates/1"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "estimate_id": 1,
+                "estimate_number": "EST-2026-00001",
+                "patient_id": 1,
+                "mrn": "MRN-2026-000001",
+                "patient_name": "Ali Khan",
+                "admission_id": 1,
+                "admission_number": "ADM-2026-00001",
+                "transfer_id": null,
+                "reason": "Admission",
+                "ward_id": 2,
+                "ward_name": "General Ward",
+                "expected_days": 5,
+                "total": 33000,
+                "deposit": 16500,
+                "payment_terms": "Payment in cash, by card or by bank transfer at the cash counters. Inpatients pay a deposit at admission and settle the bill before they leave; patients of a panel are billed to the panel by its agreement.",
+                "note": null,
+                "status": "Superseded",
+                "prepared_by_name": "u6a98fd085c",
+                "prepared_at": "2026-10-01T07:15:43.192249+00:00",
+                "explained_at": "2026-10-01T07:15:43.233144+00:00",
+                "explained_by_name": "Dr Ahmed",
+                "explained_to": "Mr Aslam",
+                "explained_relation": "Relative",
+                "language": "Urdu",
+                "acknowledged": true,
+                "explain_stamp": {
+                  "at": "2026-10-01T07:15:43.233144+00:00",
+                  "name": "Dr Ahmed",
+                  "text": "Dr Ahmed, Doctor, PMDC PMDC-11003, 01-Oct-2026 12:15",
+                  "user_id": 1,
+                  "designation": "Doctor",
+                  "employee_id": 1,
+                  "registration": "PMDC PMDC-11003"
+                },
+                "superseded_by": 2,
+                "cancel_reason": null,
+                "row_version": 4,
+                "billed_so_far": 0,
+                "lines": [
+                  {
+                    "line_id": 1,
+                    "kind": "BedDays",
+                    "service_id": 2,
+                    "description": "General Ward: bed-days",
+                    "quantity": 5,
+                    "unit_price": 3000,
+                    "amount": 15000
+                  },
+                  {
+                    "line_id": 2,
+                    "kind": "Procedure",
+                    "service_id": 4,
+                    "description": "Chest tube insertion",
+                    "quantity": 1,
+                    "unit_price": 8000,
+                    "amount": 8000
+                  },
+                  {
+                    "line_id": 3,
+                    "kind": "Medicines",
+                    "service_id": null,
+                    "description": "Antibiotics and IV fluids for 5 days",
+                    "quantity": 1,
+                    "unit_price": 10000,
+                    "amount": 10000
+                  }
+                ]
+              },
+              "meta": {
+                "server_time": "2026-10-01T07:15:43.361178+00:00"
+              },
+              "request_id": "fe098c7c074140d9bcda9f31774963af"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "cssd_technician",
+          "employee_self",
+          "hr_admin",
+          "ipc_nurse"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:POST /cost-estimates/{estimate_id}/explain",
+      "call": "POST /api/v1/cost-estimates/{estimate_id}/explain",
+      "summary": "Record that the estimate was explained",
+      "happy_path": {
+        "as_one_of": [
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "surgeon"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/cost-estimates/1/explain",
+            "body": {
+              "explained_to": "Mr Aslam",
+              "explained_relation": "Relative",
+              "language": "Urdu",
+              "acknowledged": true
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "estimate_id": 1,
+                "estimate_number": "EST-2026-00001",
+                "patient_id": 1,
+                "mrn": "MRN-2026-000001",
+                "patient_name": "Ali Khan",
+                "admission_id": 1,
+                "admission_number": "ADM-2026-00001",
+                "transfer_id": null,
+                "reason": "Admission",
+                "ward_id": 2,
+                "ward_name": "General Ward",
+                "expected_days": 5,
+                "total": 33000,
+                "deposit": 16500,
+                "payment_terms": "Payment in cash, by card or by bank transfer at the cash counters. Inpatients pay a deposit at admission and settle the bill before they leave; patients of a panel are billed to the panel by its agreement.",
+                "note": null,
+                "status": "Explained",
+                "prepared_by_name": "u6a98fd085c",
+                "prepared_at": "2026-10-01T07:15:43.192249+00:00",
+                "explained_at": "2026-10-01T07:15:43.233144+00:00",
+                "explained_by_name": "Dr Ahmed",
+                "explained_to": "Mr Aslam",
+                "explained_relation": "Relative",
+                "language": "Urdu",
+                "acknowledged": true,
+                "explain_stamp": {
+                  "at": "2026-10-01T07:15:43.233144+00:00",
+                  "name": "Dr Ahmed",
+                  "text": "Dr Ahmed, Doctor, PMDC PMDC-11003, 01-Oct-2026 12:15",
+                  "user_id": 1,
+                  "designation": "Doctor",
+                  "employee_id": 1,
+                  "registration": "PMDC PMDC-11003"
+                },
+                "superseded_by": null,
+                "cancel_reason": null,
+                "row_version": 3,
+                "billed_so_far": 0,
+                "lines": [
+                  {
+                    "line_id": 1,
+                    "kind": "BedDays",
+                    "service_id": 2,
+                    "description": "General Ward: bed-days",
+                    "quantity": 5,
+                    "unit_price": 3000,
+                    "amount": 15000
+                  },
+                  {
+                    "line_id": 2,
+                    "kind": "Procedure",
+                    "service_id": 4,
+                    "description": "Chest tube insertion",
+                    "quantity": 1,
+                    "unit_price": 8000,
+                    "amount": 8000
+                  },
+                  {
+                    "line_id": 3,
+                    "kind": "Medicines",
+                    "service_id": null,
+                    "description": "Antibiotics and IV fluids for 5 days",
+                    "quantity": 1,
+                    "unit_price": 10000,
+                    "amount": 10000
+                  }
+                ]
+              },
+              "meta": {
+                "server_time": "2026-10-01T07:15:43.239242+00:00"
+              },
+              "request_id": "968c879035444ff4b3b6cbbeb6a1b465"
+            }
+          },
+          "errors_seen": [
+            "ESTIMATE_STATE_INVALID"
+          ],
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "cashier",
+          "clinic_director",
+          "cssd_technician",
+          "employee_self"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "ESTIMATE_STATE_INVALID",
+        "VALIDATION_ERROR"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:POST /cost-estimates/{estimate_id}/cancel",
+      "call": "POST /api/v1/cost-estimates/{estimate_id}/cancel",
+      "summary": "Cancel an estimate",
+      "happy_path": {
+        "as_one_of": [
+          "admissions_officer",
+          "billing_admin"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/cost-estimates/3/cancel",
+            "body": {
+              "reason": "Prepared for the wrong patient"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "estimate_id": 3,
+                "estimate_number": "EST-2026-00003",
+                "patient_id": 1,
+                "mrn": "MRN-2026-000001",
+                "patient_name": "Ali Khan",
+                "admission_id": null,
+                "admission_number": null,
+                "transfer_id": null,
+                "reason": "OnRequest",
+                "ward_id": null,
+                "ward_name": null,
+                "expected_days": null,
+                "total": 16000,
+                "deposit": 8000,
+                "payment_terms": "Payment in cash, by card or by bank transfer at the cash counters. Inpatients pay a deposit at admission and settle the bill before they leave; patients of a panel are billed to the panel by its agreement.",
+                "note": null,
+                "status": "Cancelled",
+                "prepared_by_name": "u6a98fd085c",
+                "prepared_at": "2026-10-01T07:15:43.377461+00:00",
+                "explained_at": null,
+                "explained_by_name": null,
+                "explained_to": null,
+                "explained_relation": null,
+                "language": null,
+                "acknowledged": null,
+                "explain_stamp": null,
+                "superseded_by": null,
+                "cancel_reason": "Prepared for the wrong patient",
+                "row_version": 3,
+                "billed_so_far": 0,
+                "lines": [
+                  {
+                    "line_id": 7,
+                    "kind": "Procedure",
+                    "service_id": 4,
+                    "description": "Chest tube insertion",
+                    "quantity": 2,
+                    "unit_price": 8000,
+                    "amount": 16000
+                  }
+                ]
+              },
+              "meta": {
+                "server_time": "2026-10-01T07:15:43.393170+00:00"
+              },
+              "request_id": "302c975e06404a4fbedb211ca8cf4340"
+            }
+          },
+          "errors_seen": [
+            "ESTIMATE_STATE_INVALID"
+          ],
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "anaesthetist",
+          "cashier",
+          "clinic_director",
+          "clinical_specialist"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "ESTIMATE_STATE_INVALID",
+        "VALIDATION_ERROR"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:GET /cost-estimates/{estimate_id}/print-payload",
+      "call": "GET /api/v1/cost-estimates/{estimate_id}/print-payload",
+      "summary": "The estimate to print and sign (A4)",
+      "happy_path": {
+        "as_one_of": [
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier",
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer",
+          "surgeon"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/cost-estimates/1/print-payload"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "document_type": "cost_estimate",
+                "printer_role": "document",
+                "paper_width_mm": 210,
+                "fields": {
+                  "hospital": {
+                    "name": "Haspataal Hospital",
+                    "address": "",
+                    "phone": "",
+                    "phc_number": "",
+                    "issue_line": "Issued 14-Oct-2026 15:45; this copy printed 14-Oct-2026 15:45"
+                  },
+                  "estimate": {
+                    "estimate_id": 1,
+                    "estimate_number": "EST-2026-00001",
+                    "patient_id": 1,
+                    "mrn": "MRN-2026-000001",
+                    "patient_name": "Ali Khan",
+                    "admission_id": 1,
+                    "admission_number": "ADM-2026-00001",
+                    "transfer_id": null,
+                    "reason": "Admission",
+                    "ward_id": 2,
+                    "ward_name": "General Ward",
+                    "expected_days": 5,
+                    "total": 33000,
+                    "deposit": 16500,
+                    "payment_terms": "Payment in cash, by card or by bank transfer at the cash counters. Inpatients pay a deposit at admission and settle the bill before they leave; patients of a panel are billed to the panel by its agreement.",
+                    "note": null,
+                    "status": "Draft",
+                    "prepared_by_name": "u88ee47ecfd",
+                    "prepared_at": "2026-10-14T10:45:09.650535+00:00",
+                    "explained_at": null,
+                    "explained_by_name": null,
+                    "explained_to": null,
+                    "explained_relation": null,
+                    "language": null,
+                    "acknowledged": null,
+                    "explain_stamp": null,
+                    "superseded_by": null,
+                    "cancel_reason": null,
+                    "row_version": 2,
+                    "billed_so_far": 0,
+                    "lines": [
+                      {
+                        "line_id": 1,
+                        "kind": "BedDays",
+                        "service_id": 2,
+                        "description": "General Ward: bed-days",
+                        "quantity": 5,
+                        "unit_price": 3000,
+                        "amount": 15000
+                      },
+                      {
+                        "line_id": 2,
+                        "kind": "Procedure",
+                        "service_id": 4,
+                        "description": "Chest tube insertion",
+                        "quantity": 1,
+                        "unit_price": 8000,
+                        "amount": 8000
+                      },
+                      {
+                        "line_id": 3,
+                        "kind": "Medicines",
+                        "service_id": null,
+                        "description": "Antibiotics and IV fluids for 5 days",
+                        "quantity": 1,
+                        "unit_price": 10000,
+                        "amount": 10000
+                      }
+                    ]
+                  },
+                  "english": [
+                    "This is an estimate of the cost of treatment; the bill depends on the treatment the patient needs.",
+                    "If the patient's condition or ward changes (for example to the ICU), you will be told the new estimate.",
+                    "Every service is priced from the hospital's tariff, available at the reception."
+                  ],
+                  "urdu": [
+                    "یہ آپ کے علاج کے اخراجات کا تخمینہ ہے۔ اصل بل علاج کی ضرورت کے مطابق کم یا زیادہ ہو سکتا ہے۔",
+                    "اگر مریض کی حالت یا وارڈ بدلے (مثلاً آئی سی یو) تو آپ کو نیا تخمینہ بتایا جائے گا۔",
+                    "ہر سروس کی قیمت ہسپتال کے ٹیرف کے مطابق ہے جو استقبالیہ پر دستیاب ہے۔"
+                  ],
+                  "signature_lines": [
+                    "Patient or family member: name, relationship, signature or thumb impression",
+                    "Explained by: name, designation, signature",
+                    "Date and time"
+                  ]
+                },
+                "text": "               Haspataal Hospital\n            Issued 14-Oct-2026 15:45\n      this copy printed 14-Oct-2026 15:45\n          COST ESTIMATE EST-2026-00001\n------------------------------------------------\nPatient               Ali Khan (MRN-2026-000001)\nAdmission                         ADM-2026-00001\n------------------------------------------------\nGeneral Ward: bed-days x 5         Rs. 15,000.00\nChe…",
+                "barcode_svg": null,
+                "qr_svg": null,
+                "pdf_url": "/api/v1/cost-estimates/1/pdf"
+              },
+              "meta": {
+                "server_time": "2026-10-14T10:45:09.687011+00:00"
+              },
+              "request_id": "dfc9eebe83244636a302030958f44bbf"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "cssd_technician",
+          "employee_self",
+          "hr_admin",
+          "ipc_nurse"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /cost-estimates/{estimate_id}/pdf",
+      "call": "GET /api/v1/cost-estimates/{estimate_id}/pdf",
+      "summary": "The estimate (PDF, English)",
+      "happy_path": {
+        "as_one_of": [
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier",
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer",
+          "surgeon"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/cost-estimates/2/pdf"
+          },
+          "response": {
+            "status": 200,
+            "content_type": "application/pdf",
+            "bytes": 3260
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "cssd_technician",
+          "employee_self",
+          "hr_admin",
+          "ipc_nurse"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /tariff",
+      "call": "GET /api/v1/tariff",
+      "summary": "The tariff: every price, by category",
+      "happy_path": {
+        "as_one_of": [
+          "any logged-in user"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/tariff"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "hospital_name": "Haspataal Hospital",
+                "as_of": "2026-10-01",
+                "currency": "PKR",
+                "categories": [
+                  {
+                    "category": "OPD",
+                    "label": "Consultations (OPD)",
+                    "items": [
+                      {
+                        "service_id": 1,
+                        "code": "OPD-GM",
+                        "name": "OPD Consultation - GM",
+                        "category": "OPD",
+                        "price": 1000,
+                        "department_name": "General Medicine"
+                      }
+                    ]
+                  },
+                  {
+                    "category": "RoomCharge",
+                    "label": "Ward bed charges (per day)",
+                    "items": [
+                      {
+                        "service_id": 2,
+                        "code": "ROOM-GW",
+                        "name": "General ward bed-day",
+                        "category": "RoomCharge",
+                        "price": 3000,
+                        "department_name": null
+                      },
+                      {
+                        "service_id": 3,
+                        "code": "ROOM-ICU",
+                        "name": "ICU bed-day",
+                        "category": "RoomCharge",
+                        "price": 12000,
+                        "department_name": null
+                      }
+                    ]
+                  },
+                  {
+                    "category": "Procedure",
+                    "label": "Procedures",
+                    "items": [
+                      {
+                        "service_id": 4,
+                        "code": "PROC-CT",
+                        "name": "Chest tube insertion",
+                        "category": "Procedure",
+                        "price": 8000,
+                        "department_name": null
+                      }
+                    ]
+                  }
+                ],
+                "wards": [
+                  {
+                    "ward_id": 2,
+                    "name": "General Ward",
+                    "ward_type": "General",
+                    "bed_day_price": 3000
+                  },
+                  {
+                    "ward_id": 1,
+                    "name": "ICU",
+                    "ward_type": "ICU",
+                    "bed_day_price": 12000
+                  }
+                ],
+                "lab_tests": []
+              },
+              "meta": {
+                "server_time": "2026-10-01T07:15:43.151599+00:00"
+              },
+              "request_id": "fb1d4256c2be43089f059e2184bfbbd9"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": []
+    },
+    {
+      "id": "case:GET /admissions/{admission_id}/transfers",
+      "call": "GET /api/v1/admissions/{admission_id}/transfers",
+      "summary": "The moves of an admission",
+      "happy_path": {
+        "as_one_of": [
+          "admissions_officer",
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/admissions/1/transfers"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "transfer_id": 1,
+                  "admission_id": 1,
+                  "from_ward_id": 2,
+                  "from_ward_name": "General Ward",
+                  "from_bed_id": 2,
+                  "from_bed_label": "GW-1",
+                  "to_ward_id": 1,
+                  "to_ward_name": "ICU",
+                  "to_bed_id": 1,
+                  "to_bed_label": "ICU-1",
+                  "reason": "Respiratory failure, needs ventilation",
+                  "from_daily_rate": 3000,
+                  "to_daily_rate": 12000,
+                  "rate_changed": true,
+                  "transferred_at": "2026-10-01T07:15:43.271127+00:00",
+                  "transferred_by_name": "u6a98fd085c",
+                  "estimate_explained": false
+                }
+              ],
+              "meta": {
+                "server_time": "2026-10-01T07:15:43.321187+00:00"
+              },
+              "request_id": "e2e1540a4ce846749074a349c6a886ce"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "billing_admin",
+          "cashier",
+          "clinic_director",
+          "cssd_technician"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    }
+  ],
+  "service_cases": [],
+  "delivery_gate": {
+    "required": true,
+    "status": "required",
+    "progress_reporting": {
+      "required": true,
+      "submit": "propose_progress",
+      "verify": "progress_proposals",
+      "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+    },
+    "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+    "compulsory": [
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+        "points": 2
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+        "points": 3
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+        "points": 2
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+        "points": 4
+      }
+    ],
+    "zoom": {
+      "min_pct": 100,
+      "max_pct": 250,
+      "reset_pct": 100,
+      "keys": [
+        "Ctrl + or Ctrl = (zoom in)",
+        "Ctrl - (zoom out)",
+        "Ctrl 0 (reset to 100 %)",
+        "Command on macOS"
+      ],
+      "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+    },
+    "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+    "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+  },
+  "handbook_page": "screens/cost_estimates_billing",
+  "workspace_guide": "get_handbook_outline('billing_admin')",
+  "realtime": [
+    {
+      "event": "admission.transferred",
+      "check": "the screen refreshes without polling"
+    }
+  ],
+  "acceptance_rules": [
+    "Worklist first: admissions without an explained estimate and moves to a ward with another daily charge (overdue in red after estimate_due_hours; admission.transferred with rate_changed arrives with priority high).",
+    "Prepare: the ward and the expected days (the bed charge comes from the tariff), the services and procedures picked from GET /tariff (their price is the tariff's: never typed), the allowances for medicines and consumables, the deposit (prefilled). For a move: reason ChangeOfWard with the transfer_id.",
+    "Print it (A4; Urdu from fields.urdu, right to left), explain it in the family's language, let them sign, then 'Mark explained' (who heard it, the relationship, the language, signed). Final; a new one supersedes it.",
+    "Show billed_so_far beside the total during the stay."
+  ],
+  "demo_accounts": "demo_accounts() lists a login per role; sandbox_call runs each case on the DEV server"
+}

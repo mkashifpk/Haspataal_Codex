@@ -1,0 +1,16 @@
+{
+  "implementation_id": 1,
+  "request_id": "codex-billing56-transfers-permission-20261029-v1",
+  "kind": "MissingWorkflow",
+  "severity": "Medium",
+  "title": "Billing cost-estimate transfer lookup requires a permission demo.billing does not have",
+  "screen_id": "cost_estimates_billing",
+  "endpoint": "GET /admissions/{admission_id}/transfers",
+  "workflow": "cost-estimates-and-tariff",
+  "build": "5f5d54a + billing56 contract review",
+  "agent": "Codex",
+  "actual": "cost_estimates_billing lists GET /admissions/{admission_id}/transfers for the ChangeOfWard estimate. demo.billing has estimate.view/prepare/explain but not ipd.admission.view, and the lookup returns403 FORBIDDEN. Its worklist is authorised and carries a pending move's transfer_id, but selecting/reviewing the recorded moves through the listed endpoint is unavailable.",
+  "expected": "Provide an estimate-scoped authorised transfer lookup, or define how Billing should obtain the recorded move using its estimate permissions without clinical chart access. Keep permissions enforced; do not require a typed or guessed transfer id.",
+  "steps": "Read current cost_estimates_billing bundle/endpoints and demo.billing auth/me. Create own synthetic ipd.admission_pending scenario ae4ad2 (patient6/ticket5/admission7), then GET /admissions/7/transfers as demo.billing.",
+  "evidence": "Server2026-10-28T21:29:45.848402+00:00/contracte90ba541e495d6487532. Real403 request_id fa45fdfac23e4387a6f8ed3dff9478b8, required ipd.admission.view. docs/billing56/scenario-result.json and transfer-refusal.json. No transfer or clinical care performed; no replay/permission bypass."
+}

@@ -970,10 +970,11 @@ ipcMain.handle("terminal", async (event, action, args = {}) => {
     }
     if (action === "print-estimate") {
       if(!Number.isSafeInteger(args.estimateId)||args.estimateId<1||!Number.isSafeInteger(args.expectedVersion))throw new Error('Invalid estimate reference');
-      const actor=auth?.user.user_id,workspace=windows.get(win.id);
+      const actor=auth?.user.user_id,workspace=windows.get(win.id),screenId=args.screenId||'cost_estimates_admissions';
+      if(!['cost_estimates_admissions','cost_estimates_billing'].includes(screenId))throw Error('Invalid estimate workspace');
       const [record,payload,est]=await Promise.all([api('GET','/cost-estimates/'+args.estimateId,undefined,workspace),api('GET','/cost-estimates/'+args.estimateId+'/print-payload',undefined,workspace),api('GET','/establishment',undefined,workspace)]);
       if(!record.ok)return record;if(!payload.ok)return payload;if(!est.ok)return est;
-      if(!['full','open_work','records'].includes(est.data.views.screens.find(s=>s.screen_id==='cost_estimates_admissions')?.view))throw new Error('The estimate records view is unavailable');
+      if(!['full','open_work','records'].includes(require('./estimate-access.cjs').estimateView(screenId,est.data)))throw new Error('The estimate records view is unavailable');
       const f=require('./estimate-print.cjs').assertEstimate(payload.data,args.estimateId);
       if(record.data.row_version!==args.expectedVersion||f.estimate.row_version!==args.expectedVersion||record.data.patient_id!==f.estimate.patient_id||record.data.mrn!==f.estimate.mrn)throw new Error('The estimate changed. Read it before printing.');
       const terminal=await api('GET','/terminals/whoami');if(!terminal.ok)return terminal;

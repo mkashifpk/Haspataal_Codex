@@ -10,6 +10,58 @@ export type HelpPage = {
   faqUr: [string, string][];
 };
 export const help: Record<string, HelpPage> = {
+ cost_estimates_billing: {
+  title: "Cost estimates",
+  titleUr: "متوقع اخراجات",
+  purpose: "During billing discussions, the Billing Administrator prepares tariff-based estimates, explains costs and retains a factual signed-paper acknowledgement. This screen records estimates and never collects payment. Urdu is a draft pending native review.",
+  purposeUr: "بلنگ گفتگو میں بلنگ منتظم اصل نرخ سے تخمینہ، خرچ کی وضاحت و اصل دستخط کا اندراج کرتا ہے۔ یہ تخمینہ ہے، رقم وصول نہیں ہوتی۔ اردو مقامی جائزے تک مسودہ۔",
+  steps: [
+    "Open Billing → Cost estimates. Work waiting comes first, including a changed ward rate. Check the patient name, MRN, admission and actual transfer; overdue work says Overdue and its time. Refresh rereads work, register, tariff and moves.",
+    "Billing has estimate permissions without the full clinical admission chart. Prepare from an authorised current work item, or Find patient for estimate with name or MRN, then choose the returned patient row for an estimate before admission. Never type a patient or transfer id. ChangeOfWard preparation is disabled because the recorded transfer lookup is forbidden for Billing; backend issue41 is pending. Ask Admissions to handle that move; existing estimates can still be read and printed.",
+    "Ward to price shows published daily charges. Expected days is a whole0–365. Add tariff service picks published items and quantities greater than0 up to1000; its unit price cannot be typed. Remove service removes only the unsent line. Add allowance records the kind, description3–300characters and positive amount; remove it before saving if unnecessary. This estimates costs, never dispenses or charges medicine.",
+    "Blank Deposit and Payment terms use the hospital defaults when prepared. Optional Estimate note is up to2000characters. Check the patient/action tick, Review estimate action freezes the input, then Confirm this estimate action once. Back keeps input; Close estimate draft asks before discarding. The server prices the lines and returns the total and deposit; compare Billed so far beside them.",
+    "Choose the returned estimate in the register or Read this estimate by a known reference. Search matches name/MRN/number locally within the latest1000 filtered records; Estimate status filters on the server. Preview estimate form shows original bilingual notes; Print estimate or Save terminal estimate PDF uses the selected app language, A4 and version checks. Download English server PDF saves original server bytes. Check the actual paper; cancelling a file dialog or a printer error never repeats preparation.",
+    "After explaining in the family’s language and obtaining the actual signed or thumb-printed paper, Mark explained records who heard it, relationship, language, questions/deposit agreement and the signed-paper tick. A final explanation cannot be edited; Prepare a revision creates another estimate and keeps history. Cancel estimate needs5–1000characters and applies to Draft or an incorrect Explained estimate. There is no delete.",
+    "State refusals reread the exact record and keep input; field errors appear beside fields. A transfer event or reconnect refreshes and stops a stale review. Read latest and keep input resets acknowledgements before another review. After a lost reply, keep the original request: explicit Retry original request uses the same key/body within retention; never automatically retry. Reading a matching list is not proof of this preparation. If retry is unavailable, ask IT; do not create a replacement. F1 restores focus; EN/Urdu and shared keyboard/Settings zoom100–250 apply. Native Urdu, physical paper and signed human review remain pending."
+  ],
+  stepsUr: [
+    "بلنگ سے متوقع اخراجات کھولیں۔ منتظر کام پہلے، بدلے وارڈ نرخ سمیت۔ مریض، ایم آر این، داخلہ اور اصل منتقلی چیک کریں؛ تاخیر و وقت نمایاں۔ تازہ سے کام، رجسٹر، نرخ و منتقلی دوبارہ پڑھی جاتی ہے۔",
+    "بلنگ کو تخمینے کی اجازت ہے، مکمل طبی داخلہ چارٹ نہیں۔ اصل منتظر کام سے تیار کریں یا تخمینے کا مریض نام/ایم آر این سے تلاش کر کے واپس سطر چنیں۔ آئی ڈی نہ ٹائپ۔ وارڈ تبدیلی کی اصل منتقلی بلنگ کو ممنوع، اس کی تیاری بند؛ مسئلہ41زیر غور، داخلہ ڈیسک سے کہیں۔ موجودہ تخمینے پڑھے و پرنٹ ہو سکتے ہیں۔",
+    "وارڈ کے شائع روزانہ نرخ، متوقع دن0تا365پورے۔ نرخ کی خدمت اصل سطر و مقدار صفر سے زیادہ تا1000؛ فی اکائی نرخ ٹائپ نہیں۔ ہٹانے سے صرف غیر ارسال سطر ہٹے۔ مد میں قسم، تفصیل3تا300حروف و مثبت رقم؛ غیر ضروری ہٹا دیں۔ یہ خرچ کا اندازہ ہے، دوا یا رقم وصول نہیں۔",
+    "خالی پیشگی رقم و ادائیگی شرائط تیاری پر ہسپتال کی طے شدہ۔ اختیاری نوٹ2000حروف۔ مریض/عمل نشان، جائزہ معلومات منجمد، پھر ایک تصدیق۔ واپس معلومات رکھے؛ بند کرنے پر پوچھے۔ سرور نرخ، کل و پیشگی رقم دے؛ ساتھ اب تک بل کا موازنہ کریں۔",
+    "رجسٹر یا معلوم حوالہ سے پڑھیں۔ تلاش تازہ1000مشروط سطروں میں نام/ایم آر این/نمبر، حالت سرور فلٹر۔ جائزہ اصل دو زبان نوٹس؛ پرنٹ/ٹرمینل پی ڈی ایف ایپ زبان و اے فور و ورژن چیک۔ سرور انگریزی پی ڈی ایف اصل بائٹس۔ اصل کاغذ چیک؛ فائل منسوخ یا پرنٹر خرابی سے تیاری نہیں دہرائی جاتی۔",
+    "خاندان کی زبان میں سمجھا کر اصل دستخط/انگوٹھے کے بعد سمجھایا گیا درج کریں: سننے والا، رشتہ، زبان، سوالات/پیشگی اتفاق و کاغذ نشان۔ حتمی وضاحت ترمیم نہیں؛ نیا تخمینہ تاریخ رکھتا۔ منسوخی5تا1000حروف؛ مسودہ یا غلط سمجھایا تخمینہ، تاریخ باقی۔ حذف نہیں۔",
+    "حالت انکار پر عین ریکارڈ پڑھیں و معلومات رکھیں، غلطی خانے کے پاس۔ منتقلی/رابطہ بحالی تازہ کرے و پرانا جائزہ روکے۔ تازہ پڑھ کر معلومات رکھنے سے نئے جائزے کا نشان لازم۔ جواب گم تو اصل درخواست رکھیں؛ واضح اصل کوشش وہی کلید/معلومات وقت کے اندر، خودکار نہیں۔ ملتی سطر اصل تیاری کا ثبوت نہیں۔ کوشش دستیاب نہیں تو آئی ٹی، متبادل نہیں۔ ایف ون فوکس واپس؛ دو زبان و زوم100تا250مشترک۔ مقامی اردو، کاغذ و انسانی جائزہ باقی۔"
+  ],
+  faq: [
+    [
+      "Billing Administrator: how do I prepare without clinical admission access?",
+      "Billing has estimate permissions without the full clinical admission chart. Prepare from an authorised current work item, or Find patient for estimate with name or MRN, then choose the returned patient row for an estimate before admission. Never type a patient or transfer id. ChangeOfWard preparation is disabled because the recorded transfer lookup is forbidden for Billing; backend issue41 is pending. Ask Admissions to handle that move; existing estimates can still be read and printed."
+    ],
+    [
+      "Why can I not change an explained estimate?",
+      "It records what the family was told. Prepare a revision; old records remain. A Draft or an incorrect Explained estimate can be cancelled with a reason; history stays."
+    ],
+    [
+      "What if the result or printer reply is lost?",
+      "Keep the draft and original request. Read the current result; only explicit original-key replay can resolve an uncertain preparation. A PDF or print failure is separate and never repeats the estimate."
+    ]
+  ],
+  faqUr: [
+    [
+      "بلنگ منتظم: طبی داخلہ اجازت کے بغیر کیسے تیار کروں؟",
+      "بلنگ کو تخمینے کی اجازت ہے، مکمل طبی داخلہ چارٹ نہیں۔ اصل منتظر کام سے تیار کریں یا تخمینے کا مریض نام/ایم آر این سے تلاش کر کے واپس سطر چنیں۔ آئی ڈی نہ ٹائپ۔ وارڈ تبدیلی کی اصل منتقلی بلنگ کو ممنوع، اس کی تیاری بند؛ مسئلہ41زیر غور، داخلہ ڈیسک سے کہیں۔ موجودہ تخمینے پڑھے و پرنٹ ہو سکتے ہیں۔"
+    ],
+    [
+      "سمجھایا تخمینہ کیوں نہیں بدلتا؟",
+      "خاندان کو بتائی بات ریکارڈ ہے۔ نیا تیار کریں، پرانا رہے۔ مسودہ یا غلط سمجھایا تخمینہ وجہ سے منسوخ، تاریخ باقی۔"
+    ],
+    [
+      "جواب یا پرنٹ گم ہو؟",
+      "مسودہ و اصل درخواست رکھیں، موجودہ پڑھیں؛ صرف اصل کلید کی کوشش نامعلوم تیاری حل کرتی ہے۔ پی ڈی ایف/پرنٹ الگ، تخمینہ نہ دہرائیں۔"
+    ]
+  ]
+},
  cost_estimates_admissions: {
   title: "Cost estimates",
   titleUr: "متوقع اخراجات",

@@ -1,3 +1,9 @@
+import { estimateView, type EstimateScreenId } from "../estimate-access";
+import {
+  searchPatients,
+  getPatient,
+  type PatientSearchHitOut,
+} from "../generated/patient_search";
 import { useEffect, useRef, useState } from "react";
 import { api, call, ApiError } from "../bridge";
 import {
@@ -20,7 +26,8 @@ import { checkedEstimate, estimateSnapshot } from "../estimate-policy";
 import { formatHospitalTime } from "../hospital-time";
 type Draft = {
   kind: "prepare" | "explain" | "cancel";
-  admissionId: number;
+  admissionId: number | null;
+  subject?: { patient_id: number; patient_name: string; mrn: string };
   source?: e.EstimateDetailOut;
   body: e.EstimateIn;
   explain: e.EstimateExplainIn;
@@ -33,7 +40,9 @@ export function CostEstimates({
   connected,
   stream,
   timeZone,
+  screenId = "cost_estimates_admissions",
 }: {
+  screenId?: EstimateScreenId;
   user: ClinicalUser;
   establishment: EstablishmentOut;
   connected: boolean;
@@ -41,9 +50,7 @@ export function CostEstimates({
   timeZone?: string;
 }) {
   const can = (p: string) => user.permissions.includes(p),
-    view = establishment.views.screens.find(
-      (s) => s.screen_id === "cost_estimates_admissions",
-    )?.view,
+    view = estimateView(screenId, establishment),
     read =
       ["full", "open_work", "records"].includes(view || "") &&
       ["estimate.view", "estimate.prepare", "estimate.explain"].some(can),
@@ -66,6 +73,26 @@ export function CostEstimates({
   const root = useRef<HTMLElement>(null),
     flight = useRef(false),
     generation = useRef(0);
+  const [patientQuery, setPatientQuery] = useState(""),
+    [patientHits, setPatientHits] = useState<PatientSearchHitOut[]>([]),
+    [patientSearched,setPatientSearched]=useState(false);
+  async function findPatient() {
+    if (patientQuery.trim().length < 2) return;
+    setBusy(true);
+    setError(undefined);
+    setPatientSearched(false);
+    try {
+      setPatientHits(
+        await searchPatients({ q: patientQuery.trim(), limit: 20 }),
+      );
+      setPatientSearched(true);
+    } catch (e) {
+      setPatientHits([]);
+      setError(e);
+    } finally {
+      setBusy(false);
+    }
+  }
   const work = useLoad(
     () => (read ? e.worklistCostEstimates() : Promise.resolve([])),
     [read, revision],
@@ -98,28 +125,25 @@ export function CostEstimates({
         : Promise.resolve([]),
     [draft?.admissionId, revision],
   );
-  const write = useClinicalWrite(
-    user,
-    "cost_estimates_admissions",
-    async (value, command) => {
-      const body = command.body as e.EstimateIn;
-      if (
-        !value?.estimate_id ||
-        (command.path === "/cost-estimates" &&
-          value.admission_id !== body.admission_id) ||
-        (command.path !== "/cost-estimates" &&
-          command.path.split("/")[2] !== String(value.estimate_id))
-      )
-        throw Error(
-          "Returned estimate identity differs. Keep the draft and ask IT to reconcile.",
-        );
-      setRecord(value);
-      setDraft(undefined);
-      setReview(undefined);
-      setStale(false);
-      setRevision((n) => n + 1);
-    },
-  );
+  const write = useClinicalWrite(user, screenId, async (value, command) => {
+    const body = command.body as e.EstimateIn;
+    if (
+      !value?.estimate_id ||
+      (command.path === "/cost-estimates" &&
+        (value.admission_id !== body.admission_id ||
+          (body.patient_id && value.patient_id !== body.patient_id))) ||
+      (command.path !== "/cost-estimates" &&
+        command.path.split("/")[2] !== String(value.estimate_id))
+    )
+      throw Error(
+        "Returned estimate identity differs. Keep the draft and ask IT to reconcile.",
+      );
+    setRecord(value);
+    setDraft(undefined);
+    setReview(undefined);
+    setStale(false);
+    setRevision((n) => n + 1);
+  });
   useEffect(() => {
     if (write.error) {
       setReview(undefined);
@@ -134,7 +158,8 @@ export function CostEstimates({
         if (current.current) void reread(current.current.estimate_id);
         if (
           write.error.response.error?.code === "ADMISSION_STATE_INVALID" &&
-          draft?.admissionId
+          draft?.admissionId &&
+          can("ipd.admission.view")
         ) {
           const failure = write.error;
           void api<{ status: string }>(
@@ -234,11 +259,13 @@ export function CostEstimates({
   }
   function begin(
     kind: Draft["kind"],
-    admissionId: number,
+    admissionId: number | null,
     transferId?: number,
     source?: e.EstimateDetailOut,
+    subject?: Draft["subject"],
   ) {
     if (!leave()) return;
+    write.clearError();
     setError(undefined);
     setNotice("");
     setStale(false);
@@ -247,8 +274,16 @@ export function CostEstimates({
       kind,
       admissionId,
       source,
+      subject:
+        subject ||
+        source ||
+        work.data?.find((w) => w.admission_id === admissionId) ||
+        stays.data?.find((w) => w.admission_id === admissionId),
       body: {
         admission_id: admissionId,
+        patient_id: admissionId
+          ? undefined
+          : subject?.patient_id || source?.patient_id,
         reason: transferId ? "ChangeOfWard" : "Admission",
         transfer_id: transferId,
         ward_id: tariff.data?.wards.find(
@@ -278,6 +313,8 @@ export function CostEstimates({
     if (!draft || locked) return;
     setError(undefined);
     try {
+      if (!draft.subject?.patient_id || !draft.subject.mrn)
+        throw Error("Choose a verified patient or admission before review.");
       if (!draft.ack)
         throw Error(
           t(
@@ -337,7 +374,7 @@ export function CostEstimates({
         protection: "idempotent",
         reconcilePath:
           d.kind === "prepare"
-            ? `/cost-estimates?admission_id=${d.admissionId}&limit=1000`
+            ? `/cost-estimates?${d.admissionId ? "admission_id=" + d.admissionId : "patient_id=" + d.subject?.patient_id}&limit=1000`
             : `/cost-estimates/${d.source!.estimate_id}`,
         label: t("Cost estimate", "متوقع اخراجات") + " · " + d.kind,
       },
@@ -349,26 +386,53 @@ export function CostEstimates({
         if (
           actor.user_id !== user.user_id ||
           !actor.permissions.includes(permission) ||
-          !["full", "open_work"].includes(
-            est.views.screens.find(
-              (s) => s.screen_id === "cost_estimates_admissions",
-            )?.view || "",
-          )
+          !["full", "open_work"].includes(estimateView(screenId, est) || "")
         )
           throw Error(
             "The account, permission or service view changed. Read before another review.",
           );
         if (d.kind === "prepare") {
-          const stay = await api<{ status: string }>(
-            "GET",
-            "/admissions/" + d.admissionId,
-          );
-          if (["Cancelled", "Discharged"].includes(stay.status))
-            throw Error(
-              "The admission is " +
-                stay.status +
-                ". Keep this draft and choose a current admission.",
+          if (d.admissionId && can("ipd.admission.view")) {
+            const stay = await api<{ status: string }>(
+              "GET",
+              "/admissions/" + d.admissionId,
             );
+            if (["Cancelled", "Discharged"].includes(stay.status))
+              throw Error(
+                "The admission is " +
+                  stay.status +
+                  ". Keep this draft and choose a current admission.",
+              );
+          } else if (d.admissionId) {
+            if (d.source) {
+              const latest = await e.getEstimate(d.source.estimate_id);
+              if (estimateSnapshot(latest) !== estimateSnapshot(d.source))
+                throw Error(
+                  "The source estimate changed; read latest and keep input.",
+                );
+            } else {
+              const latest = await e.worklistCostEstimates();
+              if (
+                !latest.some(
+                  (w) =>
+                    w.admission_id === d.admissionId &&
+                    w.patient_id === d.subject?.patient_id,
+                )
+              )
+                throw Error(
+                  "This admission is no longer in your estimate worklist. Ask Admissions to check its state; your input is kept.",
+                );
+            }
+          } else {
+            const person = await getPatient(d.subject!.patient_id);
+            if (
+              person.patient_id !== d.subject!.patient_id ||
+              person.mrn !== d.subject!.mrn
+            )
+              throw Error(
+                "The selected patient changed. Read before another review.",
+              );
+          }
           const now = await e.getTariff();
           checkedEstimate(body as e.EstimateIn, now);
           if (JSON.stringify(now) !== JSON.stringify(tariff.data)) {
@@ -421,6 +485,7 @@ export function CostEstimates({
           kind === "server"
             ? { path: `/cost-estimates/${record.estimate_id}/pdf` }
             : {
+                screenId,
                 estimateId: record.estimate_id,
                 expectedVersion: record.row_version,
                 pdf: kind === "pdf",
@@ -456,6 +521,7 @@ export function CostEstimates({
   return (
     <section
       ref={root}
+      data-estimate-screen={screenId}
       data-unsaved={!!draft}
       data-write-pending={write.blocked}
     >
@@ -497,15 +563,20 @@ export function CostEstimates({
           >
             <option value="">{t("All states", "تمام حالتیں")}</option>
             {["Draft", "Explained", "Superseded", "Cancelled"].map((s) => (
-              <option key={s}>{s}</option>
+              <option
+                key={s}
+                disabled={s === "ChangeOfWard" && !can("ipd.admission.view")}
+              >
+                {s}
+              </option>
             ))}
           </select>
         </Field>
       </div>
       <ErrorBox error={error} />
       <ErrorBox error={write.error} />
-      {(notice || write.notice) && (
-        <p role="status">{notice || write.notice}</p>
+      {(notice || (!draft && write.notice)) && (
+        <p role="status">{notice || (!draft && write.notice)}</p>
       )}
       {write.attempt && !write.busy && (
         <aside className="notice">
@@ -565,15 +636,30 @@ export function CostEstimates({
                     {time(w.since)} {w.overdue ? t("Overdue", "تاخیر") : ""}
                   </p>
                   <p>{w.detail}</p>
+                  {w.kind === "ChangeOfWard" && !can("ipd.admission.view") && (
+                    <p>
+                      {t(
+                        "The ward-change record is unavailable to this account. Ask Admissions to prepare the estimate. Existing estimates can still be read and printed.",
+                        "اس صارف کو اصل وارڈ منتقلی دستیاب نہیں۔ داخلہ ڈیسک سے تخمینہ تیار کرائیں۔ موجودہ تخمینے پڑھے و پرنٹ کیے جا سکتے ہیں۔",
+                      )}
+                    </p>
+                  )}
                   {workView && can("estimate.prepare") && (
                     <button
                       data-help="estimates.prepare"
-                      disabled={locked || !live}
+                      disabled={
+                        locked ||
+                        !live ||
+                        (w.kind === "ChangeOfWard" &&
+                          !can("ipd.admission.view"))
+                      }
                       onClick={() =>
                         begin(
                           "prepare",
                           w.admission_id,
                           w.transfer_id ?? undefined,
+                          undefined,
+                          w,
                         )
                       }
                     >
@@ -671,9 +757,15 @@ export function CostEstimates({
                   {record.lines.map((l) => (
                     <tr key={l.line_id}>
                       <td>{l.description}</td>
-                      <td><bdi>{l.quantity}</bdi></td>
-                      <td><bdi>{l.unit_price}</bdi></td>
-                      <td><bdi>{l.amount}</bdi></td>
+                      <td>
+                        <bdi>{l.quantity}</bdi>
+                      </td>
+                      <td>
+                        <bdi>{l.unit_price}</bdi>
+                      </td>
+                      <td>
+                        <bdi>{l.amount}</bdi>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -731,12 +823,7 @@ export function CostEstimates({
                       data-help="estimates.explain"
                       disabled={locked}
                       onClick={() =>
-                        begin(
-                          "explain",
-                          record.admission_id!,
-                          undefined,
-                          record,
-                        )
+                        begin("explain", record.admission_id, undefined, record)
                       }
                     >
                       {t("Mark explained", "سمجھایا گیا درج کریں")}
@@ -756,29 +843,21 @@ export function CostEstimates({
                       {t("Cancel estimate", "تخمینہ منسوخ")}
                     </button>
                   )}
-                {workView &&
-                  live &&
-                  record.admission_id &&
-                  can("estimate.prepare") && (
-                    <button
-                      data-help="estimates.prepare"
-                      disabled={locked}
-                      onClick={() =>
-                        begin(
-                          "prepare",
-                          record.admission_id!,
-                          undefined,
-                          record,
-                        )
-                      }
-                    >
-                      {t("Prepare a revision", "نیا تخمینہ تیار")}
-                    </button>
-                  )}
+                {workView && live && can("estimate.prepare") && (
+                  <button
+                    data-help="estimates.prepare"
+                    disabled={locked}
+                    onClick={() =>
+                      begin("prepare", record.admission_id!, undefined, record)
+                    }
+                  >
+                    {t("Prepare a revision", "نیا تخمینہ تیار")}
+                  </button>
+                )}
               </div>
             </>
           )}
-          {workView && can("estimate.prepare") && (
+          {workView && can("estimate.prepare") && can("ipd.admission.view") && (
             <>
               <h2>
                 {t(
@@ -817,6 +896,54 @@ export function CostEstimates({
           )}
         </article>
       </div>
+      {screenId === "cost_estimates_billing" &&
+        workView &&
+        can("estimate.prepare") &&
+        can("patient.search") &&
+        can("patient.view") && (
+          <section className="card">
+            <h2>{t("Prepare before admission", "داخلے سے پہلے تخمینہ")}</h2>
+            <Field
+              label={t("Find patient for estimate", "تخمینے کا مریض تلاش")}
+            >
+              <input
+                data-help="estimates.patient"
+                disabled={locked}
+                value={patientQuery}
+                onChange={(ev) => {
+                  setPatientQuery(ev.target.value);
+                  setPatientSearched(false);
+                  setPatientHits([]);
+                }}
+              />
+            </Field>
+            <button
+              data-help="estimates.patient"
+              disabled={locked || patientQuery.trim().length < 2}
+              onClick={() => void findPatient()}
+            >
+              {t("Find patient", "مریض تلاش")}
+            </button>
+            {patientSearched&&!busy&&patientHits.length===0&&<p role="status">{t("No patients matched. Check the name or MRN.","کوئی مریض نہیں ملا۔ نام یا ایم آر این چیک کریں۔")}</p>}
+            {patientHits.map((p) => (
+              <button
+                className="list-row"
+                data-help="estimates.patient"
+                disabled={locked || !live}
+                key={p.patient_id}
+                onClick={() =>
+                  begin("prepare", null, undefined, undefined, {
+                    patient_id: p.patient_id,
+                    patient_name: p.full_name,
+                    mrn: p.mrn,
+                  })
+                }
+              >
+                {p.full_name} · <bdi>{p.mrn}</bdi>
+              </button>
+            ))}
+          </section>
+        )}
       {draft && (
         <section className="card" data-unsaved="true">
           <h2>
@@ -827,11 +954,11 @@ export function CostEstimates({
                 : t("Cancel estimate", "تخمینہ منسوخ")}
           </h2>
           <p>
-            {draft.source?.patient_name ||
+            {draft.subject?.patient_name ||
               stays.data?.find((s) => s.admission_id === draft.admissionId)
                 ?.patient_name}{" "}
             ·{" "}
-            {draft.source?.mrn ||
+            {draft.subject?.mrn ||
               stays.data?.find((s) => s.admission_id === draft.admissionId)
                 ?.mrn}
           </p>
@@ -870,7 +997,14 @@ export function CostEstimates({
                       "Procedure",
                       "OnRequest",
                     ].map((s) => (
-                      <option key={s}>{s}</option>
+                      <option
+                        key={s}
+                        disabled={
+                          s === "ChangeOfWard" && !can("ipd.admission.view")
+                        }
+                      >
+                        {s}
+                      </option>
                     ))}
                   </select>
                 </Field>
@@ -1425,10 +1559,10 @@ export function CostEstimates({
           onClose={() => !locked && setReview(undefined)}
         >
           <p>
-            {draft.source?.patient_name ||
+            {draft.subject?.patient_name ||
               stays.data?.find((s) => s.admission_id === draft.admissionId)
                 ?.patient_name}{" "}
-            · {draft.kind}
+            · <bdi>{draft.subject?.mrn}</bdi> · {draft.kind}
           </p>
           <Details value={review} />
           <button
@@ -1470,9 +1604,15 @@ export function CostEstimates({
               {preview.fields.estimate.lines.map((l) => (
                 <tr key={l.line_id}>
                   <td>{l.description}</td>
-                  <td><bdi>{l.quantity}</bdi></td>
-                  <td><bdi>{l.unit_price}</bdi></td>
-                  <td><bdi>{l.amount}</bdi></td>
+                  <td>
+                    <bdi>{l.quantity}</bdi>
+                  </td>
+                  <td>
+                    <bdi>{l.unit_price}</bdi>
+                  </td>
+                  <td>
+                    <bdi>{l.amount}</bdi>
+                  </td>
                 </tr>
               ))}
             </tbody>

@@ -64,6 +64,7 @@ import { createMetadataFlight } from "./metadata-flight";
 import { createBootstrapSeed } from "./bootstrap-seed";
 type WorkspaceSnapshot = {establishment:EstablishmentOut;settings:any;me:MeOut;permittedWorkspaces:MeOut["workspaces"]};
 const labels: Record<string, [string, string, string]> = {
+ cost_estimates_billing: ["Cost estimates","متوقع اخراجات","₨"],
  cost_estimates_admissions: ["Cost estimates","متوقع اخراجات","₨"],
  consents_admissions: ["General consent at admission","داخلے پر عمومی رضامندی","▤"],
  wristbands_admissions: ["Identity wristbands","شناختی پٹیاں","▤"],
@@ -131,6 +132,7 @@ const labels: Record<string, [string, string, string]> = {
 };
 const frontDeskScreens = new Set([
   'roll_call',
+  'cost_estimates_billing',
   'cost_estimates_admissions',
   'consents_admissions',
   'wristbands_admissions',
@@ -785,6 +787,7 @@ export function App() {
     'lab_send_outs',
     'imaging_quality_setup',
     'roll_call',
+  'cost_estimates_billing',
   'cost_estimates_admissions',
   'consents_admissions',
   'wristbands_admissions',
@@ -1200,6 +1203,7 @@ export function App() {
               {screen === 'imaging_quality_setup' && est && <ImagingQualitySetup key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} fromFacility={imagingSetupEntry}/>}
               {screen === 'diagnostic_services_list' && <DiagnosticServicesList key={user.user_id} user={user} connected={connected} stream={stream}/>}
               {screen === 'lab_send_outs' && est && <LabSendOuts key={user.user_id} user={user} connected={connected} stream={stream} establishment={est} timeZone={meta?.hospital_timezone}/>}
+              {screen === 'cost_estimates_billing' && est && <CostEstimates key={user.user_id+'billing'} screenId="cost_estimates_billing" user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone}/>}
               {screen === 'cost_estimates_admissions' && est && <CostEstimates key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone}/>}
               {screen === 'consents_admissions' && est && <ConsentsAdmissions key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone}/>}
               {screen === 'wristbands_admissions' && est && <Wristbands key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone}/>}
