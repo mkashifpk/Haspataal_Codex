@@ -77,13 +77,15 @@ export function ConsentsAdmissions({
   connected: boolean;
   stream: string;
   timeZone?: string;
-  screenId?: "consents_admissions" | "consents_ward";
+  screenId?: "consents_admissions" | "consents_ward" | "consents_doctor";
 }) {
   const isWard = screenId === "consents_ward",
+    isDoctor = screenId === "consents_doctor",
+    isClinical = isWard || isDoctor,
     can = (p: string) => user.permissions.includes(p),
     view = establishment.views.screens.find(
       (s) => s.screen_id === (screenId || "consents_admissions"),
-    )?.view,
+    )?.view ?? (isDoctor ? "full" : undefined),
     access = consentAccess(view, user.permissions),
     live = connected && stream === "Live";
   const [revision, setRevision] = useState(0),
@@ -121,7 +123,7 @@ export function ConsentsAdmissions({
     () =>
       access.read
         ? c.listConsents({
-            category: isWard
+            category: isClinical
               ? (category ? (category as c.ConsentBriefOut["category"]) : undefined)
               : "General",
             limit: 1000,
@@ -130,7 +132,7 @@ export function ConsentsAdmissions({
               : undefined,
           })
         : Promise.resolve([]),
-    [revision, status, category, isWard, access.read],
+    [revision, status, category, isClinical, access.read],
   );
   const forms = useLoad(
     () => (access.read ? c.listForms() : Promise.resolve([])),
@@ -756,12 +758,19 @@ export function ConsentsAdmissions({
       <div className="bed-board-heading">
         <div>
           <h1>
-            {isWard
+            {isDoctor
+              ? t("Consents: informed consent and refusal", "رضامندی: باخبر رضامندی اور انکار")
+              : isWard
               ? t("Consents of my patients", "میرے مریضوں کی رضامندی")
               : t("General consent at admission", "داخلے پر عمومی رضامندی")}
           </h1>
           <p>
-            {isWard
+            {isDoctor
+              ? t(
+                  "The consents the doctor takes: operations, procedures, transfusion, high-risk treatments, leaving against advice; the general consent; the emergency note.",
+                  "ڈاکٹر کی لی جانے والی رضامندیاں: آپریشن، طریقہ کار، انتقال خون، پرخطر علاج، مرضی کے خلاف روانگی؛ عمومی رضامندی؛ ہنگامی نوٹ۔",
+                )
+              : isWard
               ? t(
                   "The general consent still missing on the ward, and the signed forms to scan.",
                   "وارڈ میں ابھی تک غیر موجود عمومی رضامندی اور دستخط شدہ فارموں کو اسکین کرنا۔",
@@ -937,11 +946,11 @@ export function ConsentsAdmissions({
           </Field>
           <LoadState {...stays} retry={stays.reload} />
           <h3>
-            {isWard
+            {isClinical
               ? t("Consent register", "رضامندی رجسٹر")
               : t("General consent register", "عمومی رضامندی رجسٹر")}
           </h3>
-          {isWard && (
+          {isClinical && (
             <Field label={t("Consent category", "رضامندی کی قسم")}>
               <select
                 data-field="category"

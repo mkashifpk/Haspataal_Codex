@@ -2907,6 +2907,92 @@ consents_ward: {
    faq:[["Who records or manages programme care?","Doctors/clinical specialists and triage, ward or head nurses with programme.give perform permitted enrolment/service/closure. programme.view/manage controls history and programme.view the due list. Quality/authorized setup staff maintain offered programmes and national guidance in their separate workspace. Never infer clinical authority from a role name or facility category."],["What remains available when service retires?","No new enrolment from now on. An existing eligible Active enrolment from before retirement can still record service and close. History stays readable in records view. The server is authoritative and is re-read before every write; a never-offered Available service is hidden from daily menus, not falsely shown Active for testing."],["Where does the next date come from?","Only the actual programme card. It begins blank; no vaccine schedule, interval, dose or suggested next date is computed. Given time is explicit, converted from hospital timezone and checked against authenticated server time; next date cannot precede the given local day. Record the actual vaccine/medicine batch where applicable. National guidance is displayed unchanged for the clinician to interpret."],["What if already enrolled, closed or corrected?","PROGRAMME_ENROLLED means read/open that patient's actual existing Active enrolment. A closed enrolment cannot receive new services or closure; deliberately re-enrol for a new course when permitted. Entries are append-only and stamped; a mistake is followed by a correct entry with explanatory note, never editing the original or fabricating a vaccination."],["How do due-list and closure actions work?","Due query date defaults to server hospital today and uses the latest card-written next_due_on of open enrolments, with real phone numbers. Reads are logged; no automatic communication. Completed closes, transfer-out requires where and discontinued requires why. Closing is not an idempotent replay: read the original after an uncertain reply before another action."],["What can be printed and what remains to test?","Authorized managers/MSDS viewers can open the official offered-programme list PDF; inactive service prints that none is provided. No app-generated patient card/schedule/certificate exists. On authorized Active DEV setup the named clinician/nurse must create fresh enrolments, record actual card services, close in all permitted ways, check already-enrolled/closed/future/inactive refusal, due follow-up, original-key recovery, F1/dialog focus, both languages/themes250% and native Urdu/editor/printed list. Current inactive previews/units do not establish positive delivery or fill the human worksheet."]],
    faqUr:[["پروگرام کی نگہداشت کون کرتا ہے؟","اصل اجازت والے ڈاکٹر/ماہر، ٹرائیج، وارڈ یا ہیڈ نرس اندراج/خدمت/بندش؛ تاریخ کو پڑھائی/انتظام اور واجب فہرست کو پڑھائی کی اجازت۔ کوالٹی/مجاز ترتیب الگ پروگرام و قومی رہنما رکھتی ہے۔ کردار یا ہسپتال کی قسم سے طبی اجازت فرض نہیں۔"],["خدمت ریٹائر ہو تو کیا باقی؟","اب نیا اندراج نہیں۔ پہلے کا موزوں کھلا اندراج خدمت و بندش جاری رکھ سکتا ہے۔ ریکارڈ منظر میں تاریخ۔ ہر عمل سے پہلے اصل سرور؛ کبھی نہ دی گئی دستیاب خدمت مینو سے غائب، ٹیسٹ کے لیے جھوٹی فعال نہیں۔"],["اگلی تاریخ کہاں سے؟","صرف اصل کارڈ، ابتدا خالی؛ ویکسین شیڈول، وقفہ، خوراک یا تجویز نہیں۔ اصل وقت ہسپتال سے تبدیل اور سرور کے وقت سے چیک؛ اگلی تاریخ دینے کے مقامی دن سے پہلے نہیں۔ جہاں لازم اصل بیچ؛ قومی رہنما بعینہ معالج پڑھے۔"],["پہلے درج، بند یا غلطی پر؟","پہلے درج پر اسی مریض کا اصل کھلا اندراج پڑھ/کھولیں۔ بند میں خدمت/دوبارہ بندش نہیں؛ مناسب فعال خدمت میں نیا کورس۔ مہر والے صرف اضافے، غلطی پر وضاحت سے نیا درست اندراج؛ اصل بدلنا یا فرضی ویکسین نہیں۔"],["واجب فہرست اور بندش کیسے؟","تلاش سرور کا ہسپتال آج، کھلے اندراج کی اصل آخری کارڈ تاریخ و فون؛ رسائی درج، خود رابطہ نہیں۔ مکمل بند، منتقل کو منزل، ختم کو وجہ۔ گم بندش محفوظ تکرار نہیں؛ پہلے اصل حالت پڑھیں۔"],["پرنٹ اور باقی جائزہ؟","مجاز منتظم/معیار اصل دستیاب فہرست پی ڈی ایف؛ غیر فعال پر نہ دینے کا بیان۔ ایپ کارڈ/شیڈول/سرٹیفکیٹ نہیں بناتی۔ مجاز فعال ڈی وی میں نام زد ڈاکٹر/نرس نئے اندراج، اصل کارڈ خدمت، بندش، پہلے درج/بند/مستقبل/غیرفعال انکار، واجب رابطہ، اصل کوشش، ایف۱، دونوں زبان250فیصد و اصل اردو/مدیر/فہرست پرنٹ چیک کرے۔ موجودہ غیر فعال مثال/اکائی ٹیسٹ مثبت خدمت یا انسانی شیٹ نہیں۔"]]
   },
+consents_doctor: {
+  title: "Consents: informed consent and refusal",
+  titleUr: "رضامندی: باخبر رضامندی اور انکار",
+  purpose: "The consents the doctor takes: operations, procedures, transfusion, high-risk treatments, leaving against advice; the general consent; the emergency note. Urdu remains a draft until a native speaker reviews it.",
+  purposeUr: "ڈاکٹر کی لی جانے والی رضامندیاں: آپریشن، طریقہ کار، انتقال خون، پرخطر علاج، مرضی کے خلاف روانگی؛ عمومی رضامندی؛ ہنگامی نوٹ۔ اردو انسانی جائزے تک مسودہ ہے۔",
+  steps: [
+    "Open Clinical OPD / IPD → Consents: informed consent and refusal. Review the clinical consent worklist highlighting missing pre-op surgical, anaesthesia, or high-risk procedure consents.",
+    "Filter by 'My patients and forms' to focus on inpatients under your primary or admitting clinical care, or search by patient name/MRN across the hospital register.",
+    "Prepare informed consent: select the specialty form (Operation, Anaesthesia, Procedure, Transfusion, HighRiskTreatment, AgainstMedicalAdvice) and the patient's preferred language (English, Urdu, or regional).",
+    "Fill clinical explanation fields: enter the procedure details, operating surgeon, risks, expected benefits, and alternatives; for admission consent, specify clinical necessity, anticipated stay, and cost estimate.",
+    "Print the bilingual consent form (GET /consents/{id}/print-payload): verify Nastaliq Urdu RTL typography. Personally explain clinical risks and alternatives in simple, clear language; ensure the patient or family understands.",
+    "Verify signer eligibility via server who_decides policy (adult patient, or authorized legal guardians in defined priority order for minors or incapacitated patients).",
+    "Record the decision: capture patient/guardian signature or thumb impression, witness details, or witnessed verbal refusal. In life-threatening emergencies with incapacitated patients, record an EmergencyNote with second PMDC physician concurrence.",
+    "Scan signed physical document: upload the signed/thumb-printed paper copy via patient documents and attach scan to finalize the legal medical record. Board updates via realtime consent.updated events."
+  ],
+  stepsUr: [
+    "کلینکل او پی ڈی / آئی پی ڈی سے رضامندی: باخبر رضامندی اور انکار کھولیں۔ منتظر کام کا جائزہ لیں جہاں سرجری، بے ہوشی یا پرخطر طریقہ کار کی مطلوبہ رضامندیاں نمایاں ہوتی ہیں۔",
+    "'میرے مریض اور فارم' سے فلٹر کر کے اپنے زیر علاج مریضوں پر توجہ مرکوز کریں، یا ہسپتال رجسٹر میں مریض کے نام یا ایم آر این سے تلاش کریں۔",
+    "باخبر رضامندی تیار کریں: متعلقہ شعبے کا فارم (آپریشن، بے ہوشی، طریقہ کار، انتقال خون، پرخطر علاج، مرضی کے خلاف روانگی) اور مریض کی مادری زبان منتخب کریں۔",
+    "طبی وضاحت کے خانے پر کریں: طریقہ کار، سرجن کا نام، خطرات، متوقع فوائد اور متبادل علاج درج کریں؛ داخلے کی رضامندی میں ضرورت، قیام اور خرچ درج کریں۔",
+    "دو لسانی رضامندی فارم پرنٹ کریں (GET /consents/{id}/print-payload): دائیں سے بائیں خطِ نستعلیق کی تصدیق کریں۔ طبی خطرات اور متبادل خود آسان زبان میں سمجھائیں اور مریض یا لواحقین کی تسلی کریں۔",
+    "سرور کی who_decides پالیسی سے مجاز فیصلہ کنندہ کی تصدیق کریں (بالغ مریض خود، یا نابالغ/بے ہوش مریض کے لیے ترجیحی قانونی سرپرست)۔",
+    "فیصلہ درج کریں: مریض یا سرپرست کے دستخط یا انگوٹھا، گواہ کے کوائف یا باخبر زبانی انکار ریکارڈ کریں۔ جان لیوا ہنگامی صورتحال میں دوسرے پی ایم ڈی سی ڈاکٹر کے ساتھ ہنگامی نوٹ درج کریں۔",
+    "دستخط شدہ کاغذی دستاویز اسکین کریں: دستخط شدہ یا انگوٹھے والا کاغذ اپ لوڈ کر کے منسلک کریں تاکہ قانونی طبی ریکارڈ مکمل ہو جائے۔ consent.updated سے بورڈ ازخود تازہ ہوتا ہے۔"
+  ],
+  faq: [
+    [
+      "What is the doctor's legal and ethical responsibility in informed consent?",
+      "Under rule:f811c03843 and PMDC standards, informed consent must be taken personally by a qualified registered medical practitioner who explains the nature, risks, benefits, and alternatives of the proposed clinical intervention. Non-clinical staff or nurses cannot substitute for doctor-led informed consent."
+    ],
+    [
+      "Can the operating surgeon take anaesthesia consent?",
+      "No. Under rule:f811c03843, anaesthesia consent must be explained and taken by a doctor belonging to the anaesthesia team (CONSENT_TAKER_NOT_AUTHORIZED is returned if taken by non-anaesthesia staff)."
+    ],
+    [
+      "How should clinical risks and procedures be explained to Urdu-speaking patients?",
+      "Use simple Urdu terminology without obscure medical jargon. The printed form provides RTL Nastaliq Urdu layout (rule:fea5622fc5). Ensure the patient or attendant can explain the diagnosis, procedure, and primary risks back in their own words before signing."
+    ],
+    [
+      "Who may legally sign for a pediatric or minor patient?",
+      "Signer eligibility is determined by the server's who_decides model (rule:cb2f327ee7). Patient signing is disabled for minors; consent must be granted by authorized decision makers in legal priority order (Father, Mother, Legal Guardian). Clinicians must not override or invent relationship categories."
+    ],
+    [
+      "How is a patient's refusal of critical treatment documented?",
+      "Select 'Record informed refusal' (rule:b7bacc1ffb). Document the patient's verbatim words explaining why they decline treatment, confirm that risks (including death or irreversible disability) were clearly explained, and obtain a witnessed signature."
+    ],
+    [
+      "What are the requirements for an EmergencyNote when the patient is unconscious?",
+      "An EmergencyNote documents why the emergency intervention cannot wait and why no family member is available to consent. Under rule:b7bacc1ffb and rule:cb2f327ee7, hospital policy may mandate concurrence and co-signature by a second registered PMDC physician."
+    ],
+    [
+      "What should be done if a patient changes their mind after signing consent?",
+      "A finalized consent cannot be edited. The doctor must withdraw the existing consent using POST /consents/{id}/withdraw, documenting the clinical reason for withdrawal, and prepare a fresh consent if another course of care is agreed."
+    ]
+  ],
+  faqUr: [
+    [
+      "باخبر رضامندی میں ڈاکٹر کی قانونی اور اخلاقی ذمہ داری کیا ہے؟",
+      "اصول f811c03843 اور پی ایم ڈی سی قواعد کے تحت باخبر رضامندی کا عمل صرف مستند رجسٹرڈ ڈاکٹر ذاتی طور پر مکمل کر سکتا ہے، جو مجوزہ طریقہ کار، خطرات، فوائد اور متبادل کی وضاحت کرتا ہے۔ نرس یا غیر معالج عملہ ڈاکٹر کا متبادل نہیں ہو سکتا۔"
+    ],
+    [
+      "کیا جراحی کرنے والا سرجن بے ہوشی (Anaesthesia) کی رضامندی لے سکتا ہے؟",
+      "نہیں۔ اصول f811c03843 کے تحت بے ہوشی کی رضامندی لازماً اینستھیزیا ٹیم کا ڈاکٹر سمجھا کر لیتا ہے (بصورت دیگر سرور CONSENT_TAKER_NOT_AUTHORIZED سے انکار کرتا ہے)۔"
+    ],
+    [
+      "اردو بولنے والے مریضوں کو طبی خطرات اور طریقہ کار کیسے سمجھائے جائیں؟",
+      "طبی اصطلاحات کی بجائے عام فہم اردو استعمال کریں۔ پرنٹ شدہ فارم دائیں سے بائیں خطِ نستعلیق میں فراہم کیا جاتا ہے (اصول fea5622fc5)۔ دستخط سے قبل مریض سے خود اس کے الفاظ میں طریقہ کار دہروا کر تسلی کریں۔"
+    ],
+    [
+      "نابالغ یا کم عمر مریض کی رضامندی پر کون دستخط کر سکتا ہے؟",
+      "دستخط کی اہلیت سرور کی who_decides پالیسی طے کرتی ہے (اصول cb2f327ee7)۔ کم عمر بچوں کے لیے خود دستخط بند ہوتے ہیں اور قانونی ترجیحی ترتیب (والد، والدہ، قانونی سرپرست) کے مطابق سرپرست کے دستخط لیے جاتے ہیں۔"
+    ],
+    [
+      "جب مریض ضروری علاج سے انکار کرے تو کیا طریقہ اختیار کیا جائے؟",
+      "'باخبر انکار کا اندراج' منتخب کریں (اصول b7bacc1ffb)۔ مریض کے اپنے الفاظ میں انکار کی وجہ لکھیں، یہ تصدیق کریں کہ علاج نہ کروانے کے جان لیوا خطرات واضح کیے گئے ہیں، اور گواہ کے دستخط حاصل کریں۔"
+    ],
+    [
+      "بے ہوش مریض کے لیے ہنگامی نوٹ (Emergency Note) کے کیا تقاضے ہیں؟",
+      "ہنگامی نوٹ یہ واضح کرتا ہے کہ علاج میں تاخیر جان لیوا تھی اور کوئی سرپرست دستیاب نہ تھا۔ اصول b7bacc1ffb کے تحت ہسپتال پالیسی کے مطابق دوسرے رجسٹرڈ پی ایم ڈی سی ڈاکٹر کی توثیق لازمی ہوتی ہے۔"
+    ],
+    [
+      "اگر مریض دستخط کے بعد اپنا ارادہ بدل لے تو کیا کیا جائے؟",
+      "حتمی رضامندی میں ترمیم نہیں ہو سکتی۔ ڈاکٹر کو تحریری وجہ درج کر کے پرانی رضامندی واپس (Withdraw) کرنی چاہیے، اور متبادل علاج کا نیا فارم تیار کرنا چاہیے۔"
+    ]
+  ]
+},
   patient_education:{
    title:"Health education given",titleUr:"دی گئی صحت کی رہنمائی",
    purpose:"The clinician, nurse or pharmacist with education permission records what guidance the patient or attendant was actually given, how and using which material. The patient chart keeps the signed entries and later corrective entries. The quality team maintains the material catalogue in its separate workspace.",purposeUr:"مجاز معالج، نرس یا فارماسسٹ درج کرتا ہے کہ مریض/تیماردار کو واقعی کیا، کیسے اور کس مواد سے سمجھایا۔ چارٹ دستخط شدہ اندراج و بعد کی تصحیح رکھتا ہے۔ کوالٹی ٹیم اپنی جگہ مواد کی فہرست رکھتی ہے۔ اردو مقامی جائزے تک مسودہ ہے۔",

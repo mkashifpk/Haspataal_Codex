@@ -87,6 +87,7 @@ const labels: Record<string, [string, string, string]> = {
  cost_estimates_admissions: ["Cost estimates","متوقع اخراجات","₨"],
  consents_admissions: ["General consent at admission","داخلے پر عمومی رضامندی","▤"],
  consents_ward: ["Consents of my patients","میرے مریضوں کی رضامندی","▤"],
+ consents_doctor: ["Consents: informed consent and refusal","رضامندی: باخبر رضامندی اور انکار","▤"],
  wristbands_admissions: ["Identity wristbands","شناختی پٹیاں","▤"],
  wristbands_ward: ["Identity wristbands","شناختی پٹیاں","▤"],
  own_medicines_ward: ["Patient's own medicines","مریض کی اپنی ادویات","▤"],
@@ -173,6 +174,7 @@ const frontDeskScreens = new Set([
   'own_medicines_pharmacy',
   'critical_results_ward',
   'consents_ward',
+  'consents_doctor',
   'bed_matrix',
   'pending_admissions',
   'duty_roster',
@@ -846,6 +848,7 @@ export function App() {
   'own_medicines_pharmacy',
   'critical_results_ward',
   'consents_ward',
+  'consents_doctor',
   'bed_matrix',
   'pending_admissions',
   'duty_roster',
@@ -1271,6 +1274,7 @@ export function App() {
               {screen === 'cost_estimates_admissions' && est && <CostEstimates key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone}/>}
               {screen === 'consents_admissions' && est && <ConsentsAdmissions key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone}/>}
               {screen === 'consents_ward' && est && <ConsentsAdmissions key={user.user_id+'ward'} screenId="consents_ward" user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone}/>}
+              {screen === 'consents_doctor' && est && <ConsentsAdmissions key={user.user_id+'doctor'} screenId="consents_doctor" user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone}/>}
               {screen === 'wristbands_admissions' && est && <Wristbands key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone}/>}
               {screen === 'wristbands_ward' && est && <Wristbands screenId="wristbands_ward" key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone}/>}
               {screen === 'own_medicines_ward' && est && <OwnMedicinesWard key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone} initialAdmissionId={wardAdmissionEntry?.userId===user.user_id?wardAdmissionEntry.admissionId:undefined} onBack={id=>{if(navigate('my_beds'))setWardAdmissionEntry({userId:user.user_id,admissionId:id});}}/>}
