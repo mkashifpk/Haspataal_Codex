@@ -2,19 +2,31 @@
 Last updated: 30 October 2026, Antigravity (Codex pair), Asia/Karachi.
 
 ## Active new screen request
-Screen 65 `medication_orders_doctor` (Doctor workspace, Phase P4) implementation, verification, and progress proposal COMPLETED.
-- Implementation: `src/screens/MedicationOrdersDoctor.tsx` covering all 7 endpoints, 2 events (`medication.order.updated`, `notification.created`), and rules `rule:15dd98f03c` (readback verification before countersigning, red overdue styling after countersign_due_at) and `rule:aac4a043c3` (ConfirmedAsWritten vs Changed requiring item stopped first).
-- Pure policies: `src/medication-orders-doctor-policy.ts`.
-- App integration: `src/App.tsx` router and doctor navigation.
-- Handbook & Coverage: `src/help.ts` (bilingual tasks, steps, role FAQs), `src/foundation-help.ts` (7 new bilingual control guides, deliveredHelpScreens updated), `src/foundation-catalogue.json` (65 screens), `src/foundation-task-map.json`, `scripts/check-help.mjs`, and reference screenshots `public/handbook/medication_orders_doctor-*.png`.
-- Tests: `tests/medication-orders-doctor.test.mjs` (5 unit tests covering overdue check, readback guard, query answer rules, stop character bounds, and idempotency) and `tests/help-coverage.test.mjs` (65 screens).
-- Verifications:
-  - `npm run check:help`: PASS (65 screens, 1369 controls, 541 groups, 69 FAQ seeds, 30 workspace guides).
-  - `npm test`: 243/243 PASS.
-  - `npm run build`: PASS (tsc + vite client bundle).
-  - Live DEV reads: `GET /medication-safety/worklist`, `GET /verbal-orders`, `GET /prescription-queries`, `GET /prescriptions/1` all 200 OK.
-- Progress Reporting: Proposal ID #218 (`prop-med-orders-doc-20261030-01`) successfully submitted and verified via `progress_proposals` with 20 rubric items claimed. Awaiting human review on /docs -> My progress.
-- Work in progress: None. No running commands or uncertain writes.
+Implementing Screen 67 `wristbands_ward` (Ward Nursing workspace, Phase P4 Inpatient journey).
+- Purpose: Print, replace, reprint, and verify identity wristbands on inpatient wards per same_component_as ["wristbands_admissions", "wristbands_er"].
+- Scope:
+  - Wire `wristbands_ward` in `src/screens/Wristbands.tsx` (support screenId prop to evaluate ward_nurse establishment screen view).
+  - Add navigation route in `src/App.tsx` under ward_nurse workspace.
+  - Register in `src/foundation-catalogue.json` (66 screens) and `src/foundation-task-map.json`.
+  - Author English/Urdu bilingual help and role FAQs in `src/help.ts`.
+  - Update `src/foundation-help.ts` (deliveredHelpScreens, add `wristbands_ward` to `bands.*` control guides).
+  - Add screenshots `public/handbook/wristbands_ward-en.png` and `public/handbook/wristbands_ward-ur.png`.
+  - Unit tests in `tests/wristband-policy.test.mjs` and update count in `tests/help-coverage.test.mjs` (66 screens).
+  - Run checks (check:help, build, test), live DEV verification, propose progress via MCP `propose_progress`, and verify with `progress_proposals`.
+- Files involved:
+  - contracts/wristbands_ward.json
+  - src/screens/Wristbands.tsx
+  - src/App.tsx
+  - src/foundation-catalogue.json
+  - src/foundation-task-map.json
+  - src/foundation-help.ts
+  - src/help.ts
+  - public/handbook/wristbands_ward-en.png
+  - public/handbook/wristbands_ward-ur.png
+  - tests/help-coverage.test.mjs
+  - tests/wristband-policy.test.mjs
+  - handoff.md
+- Next concrete step: Parameterize `src/screens/Wristbands.tsx` and wire into `src/App.tsx`.
 
 ## Prior task and Git
 User requested fa151db backend refresh (#41–49), all built-screen contracts/errors/events/help, fresh synthetic DEV tests, commit and changed/tested-only progress proposals, then checkpoint next steps. Baseline verified CLEAN 758bd34a8152086f8f8f42434167694620a72f36 on main. Source/evidence committed d81d4c180d3aebace49509b27b21e3d1ff769f20; tree verified clean. Source complete, 10 proposals confirmed/verified pending; reporting docs/final handoff included in this reporting commit. No running commands, unknown writes or agents. Never reuse pre-reinstall IDs/keys/cursors from archived ward6364/earlier evidence.

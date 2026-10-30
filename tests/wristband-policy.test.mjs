@@ -18,3 +18,13 @@ test('admissions wristband permission opens its missing-band worklist without me
  assert.equal(bandAccess('full',['patient.view','patient.wristband.print']).worklist,true);
  assert.equal(bandAccess('hidden',['patient.wristband.print']).worklist,false);
 });
+test('ward nurse role access and view policy for wristbands_ward', () => {
+  const wardNursePerms = ['patient.view', 'patient.wristband.print'];
+  assert.equal(bandAccess('full', wardNursePerms).issue, true);
+  assert.equal(bandAccess('full', wardNursePerms).print, true);
+  assert.equal(bandAccess('full', wardNursePerms).worklist, true);
+  assert.equal(bandAccess('open_work', wardNursePerms).issue, true);
+  assert.equal(bandAccess('records', wardNursePerms).issue, false);
+  assert.equal(bandAccess('records', wardNursePerms).print, true);
+  assert.equal(bandAccess('hidden', wardNursePerms).read, false);
+});

@@ -42,16 +42,18 @@ export function Wristbands({
   connected,
   stream,
   timeZone,
+  screenId = "wristbands_admissions",
 }: {
   user: ClinicalUser;
   establishment: EstablishmentOut;
   connected: boolean;
   stream: string;
   timeZone?: string;
+  screenId?: string;
 }) {
   const can = (p: string) => user.permissions.includes(p),
     view = establishment.views.screens.find(
-      (s) => s.screen_id === "wristbands_admissions",
+      (s) => s.screen_id === screenId,
     )?.view,
     access = bandAccess(view, user.permissions),
     live = connected && stream === "Live";
@@ -342,7 +344,7 @@ export function Wristbands({
           readContext(r.context.stay),
         ]);
         const permitted = bandAccess(
-          est.views.screens.find((s) => s.screen_id === "wristbands_admissions")
+          est.views.screens.find((s) => s.screen_id === screenId)
             ?.view,
           me.permissions,
         ).issue;

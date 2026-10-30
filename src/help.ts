@@ -1208,6 +1208,92 @@ nursing_assessment: {
     ]
   ]
 },
+ wristbands_ward: {
+  title: "Identity wristbands",
+  titleUr: "شناختی پٹیاں",
+  purpose: "On the inpatient ward during the shift, the ward nurse verifies the admitted patient and stay, issues or replaces an identity band, prints and fits it, and scans to verify identity before bedside procedures. A jammed printer reprints the same band; a replacement requires a factual reason. Urdu remains a draft until a native speaker reviews it.",
+  purposeUr: "وارڈ میں شفٹ کے دوران وارڈ نرس داخل مریض اور قیام کی دو شناختیں چیک کرتی ہے، شناختی پٹی جاری یا تبدیل کرتی ہے، پرنٹ کر کے پہناتی ہے، اور بستر پر عمل سے پہلے اسکین کر کے شناخت کی تصدیق کرتی ہے۔ جام پر اسی پٹی کا دوبارہ پرنٹ؛ متبادل کے لیے اصل وجہ لازم۔ اردو مقامی زبان کے انسانی جائزے تک مسودہ۔",
+  steps: [
+    "Open Ward Nursing → Identity wristbands. Choose Admissions or Emergency visits where permitted. Find a stay filters returned names, MRNs and numbers. Select the actual stay row, or enter Known admission reference from its record and Read this admission. Never guess an ID. Refresh wristbands rereads lists and selected context; it clears old scan approval and print preview while keeping a typed replacement reason. A failed read has Try again. No matching stays is an empty result, not proof that a patient has no band.",
+    "Patient and band shows the name, MRN, birth date, sex, stay number/status and returned ward/bed. Compare two identifiers at the patient bedside; location is not identity. Empty allergies means not recorded, never no allergies. Band history is for that patient across stays; Earlier bands expands replaced records without changing them: Current band, Replaced band, issuer, time and replacement reason. A first band still needs the patient/stay check; a newborn needs its own registered identity through the newborn workflow, never the mother’s band renamed here.",
+    "An authorised user sees Patients without a wristband in red from the medication-safety worklist. Read missing-band stay opens its actual admission or emergency visit. The worklist highlights inpatients arriving on the ward without a band; this is an urgent safety queue, not an empty clinical result. Choose the admission directly. No polling: Refresh and a resumed live connection reread. This screen does not allocate beds, record medicines or perform a clinical identity check for another procedure.",
+    "To issue, check I checked this patient and stay using two identifiers, then Review wristband issue. If any current band exists, enter Replacement reason (up to 300 characters), such as damaged or removed for a procedure; a blank reason cannot replace it. Review freezes the patient/stay, existing band history and reason. Back to band draft preserves input. Confirm band issue once. A fresh actor/permission/service/patient/stay/history check precedes the write; a concurrent change keeps the reason and requires a new review. Server refusal stays visible by code/reference.",
+    "If the issue reply is lost, the draft and navigation are held. Retry original band request uses the identical original key/body within its retention, explicitly and never automatically. Read original patient bands reads history without issuing. A new row alone does not prove who issued it: compare its issuer/time, then Bands reviewed; return to draft only after reconciliation. Outside retention or still uncertain ask IT. Never use a new key to guess a retry. Session expiry and leaving unsaved input require recovery before another action.",
+    "Issuing confirms only the band record. Band ready to print shows server fields, MRN barcode and QR with prominent recorded allergies. Print this same wristband uses the mapped label printer; Save wristband PDF saves a separate file or can be cancelled. For a jam, Read this band for reprint fetches the current band again and never issues another. Replaced bands cannot be reprinted here. Printer failure, a cancelled save or paper not emerging never repeats issuance; check paper/printer and reprint the same band. The secure terminal rereads band identity/current status and printer mapping. Physical printer fit, scannability and colour are human checks.",
+    "Place focus in Scan patient wristband and scan its MRN barcode or patient QR; Enter or Verify against this stay compares it with the selected stay. Never capture a scan from a reason field. A match names the expected patient. STOP — band does not match shows whose band was scanned, or No patient found, and blocks issuing from that mismatch. Stop care, correct the patient/band and rescan; this page does not record completion of a procedure’s own bedside safety check. Changing scan input or stay clears old approval.",
+    "F1 or visible Help opens this page from fields and review, preserving draft/focus. English/Urdu and Light/DarkHighContrast share Settings/native keyboard zoom100–250%, reset100%. Offline data is not proof of current identity. Actions follow permissions and server service views: records allows reads/verification/reprints, not issuing; existing stays continue in open_work with its no-new-admissions banner. No category branching. Printing does not finish ward care. Human fresh-data, Urdu/role and editor review remain pending."
+  ],
+  stepsUr: [
+    "وارڈ نرسنگ سے شناختی پٹیاں کھولیں۔ مجاز داخلے یا ایمرجنسی چنیں۔ تلاش واپس نام، نمبر و ایم آر این محدود کرتی۔ اصل سطر یا ریکارڈ سے معلوم حوالہ پڑھیں، اندازہ نہیں۔ تازہ فہرست و منتخب مریض دوبارہ، پرانی اسکین تصدیق و پرنٹ ہٹائے، وجہ رکھے۔ ناکام مطالعہ دوبارہ کوشش۔ خالی فہرست سے پٹی نہ ہونے کا ثبوت نہیں۔",
+    "مریض و پٹی نام، ایم آر این، تاریخ پیدائش، جنس، قیام نمبر/حالت اور وارڈ/بستر دکھاتی ہے۔ مریض کے بستر پر دو شناختیں چیک کریں، جگہ شناخت نہیں۔ الرجی خالی مطلب اندراج نہیں، الرجی نہ ہونا نہیں۔ پٹی کی تاریخ اس مریض کے تمام قیاموں کے لیے؛ پرانی پٹیاں تبدیل شدہ ریکارڈ دکھاتی مگر بدلتی نہیں۔ پہلی پٹی پر بھی تصدیق لازم؛ نومولود کا اپنا اندراج ہونا چاہیے، ماں کی پٹی کا نام یہاں نہیں بدلتے۔",
+    "مجاز صارف کو دوا حفاظت فہرست سے بغیر پٹی مریض سرخ نظر آتے؛ اصل داخلہ یا ایمرجنسی پڑھیں۔ وارڈ پر بغیر پٹی پہنچنے والے مریضوں کی فوری حفاظت کی قطار ہے۔ داخلہ براہ راست چنیں۔ پولنگ نہیں؛ تازہ اور رابطہ بحالی پر مطالعہ۔ یہاں بستر تعینات، دوا یا دوسرے عمل کا طبی شناختی چیک نہیں ہوتا۔",
+    "اجرا کے لیے دو شناختوں کی تصدیق کا نشان، پھر جائزہ۔ موجودہ پٹی ہو تو تبدیلی کی اصل وجہ زیادہ سے زیادہ300حروف، مثلاً خراب یا عمل میں اتری؛ خالی وجہ سے متبادل نہیں۔ جائزہ اصل مریض، داخلہ، تاریخ و وجہ رکھتا۔ مسودے پر واپس معلومات رکھے؛ ایک تصدیق۔ پہلے صارف، اجازت، خدمت، شناخت و پٹی دوبارہ چیک؛ بدلاؤ پر وجہ محفوظ و نیا جائزہ۔ سرور کا انکار کوڈ و حوالے سے نمایاں۔",
+    "اجرا جواب گم تو مسودہ و نیویگیشن مقفل۔ اصل درخواست عین کلید و معلومات کے ساتھ مدت میں صرف واضح کوشش، خودکار نہیں۔ اصل مریض کی پٹیاں بغیر اجرا پڑھیں۔ نئی سطر اکیلے ثبوت نہیں؛ جاری کنندہ و وقت چیک، پھر جائزہ مکمل کرکے مسودہ کھولیں۔ مدت ختم یا شبہ پر آئی ٹی؛ نئی کلید سے اندازہ نہیں۔ سیشن و غیر محفوظ معلومات پر پہلے بحالی۔",
+    "اجرا صرف پٹی کا ریکارڈ۔ تیار پٹی میں اصل سرور نام، ایم آر این بارکوڈ و کیو آر، حساسیت نمایاں۔ اسی پٹی کا پرنٹ مقررہ لیبل پرنٹر؛ پی ڈی ایف الگ محفوظ یا منسوخ۔ جام پر موجودہ پٹی دوبارہ پڑھیں؛ نیا اجرا نہیں۔ بدلی پٹی یہاں پرنٹ نہیں۔ ناکامی، منسوخ فائل یا کاغذ نہ نکلنے پر اجرا نہ دہرائیں؛ پرنٹر و کاغذ چیک اور وہی پٹی پرنٹ۔ محفوظ ٹرمینل اصل حالت و پرنٹر دوبارہ پڑھتا۔ اصل سائز، اسکین و رنگ انسانی چیک۔",
+    "مریض کی شناختی پٹی اسکین خانے میں بارکوڈ یا مریض کیو آر؛ اینٹر یا اس داخلے سے تصدیق اصل مریض سے موازنہ۔ وجہ کے خانے سے اسکین نہ لیں۔ درست پر متوقع مریض؛ مختلف پر رکیں، اصل اسکین مریض یا نہیں ملا، اجرا بند۔ نگہداشت روک کر شناخت درست و دوبارہ اسکین؛ دوسرے عمل کی اپنی حفاظتی تصدیق یہاں درج نہیں۔ اسکین یا داخلہ بدلنے سے پرانی تصدیق ختم۔",
+    "ایف ون یا مدد خانے و جائزے سے یہی صفحہ، مسودہ و فوکس محفوظ۔ انگریزی/اردو و دونوں تھیم، مشترک ترتیب و کی بورڈ زوم100تا250، ری سیٹ100۔ آف لائن معلومات تازہ شناخت کا ثبوت نہیں۔ اجازت و سرور خدمت: صرف ریکارڈ میں پڑھنا، تصدیق و دوبارہ پرنٹ؛ اجرا نہیں۔ ختم ہوتی خدمت میں موجودہ داخلے جاری و نئے داخلے بند کی عبارت۔ زمرے سے فیصلہ نہیں۔ پرنٹ سے وارڈ نگہداشت مکمل نہیں۔ انسانی نئے ریکارڈ، اردو، کردار و تدوین جائزہ باقی۔"
+  ],
+  faq: [
+    [
+      "Where do I find the ward patient?",
+      "Open Ward Nursing → Identity wristbands. Choose Admissions or Emergency visits where permitted. Find a stay filters returned names, MRNs and numbers. Select the actual stay row, or enter Known admission reference from its record and Read this admission. Never guess an ID. Refresh wristbands rereads lists and selected context; it clears old scan approval and print preview while keeping a typed replacement reason. A failed read has Try again. No matching stays is an empty result, not proof that a patient has no band."
+    ],
+    [
+      "Why can I not see missing-band work?",
+      "An authorised user sees Patients without a wristband in red from the medication-safety worklist. Read missing-band stay opens its actual admission or emergency visit. The worklist highlights inpatients arriving on the ward without a band; this is an urgent safety queue, not an empty clinical result. Choose the admission directly. No polling: Refresh and a resumed live connection reread. This screen does not allocate beds, record medicines or perform a clinical identity check for another procedure."
+    ],
+    [
+      "Replace or reprint on the ward?",
+      "Issuing confirms only the band record. Band ready to print shows server fields, MRN barcode and QR with prominent recorded allergies. Print this same wristband uses the mapped label printer; Save wristband PDF saves a separate file or can be cancelled. For a jam, Read this band for reprint fetches the current band again and never issues another. Replaced bands cannot be reprinted here. Printer failure, a cancelled save or paper not emerging never repeats issuance; check paper/printer and reprint the same band. The secure terminal rereads band identity/current status and printer mapping. Physical printer fit, scannability and colour are human checks."
+    ],
+    [
+      "What if an inpatient already wears a band?",
+      "To issue, check I checked this patient and stay using two identifiers, then Review wristband issue. If any current band exists, enter Replacement reason (up to 300 characters), such as damaged or removed for a procedure; a blank reason cannot replace it. Review freezes the patient/stay, existing band history and reason. Back to band draft preserves input. Confirm band issue once. A fresh actor/permission/service/patient/stay/history check precedes the write; a concurrent change keeps the reason and requires a new review. Server refusal stays visible by code/reference."
+    ],
+    [
+      "What if the issue reply is lost on the ward?",
+      "If the issue reply is lost, the draft and navigation are held. Retry original band request uses the identical original key/body within its retention, explicitly and never automatically. Read original patient bands reads history without issuing. A new row alone does not prove who issued it: compare its issuer/time, then Bands reviewed; return to draft only after reconciliation. Outside retention or still uncertain ask IT. Never use a new key to guess a retry. Session expiry and leaving unsaved input require recovery before another action."
+    ],
+    [
+      "What if the bedside scanner names someone else?",
+      "Place focus in Scan patient wristband and scan its MRN barcode or patient QR; Enter or Verify against this stay compares it with the selected stay. Never capture a scan from a reason field. A match names the expected patient. STOP — band does not match shows whose band was scanned, or No patient found, and blocks issuing from that mismatch. Stop care, correct the patient/band and rescan; this page does not record completion of a procedure’s own bedside safety check. Changing scan input or stay clears old approval."
+    ],
+    [
+      "How do I change language, help or zoom on the ward?",
+      "F1 or visible Help opens this page from fields and review, preserving draft/focus. English/Urdu and Light/DarkHighContrast share Settings/native keyboard zoom100–250%, reset100%. Offline data is not proof of current identity. Actions follow permissions and server service views: records allows reads/verification/reprints, not issuing; existing stays continue in open_work with its no-new-admissions banner. No category branching. Printing does not finish ward care. Human fresh-data, Urdu/role and editor review remain pending."
+    ]
+  ],
+  faqUr: [
+    [
+      "وارڈ کا مریض کہاں تلاش کریں؟",
+      "وارڈ نرسنگ سے شناختی پٹیاں کھولیں۔ مجاز داخلے یا ایمرجنسی چنیں۔ تلاش واپس نام، نمبر و ایم آر این محدود کرتی۔ اصل سطر یا ریکارڈ سے معلوم حوالہ پڑھیں، اندازہ نہیں۔ تازہ فہرست و منتخب مریض دوبارہ، پرانی اسکین تصدیق و پرنٹ ہٹائے، وجہ رکھے۔ ناکام مطالعہ دوبارہ کوشش۔ خالی فہرست سے پٹی نہ ہونے کا ثبوت نہیں۔"
+    ],
+    [
+      "بغیر پٹی فہرست کیوں اہم ہے؟",
+      "مجاز صارف کو دوا حفاظت فہرست سے بغیر پٹی مریض سرخ نظر آتے؛ اصل داخلہ یا ایمرجنسی پڑھیں۔ وارڈ پر بغیر پٹی پہنچنے والے مریضوں کی فوری حفاظت کی قطار ہے۔ داخلہ براہ راست چنیں۔ پولنگ نہیں؛ تازہ اور رابطہ بحالی پر مطالعہ۔ یہاں بستر تعینات، دوا یا دوسرے عمل کا طبی شناختی چیک نہیں ہوتا۔"
+    ],
+    [
+      "وارڈ پر متبادل یا دوبارہ پرنٹ؟",
+      "اجرا صرف پٹی کا ریکارڈ۔ تیار پٹی میں اصل سرور نام، ایم آر این بارکوڈ و کیو آر، حساسیت نمایاں۔ اسی پٹی کا پرنٹ مقررہ لیبل پرنٹر؛ پی ڈی ایف الگ محفوظ یا منسوخ۔ جام پر موجودہ پٹی دوبارہ پڑھیں؛ نیا اجرا نہیں۔ بدلی پٹی یہاں پرنٹ نہیں۔ ناکامی، منسوخ فائل یا کاغذ نہ نکلنے پر اجرا نہ دہرائیں؛ پرنٹر و کاغذ چیک اور وہی پٹی پرنٹ۔ محفوظ ٹرمینل اصل حالت و پرنٹر دوبارہ پڑھتا۔ اصل سائز، اسکین و رنگ انسانی چیک۔"
+    ],
+    [
+      "داخل مریض کے پاس پہلے پٹی ہو تو؟",
+      "اجرا کے لیے دو شناختوں کی تصدیق کا نشان، پھر جائزہ۔ موجودہ پٹی ہو تو تبدیلی کی اصل وجہ زیادہ سے زیادہ300حروف، مثلاً خراب یا عمل میں اتری؛ خالی وجہ سے متبادل نہیں۔ جائزہ اصل مریض، داخلہ، تاریخ و وجہ رکھتا۔ مسودے پر واپس معلومات رکھے؛ ایک تصدیق۔ پہلے صارف، اجازت، خدمت، شناخت و پٹی دوبارہ چیک؛ بدلاؤ پر وجہ محفوظ و نیا جائزہ۔ سرور کا انکار کوڈ و حوالے سے نمایاں۔"
+    ],
+    [
+      "وارڈ پر اجرا جواب گم ہو تو؟",
+      "اجرا جواب گم تو مسودہ و نیویگیشن مقفل۔ اصل درخواست عین کلید و معلومات کے ساتھ مدت میں صرف واضح کوشش، خودکار نہیں۔ اصل مریض کی پٹیاں بغیر اجرا پڑھیں۔ نئی سطر اکیلے ثبوت نہیں؛ جاری کنندہ و وقت چیک، پھر جائزہ مکمل کرکے مسودہ کھولیں۔ مدت ختم یا شبہ پر آئی ٹی؛ نئی کلید سے اندازہ نہیں۔ سیشن و غیر محفوظ معلومات پر پہلے بحالی۔"
+    ],
+    [
+      "بستر پر اسکین دوسرے مریض کا ہو تو؟",
+      "مریض کی شناختی پٹی اسکین خانے میں بارکوڈ یا مریض کیو آر؛ اینٹر یا اس داخلے سے تصدیق اصل مریض سے موازنہ۔ وجہ کے خانے سے اسکین نہ لیں۔ درست پر متوقع مریض؛ مختلف پر رکیں، اصل اسکین مریض یا نہیں ملا، اجرا بند۔ نگہداشت روک کر شناخت درست و دوبارہ اسکین؛ دوسرے عمل کی اپنی حفاظتی تصدیق یہاں درج نہیں۔ اسکین یا داخلہ بدلنے سے پرانی تصدیق ختم۔"
+    ],
+    [
+      "وارڈ پر زبان، مدد و زوم کیسے؟",
+      "ایف ون یا مدد خانے و جائزے سے یہی صفحہ، مسودہ و فوکس محفوظ۔ انگریزی/اردو و دونوں تھیم، مشترک ترتیب و کی بورڈ زوم100تا250، ری سیٹ100۔ آف لائن معلومات تازہ شناخت کا ثبوت نہیں۔ اجازت و سرور خدمت: صرف ریکارڈ میں پڑھنا، تصدیق و دوبارہ پرنٹ؛ اجرا نہیں۔ ختم ہوتی خدمت میں موجودہ داخلے جاری و نئے داخلے بند کی عبارت۔ زمرے سے فیصلہ نہیں۔ پرنٹ سے وارڈ نگہداشت مکمل نہیں۔ انسانی نئے ریکارڈ، اردو، کردار و تدوین جائزہ باقی۔"
+    ]
+  ]
+},
  bed_matrix: {
   title: "Live bed matrix",
   titleUr: "بستروں کی تازہ صورت حال",
