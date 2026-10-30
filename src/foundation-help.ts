@@ -20,7 +20,7 @@ export const phase1Screens = [
 const approvalScreens = ["approval_queue", "charity_approvals"];
 // Coverage grows screen by screen; Phase 1 acceptance remains separate.
 export const deliveredHelpScreens = [
- "mar", "verbal_orders_ward",
+ "mar", "verbal_orders_ward", "medication_orders_doctor",
  "vitals_tracker",
  "patient_education_ward",
  "nursing_assessment",
@@ -1238,6 +1238,62 @@ export const controlGuides: Record<string, ControlGuide> = {
     [
       "Print handbook page opens the terminal's print dialog for the selected help content; choose the printer or cancel without changing records. A printer error is shown and does not submit any form. Close (× or Escape) returns to the previous focus. Screenshots are synthetic DEV examples, not evidence that your own action succeeded.",
       "رہنما صفحہ پرنٹ سے منتخب مدد کے لیے ٹرمینل کا پرنٹ مکالمہ کھلتا ہے؛ پرنٹر چنیں یا ریکارڈ بدلے بغیر منسوخ کریں۔ پرنٹر کی خطا دکھتی ہے اور فارم ارسال نہیں ہوتا۔ بند کریں (× یا Escape) سے پچھلا فوکس لوٹتا ہے۔ تصاویر فرضی ڈیَو مثالیں ہیں، آپ کے کام کی کامیابی کا ثبوت نہیں۔",
+    ],
+  ),
+  "medication.doctor.worklist": g(
+    ["medication_orders_doctor"],
+    ["Medication safety worklist / Filter", "حفاظتی کام کی فہرست / فلٹر"],
+    [
+      "Safety worklist shows pending medication safety items assigned to you or your ward, including verbal orders awaiting countersignature (marked Overdue in red after the countersign hours) and open pharmacist queries. Use the search input and My orders only toggle to focus on your patients. Refresh re-queries the worklist without replaying writes.",
+      "حفاظتی فہرست آپ یا آپ کے وارڈ کے زیر التواء ادویاتی کام دکھاتی ہے جس میں زبانی احکامات (مقررہ وقت کے بعد سرخ نشان) اور فارماسسٹ کے سوالات شامل ہیں۔ تلاش اور فلٹر کے ذریعے صرف اپنے مریض دیکھیں۔ تازہ کریں کا بٹن بغیر نیا ریکارڈ بنائے فہرست اپ ڈیٹ کرتا ہے۔",
+    ],
+  ),
+  "medication.doctor.verbal": g(
+    ["medication_orders_doctor"],
+    ["Verbal and telephone orders list / Pending filter", "زبانی احکامات کی فہرست / زیر التواء فلٹر"],
+    [
+      "Verbal orders tab lists verbal and telephone orders recorded by ward or emergency nurses. Toggle Pending countersign only to isolate unconfirmed orders. Each order displays patient MRN, nurse receiver, time taken, due deadline, and full prescribed medication lines. An overdue order indicates immediate clinical countersignature is required.",
+      "زبانی احکامات کا ٹیب نرسوں کے درج کردہ زبانی اور ٹیلی فونک احکامات دکھاتا ہے۔ صرف غیر توثیق شدہ احکام دیکھنے کے لیے فلٹر استعمال کریں۔ ہر حکم میں مریض، نرس کا نام، وقت، مقررہ حد اور ادویات کی سطریں شامل ہیں۔ تاخیر کی صورت میں فوری توثیق ضروری ہے۔",
+    ],
+  ),
+  "medication.doctor.countersign": g(
+    ["medication_orders_doctor"],
+    ["Read back and countersign verbal order", "زبانی حکم دہرا کر توثیق کریں"],
+    [
+      "Countersign opens the read-back verification dialog. Review all prescribed lines, doses, routes, and frequencies against what you dictated. You must tick the read-back verification checkbox confirming every line matches your verbal instruction before Confirm Countersignature activates. The server attaches your PMDC registration stamp to the verified order.",
+      "توثیق کا بٹن دہرا کر تصدیق کا مکالمہ کھولتا ہے۔ تمام تجویز کردہ ادویات، خوراک، راستہ اور اوقات چیک کریں۔ توثیق کی تصدیق کا بٹن دبانے سے پہلے یہ تصدیقی خانہ نشان زد کریں کہ تمام سطریں آپ کی ہدایات کے عین مطابق ہیں۔ سرور آپ کا پی ایم ڈی سی مہر منسلک کرے گا۔",
+    ],
+  ),
+  "medication.doctor.queries": g(
+    ["medication_orders_doctor"],
+    ["Pharmacy queries list / Status filter", "فارمیسی سوالات کی فہرست / حالت فلٹر"],
+    [
+      "Pharmacy queries lists questions raised by clinical pharmacists regarding unclear, duplicate, high-alert, or interacting medication orders. Filter by Open, Answered, Withdrawn, or All. Each row displays the pharmacist's question, reason category, patient MRN, and queried medicine.",
+      "فارمیسی سوالات کی فہرست میں فارماسسٹ کی طرف سے غیر واضح، مکرر یا متصادم ادویات کے بارے میں اٹھائے گئے سوالات ہوتے ہیں۔ کھلے، جواب شدہ یا تمام سوالات کے حساب سے فلٹر کریں۔ ہر سطر میں فارماسسٹ کا سوال، وجہ، مریض اور دوا کی تفصیل ہوتی ہے۔",
+    ],
+  ),
+  "medication.doctor.answer": g(
+    ["medication_orders_doctor"],
+    ["Answer pharmacy query / Outcome and explanation", "فارمیسی سوال کا جواب / نتیجہ اور وضاحت"],
+    [
+      "Answer Query allows the prescriber to confirm or change the order. Select Confirmed As Written if the prescription stands as intended. Select Changed if the order is modified: rule aac4a043c3 requires stopping the queried medication line (or cancelling the prescription) first before answering Changed. Enter clear clinical explanation; your answer is recorded with an official PMDC stamp.",
+      "سوال کا جواب دیں کے ذریعے معالج حکم کی تصدیق یا تبدیلی کر سکتا ہے۔ اگر حکم برقرار رکھنا ہو تو 'جیسا لکھا ہے درست ہے' منتخب کریں۔ تبدیلی کی صورت میں قاعدہ aac4a043c3 کے تحت دوا کی سطر پہلے روکنا ضروری ہے۔ واضح طبی وضاحت درج کریں جو آپ کے سرکاری پی ایم ڈی سی مہر کے ساتھ محفوظ ہوگی۔",
+    ],
+  ),
+  "medication.doctor.stop": g(
+    ["medication_orders_doctor"],
+    ["Stop medication line / Reason", "دوا کی سطر روکیں / وجہ"],
+    [
+      "Stop medication line permanently halts further administrations and dispensations of that item on the prescription. Enter a factual clinical reason (e.g. Changed after pharmacy query, Adverse drug reaction). Stopped lines remain visible with a strikethrough and stopped note; append-only history is preserved without editing past administrations.",
+      "دوا کی سطر روکیں سے نسخے کی وہ دوا مستقل طور پر بند ہو جاتی ہے۔ روکنے کی واضح طبی وجہ درج کریں (جیسے فارمیسی سوال پر تبدیلی یا الرجی)۔ روکی گئی دوا خط کشیدہ حالت میں دکھائی دیتی ہے اور ماضی کا ریکارڈ برقرار رہتا ہے۔",
+    ],
+  ),
+  "medication.doctor.detail": g(
+    ["medication_orders_doctor"],
+    ["View prescription details / Close dialog", "نسخے کی تفصیلات دیکھیں / مکالمہ بند کریں"],
+    [
+      "View Prescription retrieves full details of the prescription, including all active and stopped medication lines, dispensed quantities, remaining stock status, and previous dispensations. Reviewing full prescription context ensures safe therapeutic decisions before countersigning or answering queries. Close restores previous screen focus.",
+      "نسخہ دیکھیں سے مکمل نسخے کی تمام ادویات، دی گئی مقدار، باقی ماندہ اسٹاک اور پچھلی ترسیل کی تفصیلات نظر آتی ہیں۔ توثیق یا سوال کے جواب سے پہلے پورا نسخہ دیکھنا محفوظ علاج یقینی بناتا ہے۔ بند کریں سے پچھلی اسکرین پر واپس جایا جاتا ہے۔",
     ],
   ),
 };

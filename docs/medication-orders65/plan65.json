@@ -1,0 +1,801 @@
+{
+  "screen": "medication_orders_doctor",
+  "title": "Verbal orders to countersign and pharmacy queries",
+  "cases": [
+    {
+      "id": "case:GET /medication-safety/worklist",
+      "call": "GET /api/v1/medication-safety/worklist",
+      "summary": "Medication safety work waiting",
+      "happy_path": {
+        "as_one_of": [
+          "admissions_officer",
+          "anaesthetist",
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "ot_nurse",
+          "owner",
+          "pharmacist",
+          "pharmacy_admin",
+          "quality_officer",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/medication-safety/worklist",
+            "query": {
+              "mine": "true"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "kind": "VerbalOrderToCountersign",
+                  "title": "Countersign verbal order RX-2026-000001",
+                  "is_overdue": true,
+                  "detail": "Taken by u15d336608e for Dr Dr Ahmed",
+                  "due_at": "2026-09-30T09:02:32.094405+00:00",
+                  "patient_id": 1,
+                  "patient_name": "Ali Khan",
+                  "mrn": "MRN-2026-000001",
+                  "admission_id": 1,
+                  "er_visit_id": null,
+                  "ward_id": 2,
+                  "ward_name": "General Ward",
+                  "bed_label": "GW-1",
+                  "prescription_id": 1,
+                  "prescription_number": "RX-2026-000001",
+                  "query_id": null,
+                  "own_medicine_id": null,
+                  "recall_id": null,
+                  "recall_number": null,
+                  "batch_id": null
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-30T15:02:33.034572+00:00"
+              },
+              "request_id": "966eee106ed541d5a4f8dad33549039d"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "billing_admin",
+          "cashier",
+          "cssd_technician",
+          "employee_self"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /verbal-orders",
+      "call": "GET /api/v1/verbal-orders",
+      "summary": "Verbal orders and their countersignatures",
+      "happy_path": {
+        "as_one_of": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "pharmacist",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/verbal-orders",
+            "query": {
+              "mine": "true",
+              "pending": "true"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "prescription_id": 1,
+                  "prescription_number": "RX-2026-000001",
+                  "order_mode": "Telephone",
+                  "source": "IPD",
+                  "status": "Active",
+                  "patient_id": 1,
+                  "patient_name": "Ali Khan",
+                  "mrn": "MRN-2026-000001",
+                  "admission_id": 1,
+                  "ticket_id": null,
+                  "prescriber_id": 1,
+                  "prescriber_name": "Dr Ahmed",
+                  "received_by": 7,
+                  "received_by_name": "u15d336608e",
+                  "created_at": "2026-09-30T15:02:32.094405+00:00",
+                  "countersigned_at": null,
+                  "countersigned_by_name": null,
+                  "countersign_due_at": "2026-10-01T15:02:32.094405+00:00",
+                  "is_overdue": false,
+                  "countersigned_late": null,
+                  "lines": [
+                    "Amoxicillin 500mg 500 mg Oral TDS"
+                  ]
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-30T15:02:32.766020+00:00"
+              },
+              "request_id": "f79d809897a5403499ce74f66ce2e18f"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "billing_admin",
+          "cashier",
+          "clinic_director"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:POST /prescriptions/{prescription_id}/countersign",
+      "call": "POST /api/v1/prescriptions/{prescription_id}/countersign",
+      "summary": "Countersign my verbal order",
+      "happy_path": {
+        "as_one_of": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "surgeon"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/prescriptions/1/countersign"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "prescription_id": 1,
+                "prescription_number": "RX-2026-000001",
+                "patient_id": 1,
+                "prescriber_id": 1,
+                "ticket_id": null,
+                "admission_id": 1,
+                "encounter_id": null,
+                "source": "IPD",
+                "destination": "HospitalPharmacy",
+                "status": "Active",
+                "is_content_locked": false,
+                "replaced_by_id": null,
+                "notes": null,
+                "cancelled_at": null,
+                "cancel_reason": null,
+                "external_printed_at": null,
+                "order_mode": "Telephone",
+                "received_by": 7,
+                "read_back": true,
+                "countersigned_by": 1,
+                "countersigned_at": "2026-10-14T02:31:13.930531+00:00",
+                "countersign_alerted_at": "2026-10-14T02:31:13.912733+00:00",
+                "created_by": 7,
+                "created_at": "2026-10-12T20:31:13.697316+00:00",
+                "row_version": 4,
+                "patient_name": "Ali Khan",
+                "mrn": "MRN-2026-000001",
+                "prescriber_name": "Dr Ahmed",
+                "prescriber_stamp": {
+                  "at": "2026-10-12T20:31:13.697316+00:00",
+                  "name": "Dr Ahmed",
+                  "text": "Dr Ahmed, Doctor, PMDC PMDC-15990, 13-Oct-2026 01:31",
+                  "user_id": 7,
+                  "designation": "Doctor",
+                  "employee_id": 1,
+                  "registration": "PMDC PMDC-15990"
+                },
+                "received_by_name": "u08bd08724d",
+                "items": [
+                  {
+                    "prescription_item_id": 1,
+                    "prescription_id": 1,
+                    "drug_id": 1,
+                    "is_external": false,
+                    "external_drug_name": null,
+                    "external_strength": null,
+                    "external_form": null,
+                    "qty_prescribed": 15,
+                    "qty_dispensed": 0,
+                    "dose_text": "500 mg",
+                    "route": "Oral",
+                    "frequency_code": "TDS",
+                    "interval_hours": 8,
+                    "duration_days": 2,
+                    "instructions": null,
+                    "start_at": "2026-10-14T02:26:13.692722+00:00",
+                    "end_at": null,
+                    "is_prn": false,
+                    "is_stat": false,
+                    "self_administration": false,
+                    "item_status": "Active",
+                    "stopped_at": null,
+                    "stopped_by": null,
+                    "stop_reason": null,
+                    "row_version": 1,
+                    "drug_name": "Amoxicillin 500mg",
+                    "strength": null,
+                    "form": "Capsule",
+                    "unit": "unit",
+                    "qty_available": 50,
+                    "stock_status": "InStock",
+                    "qty_remaining": 15,
+                    "high_alert_category": null,
+                    "is_restricted": false,
+                    "lasa_with": []
+                  }
+                ],
+                "dispensations": [],
+                "queries": [],
+                "handovers": []
+              },
+              "meta": {
+                "server_time": "2026-10-14T02:31:13.947341+00:00"
+              },
+              "request_id": "d9f4b9eaa09f4c87aa24c9e3c3e2f782"
+            }
+          },
+          "errors_seen": [
+            "VERBAL_ORDER_COUNTERSIGN_INVALID"
+          ],
+          "events_emitted": [
+            "medication.order.updated"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "billing_admin",
+          "cashier",
+          "clinic_director"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR",
+        "VERBAL_ORDER_COUNTERSIGN_INVALID"
+      ]
+    },
+    {
+      "id": "case:GET /prescription-queries",
+      "call": "GET /api/v1/prescription-queries",
+      "summary": "The pharmacist's queries",
+      "happy_path": {
+        "as_one_of": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "pharmacist",
+          "pharmacy_admin",
+          "surgeon",
+          "ward_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/prescription-queries",
+            "query": {
+              "mine": "true",
+              "status": "Open"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "query_id": 1,
+                  "prescription_id": 8,
+                  "prescription_item_id": 7,
+                  "reason": "Duplicate",
+                  "question": "Amoxicillin is also ordered by telephone: both?",
+                  "status": "Open",
+                  "raised_by": 9,
+                  "raised_at": "2026-09-30T15:02:34.572897+00:00",
+                  "outcome": null,
+                  "answer": null,
+                  "answered_by": null,
+                  "answered_at": null,
+                  "answer_stamp": null,
+                  "withdrawn_by": null,
+                  "withdrawn_at": null,
+                  "withdraw_reason": null,
+                  "row_version": 1,
+                  "raised_by_name": "ub1ab916856",
+                  "answered_by_name": null,
+                  "prescription_number": "RX-2026-000004",
+                  "patient_id": 1,
+                  "patient_name": "Ali Khan",
+                  "mrn": "MRN-2026-000001",
+                  "admission_id": 1,
+                  "ticket_id": null,
+                  "prescriber_id": 1,
+                  "prescriber_name": "Dr Ahmed",
+                  "drug_name": "Amoxicillin 500mg",
+                  "dose_text": "500 mg",
+                  "route": "Oral",
+                  "frequency_code": "TDS"
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-30T15:02:34.776965+00:00"
+              },
+              "request_id": "fef4bd3dfe2f44a792aa60ef32adb283"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "billing_admin",
+          "cashier",
+          "clinic_director"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:POST /prescription-queries/{query_id}/answer",
+      "call": "POST /api/v1/prescription-queries/{query_id}/answer",
+      "summary": "Answer the pharmacist's query",
+      "happy_path": {
+        "as_one_of": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "surgeon"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/prescription-queries/1/answer",
+            "body": {
+              "outcome": "ConfirmedAsWritten",
+              "answer": "Both intended: the telephone order was the first dose"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "query_id": 1,
+                "prescription_id": 8,
+                "prescription_item_id": 7,
+                "reason": "Duplicate",
+                "question": "Amoxicillin is also ordered by telephone: both?",
+                "status": "Answered",
+                "raised_by": 9,
+                "raised_at": "2026-09-30T15:02:34.572897+00:00",
+                "outcome": "ConfirmedAsWritten",
+                "answer": "Both intended: the telephone order was the first dose",
+                "answered_by": 1,
+                "answered_at": "2026-09-30T15:02:34.868332+00:00",
+                "answer_stamp": {
+                  "at": "2026-09-30T15:02:34.868332+00:00",
+                  "name": "Dr Ahmed",
+                  "text": "Dr Ahmed, Doctor, PMDC PMDC-49105, 30-Sep-2026 20:02",
+                  "user_id": 1,
+                  "designation": "Doctor",
+                  "employee_id": 1,
+                  "registration": "PMDC PMDC-49105"
+                },
+                "withdrawn_by": null,
+                "withdrawn_at": null,
+                "withdraw_reason": null,
+                "row_version": 2,
+                "raised_by_name": "ub1ab916856",
+                "answered_by_name": "Dr Ahmed",
+                "prescription_number": "RX-2026-000004",
+                "patient_id": 1,
+                "patient_name": "Ali Khan",
+                "mrn": "MRN-2026-000001",
+                "admission_id": 1,
+                "ticket_id": null,
+                "prescriber_id": 1,
+                "prescriber_name": "Dr Ahmed",
+                "drug_name": "Amoxicillin 500mg",
+                "dose_text": "500 mg",
+                "route": "Oral",
+                "frequency_code": "TDS"
+              },
+              "meta": {
+                "server_time": "2026-09-30T15:02:34.904829+00:00"
+              },
+              "request_id": "633c4d62b6714a7baf0b7a811d474f94"
+            }
+          },
+          "errors_seen": [
+            "FORBIDDEN",
+            "PRESCRIPTION_QUERY_STATE_INVALID"
+          ],
+          "events_emitted": [
+            "medication.order.updated",
+            "notification.created"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "billing_admin",
+          "cashier",
+          "clinic_director"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "FORBIDDEN",
+        "PRESCRIPTION_QUERY_STATE_INVALID",
+        "VALIDATION_ERROR"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:POST /prescriptions/{prescription_id}/items/{item_id}/stop",
+      "call": "POST /api/v1/prescriptions/{prescription_id}/items/{item_id}/stop",
+      "summary": "Stop one medication line",
+      "happy_path": {
+        "as_one_of": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "surgeon"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/prescriptions/1/items/1/stop",
+            "body": {
+              "reason": "rash"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "prescription_id": 1,
+                "prescription_number": "RX-2026-000001",
+                "patient_id": 1,
+                "prescriber_id": 1,
+                "ticket_id": 1,
+                "admission_id": null,
+                "encounter_id": null,
+                "source": "OPD",
+                "destination": "HospitalPharmacy",
+                "status": "FullyDispensed",
+                "is_content_locked": false,
+                "replaced_by_id": null,
+                "notes": null,
+                "cancelled_at": null,
+                "cancel_reason": null,
+                "external_printed_at": null,
+                "order_mode": "Written",
+                "received_by": null,
+                "read_back": false,
+                "countersigned_by": null,
+                "countersigned_at": null,
+                "countersign_alerted_at": null,
+                "created_by": 1,
+                "created_at": "2026-10-14T02:42:36.512575+00:00",
+                "row_version": 2,
+                "patient_name": "Ali Khan",
+                "mrn": "MRN-2026-000001",
+                "prescriber_name": "Dr Ahmed",
+                "prescriber_stamp": {
+                  "at": "2026-10-14T02:42:36.512575+00:00",
+                  "name": "Dr Ahmed",
+                  "text": "Dr Ahmed, Doctor, PMDC PMDC-20014, 14-Oct-2026 07:42",
+                  "user_id": 1,
+                  "designation": "Doctor",
+                  "employee_id": 1,
+                  "registration": "PMDC PMDC-20014"
+                },
+                "received_by_name": null,
+                "items": [
+                  {
+                    "prescription_item_id": 1,
+                    "prescription_id": 1,
+                    "drug_id": 1,
+                    "is_external": false,
+                    "external_drug_name": null,
+                    "external_strength": null,
+                    "external_form": null,
+                    "qty_prescribed": 12,
+                    "qty_dispensed": 0,
+                    "dose_text": "500 mg",
+                    "route": "Oral",
+                    "frequency_code": "TDS",
+                    "interval_hours": null,
+                    "duration_days": 4,
+                    "instructions": null,
+                    "start_at": null,
+                    "end_at": null,
+                    "is_prn": false,
+                    "is_stat": false,
+                    "self_administration": false,
+                    "item_status": "Stopped",
+                    "stopped_at": "2026-10-14T02:42:36.547368+00:00",
+                    "stopped_by": 1,
+                    "stop_reason": "rash",
+                    "row_version": 2,
+                    "drug_name": "Amoxicillin 500mg",
+                    "strength": null,
+                    "form": "Capsule",
+                    "unit": "unit",
+                    "qty_available": 15,
+                    "stock_status": "InStock",
+                    "qty_remaining": 12,
+                    "high_alert_category": null,
+                    "is_restricted": false,
+                    "lasa_with": []
+                  }
+                ],
+                "dispensations": [],
+                "queries": [],
+                "handovers": []
+              },
+              "meta": {
+                "server_time": "2026-10-14T02:42:36.559817+00:00"
+              },
+              "request_id": "df01d88479364cac8b30da58953b91ff"
+            }
+          },
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "billing_admin",
+          "cashier",
+          "clinic_director"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /prescriptions/{prescription_id}",
+      "call": "GET /api/v1/prescriptions/{prescription_id}",
+      "summary": "Prescription with remaining quantities and stock per line",
+      "happy_path": {
+        "as_one_of": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "pharmacist",
+          "surgeon",
+          "ward_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/prescriptions/1"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "prescription_id": 1,
+                "prescription_number": "RX-2026-000001",
+                "patient_id": 1,
+                "prescriber_id": 1,
+                "ticket_id": null,
+                "admission_id": 1,
+                "encounter_id": null,
+                "source": "IPD",
+                "destination": "HospitalPharmacy",
+                "status": "FullyDispensed",
+                "is_content_locked": false,
+                "replaced_by_id": null,
+                "notes": null,
+                "cancelled_at": null,
+                "cancel_reason": null,
+                "external_printed_at": null,
+                "order_mode": "Written",
+                "received_by": null,
+                "read_back": false,
+                "countersigned_by": null,
+                "countersigned_at": null,
+                "countersign_alerted_at": null,
+                "created_by": 1,
+                "created_at": "2026-10-14T02:30:59.172751+00:00",
+                "row_version": 2,
+                "patient_name": "Ali Khan",
+                "mrn": "MRN-2026-000001",
+                "prescriber_name": "Dr Ahmed",
+                "prescriber_stamp": {
+                  "at": "2026-10-14T02:30:59.172751+00:00",
+                  "name": "Dr Ahmed",
+                  "text": "Dr Ahmed, Doctor, PMDC PMDC-51922, 14-Oct-2026 07:30",
+                  "user_id": 1,
+                  "designation": "Doctor",
+                  "employee_id": 1,
+                  "registration": "PMDC PMDC-51922"
+                },
+                "received_by_name": null,
+                "items": [
+                  {
+                    "prescription_item_id": 1,
+                    "prescription_id": 1,
+                    "drug_id": 1,
+                    "is_external": false,
+                    "external_drug_name": null,
+                    "external_strength": null,
+                    "external_form": null,
+                    "qty_prescribed": 4,
+                    "qty_dispensed": 4,
+                    "dose_text": "10 mmol",
+                    "route": "IV",
+                    "frequency_code": "BD",
+                    "interval_hours": 12,
+                    "duration_days": 2,
+                    "instructions": "in 500 ml normal saline over 4 hours",
+                    "start_at": "2026-10-14T02:25:59.170206+00:00",
+                    "end_at": null,
+                    "is_prn": false,
+                    "is_stat": false,
+                    "self_administration": false,
+                    "item_status": "FullyDispensed",
+                    "stopped_at": null,
+                    "stopped_by": null,
+                    "stop_reason": null,
+                    "row_version": 2,
+                    "drug_name": "Potassium chloride 15%",
+                    "strength": null,
+                    "form": "Injection",
+                    "unit": "unit",
+                    "qty_available": 46,
+                    "stock_status": "InStock",
+                    "qty_remaining": 0,
+                    "high_alert_category": "ConcentratedElectrolyte",
+                    "is_restricted": false,
+                    "lasa_with": []
+                  }
+                ],
+                "dispensations": [
+                  {
+                    "dispensation_id": 1,
+                    "payment_mode": "IPDBill",
+                    "total_amount": 80,
+                    "dispensed_at": "2026-10-14T02:30:59.265053+00:00",
+                    "dispensed_by": 9,
+                    "checked_by": 12
+                  }
+                ],
+                "queries": [],
+                "handovers": []
+              },
+              "meta": {
+                "server_time": "2026-10-14T02:30:59.491354+00:00"
+              },
+              "request_id": "2452a6a8af3b47148819cf9c1340c3df"
+            }
+          },
+          "errors_seen": [
+            "FORBIDDEN"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "billing_admin",
+          "cashier",
+          "clinic_director"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "FORBIDDEN",
+        "VALIDATION_ERROR"
+      ]
+    }
+  ],
+  "service_cases": [],
+  "delivery_gate": {
+    "required": true,
+    "status": "required",
+    "progress_reporting": {
+      "required": true,
+      "submit": "propose_progress",
+      "verify": "progress_proposals",
+      "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+    },
+    "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+    "compulsory": [
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+        "points": 2
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+        "points": 3
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+        "points": 2
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+        "points": 4
+      }
+    ],
+    "zoom": {
+      "min_pct": 100,
+      "max_pct": 250,
+      "reset_pct": 100,
+      "keys": [
+        "Ctrl + or Ctrl = (zoom in)",
+        "Ctrl - (zoom out)",
+        "Ctrl 0 (reset to 100 %)",
+        "Command on macOS"
+      ],
+      "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+    },
+    "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+    "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+  },
+  "handbook_page": "screens/medication_orders_doctor",
+  "workspace_guide": "get_handbook_outline('doctor')",
+  "realtime": [
+    {
+      "event": "medication.order.updated",
+      "check": "the screen refreshes without polling"
+    },
+    {
+      "event": "notification.created",
+      "check": "the screen refreshes without polling"
+    }
+  ],
+  "acceptance_rules": [
+    "GET /medication-safety/worklist?mine=true: VerbalOrderToCountersign (overdue in red after verbal_order_countersign_hours) and QueryOpen. Countersign reads the order back to you first.",
+    "Answer: ConfirmedAsWritten, or Changed: stop the queried line (or cancel the prescription) and write the new order FIRST (PRESCRIPTION_QUERY_STATE_INVALID otherwise). The answer carries your stamp."
+  ],
+  "demo_accounts": "demo_accounts() lists a login per role; sandbox_call runs each case on the DEV server"
+}

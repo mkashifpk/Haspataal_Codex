@@ -10,6 +10,59 @@ export type HelpPage = {
   faqUr: [string, string][];
 };
 export const help: Record<string, HelpPage> = {
+medication_orders_doctor: {
+  title: "Verbal orders to countersign and pharmacy queries",
+  titleUr: "زبانی احکامات کی توثیق اور فارمیسی کے سوالات",
+  purpose: "The doctor reviews their medication safety worklist, reads back and countersigns verbal or telephone orders, and answers queries raised by clinical pharmacists. Overdue orders require immediate countersignature.",
+  purposeUr: "معالج اپنے حفاظتی کام کی فہرست دیکھتا ہے، زبانی یا ٹیلی فونک احکامات کو دہرا کر ان کی توثیق کرتا ہے اور فارماسسٹ کے سوالات کے باضابطہ جوابات دیتا ہے۔ زائد المیعاد احکام کی فوری توثیق ضروری ہے۔",
+  steps: [
+    "Open Verbal orders to countersign and pharmacy queries from the Doctor workspace. Use the top tabs to switch between Verbal Orders, Pharmacy Queries, and the full Safety Worklist. Toggle My orders only to focus on your patients, and filter by status or search by patient name, MRN, or prescription number. Refresh re-queries current server state without polling.",
+    "Review verbal and telephone orders in the Verbal Orders tab. Orders past the countersignature deadline appear with an Overdue warning in red. Click Read Back & Countersign to open the verification dialog.",
+    "In the Read Back & Countersign dialog, review the recording nurse, timestamp, and every prescribed medication line. Verify each line against what you instructed. Tick the confirmation checkbox stating that the order was read back and verified accurately before clicking Confirm Countersignature. The server records your countersignature with an immutable PMDC stamp.",
+    "Open Pharmacy Queries to review questions raised by clinical pharmacists regarding unclear, duplicate, or interacting prescriptions. Click Answer Query to review the pharmacist's question and choose an answer outcome: Confirmed As Written or Changed.",
+    "If the order stands as intended, select Confirmed As Written and enter your clinical rationale. The answer is submitted idempotently with your PMDC signature.",
+    "If the order must be modified, select Changed. Rule aac4a043c3 requires stopping the queried medication line (or cancelling the prescription) before answering Changed. Click Stop Queried Line Now to record the stop reason first, then enter the clinical explanation and new prescription details before submitting your answer.",
+    "Click View Prescription on any verbal order or query row to inspect full prescription context, including active lines, stock availability, and previous dispensations.",
+  ],
+  stepsUr: [
+    "ڈاکٹر ورک اسپیس سے زبانی احکامات کی توثیق اور فارمیسی کے سوالات کھولیں۔ اوپر موجود ٹیبز کے ذریعے زبانی احکامات، فارمیسی سوالات اور حفاظتی فہرست میں تبدیلی کریں۔ صرف اپنے مریض دیکھنے کے لیے فلٹر استعمال کریں یا نام، ایم آر این یا نسخہ سے تلاش کریں۔ تازہ کریں کا بٹن بغیر نیا ریکارڈ بنائے سرور سے موجودہ حالت لاتا ہے۔",
+    "زبانی احکامات کے ٹیب میں نرسوں کے درج کردہ زبانی اور ٹیلی فونک احکام دیکھیں۔ مقررہ وقت گزرنے پر احکام کے ساتھ سرخ رنگ میں زائد المیعاد کا انتباہ ہوتا ہے۔ توثیق کا مکالمہ کھولنے کے لیے دہرا کر تصدیق کریں پر کلک کریں۔",
+    "دہرا کر تصدیق کے مکالمے میں نرس کا نام، وقت اور ہر دوا کی سطر غور سے دیکھیں۔ چیک کریں کہ تمام ادویات، خوراک اور اوقات آپ کی دی گئی ہدایات کے عین مطابق ہیں۔ توثیق کی تصدیق دبانے سے پہلے تصدیقی خانہ نشان زد کریں۔ سرور آپ کے پی ایم ڈی سی مہر کے ساتھ توثیق درج کرتا ہے۔",
+    "فارمیسی سوالات کا ٹیب کھول کر غیر واضح، مکرر یا متصادم ادویات پر فارماسسٹ کے سوالات دیکھیں۔ سوال کا جائزہ لینے کے لیے جواب دیں پر کلک کریں اور نتیجہ منتخب کریں: جیسا لکھا ہے درست ہے یا تبدیل شدہ۔",
+    "اگر حکم برقرار رکھنا مقصود ہو تو جیسا لکھا ہے درست ہے منتخب کریں اور طبی وضاحت درج کریں۔ جواب آپ کے پی ایم ڈی سی دستخط کے ساتھ محفوظ ہو جائے گا۔",
+    "اگر حکم تبدیل کرنا ہو تو تبدیل شدہ منتخب کریں۔ قاعدہ aac4a043c3 کے مطابق تبدیل شدہ جواب دینے سے پہلے متعلقہ دوا کی سطر روکنا لازمی ہے۔ پہلے متعلقہ سطر روکیں پر کلک کر کے وجہ درج کریں، پھر متبادل نسخے کی تفصیل لکھ کر جواب جمع کریں۔",
+    "کسی بھی سطر کے ساتھ نسخہ دیکھیں پر کلک کر کے تمام ادویات، اسٹاک کی دستیابی اور پچھلی ترسیل کی تفصیلات دیکھیں تاکہ علاج کا محفوظ فیصلہ کیا جا سکے۔",
+  ],
+  faq: [
+    [
+      "Why does countersigning require ticking the read-back checkbox?",
+      "Under hospital medication safety policy (MSDS 55), verbal and telephone orders must be read back and verified by the prescriber before countersigning to prevent fatal transcription errors.",
+    ],
+    [
+      "Why does the server refuse a Changed answer with PRESCRIPTION_QUERY_STATE_INVALID?",
+      "Rule aac4a043c3 mandates that to change a queried order, the queried line must be stopped first (or the prescription cancelled) so nurses and pharmacy staff do not dispense the superseded item.",
+    ],
+    [
+      "Can another doctor countersign my verbal order?",
+      "No. The server enforces VERBAL_ORDER_COUNTERSIGN_INVALID: only the doctor who gave the verbal instruction can countersign it.",
+    ],
+  ],
+  faqUr: [
+    [
+      "توثیق سے پہلے دہرا کر تصدیق کا خانہ نشان زد کرنا کیوں ضروری ہے؟",
+      "ادویاتی حفاظت کی پالیسی (MSDS 55) کے تحت زبانی احکامات میں غلطی سے بچنے کے لیے معالج کا حکم کو دوبارہ سن کر تصدیق کرنا قانونی اور طبی تقاضا ہے۔",
+    ],
+    [
+      "سرور تبدیل شدہ جواب پر PRESCRIPTION_QUERY_STATE_INVALID کیوں دیتا ہے؟",
+      "قاعدہ aac4a043c3 کے تحت حکم تبدیل کرنے کے لیے پچھلی سطر پہلے روکنا ضروری ہے تاکہ فارمیسی یا وارڈ کا عملہ غلطی سے پرانی دوا نہ دے سکے۔",
+    ],
+    [
+      "کیا کوئی دوسرا معالج میرے زبانی حکم کی توثیق کر سکتا ہے؟",
+      "نہیں۔ سرور VERBAL_ORDER_COUNTERSIGN_INVALID کے ذریعے پابندی لگاتا ہے کہ صرف وہی ڈاکٹر جس نے زبانی حکم دیا تھا توثیق کر سکتا ہے۔",
+    ],
+  ],
+},
+
 mar: {
   title: "Medication administration record",
   titleUr: "دوا دینے کا ریکارڈ",

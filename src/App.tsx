@@ -2,6 +2,7 @@ import { MedicationAdministration } from './screens/MedicationAdministration';
 import { VerbalOrders } from './screens/VerbalOrders';
 import { VitalsFlowsheet } from './screens/VitalsFlowsheet';
 import { DoctorInpatients } from './screens/DoctorInpatients';
+import { MedicationOrdersDoctor } from './screens/MedicationOrdersDoctor';
 import { CostEstimates } from './screens/CostEstimates';
 import { useCallback, useEffect, useRef, useState } from "react";
 import { api, call, resetRequests } from "./bridge";
@@ -1244,6 +1245,7 @@ export function App() {
               {screen === 'vitals_tracker' && est && <VitalsFlowsheet key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone} initialAdmissionId={wardAdmissionEntry?.userId===user.user_id?wardAdmissionEntry.admissionId:undefined} onBack={id=>{if(navigate('my_beds'))setWardAdmissionEntry({userId:user.user_id,admissionId:id});}}/>}
               {screen === 'nursing_assessment' && est && <NursingAssessment key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone} initialAdmissionId={wardAdmissionEntry?.userId===user.user_id?wardAdmissionEntry.admissionId:undefined} onBack={id=>{if(navigate('my_beds'))setWardAdmissionEntry({userId:user.user_id,admissionId:id});}}/>}
               {screen === 'doctor_inpatients' && est && <DoctorInpatients key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone} availableScreens={nav} initialAdmissionId={doctorAdmissionEntry?.userId===user.user_id?doctorAdmissionEntry.admissionId:undefined} onRoute={(next,id)=>{if(nav.includes(next)&&navigate(next)){setDoctorAdmissionEntry({userId:user.user_id,admissionId:id});if(next==='explain_estimate')setEstimateAdmissionEntry({userId:user.user_id,admissionId:id});}}}/>}
+              {screen === 'medication_orders_doctor' && <MedicationOrdersDoctor key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone} availableScreens={nav} onRoute={(next,id)=>{if(nav.includes(next))navigate(next);}}/>}
               {screen === 'explain_estimate' && est && <CostEstimates key={user.user_id+'explain'} screenId="explain_estimate" initialAdmissionId={estimateAdmissionEntry?.userId===user.user_id?estimateAdmissionEntry.admissionId:undefined} onAdmission={nav.includes("doctor_inpatients")?id=>{if(navigate("doctor_inpatients"))setDoctorAdmissionEntry({userId:user.user_id,admissionId:id})}:undefined} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone}/>}
               {screen === 'cost_estimates_billing' && est && <CostEstimates key={user.user_id+'billing'} screenId="cost_estimates_billing" user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone}/>}
               {screen === 'cost_estimates_admissions' && est && <CostEstimates key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone}/>}

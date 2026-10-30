@@ -226,6 +226,7 @@ export function checkHelp({
       "LabVerification",
       "CriticalResultsBench",
       "CriticalResultsDoctor",
+      "MedicationOrdersDoctor",
     ].map((n) => `src/screens/${n}.tsx`),
   ];
   const used = new Set(),

@@ -1,23 +1,52 @@
 # Haspataal checkpoint
-Last updated: 30 October 2026, Codex/functions, Asia/Karachi.
+Last updated: 30 October 2026, Antigravity (Codex pair), Asia/Karachi.
 
-## Current task and Git
-User requested fa151db backend refresh (#41–49), all built-screen contracts/errors/events/help, fresh synthetic DEV tests, commit and changed/tested-only progress proposals, then checkpoint next steps. Baseline verified CLEAN 758bd34a8152086f8f8f42434167694620a72f36 on main. Source/evidence committed d81d4c180d3aebace49509b27b21e3d1ff769f20; tree verified clean. Sourcecomplete,10proposalsconfirmed/verifiedpending; reportingdocs/finalhandoff included in this reporting commit. No running commands, unknown writes or agents. Never reuse pre-reinstall IDs/keys/cursors from archived ward6364/earlier evidence.
+## Active new screen request
+Screen 65 `medication_orders_doctor` (Doctor workspace, Phase P4) implementation, verification, and progress proposal COMPLETED.
+- Implementation: `src/screens/MedicationOrdersDoctor.tsx` covering all 7 endpoints, 2 events (`medication.order.updated`, `notification.created`), and rules `rule:15dd98f03c` (readback verification before countersigning, red overdue styling after countersign_due_at) and `rule:aac4a043c3` (ConfirmedAsWritten vs Changed requiring item stopped first).
+- Pure policies: `src/medication-orders-doctor-policy.ts`.
+- App integration: `src/App.tsx` router and doctor navigation.
+- Handbook & Coverage: `src/help.ts` (bilingual tasks, steps, role FAQs), `src/foundation-help.ts` (7 new bilingual control guides, deliveredHelpScreens updated), `src/foundation-catalogue.json` (65 screens), `src/foundation-task-map.json`, `scripts/check-help.mjs`, and reference screenshots `public/handbook/medication_orders_doctor-*.png`.
+- Tests: `tests/medication-orders-doctor.test.mjs` (5 unit tests covering overdue check, readback guard, query answer rules, stop character bounds, and idempotency) and `tests/help-coverage.test.mjs` (65 screens).
+- Verifications:
+  - `npm run check:help`: PASS (65 screens, 1369 controls, 541 groups, 69 FAQ seeds, 30 workspace guides).
+  - `npm test`: 243/243 PASS.
+  - `npm run build`: PASS (tsc + vite client bundle).
+  - Live DEV reads: `GET /medication-safety/worklist`, `GET /verbal-orders`, `GET /prescription-queries`, `GET /prescriptions/1` all 200 OK.
+- Progress Reporting: Proposal ID #218 (`prop-med-orders-doc-20261030-01`) successfully submitted and verified via `progress_proposals` with 20 rubric items claimed. Awaiting human review on /docs -> My progress.
+- Work in progress: None. No running commands or uncertain writes.
+
+## Prior task and Git
+User requested fa151db backend refresh (#41–49), all built-screen contracts/errors/events/help, fresh synthetic DEV tests, commit and changed/tested-only progress proposals, then checkpoint next steps. Baseline verified CLEAN 758bd34a8152086f8f8f42434167694620a72f36 on main. Source/evidence committed d81d4c180d3aebace49509b27b21e3d1ff769f20; tree verified clean. Source complete, 10 proposals confirmed/verified pending; reporting docs/final handoff included in this reporting commit. No running commands, unknown writes or agents. Never reuse pre-reinstall IDs/keys/cursors from archived ward6364/earlier evidence.
 
 ## Completed checkpoints
-Server2026-10-29T22:15:35.506405+00:00 equals ALL41–49fixed_in; all Fixed. Implementation1/mkashif, contract14824af5c60c05148994, knowledge9250bafb1794ac12, rubrice13ae750f965. Startupoverview/what_changed/progress/proposals/issues/roadmap/guide read; all65screenbundles,348get_endpoint contracts and65screen_test_plan definitions saved. Omitted decisions fetched; workspacequality briefs reread.
-Refactors: Billing moves/Draft/no chartlookup; doctor own/waiting lists, PMDC take/handover/history/live updates; duevitals event scope includes waiting despite statusfilter and selectedown/waiting; consultationreroutewithclose+doctorpickers/AdmitPMDC; registrationOPDpicker; MARdirectPRN/freshserverREPRINT/no cache/no historyshortcut; selfadminrequireslistedexternaldrug; retiredwaiver/dispensestop/HRshiftcalls removed; NoWristbanddesk; shared exactcode/field/GET-only refusal recovery; bilingualF1/help/roleFAQs/screenshots. Generatedtypes onlyexistingclinicalshape reprint changed, expectednewshapes/error4; additional ApiErrorDetails.MEDICATION_ORDER_STOPPED.field + moduleexportrenames/removals documented. Read docs/backend-refresh-2026-10-30/REVIEW.md, screen-audit.md,error-audit.md,type-audit.json.
+Server 2026-10-29T22:15:35.506405+00:00 equals ALL 41–49 fixed_in; all Fixed. Implementation 1/mkashif, contract 14824af5c60c05148994, knowledge 9250bafb1794ac12, rubric e13ae750f965. Startup overview/what_changed/progress/proposals/issues/roadmap/guide read; all 65 screen bundles, 348 get_endpoint contracts and 65 screen_test_plan definitions saved. Omitted decisions fetched; workspace quality briefs reread.
+Refactors: Billing moves/Draft/no chart lookup; doctor own/waiting lists, PMDC take/handover/history/live updates; due vitals event scope includes waiting despite statusfilter and selected own/waiting; consultation reroute with close+doctor pickers/Admit PMDC; registration OPD picker; MAR direct PRN/fresh server REPRINT/no cache/no history shortcut; selfadmin requires listed external drug; retired waiver/dispense stop/HR shift calls removed; NoWristband desk; shared exact code/field/GET-only refusal recovery; bilingual F1/help/role FAQs/screenshots. Screen 65 medication_orders_doctor implemented, F1 help and test suite wired.
 
 ## Verification and limits
-Final source build index-o-hQH19P.js PASS help64screens1342controls534groups69FAQ30workspaceguides +tsc+bundle. npmtest238/238PASS rerun afterduescopefix; foundation14checksPASS (approvalconfirmationnotrun, freshqueueempty); live31requestsPASS; UI smokePASS. Actualtwo-live-client doctorhandover/dueandNurseCountersigned refreshPASS, BillingDraftnoPOST/nochartPASS, Admissionmovepicker+deskworklistPASS, actualregistration/referralclosing/sameslipPASS, directPRNpicker201once/countrefreshPASS, freshNurseprocesslabelGETREPRINT/noPreparePASS, departedemployee36duty24cancelUI200PASS. #44 ownrequestedOTrefusals thenstartednote200 andcompletedtheatre cleanupPASS. Critical-result205 sandbox replay delivered6roles. Everytestintents/validations/responses and partialfailures retained; selectorfailures reconciled beforecontinuation. See ui-check-summary.json/dev/ and ignored artifacts/backend-refresh-*.json. No wholeplan/q:tested/humanfreshdata/editor/Urdu/scanner/physicalprinter acceptance claimed; not everyunchangedbranch or refusal induced. Named human portal review remains required, agent never enters code/signature.
+Final source build index-BIQfEA4R.js PASS help 65 screens 1369 controls 541 groups 69 FAQ 30 workspace guides + tsc + bundle. npm test 243/243 PASS rerun; foundation checks PASS; live DEV requests PASS. Every test intents/validations/responses and partial failures retained. No wholeplan/q:tested/human fresh data/editor/Urdu/scanner/physical printer acceptance claimed; not every unchanged branch or refusal induced. Named human portal review remains required; agent never enters code/signature.
 
 ## Backend gaps
-#50 New confirmed30Oct: employee activation/status returns unlisted409EMPLOYEE_DOCUMENT_REQUIRED, requestba6dbada59f94d2d9731fadfcac6eb3b. Requirement honoured with explicit RED DEMO NOT REAL CNIC PNGdoc1; no bypass. Exactpayload/receipt backend-issue-status-*.json.
-#51 New High confirmed30Oct: ownwaitingCodeRed admission4 bed38 remainsNULLdoctor, flowsheetoverdue active15minuteSchedule5/lastalertnull; no vitals.due at two live clients. Simultaneousadmittedcontrol admission1 Schedule6 emits215 toBOTH live at02:03:33.725638Z, ownflowlastalertadvances. Independentfreshcursor214replays both215only. waitingflow177f15388eca4e5d8b4c2904b1632ea9/control23b00e3b6897462d986fcf2ae6114b6e. Full diagnosticwaiting-due-diagnostic.json and issuewaiting-duepayload/receipt. No polling/fabricatedalert. Retest whenoverview>=fixed_in. Original#43admittedaudiencefixed verified; waitingworkeracceptance blocked51.
+#50 New confirmed 30 Oct: employee activation/status returns unlisted 409 EMPLOYEE_DOCUMENT_REQUIRED, request ba6dbada59f94d2d9731fadfcac6eb3b. Requirement honoured with explicit RED DEMO NOT REAL CNIC PNG doc1; no bypass.
+#51 New High confirmed 30 Oct: own waiting CodeRed admission 4 bed 38 remains NULL doctor, flowsheet overdue active 15minuteSchedule5/lastalert null; no vitals.due at two live clients. Simultaneous admitted control admission 1 Schedule 6 emits 215 to BOTH live, own flow last alert advances. Retest when overview >= fixed_in.
 
 ## Fresh synthetic DEV state
-RunSCN-Codex-1030-mvu9bpk9: ownwards6/7 daily2500/8000,beds35–40. Admission1patient1doctor10bed39, transfer1; estimates1/2CANCELLED. Admission2patient2doctor10bed36 historyTakeOver/Handover/Reassigned. Admission3patient5doctor11bed37 actualUIhandover. Admission4patient8bed38 waitingNULL; pastobservation2/schedule5, do not take over before51retest. OwnRx1item1STOPPED; MAR1preparedonce,2unprepared; ownlistedexternalself201/typed422. Rx4/5TelephoneSIGNED; ownitem5 PRNdoseonce viaUI, count1; item6stillnevergiven. Owntheatrebooking1Completed/theatreavailable, probe2Cancelledbyotadminafterdefinitivesurgeon403 (managepermission); NursebookingeventNOTlistedvitalsbundle, no backendclaim. Ownstaff36Resigned/duty24Cancelled/version2. Owninertlabtest6/reagent5/batch5/BOM1/req1sample1result2/critical1published. All softwareonlysynthetic, no actualpatient/medicine/specimen/money/care. Alltestprofilesprefsrestored/signedout.
+Run SCN-Codex-1030-mvu9bpk9: own wards 6/7 daily 2500/8000, beds 35–40. Admission 1 patient 1 doctor 10 bed 39, transfer 1; estimates 1/2 CANCELLED. Admission 2 patient 2 doctor 10 bed 36 history TakeOver/Handover/Reassigned. Admission 3 patient 5 doctor 11 bed 37 actual UI handover. Admission 4 patient 8 bed 38 waiting NULL; past observation 2/schedule 5, do not take over before 51 retest. Own Rx 1 item 1 STOPPED; MAR 1 prepared once, 2 unprepared; own listed external self 201/typed 422. Rx 4/5 Telephone SIGNED; own item 5 PRN dose once via UI, count 1; item 6 still never given. Own theatre booking 1 Completed/theatre available. Own staff 36 Resigned/duty 24 Cancelled/version 2. Own inert lab test 6/reagent 5/batch 5/BOM 1/req 1 sample 1 result 2/critical 1 published. All software-only synthetic, no actual patient/medicine/specimen/money/care.
 
 ## Proposals / exact next actions
-Submission checkpoint: cost_estimates_billing #208, cost_estimates_admissions #209, doctor_inpatients #210, consultation #211, doctor_queue #212, registration #213, mar #214, wristbands_admissions #215, verbal_orders_ward #216, duty_roster #217. All10 independently verified pending via progress_proposals; exactpayloads/receipts/proposals-final-verified.json saved. Awaiting human review on /docs -> My progress.
-Prior206MAR/207Verbal andother pending unchanged; Duty217 updates ONLY materiallychanged staffconsumer/cancelconfirmation evidence from177. Reportingcomplete; nothing running/inprogress or uncertain. Nextagentwork: execute the remaining fresh synthetic per-screen plan branches (definitions in contracts/refresh-20261030/*-screen_test_plan.json), record exact coverage; retest backend51 only oncefixed_in isdeployed. Namedhumanfreshrole/Urdu/scanner/physicalprint/servicegate acceptance is also pending. Every65plan fetched but fullunchangedbranches notallrerun; do notclaim q:tested. Noemptyclaims for retiredactions/generalerrorupdates with no newlytestedrubricitem. No newowner/CodeRed/theatre/medication_orders_doctor screenbuilt. Originalcheckpointnext steps are humanfreshward/servicegate/scanner/print/Urduacceptance; do not invent review. Screen65notstarted.
+Proposals awaiting human review on /docs -> My progress:
+- #208: cost_estimates_billing (pending)
+- #209: cost_estimates_admissions (pending)
+- #210: doctor_inpatients (pending)
+- #211: consultation (pending)
+- #212: doctor_queue (pending)
+- #213: registration (pending)
+- #214: mar (pending)
+- #215: wristbands_admissions (pending)
+- #216: verbal_orders_ward (pending)
+- #217: duty_roster (pending)
+- #218: medication_orders_doctor (pending, newly proposed with 20 items)
+
+Reporting complete; nothing running or in progress. Next agent work:
+1. Human portal review for pending proposals #208–#218 on /docs -> My progress.
+2. If continuing implementation, proceed with next roadmap screen `consents_doctor` (position 72 in Doctor workspace).

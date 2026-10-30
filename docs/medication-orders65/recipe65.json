@@ -1,0 +1,3675 @@
+{
+  "slug": "medication-safety",
+  "title": "Medication safety (MSDS)",
+  "workflow": "MSDS MOM indicators 51-71, AAC 30, COP 37",
+  "workspaces": [
+    "doctor",
+    "ward_nurse",
+    "head_nurse",
+    "triage",
+    "admissions",
+    "pharmacy",
+    "pharmacy_admin",
+    "quality",
+    "owner_dashboard"
+  ],
+  "sections": [
+    {
+      "section": "1. The lists and the policy (pharmacy admin)",
+      "calls": [
+        {
+          "method": "PATCH",
+          "path": "/api/v1/medication-safety/drugs/{drug_id}",
+          "summary": "Set a medicine's high-alert category or restriction",
+          "permissions": [
+            "medication.safety.configure"
+          ],
+          "idempotency_key": false,
+          "request": {
+            "path": "/api/v1/medication-safety/drugs/2",
+            "body": {
+              "high_alert_category": "Insulin"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "drug_id": 2,
+                "code": "INSR",
+                "name": "Insulin regular",
+                "generic_name": null,
+                "strength": null,
+                "form": "Injection",
+                "schedule": "HospitalOnly",
+                "high_alert_category": "Insulin",
+                "is_restricted": false,
+                "is_otc_allowed": false,
+                "is_active": true,
+                "row_version": 2,
+                "lasa_with": []
+              },
+              "meta": {
+                "server_time": "2026-09-30T15:01:44.556256+00:00"
+              },
+              "request_id": "3820822cf3f5470eb7a1cfb3ffb2a375"
+            }
+          }
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/pharmacy-admin/drugs",
+          "summary": "Add a formulary drug",
+          "permissions": [
+            "pharmacy.drug.manage"
+          ],
+          "idempotency_key": true,
+          "request": {
+            "path": "/api/v1/pharmacy-admin/drugs",
+            "body": {
+              "code": "SUT-1",
+              "name": "Suture 2-0",
+              "form": "Consumable",
+              "schedule": "HospitalOnly",
+              "barcode": "8901234567890"
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "drug_id": 1,
+                "code": "SUT-1",
+                "name": "Suture 2-0",
+                "generic_name": null,
+                "strength": null,
+                "form": "Consumable",
+                "unit": "unit",
+                "schedule": "HospitalOnly",
+                "is_otc_allowed": false,
+                "barcode": "8901234567890",
+                "low_stock_threshold": 0,
+                "near_expiry_alert_days": 90,
+                "high_alert_category": null,
+                "is_restricted": false,
+                "is_active": true,
+                "row_version": 1
+              },
+              "meta": {
+                "server_time": "2026-09-30T14:37:13.566531+00:00"
+              },
+              "request_id": "06c2e3f343064f3395e967972ceac6a8"
+            }
+          }
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/medication-safety/lasa-pairs",
+          "summary": "Pair two look-alike or sound-alike medicines",
+          "permissions": [
+            "medication.safety.configure"
+          ],
+          "idempotency_key": true,
+          "request": {
+            "path": "/api/v1/medication-safety/lasa-pairs",
+            "body": {
+              "drug_id": 3,
+              "other_drug_id": 2,
+              "note": "Regular is clear, NPH cloudy"
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "pair_id": 1,
+                "drug_id": 2,
+                "drug_name": "Insulin regular",
+                "drug_strength": null,
+                "other_drug_id": 3,
+                "other_drug_name": "Insulin NPH",
+                "other_drug_strength": null,
+                "note": "Regular is clear, NPH cloudy",
+                "is_active": true,
+                "created_at": "2026-09-30T15:01:44.639919+00:00",
+                "row_version": 1
+              },
+              "meta": {
+                "server_time": "2026-09-30T15:01:44.690879+00:00"
+              },
+              "request_id": "a8e4c22a690c473ba23d916576393eb9"
+            }
+          }
+        },
+        {
+          "method": "PATCH",
+          "path": "/api/v1/medication-safety/lasa-pairs/{pair_id}",
+          "summary": "Change or retire a look-alike pair",
+          "permissions": [
+            "medication.safety.configure"
+          ],
+          "idempotency_key": false,
+          "request": {
+            "path": "/api/v1/medication-safety/lasa-pairs/1",
+            "body": {
+              "note": "Regular is clear, NPH is cloudy: read the label, never the cap"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "pair_id": 1,
+                "drug_id": 2,
+                "drug_name": "Insulin regular",
+                "drug_strength": null,
+                "other_drug_id": 3,
+                "other_drug_name": "Insulin NPH",
+                "other_drug_strength": null,
+                "note": "Regular is clear, NPH is cloudy: read the label, never the cap",
+                "is_active": true,
+                "created_at": "2026-09-30T15:01:44.639919+00:00",
+                "row_version": 2
+              },
+              "meta": {
+                "server_time": "2026-09-30T15:01:44.770304+00:00"
+              },
+              "request_id": "4cab20231fc841e892166aa0e5f2912c"
+            }
+          }
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/medication-safety/high-alert-list",
+          "summary": "The high-alert, restricted and look-alike medicines",
+          "permissions": [
+            "medication.safety.view",
+            "medication.safety.configure"
+          ],
+          "idempotency_key": false,
+          "request": {
+            "path": "/api/v1/medication-safety/high-alert-list"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "categories": [
+                  {
+                    "category": "ConcentratedElectrolyte",
+                    "label": "Concentrated electrolytes (potassium chloride, hypertonic saline, magnesium sulphate)",
+                    "drugs": [
+                      {
+                        "drug_id": 1,
+                        "code": "KCL",
+                        "name": "Potassium chloride 15%",
+                        "generic_name": null,
+                        "strength": null,
+                        "form": "Injection",
+                        "schedule": "HospitalOnly",
+                        "high_alert_category": "ConcentratedElectrolyte",
+                        "is_restricted": false,
+                        "is_otc_allowed": false,
+                        "is_active": true,
+                        "row_version": 1,
+                        "lasa_with": []
+                      }
+                    ]
+                  },
+                  {
+                    "category": "Insulin",
+                    "label": "Insulins",
+                    "drugs": [
+                      {
+                        "drug_id": 2,
+                        "code": "INSR",
+                        "name": "Insulin regular",
+                        "generic_name": null,
+                        "strength": null,
+                        "form": "Injection",
+                        "schedule": "HospitalOnly",
+                        "high_alert_category": "Insulin",
+                        "is_restricted": false,
+                        "is_otc_allowed": false,
+                        "is_active": true,
+                        "row_version": 2,
+                        "lasa_with": [
+                          "Insulin NPH"
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "restricted": [],
+                "lasa_pairs": [
+                  {
+                    "pair_id": 1,
+                    "drug_id": 2,
+                    "drug_name": "Insulin regular",
+                    "drug_strength": null,
+                    "other_drug_id": 3,
+                    "other_drug_name": "Insulin NPH",
+                    "other_drug_strength": null,
+                    "note": "Regular is clear, NPH is cloudy: read the label, never the cap",
+                    "is_active": true,
+                    "created_at": "2026-09-30T15:01:44.639919+00:00",
+                    "row_version": 2
+                  }
+                ]
+              },
+              "meta": {
+                "server_time": "2026-09-30T15:01:44.813457+00:00"
+              },
+              "request_id": "4c662714c6a64d16908b22e3ba35934e"
+            }
+          }
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/medication-safety/high-alert-list/pdf",
+          "summary": "The high-alert list to display, as a PDF",
+          "permissions": [
+            "medication.safety.view",
+            "medication.safety.configure"
+          ],
+          "idempotency_key": false,
+          "request": {
+            "path": "/api/v1/medication-safety/high-alert-list/pdf"
+          },
+          "response": {
+            "status": 200,
+            "content_type": "application/pdf",
+            "bytes": 3259
+          }
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/medication-safety/policy/pdf",
+          "summary": "The written medication policy as a PDF",
+          "permissions": [
+            "medication.safety.view",
+            "medication.safety.configure"
+          ],
+          "idempotency_key": false,
+          "request": {
+            "path": "/api/v1/medication-safety/policy/pdf"
+          },
+          "response": {
+            "status": 200,
+            "content_type": "application/pdf",
+            "bytes": 6670
+          }
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/ot/privileges",
+          "summary": "Grant a clinical privilege",
+          "permissions": [
+            "ot.privilege.manage"
+          ],
+          "idempotency_key": true,
+          "request": {
+            "path": "/api/v1/ot/privileges",
+            "body": {
+              "employee_id": 7,
+              "privilege": "Surgery",
+              "scope": "All operations of the specialty, adults and children",
+              "basis": "FCPS; credentials committee"
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "privilege_id": 1,
+                "employee_id": 7,
+                "full_name": "Dr Tariq",
+                "designation": "Doctor",
+                "specialty": null,
+                "license_type": "PMDC",
+                "license_number": "PMDC-8073",
+                "privilege": "Surgery",
+                "scope": "All operations of the specialty, adults and children",
+                "basis": "FCPS; credentials committee",
+                "valid_from": "2026-09-30",
+                "valid_until": null,
+                "granted_by": 11,
+                "granted_by_name": "u57893fa1b5",
+                "granted_at": "2026-09-30T09:00:36.229037+00:00",
+                "revoked_at": null,
+                "revoked_by_name": null,
+                "revoke_reason": null,
+                "row_version": 1,
+                "is_current": true
+              },
+              "meta": {
+                "server_time": "2026-09-30T09:00:36.233432+00:00"
+              },
+              "request_id": "271aac31f1e242da94d7c95f2fb0769f"
+            }
+          }
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/drugs/search",
+          "summary": "Formulary search with live stock colour",
+          "permissions": [
+            "pharmacy.formulary.view"
+          ],
+          "idempotency_key": false,
+          "request": {
+            "path": "/api/v1/drugs/search",
+            "query": {
+              "q": "Insulin"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "drug_id": 3,
+                  "code": "INSN",
+                  "name": "Insulin NPH",
+                  "generic_name": null,
+                  "strength": null,
+                  "form": "Injection",
+                  "unit": "unit",
+                  "schedule": "HospitalOnly",
+                  "is_otc_allowed": false,
+                  "barcode": "8931440574755",
+                  "low_stock_threshold": 0,
+                  "is_active": true,
+                  "high_alert_category": null,
+                  "is_restricted": false,
+                  "lasa_with": [
+                    "Insulin regular"
+                  ],
+                  "qty_available": 50,
+                  "next_expiry": "2099-01-01",
+                  "stock_status": "InStock"
+                },
+                {
+                  "drug_id": 2,
+                  "code": "INSR",
+                  "name": "Insulin regular",
+                  "generic_name": null,
+                  "strength": null,
+                  "form": "Injection",
+                  "unit": "unit",
+                  "schedule": "HospitalOnly",
+                  "is_otc_allowed": false,
+                  "barcode": "8991682543668",
+                  "low_stock_threshold": 0,
+                  "is_active": true,
+                  "high_alert_category": "Insulin",
+                  "is_restricted": false,
+                  "lasa_with": [
+                    "Insulin NPH"
+                  ],
+                  "qty_available": 50,
+                  "next_expiry": "2099-01-01",
+                  "stock_status": "InStock"
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-30T15:01:45.066819+00:00"
+              },
+              "request_id": "3c9f279059e64b359f9c572408414e0b"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "section": "2. Prescribing (doctor)",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/prescriptions",
+          "summary": "E-prescription (hospital pharmacy or external slip)",
+          "permissions": [
+            "prescription.create"
+          ],
+          "idempotency_key": true,
+          "request": {
+            "path": "/api/v1/prescriptions",
+            "body": {
+              "ticket_id": 1,
+              "destination": "ExternalMarket",
+              "items": [
+                {
+                  "external_drug_name": "Augmentin 625",
+                  "qty_prescribed": 10,
+                  "dose_text": "625 mg",
+                  "route": "Oral",
+                  "frequency_code": "BD",
+                  "duration_days": 5
+                }
+              ]
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "prescription_id": 1,
+                "prescription_number": "RX-2026-000001",
+                "patient_id": 1,
+                "prescriber_id": 1,
+                "ticket_id": 1,
+                "admission_id": null,
+                "encounter_id": null,
+                "source": "OPD",
+                "destination": "ExternalMarket",
+                "status": "ExternalPrinted",
+                "is_content_locked": false,
+                "replaced_by_id": null,
+                "notes": null,
+                "cancelled_at": null,
+                "cancel_reason": null,
+                "external_printed_at": "2026-10-14T01:57:29.662705+00:00",
+                "order_mode": "Written",
+                "received_by": null,
+                "read_back": false,
+                "countersigned_by": null,
+                "countersigned_at": null,
+                "countersign_alerted_at": null,
+                "created_by": 1,
+                "created_at": "2026-10-14T01:57:29.662705+00:00",
+                "row_version": 1,
+                "patient_name": "Ali Khan",
+                "mrn": "MRN-2026-000001",
+                "prescriber_name": "Dr Ahmed",
+                "prescriber_stamp": {
+                  "at": "2026-10-14T01:57:29.662705+00:00",
+                  "name": "Dr Ahmed",
+                  "text": "Dr Ahmed, Doctor, PMDC PMDC-47431, 14-Oct-2026 06:57",
+                  "user_id": 1,
+                  "designation": "Doctor",
+                  "employee_id": 1,
+                  "registration": "PMDC PMDC-47431"
+                },
+                "received_by_name": null,
+                "items": [
+                  {
+                    "prescription_item_id": 1,
+                    "prescription_id": 1,
+                    "drug_id": null,
+                    "is_external": true,
+                    "external_drug_name": "Augmentin 625",
+                    "external_strength": null,
+                    "external_form": null,
+                    "qty_prescribed": 10,
+                    "qty_dispensed": 0,
+                    "dose_text": "625 mg",
+                    "route": "Oral",
+                    "frequency_code": "BD",
+                    "interval_hours": null,
+                    "duration_days": 5,
+                    "instructions": null,
+                    "start_at": null,
+                    "end_at": null,
+                    "is_prn": false,
+                    "is_stat": false,
+                    "self_administration": false,
+                    "item_status": "Active",
+                    "stopped_at": null,
+                    "stopped_by": null,
+                    "stop_reason": null,
+                    "row_version": 1,
+                    "drug_name": null,
+                    "strength": null,
+                    "form": null,
+                    "unit": null,
+                    "qty_available": null,
+                    "stock_status": null,
+                    "qty_remaining": 10,
+                    "high_alert_category": null,
+                    "is_restricted": null,
+                    "lasa_with": []
+                  }
+                ],
+                "dispensations": [],
+                "queries": [],
+                "handovers": []
+              },
+              "meta": {
+                "server_time": "2026-10-14T01:57:29.711122+00:00"
+              },
+              "request_id": "9f3f3535ac2a4c0c8f2d2d4385077a6b"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "section": "3. Verbal and telephone orders (nurse → doctor)",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/prescriptions/verbal",
+          "summary": "Write down a verbal or telephone order",
+          "permissions": [
+            "prescription.verbal.record"
+          ],
+          "idempotency_key": true,
+          "request": {
+            "path": "/api/v1/prescriptions/verbal",
+            "body": {
+              "prescriber_id": 1,
+              "order_mode": "Telephone",
+              "read_back": true,
+              "admission_id": 1,
+              "items": [
+                {
+                  "drug_id": 1,
+                  "qty_prescribed": 15,
+                  "dose_text": "500 mg",
+                  "route": "Oral",
+                  "frequency_code": "TDS",
+                  "interval_hours": 8,
+                  "duration_days": 2,
+                  "start_at": "2026-10-14T02:26:13.692722+00:00"
+                }
+              ]
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "prescription_id": 1,
+                "prescription_number": "RX-2026-000001",
+                "patient_id": 1,
+                "prescriber_id": 1,
+                "ticket_id": null,
+                "admission_id": 1,
+                "encounter_id": null,
+                "source": "IPD",
+                "destination": "HospitalPharmacy",
+                "status": "Active",
+                "is_content_locked": false,
+                "replaced_by_id": null,
+                "notes": null,
+                "cancelled_at": null,
+                "cancel_reason": null,
+                "external_printed_at": null,
+                "order_mode": "Telephone",
+                "received_by": 7,
+                "read_back": true,
+                "countersigned_by": null,
+                "countersigned_at": null,
+                "countersign_alerted_at": null,
+                "created_by": 7,
+                "created_at": "2026-10-14T02:31:13.697316+00:00",
+                "row_version": 1,
+                "patient_name": "Ali Khan",
+                "mrn": "MRN-2026-000001",
+                "prescriber_name": "Dr Ahmed",
+                "prescriber_stamp": {
+                  "at": "2026-10-14T02:31:13.697316+00:00",
+                  "name": "Dr Ahmed",
+                  "text": "Dr Ahmed, Doctor, PMDC PMDC-15990, 14-Oct-2026 07:31",
+                  "user_id": 7,
+                  "designation": "Doctor",
+                  "employee_id": 1,
+                  "registration": "PMDC PMDC-15990"
+                },
+                "received_by_name": "u08bd08724d",
+                "items": [
+                  {
+                    "prescription_item_id": 1,
+                    "prescription_id": 1,
+                    "drug_id": 1,
+                    "is_external": false,
+                    "external_drug_name": null,
+                    "external_strength": null,
+                    "external_form": null,
+                    "qty_prescribed": 15,
+                    "qty_dispensed": 0,
+                    "dose_text": "500 mg",
+                    "route": "Oral",
+                    "frequency_code": "TDS",
+                    "interval_hours": 8,
+                    "duration_days": 2,
+                    "instructions": null,
+                    "start_at": "2026-10-14T02:26:13.692722+00:00",
+                    "end_at": null,
+                    "is_prn": false,
+                    "is_stat": false,
+                    "self_administration": false,
+                    "item_status": "Active",
+                    "stopped_at": null,
+                    "stopped_by": null,
+                    "stop_reason": null,
+                    "row_version": 1,
+                    "drug_name": "Amoxicillin 500mg",
+                    "strength": null,
+                    "form": "Capsule",
+                    "unit": "unit",
+                    "qty_available": 50,
+                    "stock_status": "InStock",
+                    "qty_remaining": 15,
+                    "high_alert_category": null,
+                    "is_restricted": false,
+                    "lasa_with": []
+                  }
+                ],
+                "dispensations": [],
+                "queries": [],
+                "handovers": []
+              },
+              "meta": {
+                "server_time": "2026-10-14T02:31:13.729250+00:00"
+              },
+              "request_id": "077376ca082a413d93ae4f180ae5a00b"
+            }
+          }
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/prescriptions/{prescription_id}/countersign",
+          "summary": "Countersign my verbal order",
+          "permissions": [
+            "prescription.create"
+          ],
+          "idempotency_key": false,
+          "request": {
+            "path": "/api/v1/prescriptions/1/countersign"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "prescription_id": 1,
+                "prescription_number": "RX-2026-000001",
+                "patient_id": 1,
+                "prescriber_id": 1,
+                "ticket_id": null,
+                "admission_id": 1,
+                "encounter_id": null,
+                "source": "IPD",
+                "destination": "HospitalPharmacy",
+                "status": "Active",
+                "is_content_locked": false,
+                "replaced_by_id": null,
+                "notes": null,
+                "cancelled_at": null,
+                "cancel_reason": null,
+                "external_printed_at": null,
+                "order_mode": "Telephone",
+                "received_by": 7,
+                "read_back": true,
+                "countersigned_by": 1,
+                "countersigned_at": "2026-10-14T02:31:13.930531+00:00",
+                "countersign_alerted_at": "2026-10-14T02:31:13.912733+00:00",
+                "created_by": 7,
+                "created_at": "2026-10-12T20:31:13.697316+00:00",
+                "row_version": 4,
+                "patient_name": "Ali Khan",
+                "mrn": "MRN-2026-000001",
+                "prescriber_name": "Dr Ahmed",
+                "prescriber_stamp": {
+                  "at": "2026-10-12T20:31:13.697316+00:00",
+                  "name": "Dr Ahmed",
+                  "text": "Dr Ahmed, Doctor, PMDC PMDC-15990, 13-Oct-2026 01:31",
+                  "user_id": 7,
+                  "designation": "Doctor",
+                  "employee_id": 1,
+                  "registration": "PMDC PMDC-15990"
+                },
+                "received_by_name": "u08bd08724d",
+                "items": [
+                  {
+                    "prescription_item_id": 1,
+                    "prescription_id": 1,
+                    "drug_id": 1,
+                    "is_external": false,
+                    "external_drug_name": null,
+                    "external_strength": null,
+                    "external_form": null,
+                    "qty_prescribed": 15,
+                    "qty_dispensed": 0,
+                    "dose_text": "500 mg",
+                    "route": "Oral",
+                    "frequency_code": "TDS",
+                    "interval_hours": 8,
+                    "duration_days": 2,
+                    "instructions": null,
+                    "start_at": "2026-10-14T02:26:13.692722+00:00",
+                    "end_at": null,
+                    "is_prn": false,
+                    "is_stat": false,
+                    "self_administration": false,
+                    "item_status": "Active",
+                    "stopped_at": null,
+                    "stopped_by": null,
+                    "stop_reason": null,
+                    "row_version": 1,
+                    "drug_name": "Amoxicillin 500mg",
+                    "strength": null,
+                    "form": "Capsule",
+                    "unit": "unit",
+                    "qty_available": 50,
+                    "stock_status": "InStock",
+                    "qty_remaining": 15,
+                    "high_alert_category": null,
+                    "is_restricted": false,
+                    "lasa_with": []
+                  }
+                ],
+                "dispensations": [],
+                "queries": [],
+                "handovers": []
+              },
+              "meta": {
+                "server_time": "2026-10-14T02:31:13.947341+00:00"
+              },
+              "request_id": "d9f4b9eaa09f4c87aa24c9e3c3e2f782"
+            }
+          }
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/verbal-orders",
+          "summary": "Verbal orders and their countersignatures",
+          "permissions": [
+            "prescription.view",
+            "prescription.verbal.record"
+          ],
+          "idempotency_key": false,
+          "request": {
+            "path": "/api/v1/verbal-orders",
+            "query": {
+              "mine": "true",
+              "pending": "true"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "prescription_id": 1,
+                  "prescription_number": "RX-2026-000001",
+                  "order_mode": "Telephone",
+                  "source": "IPD",
+                  "status": "Active",
+                  "patient_id": 1,
+                  "patient_name": "Ali Khan",
+                  "mrn": "MRN-2026-000001",
+                  "admission_id": 1,
+                  "ticket_id": null,
+                  "prescriber_id": 1,
+                  "prescriber_name": "Dr Ahmed",
+                  "received_by": 7,
+                  "received_by_name": "u15d336608e",
+                  "created_at": "2026-09-30T15:02:32.094405+00:00",
+                  "countersigned_at": null,
+                  "countersigned_by_name": null,
+                  "countersign_due_at": "2026-10-01T15:02:32.094405+00:00",
+                  "is_overdue": false,
+                  "countersigned_late": null,
+                  "lines": [
+                    "Amoxicillin 500mg 500 mg Oral TDS"
+                  ]
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-30T15:02:32.766020+00:00"
+              },
+              "request_id": "f79d809897a5403499ce74f66ce2e18f"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "section": "4. The pharmacist's query (pharmacist ↔ doctor)",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/prescriptions/{prescription_id}/queries",
+          "summary": "Query an unclear or unsafe order",
+          "permissions": [
+            "prescription.query.raise"
+          ],
+          "idempotency_key": true,
+          "request": {
+            "path": "/api/v1/prescriptions/8/queries",
+            "body": {
+              "prescription_item_id": 7,
+              "reason": "Duplicate",
+              "question": "Amoxicillin is also ordered by telephone: both?"
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "query_id": 1,
+                "prescription_id": 8,
+                "prescription_item_id": 7,
+                "reason": "Duplicate",
+                "question": "Amoxicillin is also ordered by telephone: both?",
+                "status": "Open",
+                "raised_by": 9,
+                "raised_at": "2026-09-30T15:02:34.572897+00:00",
+                "outcome": null,
+                "answer": null,
+                "answered_by": null,
+                "answered_at": null,
+                "answer_stamp": null,
+                "withdrawn_by": null,
+                "withdrawn_at": null,
+                "withdraw_reason": null,
+                "row_version": 1,
+                "raised_by_name": "ub1ab916856",
+                "answered_by_name": null,
+                "prescription_number": "RX-2026-000004",
+                "patient_id": 1,
+                "patient_name": "Ali Khan",
+                "mrn": "MRN-2026-000001",
+                "admission_id": 1,
+                "ticket_id": null,
+                "prescriber_id": 1,
+                "prescriber_name": "Dr Ahmed",
+                "drug_name": "Amoxicillin 500mg",
+                "dose_text": "500 mg",
+                "route": "Oral",
+                "frequency_code": "TDS"
+              },
+              "meta": {
+                "server_time": "2026-09-30T15:02:34.645373+00:00"
+              },
+              "request_id": "9c617caebe3a44e0acdccccb191c7211"
+            }
+          }
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/prescription-queries/{query_id}/answer",
+          "summary": "Answer the pharmacist's query",
+          "permissions": [
+            "prescription.create"
+          ],
+          "idempotency_key": true,
+          "request": {
+            "path": "/api/v1/prescription-queries/1/answer",
+            "body": {
+              "outcome": "ConfirmedAsWritten",
+              "answer": "Both intended: the telephone order was the first dose"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "query_id": 1,
+                "prescription_id": 8,
+                "prescription_item_id": 7,
+                "reason": "Duplicate",
+                "question": "Amoxicillin is also ordered by telephone: both?",
+                "status": "Answered",
+                "raised_by": 9,
+                "raised_at": "2026-09-30T15:02:34.572897+00:00",
+                "outcome": "ConfirmedAsWritten",
+                "answer": "Both intended: the telephone order was the first dose",
+                "answered_by": 1,
+                "answered_at": "2026-09-30T15:02:34.868332+00:00",
+                "answer_stamp": {
+                  "at": "2026-09-30T15:02:34.868332+00:00",
+                  "name": "Dr Ahmed",
+                  "text": "Dr Ahmed, Doctor, PMDC PMDC-49105, 30-Sep-2026 20:02",
+                  "user_id": 1,
+                  "designation": "Doctor",
+                  "employee_id": 1,
+                  "registration": "PMDC PMDC-49105"
+                },
+                "withdrawn_by": null,
+                "withdrawn_at": null,
+                "withdraw_reason": null,
+                "row_version": 2,
+                "raised_by_name": "ub1ab916856",
+                "answered_by_name": "Dr Ahmed",
+                "prescription_number": "RX-2026-000004",
+                "patient_id": 1,
+                "patient_name": "Ali Khan",
+                "mrn": "MRN-2026-000001",
+                "admission_id": 1,
+                "ticket_id": null,
+                "prescriber_id": 1,
+                "prescriber_name": "Dr Ahmed",
+                "drug_name": "Amoxicillin 500mg",
+                "dose_text": "500 mg",
+                "route": "Oral",
+                "frequency_code": "TDS"
+              },
+              "meta": {
+                "server_time": "2026-09-30T15:02:34.904829+00:00"
+              },
+              "request_id": "633c4d62b6714a7baf0b7a811d474f94"
+            }
+          }
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/prescriptions/{prescription_id}/items/{item_id}/stop",
+          "summary": "Stop one medication line",
+          "permissions": [
+            "prescription.cancel"
+          ],
+          "idempotency_key": false,
+          "request": {
+            "path": "/api/v1/prescriptions/1/items/1/stop",
+            "body": {
+              "reason": "rash"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "prescription_id": 1,
+                "prescription_number": "RX-2026-000001",
+                "patient_id": 1,
+                "prescriber_id": 1,
+                "ticket_id": 1,
+                "admission_id": null,
+                "encounter_id": null,
+                "source": "OPD",
+                "destination": "HospitalPharmacy",
+                "status": "FullyDispensed",
+                "is_content_locked": false,
+                "replaced_by_id": null,
+                "notes": null,
+                "cancelled_at": null,
+                "cancel_reason": null,
+                "external_printed_at": null,
+                "order_mode": "Written",
+                "received_by": null,
+                "read_back": false,
+                "countersigned_by": null,
+                "countersigned_at": null,
+                "countersign_alerted_at": null,
+                "created_by": 1,
+                "created_at": "2026-10-14T02:42:36.512575+00:00",
+                "row_version": 2,
+                "patient_name": "Ali Khan",
+                "mrn": "MRN-2026-000001",
+                "prescriber_name": "Dr Ahmed",
+                "prescriber_stamp": {
+                  "at": "2026-10-14T02:42:36.512575+00:00",
+                  "name": "Dr Ahmed",
+                  "text": "Dr Ahmed, Doctor, PMDC PMDC-20014, 14-Oct-2026 07:42",
+                  "user_id": 1,
+                  "designation": "Doctor",
+                  "employee_id": 1,
+                  "registration": "PMDC PMDC-20014"
+                },
+                "received_by_name": null,
+                "items": [
+                  {
+                    "prescription_item_id": 1,
+                    "prescription_id": 1,
+                    "drug_id": 1,
+                    "is_external": false,
+                    "external_drug_name": null,
+                    "external_strength": null,
+                    "external_form": null,
+                    "qty_prescribed": 12,
+                    "qty_dispensed": 0,
+                    "dose_text": "500 mg",
+                    "route": "Oral",
+                    "frequency_code": "TDS",
+                    "interval_hours": null,
+                    "duration_days": 4,
+                    "instructions": null,
+                    "start_at": null,
+                    "end_at": null,
+                    "is_prn": false,
+                    "is_stat": false,
+                    "self_administration": false,
+                    "item_status": "Stopped",
+                    "stopped_at": "2026-10-14T02:42:36.547368+00:00",
+                    "stopped_by": 1,
+                    "stop_reason": "rash",
+                    "row_version": 2,
+                    "drug_name": "Amoxicillin 500mg",
+                    "strength": null,
+                    "form": "Capsule",
+                    "unit": "unit",
+                    "qty_available": 15,
+                    "stock_status": "InStock",
+                    "qty_remaining": 12,
+                    "high_alert_category": null,
+                    "is_restricted": false,
+                    "lasa_with": []
+                  }
+                ],
+                "dispensations": [],
+                "queries": [],
+                "handovers": []
+              },
+              "meta": {
+                "server_time": "2026-10-14T02:42:36.559817+00:00"
+              },
+              "request_id": "df01d88479364cac8b30da58953b91ff"
+            }
+          }
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/prescription-queries",
+          "summary": "The pharmacist's queries",
+          "permissions": [
+            "prescription.view",
+            "prescription.query.raise"
+          ],
+          "idempotency_key": false,
+          "request": {
+            "path": "/api/v1/prescription-queries",
+            "query": {
+              "mine": "true",
+              "status": "Open"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "query_id": 1,
+                  "prescription_id": 8,
+                  "prescription_item_id": 7,
+                  "reason": "Duplicate",
+                  "question": "Amoxicillin is also ordered by telephone: both?",
+                  "status": "Open",
+                  "raised_by": 9,
+                  "raised_at": "2026-09-30T15:02:34.572897+00:00",
+                  "outcome": null,
+                  "answer": null,
+                  "answered_by": null,
+                  "answered_at": null,
+                  "answer_stamp": null,
+                  "withdrawn_by": null,
+                  "withdrawn_at": null,
+                  "withdraw_reason": null,
+                  "row_version": 1,
+                  "raised_by_name": "ub1ab916856",
+                  "answered_by_name": null,
+                  "prescription_number": "RX-2026-000004",
+                  "patient_id": 1,
+                  "patient_name": "Ali Khan",
+                  "mrn": "MRN-2026-000001",
+                  "admission_id": 1,
+                  "ticket_id": null,
+                  "prescriber_id": 1,
+                  "prescriber_name": "Dr Ahmed",
+                  "drug_name": "Amoxicillin 500mg",
+                  "dose_text": "500 mg",
+                  "route": "Oral",
+                  "frequency_code": "TDS"
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-30T15:02:34.776965+00:00"
+              },
+              "request_id": "fef4bd3dfe2f44a792aa60ef32adb283"
+            }
+          }
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/prescription-queries/{query_id}/withdraw",
+          "summary": "Withdraw a query",
+          "permissions": [
+            "prescription.query.raise"
+          ],
+          "idempotency_key": true,
+          "request": {
+            "path": "/api/v1/prescription-queries/2/withdraw",
+            "body": {
+              "reason": "Found it in the order: 2 days"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "query_id": 2,
+                "prescription_id": 1,
+                "prescription_item_id": null,
+                "reason": "Unclear",
+                "question": "Duration?",
+                "status": "Withdrawn",
+                "raised_by": 9,
+                "raised_at": "2026-09-30T15:02:35.157406+00:00",
+                "outcome": null,
+                "answer": null,
+                "answered_by": null,
+                "answered_at": null,
+                "answer_stamp": null,
+                "withdrawn_by": 9,
+                "withdrawn_at": "2026-09-30T15:02:35.224859+00:00",
+                "withdraw_reason": "Found it in the order: 2 days",
+                "row_version": 2,
+                "raised_by_name": "ub1ab916856",
+                "answered_by_name": null,
+                "prescription_number": "RX-2026-000001",
+                "patient_id": 1,
+                "patient_name": "Ali Khan",
+                "mrn": "MRN-2026-000001",
+                "admission_id": 1,
+                "ticket_id": null,
+                "prescriber_id": 1,
+                "prescriber_name": "Dr Ahmed",
+                "drug_name": null,
+                "dose_text": null,
+                "route": null,
+                "frequency_code": null
+              },
+              "meta": {
+                "server_time": "2026-09-30T15:02:35.255363+00:00"
+              },
+              "request_id": "32d0677e4b0b44059b4d73e6ec2c9a53"
+            }
+          }
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/prescriptions/{prescription_id}",
+          "summary": "Prescription with remaining quantities and stock per line",
+          "permissions": [
+            "prescription.view"
+          ],
+          "idempotency_key": false,
+          "request": {
+            "path": "/api/v1/prescriptions/1"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "prescription_id": 1,
+                "prescription_number": "RX-2026-000001",
+                "patient_id": 1,
+                "prescriber_id": 1,
+                "ticket_id": null,
+                "admission_id": 1,
+                "encounter_id": null,
+                "source": "IPD",
+                "destination": "HospitalPharmacy",
+                "status": "FullyDispensed",
+                "is_content_locked": false,
+                "replaced_by_id": null,
+                "notes": null,
+                "cancelled_at": null,
+                "cancel_reason": null,
+                "external_printed_at": null,
+                "order_mode": "Written",
+                "received_by": null,
+                "read_back": false,
+                "countersigned_by": null,
+                "countersigned_at": null,
+                "countersign_alerted_at": null,
+                "created_by": 1,
+                "created_at": "2026-10-14T02:30:59.172751+00:00",
+                "row_version": 2,
+                "patient_name": "Ali Khan",
+                "mrn": "MRN-2026-000001",
+                "prescriber_name": "Dr Ahmed",
+                "prescriber_stamp": {
+                  "at": "2026-10-14T02:30:59.172751+00:00",
+                  "name": "Dr Ahmed",
+                  "text": "Dr Ahmed, Doctor, PMDC PMDC-51922, 14-Oct-2026 07:30",
+                  "user_id": 1,
+                  "designation": "Doctor",
+                  "employee_id": 1,
+                  "registration": "PMDC PMDC-51922"
+                },
+                "received_by_name": null,
+                "items": [
+                  {
+                    "prescription_item_id": 1,
+                    "prescription_id": 1,
+                    "drug_id": 1,
+                    "is_external": false,
+                    "external_drug_name": null,
+                    "external_strength": null,
+                    "external_form": null,
+                    "qty_prescribed": 4,
+                    "qty_dispensed": 4,
+                    "dose_text": "10 mmol",
+                    "route": "IV",
+                    "frequency_code": "BD",
+                    "interval_hours": 12,
+                    "duration_days": 2,
+                    "instructions": "in 500 ml normal saline over 4 hours",
+                    "start_at": "2026-10-14T02:25:59.170206+00:00",
+                    "end_at": null,
+                    "is_prn": false,
+                    "is_stat": false,
+                    "self_administration": false,
+                    "item_status": "FullyDispensed",
+                    "stopped_at": null,
+                    "stopped_by": null,
+                    "stop_reason": null,
+                    "row_version": 2,
+                    "drug_name": "Potassium chloride 15%",
+                    "strength": null,
+                    "form": "Injection",
+                    "unit": "unit",
+                    "qty_available": 46,
+                    "stock_status": "InStock",
+                    "qty_remaining": 0,
+                    "high_alert_category": "ConcentratedElectrolyte",
+                    "is_restricted": false,
+                    "lasa_with": []
+                  }
+                ],
+                "dispensations": [
+                  {
+                    "dispensation_id": 1,
+                    "payment_mode": "IPDBill",
+                    "total_amount": 80,
+                    "dispensed_at": "2026-10-14T02:30:59.265053+00:00",
+                    "dispensed_by": 9,
+                    "checked_by": 12
+                  }
+                ],
+                "queries": [],
+                "handovers": []
+              },
+              "meta": {
+                "server_time": "2026-10-14T02:30:59.491354+00:00"
+              },
+              "request_id": "2452a6a8af3b47148819cf9c1340c3df"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "section": "5. Dispensing a high-alert medicine, and the labels (pharmacist)",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/prescriptions/{prescription_id}/dispense",
+          "summary": "Dispense Now (partial allowed, FEFO)",
+          "permissions": [
+            "pharmacy.dispense"
+          ],
+          "idempotency_key": true,
+          "request": {
+            "path": "/api/v1/prescriptions/1/dispense",
+            "body": {
+              "items": [
+                {
+                  "prescription_item_id": 1
+                },
+                {
+                  "prescription_item_id": 2
+                }
+              ]
+            }
+          },
+          "response": {
+            "status": 201,
+            "body_preview": "{\"status\": 201, \"body\": {\"data\": {\"dispensation\": {\"dispensation_id\": 1, \"prescription_id\": 1, \"patient_id\": 1, \"admission_id\": 1, \"employee_id\": null, \"invoice_id\": 2, \"payment_mode\": \"IPDBill\", \"is_otc_sale\": false, \"walkin_customer_name\": null, \"walkin_customer_mobile\": null, \"charity_approval_id\": null, \"total_amount\": 2850.0, \"total_cost\": 1900.0, \"dispensed_by\": 9, \"checked_by\": null, \"dispensed_at\": \"2026-09-30T14:37:51.424130+00:00\", \"business_date\": \"2026-09-30\"}, \"lines\": [{\"prescription_item_id\": 1, \"drug_id\": 1, \"batch_id\": 1, \"unit_cost\": 100.0, \"retail_price\": 150.0, \"expiry_date\": \"2099-01-01\", \"take\": 4.0}, {\"prescription_item_id\": 2, \"drug_id\": 2, \"batch_id\": 2, \"unit_cost\": 100.0, \"retail_price\": 150.0, \"expiry_date\": \"2099-01-01\", \"take\": 15.0}], \"invoice\": {\"invoice_id\": 2, \"invoice_no\": \"INV-2026-0000002\", \"invoice_type\": \"IPD\", \"patient_id\": 1, \"admission_id\": 1, \"ticket_id\": null, \"panel_id\": null, \"employee_id\": null, \"walkin_customer_name\": null, \"walkin_customer_mobile\": null, \"gross_total\": 2850.0, \"discount_total\": 0.0, \"net_payable\": 2850.0, \"amount_paid\": 0.0, \"amount_refunded\": 0.0, \"waiver_amount\": 0.0, \"waiver_dispensed_amount\": 0.0, \"credit_amount\": 0.0, \"status\": \"Draft\", \"is_locked\": false, \"locked_reason\": null, \"finalized_at\": null, \"business_date\": \"2026-09-30\", \"created_at\": \"2026-09-30T14:37:51.283668+00:00\", \"row_version\": 3, \"lines\": [{\"invoice_item_id\": 2, \"line_type\": \"Drug\", \"description\": \"Ceftriaxone\", \"qty\": 4.0, \"unit_price\": 150.0, \"line_total\": 600.0, \"bed_day\": null, \"reverses_item_id\": null, \"reversal_reason\": null, \"created_at\": \"2026-09-30T14:37:51.424130+00:00\"}, {\"invoice_item_id\": 3, \"line_type\": \"Drug\", \"description\": \"Amoxicillin\", \"qty\": 15.0, \"unit_price\": 150.0, \"line_total\": 2250.0, \"bed_day\": null, \"reverses_item_id\": null, \"reversal_reason\": null, \"created_at\": \"2026-09-30T14:37:51.424130+00:00\"}], \"balance_due\": 2850.0}, \"payment\": null, \"receipt\": {\"document_type\": \"pharmacy_receipt\", \"printer_role\": \"receipt\", \"paper_width_mm\": 80, \"fields\": {\"dispensation\": {\"dispensation_id\": 1, \"prescription_id\": 1, \"patient_id\": 1, \"admission_id\": 1, \"employee_id\": null, \"invoice_id\": 2, \"payment_mode\": \"IPDBill\", \"is_otc_sale\": false, \"walkin_customer_name\": null, \"walkin_customer_mobile\": null, \"charity_approval_id\": null, \"total_amount\": 2850.0, \"total_cost\": 1900.0, \"dispensed_by\": 9, \"checked_by\": null, \"dispensed_at\": \"2026-09-30T14:37:51.424130+00:00\", \"business_date\": \"2026-09-30\"}, \"items\": [{\"qty\": 4.0, \"retail_price\": 150.0, \"line_total\": 600.0, \"name\": \"Ceftriaxone\", \"batch_no\": \"B-CEF-1G\", \"expiry_date\": \"2099-01-01\"}, {\"qty\": 15.0, \"retail_price\": 150.0, \"line_total\": 2250.0, \"name\": \"Amoxicillin\", \"batch_no\": \"B-AMX-500\", \"expiry_date\": \"2099-01-01\"}], \"hospital_name\": \"Haspataal Hospital\"}, \"text\": \"               Haspataal Hospital\\n                PHARMACY RECEIPT\\n------------------------------------------------\\nNo.                                          D-1\\nDate     …"
+          }
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/dispensations/{dispensation_id}/labels",
+          "summary": "The labels of a dispensation",
+          "permissions": [
+            "pharmacy.dispense",
+            "pharmacy.otc.sell"
+          ],
+          "idempotency_key": false,
+          "request": {
+            "path": "/api/v1/dispensations/1/labels"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "document_type": "dispensing_label",
+                  "printer_role": "label",
+                  "paper_width_mm": 50,
+                  "fields": {
+                    "hospital_name": "Haspataal Hospital",
+                    "dispensation_id": 1,
+                    "dispensation_item_id": 1,
+                    "dispensed_at": "2026-09-30T15:01:47.063106+00:00",
+                    "dispensed_by_name": "ue85df46134",
+                    "patient_name": "Ali Khan",
+                    "mrn": "MRN-2026-000001",
+                    "drug_name": "Potassium chloride 15%",
+                    "generic_name": null,
+                    "strength": null,
+                    "form": "Injection",
+                    "qty": 4,
+                    "unit": "unit",
+                    "dose_text": "10 mmol",
+                    "route": "IV",
+                    "frequency_code": "BD",
+                    "duration_days": 2,
+                    "instructions": "in 500 ml normal saline over 4 hours",
+                    "directions": "10 mmol IV twice a day for 2 days in 500 ml normal saline over 4 hours",
+                    "prescriber_name": "Dr Ahmed",
+                    "batch_no": "KCL-1",
+                    "expiry_date": "2099-01-01",
+                    "warnings": [
+                      "HIGH ALERT (concentrated electrolyte): second check before use"
+                    ]
+                  },
+                  "text": "Haspataal Hospital\nAli Khan MRN-2026-000001\n----------------------------------------\nPotassium chloride 15%\n10 mmol IV twice a day for 2 days in 500\nml normal saline over 4 hours\nQty 4.00 unit          B:KCL-1 Exp 01/99\nDr. Dr Ahmed\nDispensed 30-Sep-2026 20:01\nHIGH ALERT (concentrated electrolyte):\nsecond check before use\n",
+                  "barcode_svg": "<svg version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" width=\"23.040mm\" height=\"12.411mm\">\r\n    <!--Autogenerated with python-barcode 0.16.1-->\r\n    <g id=\"barcode_group\">\r\n        <rect width=\"100%\" height=\"100%\" style=\"fill:white\"/>\r\n        <rect x=\"2.000mm\" y=\"1.000mm\" width=\"0.560mm\" height=\"6.000mm\" style=\"fill:black;\"/>\r\n        <rect x=\"2.840mm\" y=\"1.000mm\" width=\"0.280mm\" height=\"6.000mm\" …",
+                  "qr_svg": null,
+                  "pdf_url": null
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-30T15:01:47.430144+00:00"
+              },
+              "request_id": "86bb0c70bfbc40a2baf44bf906cd7cb6"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "section": "6. Wristbands (admission desk, ward, ER)",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/wristbands",
+          "summary": "Print an identity wristband",
+          "permissions": [
+            "patient.wristband.print"
+          ],
+          "idempotency_key": true,
+          "request": {
+            "path": "/api/v1/wristbands",
+            "body": {
+              "admission_id": 1
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "wristband": {
+                  "wristband_id": 1,
+                  "patient_id": 1,
+                  "admission_id": 1,
+                  "er_visit_id": null,
+                  "reason": "Admission",
+                  "replacement_reason": null,
+                  "issued_by": 7,
+                  "issued_by_name": "u92786ebbd8",
+                  "issued_at": "2026-09-30T15:01:47.456237+00:00",
+                  "replaced_at": null,
+                  "is_current": true,
+                  "row_version": 1,
+                  "patient_name": "Ali Khan",
+                  "mrn": "MRN-2026-000001",
+                  "admission_number": "ADM-2026-00001",
+                  "er_number": null
+                },
+                "print": {
+                  "document_type": "wristband",
+                  "printer_role": "label",
+                  "paper_width_mm": 25,
+                  "fields": {
+                    "wristband_id": 1,
+                    "hospital_name": "Haspataal Hospital",
+                    "patient_name": "Ali Khan",
+                    "father_or_husband_name": null,
+                    "mrn": "MRN-2026-000001",
+                    "gender": "male",
+                    "age": "40y",
+                    "dob": null,
+                    "admission_number": "ADM-2026-00001",
+                    "er_number": null,
+                    "ward_name": "General Ward",
+                    "bed_label": "GW-1",
+                    "allergies": null,
+                    "blood_group": null,
+                    "issued_at": "2026-09-30T15:01:47.456237+00:00"
+                  },
+                  "text": "Haspataal Hospital\nALI KHAN\nMRN-2026-000001 M 40y\nADM-2026-00001 General Ward GW-1\n",
+                  "barcode_svg": "<svg version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" width=\"53.840mm\" height=\"14.411mm\">\r\n    <!--Autogenerated with python-barcode 0.16.1-->\r\n    <g id=\"barcode_group\">\r\n        <rect width=\"100%\" height=\"100%\" style=\"fill:white\"/>\r\n        <rect x=\"2.000mm\" y=\"1.000mm\" width=\"0.560mm\" height=\"8.000mm\" style=\"fill:black;\"/>\r\n        <rect x=\"2.840mm\" y=\"1.000mm\" width=\"0.280mm\" height=\"8.000mm\" …",
+                  "qr_svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"87\" height=\"87\" class=\"segno\"><path transform=\"scale(3)\" class=\"qrline\" stroke=\"#000\" d=\"M2 2.5h7m2 0h3m1 0h3m2 0h7m-25 1h1m5 0h1m1 0h2m3 0h3m2 0h1m5 0h1m-25 1h1m1 0h3m1 0h1m5 0h3m3 0h1m1 0h3m1 0h1m-25 1h1m1 0h3m1 0h1m1 0h3m1 0h1m1 0h3m1 0h1m1 0h3m1 0h1m-25 1h1m1 0h3m1 0h1m1 0h1m1 0h1m2 0h1m1 0h1m2 0h1m1 0h3m1 0h1m-25 1h1m5 0h1m2 0h1m2 0h3m1 0h1m1 0h1…",
+                  "pdf_url": null
+                }
+              },
+              "meta": {
+                "server_time": "2026-09-30T15:01:47.546135+00:00"
+              },
+              "request_id": "d16ac8a53c884f6eb756003c03c7bd6b"
+            }
+          }
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/wristbands",
+          "summary": "The wristbands of a patient or a stay",
+          "permissions": [
+            "patient.view"
+          ],
+          "idempotency_key": false,
+          "request": {
+            "path": "/api/v1/wristbands",
+            "query": {
+              "admission_id": 1
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "wristband_id": 2,
+                  "patient_id": 1,
+                  "admission_id": 1,
+                  "er_visit_id": null,
+                  "reason": "Replacement",
+                  "replacement_reason": "Cut off for the cannula",
+                  "issued_by": 7,
+                  "issued_by_name": "u92786ebbd8",
+                  "issued_at": "2026-09-30T15:01:47.590004+00:00",
+                  "replaced_at": null,
+                  "is_current": true,
+                  "row_version": 1,
+                  "patient_name": "Ali Khan",
+                  "mrn": "MRN-2026-000001",
+                  "admission_number": "ADM-2026-00001",
+                  "er_number": null
+                },
+                {
+                  "wristband_id": 1,
+                  "patient_id": 1,
+                  "admission_id": 1,
+                  "er_visit_id": null,
+                  "reason": "Admission",
+                  "replacement_reason": null,
+                  "issued_by": 7,
+                  "issued_by_name": "u92786ebbd8",
+                  "issued_at": "2026-09-30T15:01:47.456237+00:00",
+                  "replaced_at": "2026-09-30T15:01:47.590004+00:00",
+                  "is_current": false,
+                  "row_version": 2,
+                  "patient_name": "Ali Khan",
+                  "mrn": "MRN-2026-000001",
+                  "admission_number": "ADM-2026-00001",
+                  "er_number": null
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-30T15:01:47.689971+00:00"
+              },
+              "request_id": "84706c6e6fa545de88234096d95d2e8e"
+            }
+          }
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/wristbands/{wristband_id}/print-payload",
+          "summary": "Reprint a wristband's label",
+          "permissions": [
+            "patient.wristband.print"
+          ],
+          "idempotency_key": false,
+          "request": {
+            "path": "/api/v1/wristbands/2/print-payload"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "document_type": "wristband",
+                "printer_role": "label",
+                "paper_width_mm": 25,
+                "fields": {
+                  "wristband_id": 2,
+                  "hospital_name": "Haspataal Hospital",
+                  "patient_name": "Ali Khan",
+                  "father_or_husband_name": null,
+                  "mrn": "MRN-2026-000001",
+                  "gender": "male",
+                  "age": "40y",
+                  "dob": null,
+                  "admission_number": "ADM-2026-00001",
+                  "er_number": null,
+                  "ward_name": "General Ward",
+                  "bed_label": "GW-1",
+                  "allergies": null,
+                  "blood_group": null,
+                  "issued_at": "2026-09-30T15:01:47.590004+00:00"
+                },
+                "text": "Haspataal Hospital\nALI KHAN\nMRN-2026-000001 M 40y\nADM-2026-00001 General Ward GW-1\n",
+                "barcode_svg": "<svg version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" width=\"53.840mm\" height=\"14.411mm\">\r\n    <!--Autogenerated with python-barcode 0.16.1-->\r\n    <g id=\"barcode_group\">\r\n        <rect width=\"100%\" height=\"100%\" style=\"fill:white\"/>\r\n        <rect x=\"2.000mm\" y=\"1.000mm\" width=\"0.560mm\" height=\"8.000mm\" style=\"fill:black;\"/>\r\n        <rect x=\"2.840mm\" y=\"1.000mm\" width=\"0.280mm\" height=\"8.000mm\" …",
+                "qr_svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"87\" height=\"87\" class=\"segno\"><path transform=\"scale(3)\" class=\"qrline\" stroke=\"#000\" d=\"M2 2.5h7m2 0h3m1 0h3m2 0h7m-25 1h1m5 0h1m1 0h2m3 0h3m2 0h1m5 0h1m-25 1h1m1 0h3m1 0h1m5 0h3m3 0h1m1 0h3m1 0h1m-25 1h1m1 0h3m1 0h1m1 0h3m1 0h1m1 0h3m1 0h1m1 0h3m1 0h1m-25 1h1m1 0h3m1 0h1m1 0h1m1 0h1m2 0h1m1 0h1m2 0h1m1 0h3m1 0h1m-25 1h1m5 0h1m2 0h1m2 0h3m1 0h1m1 0h1…",
+                "pdf_url": null
+              },
+              "meta": {
+                "server_time": "2026-09-30T15:01:47.745220+00:00"
+              },
+              "request_id": "c528e137f7984b7a870b25fc65fcb208"
+            }
+          }
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/wristbands/verify",
+          "summary": "Scan to verify a patient's identity",
+          "permissions": [
+            "patient.view"
+          ],
+          "idempotency_key": false,
+          "request": {
+            "path": "/api/v1/wristbands/verify",
+            "query": {
+              "code": "HMS:PT:MRN-2026-000001",
+              "admission_id": 1
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "match": true,
+                "scanned_mrn": "MRN-2026-000001",
+                "scanned_patient": {
+                  "patient_id": 1,
+                  "full_name": "Ali Khan",
+                  "mrn": "MRN-2026-000001",
+                  "gender": "male",
+                  "dob": null
+                },
+                "expected_patient": {
+                  "patient_id": 1,
+                  "full_name": "Ali Khan",
+                  "mrn": "MRN-2026-000001",
+                  "gender": "male",
+                  "dob": null
+                }
+              },
+              "meta": {
+                "server_time": "2026-09-30T15:01:48.318876+00:00"
+              },
+              "request_id": "e254efa3ddfd48dfb4adc35183816f34"
+            }
+          }
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/ot/bookings/{booking_id}/safety-checks",
+          "summary": "Record a pause of the surgical safety checklist",
+          "permissions": [
+            "ot.checklist.record"
+          ],
+          "idempotency_key": true,
+          "request": {
+            "path": "/api/v1/ot/bookings/1/safety-checks",
+            "body": {
+              "phase": "SignIn",
+              "answers": [
+                {
+                  "item_id": 1,
+                  "answer": "Yes"
+                },
+                {
+                  "item_id": 2,
+                  "answer": "Yes"
+                },
+                {
+                  "item_id": 3,
+                  "answer": "Yes"
+                }
+              ],
+              "identity_check": "TwoIdentifiers"
+            }
+          },
+          "response": {
+            "status": 201,
+            "body_preview": "{\"status\": 201, \"body\": {\"data\": {\"booking\": {\"booking_id\": 1, \"booking_number\": \"OT-2026-00001\", \"status\": \"InProgress\", \"booking_type\": \"Scheduled\", \"procedure_name\": \"Appendectomy\", \"anesthesia_type\": \"General\", \"patient_id\": 1, \"admission_id\": null, \"primary_surgeon_id\": 7, \"surgeon_name\": \"Dr Tariq\", \"ot_id\": 1, \"ot_name\": \"Main OT 1\", \"scheduled_start\": \"2026-10-01T09:00:00+00:00\", \"scheduled_end\": \"2026-10-01T10:30:00+00:00\", \"actual_start\": \"2026-09-30T14:37:14.466723+00:00\", \"actual_end\": null, \"mrn\": \"MRN-2026-000001\", \"patient_name\": \"Ali Khan\", \"gender\": \"male\", \"age_years\": 40, \"admission_number\": null, \"needs_anaesthetist\": true}, \"parts\": [{\"part\": \"PreOpNote\", \"label\": \"Pre-operative note\", \"state\": \"Final\"}, {\"part\": \"OperationConsent\", \"label\": \"Consent to the operation\", \"state\": \"Final\"}, {\"part\": \"PreAnaesthesia\", \"label\": \"Pre-anaesthesia assessment\", \"state\": \"Final\"}], \"next_step\": \"Call the time out (safety checklist)\", \"pre_op_note\": {\"booking_id\": 1, \"history_examination\": \"Right iliac fossa pain for 2 days, fever; tender at McBurney's point, guarding\", \"provisional_diagnosis\": \"Acute appendicitis\", \"icd_codes\": [], \"icd_terms\": [], \"operation_plan\": \"Open appendicectomy\", \"laterality\": \"Right\", \"recorded_at\": \"2026-09-30T14:37:14.223953+00:00\", \"author_stamp\": {\"at\": \"2026-09-30T14:37:14.223953+00:00\", \"name\": \"Dr Tariq\", \"text\": \"Dr Tariq, Doctor, PMDC PMDC-36741, 30-Sep-2026 19:37\", \"user_id\": 7, \"designation\": \"Doctor\", \"employee_id\": 7, \"registration\": \"PMDC PMDC-36741\"}, \"row_version\": 1}, \"consents\": [{\"consent_id\": 1, \"consent_number\": \"CN-2026-000001\", \"patient_id\": 1, \"mrn\": \"MRN-2026-000001\", \"patient_name\": \"Ali Khan\", \"form_code\": \"OPERATION\", \"form_title\": \"Consent for an operation\", \"category\": \"Procedure\", \"status\": \"Withdrawn\", \"language\": \"English\", \"admission_id\": null, \"admission_number\": null, \"booking_id\": 1, \"booking_number\": \"OT-2026-00001\", \"procedure_name\": \"Appendectomy\", \"mode\": \"Signed\", \"signer\": \"Patient\", \"signer_name\": \"Ali Khan\", \"signer_relationship\": null, \"decided_at\": \"2026-09-30T14:37:14.133368+00:00\", \"obtained_by_name\": \"Dr Tariq\", \"document_id\": null, \"scanned_at\": null, \"created_at\": \"2026-09-30T14:37:14.014460+00:00\"}, {\"consent_id\": 2, \"consent_number\": \"CN-2026-000002\", \"patient_id\": 1, \"mrn\": \"MRN-2026-000001\", \"patient_name\": \"Ali Khan\", \"form_code\": \"ANAESTHESIA\", \"form_title\": \"Consent for anaesthesia\", \"category\": \"Anaesthesia\", \"status\": \"Given\", \"language\": \"English\", \"admission_id\": null, \"admission_number\": null, \"booking_id\": 1, \"booking_number\": \"OT-2026-00001\", \"procedure_name\": \"Anaesthesia for Appendectomy\", \"mode\": \"Signed\", \"signer\": \"DecisionMaker\", \"signer_name\": \"Amina Bibi\", \"signer_relationship\": \"Spouse\", \"decided_at\": \"2026-09-30T14:37:14.205346+00:00\", \"obtained_by_name\": \"Dr Asma Anaes\", \"document_id\": null, \"scanned_at\": null, \"created_at\": \"2026-09-30T14:37:14.161246+00:00\"}, {\"consent_id\": 3, \"consent_number\": \"CN-2026-000003\", \"patient_id\": 1, \"m…"
+          }
+        }
+      ]
+    },
+    {
+      "section": "7. Giving a dose (ward nurse)",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/mar/{mar_id}/chart",
+          "summary": "Chart a scheduled dose (Administered / Held / Refused / Missed)",
+          "permissions": [
+            "ipd.mar.administer"
+          ],
+          "idempotency_key": false,
+          "request": {
+            "path": "/api/v1/mar/1/chart",
+            "body": {
+              "status": "Administered",
+              "identity_check": "TwoIdentifiers"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "mar_id": 1,
+                "admission_id": 1,
+                "patient_id": 1,
+                "prescription_item_id": 1,
+                "scheduled_at": "2026-09-30T14:32:51.388788+00:00",
+                "status": "Administered",
+                "administered_at": "2026-09-30T14:37:51.474484+00:00",
+                "administered_by": 7,
+                "dose_given_text": "1 g",
+                "route_given": "IV",
+                "status_reason": null,
+                "is_correction": false,
+                "corrects_mar_id": null,
+                "correction_reason": null,
+                "identity_check": "TwoIdentifiers",
+                "identity_note": null,
+                "drug_check": "Visual",
+                "second_checked_by": null,
+                "self_administered": false,
+                "variance_reason": null,
+                "prepared_by": null,
+                "prepared_at": null,
+                "preparation": null,
+                "created_at": "2026-09-30T14:37:51.390524+00:00",
+                "row_version": 2
+              },
+              "meta": {
+                "server_time": "2026-09-30T14:37:51.481295+00:00"
+              },
+              "request_id": "6521516ac3b34453a27eb1560c0b7c52"
+            }
+          }
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/admissions/{admission_id}/mar/prn",
+          "summary": "Chart a PRN / ad-hoc dose",
+          "permissions": [
+            "ipd.mar.administer"
+          ],
+          "idempotency_key": true,
+          "request": {
+            "path": "/api/v1/admissions/1/mar/prn",
+            "body": {
+              "prescription_item_id": 2,
+              "dose_given_text": "1 g",
+              "status_reason": "fever 38.9",
+              "identity_check": "TwoIdentifiers"
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "mar_id": 7,
+                "admission_id": 1,
+                "patient_id": 1,
+                "prescription_item_id": 2,
+                "scheduled_at": null,
+                "status": "Administered",
+                "administered_at": "2026-09-30T14:47:43.418871+00:00",
+                "administered_by": 7,
+                "dose_given_text": "1 g",
+                "route_given": "IV",
+                "status_reason": "fever 38.9",
+                "is_correction": false,
+                "corrects_mar_id": null,
+                "correction_reason": null,
+                "identity_check": "TwoIdentifiers",
+                "identity_note": null,
+                "drug_check": "Visual",
+                "second_checked_by": null,
+                "self_administered": false,
+                "variance_reason": null,
+                "prepared_by": null,
+                "prepared_at": null,
+                "preparation": null,
+                "created_at": "2026-09-30T14:47:43.418871+00:00",
+                "row_version": 1
+              },
+              "meta": {
+                "server_time": "2026-09-30T14:47:43.515970+00:00"
+              },
+              "request_id": "bd0063688a934617a25e05866fc87580"
+            }
+          }
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/mar/{mar_id}/prepare",
+          "summary": "Prepare a dose and print its label",
+          "permissions": [
+            "ipd.mar.administer"
+          ],
+          "idempotency_key": true,
+          "request": {
+            "path": "/api/v1/mar/1/prepare",
+            "body": {
+              "preparation": "in 500 ml normal saline over 4 hours"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "document_type": "dose_label",
+                "printer_role": "label",
+                "paper_width_mm": 50,
+                "fields": {
+                  "hospital_name": "Haspataal Hospital",
+                  "mar_id": 1,
+                  "patient_name": "Ali Khan",
+                  "mrn": "MRN-2026-000001",
+                  "ward_name": "General Ward",
+                  "bed_label": "GW-1",
+                  "drug_name": "Potassium chloride 15%",
+                  "strength": null,
+                  "dose_text": "10 mmol",
+                  "route": "IV",
+                  "preparation": "in 500 ml normal saline over 4 hours",
+                  "scheduled_at": "2026-10-29T21:42:36.244104+00:00",
+                  "prepared_by_name": "uc1378cbc09",
+                  "prepared_at": "2026-10-29T21:47:37.053121+00:00",
+                  "warnings": [
+                    "HIGH ALERT (concentrated electrolyte): second check before use"
+                  ],
+                  "reprint": false
+                },
+                "text": "Ali Khan\nMRN-2026-000001 General Ward\nGW-1\n--------------------------------\nPotassium chloride 15%\n10 mmol IV\nin 500 ml normal saline over 4\nhours\nDue 30-Oct-2026 02:42\nBy uc1378cbc09 30-Oct-2026 02:47\nHIGH ALERT (concentrated\nelectrolyte): second check\nbefore use\n",
+                "barcode_svg": "<svg version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" width=\"53.840mm\" height=\"12.411mm\">\r\n    <!--Autogenerated with python-barcode 0.16.1-->\r\n    <g id=\"barcode_group\">\r\n        <rect width=\"100%\" height=\"100%\" style=\"fill:white\"/>\r\n        <rect x=\"2.000mm\" y=\"1.000mm\" width=\"0.560mm\" height=\"6.000mm\" style=\"fill:black;\"/>\r\n        <rect x=\"2.840mm\" y=\"1.000mm\" width=\"0.280mm\" height=\"6.000mm\" …",
+                "qr_svg": null,
+                "pdf_url": null
+              },
+              "meta": {
+                "server_time": "2026-10-29T21:47:37.074390+00:00"
+              },
+              "request_id": "b9c22c20b47f4f63ac7637cdae767d51"
+            }
+          }
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/mar/{mar_id}/dose-label",
+          "summary": "Print a prepared dose's label again",
+          "permissions": [
+            "ipd.mar.administer"
+          ],
+          "idempotency_key": false,
+          "request": {
+            "path": "/api/v1/mar/1/dose-label"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "document_type": "dose_label",
+                "printer_role": "label",
+                "paper_width_mm": 50,
+                "fields": {
+                  "hospital_name": "Haspataal Hospital",
+                  "mar_id": 1,
+                  "patient_name": "Ali Khan",
+                  "mrn": "MRN-2026-000001",
+                  "ward_name": "General Ward",
+                  "bed_label": "GW-1",
+                  "drug_name": "Potassium chloride 15%",
+                  "strength": null,
+                  "dose_text": "10 mmol",
+                  "route": "IV",
+                  "preparation": "in 500 ml normal saline over 4 hours",
+                  "scheduled_at": "2026-10-29T21:42:36.244104+00:00",
+                  "prepared_by_name": "uc1378cbc09",
+                  "prepared_at": "2026-10-29T21:47:37.053121+00:00",
+                  "warnings": [
+                    "HIGH ALERT (concentrated electrolyte): second check before use"
+                  ],
+                  "reprint": true
+                },
+                "text": "REPRINT of the label\nAli Khan\nMRN-2026-000001 General Ward\nGW-1\n--------------------------------\nPotassium chloride 15%\n10 mmol IV\nin 500 ml normal saline over 4\nhours\nDue 30-Oct-2026 02:42\nBy uc1378cbc09 30-Oct-2026 02:47\nHIGH ALERT (concentrated\nelectrolyte): second check\nbefore use\n",
+                "barcode_svg": "<svg version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" width=\"53.840mm\" height=\"12.411mm\">\r\n    <!--Autogenerated with python-barcode 0.16.1-->\r\n    <g id=\"barcode_group\">\r\n        <rect width=\"100%\" height=\"100%\" style=\"fill:white\"/>\r\n        <rect x=\"2.000mm\" y=\"1.000mm\" width=\"0.560mm\" height=\"6.000mm\" style=\"fill:black;\"/>\r\n        <rect x=\"2.840mm\" y=\"1.000mm\" width=\"0.280mm\" height=\"6.000mm\" …",
+                "qr_svg": null,
+                "pdf_url": null
+              },
+              "meta": {
+                "server_time": "2026-10-29T21:47:37.116525+00:00"
+              },
+              "request_id": "a6825fb8ff724f8b904126d7d5c2631f"
+            }
+          }
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/admissions/{admission_id}/mar",
+          "summary": "Medication Administration Record (checklist)",
+          "permissions": [
+            "ipd.mar.view"
+          ],
+          "idempotency_key": false,
+          "request": {
+            "path": "/api/v1/admissions/1/mar"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "mar_id": 1,
+                  "prescription_item_id": 1,
+                  "drug_name": "Ceftriaxone",
+                  "dose_text": "1 g",
+                  "route": "IV",
+                  "frequency_code": "BD",
+                  "is_prn": false,
+                  "is_stat": false,
+                  "scheduled_at": "2026-09-30T14:32:51.388788+00:00",
+                  "status": "Scheduled",
+                  "administered_at": null,
+                  "administered_by": null,
+                  "administered_by_name": null,
+                  "dose_given_text": null,
+                  "route_given": null,
+                  "status_reason": null,
+                  "is_correction": false,
+                  "corrects_mar_id": null,
+                  "correction_reason": null,
+                  "created_at": "2026-09-30T14:37:51.390524+00:00",
+                  "is_overdue": true,
+                  "high_alert_category": null,
+                  "lasa_with": [],
+                  "self_administration": false,
+                  "identity_check": null,
+                  "identity_note": null,
+                  "drug_check": null,
+                  "second_checked_by": null,
+                  "second_checked_by_name": null,
+                  "self_administered": false,
+                  "variance_reason": null,
+                  "prepared_at": null,
+                  "prepared_by_name": null,
+                  "preparation": null
+                },
+                {
+                  "mar_id": 4,
+                  "prescription_item_id": 2,
+                  "drug_name": "Amoxicillin",
+                  "dose_text": "1 capsule",
+                  "route": "Oral",
+                  "frequency_code": "TDS",
+                  "is_prn": false,
+                  "is_stat": false,
+                  "scheduled_at": "2026-09-30T14:32:51.388788+00:00",
+                  "status": "Scheduled",
+                  "administered_at": null,
+                  "administered_by": null,
+                  "administered_by_name": null,
+                  "dose_given_text": null,
+                  "route_given": null,
+                  "status_reason": null,
+                  "is_correction": false,
+                  "corrects_mar_id": null,
+                  "correction_reason": null,
+                  "created_at": "2026-09-30T14:37:51.390524+00:00",
+                  "is_overdue": true,
+                  "high_alert_category": null,
+                  "lasa_with": [],
+                  "self_administration": false,
+                  "identity_check": null,
+                  "identity_note": null,
+                  "drug_check": null,
+                  "second_checked_by": null,
+                  "second_checked_by_name": null,
+                  "self_administered": false,
+                  "variance_reason": null,
+                  "prepared_at": null,
+                  "prepared_by_name": null,
+                  "preparation": null
+                },
+                {
+                  "mar_id": 5,
+                  "prescription_item_id": 2,
+                  "drug_name": "Amoxicillin",
+                  "dose_text": "1 capsule",
+                  "route": "Oral",
+                  "frequency_code": "TDS",
+                  "is_prn": false,
+                  "is_stat": false,
+                  "scheduled_at": "2026-09-30T22:32:51.388788+00:00",
+                  "status": "Scheduled",
+                  "administered_at": null,
+                  "administered_by": null,
+                  "administered_by_name": null,
+                  "dose_given_text": null,
+                  "route_given": null,
+                  "status_reason": null,
+                  "is_correction": false,
+                  "corrects_mar_id": null,
+                  "correction_reason": null,
+                  "created_at": "2026-09-30T14:37:51.390524+00:00",
+                  "is_overdue": false,
+                  "high_alert_category": null,
+                  "lasa_with": [],
+                  "self_administration": false,
+                  "identity_check": null,
+                  "identity_note": null,
+                  "drug_check": null,
+                  "second_checked_by": null,
+                  "second_checked_by_name": null,
+                  "self_administered": false,
+                  "variance_reason": null,
+                  "prepared_at": null,
+                  "prepared_by_name": null,
+                  "preparation": null
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-30T14:37:51.469490+00:00"
+              },
+              "request_id": "f6486811b7b44e26b313ced0a8cde610"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "section": "8. Recalls (pharmacy admin)",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/drug-recalls",
+          "summary": "Open a batch recall",
+          "permissions": [
+            "pharmacy.recall.manage"
+          ],
+          "idempotency_key": true,
+          "request": {
+            "path": "/api/v1/drug-recalls",
+            "body": {
+              "drug_id": 1,
+              "batch_ids": [
+                1
+              ],
+              "source": "DRAP",
+              "reference": "DRAP alert 12/2026",
+              "recall_class": "ClassII",
+              "reason": "Particulate matter in vials",
+              "contact_patients": true
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "recall_id": 1,
+                "recall_number": "RCL-2026-0001",
+                "drug_id": 1,
+                "source": "DRAP",
+                "reference": "DRAP alert 12/2026",
+                "recall_class": "ClassII",
+                "reason": "Particulate matter in vials",
+                "contact_patients": true,
+                "status": "Open",
+                "opened_by": 11,
+                "opened_at": "2026-09-30T15:03:29.138586+00:00",
+                "stock_removed_by": null,
+                "stock_removed_at": null,
+                "closed_by": null,
+                "closed_at": null,
+                "closing_note": null,
+                "cancelled_by": null,
+                "cancelled_at": null,
+                "cancel_reason": null,
+                "row_version": 1,
+                "drug_name": "Ceftriaxone 1g",
+                "drug_code": "CEF",
+                "opened_by_name": "ua7a3486c32",
+                "batch_numbers": [
+                  "CEF-1"
+                ],
+                "stock_left": 17,
+                "patients_to_contact": 2,
+                "batches": [
+                  {
+                    "batch_id": 1,
+                    "batch_no": "CEF-1",
+                    "expiry_date": "2098-01-01",
+                    "qty_received": 20,
+                    "pharmacy_qty": 14,
+                    "ward_qty": 3,
+                    "dispensed_qty": 2,
+                    "administered_qty": 1,
+                    "theatre_qty": 0
+                  }
+                ],
+                "ward_stock": [
+                  {
+                    "ward_id": 2,
+                    "ward_name": "General Ward",
+                    "batch_id": 1,
+                    "batch_no": "CEF-1",
+                    "qty": 3
+                  }
+                ],
+                "patients": [
+                  {
+                    "recall_patient_id": 1,
+                    "recall_id": 1,
+                    "patient_id": 1,
+                    "walkin_name": null,
+                    "walkin_mobile": null,
+                    "quantity": 2,
+                    "first_received_at": "2026-09-30T15:03:26.965997+00:00",
+                    "last_received_at": "2026-09-30T15:03:26.965997+00:00",
+                    "sources": [
+                      {
+                        "at": "2026-09-30T15:03:26.965997+00:00",
+                        "id": 1,
+                        "qty": 2,
+                        "kind": "Dispensed"
+                      }
+                    ],
+                    "outcome": "ToContact",
+                    "note": null,
+                    "updated_by": null,
+                    "updated_at": null,
+                    "row_version": 1,
+                    "patient_name": "Ali Khan",
+                    "mrn": "MRN-2026-000001",
+                    "mobile": "03003153345",
+                    "updated_by_name": null
+                  },
+                  {
+                    "recall_patient_id": 2,
+                    "recall_id": 1,
+                    "patient_id": 2,
+                    "walkin_name": null,
+                    "walkin_mobile": null,
+                    "quantity": 1,
+                    "first_received_at": "2026-09-30T15:03:28.982018+00:00",
+                    "last_received_at": "2026-09-30T15:03:28.982018+00:00",
+                    "sources": [
+                      {
+                        "at": "2026-09-30T15:03:28.982018+00:00",
+                        "id": 1,
+                        "qty": 1,
+                        "kind": "Administered"
+                      }
+                    ],
+                    "outcome": "ToContact",
+                    "note": null,
+                    "updated_by": null,
+                    "updated_at": null,
+                    "row_version": 1,
+                    "patient_name": "Ali Khan",
+                    "mrn": "MRN-2026-000002",
+                    "mobile": "03001798456",
+                    "updated_by_name": null
+                  }
+                ],
+                "can_close": false
+              },
+              "meta": {
+                "server_time": "2026-09-30T15:03:29.364057+00:00"
+              },
+              "request_id": "f6f80a6af1684e44b7bd049408005c81"
+            }
+          }
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/drug-recalls/{recall_id}",
+          "summary": "A recall and where its batches went",
+          "permissions": [
+            "pharmacy.recall.view"
+          ],
+          "idempotency_key": false,
+          "request": {
+            "path": "/api/v1/drug-recalls/1"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "recall_id": 1,
+                "recall_number": "RCL-2026-0001",
+                "drug_id": 1,
+                "source": "DRAP",
+                "reference": "DRAP alert 12/2026",
+                "recall_class": "ClassII",
+                "reason": "Particulate matter in vials",
+                "contact_patients": true,
+                "status": "Closed",
+                "opened_by": 11,
+                "opened_at": "2026-09-30T15:03:29.138586+00:00",
+                "stock_removed_by": 11,
+                "stock_removed_at": "2026-09-30T15:03:29.847140+00:00",
+                "closed_by": 11,
+                "closed_at": "2026-09-30T15:03:30.222822+00:00",
+                "closing_note": "Stock returned, patients informed",
+                "cancelled_by": null,
+                "cancelled_at": null,
+                "cancel_reason": null,
+                "row_version": 3,
+                "drug_name": "Ceftriaxone 1g",
+                "drug_code": "CEF",
+                "opened_by_name": "ua7a3486c32",
+                "batch_numbers": [
+                  "CEF-1"
+                ],
+                "stock_left": 0,
+                "patients_to_contact": 0,
+                "batches": [
+                  {
+                    "batch_id": 1,
+                    "batch_no": "CEF-1",
+                    "expiry_date": "2098-01-01",
+                    "qty_received": 20,
+                    "pharmacy_qty": 0,
+                    "ward_qty": 0,
+                    "dispensed_qty": 2,
+                    "administered_qty": 1,
+                    "theatre_qty": 0
+                  }
+                ],
+                "ward_stock": [],
+                "patients": [
+                  {
+                    "recall_patient_id": 1,
+                    "recall_id": 1,
+                    "patient_id": 1,
+                    "walkin_name": null,
+                    "walkin_mobile": null,
+                    "quantity": 2,
+                    "first_received_at": "2026-09-30T15:03:26.965997+00:00",
+                    "last_received_at": "2026-09-30T15:03:26.965997+00:00",
+                    "sources": [
+                      {
+                        "at": "2026-09-30T15:03:26.965997+00:00",
+                        "id": 1,
+                        "qty": 2,
+                        "kind": "Dispensed"
+                      }
+                    ],
+                    "outcome": "Contacted",
+                    "note": "Told by telephone: no reaction; come back if a rash appears",
+                    "updated_by": 11,
+                    "updated_at": "2026-09-30T15:03:30.040953+00:00",
+                    "row_version": 2,
+                    "patient_name": "Ali Khan",
+                    "mrn": "MRN-2026-000001",
+                    "mobile": "03003153345",
+                    "updated_by_name": "ua7a3486c32"
+                  },
+                  {
+                    "recall_patient_id": 2,
+                    "recall_id": 1,
+                    "patient_id": 2,
+                    "walkin_name": null,
+                    "walkin_mobile": null,
+                    "quantity": 1,
+                    "first_received_at": "2026-09-30T15:03:28.982018+00:00",
+                    "last_received_at": "2026-09-30T15:03:28.982018+00:00",
+                    "sources": [
+                      {
+                        "at": "2026-09-30T15:03:28.982018+00:00",
+                        "id": 1,
+                        "qty": 1,
+                        "kind": "Administered"
+                      }
+                    ],
+                    "outcome": "Contacted",
+                    "note": "Told by telephone: no reaction; come back if a rash appears",
+                    "updated_by": 11,
+                    "updated_at": "2026-09-30T15:03:30.142907+00:00",
+                    "row_version": 2,
+                    "patient_name": "Ali Khan",
+                    "mrn": "MRN-2026-000002",
+                    "mobile": "03001798456",
+                    "updated_by_name": "ua7a3486c32"
+                  }
+                ],
+                "can_close": false
+              },
+              "meta": {
+                "server_time": "2026-09-30T15:03:30.385738+00:00"
+              },
+              "request_id": "90393f95349140a9a1cf06fbcc96b088"
+            }
+          }
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/drug-recalls/{recall_id}/remove-stock",
+          "summary": "Remove the recalled stock left",
+          "permissions": [
+            "pharmacy.recall.manage"
+          ],
+          "idempotency_key": true,
+          "request": {
+            "path": "/api/v1/drug-recalls/1/remove-stock",
+            "body": {
+              "note": "Returned to the supplier"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "recall_id": 1,
+                "recall_number": "RCL-2026-0001",
+                "drug_id": 1,
+                "source": "DRAP",
+                "reference": "DRAP alert 12/2026",
+                "recall_class": "ClassII",
+                "reason": "Particulate matter in vials",
+                "contact_patients": true,
+                "status": "Open",
+                "opened_by": 11,
+                "opened_at": "2026-09-30T15:03:29.138586+00:00",
+                "stock_removed_by": 11,
+                "stock_removed_at": "2026-09-30T15:03:29.847140+00:00",
+                "closed_by": null,
+                "closed_at": null,
+                "closing_note": null,
+                "cancelled_by": null,
+                "cancelled_at": null,
+                "cancel_reason": null,
+                "row_version": 2,
+                "drug_name": "Ceftriaxone 1g",
+                "drug_code": "CEF",
+                "opened_by_name": "ua7a3486c32",
+                "batch_numbers": [
+                  "CEF-1"
+                ],
+                "stock_left": 0,
+                "patients_to_contact": 2,
+                "batches": [
+                  {
+                    "batch_id": 1,
+                    "batch_no": "CEF-1",
+                    "expiry_date": "2098-01-01",
+                    "qty_received": 20,
+                    "pharmacy_qty": 0,
+                    "ward_qty": 0,
+                    "dispensed_qty": 2,
+                    "administered_qty": 1,
+                    "theatre_qty": 0
+                  }
+                ],
+                "ward_stock": [],
+                "patients": [
+                  {
+                    "recall_patient_id": 1,
+                    "recall_id": 1,
+                    "patient_id": 1,
+                    "walkin_name": null,
+                    "walkin_mobile": null,
+                    "quantity": 2,
+                    "first_received_at": "2026-09-30T15:03:26.965997+00:00",
+                    "last_received_at": "2026-09-30T15:03:26.965997+00:00",
+                    "sources": [
+                      {
+                        "at": "2026-09-30T15:03:26.965997+00:00",
+                        "id": 1,
+                        "qty": 2,
+                        "kind": "Dispensed"
+                      }
+                    ],
+                    "outcome": "ToContact",
+                    "note": null,
+                    "updated_by": null,
+                    "updated_at": null,
+                    "row_version": 1,
+                    "patient_name": "Ali Khan",
+                    "mrn": "MRN-2026-000001",
+                    "mobile": "03003153345",
+                    "updated_by_name": null
+                  },
+                  {
+                    "recall_patient_id": 2,
+                    "recall_id": 1,
+                    "patient_id": 2,
+                    "walkin_name": null,
+                    "walkin_mobile": null,
+                    "quantity": 1,
+                    "first_received_at": "2026-09-30T15:03:28.982018+00:00",
+                    "last_received_at": "2026-09-30T15:03:28.982018+00:00",
+                    "sources": [
+                      {
+                        "at": "2026-09-30T15:03:28.982018+00:00",
+                        "id": 1,
+                        "qty": 1,
+                        "kind": "Administered"
+                      }
+                    ],
+                    "outcome": "ToContact",
+                    "note": null,
+                    "updated_by": null,
+                    "updated_at": null,
+                    "row_version": 1,
+                    "patient_name": "Ali Khan",
+                    "mrn": "MRN-2026-000002",
+                    "mobile": "03001798456",
+                    "updated_by_name": null
+                  }
+                ],
+                "can_close": false
+              },
+              "meta": {
+                "server_time": "2026-09-30T15:03:30.001972+00:00"
+              },
+              "request_id": "42b727cd8c344fdbaac49fd7167ee75b"
+            }
+          }
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/pharmacy-admin/batches/{batch_id}/supplier-returns",
+          "summary": "Return units of a batch to its supplier",
+          "permissions": [
+            "pharmacy.supplier_return.record"
+          ],
+          "idempotency_key": true,
+          "request": {
+            "path": "/api/v1/pharmacy-admin/batches/4/supplier-returns",
+            "body": {
+              "qty": 40,
+              "reason": "NearExpiry",
+              "note": "Collected by the distributor's rider"
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "return_id": 1,
+                "return_number": "SRN-2026-00001",
+                "vendor_id": 1,
+                "batch_id": 4,
+                "drug_id": 2,
+                "qty": 40,
+                "unit_cost": 10,
+                "value_at_cost": 400,
+                "reason": "NearExpiry",
+                "recall_id": null,
+                "note": "Collected by the distributor's rider",
+                "status": "Returned",
+                "returned_at": "2026-10-15T12:48:49.593362+00:00",
+                "credit_note_no": null,
+                "credit_note_date": null,
+                "credit_amount": null,
+                "credit_applied": 0,
+                "decided_at": null,
+                "decision_note": null,
+                "vendor_name": "MedSupply",
+                "drug_name": "Paracetamol 500mg",
+                "drug_code": "PCM-500",
+                "batch_no": "RET-1",
+                "expiry_date": "2099-01-01",
+                "recall_number": null,
+                "returned_by_name": "ud08052568e",
+                "decided_by_name": null,
+                "credit_left": null
+              },
+              "meta": {
+                "server_time": "2026-10-15T12:48:49.605046+00:00"
+              },
+              "request_id": "a7f697553f2c4eb2a39ed0ef4fc08846"
+            }
+          }
+        },
+        {
+          "method": "PATCH",
+          "path": "/api/v1/drug-recalls/{recall_id}/patients/{recall_patient_id}",
+          "summary": "Record a contact with a patient of a recall",
+          "permissions": [
+            "pharmacy.recall.manage"
+          ],
+          "idempotency_key": false,
+          "request": {
+            "path": "/api/v1/drug-recalls/1/patients/1",
+            "body": {
+              "outcome": "Contacted",
+              "note": "Told by telephone: no reaction; come back if a rash appears"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "recall_id": 1,
+                "recall_number": "RCL-2026-0001",
+                "drug_id": 1,
+                "source": "DRAP",
+                "reference": "DRAP alert 12/2026",
+                "recall_class": "ClassII",
+                "reason": "Particulate matter in vials",
+                "contact_patients": true,
+                "status": "Open",
+                "opened_by": 11,
+                "opened_at": "2026-09-30T15:03:29.138586+00:00",
+                "stock_removed_by": 11,
+                "stock_removed_at": "2026-09-30T15:03:29.847140+00:00",
+                "closed_by": null,
+                "closed_at": null,
+                "closing_note": null,
+                "cancelled_by": null,
+                "cancelled_at": null,
+                "cancel_reason": null,
+                "row_version": 2,
+                "drug_name": "Ceftriaxone 1g",
+                "drug_code": "CEF",
+                "opened_by_name": "ua7a3486c32",
+                "batch_numbers": [
+                  "CEF-1"
+                ],
+                "stock_left": 0,
+                "patients_to_contact": 1,
+                "batches": [
+                  {
+                    "batch_id": 1,
+                    "batch_no": "CEF-1",
+                    "expiry_date": "2098-01-01",
+                    "qty_received": 20,
+                    "pharmacy_qty": 0,
+                    "ward_qty": 0,
+                    "dispensed_qty": 2,
+                    "administered_qty": 1,
+                    "theatre_qty": 0
+                  }
+                ],
+                "ward_stock": [],
+                "patients": [
+                  {
+                    "recall_patient_id": 2,
+                    "recall_id": 1,
+                    "patient_id": 2,
+                    "walkin_name": null,
+                    "walkin_mobile": null,
+                    "quantity": 1,
+                    "first_received_at": "2026-09-30T15:03:28.982018+00:00",
+                    "last_received_at": "2026-09-30T15:03:28.982018+00:00",
+                    "sources": [
+                      {
+                        "at": "2026-09-30T15:03:28.982018+00:00",
+                        "id": 1,
+                        "qty": 1,
+                        "kind": "Administered"
+                      }
+                    ],
+                    "outcome": "ToContact",
+                    "note": null,
+                    "updated_by": null,
+                    "updated_at": null,
+                    "row_version": 1,
+                    "patient_name": "Ali Khan",
+                    "mrn": "MRN-2026-000002",
+                    "mobile": "03001798456",
+                    "updated_by_name": null
+                  },
+                  {
+                    "recall_patient_id": 1,
+                    "recall_id": 1,
+                    "patient_id": 1,
+                    "walkin_name": null,
+                    "walkin_mobile": null,
+                    "quantity": 2,
+                    "first_received_at": "2026-09-30T15:03:26.965997+00:00",
+                    "last_received_at": "2026-09-30T15:03:26.965997+00:00",
+                    "sources": [
+                      {
+                        "at": "2026-09-30T15:03:26.965997+00:00",
+                        "id": 1,
+                        "qty": 2,
+                        "kind": "Dispensed"
+                      }
+                    ],
+                    "outcome": "Contacted",
+                    "note": "Told by telephone: no reaction; come back if a rash appears",
+                    "updated_by": 11,
+                    "updated_at": "2026-09-30T15:03:30.040953+00:00",
+                    "row_version": 2,
+                    "patient_name": "Ali Khan",
+                    "mrn": "MRN-2026-000001",
+                    "mobile": "03003153345",
+                    "updated_by_name": "ua7a3486c32"
+                  }
+                ],
+                "can_close": false
+              },
+              "meta": {
+                "server_time": "2026-09-30T15:03:30.100185+00:00"
+              },
+              "request_id": "5a6dbdc746704808b704a0c0d48cde51"
+            }
+          }
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/drug-recalls/{recall_id}/close",
+          "summary": "Close a recall",
+          "permissions": [
+            "pharmacy.recall.manage"
+          ],
+          "idempotency_key": true,
+          "request": {
+            "path": "/api/v1/drug-recalls/1/close",
+            "body": {
+              "note": "Stock returned, patients informed"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "recall_id": 1,
+                "recall_number": "RCL-2026-0001",
+                "drug_id": 1,
+                "source": "DRAP",
+                "reference": "DRAP alert 12/2026",
+                "recall_class": "ClassII",
+                "reason": "Particulate matter in vials",
+                "contact_patients": true,
+                "status": "Closed",
+                "opened_by": 11,
+                "opened_at": "2026-09-30T15:03:29.138586+00:00",
+                "stock_removed_by": 11,
+                "stock_removed_at": "2026-09-30T15:03:29.847140+00:00",
+                "closed_by": 11,
+                "closed_at": "2026-09-30T15:03:30.222822+00:00",
+                "closing_note": "Stock returned, patients informed",
+                "cancelled_by": null,
+                "cancelled_at": null,
+                "cancel_reason": null,
+                "row_version": 3,
+                "drug_name": "Ceftriaxone 1g",
+                "drug_code": "CEF",
+                "opened_by_name": "ua7a3486c32",
+                "batch_numbers": [
+                  "CEF-1"
+                ],
+                "stock_left": 0,
+                "patients_to_contact": 0,
+                "batches": [
+                  {
+                    "batch_id": 1,
+                    "batch_no": "CEF-1",
+                    "expiry_date": "2098-01-01",
+                    "qty_received": 20,
+                    "pharmacy_qty": 0,
+                    "ward_qty": 0,
+                    "dispensed_qty": 2,
+                    "administered_qty": 1,
+                    "theatre_qty": 0
+                  }
+                ],
+                "ward_stock": [],
+                "patients": [
+                  {
+                    "recall_patient_id": 1,
+                    "recall_id": 1,
+                    "patient_id": 1,
+                    "walkin_name": null,
+                    "walkin_mobile": null,
+                    "quantity": 2,
+                    "first_received_at": "2026-09-30T15:03:26.965997+00:00",
+                    "last_received_at": "2026-09-30T15:03:26.965997+00:00",
+                    "sources": [
+                      {
+                        "at": "2026-09-30T15:03:26.965997+00:00",
+                        "id": 1,
+                        "qty": 2,
+                        "kind": "Dispensed"
+                      }
+                    ],
+                    "outcome": "Contacted",
+                    "note": "Told by telephone: no reaction; come back if a rash appears",
+                    "updated_by": 11,
+                    "updated_at": "2026-09-30T15:03:30.040953+00:00",
+                    "row_version": 2,
+                    "patient_name": "Ali Khan",
+                    "mrn": "MRN-2026-000001",
+                    "mobile": "03003153345",
+                    "updated_by_name": "ua7a3486c32"
+                  },
+                  {
+                    "recall_patient_id": 2,
+                    "recall_id": 1,
+                    "patient_id": 2,
+                    "walkin_name": null,
+                    "walkin_mobile": null,
+                    "quantity": 1,
+                    "first_received_at": "2026-09-30T15:03:28.982018+00:00",
+                    "last_received_at": "2026-09-30T15:03:28.982018+00:00",
+                    "sources": [
+                      {
+                        "at": "2026-09-30T15:03:28.982018+00:00",
+                        "id": 1,
+                        "qty": 1,
+                        "kind": "Administered"
+                      }
+                    ],
+                    "outcome": "Contacted",
+                    "note": "Told by telephone: no reaction; come back if a rash appears",
+                    "updated_by": 11,
+                    "updated_at": "2026-09-30T15:03:30.142907+00:00",
+                    "row_version": 2,
+                    "patient_name": "Ali Khan",
+                    "mrn": "MRN-2026-000002",
+                    "mobile": "03001798456",
+                    "updated_by_name": "ua7a3486c32"
+                  }
+                ],
+                "can_close": false
+              },
+              "meta": {
+                "server_time": "2026-09-30T15:03:30.267732+00:00"
+              },
+              "request_id": "a95c6cbd429e436e82d4f99133b9c025"
+            }
+          }
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/drug-recalls/{recall_id}/cancel",
+          "summary": "Cancel a recall opened by mistake",
+          "permissions": [
+            "pharmacy.recall.manage"
+          ],
+          "idempotency_key": true,
+          "request": {
+            "path": "/api/v1/drug-recalls/2/cancel",
+            "body": {
+              "reason": "Wrong batch number keyed"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "recall_id": 2,
+                "recall_number": "RCL-2026-0002",
+                "drug_id": 1,
+                "source": "DRAP",
+                "reference": "DRAP alert 12/2026",
+                "recall_class": "ClassII",
+                "reason": "Particulate matter in vials",
+                "contact_patients": false,
+                "status": "Cancelled",
+                "opened_by": 11,
+                "opened_at": "2026-09-30T15:03:30.429949+00:00",
+                "stock_removed_by": null,
+                "stock_removed_at": null,
+                "closed_by": null,
+                "closed_at": null,
+                "closing_note": null,
+                "cancelled_by": 11,
+                "cancelled_at": "2026-09-30T15:03:30.522593+00:00",
+                "cancel_reason": "Wrong batch number keyed",
+                "row_version": 2,
+                "drug_name": "Ceftriaxone 1g",
+                "drug_code": "CEF",
+                "opened_by_name": "ua7a3486c32",
+                "batch_numbers": [
+                  "CEF-2"
+                ],
+                "stock_left": 18,
+                "patients_to_contact": 0,
+                "batches": [
+                  {
+                    "batch_id": 2,
+                    "batch_no": "CEF-2",
+                    "expiry_date": "2099-01-01",
+                    "qty_received": 20,
+                    "pharmacy_qty": 18,
+                    "ward_qty": 0,
+                    "dispensed_qty": 2,
+                    "administered_qty": 0,
+                    "theatre_qty": 0
+                  }
+                ],
+                "ward_stock": [],
+                "patients": [],
+                "can_close": false
+              },
+              "meta": {
+                "server_time": "2026-09-30T15:03:30.559869+00:00"
+              },
+              "request_id": "7797aeac8477413eb958b225832d429d"
+            }
+          }
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/drug-recalls",
+          "summary": "The recall register",
+          "permissions": [
+            "pharmacy.recall.view"
+          ],
+          "idempotency_key": false,
+          "request": {
+            "path": "/api/v1/drug-recalls"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "recall_id": 1,
+                  "recall_number": "RCL-2026-0001",
+                  "drug_id": 1,
+                  "source": "DRAP",
+                  "reference": "DRAP alert 12/2026",
+                  "recall_class": "ClassII",
+                  "reason": "Particulate matter in vials",
+                  "contact_patients": true,
+                  "status": "Closed",
+                  "opened_by": 11,
+                  "opened_at": "2026-09-30T15:03:29.138586+00:00",
+                  "stock_removed_by": 11,
+                  "stock_removed_at": "2026-09-30T15:03:29.847140+00:00",
+                  "closed_by": 11,
+                  "closed_at": "2026-09-30T15:03:30.222822+00:00",
+                  "closing_note": "Stock returned, patients informed",
+                  "cancelled_by": null,
+                  "cancelled_at": null,
+                  "cancel_reason": null,
+                  "row_version": 3,
+                  "drug_name": "Ceftriaxone 1g",
+                  "drug_code": "CEF",
+                  "opened_by_name": "ua7a3486c32",
+                  "batch_numbers": [
+                    "CEF-1"
+                  ],
+                  "stock_left": 0,
+                  "patients_to_contact": 0
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-30T15:03:30.325564+00:00"
+              },
+              "request_id": "fc87670ab78d464082f914c781774723"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "section": "9. Expired ward stock (head nurse)",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/wards/{ward_id}/inventory",
+          "summary": "Ward-local stock",
+          "permissions": [
+            "ward.inventory.view"
+          ],
+          "idempotency_key": false,
+          "request": {
+            "path": "/api/v1/wards/2/inventory"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "drug_id": 1,
+                  "drug_name": "Paracetamol IV",
+                  "batch_id": 1,
+                  "batch_no": "IV1",
+                  "expiry_date": "2099-01-01",
+                  "qty": 3,
+                  "updated_at": "2026-09-30T14:47:42.873629+00:00",
+                  "is_expired": false,
+                  "is_recalled": false
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-30T14:47:42.994102+00:00"
+              },
+              "request_id": "6ca8f9cb1af247c29698301eb3e365f2"
+            }
+          }
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/wards/{ward_id}/inventory/remove",
+          "summary": "Remove stock from a ward (expired, damaged, or returned to the pharmacy)",
+          "permissions": [
+            "ward.indent.create",
+            "pharmacy.stock.adjust"
+          ],
+          "idempotency_key": true,
+          "request": {
+            "path": "/api/v1/wards/2/inventory/remove",
+            "body": {
+              "batch_id": 3,
+              "qty": 5,
+              "reason": "Expiry",
+              "note": "Expired yesterday, destroyed"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [],
+              "meta": {
+                "server_time": "2026-09-30T15:03:30.824673+00:00"
+              },
+              "request_id": "02dd95b2fe30438aa7831b60ba18db86"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "section": "10. The patient's own medicines (ward nurse, pharmacist)",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/admissions/{admission_id}/own-medicines",
+          "summary": "Record the medicines a patient brought in",
+          "permissions": [
+            "patient.own_medicine.record"
+          ],
+          "idempotency_key": true,
+          "request": {
+            "path": "/api/v1/admissions/1/own-medicines",
+            "body": {
+              "brought_by": "Son, Kamran",
+              "medicines": [
+                {
+                  "medicine_name": "Metformin",
+                  "strength": "500 mg",
+                  "quantity": "1 strip, 6 tablets left",
+                  "expiry_date": "2027-06-30"
+                },
+                {
+                  "medicine_name": "Amlodipine",
+                  "strength": "5 mg",
+                  "quantity": "4 tablets",
+                  "expiry_date": "2025-01-31"
+                }
+              ]
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": [
+                {
+                  "own_medicine_id": 1,
+                  "admission_id": 1,
+                  "patient_id": 2,
+                  "medicine_name": "Metformin",
+                  "strength": "500 mg",
+                  "form": null,
+                  "quantity": "1 strip, 6 tablets left",
+                  "batch_no": null,
+                  "expiry_date": "2027-06-30",
+                  "brought_by": "Son, Kamran",
+                  "stored_at": "Ward",
+                  "status": "Received",
+                  "received_by": 7,
+                  "received_at": "2026-09-30T15:03:30.857402+00:00",
+                  "drug_id": null,
+                  "identification": null,
+                  "identification_note": null,
+                  "identified_by": null,
+                  "identified_at": null,
+                  "handed_to": null,
+                  "handed_by": null,
+                  "handed_at": null,
+                  "destroy_reason": null,
+                  "destroy_witness": null,
+                  "destroyed_by": null,
+                  "destroyed_at": null,
+                  "row_version": 1,
+                  "is_expired": false,
+                  "drug_name": null,
+                  "received_by_name": "uf6a080eb67",
+                  "identified_by_name": null,
+                  "handed_by_name": null,
+                  "destroyed_by_name": null
+                },
+                {
+                  "own_medicine_id": 2,
+                  "admission_id": 1,
+                  "patient_id": 2,
+                  "medicine_name": "Amlodipine",
+                  "strength": "5 mg",
+                  "form": null,
+                  "quantity": "4 tablets",
+                  "batch_no": null,
+                  "expiry_date": "2025-01-31",
+                  "brought_by": "Son, Kamran",
+                  "stored_at": "Ward",
+                  "status": "Received",
+                  "received_by": 7,
+                  "received_at": "2026-09-30T15:03:30.857402+00:00",
+                  "drug_id": null,
+                  "identification": null,
+                  "identification_note": null,
+                  "identified_by": null,
+                  "identified_at": null,
+                  "handed_to": null,
+                  "handed_by": null,
+                  "handed_at": null,
+                  "destroy_reason": null,
+                  "destroy_witness": null,
+                  "destroyed_by": null,
+                  "destroyed_at": null,
+                  "row_version": 1,
+                  "is_expired": true,
+                  "drug_name": null,
+                  "received_by_name": "uf6a080eb67",
+                  "identified_by_name": null,
+                  "handed_by_name": null,
+                  "destroyed_by_name": null
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-30T15:03:30.916002+00:00"
+              },
+              "request_id": "e70e22b83a8349dcb931edc31cac2546"
+            }
+          }
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/admissions/{admission_id}/own-medicines",
+          "summary": "The patient's own medicines",
+          "permissions": [
+            "patient.own_medicine.record",
+            "patient.own_medicine.identify",
+            "prescription.view"
+          ],
+          "idempotency_key": false,
+          "request": {
+            "path": "/api/v1/admissions/1/own-medicines"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "own_medicine_id": 1,
+                  "admission_id": 1,
+                  "patient_id": 2,
+                  "medicine_name": "Metformin",
+                  "strength": "500 mg",
+                  "form": null,
+                  "quantity": "1 strip, 6 tablets left",
+                  "batch_no": null,
+                  "expiry_date": "2027-06-30",
+                  "brought_by": "Son, Kamran",
+                  "stored_at": "Pharmacy",
+                  "status": "Retained",
+                  "received_by": 7,
+                  "received_at": "2026-09-30T15:03:30.857402+00:00",
+                  "drug_id": null,
+                  "identification": "Identified",
+                  "identification_note": "Glucophage 500 mg",
+                  "identified_by": 9,
+                  "identified_at": "2026-09-30T15:03:30.961140+00:00",
+                  "handed_to": null,
+                  "handed_by": null,
+                  "handed_at": null,
+                  "destroy_reason": null,
+                  "destroy_witness": null,
+                  "destroyed_by": null,
+                  "destroyed_at": null,
+                  "row_version": 2,
+                  "is_expired": false,
+                  "drug_name": null,
+                  "received_by_name": "uf6a080eb67",
+                  "identified_by_name": "u2789b321ca",
+                  "handed_by_name": null,
+                  "destroyed_by_name": null
+                },
+                {
+                  "own_medicine_id": 2,
+                  "admission_id": 1,
+                  "patient_id": 2,
+                  "medicine_name": "Amlodipine",
+                  "strength": "5 mg",
+                  "form": null,
+                  "quantity": "4 tablets",
+                  "batch_no": null,
+                  "expiry_date": "2025-01-31",
+                  "brought_by": "Son, Kamran",
+                  "stored_at": "Ward",
+                  "status": "Received",
+                  "received_by": 7,
+                  "received_at": "2026-09-30T15:03:30.857402+00:00",
+                  "drug_id": null,
+                  "identification": null,
+                  "identification_note": null,
+                  "identified_by": null,
+                  "identified_at": null,
+                  "handed_to": null,
+                  "handed_by": null,
+                  "handed_at": null,
+                  "destroy_reason": null,
+                  "destroy_witness": null,
+                  "destroyed_by": null,
+                  "destroyed_at": null,
+                  "row_version": 1,
+                  "is_expired": true,
+                  "drug_name": null,
+                  "received_by_name": "uf6a080eb67",
+                  "identified_by_name": null,
+                  "handed_by_name": null,
+                  "destroyed_by_name": null
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-30T15:03:31.100678+00:00"
+              },
+              "request_id": "6b455fc8408e466183dd5947a9204145"
+            }
+          }
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/own-medicines/{own_medicine_id}/identify",
+          "summary": "Identify a patient's own medicine",
+          "permissions": [
+            "patient.own_medicine.identify"
+          ],
+          "idempotency_key": true,
+          "request": {
+            "path": "/api/v1/own-medicines/1/identify",
+            "body": {
+              "identification": "Identified",
+              "note": "Glucophage 500 mg",
+              "stored_at": "Pharmacy"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "own_medicine_id": 1,
+                "admission_id": 1,
+                "patient_id": 2,
+                "medicine_name": "Metformin",
+                "strength": "500 mg",
+                "form": null,
+                "quantity": "1 strip, 6 tablets left",
+                "batch_no": null,
+                "expiry_date": "2027-06-30",
+                "brought_by": "Son, Kamran",
+                "stored_at": "Pharmacy",
+                "status": "Retained",
+                "received_by": 7,
+                "received_at": "2026-09-30T15:03:30.857402+00:00",
+                "drug_id": null,
+                "identification": "Identified",
+                "identification_note": "Glucophage 500 mg",
+                "identified_by": 9,
+                "identified_at": "2026-09-30T15:03:30.961140+00:00",
+                "handed_to": null,
+                "handed_by": null,
+                "handed_at": null,
+                "destroy_reason": null,
+                "destroy_witness": null,
+                "destroyed_by": null,
+                "destroyed_at": null,
+                "row_version": 2,
+                "is_expired": false,
+                "drug_name": null,
+                "received_by_name": "uf6a080eb67",
+                "identified_by_name": "u2789b321ca",
+                "handed_by_name": null,
+                "destroyed_by_name": null
+              },
+              "meta": {
+                "server_time": "2026-09-30T15:03:31.004967+00:00"
+              },
+              "request_id": "ed1758078d944056990cd0f909953a4a"
+            }
+          }
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/admissions/{admission_id}/own-medicines/hand-back",
+          "summary": "Hand the patient's own medicines back",
+          "permissions": [
+            "patient.own_medicine.record"
+          ],
+          "idempotency_key": true,
+          "request": {
+            "path": "/api/v1/admissions/1/own-medicines/hand-back",
+            "body": {
+              "handed_to": "Son, Kamran"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "own_medicine_id": 1,
+                  "admission_id": 1,
+                  "patient_id": 2,
+                  "medicine_name": "Metformin",
+                  "strength": "500 mg",
+                  "form": null,
+                  "quantity": "1 strip, 6 tablets left",
+                  "batch_no": null,
+                  "expiry_date": "2027-06-30",
+                  "brought_by": "Son, Kamran",
+                  "stored_at": "Pharmacy",
+                  "status": "Returned",
+                  "received_by": 7,
+                  "received_at": "2026-09-30T15:03:30.857402+00:00",
+                  "drug_id": null,
+                  "identification": "Identified",
+                  "identification_note": "Glucophage 500 mg",
+                  "identified_by": 9,
+                  "identified_at": "2026-09-30T15:03:30.961140+00:00",
+                  "handed_to": "Son, Kamran",
+                  "handed_by": 7,
+                  "handed_at": "2026-09-30T15:03:32.235487+00:00",
+                  "destroy_reason": null,
+                  "destroy_witness": null,
+                  "destroyed_by": null,
+                  "destroyed_at": null,
+                  "row_version": 3,
+                  "is_expired": false,
+                  "drug_name": null,
+                  "received_by_name": "uf6a080eb67",
+                  "identified_by_name": "u2789b321ca",
+                  "handed_by_name": "uf6a080eb67",
+                  "destroyed_by_name": null
+                },
+                {
+                  "own_medicine_id": 2,
+                  "admission_id": 1,
+                  "patient_id": 2,
+                  "medicine_name": "Amlodipine",
+                  "strength": "5 mg",
+                  "form": null,
+                  "quantity": "4 tablets",
+                  "batch_no": null,
+                  "expiry_date": "2025-01-31",
+                  "brought_by": "Son, Kamran",
+                  "stored_at": "Ward",
+                  "status": "Destroyed",
+                  "received_by": 7,
+                  "received_at": "2026-09-30T15:03:30.857402+00:00",
+                  "drug_id": null,
+                  "identification": null,
+                  "identification_note": null,
+                  "identified_by": null,
+                  "identified_at": null,
+                  "handed_to": null,
+                  "handed_by": null,
+                  "handed_at": null,
+                  "destroy_reason": "Expired; the son agreed",
+                  "destroy_witness": "Staff nurse Amna",
+                  "destroyed_by": 7,
+                  "destroyed_at": "2026-09-30T15:03:32.175370+00:00",
+                  "row_version": 2,
+                  "is_expired": true,
+                  "drug_name": null,
+                  "received_by_name": "uf6a080eb67",
+                  "identified_by_name": null,
+                  "handed_by_name": null,
+                  "destroyed_by_name": "uf6a080eb67"
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-30T15:03:32.263134+00:00"
+              },
+              "request_id": "8e72a8787f604274b327220a5826692c"
+            }
+          }
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/own-medicines/{own_medicine_id}/destroy",
+          "summary": "Destroy a patient's own medicine",
+          "permissions": [
+            "patient.own_medicine.record"
+          ],
+          "idempotency_key": false,
+          "request": {
+            "path": "/api/v1/own-medicines/2/destroy",
+            "body": {
+              "reason": "Expired; the son agreed",
+              "witness": "Staff nurse Amna"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "own_medicine_id": 2,
+                "admission_id": 1,
+                "patient_id": 2,
+                "medicine_name": "Amlodipine",
+                "strength": "5 mg",
+                "form": null,
+                "quantity": "4 tablets",
+                "batch_no": null,
+                "expiry_date": "2025-01-31",
+                "brought_by": "Son, Kamran",
+                "stored_at": "Ward",
+                "status": "Destroyed",
+                "received_by": 7,
+                "received_at": "2026-09-30T15:03:30.857402+00:00",
+                "drug_id": null,
+                "identification": null,
+                "identification_note": null,
+                "identified_by": null,
+                "identified_at": null,
+                "handed_to": null,
+                "handed_by": null,
+                "handed_at": null,
+                "destroy_reason": "Expired; the son agreed",
+                "destroy_witness": "Staff nurse Amna",
+                "destroyed_by": 7,
+                "destroyed_at": "2026-09-30T15:03:32.175370+00:00",
+                "row_version": 2,
+                "is_expired": true,
+                "drug_name": null,
+                "received_by_name": "uf6a080eb67",
+                "identified_by_name": null,
+                "handed_by_name": null,
+                "destroyed_by_name": "uf6a080eb67"
+              },
+              "meta": {
+                "server_time": "2026-09-30T15:03:32.200234+00:00"
+              },
+              "request_id": "8b9dc8cf5d964c3286bb6c9e8479dd08"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "section": "11. The worklist and the statistics",
+      "calls": [
+        {
+          "method": "GET",
+          "path": "/api/v1/medication-safety/worklist",
+          "summary": "Medication safety work waiting",
+          "permissions": [
+            "medication.safety.view",
+            "patient.wristband.print"
+          ],
+          "idempotency_key": false,
+          "request": {
+            "path": "/api/v1/medication-safety/worklist",
+            "query": {
+              "mine": "true"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "kind": "VerbalOrderToCountersign",
+                  "title": "Countersign verbal order RX-2026-000001",
+                  "is_overdue": true,
+                  "detail": "Taken by u15d336608e for Dr Dr Ahmed",
+                  "due_at": "2026-09-30T09:02:32.094405+00:00",
+                  "patient_id": 1,
+                  "patient_name": "Ali Khan",
+                  "mrn": "MRN-2026-000001",
+                  "admission_id": 1,
+                  "er_visit_id": null,
+                  "ward_id": 2,
+                  "ward_name": "General Ward",
+                  "bed_label": "GW-1",
+                  "prescription_id": 1,
+                  "prescription_number": "RX-2026-000001",
+                  "query_id": null,
+                  "own_medicine_id": null,
+                  "recall_id": null,
+                  "recall_number": null,
+                  "batch_id": null
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-30T15:02:33.034572+00:00"
+              },
+              "request_id": "966eee106ed541d5a4f8dad33549039d"
+            }
+          }
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/medication-safety/statistics",
+          "summary": "Medication safety statistics",
+          "permissions": [
+            "medication.statistics.view"
+          ],
+          "idempotency_key": false,
+          "request": {
+            "path": "/api/v1/medication-safety/statistics",
+            "query": {
+              "date_from": "2026-09-30",
+              "date_to": "2026-09-30"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "date_from": "2026-09-30",
+                "date_to": "2026-09-30",
+                "measures": [
+                  {
+                    "code": "verbal_orders_countersigned",
+                    "title": "Verbal orders countersigned within 24 hours",
+                    "msds": "MOM 55",
+                    "numerator": 0,
+                    "denominator": 0,
+                    "pct": null
+                  },
+                  {
+                    "code": "high_alert_doses_double_checked",
+                    "title": "High-alert doses checked by a second nurse or doctor",
+                    "msds": "MOM 57",
+                    "numerator": 0,
+                    "denominator": 0,
+                    "pct": null
+                  },
+                  {
+                    "code": "high_alert_dispensing_checked",
+                    "title": "High-alert medicines dispensed after a second check",
+                    "msds": "MOM 57",
+                    "numerator": 0,
+                    "denominator": 0,
+                    "pct": null
+                  }
+                ],
+                "doses_given": 1,
+                "high_alert_doses": 0,
+                "variances": 0,
+                "verbal_orders": 0,
+                "doses_by_identity": [
+                  {
+                    "value": "WristbandScan",
+                    "count": 1
+                  }
+                ],
+                "doses_by_drug_check": [
+                  {
+                    "value": "BarcodeScan",
+                    "count": 1
+                  }
+                ],
+                "queries_by_reason": [],
+                "queries_by_outcome": [],
+                "recalls": [
+                  {
+                    "recall_number": "RCL-2026-0001",
+                    "drug_name": "Ceftriaxone 1g",
+                    "recall_class": "ClassII",
+                    "status": "Closed",
+                    "opened_at": "2026-09-30T15:03:29.138586+00:00",
+                    "closed_at": "2026-09-30T15:03:30.222822+00:00",
+                    "days_open": 0
+                  },
+                  {
+                    "recall_number": "RCL-2026-0002",
+                    "drug_name": "Ceftriaxone 1g",
+                    "recall_class": "ClassII",
+                    "status": "Cancelled",
+                    "opened_at": "2026-09-30T15:03:30.429949+00:00",
+                    "closed_at": null,
+                    "days_open": 0
+                  }
+                ]
+              },
+              "meta": {
+                "server_time": "2026-09-30T15:03:32.727037+00:00"
+              },
+              "request_id": "590d4da563e44c75bc88d316f7bc7329"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "section": "12. The storage log (pharmacist, ward nurse)",
+      "calls": [
+        {
+          "method": "POST",
+          "path": "/api/v1/pharmacy/storage-checks",
+          "summary": "Record a temperature (and humidity) reading of a medicine store, refrigerator or freezer",
+          "permissions": [
+            "pharmacy.storage.record"
+          ],
+          "idempotency_key": true,
+          "request": {
+            "path": "/api/v1/pharmacy/storage-checks",
+            "body": {
+              "storage_area": "Main pharmacy store",
+              "storage_kind": "Room",
+              "temperature_c": "24.5",
+              "humidity_pct": "55"
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "check_id": 1,
+                "storage_area": "Main pharmacy store",
+                "storage_kind": "Room",
+                "ward_id": null,
+                "ward_name": null,
+                "recorded_at": "2026-10-04T07:46:03.564874+00:00",
+                "temperature_c": 24.5,
+                "humidity_pct": 55,
+                "min_c": 10,
+                "max_c": 25,
+                "within_range": true,
+                "action_taken": null,
+                "recorded_by": 1,
+                "recorded_by_name": "uef04544d20"
+              },
+              "meta": {
+                "server_time": "2026-10-04T07:46:03.577366+00:00"
+              },
+              "request_id": "464c548503e449bc97d848acd0ddf860"
+            }
+          }
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/pharmacy/storage-checks",
+          "summary": "The storage log",
+          "permissions": [
+            "pharmacy.stock.view",
+            "medication.safety.view",
+            "pharmacy.storage.record"
+          ],
+          "idempotency_key": false,
+          "request": {
+            "path": "/api/v1/pharmacy/storage-checks"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "check_id": 4,
+                  "storage_area": "Plasma freezer",
+                  "storage_kind": "Freezer",
+                  "ward_id": null,
+                  "ward_name": null,
+                  "recorded_at": "2026-10-04T07:46:03.618774+00:00",
+                  "temperature_c": -20,
+                  "humidity_pct": null,
+                  "min_c": -30,
+                  "max_c": -15,
+                  "within_range": true,
+                  "action_taken": null,
+                  "recorded_by": 1,
+                  "recorded_by_name": "uef04544d20"
+                },
+                {
+                  "check_id": 3,
+                  "storage_area": "Vaccine carrier A",
+                  "storage_kind": "ColdChainBox",
+                  "ward_id": null,
+                  "ward_name": null,
+                  "recorded_at": "2026-10-04T07:46:03.601341+00:00",
+                  "temperature_c": 6.5,
+                  "humidity_pct": null,
+                  "min_c": 2,
+                  "max_c": 7,
+                  "within_range": true,
+                  "action_taken": null,
+                  "recorded_by": 1,
+                  "recorded_by_name": "uef04544d20"
+                },
+                {
+                  "check_id": 2,
+                  "storage_area": "Ward 1 fridge",
+                  "storage_kind": "Refrigerator",
+                  "ward_id": 1,
+                  "ward_name": "Ward 1",
+                  "recorded_at": "2026-10-04T07:46:03.587919+00:00",
+                  "temperature_c": 9.5,
+                  "humidity_pct": null,
+                  "min_c": 2,
+                  "max_c": 8,
+                  "within_range": false,
+                  "action_taken": "Door ajar: closed, insulin checked",
+                  "recorded_by": 2,
+                  "recorded_by_name": "u3463cac665"
+                }
+              ],
+              "meta": {
+                "server_time": "2026-10-04T07:46:03.635639+00:00"
+              },
+              "request_id": "0dccc25b59604cb1adcefa7e2675a859"
+            }
+          }
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/pharmacy/storage-checks/summary",
+          "summary": "The storage log by storage area: readings, out of range, days with the full routine",
+          "permissions": [
+            "pharmacy.stock.view",
+            "medication.safety.view",
+            "pharmacy.storage.record"
+          ],
+          "idempotency_key": false,
+          "request": {
+            "path": "/api/v1/pharmacy/storage-checks/summary"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "date_from": "2026-10-01",
+                "date_to": "2026-10-04",
+                "days": 4,
+                "checks_per_day": 2,
+                "ranges": {
+                  "room_min": 10,
+                  "room_max": 25,
+                  "fridge_min": 2,
+                  "fridge_max": 8,
+                  "freezer_min": -30,
+                  "freezer_max": -15
+                },
+                "areas": [
+                  {
+                    "storage_area": "Main pharmacy store",
+                    "storage_kind": "Room",
+                    "ward_name": null,
+                    "checks": 1,
+                    "out_of_range": 0,
+                    "min_seen": 24.5,
+                    "max_seen": 24.5,
+                    "last_at": "2026-10-04T07:46:03.564874+00:00",
+                    "days_checked": 1,
+                    "days_complete": 0
+                  },
+                  {
+                    "storage_area": "Plasma freezer",
+                    "storage_kind": "Freezer",
+                    "ward_name": null,
+                    "checks": 1,
+                    "out_of_range": 0,
+                    "min_seen": -20,
+                    "max_seen": -20,
+                    "last_at": "2026-10-04T07:46:03.618774+00:00",
+                    "days_checked": 1,
+                    "days_complete": 0
+                  },
+                  {
+                    "storage_area": "Vaccine carrier A",
+                    "storage_kind": "ColdChainBox",
+                    "ward_name": null,
+                    "checks": 1,
+                    "out_of_range": 0,
+                    "min_seen": 6.5,
+                    "max_seen": 6.5,
+                    "last_at": "2026-10-04T07:46:03.601341+00:00",
+                    "days_checked": 1,
+                    "days_complete": 0
+                  }
+                ],
+                "checks": 4,
+                "out_of_range": 1
+              },
+              "meta": {
+                "server_time": "2026-10-04T07:46:03.660811+00:00"
+              },
+              "request_id": "38d19118ebdf489cb5f4bddf2c237fde"
+            }
+          }
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/pharmacy/storage-checks/register/pdf",
+          "summary": "The storage register of a period as a PDF (MSDS MOM 58)",
+          "permissions": [
+            "pharmacy.stock.view",
+            "medication.safety.view",
+            "pharmacy.storage.record"
+          ],
+          "idempotency_key": false,
+          "request": {
+            "path": "/api/v1/pharmacy/storage-checks/register/pdf"
+          },
+          "response": {
+            "status": 200,
+            "content_type": "application/pdf",
+            "bytes": 3810
+          }
+        }
+      ]
+    }
+  ],
+  "narrative": "get_workflow(slug) has the playbook text with the rules for each step"
+}
