@@ -1,0 +1,1127 @@
+{
+  "screen_id": "queue_management",
+  "contract_fingerprint": "14824af5c60c05148994",
+  "knowledge_revision": "9250bafb1794ac12",
+  "delivery_gate": {
+    "required": true,
+    "status": "required",
+    "progress_reporting": {
+      "required": true,
+      "submit": "propose_progress",
+      "verify": "progress_proposals",
+      "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+    },
+    "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+    "compulsory": [
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+        "points": 2
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+        "points": 3
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+        "points": 2
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+        "points": 4
+      }
+    ],
+    "zoom": {
+      "min_pct": 100,
+      "max_pct": 250,
+      "reset_pct": 100,
+      "keys": [
+        "Ctrl + or Ctrl = (zoom in)",
+        "Ctrl - (zoom out)",
+        "Ctrl 0 (reset to 100 %)",
+        "Command on macOS"
+      ],
+      "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+    },
+    "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+    "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+  },
+  "screen": {
+    "id": "queue_management",
+    "workspace": "reception",
+    "title": "Queue management",
+    "purpose": "Live queues per doctor; defer / reactivate tickets; cancel unpaid slips.",
+    "workflow": "§1.3–§1.5",
+    "rule_objects": [
+      {
+        "id": "rule:28af882c64",
+        "text": "Reactivation keeps the original token number and needs no new payment while the ticket is valid.",
+        "cites": []
+      },
+      {
+        "id": "rule:37ebfb4586",
+        "text": "Tickets past valid_until show 'Expired — new visit needs a new slip'.",
+        "cites": []
+      }
+    ],
+    "related_workflows": [
+      "opd-reception"
+    ]
+  },
+  "endpoints": [
+    {
+      "endpoint": "GET /opd-tickets/{ticket_id}/status-history",
+      "summary": "Every status/payment/lock change of a ticket",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "opd.ticket.view"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of opd.ticket.view",
+        "roles_allowed": [
+          "accountant",
+          "anaesthetist",
+          "billing_admin",
+          "cashier",
+          "clinical_specialist",
+          "doctor",
+          "receptionist",
+          "surgeon"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "ticket_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Ticket Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_TicketStatusChangeOut__"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "GET /opd-queues/reception-dashboard",
+      "summary": "All queues, deferred tickets, pending approvals, cash-back prompts",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "opd.queue.view"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of opd.queue.view",
+        "roles_allowed": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "receptionist",
+          "triage_nurse"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_ReceptionDashboardOut_"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "object",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "GET /opd-queues/by-doctor/{doctor_id}",
+      "summary": "A doctor's live queue",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "opd.queue.view"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of opd.queue.view",
+        "roles_allowed": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "receptionist",
+          "triage_nurse"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "doctor_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Doctor Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_DoctorQueueEntryOut__"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "POST /opd-tickets/{ticket_id}/defer",
+      "summary": "Defer (patient must leave; keeps the ticket, no refund)",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "opd.ticket.defer"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of opd.ticket.defer",
+        "roles_allowed": [
+          "receptionist"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "TICKET_TRANSITION_INVALID",
+          "http_status": 409,
+          "message": "This ticket cannot move to the requested state.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "POST /api/v1/opd-tickets/{ticket_id}/complete"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "ticket_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Ticket Id"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/OpdReasonIn"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_OpdTicketDetailOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "application/json",
+        "model": "OpdReasonIn",
+        "fields": [
+          {
+            "pointer": "/reason",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "min_length": 3,
+            "max_length": 500
+          }
+        ],
+        "cross_field_rules": {},
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "state_guard",
+        "on_lost_answer": "A repeat is refused with TICKET_TRANSITION_INVALID: the ticket is already deferred. The first call may have succeeded; this error does not replay its result. Never retry automatically; re-read the record, then offer the action again only if it is still needed.",
+        "reconcile_with": "GET /opd-tickets/{ticket_id}",
+        "refused_with": "TICKET_TRANSITION_INVALID",
+        "emits_events": [
+          "opd.queue.updated",
+          "opd.ticket.status_changed"
+        ],
+        "prints": false,
+        "related_state_machine": "ticket"
+      }
+    },
+    {
+      "endpoint": "POST /opd-tickets/{ticket_id}/reactivate",
+      "summary": "Reactivate a deferred ticket (no new payment)",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "opd.ticket.reactivate"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of opd.ticket.reactivate",
+        "roles_allowed": [
+          "receptionist"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": true,
+      "errors": [
+        {
+          "code": "TICKET_EXPIRED",
+          "http_status": 409,
+          "message": "This ticket has expired.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": null
+        },
+        {
+          "code": "TICKET_TRANSITION_INVALID",
+          "http_status": 409,
+          "message": "This ticket cannot move to the requested state.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "POST /api/v1/opd-tickets/{ticket_id}/complete"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "ticket_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Ticket Id"
+          }
+        },
+        {
+          "name": "Idempotency-Key",
+          "in": "header",
+          "required": false,
+          "description": "Unique per logical action; retries return the first result",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Unique per logical action; retries return the first result",
+            "title": "Idempotency-Key"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_OpdTicketDetailOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": null,
+      "write": {
+        "protection": "idempotency_key",
+        "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+        "reconcile_with": "GET /opd-tickets/{ticket_id}",
+        "emits_events": [
+          "opd.queue.updated",
+          "opd.ticket.status_changed"
+        ],
+        "prints": false,
+        "related_state_machine": "ticket"
+      }
+    },
+    {
+      "endpoint": "POST /opd-tickets/{ticket_id}/cancel",
+      "summary": "Cancel an UNPAID ticket",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "opd.ticket.cancel"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of opd.ticket.cancel",
+        "roles_allowed": [
+          "receptionist"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": true,
+      "errors": [
+        {
+          "code": "INVOICE_HAS_PAYMENTS",
+          "http_status": 409,
+          "message": "An invoice with payments cannot be cancelled; refund it instead.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "POST /api/v1/opd-tickets/{ticket_id}/void"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "ticket_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Ticket Id"
+          }
+        },
+        {
+          "name": "Idempotency-Key",
+          "in": "header",
+          "required": false,
+          "description": "Unique per logical action; retries return the first result",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Unique per logical action; retries return the first result",
+            "title": "Idempotency-Key"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/OpdReasonIn"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_OpdTicketDetailOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "application/json",
+        "model": "OpdReasonIn",
+        "fields": [
+          {
+            "pointer": "/reason",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "min_length": 3,
+            "max_length": 500
+          }
+        ],
+        "cross_field_rules": {},
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "idempotency_key",
+        "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+        "reconcile_with": "GET /opd-tickets/{ticket_id}",
+        "emits_events": [
+          "opd.ticket.status_changed"
+        ],
+        "prints": false,
+        "related_state_machine": "ticket"
+      }
+    },
+    {
+      "endpoint": "GET /opd-tickets/by-number/{ticket_number}",
+      "summary": "Scan an OPD slip barcode",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "opd.ticket.view"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of opd.ticket.view",
+        "roles_allowed": [
+          "accountant",
+          "anaesthetist",
+          "billing_admin",
+          "cashier",
+          "clinical_specialist",
+          "doctor",
+          "receptionist",
+          "surgeon"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "ticket_number",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "string",
+            "title": "Ticket Number"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_OpdTicketDetailOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "object",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      }
+    }
+  ],
+  "realtime": {
+    "topics": [
+      "opd.queue.updated",
+      "opd.ticket.status_changed",
+      "ticket.forfeited",
+      "session.*",
+      "system.*",
+      "notification.created"
+    ],
+    "handlers": [
+      {
+        "event": "opd.queue.updated",
+        "priority": "normal",
+        "presentation": null,
+        "emitted_by_operations": [
+          "POST /approvals/{request_id}/approve",
+          "POST /clinical-encounters",
+          "POST /er/visits/{er_visit_id}/depart",
+          "POST /er/visits/{er_visit_id}/triage",
+          "POST /opd-queues/{queue_id}/call",
+          "POST /opd-queues/{queue_id}/reroute",
+          "POST /opd-tickets/{ticket_id}/complete",
+          "POST /opd-tickets/{ticket_id}/defer",
+          "POST /opd-tickets/{ticket_id}/pay",
+          "POST /opd-tickets/{ticket_id}/reactivate",
+          "POST /opd-tickets/{ticket_id}/refund-request",
+          "POST /opd-tickets/{ticket_id}/void",
+          "POST /reception/registrations"
+        ],
+        "refresh": [
+          "GET /opd-tickets/{ticket_id}/status-history",
+          "GET /opd-queues/reception-dashboard",
+          "GET /opd-queues/by-doctor/{doctor_id}"
+        ]
+      },
+      {
+        "event": "opd.ticket.status_changed",
+        "priority": "normal",
+        "presentation": null,
+        "emitted_by_operations": [
+          "POST /approvals/{request_id}/approve",
+          "POST /approvals/{request_id}/cancel",
+          "POST /approvals/{request_id}/reject",
+          "POST /clinical-encounters",
+          "POST /clinical-encounters/{encounter_id}/finalize",
+          "POST /er/visits/{er_visit_id}/depart",
+          "POST /finance/invoices/{invoice_id}/payments",
+          "POST /opd-queues/{queue_id}/call",
+          "POST /opd-queues/{queue_id}/reroute",
+          "POST /opd-tickets/{ticket_id}/cancel",
+          "POST /opd-tickets/{ticket_id}/complete",
+          "POST /opd-tickets/{ticket_id}/credit-request",
+          "POST /opd-tickets/{ticket_id}/defer",
+          "POST /opd-tickets/{ticket_id}/pay",
+          "POST /opd-tickets/{ticket_id}/reactivate",
+          "POST /opd-tickets/{ticket_id}/refund-request",
+          "POST /opd-tickets/{ticket_id}/refund/confirm-dispensation",
+          "POST /opd-tickets/{ticket_id}/vip-waiver-post-consult",
+          "POST /opd-tickets/{ticket_id}/vip-waiver-request",
+          "POST /opd-tickets/{ticket_id}/void",
+          "POST /reception/registrations"
+        ],
+        "refresh": [
+          "GET /opd-tickets/{ticket_id}/status-history",
+          "GET /opd-queues/reception-dashboard",
+          "GET /opd-queues/by-doctor/{doctor_id}"
+        ]
+      },
+      {
+        "event": "ticket.forfeited",
+        "priority": "normal",
+        "presentation": null,
+        "emitted_by_operations": [],
+        "refresh": [
+          "GET /opd-tickets/{ticket_id}/status-history",
+          "GET /opd-queues/reception-dashboard"
+        ]
+      }
+    ],
+    "rule": "Refresh the listed reads when the event arrives (a list without a path id: every time; a detail read: when the payload names the same id). Never poll."
+  },
+  "rules_in_force": null,
+  "decisions": [
+    {
+      "id": "H02",
+      "question": "Digits in the Urdu UI and printouts: Latin 0-9 or Extended Arabic-Indic ۰-۹.",
+      "owner": [
+        "vendor"
+      ],
+      "affects": [
+        "every screen in Urdu"
+      ],
+      "meanwhile": "Latin digits; identifiers, doses and money stay left to right."
+    },
+    {
+      "id": "H03",
+      "question": "How dates and times are shown on screen, and a 12- or 24-hour clock.",
+      "owner": [
+        "vendor",
+        "clinical_lead"
+      ],
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "The server's print format (e.g. 27-Sep-2026) and the hospital time zone."
+    },
+    {
+      "id": "H04",
+      "question": "Money on screen: decimals shown, and digit grouping (1,234,567 or 12,34,567).",
+      "owner": [
+        "vendor"
+      ],
+      "affects": [
+        "every screen with money"
+      ],
+      "meanwhile": "The amounts as the API sends them, with the currency setting."
+    },
+    {
+      "id": "H07",
+      "question": "Is a waiting-room display of token numbers in scope? No such screen exists.",
+      "owner": [
+        "vendor"
+      ],
+      "affects": [
+        "queue_management"
+      ],
+      "meanwhile": "Not built."
+    },
+    {
+      "id": "H08",
+      "question": "Who writes and signs off the Urdu text of the UI, above all clinical and consent wording.",
+      "owner": [
+        "vendor",
+        "translator",
+        "clinical_lead"
+      ],
+      "affects": [
+        "every screen in Urdu"
+      ],
+      "meanwhile": "Urdu you add is a draft: mark it so (the interview bank's pattern: a draft until a native speaker reviews it)."
+    },
+    {
+      "id": "H09",
+      "question": "One design system shared by every frontend team (who authors and approves it), or each team's own.",
+      "owner": [
+        "vendor",
+        "frontend_lead"
+      ],
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "Each team designs within the backend's constraints: themes Light and DarkHighContrast, zoom 100-250 %, Noto Nastaliq Urdu, status shown as text and icon, never colour alone. Follow the vendor's design principles (frontend guide 18, get_design_principles)."
+    },
+    {
+      "id": "H10",
+      "question": "How each realtime event is shown (interrupt, attention, inform, silent), alert sounds and which terminals play them. Only Code Red (interrupt), the licence and maintenance banners and the logout on session.revoked are prescribed (the event catalogue's `presentation`).",
+      "owner": [
+        "clinical_lead",
+        "vendor"
+      ],
+      "affects": [
+        "every screen with realtime events"
+      ],
+      "meanwhile": "Code Red interrupts; every other event updates the screen and, at most, a dismissible notice. `priority` is the delivery urgency, not a presentation rule."
+    },
+    {
+      "id": "H12",
+      "question": "Which workspaces run on web, Android and iOS, which cannot read a MAC address, discover the server by UDP or print silently; or are cash and printing Windows-only.",
+      "owner": [
+        "vendor",
+        "backend"
+      ],
+      "affects": [
+        "my_cash_shift",
+        "registration",
+        "every screen that prints"
+      ],
+      "meanwhile": "The guides describe the Windows (Electron) terminal; tell your developer when a screen needs a capability your platform lacks."
+    },
+    {
+      "id": "H18",
+      "question": "Noto Nastaliq Urdu everywhere, or the more compact Naskh in dense tables.",
+      "owner": [
+        "vendor",
+        "frontend_lead"
+      ],
+      "affects": [
+        "every table in Urdu"
+      ],
+      "meanwhile": "Noto Nastaliq Urdu, as the guides require."
+    },
+    {
+      "id": "H19",
+      "question": "Allergies: the patient record keeps free text, so it cannot tell \"no known allergies\" (asserted by a clinician) from \"not recorded\". Should it?",
+      "owner": [
+        "clinical_lead",
+        "backend"
+      ],
+      "affects": [
+        "every screen with a patient banner"
+      ],
+      "meanwhile": "Show the recorded text as recorded; an empty value is \"not recorded\", never \"none\"."
+    },
+    {
+      "id": "H20",
+      "question": "May unsaved form input be kept on the terminal (which fields, encrypted, for how long)?",
+      "owner": [
+        "vendor",
+        "hospital"
+      ],
+      "affects": [
+        "every form"
+      ],
+      "meanwhile": "In memory only; never a second checker's password."
+    },
+    {
+      "id": "H22",
+      "question": "Which documents may print on an unregistered terminal's default printer (sensitive A4 documents).",
+      "owner": [
+        "hospital",
+        "vendor"
+      ],
+      "affects": [
+        "every screen that prints"
+      ],
+      "meanwhile": "As the printing guide says: the hint, then the default printer."
+    },
+    {
+      "id": "H24",
+      "question": "Who approves frontend performance targets, alert thresholds and escalation timers.",
+      "owner": [
+        "vendor",
+        "clinical_lead"
+      ],
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "The server's own settings (e.g. critical_result_communicate_minutes)."
+    }
+  ],
+  "unknowns": [
+    {
+      "what": "decision H02",
+      "owner": [
+        "vendor"
+      ],
+      "question": "Digits in the Urdu UI and printouts: Latin 0-9 or Extended Arabic-Indic ۰-۹.",
+      "affects": [
+        "every screen in Urdu"
+      ],
+      "meanwhile": "Latin digits; identifiers, doses and money stay left to right."
+    },
+    {
+      "what": "decision H03",
+      "owner": [
+        "vendor",
+        "clinical_lead"
+      ],
+      "question": "How dates and times are shown on screen, and a 12- or 24-hour clock.",
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "The server's print format (e.g. 27-Sep-2026) and the hospital time zone."
+    },
+    {
+      "what": "decision H04",
+      "owner": [
+        "vendor"
+      ],
+      "question": "Money on screen: decimals shown, and digit grouping (1,234,567 or 12,34,567).",
+      "affects": [
+        "every screen with money"
+      ],
+      "meanwhile": "The amounts as the API sends them, with the currency setting."
+    },
+    {
+      "what": "decision H07",
+      "owner": [
+        "vendor"
+      ],
+      "question": "Is a waiting-room display of token numbers in scope? No such screen exists.",
+      "affects": [
+        "queue_management"
+      ],
+      "meanwhile": "Not built."
+    },
+    {
+      "what": "decision H08",
+      "owner": [
+        "vendor",
+        "translator",
+        "clinical_lead"
+      ],
+      "question": "Who writes and signs off the Urdu text of the UI, above all clinical and consent wording.",
+      "affects": [
+        "every screen in Urdu"
+      ],
+      "meanwhile": "Urdu you add is a draft: mark it so (the interview bank's pattern: a draft until a native speaker reviews it)."
+    },
+    {
+      "what": "decision H09",
+      "owner": [
+        "vendor",
+        "frontend_lead"
+      ],
+      "question": "One design system shared by every frontend team (who authors and approves it), or each team's own.",
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "Each team designs within the backend's constraints: themes Light and DarkHighContrast, zoom 100-250 %, Noto Nastaliq Urdu, status shown as text and icon, never colour alone. Follow the vendor's design principles (frontend guide 18, get_design_principles)."
+    },
+    {
+      "what": "decision H10",
+      "owner": [
+        "clinical_lead",
+        "vendor"
+      ],
+      "question": "How each realtime event is shown (interrupt, attention, inform, silent), alert sounds and which terminals play them. Only Code Red (interrupt), the licence and maintenance banners and the logout on session.revoked are prescribed (the event catalogue's `presentation`).",
+      "affects": [
+        "every screen with realtime events"
+      ],
+      "meanwhile": "Code Red interrupts; every other event updates the screen and, at most, a dismissible notice. `priority` is the delivery urgency, not a presentation rule."
+    },
+    {
+      "what": "decision H12",
+      "owner": [
+        "vendor",
+        "backend"
+      ],
+      "question": "Which workspaces run on web, Android and iOS, which cannot read a MAC address, discover the server by UDP or print silently; or are cash and printing Windows-only.",
+      "affects": [
+        "my_cash_shift",
+        "registration",
+        "every screen that prints"
+      ],
+      "meanwhile": "The guides describe the Windows (Electron) terminal; tell your developer when a screen needs a capability your platform lacks."
+    },
+    {
+      "what": "decision H18",
+      "owner": [
+        "vendor",
+        "frontend_lead"
+      ],
+      "question": "Noto Nastaliq Urdu everywhere, or the more compact Naskh in dense tables.",
+      "affects": [
+        "every table in Urdu"
+      ],
+      "meanwhile": "Noto Nastaliq Urdu, as the guides require."
+    },
+    {
+      "what": "decision H19",
+      "owner": [
+        "clinical_lead",
+        "backend"
+      ],
+      "question": "Allergies: the patient record keeps free text, so it cannot tell \"no known allergies\" (asserted by a clinician) from \"not recorded\". Should it?",
+      "affects": [
+        "every screen with a patient banner"
+      ],
+      "meanwhile": "Show the recorded text as recorded; an empty value is \"not recorded\", never \"none\"."
+    },
+    {
+      "what": "decision H20",
+      "owner": [
+        "vendor",
+        "hospital"
+      ],
+      "question": "May unsaved form input be kept on the terminal (which fields, encrypted, for how long)?",
+      "affects": [
+        "every form"
+      ],
+      "meanwhile": "In memory only; never a second checker's password."
+    },
+    {
+      "what": "decision H22",
+      "owner": [
+        "hospital",
+        "vendor"
+      ],
+      "question": "Which documents may print on an unregistered terminal's default printer (sensitive A4 documents).",
+      "affects": [
+        "every screen that prints"
+      ],
+      "meanwhile": "As the printing guide says: the hint, then the default printer."
+    },
+    {
+      "what": "decision H24",
+      "owner": [
+        "vendor",
+        "clinical_lead"
+      ],
+      "question": "Who approves frontend performance targets, alert thresholds and escalation timers.",
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "The server's own settings (e.g. critical_result_communicate_minutes)."
+    }
+  ]
+}

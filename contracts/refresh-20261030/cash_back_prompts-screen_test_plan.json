@@ -1,0 +1,516 @@
+{
+  "screen": "cash_back_prompts",
+  "title": "Mandatory cash-back prompts",
+  "cases": [
+    {
+      "id": "case:GET /opd-tickets/{ticket_id}",
+      "call": "GET /api/v1/opd-tickets/{ticket_id}",
+      "summary": "Ticket with invoice, queue entry, pending approval and cash-back prompts",
+      "happy_path": {
+        "as_one_of": [
+          "accountant",
+          "anaesthetist",
+          "billing_admin",
+          "cashier",
+          "clinical_specialist",
+          "doctor",
+          "receptionist",
+          "surgeon"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/opd-tickets/1"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "ticket_id": 1,
+                "ticket_number": "OPD-2026-000001",
+                "patient_id": 1,
+                "mrn": "MRN-2026-000001",
+                "patient_name": "Ali Khan",
+                "gender": "male",
+                "age_years": 40,
+                "dob": null,
+                "doctor_id": 1,
+                "doctor_name": "Dr Ahmed",
+                "department_id": 1,
+                "department_name": "General Medicine",
+                "service_id": 1,
+                "source": "WalkIn",
+                "status": "Waiting",
+                "payment_status": "CreditAuthorized",
+                "approval_lock": "None",
+                "gross_amount": 1000,
+                "discount_amount": 0,
+                "net_payable": 1000,
+                "discount_reason": null,
+                "issued_at": "2026-09-27T17:41:24.633432+00:00",
+                "paid_at": "2026-09-27T17:41:24.839577+00:00",
+                "valid_until": "2026-09-30T17:41:24.839577+00:00",
+                "called_at": null,
+                "examined_at": null,
+                "completed_at": null,
+                "deferred_at": null,
+                "reactivated_at": null,
+                "expired_at": null,
+                "voided_at": null,
+                "void_reason": null,
+                "cancelled_at": null,
+                "is_clinical_locked": false,
+                "clinical_lock_reason": null,
+                "is_emergency_bypass": false,
+                "is_ar_block_overridden": false,
+                "row_version": 7,
+                "queue": {
+                  "queue_id": 1,
+                  "queue_group": "doctor:1",
+                  "token_no": 1,
+                  "token_date": "2026-09-27",
+                  "priority": 0,
+                  "status": "Active",
+                  "queued_at": "2026-09-27T17:41:24.839577+00:00",
+                  "called_at": null,
+                  "rerouted_from_queue_id": null
+                },
+                "invoice": {
+                  "invoice_id": 1,
+                  "invoice_no": "INV-2026-0000001",
+                  "invoice_type": "OPD",
+                  "patient_id": 1,
+                  "admission_id": null,
+                  "ticket_id": 1,
+                  "panel_id": null,
+                  "employee_id": null,
+                  "walkin_customer_name": null,
+                  "walkin_customer_mobile": null,
+                  "gross_total": 1000,
+                  "discount_total": 0,
+                  "net_payable": 1000,
+                  "amount_paid": 400,
+                  "amount_refunded": 0,
+                  "waiver_amount": 0,
+                  "waiver_dispensed_amount": 0,
+                  "credit_amount": 600,
+                  "status": "CreditAuthorized",
+                  "is_locked": false,
+                  "locked_reason": null,
+                  "finalized_at": "2026-09-27T17:41:24.633432+00:00",
+                  "business_date": "2026-09-27",
+                  "created_at": "2026-09-27T17:41:24.633432+00:00",
+                  "row_version": 9,
+                  "lines": [
+                    {
+                      "invoice_item_id": 1,
+                      "line_type": "Consultation",
+                      "description": "OPD Consultation - GM",
+                      "qty": 1,
+                      "unit_price": 1000,
+                      "line_total": 1000,
+                      "bed_day": null,
+                      "reverses_item_id": null,
+                      "reversal_reason": null,
+                      "created_at": "2026-09-27T17:41:24.633432+00:00"
+                    }
+                  ],
+                  "balance_due": 0
+                },
+                "pending_approval": null,
+                "cash_back_prompts": []
+              },
+              "meta": {
+                "server_time": "2026-09-27T17:41:24.874735+00:00"
+              },
+              "request_id": "84c1d5292bf6400c800c2ee43a2811fe"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "admissions_officer",
+          "clinic_director",
+          "cssd_technician",
+          "employee_self",
+          "head_nurse"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:POST /opd-tickets/{ticket_id}/refund/confirm-dispensation",
+      "call": "POST /api/v1/opd-tickets/{ticket_id}/refund/confirm-dispensation",
+      "summary": "Hand the approved refund back (cash-out)",
+      "happy_path": {
+        "as_one_of": [
+          "cashier",
+          "receptionist"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/opd-tickets/1/refund/confirm-dispensation"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "payment": {
+                  "payment_id": 2,
+                  "receipt_no": "RCT-2026-0000002",
+                  "payment_type": "Refund",
+                  "amount": 1000,
+                  "method": "Cash",
+                  "invoice_id": 1,
+                  "shift_id": 1,
+                  "collected_at": "2026-09-27T17:41:29.493405+00:00"
+                },
+                "ticket": {
+                  "ticket_id": 1,
+                  "ticket_number": "OPD-2026-000001",
+                  "patient_id": 1,
+                  "mrn": "MRN-2026-000001",
+                  "patient_name": "Ali Khan",
+                  "gender": "male",
+                  "age_years": 40,
+                  "dob": null,
+                  "doctor_id": 1,
+                  "doctor_name": "Dr Ahmed",
+                  "department_id": 1,
+                  "department_name": "General Medicine",
+                  "service_id": 1,
+                  "source": "WalkIn",
+                  "status": "Refunded",
+                  "payment_status": "Refunded",
+                  "approval_lock": "None",
+                  "gross_amount": 1000,
+                  "discount_amount": 0,
+                  "net_payable": 1000,
+                  "discount_reason": null,
+                  "issued_at": "2026-09-27T17:41:29.232701+00:00",
+                  "paid_at": "2026-09-27T17:41:29.232701+00:00",
+                  "valid_until": "2026-09-30T17:41:29.232701+00:00",
+                  "called_at": null,
+                  "examined_at": null,
+                  "completed_at": null,
+                  "deferred_at": null,
+                  "reactivated_at": null,
+                  "expired_at": null,
+                  "voided_at": null,
+                  "void_reason": null,
+                  "cancelled_at": null,
+                  "is_clinical_locked": true,
+                  "clinical_lock_reason": "Refund approved",
+                  "is_emergency_bypass": false,
+                  "is_ar_block_overridden": false,
+                  "row_version": 7,
+                  "queue": {
+                    "queue_id": 1,
+                    "queue_group": "doctor:1",
+                    "token_no": 1,
+                    "token_date": "2026-09-27",
+                    "priority": 0,
+                    "status": "Cancelled",
+                    "queued_at": "2026-09-27T17:41:29.232701+00:00",
+                    "called_at": null,
+                    "rerouted_from_queue_id": null
+                  },
+                  "invoice": {
+                    "invoice_id": 1,
+                    "invoice_no": "INV-2026-0000001",
+                    "invoice_type": "OPD",
+                    "patient_id": 1,
+                    "admission_id": null,
+                    "ticket_id": 1,
+                    "panel_id": null,
+                    "employee_id": null,
+                    "walkin_customer_name": null,
+                    "walkin_customer_mobile": null,
+                    "gross_total": 1000,
+                    "discount_total": 0,
+                    "net_payable": 1000,
+                    "amount_paid": 1000,
+                    "amount_refunded": 1000,
+                    "waiver_amount": 0,
+                    "waiver_dispensed_amount": 0,
+                    "credit_amount": 0,
+                    "status": "Refunded",
+                    "is_locked": false,
+                    "locked_reason": null,
+                    "finalized_at": "2026-09-27T17:41:29.232701+00:00",
+                    "business_date": "2026-09-27",
+                    "created_at": "2026-09-27T17:41:29.232701+00:00",
+                    "row_version": 9,
+                    "lines": [
+                      {
+                        "invoice_item_id": 1,
+                        "line_type": "Consultation",
+                        "description": "OPD Consultation - GM",
+                        "qty": 1,
+                        "unit_price": 1000,
+                        "line_total": 1000,
+                        "bed_day": null,
+                        "reverses_item_id": null,
+                        "reversal_reason": null,
+                        "created_at": "2026-09-27T17:41:29.232701+00:00"
+                      }
+                    ],
+                    "balance_due": 0
+                  },
+                  "pending_approval": null,
+                  "cash_back_prompts": []
+                }
+              },
+              "meta": {
+                "server_time": "2026-09-27T17:41:29.508109+00:00"
+              },
+              "request_id": "7c0e643afed04734bbcee8bdbe393745"
+            }
+          },
+          "events_emitted": [
+            "opd.ticket.status_changed"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "clinic_director"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "SHIFT_NOT_OPEN",
+        "VALIDATION_ERROR"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:POST /opd-tickets/{ticket_id}/waiver-refund/confirm-dispensation",
+      "call": "POST /api/v1/opd-tickets/{ticket_id}/waiver-refund/confirm-dispensation",
+      "summary": "Confirm Dispensation of waiver cash-back",
+      "happy_path": {
+        "as_one_of": [
+          "cashier",
+          "receptionist"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/opd-tickets/1/waiver-refund/confirm-dispensation"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "payment": {
+                  "payment_id": 2,
+                  "receipt_no": "RCT-2026-0000002",
+                  "payment_type": "WaiverDispensation",
+                  "amount": 1000,
+                  "method": "Cash",
+                  "invoice_id": 1,
+                  "shift_id": 1,
+                  "collected_at": "2026-09-27T17:41:33.933987+00:00"
+                },
+                "ticket": {
+                  "ticket_id": 1,
+                  "ticket_number": "OPD-2026-000001",
+                  "patient_id": 1,
+                  "mrn": "MRN-2026-000001",
+                  "patient_name": "Ali Khan",
+                  "gender": "male",
+                  "age_years": 40,
+                  "dob": null,
+                  "doctor_id": 1,
+                  "doctor_name": "Dr Ahmed",
+                  "department_id": 1,
+                  "department_name": "General Medicine",
+                  "service_id": 1,
+                  "source": "WalkIn",
+                  "status": "Examined",
+                  "payment_status": "Waivered",
+                  "approval_lock": "None",
+                  "gross_amount": 1000,
+                  "discount_amount": 0,
+                  "net_payable": 1000,
+                  "discount_reason": null,
+                  "issued_at": "2026-09-27T17:41:33.637919+00:00",
+                  "paid_at": "2026-09-27T17:41:33.637919+00:00",
+                  "valid_until": "2026-09-30T17:41:33.637919+00:00",
+                  "called_at": "2026-09-27T17:41:33.808480+00:00",
+                  "examined_at": "2026-09-27T17:41:33.851851+00:00",
+                  "completed_at": null,
+                  "deferred_at": null,
+                  "reactivated_at": null,
+                  "expired_at": null,
+                  "voided_at": null,
+                  "void_reason": null,
+                  "cancelled_at": null,
+                  "is_clinical_locked": false,
+                  "clinical_lock_reason": null,
+                  "is_emergency_bypass": false,
+                  "is_ar_block_overridden": false,
+                  "row_version": 9,
+                  "queue": {
+                    "queue_id": 1,
+                    "queue_group": "doctor:1",
+                    "token_no": 1,
+                    "token_date": "2026-09-27",
+                    "priority": 0,
+                    "status": "Active",
+                    "queued_at": "2026-09-27T17:41:33.637919+00:00",
+                    "called_at": "2026-09-27T17:41:33.807010+00:00",
+                    "rerouted_from_queue_id": null
+                  },
+                  "invoice": {
+                    "invoice_id": 1,
+                    "invoice_no": "INV-2026-0000001",
+                    "invoice_type": "OPD",
+                    "patient_id": 1,
+                    "admission_id": null,
+                    "ticket_id": 1,
+                    "panel_id": null,
+                    "employee_id": null,
+                    "walkin_customer_name": null,
+                    "walkin_customer_mobile": null,
+                    "gross_total": 1000,
+                    "discount_total": 0,
+                    "net_payable": 1000,
+                    "amount_paid": 1000,
+                    "amount_refunded": 0,
+                    "waiver_amount": 1000,
+                    "waiver_dispensed_amount": 1000,
+                    "credit_amount": 0,
+                    "status": "Waivered",
+                    "is_locked": false,
+                    "locked_reason": null,
+                    "finalized_at": "2026-09-27T17:41:33.637919+00:00",
+                    "business_date": "2026-09-27",
+                    "created_at": "2026-09-27T17:41:33.637919+00:00",
+                    "row_version": 10,
+                    "lines": [
+                      {
+                        "invoice_item_id": 1,
+                        "line_type": "Consultation",
+                        "description": "OPD Consultation - GM",
+                        "qty": 1,
+                        "unit_price": 1000,
+                        "line_total": 1000,
+                        "bed_day": null,
+                        "reverses_item_id": null,
+                        "reversal_reason": null,
+                        "created_at": "2026-09-27T17:41:33.637919+00:00"
+                      }
+                    ],
+                    "balance_due": 0
+                  },
+                  "pending_approval": null,
+                  "cash_back_prompts": []
+                }
+              },
+              "meta": {
+                "server_time": "2026-09-27T17:41:33.945182+00:00"
+              },
+              "request_id": "1af292f60abb4425910ded24961d6ce2"
+            }
+          },
+          "errors_seen": [
+            "WAIVER_REFUND_ALREADY_DISPENSED"
+          ],
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "clinic_director"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "SHIFT_NOT_OPEN",
+        "VALIDATION_ERROR",
+        "WAIVER_REFUND_ALREADY_DISPENSED"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    }
+  ],
+  "service_cases": [],
+  "delivery_gate": {
+    "required": true,
+    "status": "required",
+    "progress_reporting": {
+      "required": true,
+      "submit": "propose_progress",
+      "verify": "progress_proposals",
+      "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+    },
+    "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+    "compulsory": [
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+        "points": 2
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+        "points": 3
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+        "points": 2
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+        "points": 4
+      }
+    ],
+    "zoom": {
+      "min_pct": 100,
+      "max_pct": 250,
+      "reset_pct": 100,
+      "keys": [
+        "Ctrl + or Ctrl = (zoom in)",
+        "Ctrl - (zoom out)",
+        "Ctrl 0 (reset to 100 %)",
+        "Command on macOS"
+      ],
+      "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+    },
+    "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+    "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+  },
+  "handbook_page": "screens/cash_back_prompts",
+  "workspace_guide": "get_handbook_outline('reception')",
+  "realtime": [
+    {
+      "event": "waiver.refund_order.ready",
+      "check": "the screen refreshes without polling"
+    },
+    {
+      "event": "refund.ready",
+      "check": "the screen refreshes without polling"
+    }
+  ],
+  "acceptance_rules": [
+    "Show ticket.cash_back_prompts as a blocking modal with the exact amount until confirmed.",
+    "Cash leaves YOUR open shift drawer (open one first: SHIFT_NOT_OPEN)."
+  ],
+  "demo_accounts": "demo_accounts() lists a login per role; sandbox_call runs each case on the DEV server"
+}

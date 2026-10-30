@@ -51,7 +51,7 @@ export function Facility({
         facility.staffingMatrix(),
         facility.listChanges(),
         facility.confirmations(),
-        facility.listDocuments({ category: "Hospital" }),
+        facility.listDocumentsFacilityCompliance({ category: "Hospital" }),
       ]);
     return { est, profiles, msds, staff, history, confirmations, documents };
   }, [revision]);

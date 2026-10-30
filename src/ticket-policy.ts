@@ -57,9 +57,6 @@ export function requestKinds(t: Ticket, p: string[]) {
     p.includes("opd.waiver.request")
       ? ["vip-waiver-request"]
       : []),
-    ...(!!t.examined_at && p.includes("opd.waiver.request_post_consult")
-      ? ["vip-waiver-post-consult"]
-      : []),
     ...(["Unpaid", "PartiallyPaid"].includes(t.payment_status) &&
     ["Issued", "Waiting"].includes(t.status) &&
     p.includes("opd.credit.request")

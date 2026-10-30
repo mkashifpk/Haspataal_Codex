@@ -1,0 +1,844 @@
+{
+  "screen_id": "my_cash_shift",
+  "contract_fingerprint": "14824af5c60c05148994",
+  "knowledge_revision": "9250bafb1794ac12",
+  "delivery_gate": {
+    "required": true,
+    "status": "required",
+    "progress_reporting": {
+      "required": true,
+      "submit": "propose_progress",
+      "verify": "progress_proposals",
+      "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+    },
+    "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+    "compulsory": [
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+        "points": 2
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+        "points": 3
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+        "points": 2
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+        "points": 4
+      }
+    ],
+    "zoom": {
+      "min_pct": 100,
+      "max_pct": 250,
+      "reset_pct": 100,
+      "keys": [
+        "Ctrl + or Ctrl = (zoom in)",
+        "Ctrl - (zoom out)",
+        "Ctrl 0 (reset to 100 %)",
+        "Command on macOS"
+      ],
+      "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+    },
+    "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+    "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+  },
+  "screen": {
+    "id": "my_cash_shift",
+    "workspace": "reception",
+    "title": "My cash shift",
+    "purpose": "Open/close the drawer; see collections by type; hand over the cash drop.",
+    "workflow": "§7.1",
+    "rule_objects": [
+      {
+        "id": "rule:6d79bd21de",
+        "text": "Every cash action needs an open shift at this counter (node from GET /terminals/whoami cash_node).",
+        "cites": []
+      },
+      {
+        "id": "rule:a38ea1222b",
+        "text": "Closing asks for the counted cash; the Accountant verifies it later.",
+        "cites": []
+      },
+      {
+        "id": "rule:e107caec45",
+        "text": "The drawer is counted whole: expected_cash includes the opening float (1500 for a float of 1500 and no movement). Ask the cashier to count everything in the drawer, the float included, and show declared_variance after the close; never subtract the float or compute a balance yourself.",
+        "cites": []
+      },
+      {
+        "id": "rule:c7a45c46b3",
+        "text": "In the Pharmacy workspace the drawer must be the Pharmacy Counter's (node PharmacyCounter): the pharmacy's cash goes into no other. On a PC whose GET /terminals/whoami cash_node is not PharmacyCounter, say that this PC is not set up for pharmacy cash and IT must map it to the Pharmacy Counter; never let the user pick the counter.",
+        "cites": []
+      }
+    ],
+    "related_workflows": [
+      "clinical-and-prescriptions",
+      "finance-and-owner",
+      "opd-reception"
+    ]
+  },
+  "endpoints": [
+    {
+      "endpoint": "POST /finance/cash-shifts/open",
+      "summary": "Open my cash shift at a counter",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "finance.shift.operate"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of finance.shift.operate",
+        "roles_allowed": [
+          "cashier",
+          "pharmacist",
+          "receptionist"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": true,
+      "errors": [
+        {
+          "code": "SHIFT_ALREADY_OPEN",
+          "http_status": 409,
+          "message": "You already have an open shift at this counter.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": null
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "Idempotency-Key",
+          "in": "header",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Idempotency-Key"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/OpenShiftIn"
+            }
+          }
+        }
+      },
+      "responses": {
+        "201": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_CashShiftOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "application/json",
+        "model": "OpenShiftIn",
+        "fields": [
+          {
+            "pointer": "/node",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "enum": [
+              "MainReception",
+              "PharmacyCounter",
+              "LabReception",
+              "IPDBilling",
+              "EmergencyCounter",
+              "CashierDesk"
+            ]
+          },
+          {
+            "pointer": "/opening_float",
+            "type": "one of",
+            "required": false,
+            "nullable": false,
+            "default": "0",
+            "description": "Cash issued from the main vault to start the drawer (change); part of the drawer until the cash drop"
+          }
+        ],
+        "cross_field_rules": {},
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "idempotency_key",
+        "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+        "reconcile_with": "GET /finance/cash-shifts",
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "GET /finance/cash-shifts/mine",
+      "summary": "My open shift (if any)",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "finance.shift.operate"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of finance.shift.operate",
+        "roles_allowed": [
+          "cashier",
+          "pharmacist",
+          "receptionist"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "node",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "enum": [
+                  "MainReception",
+                  "PharmacyCounter",
+                  "LabReception",
+                  "IPDBilling",
+                  "EmergencyCounter",
+                  "CashierDesk"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Node"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_Union_CashShiftSummaryOut__NoneType__"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "object",
+        "paging": [],
+        "search": [],
+        "filters": [
+          {
+            "name": "node",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "MainReception",
+              "PharmacyCounter",
+              "LabReception",
+              "IPDBilling",
+              "EmergencyCounter",
+              "CashierDesk"
+            ]
+          }
+        ],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "GET /finance/cash-shifts/{shift_id}/transactions",
+      "summary": "Drawer ledger of a shift",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "finance.shift.operate",
+          "finance.shift.view_all"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of finance.shift.operate or finance.shift.view_all",
+        "roles_allowed": [
+          "accountant",
+          "cashier",
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "pharmacist",
+          "receptionist"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "shift_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Shift Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_ShiftTransactionOut__"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "POST /finance/cash-shifts/{shift_id}/close",
+      "summary": "Close shift → PendingCollection",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "finance.shift.operate"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of finance.shift.operate",
+        "roles_allowed": [
+          "cashier",
+          "pharmacist",
+          "receptionist"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "SHIFT_NOT_OPEN",
+          "http_status": 409,
+          "message": "Open a cash shift before handling cash.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "status"
+          ],
+          "details_from": "POST /api/v1/finance/cash-shifts/{shift_id}/close"
+        },
+        {
+          "code": "SHIFT_NOT_OWNED",
+          "http_status": 403,
+          "message": "Cash must go through your own open shift.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": null
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "shift_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Shift Id"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/CloseShiftIn"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_CashShiftSummaryOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "application/json",
+        "model": "CloseShiftIn",
+        "fields": [
+          {
+            "pointer": "/declared_cash",
+            "type": "one of",
+            "required": true,
+            "nullable": false,
+            "description": "Everything the cashier counted in the drawer, the opening float included"
+          }
+        ],
+        "cross_field_rules": {},
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "state_guard",
+        "on_lost_answer": "A repeat is refused with SHIFT_NOT_OPEN: the shift is closed already. The first call may have succeeded; this error does not replay its result. Never retry automatically; re-read the record, then offer the action again only if it is still needed.",
+        "reconcile_with": "GET /finance/cash-shifts/{shift_id}",
+        "refused_with": "SHIFT_NOT_OPEN",
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      }
+    }
+  ],
+  "realtime": {
+    "topics": [
+      "session.*",
+      "system.*",
+      "notification.created"
+    ],
+    "handlers": [],
+    "rule": "Refresh the listed reads when the event arrives (a list without a path id: every time; a detail read: when the payload names the same id). Never poll."
+  },
+  "rules_in_force": null,
+  "decisions": [
+    {
+      "id": "H02",
+      "question": "Digits in the Urdu UI and printouts: Latin 0-9 or Extended Arabic-Indic ۰-۹.",
+      "owner": [
+        "vendor"
+      ],
+      "affects": [
+        "every screen in Urdu"
+      ],
+      "meanwhile": "Latin digits; identifiers, doses and money stay left to right."
+    },
+    {
+      "id": "H03",
+      "question": "How dates and times are shown on screen, and a 12- or 24-hour clock.",
+      "owner": [
+        "vendor",
+        "clinical_lead"
+      ],
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "The server's print format (e.g. 27-Sep-2026) and the hospital time zone."
+    },
+    {
+      "id": "H04",
+      "question": "Money on screen: decimals shown, and digit grouping (1,234,567 or 12,34,567).",
+      "owner": [
+        "vendor"
+      ],
+      "affects": [
+        "every screen with money"
+      ],
+      "meanwhile": "The amounts as the API sends them, with the currency setting."
+    },
+    {
+      "id": "H08",
+      "question": "Who writes and signs off the Urdu text of the UI, above all clinical and consent wording.",
+      "owner": [
+        "vendor",
+        "translator",
+        "clinical_lead"
+      ],
+      "affects": [
+        "every screen in Urdu"
+      ],
+      "meanwhile": "Urdu you add is a draft: mark it so (the interview bank's pattern: a draft until a native speaker reviews it)."
+    },
+    {
+      "id": "H09",
+      "question": "One design system shared by every frontend team (who authors and approves it), or each team's own.",
+      "owner": [
+        "vendor",
+        "frontend_lead"
+      ],
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "Each team designs within the backend's constraints: themes Light and DarkHighContrast, zoom 100-250 %, Noto Nastaliq Urdu, status shown as text and icon, never colour alone. Follow the vendor's design principles (frontend guide 18, get_design_principles)."
+    },
+    {
+      "id": "H10",
+      "question": "How each realtime event is shown (interrupt, attention, inform, silent), alert sounds and which terminals play them. Only Code Red (interrupt), the licence and maintenance banners and the logout on session.revoked are prescribed (the event catalogue's `presentation`).",
+      "owner": [
+        "clinical_lead",
+        "vendor"
+      ],
+      "affects": [
+        "every screen with realtime events"
+      ],
+      "meanwhile": "Code Red interrupts; every other event updates the screen and, at most, a dismissible notice. `priority` is the delivery urgency, not a presentation rule."
+    },
+    {
+      "id": "H12",
+      "question": "Which workspaces run on web, Android and iOS, which cannot read a MAC address, discover the server by UDP or print silently; or are cash and printing Windows-only.",
+      "owner": [
+        "vendor",
+        "backend"
+      ],
+      "affects": [
+        "my_cash_shift",
+        "registration",
+        "every screen that prints"
+      ],
+      "meanwhile": "The guides describe the Windows (Electron) terminal; tell your developer when a screen needs a capability your platform lacks."
+    },
+    {
+      "id": "H18",
+      "question": "Noto Nastaliq Urdu everywhere, or the more compact Naskh in dense tables.",
+      "owner": [
+        "vendor",
+        "frontend_lead"
+      ],
+      "affects": [
+        "every table in Urdu"
+      ],
+      "meanwhile": "Noto Nastaliq Urdu, as the guides require."
+    },
+    {
+      "id": "H19",
+      "question": "Allergies: the patient record keeps free text, so it cannot tell \"no known allergies\" (asserted by a clinician) from \"not recorded\". Should it?",
+      "owner": [
+        "clinical_lead",
+        "backend"
+      ],
+      "affects": [
+        "every screen with a patient banner"
+      ],
+      "meanwhile": "Show the recorded text as recorded; an empty value is \"not recorded\", never \"none\"."
+    },
+    {
+      "id": "H20",
+      "question": "May unsaved form input be kept on the terminal (which fields, encrypted, for how long)?",
+      "owner": [
+        "vendor",
+        "hospital"
+      ],
+      "affects": [
+        "every form"
+      ],
+      "meanwhile": "In memory only; never a second checker's password."
+    },
+    {
+      "id": "H22",
+      "question": "Which documents may print on an unregistered terminal's default printer (sensitive A4 documents).",
+      "owner": [
+        "hospital",
+        "vendor"
+      ],
+      "affects": [
+        "every screen that prints"
+      ],
+      "meanwhile": "As the printing guide says: the hint, then the default printer."
+    },
+    {
+      "id": "H24",
+      "question": "Who approves frontend performance targets, alert thresholds and escalation timers.",
+      "owner": [
+        "vendor",
+        "clinical_lead"
+      ],
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "The server's own settings (e.g. critical_result_communicate_minutes)."
+    }
+  ],
+  "unknowns": [
+    {
+      "what": "decision H02",
+      "owner": [
+        "vendor"
+      ],
+      "question": "Digits in the Urdu UI and printouts: Latin 0-9 or Extended Arabic-Indic ۰-۹.",
+      "affects": [
+        "every screen in Urdu"
+      ],
+      "meanwhile": "Latin digits; identifiers, doses and money stay left to right."
+    },
+    {
+      "what": "decision H03",
+      "owner": [
+        "vendor",
+        "clinical_lead"
+      ],
+      "question": "How dates and times are shown on screen, and a 12- or 24-hour clock.",
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "The server's print format (e.g. 27-Sep-2026) and the hospital time zone."
+    },
+    {
+      "what": "decision H04",
+      "owner": [
+        "vendor"
+      ],
+      "question": "Money on screen: decimals shown, and digit grouping (1,234,567 or 12,34,567).",
+      "affects": [
+        "every screen with money"
+      ],
+      "meanwhile": "The amounts as the API sends them, with the currency setting."
+    },
+    {
+      "what": "decision H08",
+      "owner": [
+        "vendor",
+        "translator",
+        "clinical_lead"
+      ],
+      "question": "Who writes and signs off the Urdu text of the UI, above all clinical and consent wording.",
+      "affects": [
+        "every screen in Urdu"
+      ],
+      "meanwhile": "Urdu you add is a draft: mark it so (the interview bank's pattern: a draft until a native speaker reviews it)."
+    },
+    {
+      "what": "decision H09",
+      "owner": [
+        "vendor",
+        "frontend_lead"
+      ],
+      "question": "One design system shared by every frontend team (who authors and approves it), or each team's own.",
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "Each team designs within the backend's constraints: themes Light and DarkHighContrast, zoom 100-250 %, Noto Nastaliq Urdu, status shown as text and icon, never colour alone. Follow the vendor's design principles (frontend guide 18, get_design_principles)."
+    },
+    {
+      "what": "decision H10",
+      "owner": [
+        "clinical_lead",
+        "vendor"
+      ],
+      "question": "How each realtime event is shown (interrupt, attention, inform, silent), alert sounds and which terminals play them. Only Code Red (interrupt), the licence and maintenance banners and the logout on session.revoked are prescribed (the event catalogue's `presentation`).",
+      "affects": [
+        "every screen with realtime events"
+      ],
+      "meanwhile": "Code Red interrupts; every other event updates the screen and, at most, a dismissible notice. `priority` is the delivery urgency, not a presentation rule."
+    },
+    {
+      "what": "decision H12",
+      "owner": [
+        "vendor",
+        "backend"
+      ],
+      "question": "Which workspaces run on web, Android and iOS, which cannot read a MAC address, discover the server by UDP or print silently; or are cash and printing Windows-only.",
+      "affects": [
+        "my_cash_shift",
+        "registration",
+        "every screen that prints"
+      ],
+      "meanwhile": "The guides describe the Windows (Electron) terminal; tell your developer when a screen needs a capability your platform lacks."
+    },
+    {
+      "what": "decision H18",
+      "owner": [
+        "vendor",
+        "frontend_lead"
+      ],
+      "question": "Noto Nastaliq Urdu everywhere, or the more compact Naskh in dense tables.",
+      "affects": [
+        "every table in Urdu"
+      ],
+      "meanwhile": "Noto Nastaliq Urdu, as the guides require."
+    },
+    {
+      "what": "decision H19",
+      "owner": [
+        "clinical_lead",
+        "backend"
+      ],
+      "question": "Allergies: the patient record keeps free text, so it cannot tell \"no known allergies\" (asserted by a clinician) from \"not recorded\". Should it?",
+      "affects": [
+        "every screen with a patient banner"
+      ],
+      "meanwhile": "Show the recorded text as recorded; an empty value is \"not recorded\", never \"none\"."
+    },
+    {
+      "what": "decision H20",
+      "owner": [
+        "vendor",
+        "hospital"
+      ],
+      "question": "May unsaved form input be kept on the terminal (which fields, encrypted, for how long)?",
+      "affects": [
+        "every form"
+      ],
+      "meanwhile": "In memory only; never a second checker's password."
+    },
+    {
+      "what": "decision H22",
+      "owner": [
+        "hospital",
+        "vendor"
+      ],
+      "question": "Which documents may print on an unregistered terminal's default printer (sensitive A4 documents).",
+      "affects": [
+        "every screen that prints"
+      ],
+      "meanwhile": "As the printing guide says: the hint, then the default printer."
+    },
+    {
+      "what": "decision H24",
+      "owner": [
+        "vendor",
+        "clinical_lead"
+      ],
+      "question": "Who approves frontend performance targets, alert thresholds and escalation timers.",
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "The server's own settings (e.g. critical_result_communicate_minutes)."
+    }
+  ]
+}

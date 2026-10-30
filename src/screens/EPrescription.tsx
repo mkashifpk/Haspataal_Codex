@@ -446,8 +446,8 @@ function PrescriptionEditor({
         if (
           l.self &&
           (!inpatient ||
-            !["Oral", "Inhaled", "Topical"].includes(l.route) ||
-            l.drug?.high_alert_category)
+            !["Oral", "SL", "Inhaled", "Topical", "Ophthalmic", "Otic", "Nasal"].includes(l.route) ||
+            l.drug?.high_alert_category || (destination === "ExternalMarket" && (!l.drug || l.external)))
         )
           fail(
             t(
@@ -1245,8 +1245,8 @@ function PrescriptionEditor({
                       data-help="rx.safety"
                       checked={l.self}
                       disabled={
-                        !["Oral", "Inhaled", "Topical"].includes(l.route) ||
-                        !!l.drug?.high_alert_category
+                        !["Oral", "SL", "Inhaled", "Topical", "Ophthalmic", "Otic", "Nasal"].includes(l.route) ||
+                        !!l.drug?.high_alert_category || (destination === "ExternalMarket" && (!l.drug || l.external))
                       }
                       onChange={(e) => input(l.id, { self: e.target.checked })}
                     />

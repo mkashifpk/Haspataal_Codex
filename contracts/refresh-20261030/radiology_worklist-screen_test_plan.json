@@ -1,0 +1,968 @@
+{
+  "screen": "radiology_worklist",
+  "title": "Imaging worklist",
+  "cases": [
+    {
+      "id": "case:GET /imaging/worklist",
+      "call": "GET /api/v1/imaging/worklist",
+      "summary": "Radiographer worklist (STAT first, then by due time)",
+      "happy_path": {
+        "as_one_of": [
+          "radiographer",
+          "radiologist"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/imaging/worklist"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "imaging_order_id": 1,
+                  "order_number": "IMG-2026-00001",
+                  "accession_number": "AFDBBCF719E79",
+                  "modality": "XRay",
+                  "body_part": "Wrist",
+                  "laterality": "Left",
+                  "priority": "Urgent",
+                  "status": "Ordered",
+                  "ordered_at": "2026-09-30T20:03:01.784224+00:00",
+                  "transport": null,
+                  "escort": null,
+                  "contrast_given": false,
+                  "has_study": false,
+                  "patient_name": "Sana Bibi",
+                  "mrn": "MRN-2026-000002",
+                  "gender": "female",
+                  "age_years": 30,
+                  "doctor_name": "Dr Ahmed",
+                  "is_emergency": true,
+                  "is_inpatient": false,
+                  "pregnancy_check_needed": true,
+                  "due_at": "2026-09-30T20:33:01.784224+00:00",
+                  "is_overdue": false
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-30T20:03:01.835695+00:00"
+              },
+              "request_id": "f70f1280c3b7434dbb8132a1ad55a00c"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:POST /imaging/orders/{order_id}/status",
+      "call": "POST /api/v1/imaging/orders/{order_id}/status",
+      "summary": "Progress / cancel an imaging order",
+      "happy_path": {
+        "as_one_of": [
+          "radiographer",
+          "radiologist"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/imaging/orders/1/status",
+            "body": {
+              "status": "InProgress",
+              "site_confirmed": true,
+              "identity_check": "TwoIdentifiers"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "imaging_order_id": 1,
+                "order_number": "IMG-2026-00001",
+                "accession_number": "AEF50A7A1CEF9",
+                "patient_id": 1,
+                "ticket_id": 1,
+                "admission_id": null,
+                "requester_doctor_id": 1,
+                "modality": "XRay",
+                "body_part": "Chest PA",
+                "clinical_indication": "Cough for 3 weeks",
+                "service_id": 2,
+                "price_at_order": 1500,
+                "priority": "Routine",
+                "laterality": null,
+                "transport": null,
+                "escort": null,
+                "status": "InProgress",
+                "identity_check": "TwoIdentifiers",
+                "identity_note": null,
+                "site_confirmed": true,
+                "pregnancy_status": null,
+                "pregnancy_note": null,
+                "checked_by": 7,
+                "started_at": "2026-09-30T19:59:54.751251+00:00",
+                "contrast": null,
+                "contrast_doctor_id": null,
+                "completed_at": null,
+                "orthanc_study_id": null,
+                "study_instance_uid": null,
+                "partner_id": null,
+                "outsourced_at": null,
+                "external_reporter": null,
+                "report_text": null,
+                "reported_by": null,
+                "reported_at": null,
+                "critical_finding_id": null,
+                "critical_finding_note": null,
+                "cancel_reason": null,
+                "ordered_by": 1,
+                "ordered_at": "2026-09-30T19:59:54.677771+00:00",
+                "perform_alerted_at": null,
+                "report_alerted_at": null,
+                "row_version": 2
+              },
+              "meta": {
+                "server_time": "2026-09-30T19:59:54.760734+00:00"
+              },
+              "request_id": "a4317928c69f47299bac3ca3abfc5f79"
+            }
+          },
+          "errors_seen": [
+            "FORBIDDEN",
+            "IMAGING_ORDER_STATE_INVALID",
+            "IMAGING_SAFETY_CHECK_REQUIRED",
+            "PATIENT_IDENTITY_MISMATCH",
+            "VALIDATION_ERROR"
+          ],
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "FORBIDDEN",
+        "IMAGING_ORDER_STATE_INVALID",
+        "IMAGING_SAFETY_CHECK_REQUIRED",
+        "INVOICE_HAS_PAYMENTS",
+        "PATIENT_IDENTITY_MISMATCH",
+        "PATIENT_IDENTITY_REQUIRED",
+        "VALIDATION_ERROR"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:POST /imaging/orders/{order_id}/link-study",
+      "call": "POST /api/v1/imaging/orders/{order_id}/link-study",
+      "summary": "Link the PACS study (auto-find by accession if no ids given)",
+      "happy_path": {
+        "as_one_of": [
+          "radiographer",
+          "radiologist"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/imaging/orders/1/link-study",
+            "body": {
+              "orthanc_study_id": "27f7126f-4f66fb14-03f4081b-f9341db2-53925988"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "imaging_order_id": 1,
+                "order_number": "IMG-2026-00001",
+                "accession_number": "A6EA3946B9F91",
+                "patient_id": 1,
+                "ticket_id": 1,
+                "admission_id": null,
+                "requester_doctor_id": 1,
+                "modality": "XRay",
+                "body_part": "Chest PA",
+                "clinical_indication": "Cough for 3 weeks",
+                "service_id": 2,
+                "price_at_order": 1500,
+                "priority": "Routine",
+                "laterality": null,
+                "transport": null,
+                "escort": null,
+                "status": "Completed",
+                "identity_check": "TwoIdentifiers",
+                "identity_note": null,
+                "site_confirmed": true,
+                "pregnancy_status": null,
+                "pregnancy_note": null,
+                "checked_by": 7,
+                "started_at": "2026-10-28T09:07:10.697268+00:00",
+                "contrast": null,
+                "contrast_doctor_id": null,
+                "completed_at": "2026-10-28T09:07:10.719693+00:00",
+                "orthanc_study_id": "27f7126f-4f66fb14-03f4081b-f9341db2-53925988",
+                "study_instance_uid": "1.2.3.4",
+                "partner_id": null,
+                "outsourced_at": null,
+                "external_reporter": null,
+                "report_text": null,
+                "reported_by": null,
+                "reported_at": null,
+                "critical_finding_id": null,
+                "critical_finding_note": null,
+                "cancel_reason": null,
+                "ordered_by": 1,
+                "ordered_at": "2026-10-28T09:07:10.600724+00:00",
+                "perform_alerted_at": null,
+                "report_alerted_at": null,
+                "row_version": 3,
+                "viewer_url": "http://pacs.hospital.lan:8042/stone-webviewer/index.html?study=1.2.3.4"
+              },
+              "meta": {
+                "server_time": "2026-10-28T09:07:10.725400+00:00"
+              },
+              "request_id": "30371cd81f8c41aebb66cbe5a8fd9871"
+            }
+          },
+          "errors_seen": [
+            "IMAGING_STUDY_NOT_FOUND",
+            "PACS_NOT_CONFIGURED",
+            "VALIDATION_ERROR"
+          ],
+          "events_emitted": [
+            "imaging.study.available"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "IMAGING_ORDER_STATE_INVALID",
+        "IMAGING_STUDY_NOT_FOUND",
+        "NOT_FOUND",
+        "ORTHANC_UNAVAILABLE",
+        "PACS_NOT_CONFIGURED",
+        "VALIDATION_ERROR"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:POST /imaging/orders/{order_id}/report",
+      "call": "POST /api/v1/imaging/orders/{order_id}/report",
+      "summary": "Enter the radiology report (radiologist)",
+      "happy_path": {
+        "as_one_of": [
+          "radiologist"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/imaging/orders/1/report",
+            "body": {
+              "report_text": "No active lung lesion."
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "imaging_order_id": 1,
+                "order_number": "IMG-2026-00001",
+                "accession_number": "AEF50A7A1CEF9",
+                "patient_id": 1,
+                "ticket_id": 1,
+                "admission_id": null,
+                "requester_doctor_id": 1,
+                "modality": "XRay",
+                "body_part": "Chest PA",
+                "clinical_indication": "Cough for 3 weeks",
+                "service_id": 2,
+                "price_at_order": 1500,
+                "priority": "Routine",
+                "laterality": null,
+                "transport": null,
+                "escort": null,
+                "status": "Reported",
+                "identity_check": "TwoIdentifiers",
+                "identity_note": null,
+                "site_confirmed": true,
+                "pregnancy_status": null,
+                "pregnancy_note": null,
+                "checked_by": 7,
+                "started_at": "2026-09-30T19:59:54.751251+00:00",
+                "contrast": null,
+                "contrast_doctor_id": null,
+                "completed_at": "2026-09-30T19:59:54.767417+00:00",
+                "orthanc_study_id": "s-1",
+                "study_instance_uid": "1.2",
+                "partner_id": null,
+                "outsourced_at": null,
+                "external_reporter": null,
+                "report_text": "No active lung lesion.",
+                "reported_by": 6,
+                "reported_at": "2026-09-30T19:59:54.781647+00:00",
+                "critical_finding_id": null,
+                "critical_finding_note": null,
+                "cancel_reason": null,
+                "ordered_by": 1,
+                "ordered_at": "2026-09-30T19:59:54.677771+00:00",
+                "perform_alerted_at": null,
+                "report_alerted_at": null,
+                "row_version": 4
+              },
+              "meta": {
+                "server_time": "2026-09-30T19:59:54.790468+00:00"
+              },
+              "request_id": "a8f5deb230554d28a20efdc3e86915f4"
+            }
+          },
+          "errors_seen": [
+            "FORBIDDEN",
+            "IMAGING_ORDER_STATE_INVALID",
+            "IMAGING_REPORTER_NOT_AUTHORIZED"
+          ],
+          "events_emitted": [
+            "critical_result.updated",
+            "imaging.report.ready",
+            "notification.created"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "FORBIDDEN",
+        "IMAGING_ORDER_STATE_INVALID",
+        "IMAGING_REPORTER_NOT_AUTHORIZED",
+        "VALIDATION_ERROR"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:GET /imaging/orders/{order_id}",
+      "call": "GET /api/v1/imaging/orders/{order_id}",
+      "summary": "Imaging order with viewer URL",
+      "happy_path": {
+        "as_one_of": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "radiographer",
+          "radiologist",
+          "surgeon"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/imaging/orders/1"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "imaging_order_id": 1,
+                "order_number": "IMG-2026-00001",
+                "accession_number": "AEF50A7A1CEF9",
+                "patient_id": 1,
+                "ticket_id": 1,
+                "admission_id": null,
+                "requester_doctor_id": 1,
+                "modality": "XRay",
+                "body_part": "Chest PA",
+                "clinical_indication": "Cough for 3 weeks",
+                "service_id": 2,
+                "price_at_order": 1500,
+                "priority": "Routine",
+                "laterality": null,
+                "transport": null,
+                "escort": null,
+                "status": "Reported",
+                "identity_check": "TwoIdentifiers",
+                "identity_note": null,
+                "site_confirmed": true,
+                "pregnancy_status": null,
+                "pregnancy_note": null,
+                "checked_by": 7,
+                "started_at": "2026-09-30T19:59:54.751251+00:00",
+                "contrast": null,
+                "contrast_doctor_id": null,
+                "completed_at": "2026-09-30T19:59:54.767417+00:00",
+                "orthanc_study_id": "s-1",
+                "study_instance_uid": "1.2",
+                "partner_id": null,
+                "outsourced_at": null,
+                "external_reporter": null,
+                "report_text": "No active lung lesion.",
+                "reported_by": 6,
+                "reported_at": "2026-09-30T19:59:54.781647+00:00",
+                "critical_finding_id": null,
+                "critical_finding_note": null,
+                "cancel_reason": null,
+                "ordered_by": 1,
+                "ordered_at": "2026-09-30T19:59:54.677771+00:00",
+                "perform_alerted_at": null,
+                "report_alerted_at": null,
+                "row_version": 4,
+                "patient_name": "Ali Khan",
+                "mrn": "MRN-2026-000001",
+                "gender": "male",
+                "age_years": 40,
+                "doctor_name": "Dr Ahmed",
+                "reported_by_name": "Dr Hamza Radiologist",
+                "reported_stamp": {
+                  "at": "2026-09-30T19:59:54.781647+00:00",
+                  "name": "Dr Hamza Radiologist",
+                  "text": "Dr Hamza Radiologist, Doctor, PMDC PMDC-51447, 01-Oct-2026 00:59",
+                  "user_id": 6,
+                  "designation": "Doctor",
+                  "employee_id": 6,
+                  "registration": "PMDC PMDC-51447"
+                },
+                "checked_by_name": "u98c91315b4",
+                "contrast_doctor_name": null,
+                "partner_name": null,
+                "critical_finding_name": null,
+                "critical_result_id": null,
+                "perform_due_at": "2026-09-30T23:59:54.677771+00:00",
+                "report_due_at": "2026-10-01T19:59:54.767417+00:00",
+                "pregnancy_check_needed": false,
+                "viewer_url": null
+              },
+              "meta": {
+                "server_time": "2026-09-30T19:59:54.805684+00:00"
+              },
+              "request_id": "d9339d088ba24e2ea18fff49bd978ed1"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "billing_admin",
+          "cashier",
+          "clinic_director"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /critical-imaging-findings",
+      "call": "GET /api/v1/critical-imaging-findings",
+      "summary": "The critical imaging findings list",
+      "happy_path": {
+        "as_one_of": [
+          "anaesthetist",
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "lab_admin",
+          "lab_technician",
+          "lab_verifier",
+          "owner",
+          "quality_officer",
+          "radiographer",
+          "radiologist",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/critical-imaging-findings"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "finding_id": 1,
+                  "name": "Tension or large pneumothorax",
+                  "modality": null,
+                  "description": "Chest film or CT: needs decompression now",
+                  "sort_order": 10,
+                  "is_active": true,
+                  "row_version": 1
+                },
+                {
+                  "finding_id": 2,
+                  "name": "Free intraperitoneal air",
+                  "modality": null,
+                  "description": "Pneumoperitoneum without a recent operation: a perforated viscus",
+                  "sort_order": 20,
+                  "is_active": true,
+                  "row_version": 1
+                },
+                {
+                  "finding_id": 3,
+                  "name": "Intracranial haemorrhage",
+                  "modality": "CT",
+                  "description": "Any new extradural, subdural, subarachnoid or intracerebral bleed",
+                  "sort_order": 30,
+                  "is_active": true,
+                  "row_version": 1
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-30T20:03:01.968312+00:00"
+              },
+              "request_id": "f31771b72ce44a06adb1175a824f1513"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "billing_admin",
+          "cashier",
+          "cssd_technician"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /wristbands/verify",
+      "call": "GET /api/v1/wristbands/verify",
+      "summary": "Scan to verify a patient's identity",
+      "happy_path": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier",
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "ipc_nurse",
+          "lab_technician",
+          "lab_verifier",
+          "ot_admin",
+          "ot_nurse",
+          "owner",
+          "pharmacist",
+          "quality_officer",
+          "radiographer",
+          "radiologist",
+          "receptionist",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse",
+          "zakat_officer"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/wristbands/verify",
+            "query": {
+              "code": "HMS:PT:MRN-2026-000001",
+              "admission_id": 1
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "match": true,
+                "scanned_mrn": "MRN-2026-000001",
+                "scanned_patient": {
+                  "patient_id": 1,
+                  "full_name": "Ali Khan",
+                  "mrn": "MRN-2026-000001",
+                  "gender": "male",
+                  "dob": null
+                },
+                "expected_patient": {
+                  "patient_id": 1,
+                  "full_name": "Ali Khan",
+                  "mrn": "MRN-2026-000001",
+                  "gender": "male",
+                  "dob": null
+                }
+              },
+              "meta": {
+                "server_time": "2026-09-30T15:01:48.318876+00:00"
+              },
+              "request_id": "e254efa3ddfd48dfb4adc35183816f34"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "cssd_technician",
+          "employee_self",
+          "hr_admin",
+          "lab_admin",
+          "maintenance_admin"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /imaging/orders/{order_id}/report/print-payload",
+      "call": "GET /api/v1/imaging/orders/{order_id}/report/print-payload",
+      "summary": "Printable radiology report with the reporter's stamp",
+      "happy_path": {
+        "as_one_of": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "radiographer",
+          "radiologist",
+          "surgeon"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/imaging/orders/1/report/print-payload"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "document_type": "imaging_report",
+                "printer_role": "document",
+                "paper_width_mm": 210,
+                "fields": {
+                  "hospital": {
+                    "name": "Haspataal Hospital",
+                    "address": "",
+                    "phone": ""
+                  },
+                  "order": {
+                    "imaging_order_id": 1,
+                    "order_number": "IMG-2026-00001",
+                    "accession_number": "AEF50A7A1CEF9",
+                    "patient_id": 1,
+                    "ticket_id": 1,
+                    "admission_id": null,
+                    "requester_doctor_id": 1,
+                    "modality": "XRay",
+                    "body_part": "Chest PA",
+                    "clinical_indication": "Cough for 3 weeks",
+                    "service_id": 2,
+                    "price_at_order": 1500,
+                    "priority": "Routine",
+                    "laterality": null,
+                    "transport": null,
+                    "escort": null,
+                    "status": "Reported",
+                    "identity_check": "TwoIdentifiers",
+                    "identity_note": null,
+                    "site_confirmed": true,
+                    "pregnancy_status": null,
+                    "pregnancy_note": null,
+                    "checked_by": 7,
+                    "started_at": "2026-09-30T19:59:54.751251+00:00",
+                    "contrast": null,
+                    "contrast_doctor_id": null,
+                    "completed_at": "2026-09-30T19:59:54.767417+00:00",
+                    "orthanc_study_id": "s-1",
+                    "study_instance_uid": "1.2",
+                    "partner_id": null,
+                    "outsourced_at": null,
+                    "external_reporter": null,
+                    "report_text": "No active lung lesion.",
+                    "reported_by": 6,
+                    "reported_at": "2026-09-30T19:59:54.781647+00:00",
+                    "critical_finding_id": null,
+                    "critical_finding_note": null,
+                    "cancel_reason": null,
+                    "ordered_by": 1,
+                    "ordered_at": "2026-09-30T19:59:54.677771+00:00",
+                    "perform_alerted_at": null,
+                    "report_alerted_at": null,
+                    "row_version": 4,
+                    "patient_name": "Ali Khan",
+                    "mrn": "MRN-2026-000001",
+                    "gender": "male",
+                    "age_years": 40,
+                    "doctor_name": "Dr Ahmed",
+                    "reported_by_name": "Dr Hamza Radiologist",
+                    "reported_stamp": {
+                      "at": "2026-09-30T19:59:54.781647+00:00",
+                      "name": "Dr Hamza Radiologist",
+                      "text": "Dr Hamza Radiologist, Doctor, PMDC PMDC-51447, 01-Oct-2026 00:59",
+                      "user_id": 6,
+                      "designation": "Doctor",
+                      "employee_id": 6,
+                      "registration": "PMDC PMDC-51447"
+                    },
+                    "checked_by_name": "u98c91315b4",
+                    "contrast_doctor_name": null,
+                    "partner_name": null,
+                    "critical_finding_name": null,
+                    "critical_result_id": null,
+                    "perform_due_at": "2026-09-30T23:59:54.677771+00:00",
+                    "report_due_at": "2026-10-01T19:59:54.767417+00:00",
+                    "pregnancy_check_needed": false,
+                    "viewer_url": null
+                  }
+                },
+                "text": "                                    Haspataal Hospital\n                                     RADIOLOGY REPORT\n------------------------------------------------------------------------------------------\nPatient                                                     Ali Khan (MRN MRN-2026-000001)\nAge / sex                                                                        40 / male\nStudy             …",
+                "barcode_svg": "<svg version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" width=\"53.840mm\" height=\"18.411mm\">\r\n    <!--Autogenerated with python-barcode 0.16.1-->\r\n    <g id=\"barcode_group\">\r\n        <rect width=\"100%\" height=\"100%\" style=\"fill:white\"/>\r\n        <rect x=\"2.000mm\" y=\"1.000mm\" width=\"0.560mm\" height=\"12.000mm\" style=\"fill:black;\"/>\r\n        <rect x=\"2.840mm\" y=\"1.000mm\" width=\"0.280mm\" height=\"12.000mm…",
+                "qr_svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"116\" height=\"116\" class=\"segno\"><path transform=\"scale(4)\" class=\"qrline\" stroke=\"#000\" d=\"M2 2.5h7m5 0h1m2 0h2m1 0h7m-25 1h1m5 0h1m1 0h2m1 0h5m2 0h1m5 0h1m-25 1h1m1 0h3m1 0h1m2 0h4m1 0h1m3 0h1m1 0h3m1 0h1m-25 1h1m1 0h3m1 0h1m2 0h1m3 0h1m4 0h1m1 0h3m1 0h1m-25 1h1m1 0h3m1 0h1m1 0h2m1 0h4m3 0h1m1 0h3m1 0h1m-25 1h1m5 0h1m5 0h1m3 0h1m1 0h1m5 0h1m-25 1h7m1…",
+                "pdf_url": "/api/v1/imaging/orders/1/report/pdf"
+              },
+              "meta": {
+                "server_time": "2026-09-30T19:59:54.827075+00:00"
+              },
+              "request_id": "2d595f892c06456cbc3025ac44704e77"
+            }
+          },
+          "errors_seen": [
+            "IMAGING_REPORT_NOT_READY"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "billing_admin",
+          "cashier",
+          "clinic_director"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "IMAGING_REPORT_NOT_READY",
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /imaging/orders/{order_id}/report/pdf",
+      "call": "GET /api/v1/imaging/orders/{order_id}/report/pdf",
+      "summary": "The radiology report as a PDF",
+      "happy_path": {
+        "as_one_of": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "radiographer",
+          "radiologist",
+          "surgeon"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/imaging/orders/1/report/pdf"
+          },
+          "response": {
+            "status": 200,
+            "content_type": "application/pdf",
+            "bytes": 2394
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "billing_admin",
+          "cashier",
+          "clinic_director"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "IMAGING_REPORT_NOT_READY",
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /staff/lookup",
+      "call": "GET /api/v1/staff/lookup",
+      "summary": "Find a staff member for a form (badge facts only)",
+      "happy_path": {
+        "as_one_of": [
+          "any logged-in user"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/staff/lookup",
+            "query": {
+              "q": "sana look"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "employee_id": 2,
+                  "emp_number": "EMP-2026-0002",
+                  "full_name": "Sana Lookuptest",
+                  "designation": "Officer",
+                  "department_name": null,
+                  "license_type": "PNC",
+                  "registration": "PNC PNC-8403"
+                }
+              ],
+              "meta": {
+                "server_time": "2026-10-27T15:29:53.668901+00:00"
+              },
+              "request_id": "4e2ee3a40faa41c195bc2aa08edaa30b"
+            }
+          },
+          "errors_seen": [
+            "UNAUTHENTICATED",
+            "VALIDATION_ERROR"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "UNAUTHENTICATED",
+        "VALIDATION_ERROR"
+      ]
+    }
+  ],
+  "service_cases": [
+    {
+      "view": "full",
+      "set_up": "GET /establishment answers views.screens[screen_id=radiology_worklist].view = full (imaging): stub that answer, or have the DEV server's admin move the service on Facility settings",
+      "expect": "Show it; every action the user's permissions allow."
+    },
+    {
+      "view": "open_work",
+      "set_up": "GET /establishment answers views.screens[screen_id=radiology_worklist].view = open_work (imaging): stub that answer, or have the DEV server's admin move the service on Facility settings",
+      "expect": "The service is Retiring: show it with the banner 'No new <new_work> from now on' and its open work; hide the actions that start new work of it (x-capability-gates; continues_while_retiring ones stay); keep every other action (completing, transferring, settling, correcting)."
+    },
+    {
+      "view": "records",
+      "set_up": "GET /establishment answers views.screens[screen_id=radiology_worklist].view = records (imaging): stub that answer, or have the DEV server's admin move the service on Facility settings",
+      "expect": "The service is Retired (or Preparing after it ran): show it as records only, under a 'Records' marker: lists, details, prints and the corrections the server still accepts; no action that starts new work."
+    },
+    {
+      "view": "hidden",
+      "set_up": "GET /establishment answers views.screens[screen_id=radiology_worklist].view = hidden (imaging): stub that answer, or have the DEV server's admin move the service on Facility settings",
+      "expect": "Not in any menu: the service has never run here, so the screen has nothing to show."
+    }
+  ],
+  "delivery_gate": {
+    "required": true,
+    "status": "required",
+    "progress_reporting": {
+      "required": true,
+      "submit": "propose_progress",
+      "verify": "progress_proposals",
+      "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+    },
+    "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+    "compulsory": [
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+        "points": 2
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+        "points": 3
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+        "points": 2
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+        "points": 4
+      }
+    ],
+    "zoom": {
+      "min_pct": 100,
+      "max_pct": 250,
+      "reset_pct": 100,
+      "keys": [
+        "Ctrl + or Ctrl = (zoom in)",
+        "Ctrl - (zoom out)",
+        "Ctrl 0 (reset to 100 %)",
+        "Command on macOS"
+      ],
+      "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+    },
+    "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+    "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+  },
+  "handbook_page": "screens/radiology_worklist",
+  "workspace_guide": "get_handbook_outline('radiology')",
+  "realtime": [
+    {
+      "event": "imaging.order.created",
+      "check": "the screen refreshes without polling"
+    },
+    {
+      "event": "critical_result.updated",
+      "check": "the screen refreshes without polling"
+    }
+  ],
+  "acceptance_rules": [
+    "Show accession_number prominently — the modality must use it so studies auto-link.",
+    "Worklist: emergencies first, then due_at (is_overdue red); show laterality, transport, escort and pregnancy_check_needed.",
+    "Start (status InProgress) = the checks before the examination (MSDS AAC 10, 13): scan the wristband (wristband_code) or TwoIdentifiers, tick site_confirmed after checking the site and side against the order, and when pregnancy_check_needed ask and send pregnancy_status (Pregnant: pregnancy_note with the decision). Missing: PATIENT_IDENTITY_REQUIRED / IMAGING_SAFETY_CHECK_REQUIRED.",
+    "Complete: with contrast, send contrast (agent, dose, route) and contrast_doctor_id (the PMDC doctor present). A study linked while the examination is in progress completes it.",
+    "Report (radiologists only: IMAGING_REPORTER_NOT_AUTHORIZED otherwise): pick a critical finding from GET /critical-imaging-findings (critical_finding_id) and/or describe it (critical_finding_note): the critical results log opens and the doctor is alerted; phone them now and record it (screen critical_results_radiology).",
+    "A report is final once entered and carries the reporter's stamp; print it for the patient (report/print-payload).",
+    "The doctor present at contrast: pick them with GET /staff/lookup?q=...&license_type=PMDC (only PMDC-registered clinical staff; show full_name and registration) and send that employee_id as contrast_doctor_id. Never a user_id, a number typed by hand or an id taken from another list.",
+    "PACS is optional. link-study answers PACS_NOT_CONFIGURED on a server without PACS: never retry, keep the order as it is, say that images are not linked on this server and let the radiographer complete the examination with status Completed; ORTHANC_UNAVAILABLE (retryable): the PACS did not answer; IMAGING_STUDY_NOT_FOUND: the study has not arrived (the server links it by itself once it does). A manual link sends only the orthanc_study_id copied from the PACS: never a made-up or example id.",
+    "Exists for the service imaging (work): show it as GET /establishment views.screens says for screen_id radiology_worklist (full; open_work: without its new work, with the banner \"No new ... from now on\"; records: history and corrections only; setup: only from Facility settings; hidden: in no menu), after login and again on establishment.changed. Never decide it from the profile's category."
+  ],
+  "demo_accounts": "demo_accounts() lists a login per role; sandbox_call runs each case on the DEV server"
+}

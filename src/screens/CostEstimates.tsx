@@ -41,10 +41,12 @@ export function CostEstimates({
   stream,
   timeZone,
   screenId = "cost_estimates_admissions",
-  initialAdmissionId, onAdmission,
+  initialAdmissionId,
+  onAdmission,
 }: {
   screenId?: EstimateScreenId;
-  initialAdmissionId?: number; onAdmission?: (id:number)=>void;
+  initialAdmissionId?: number;
+  onAdmission?: (id: number) => void;
   user: ClinicalUser;
   establishment: EstablishmentOut;
   connected: boolean;
@@ -60,7 +62,12 @@ export function CostEstimates({
     workView = view === "full" || view === "open_work",
     live = connected && stream === "Live";
   const [chartAdmission, setChartAdmission] = useState(initialAdmissionId);
-  const [admissionScope, setAdmissionScope] = useState<{admission_id:number; patient_name:string;mrn:string;admission_number:string} >();
+  const [admissionScope, setAdmissionScope] = useState<{
+    admission_id: number;
+    patient_name: string;
+    mrn: string;
+    admission_number: string;
+  }>();
   const [revision, setRevision] = useState(0),
     [status, setStatus] = useState(""),
     [search, setSearch] = useState(""),
@@ -80,7 +87,7 @@ export function CostEstimates({
     generation = useRef(0);
   const [patientQuery, setPatientQuery] = useState(""),
     [patientHits, setPatientHits] = useState<PatientSearchHitOut[]>([]),
-    [patientSearched,setPatientSearched]=useState(false);
+    [patientSearched, setPatientSearched] = useState(false);
   async function findPatient() {
     if (patientQuery.trim().length < 2) return;
     setBusy(true);
@@ -107,14 +114,17 @@ export function CostEstimates({
       read
         ? e.listEstimates({
             limit: 1000,
-            admission_id: explanationOnly ? (admissionScope?.admission_id || chartAdmission) : undefined,
+            admission_id: explanationOnly
+              ? admissionScope?.admission_id || chartAdmission
+              : undefined,
             status: status ? (status as e.EstimateOut["status"]) : undefined,
           })
         : Promise.resolve([]),
     [read, revision, status, admissionScope?.admission_id, chartAdmission],
   );
   const tariff = useLoad(
-    () => (read && !explanationOnly ? e.getTariff() : Promise.resolve(undefined)),
+    () =>
+      read && !explanationOnly ? e.getTariff() : Promise.resolve(undefined),
     [read, revision],
   );
   const stays = useLoad(
@@ -126,8 +136,8 @@ export function CostEstimates({
   );
   const transfers = useLoad(
     () =>
-      !explanationOnly && draft?.admissionId && can("ipd.admission.view")
-        ? e.listTransfers(draft.admissionId)
+      !explanationOnly && draft?.admissionId && read
+        ? e.moves(draft.admissionId)
         : Promise.resolve([]),
     [draft?.admissionId, revision],
   );
@@ -209,10 +219,17 @@ export function CostEstimates({
         setRecord(value);
         // A known reference can select another patient's record. Keep the
         // displayed admission context tied to that returned record too.
-        if (explanationOnly) setAdmissionScope(value.admission_id ? {
-          admission_id: value.admission_id, patient_name: value.patient_name,
-          mrn: value.mrn, admission_number: value.admission_number || "",
-        } : undefined);
+        if (explanationOnly)
+          setAdmissionScope(
+            value.admission_id
+              ? {
+                  admission_id: value.admission_id,
+                  patient_name: value.patient_name,
+                  mrn: value.mrn,
+                  admission_number: value.admission_number || "",
+                }
+              : undefined,
+          );
       }
     } catch (err) {
       if (n === generation.current) {
@@ -271,7 +288,7 @@ export function CostEstimates({
         ))
     );
   }
-  function begin(
+  async function begin(
     kind: Draft["kind"],
     admissionId: number | null,
     transferId?: number,
@@ -280,11 +297,45 @@ export function CostEstimates({
   ) {
     if (explanationOnly && kind !== "explain") return;
     if (!leave()) return;
+    const opening=++generation.current;
+    let moveWard:number|undefined;
     write.clearError();
     setError(undefined);
     setNotice("");
     setStale(false);
     setReview(undefined);
+    if (kind === "prepare" && admissionId && transferId) {
+      try {
+        const moves = await e.moves(admissionId),
+          move = moves.find((m) => m.transfer_id === transferId);
+        if(opening!==generation.current)return;
+        if (!move)
+          throw Error(
+            t(
+              "The move is no longer in the worklist. Refresh before preparing.",
+              "منتقلی فہرست میں نہیں۔ تیاری سے پہلے تازہ کریں۔",
+            ),
+          );
+        if (move.estimate_status === "Draft" && move.estimate_id) {
+          setDraft(undefined);
+          await reread(move.estimate_id);
+          return;
+        }
+        if (move.estimate_explained) {
+          setNotice(
+            t(
+              "This ward move has an explained estimate.",
+              "اس وارڈ منتقلی کا تخمینہ سمجھایا جا چکا ہے۔",
+            ),
+          );
+          return;
+        }
+        moveWard=move.to_ward_id;
+      } catch (e) {
+        setError(e);
+        return;
+      }
+    }
     setDraft({
       kind,
       admissionId,
@@ -304,7 +355,7 @@ export function CostEstimates({
         ward_id: tariff.data?.wards.find(
           (w) =>
             w.ward_id ===
-              (source?.ward_id ??
+              (moveWard ?? source?.ward_id ??
                 stays.data?.find((s) => s.admission_id === admissionId)
                   ?.ward_id) && w.bed_day_price !== null,
         )?.ward_id,
@@ -338,6 +389,23 @@ export function CostEstimates({
           ),
         );
       if (draft.kind === "prepare") {
+        if (draft.body.reason === "ChangeOfWard" && draft.admissionId) {
+          const moves = await e.moves(draft.admissionId),
+            move = moves.find((m) => m.transfer_id === draft.body.transfer_id);
+          if (!move) throw Error("Choose a move returned for this admission.");
+          if (move.estimate_status === "Draft" && move.estimate_id) {
+            setDraft(undefined);
+            await reread(move.estimate_id);
+            return;
+          }
+          if (move.estimate_explained)
+            throw Error(
+              t(
+                "This move has already been explained.",
+                "اس منتقلی کا تخمینہ سمجھایا جا چکا ہے۔",
+              ),
+            );
+        }
         if (!tariff.data || tariff.loading || tariff.error)
           throw Error("Read the current tariff first.");
         setReview(
@@ -540,7 +608,11 @@ export function CostEstimates({
       data-unsaved={!!draft}
       data-write-pending={write.blocked}
     >
-      <h1>{explanationOnly ? t("Explain a cost estimate", "تخمینہ سمجھائیں") : t("Cost estimates", "متوقع اخراجات")}</h1>
+      <h1>
+        {explanationOnly
+          ? t("Explain a cost estimate", "تخمینہ سمجھائیں")
+          : t("Cost estimates", "متوقع اخراجات")}
+      </h1>
       <p>
         {t(
           "Explain the expected cost from the hospital tariff. An estimate does not collect payment.",
@@ -578,21 +650,79 @@ export function CostEstimates({
           >
             <option value="">{t("All states", "تمام حالتیں")}</option>
             {["Draft", "Explained", "Superseded", "Cancelled"].map((s) => (
-              <option
-                key={s}
-                disabled={s === "ChangeOfWard" && !can("ipd.admission.view")}
-              >
+              <option key={s} disabled={false}>
                 {s}
               </option>
             ))}
           </select>
         </Field>
       </div>
-      {explanationOnly && <section className="notice" data-help="explanation.context">
-        <p>{t("Choose an admission from work waiting or open an estimate in the register. Explain only the selected patient's Draft estimate; ask Admissions or Billing to prepare or correct it.","منتظر داخلہ یا رجسٹر کا تخمینہ چنیں۔ منتخب مریض کا صرف مسودہ سمجھائیں؛ تیاری یا تصحیح کے لیے داخلہ یا بلنگ سے کہیں۔")}</p>
-        {admissionScope && <><strong>{admissionScope.patient_name} · <bdi>{admissionScope.mrn}</bdi> · {admissionScope.admission_number}</strong><button data-help="explanation.context" disabled={locked} onClick={()=>{if(leave()){setDraft(undefined);setRecord(undefined);setAdmissionScope(undefined);setChartAdmission(undefined);}}}>{t("Show all estimate records","تمام تخمینے دکھائیں")}</button></>}
-      </section>}
-      {explanationOnly && chartAdmission && <p data-help="explanation.context">{t("Opened from the selected inpatient chart. Choose an estimate below.","منتخب داخلے کے چارٹ سے کھولا گیا۔ نیچے تخمینہ چنیں۔")} <button data-help="explanation.context" disabled={locked} onClick={()=>{if(leave())onAdmission?.(admissionScope?.admission_id||chartAdmission);}}>{t("Return to inpatient chart","داخلے کے چارٹ پر واپس")}</button>{!admissionScope&&<button data-help="explanation.context" disabled={locked} onClick={()=>{if(leave()){setDraft(undefined);setRecord(undefined);setAdmissionScope(undefined);setChartAdmission(undefined);}}}>{t("Show all estimate records","تمام تخمینے دکھائیں")}</button>}</p>}
+      {explanationOnly && (
+        <section className="notice" data-help="explanation.context">
+          <p>
+            {t(
+              "Choose an admission from work waiting or open an estimate in the register. Explain only the selected patient's Draft estimate; ask Admissions or Billing to prepare or correct it.",
+              "منتظر داخلہ یا رجسٹر کا تخمینہ چنیں۔ منتخب مریض کا صرف مسودہ سمجھائیں؛ تیاری یا تصحیح کے لیے داخلہ یا بلنگ سے کہیں۔",
+            )}
+          </p>
+          {admissionScope && (
+            <>
+              <strong>
+                {admissionScope.patient_name} · <bdi>{admissionScope.mrn}</bdi>{" "}
+                · {admissionScope.admission_number}
+              </strong>
+              <button
+                data-help="explanation.context"
+                disabled={locked}
+                onClick={() => {
+                  if (leave()) {
+                    setDraft(undefined);
+                    setRecord(undefined);
+                    setAdmissionScope(undefined);
+                    setChartAdmission(undefined);
+                  }
+                }}
+              >
+                {t("Show all estimate records", "تمام تخمینے دکھائیں")}
+              </button>
+            </>
+          )}
+        </section>
+      )}
+      {explanationOnly && chartAdmission && (
+        <p data-help="explanation.context">
+          {t(
+            "Opened from the selected inpatient chart. Choose an estimate below.",
+            "منتخب داخلے کے چارٹ سے کھولا گیا۔ نیچے تخمینہ چنیں۔",
+          )}{" "}
+          <button
+            data-help="explanation.context"
+            disabled={locked}
+            onClick={() => {
+              if (leave())
+                onAdmission?.(admissionScope?.admission_id || chartAdmission);
+            }}
+          >
+            {t("Return to inpatient chart", "داخلے کے چارٹ پر واپس")}
+          </button>
+          {!admissionScope && (
+            <button
+              data-help="explanation.context"
+              disabled={locked}
+              onClick={() => {
+                if (leave()) {
+                  setDraft(undefined);
+                  setRecord(undefined);
+                  setAdmissionScope(undefined);
+                  setChartAdmission(undefined);
+                }
+              }}
+            >
+              {t("Show all estimate records", "تمام تخمینے دکھائیں")}
+            </button>
+          )}
+        </p>
+      )}
       <ErrorBox error={error} />
       <ErrorBox error={write.error} />
       {(notice || (!draft && write.notice)) && (
@@ -608,12 +738,19 @@ export function CostEstimates({
           </p>
           <code>{write.attempt.key}</code>
           {canRetryWrite(write.attempt) && (
-            <button data-help={explanationOnly ? "explanation.recovery" : "estimates.recovery"} onClick={write.retry}>
+            <button
+              data-help={
+                explanationOnly ? "explanation.recovery" : "estimates.recovery"
+              }
+              onClick={write.retry}
+            >
               {t("Retry original request", "اصل درخواست کی دوبارہ کوشش")}
             </button>
           )}
           <button
-            data-help={explanationOnly ? "explanation.recovery" : "estimates.recovery"}
+            data-help={
+              explanationOnly ? "explanation.recovery" : "estimates.recovery"
+            }
             onClick={() => void write.inspect()}
           >
             {t("Read current result", "موجودہ نتیجہ پڑھیں")}
@@ -656,24 +793,28 @@ export function CostEstimates({
                     {time(w.since)} {w.overdue ? t("Overdue", "تاخیر") : ""}
                   </p>
                   <p>{w.detail}</p>
-                  {w.kind === "ChangeOfWard" && !can("ipd.admission.view") && (
-                    <p>
-                      {t(
-                        "The ward-change record is unavailable to this account. Ask Admissions to prepare the estimate. Existing estimates can still be read and printed.",
-                        "اس صارف کو اصل وارڈ منتقلی دستیاب نہیں۔ داخلہ ڈیسک سے تخمینہ تیار کرائیں۔ موجودہ تخمینے پڑھے و پرنٹ کیے جا سکتے ہیں۔",
-                      )}
-                    </p>
+
+                  {explanationOnly && (
+                    <button
+                      data-help="explanation.context"
+                      disabled={locked}
+                      onClick={() => {
+                        if (leave()) {
+                          setDraft(undefined);
+                          setRecord(undefined);
+                          setAdmissionScope(w);
+                          setStatus("");
+                          setSearch("");
+                        }
+                      }}
+                    >
+                      {t("Read admission estimates", "داخلے کے تخمینے پڑھیں")}
+                    </button>
                   )}
-                  {explanationOnly && <button data-help="explanation.context" disabled={locked} onClick={()=>{if(leave()){setDraft(undefined);setRecord(undefined);setAdmissionScope(w);setStatus("");setSearch("");}}}>{t("Read admission estimates","داخلے کے تخمینے پڑھیں")}</button>}
                   {!explanationOnly && workView && can("estimate.prepare") && (
                     <button
                       data-help="estimates.prepare"
-                      disabled={
-                        locked ||
-                        !live ||
-                        (w.kind === "ChangeOfWard" &&
-                          !can("ipd.admission.view"))
-                      }
+                      disabled={locked || !live}
                       onClick={() =>
                         begin(
                           "prepare",
@@ -694,7 +835,18 @@ export function CostEstimates({
               ))}
           <h2>{t("Estimate register", "تخمینہ رجسٹر")}</h2>
           <LoadState {...list} retry={list.reload} />
-          {!list.loading&&!list.error&&list.data?.filter(r=>match(r.patient_name,r.mrn,r.estimate_number)).length===0&&<p>{t("No estimates match. Clear the filter, or ask Admissions or Billing to prepare one.","کوئی تخمینہ نہیں ملا۔ فلٹر ہٹائیں یا داخلہ/بلنگ سے تیاری کا کہیں۔")}</p>}
+          {!list.loading &&
+            !list.error &&
+            list.data?.filter((r) =>
+              match(r.patient_name, r.mrn, r.estimate_number),
+            ).length === 0 && (
+              <p>
+                {t(
+                  "No estimates match. Clear the filter, or ask Admissions or Billing to prepare one.",
+                  "کوئی تخمینہ نہیں ملا۔ فلٹر ہٹائیں یا داخلہ/بلنگ سے تیاری کا کہیں۔",
+                )}
+              </p>
+            )}
           {!list.loading &&
             !list.error &&
             list.data
@@ -702,7 +854,9 @@ export function CostEstimates({
               .map((r) => (
                 <button
                   className="list-row"
-                  data-help={explanationOnly ? "explanation.read" : "estimates.read"}
+                  data-help={
+                    explanationOnly ? "explanation.read" : "estimates.read"
+                  }
                   disabled={locked}
                   key={r.estimate_id}
                   onClick={() => {
@@ -720,7 +874,9 @@ export function CostEstimates({
               ))}
           <Field label={t("Known estimate reference", "معلوم تخمینہ حوالہ")}>
             <input
-              data-help={explanationOnly ? "explanation.read" : "estimates.read"}
+              data-help={
+                explanationOnly ? "explanation.read" : "estimates.read"
+              }
               inputMode="numeric"
               value={known}
               onChange={(v) => setKnown(v.target.value)}
@@ -792,7 +948,26 @@ export function CostEstimates({
                   ))}
                 </tbody>
               </table>
-              {explanationOnly && record.admission_id && <button data-help="explanation.context" disabled={locked} onClick={()=>{if(leave()){setDraft(undefined);setAdmissionScope({admission_id:record.admission_id!,patient_name:record.patient_name,mrn:record.mrn,admission_number:record.admission_number||""});setStatus("");}}}>{t("Read this admission history","اس داخلے کی تاریخ پڑھیں")}</button>}
+              {explanationOnly && record.admission_id && (
+                <button
+                  data-help="explanation.context"
+                  disabled={locked}
+                  onClick={() => {
+                    if (leave()) {
+                      setDraft(undefined);
+                      setAdmissionScope({
+                        admission_id: record.admission_id!,
+                        patient_name: record.patient_name,
+                        mrn: record.mrn,
+                        admission_number: record.admission_number || "",
+                      });
+                      setStatus("");
+                    }
+                  }}
+                >
+                  {t("Read this admission history", "اس داخلے کی تاریخ پڑھیں")}
+                </button>
+              )}
               <p>{record.payment_terms}</p>
               <p>{record.note}</p>
               <p>
@@ -806,7 +981,14 @@ export function CostEstimates({
                 </p>
               )}
               {record.explain_stamp && <p>{record.explain_stamp.text}</p>}
-              {record.status !== "Draft" && explanationOnly && <p>{t("This explanation is final. Ask Admissions or Billing for a new estimate or a reasoned correction; the history remains.","یہ وضاحت حتمی ہے۔ نئے تخمینے یا وجہ والی تصحیح کے لیے داخلہ یا بلنگ سے کہیں؛ تاریخ باقی رہے گی۔")}</p>}
+              {record.status !== "Draft" && explanationOnly && (
+                <p>
+                  {t(
+                    "This explanation is final. Ask Admissions or Billing for a new estimate or a reasoned correction; the history remains.",
+                    "یہ وضاحت حتمی ہے۔ نئے تخمینے یا وجہ والی تصحیح کے لیے داخلہ یا بلنگ سے کہیں؛ تاریخ باقی رہے گی۔",
+                  )}
+                </p>
+              )}
               {record.cancel_reason && <p>{record.cancel_reason}</p>}
               {record.superseded_by && (
                 <p>
@@ -819,7 +1001,11 @@ export function CostEstimates({
                   (kind, i) => (
                     <button
                       key={kind}
-                      data-help={explanationOnly ? "explanation.print" : "estimates.print"}
+                      data-help={
+                        explanationOnly
+                          ? "explanation.print"
+                          : "estimates.print"
+                      }
                       disabled={locked}
                       onClick={() => void paper(kind)}
                     >
@@ -845,7 +1031,11 @@ export function CostEstimates({
                   record.status === "Draft" &&
                   can("estimate.explain") && (
                     <button
-                      data-help={explanationOnly ? "explanation.explain" : "estimates.explain"}
+                      data-help={
+                        explanationOnly
+                          ? "explanation.explain"
+                          : "estimates.explain"
+                      }
                       disabled={locked}
                       onClick={() =>
                         begin("explain", record.admission_id, undefined, record)
@@ -854,7 +1044,8 @@ export function CostEstimates({
                       {t("Mark explained", "سمجھایا گیا درج کریں")}
                     </button>
                   )}
-                {!explanationOnly && workView &&
+                {!explanationOnly &&
+                  workView &&
                   live &&
                   ["Draft", "Explained"].includes(record.status) &&
                   can("estimate.prepare") && (
@@ -868,57 +1059,73 @@ export function CostEstimates({
                       {t("Cancel estimate", "تخمینہ منسوخ")}
                     </button>
                   )}
-                {!explanationOnly && workView && live && can("estimate.prepare") && (
-                  <button
-                    data-help="estimates.prepare"
-                    disabled={locked}
-                    onClick={() =>
-                      begin("prepare", record.admission_id!, undefined, record)
-                    }
-                  >
-                    {t("Prepare a revision", "نیا تخمینہ تیار")}
-                  </button>
-                )}
+                {!explanationOnly &&
+                  workView &&
+                  live &&
+                  can("estimate.prepare") && (
+                    <button
+                      data-help="estimates.prepare"
+                      disabled={locked}
+                      onClick={() =>
+                        begin(
+                          "prepare",
+                          record.admission_id!,
+                          undefined,
+                          record,
+                        )
+                      }
+                    >
+                      {t("Prepare a revision", "نیا تخمینہ تیار")}
+                    </button>
+                  )}
               </div>
             </>
           )}
-          {!explanationOnly && workView && can("estimate.prepare") && can("ipd.admission.view") && (
-            <>
-              <h2>
-                {t(
-                  "Prepare for a current admission",
-                  "موجودہ داخلے کے لیے تیاری",
+          {!explanationOnly &&
+            workView &&
+            can("estimate.prepare") &&
+            can("ipd.admission.view") && (
+              <>
+                <h2>
+                  {t(
+                    "Prepare for a current admission",
+                    "موجودہ داخلے کے لیے تیاری",
+                  )}
+                </h2>
+                <LoadState {...stays} retry={stays.reload} />
+                {!stays.loading && !stays.error && (
+                  <Field label={t("Admission for estimate", "تخمینے کا داخلہ")}>
+                    <select
+                      data-help="estimates.prepare"
+                      value=""
+                      disabled={locked || !live}
+                      onChange={(v) =>
+                        v.target.value &&
+                        begin("prepare", Number(v.target.value))
+                      }
+                    >
+                      <option value="">
+                        {t(
+                          "Choose a patient and admission",
+                          "مریض و داخلہ چنیں",
+                        )}
+                      </option>
+                      {stays.data
+                        ?.filter(
+                          (s) =>
+                            !["Cancelled", "Discharged"].includes(s.status),
+                        )
+                        .map((s) => (
+                          <option key={s.admission_id} value={s.admission_id}>
+                            {s.patient_name} · {s.mrn} · {s.admission_number} ·{" "}
+                            {s.status}
+                          </option>
+                        ))}
+                    </select>
+                  </Field>
                 )}
-              </h2>
-              <LoadState {...stays} retry={stays.reload} />
-              {!stays.loading && !stays.error && (
-                <Field label={t("Admission for estimate", "تخمینے کا داخلہ")}>
-                  <select
-                    data-help="estimates.prepare"
-                    value=""
-                    disabled={locked || !live}
-                    onChange={(v) =>
-                      v.target.value && begin("prepare", Number(v.target.value))
-                    }
-                  >
-                    <option value="">
-                      {t("Choose a patient and admission", "مریض و داخلہ چنیں")}
-                    </option>
-                    {stays.data
-                      ?.filter(
-                        (s) => !["Cancelled", "Discharged"].includes(s.status),
-                      )
-                      .map((s) => (
-                        <option key={s.admission_id} value={s.admission_id}>
-                          {s.patient_name} · {s.mrn} · {s.admission_number} ·{" "}
-                          {s.status}
-                        </option>
-                      ))}
-                  </select>
-                </Field>
-              )}
-            </>
-          )}
+              </>
+            )}
         </article>
       </div>
       {screenId === "cost_estimates_billing" &&
@@ -949,7 +1156,14 @@ export function CostEstimates({
             >
               {t("Find patient", "مریض تلاش")}
             </button>
-            {patientSearched&&!busy&&patientHits.length===0&&<p role="status">{t("No patients matched. Check the name or MRN.","کوئی مریض نہیں ملا۔ نام یا ایم آر این چیک کریں۔")}</p>}
+            {patientSearched && !busy && patientHits.length === 0 && (
+              <p role="status">
+                {t(
+                  "No patients matched. Check the name or MRN.",
+                  "کوئی مریض نہیں ملا۔ نام یا ایم آر این چیک کریں۔",
+                )}
+              </p>
+            )}
             {patientHits.map((p) => (
               <button
                 className="list-row"
@@ -1022,12 +1236,7 @@ export function CostEstimates({
                       "Procedure",
                       "OnRequest",
                     ].map((s) => (
-                      <option
-                        key={s}
-                        disabled={
-                          s === "ChangeOfWard" && !can("ipd.admission.view")
-                        }
-                      >
+                      <option key={s} disabled={false}>
                         {s}
                       </option>
                     ))}
@@ -1045,6 +1254,14 @@ export function CostEstimates({
                           const move = transfers.data?.find(
                             (x) => x.transfer_id === Number(v.target.value),
                           );
+                          if (
+                            move?.estimate_status === "Draft" &&
+                            move.estimate_id
+                          ) {
+                            setDraft(undefined);
+                            void reread(move.estimate_id);
+                            return;
+                          }
                           mutate({
                             body: {
                               ...draft.body,
@@ -1057,12 +1274,23 @@ export function CostEstimates({
                         <option value="">
                           {t("Choose the recorded move", "درج شدہ منتقلی چنیں")}
                         </option>
-                        {transfers.data?.map((m) => (
-                          <option key={m.transfer_id} value={m.transfer_id}>
-                            {m.from_ward_name} → {m.to_ward_name} ·{" "}
-                            {m.transferred_at}
-                          </option>
-                        ))}
+                        {transfers.data
+                          ?.slice()
+                          .sort(
+                            (a, b) =>
+                              Number(b.rate_changed) - Number(a.rate_changed),
+                          )
+                          .map((m) => (
+                            <option key={m.transfer_id} value={m.transfer_id}>
+                              {m.from_ward_name} → {m.to_ward_name} ·{" "}
+                              {m.from_daily_rate} → {m.to_daily_rate} ·{" "}
+                              {m.transferred_at} ·{" "}
+                              {m.estimate_explained
+                                ? t("Explained", "سمجھا دیا")
+                                : m.estimate_status ||
+                                  t("No estimate", "تخمینہ نہیں")}
+                            </option>
+                          ))}
                       </select>
                     </Field>
                   </>
@@ -1400,7 +1628,11 @@ export function CostEstimates({
               <>
                 <Field label={t("Who heard the estimate", "تخمینہ کس نے سنا")}>
                   <input
-                    data-help={explanationOnly ? "explanation.explain" : "estimates.explain"}
+                    data-help={
+                      explanationOnly
+                        ? "explanation.explain"
+                        : "estimates.explain"
+                    }
                     data-field="explained_to"
                     minLength={2}
                     maxLength={200}
@@ -1417,7 +1649,11 @@ export function CostEstimates({
                 </Field>
                 <Field label={t("Relationship to patient", "مریض سے رشتہ")}>
                   <select
-                    data-help={explanationOnly ? "explanation.explain" : "estimates.explain"}
+                    data-help={
+                      explanationOnly
+                        ? "explanation.explain"
+                        : "estimates.explain"
+                    }
                     data-field="explained_relation"
                     value={draft.explain.explained_relation}
                     onChange={(v) =>
@@ -1443,7 +1679,11 @@ export function CostEstimates({
                 </Field>
                 <Field label={t("Language explained in", "سمجھانے کی زبان")}>
                   <select
-                    data-help={explanationOnly ? "explanation.explain" : "estimates.explain"}
+                    data-help={
+                      explanationOnly
+                        ? "explanation.explain"
+                        : "estimates.explain"
+                    }
                     data-field="language"
                     value={draft.explain.language}
                     onChange={(v) =>
@@ -1475,7 +1715,11 @@ export function CostEstimates({
                   )}
                 >
                   <textarea
-                    data-help={explanationOnly ? "explanation.explain" : "estimates.explain"}
+                    data-help={
+                      explanationOnly
+                        ? "explanation.explain"
+                        : "estimates.explain"
+                    }
                     data-field="note"
                     maxLength={2000}
                     value={draft.explain.note ?? ""}
@@ -1488,7 +1732,11 @@ export function CostEstimates({
                 </Field>
                 <label>
                   <input
-                    data-help={explanationOnly ? "explanation.explain" : "estimates.explain"}
+                    data-help={
+                      explanationOnly
+                        ? "explanation.explain"
+                        : "estimates.explain"
+                    }
                     type="checkbox"
                     checked={draft.explain.acknowledged}
                     onChange={(v) =>
@@ -1525,7 +1773,9 @@ export function CostEstimates({
             )}
             <label>
               <input
-                data-help={explanationOnly ? "explanation.review" : "estimates.review"}
+                data-help={
+                  explanationOnly ? "explanation.review" : "estimates.review"
+                }
                 type="checkbox"
                 checked={draft.ack}
                 onChange={(v) => mutate({ ack: v.target.checked })}
@@ -1537,14 +1787,20 @@ export function CostEstimates({
             </label>
             <div className="actions">
               <button
-                data-help={explanationOnly ? "explanation.review" : "estimates.review"}
+                data-help={
+                  explanationOnly ? "explanation.review" : "estimates.review"
+                }
                 disabled={!live || stale}
                 onClick={() => void reviewDraft()}
               >
                 {t("Review estimate action", "تخمینے کا جائزہ")}
               </button>
               <button
-                data-help={explanationOnly ? "explanation.recovery" : "estimates.recovery"}
+                data-help={
+                  explanationOnly
+                    ? "explanation.recovery"
+                    : "estimates.recovery"
+                }
                 onClick={async () => {
                   setError(undefined);
                   try {
@@ -1564,7 +1820,9 @@ export function CostEstimates({
                 {t("Read latest and keep input", "تازہ پڑھیں و معلومات رکھیں")}
               </button>
               <button
-                data-help={explanationOnly ? "explanation.review" : "estimates.review"}
+                data-help={
+                  explanationOnly ? "explanation.review" : "estimates.review"
+                }
                 onClick={() => {
                   if (leave()) {
                     setDraft(undefined);
@@ -1591,14 +1849,18 @@ export function CostEstimates({
           </p>
           <Details value={review} />
           <button
-            data-help={explanationOnly ? "explanation.confirm" : "estimates.confirm"}
+            data-help={
+              explanationOnly ? "explanation.confirm" : "estimates.confirm"
+            }
             disabled={locked || !live || stale}
             onClick={submit}
           >
             {t("Confirm this estimate action", "یہ تخمینہ عمل تصدیق")}
           </button>
           <button
-            data-help={explanationOnly ? "explanation.confirm" : "estimates.confirm"}
+            data-help={
+              explanationOnly ? "explanation.confirm" : "estimates.confirm"
+            }
             disabled={locked}
             onClick={() => setReview(undefined)}
           >

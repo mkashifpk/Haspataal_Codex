@@ -1,0 +1,430 @@
+{
+  "screen": "approval_queue",
+  "title": "Approval queue",
+  "cases": [
+    {
+      "id": "case:GET /approvals",
+      "call": "GET /api/v1/approvals",
+      "summary": "Approval queue visible to me (or my own requests with mine=true)",
+      "happy_path": {
+        "as_one_of": [
+          "any logged-in user"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/approvals"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "request_id": 1,
+                  "approval_type": "LargeCashDrop",
+                  "required_permission": "finance.cash_drop.second_approve",
+                  "requester_id": 4,
+                  "requester_name": "u6fdafb9454",
+                  "subject_type": "cash_drop",
+                  "subject_id": 1,
+                  "patient_id": null,
+                  "amount": 2000,
+                  "summary": "Second approval: cash drop Rs. 2000.00 (shift 1, MainReception)",
+                  "payload_jsonb": {},
+                  "is_elevated": false,
+                  "status": "Pending",
+                  "decided_by": null,
+                  "decided_by_name": null,
+                  "decided_at": null,
+                  "decision_note": null,
+                  "solo_self_approved": false,
+                  "requested_at": "2026-10-18T11:19:36.973403+00:00",
+                  "can_decide": true,
+                  "decide_blocked": null,
+                  "self_decision": null
+                }
+              ],
+              "meta": {
+                "server_time": "2026-10-18T11:19:37.021367+00:00"
+              },
+              "request_id": "fb81a79f101548f58248b706a6a533b7"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /approvals/{request_id}",
+      "call": "GET /api/v1/approvals/{request_id}",
+      "summary": "One approval request",
+      "happy_path": {
+        "as_one_of": [
+          "any logged-in user"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/approvals/1"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "request_id": 1,
+                "approval_type": "VIPWaiverPreConsult",
+                "required_permission": "approval.waiver.approve",
+                "requester_id": 3,
+                "requester_name": "Receptionist",
+                "subject_type": "vip_waiver_request",
+                "subject_id": 1,
+                "patient_id": 2,
+                "amount": 1000,
+                "summary": "Pre-consult VIP waiver 100% (Rs. 1000.00) for ticket OPD-2026-000002: Trustee relative",
+                "payload_jsonb": {
+                  "ticket_id": 2,
+                  "waiver_pct": "100"
+                },
+                "is_elevated": false,
+                "status": "Pending",
+                "decided_by": null,
+                "decided_by_name": null,
+                "decided_at": null,
+                "decision_note": null,
+                "solo_self_approved": false,
+                "requested_at": "2026-10-18T11:21:26.291512+00:00",
+                "can_decide": true,
+                "decide_blocked": null,
+                "self_decision": null
+              },
+              "meta": {
+                "server_time": "2026-10-18T11:21:26.344242+00:00"
+              },
+              "request_id": "7b60529ee5bf42269627256fdb0dc900"
+            }
+          },
+          "errors_seen": [
+            "FORBIDDEN",
+            "NOT_FOUND"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "FORBIDDEN",
+        "NOT_FOUND",
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:POST /approvals/{request_id}/approve",
+      "call": "POST /api/v1/approvals/{request_id}/approve",
+      "summary": "Approve (applies the effect atomically)",
+      "happy_path": {
+        "as_one_of": [
+          "any logged-in user"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/approvals/1/approve",
+            "body": {}
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "request_id": 1,
+                "approval_type": "WardIndent",
+                "required_permission": "approval.ward_indent.approve",
+                "requester_id": 12,
+                "requester_name": "uc6a8f1ef7a",
+                "subject_type": "ward_indent",
+                "subject_id": 1,
+                "patient_id": null,
+                "amount": null,
+                "summary": "Ward indent from General Ward: 1 item(s)",
+                "payload_jsonb": {},
+                "is_elevated": false,
+                "status": "Approved",
+                "decided_by": 11,
+                "decided_by_name": "u7bfdac5fe0",
+                "decided_at": "2026-10-18T12:06:35.914622+00:00",
+                "decision_note": null,
+                "solo_self_approved": false,
+                "requested_at": "2026-10-18T12:06:35.837712+00:00",
+                "can_decide": false,
+                "decide_blocked": "decided",
+                "self_decision": null,
+                "effect": {
+                  "indent": "approved",
+                  "partial": false
+                }
+              },
+              "meta": {
+                "server_time": "2026-10-18T12:06:35.989565+00:00"
+              },
+              "request_id": "36d21ea5fdbd44f09891295343f31486"
+            }
+          },
+          "errors_seen": [
+            "DUAL_CONTROL_SAME_PERSON",
+            "FORBIDDEN",
+            "SELF_APPROVAL_FORBIDDEN",
+            "SELF_ROLE_CHANGE_FORBIDDEN",
+            "VALIDATION_ERROR"
+          ],
+          "events_emitted": [
+            "approval.resolved",
+            "notification.created",
+            "opd.queue.updated",
+            "opd.ticket.status_changed",
+            "pharmacy.stock.updated",
+            "refund.ready",
+            "risk.critical_event",
+            "ticket.clinical_lockout",
+            "waiver.refund_order.ready"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "APPROVAL_ALREADY_DECIDED",
+        "DUAL_CONTROL_SAME_PERSON",
+        "FORBIDDEN",
+        "LAST_OWNER",
+        "SELF_APPROVAL_FORBIDDEN",
+        "SELF_ROLE_CHANGE_FORBIDDEN",
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:POST /approvals/{request_id}/reject",
+      "call": "POST /api/v1/approvals/{request_id}/reject",
+      "summary": "Reject (unfreezes the subject)",
+      "happy_path": {
+        "as_one_of": [
+          "any logged-in user"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/approvals/1/reject",
+            "body": {
+              "note": "not eligible"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "request_id": 1,
+                "approval_type": "VIPWaiverPreConsult",
+                "required_permission": "approval.waiver.approve",
+                "requester_id": 3,
+                "requester_name": "Receptionist",
+                "subject_type": "vip_waiver_request",
+                "subject_id": 1,
+                "patient_id": 1,
+                "amount": 1000,
+                "summary": "Pre-consult VIP waiver 100% (Rs. 1000.00) for ticket OPD-2026-000001: Owner guest",
+                "payload_jsonb": {
+                  "ticket_id": 1,
+                  "waiver_pct": "100"
+                },
+                "is_elevated": false,
+                "status": "Rejected",
+                "decided_by": 5,
+                "decided_by_name": "u577c8951e0",
+                "decided_at": "2026-10-18T11:22:13.944869+00:00",
+                "decision_note": "not eligible",
+                "solo_self_approved": false,
+                "requested_at": "2026-10-18T11:22:13.844212+00:00",
+                "can_decide": false,
+                "decide_blocked": "decided",
+                "self_decision": null,
+                "effect": {
+                  "waiver": "not approved"
+                }
+              },
+              "meta": {
+                "server_time": "2026-10-18T11:22:13.979062+00:00"
+              },
+              "request_id": "b61634f88dbd4a90a7d083cbc5ea23fc"
+            }
+          },
+          "errors_seen": [
+            "VALIDATION_ERROR"
+          ],
+          "events_emitted": [
+            "approval.resolved",
+            "notification.created",
+            "opd.ticket.status_changed"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "APPROVAL_ALREADY_DECIDED",
+        "SELF_APPROVAL_FORBIDDEN",
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:POST /approvals/{request_id}/cancel",
+      "call": "POST /api/v1/approvals/{request_id}/cancel",
+      "summary": "Requester withdraws a pending request",
+      "happy_path": {
+        "as_one_of": [
+          "any logged-in user"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/approvals/2/cancel",
+            "body": {
+              "note": "patient will pay"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "request_id": 2,
+                "approval_type": "VIPWaiverPreConsult",
+                "required_permission": "approval.waiver.approve",
+                "requester_id": 3,
+                "requester_name": "Receptionist",
+                "subject_type": "vip_waiver_request",
+                "subject_id": 2,
+                "patient_id": 1,
+                "amount": 1000,
+                "summary": "Pre-consult VIP waiver 100% (Rs. 1000.00) for ticket OPD-2026-000001: Trustee",
+                "payload_jsonb": {
+                  "ticket_id": 1,
+                  "waiver_pct": "100"
+                },
+                "is_elevated": false,
+                "status": "Cancelled",
+                "decided_by": null,
+                "decided_by_name": null,
+                "decided_at": "2026-10-18T11:22:14.082198+00:00",
+                "decision_note": "patient will pay",
+                "solo_self_approved": false,
+                "requested_at": "2026-10-18T11:22:14.017273+00:00",
+                "can_decide": false,
+                "decide_blocked": "decided",
+                "self_decision": null,
+                "effect": {
+                  "waiver": "not approved"
+                }
+              },
+              "meta": {
+                "server_time": "2026-10-18T11:22:14.095749+00:00"
+              },
+              "request_id": "3942cb1ff8dc4be3bb55d40b4ce5bdc4"
+            }
+          },
+          "errors_seen": [
+            "FORBIDDEN"
+          ],
+          "events_emitted": [
+            "approval.resolved",
+            "notification.created",
+            "opd.ticket.status_changed"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "APPROVAL_ALREADY_DECIDED",
+        "FORBIDDEN",
+        "VALIDATION_ERROR"
+      ]
+    }
+  ],
+  "service_cases": [],
+  "delivery_gate": {
+    "required": true,
+    "status": "required",
+    "progress_reporting": {
+      "required": true,
+      "submit": "propose_progress",
+      "verify": "progress_proposals",
+      "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+    },
+    "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+    "compulsory": [
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+        "points": 2
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+        "points": 3
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+        "points": 2
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+        "points": 4
+      }
+    ],
+    "zoom": {
+      "min_pct": 100,
+      "max_pct": 250,
+      "reset_pct": 100,
+      "keys": [
+        "Ctrl + or Ctrl = (zoom in)",
+        "Ctrl - (zoom out)",
+        "Ctrl 0 (reset to 100 %)",
+        "Command on macOS"
+      ],
+      "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+    },
+    "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+    "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+  },
+  "handbook_page": "screens/approval_queue",
+  "workspace_guide": "get_handbook_outline('*')",
+  "realtime": [
+    {
+      "event": "approval.requested",
+      "check": "the screen refreshes without polling"
+    },
+    {
+      "event": "approval.resolved",
+      "check": "the screen refreshes without polling"
+    }
+  ],
+  "acceptance_rules": [
+    "Requesters see their own pending items with GET /approvals?mine=true and a visible 'Awaiting approval' state.",
+    "Show Approve and Reject only when the request's can_decide is true; decide_blocked says why not (own_request, missing_permission, decided). You never approve your own request (SELF_APPROVAL_FORBIDDEN): self_decision forbidden shows 'Awaiting another approver'; allowed_with_note (the Owner of a solo practice, solo_practice_mode in GET /meta/settings) asks for the note, and the answer comes back solo_self_approved.",
+    "Reject requires a note. No co-signer is typed in this queue: a large cash drop is simply never approved by the cashier of its shift (DUAL_CONTROL_SAME_PERSON).",
+    "PolicyChange and PrivilegedAccess requests carry payload.current_value and payload.requested_value: show both and the reason before Approve."
+  ],
+  "demo_accounts": "demo_accounts() lists a login per role; sandbox_call runs each case on the DEV server"
+}

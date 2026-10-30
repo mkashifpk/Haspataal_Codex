@@ -220,4 +220,3 @@ export function dischargeSummaryPdf(admission_id: number): Promise<unknown> {
 export function lookupStaff(query: { q: string; department_id?: number | null; license_type?: "PMDC" | "PNC" | null; limit?: number }): Promise<StaffLookupOut[]> {
   return api<StaffLookupOut[]>("GET", withQuery(`/staff/lookup`, query), undefined);
 }
-

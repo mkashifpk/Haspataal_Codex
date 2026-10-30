@@ -203,15 +203,6 @@ export function DutyRoster({
         : Promise.resolve(undefined),
     [user.permissions.includes("ipd.bed.view"), revision],
   );
-  const extraPatterns = useLoad(
-    () =>
-      user.permissions.some((p) =>
-        ["hr.employee.view", "hr.shift.manage"].includes(p),
-      )
-        ? roster.shiftPatterns()
-        : Promise.resolve([]),
-    [user.permissions, revision],
-  );
   const swaps = useLoad(
     () =>
       canManage
@@ -226,7 +217,7 @@ export function DutyRoster({
       !planner.loading && !planner.error ? planner.data?.staff || [] : [],
     patterns =
       !planner.loading && !planner.error
-        ? planner.data?.shift_patterns || extraPatterns.data || []
+        ? planner.data?.shift_patterns || []
         : [],
     rows = !list.loading && !list.error ? list.data?.entries || [] : [];
   const matrix = !beds.loading && !beds.error ? beds.data : undefined;
@@ -881,7 +872,6 @@ export function DutyRoster({
       <LoadState {...list} retry={list.reload} />
       {canManage && <LoadState {...planner} retry={planner.reload} />}
       <LoadState {...beds} retry={beds.reload} />
-      <LoadState {...extraPatterns} retry={extraPatterns.reload} />
       {wk && (
         <p>
           <bdi>
@@ -1911,7 +1901,7 @@ export function DutyRoster({
         >
           <p>
             {noteForm.row
-              ? entryText(entryBody(noteForm.row))
+              ? noteForm.row.full_name+' · '+entryText(entryBody(noteForm.row))
               : "#" +
                 noteForm.swap?.swap_id +
                 " · " +

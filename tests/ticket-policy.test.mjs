@@ -57,9 +57,7 @@ test("requests respect permission, clinical handover and real money remaining", 
   t.invoice.amount_refunded = 1000;
   assert.deepEqual(requestKinds(t, ["opd.refund.request"]), []);
   t.examined_at = "2026-10-22T12:00:00Z";
-  assert.deepEqual(requestKinds(t, ["opd.waiver.request_post_consult"]), [
-    "vip-waiver-post-consult",
-  ]);
+  assert.deepEqual(requestKinds(t, ["opd.waiver.request_post_consult"]), []);
   assert.deepEqual(requestKinds(t, []), []);
   t.approval_lock = "WaiverPending";
   assert.deepEqual(requestKinds(t, ["opd.waiver.request_post_consult"]), []);

@@ -1,0 +1,3438 @@
+{
+  "screen_id": "consultation",
+  "contract_fingerprint": "14824af5c60c05148994",
+  "knowledge_revision": "9250bafb1794ac12",
+  "delivery_gate": {
+    "required": true,
+    "status": "required",
+    "progress_reporting": {
+      "required": true,
+      "submit": "propose_progress",
+      "verify": "progress_proposals",
+      "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+    },
+    "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+    "compulsory": [
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+        "points": 2
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+        "points": 3
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+        "points": 2
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+        "points": 4
+      }
+    ],
+    "zoom": {
+      "min_pct": 100,
+      "max_pct": 250,
+      "reset_pct": 100,
+      "keys": [
+        "Ctrl + or Ctrl = (zoom in)",
+        "Ctrl - (zoom out)",
+        "Ctrl 0 (reset to 100 %)",
+        "Command on macOS"
+      ],
+      "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+    },
+    "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+    "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+  },
+  "value_lists": [
+    {
+      "values": [
+        "Standard",
+        "Emergency",
+        "CodeRed",
+        "Overflow",
+        "Planned"
+      ],
+      "column": "admissions.admission_type",
+      "used_at": "GET /patients/{patient_id}/master-summary.admissions[].admission_type",
+      "labels": {
+        "Standard": "Standard",
+        "Emergency": "Emergency",
+        "CodeRed": "Code red",
+        "Overflow": "Overflow",
+        "Planned": "Planned"
+      }
+    },
+    {
+      "values": [
+        "AdmissionPending",
+        "Waitlisted",
+        "BedReserved",
+        "CodeRedActive",
+        "Admitted",
+        "DischargeInProgress",
+        "Discharged",
+        "Cancelled"
+      ],
+      "column": "admissions.status",
+      "used_at": "GET /patients/{patient_id}/master-summary.admissions[].status",
+      "labels": {
+        "AdmissionPending": "Admission pending",
+        "Waitlisted": "Waitlisted",
+        "BedReserved": "Bed reserved",
+        "CodeRedActive": "Code red active",
+        "Admitted": "Admitted",
+        "DischargeInProgress": "Discharge in progress",
+        "Discharged": "Discharged",
+        "Cancelled": "Cancelled"
+      }
+    },
+    {
+      "values": [
+        "Refund",
+        "VIPWaiverPreConsult",
+        "VIPWaiverPostConsult",
+        "PatientCredit",
+        "PharmacyCharityOverride",
+        "LargeCashDrop",
+        "WardIndent",
+        "APPayment",
+        "PolicyChange",
+        "PrivilegedAccess"
+      ],
+      "column": "approval_requests.approval_type",
+      "used_at": "POST /opd-tickets/{ticket_id}/complete.pending_approval.approval_type",
+      "labels": {
+        "Refund": "Refund",
+        "VIPWaiverPreConsult": "VIP waiver pre consult",
+        "VIPWaiverPostConsult": "VIP waiver post consult",
+        "PatientCredit": "Patient credit",
+        "PharmacyCharityOverride": "Pharmacy charity override",
+        "LargeCashDrop": "Large cash drop",
+        "WardIndent": "Ward indent",
+        "APPayment": "AP payment",
+        "PolicyChange": "Policy change",
+        "PrivilegedAccess": "Privileged access"
+      }
+    },
+    {
+      "values": [
+        "Available",
+        "Reserved",
+        "Occupied",
+        "Dirty",
+        "Cleaning",
+        "OutOfService"
+      ],
+      "column": "beds.current_state",
+      "used_at": "GET /beds/matrix.beds[].current_state",
+      "labels": {
+        "Available": "Available",
+        "Reserved": "Reserved",
+        "Occupied": "Occupied",
+        "Dirty": "Dirty",
+        "Cleaning": "Cleaning",
+        "OutOfService": "Out of service"
+      },
+      "state_machine": "bed",
+      "final_states": [],
+      "transitions": {
+        "Available": [
+          "Reserved",
+          "Occupied",
+          "OutOfService"
+        ],
+        "Reserved": [
+          "Occupied",
+          "Available"
+        ],
+        "Occupied": [
+          "Dirty"
+        ],
+        "Dirty": [
+          "Cleaning",
+          "Available",
+          "OutOfService"
+        ],
+        "Cleaning": [
+          "Available",
+          "Dirty",
+          "OutOfService"
+        ],
+        "OutOfService": [
+          "Available",
+          "Dirty"
+        ]
+      }
+    },
+    {
+      "values": [
+        "chief_complaint",
+        "history",
+        "examination",
+        "diagnosis",
+        "clinical_note",
+        "plan",
+        "procedure",
+        "general"
+      ],
+      "column": "clinical_encounter_corrections.field",
+      "used_at": "GET /clinical-encounters/{encounter_id}.corrections[].field",
+      "labels": {
+        "chief_complaint": "Chief complaint",
+        "history": "History",
+        "examination": "Examination",
+        "diagnosis": "Diagnosis",
+        "clinical_note": "Clinical note",
+        "plan": "Plan",
+        "procedure": "Procedure",
+        "general": "General"
+      }
+    },
+    {
+      "values": [
+        "OPD",
+        "IPD",
+        "ER",
+        "CodeRed",
+        "Procedure",
+        "FollowUp"
+      ],
+      "column": "clinical_encounters.encounter_type",
+      "used_at": "GET /opd-tickets/{ticket_id}/clinical-encounters[].encounter_type",
+      "labels": {
+        "OPD": "OPD",
+        "IPD": "IPD",
+        "ER": "ER",
+        "CodeRed": "Code red",
+        "Procedure": "Procedure",
+        "FollowUp": "Follow up"
+      }
+    },
+    {
+      "values": [
+        "Draft",
+        "Final",
+        "Cancelled"
+      ],
+      "column": "clinical_encounters.status",
+      "used_at": "GET /opd-tickets/{ticket_id}/clinical-encounters[].status",
+      "labels": {
+        "Draft": "Draft",
+        "Final": "Final",
+        "Cancelled": "Cancelled"
+      }
+    },
+    {
+      "values": [
+        "None",
+        "Local",
+        "Sedation",
+        "Regional",
+        "General"
+      ],
+      "column": "clinical_procedure_details.anaesthesia",
+      "used_at": "GET /opd-tickets/{ticket_id}/clinical-encounters[].procedure.anaesthesia",
+      "labels": {
+        "None": "None",
+        "Local": "Local",
+        "Sedation": "Sedation",
+        "Regional": "Regional",
+        "General": "General"
+      }
+    },
+    {
+      "values": [
+        "ClinicalDischarge",
+        "PharmacyClearance",
+        "NursingMARVerification",
+        "BillingSettlement",
+        "OpsCleaning"
+      ],
+      "column": "discharge_clearances.stage",
+      "used_at": "POST /admissions.discharge.stages[].stage",
+      "labels": {
+        "ClinicalDischarge": "Clinical discharge",
+        "PharmacyClearance": "Pharmacy clearance",
+        "NursingMARVerification": "Nursing MAR verification",
+        "BillingSettlement": "Billing settlement",
+        "OpsCleaning": "Ops cleaning"
+      }
+    },
+    {
+      "values": [
+        "Pending",
+        "Cleared",
+        "Cancelled"
+      ],
+      "column": "discharge_clearances.status",
+      "used_at": "POST /admissions.discharge.stages[].status",
+      "labels": {
+        "Pending": "Pending",
+        "Cleared": "Cleared",
+        "Cancelled": "Cancelled"
+      }
+    },
+    {
+      "values": [
+        "PMDC",
+        "PNC",
+        "Other"
+      ],
+      "column": "employees.license_type",
+      "used_at": "GET /staff/lookup[].license_type",
+      "labels": {
+        "PMDC": "PMDC",
+        "PNC": "PNC",
+        "Other": "Other"
+      }
+    },
+    {
+      "values": [
+        "VerbalObtained",
+        "Declined",
+        "NotExamined"
+      ],
+      "column": "home_visits.examination_consent",
+      "used_at": "GET /opd-tickets/{ticket_id}/clinical-encounters[].examination_consent",
+      "labels": {
+        "VerbalObtained": "Verbal obtained",
+        "Declined": "Declined",
+        "NotExamined": "Not examined"
+      }
+    },
+    {
+      "values": [
+        "chapter",
+        "block",
+        "category"
+      ],
+      "column": "icd_codes.kind",
+      "used_at": "GET /icd/codes.items[].kind",
+      "labels": {
+        "chapter": "Chapter",
+        "block": "Block",
+        "category": "Category"
+      }
+    },
+    {
+      "values": [
+        "ICD-11",
+        "ICD-10"
+      ],
+      "column": "icd_releases.code_system",
+      "used_at": "GET /opd-tickets/{ticket_id}/clinical-encounters[].icd_terms[].system",
+      "labels": {
+        "ICD-11": "ICD 11",
+        "ICD-10": "ICD 10"
+      }
+    },
+    {
+      "values": [
+        "Bundled",
+        "Imported"
+      ],
+      "column": "icd_releases.source",
+      "used_at": "GET /icd/releases.releases[].source",
+      "labels": {
+        "Bundled": "Bundled",
+        "Imported": "Imported"
+      }
+    },
+    {
+      "values": [
+        "Consultation",
+        "Service",
+        "Drug",
+        "LabTest",
+        "Imaging",
+        "OTProcedure",
+        "OTConsumable",
+        "RoomCharge",
+        "Reversal"
+      ],
+      "column": "invoice_items.line_type",
+      "used_at": "POST /opd-tickets/{ticket_id}/complete.invoice.lines[].line_type",
+      "labels": {
+        "Consultation": "Consultation",
+        "Service": "Service",
+        "Drug": "Drug",
+        "LabTest": "Lab test",
+        "Imaging": "Imaging",
+        "OTProcedure": "OT procedure",
+        "OTConsumable": "OT consumable",
+        "RoomCharge": "Room charge",
+        "Reversal": "Reversal"
+      }
+    },
+    {
+      "values": [
+        "OPD",
+        "IPD",
+        "Pharmacy",
+        "Lab",
+        "Imaging",
+        "OT",
+        "OTC",
+        "Other"
+      ],
+      "column": "invoices.invoice_type",
+      "used_at": "POST /opd-tickets/{ticket_id}/complete.invoice.invoice_type",
+      "labels": {
+        "OPD": "OPD",
+        "IPD": "IPD",
+        "Pharmacy": "Pharmacy",
+        "Lab": "Lab",
+        "Imaging": "Imaging",
+        "OT": "OT",
+        "OTC": "OTC",
+        "Other": "Other"
+      }
+    },
+    {
+      "values": [
+        "Draft",
+        "Open",
+        "PartiallyPaid",
+        "Paid",
+        "CreditAuthorized",
+        "Waivered",
+        "Refunded",
+        "Cancelled"
+      ],
+      "column": "invoices.status",
+      "used_at": "POST /opd-tickets/{ticket_id}/complete.invoice.status",
+      "labels": {
+        "Draft": "Draft",
+        "Open": "Open",
+        "PartiallyPaid": "Partially paid",
+        "Paid": "Paid",
+        "CreditAuthorized": "Credit authorized",
+        "Waivered": "Waivered",
+        "Refunded": "Refunded",
+        "Cancelled": "Cancelled"
+      }
+    },
+    {
+      "values": [
+        "Active",
+        "Suspended",
+        "Deferred",
+        "Rerouted",
+        "Completed",
+        "Cancelled",
+        "Expired"
+      ],
+      "column": "opd_queues.status",
+      "used_at": "POST /opd-tickets/{ticket_id}/complete.queue.status",
+      "labels": {
+        "Active": "Active",
+        "Suspended": "Suspended",
+        "Deferred": "Deferred",
+        "Rerouted": "Rerouted",
+        "Completed": "Completed",
+        "Cancelled": "Cancelled",
+        "Expired": "Expired"
+      }
+    },
+    {
+      "values": [
+        "None",
+        "RefundPending",
+        "WaiverPending",
+        "CreditPending"
+      ],
+      "column": "opd_tickets.approval_lock",
+      "used_at": "POST /opd-tickets/{ticket_id}/complete.approval_lock",
+      "labels": {
+        "None": "None",
+        "RefundPending": "Refund pending",
+        "WaiverPending": "Waiver pending",
+        "CreditPending": "Credit pending"
+      }
+    },
+    {
+      "values": [
+        "Unpaid",
+        "PartiallyPaid",
+        "Paid",
+        "CreditAuthorized",
+        "Waivered",
+        "Refunded",
+        "PanelBilled"
+      ],
+      "column": "opd_tickets.payment_status",
+      "used_at": "POST /opd-tickets/{ticket_id}/complete.payment_status",
+      "labels": {
+        "Unpaid": "Unpaid",
+        "PartiallyPaid": "Partially paid",
+        "Paid": "Paid",
+        "CreditAuthorized": "Credit authorized",
+        "Waivered": "Waivered",
+        "Refunded": "Refunded",
+        "PanelBilled": "Panel billed"
+      }
+    },
+    {
+      "values": [
+        "WalkIn",
+        "Emergency",
+        "CodeRed",
+        "Referred",
+        "ReturnVisit"
+      ],
+      "column": "opd_tickets.source",
+      "used_at": "POST /opd-tickets/{ticket_id}/complete.source",
+      "labels": {
+        "WalkIn": "Walk in",
+        "Emergency": "Emergency",
+        "CodeRed": "Code red",
+        "Referred": "Referred",
+        "ReturnVisit": "Return visit"
+      }
+    },
+    {
+      "values": [
+        "Issued",
+        "Waiting",
+        "InConsultation",
+        "Examined",
+        "Completed",
+        "Deferred",
+        "Expired",
+        "Forfeited",
+        "Refunded",
+        "Void",
+        "Cancelled"
+      ],
+      "column": "opd_tickets.status",
+      "used_at": "POST /opd-tickets/{ticket_id}/complete.status",
+      "labels": {
+        "Issued": "Issued",
+        "Waiting": "Waiting",
+        "InConsultation": "In consultation",
+        "Examined": "Examined",
+        "Completed": "Completed",
+        "Deferred": "Deferred",
+        "Expired": "Expired",
+        "Forfeited": "Forfeited",
+        "Refunded": "Refunded",
+        "Void": "Void",
+        "Cancelled": "Cancelled"
+      },
+      "state_machine": "ticket",
+      "final_states": [
+        "Forfeited",
+        "Refunded",
+        "Void",
+        "Cancelled"
+      ],
+      "transitions": {
+        "Issued": [
+          "Waiting",
+          "Deferred",
+          "Expired",
+          "Cancelled",
+          "Void",
+          "Refunded"
+        ],
+        "Waiting": [
+          "InConsultation",
+          "Deferred",
+          "Expired",
+          "Cancelled",
+          "Void",
+          "Refunded"
+        ],
+        "InConsultation": [
+          "Examined",
+          "Waiting",
+          "Deferred",
+          "Void",
+          "Cancelled",
+          "Refunded"
+        ],
+        "Examined": [
+          "Completed",
+          "Void",
+          "Refunded"
+        ],
+        "Completed": [
+          "Refunded"
+        ],
+        "Deferred": [
+          "Waiting",
+          "Expired",
+          "Cancelled",
+          "Void",
+          "Refunded"
+        ],
+        "Expired": [
+          "Forfeited"
+        ]
+      }
+    },
+    {
+      "values": [
+        "application/pdf",
+        "image/jpeg",
+        "image/png"
+      ],
+      "column": "patient_documents.content_type",
+      "used_at": "GET /patients/{patient_id}/documents[].content_type",
+      "labels": {
+        "application/pdf": "Application pdf",
+        "image/jpeg": "Image jpeg",
+        "image/png": "Image png"
+      }
+    },
+    {
+      "values": [
+        "Photo",
+        "CNIC",
+        "PanelCard",
+        "Consent",
+        "ReferralLetter",
+        "DeathCertificate",
+        "AutopsyReport",
+        "PostMortemReport",
+        "MedicoLegalReport",
+        "LabReport",
+        "Imaging",
+        "DischargeSummary",
+        "Prescription",
+        "Other"
+      ],
+      "column": "patient_documents.doc_type",
+      "used_at": "GET /patients/{patient_id}/documents[].doc_type",
+      "labels": {
+        "Photo": "Photo",
+        "CNIC": "CNIC",
+        "PanelCard": "Panel card",
+        "Consent": "Consent",
+        "ReferralLetter": "Referral letter",
+        "DeathCertificate": "Death certificate",
+        "AutopsyReport": "Autopsy report",
+        "PostMortemReport": "Post mortem report",
+        "MedicoLegalReport": "Medico legal report",
+        "LabReport": "Lab report",
+        "Imaging": "Imaging",
+        "DischargeSummary": "Discharge summary",
+        "Prescription": "Prescription",
+        "Other": "Other"
+      }
+    },
+    {
+      "values": [
+        "Cash",
+        "Panel"
+      ],
+      "column": "patients.billing_category",
+      "used_at": "POST /admissions.billing_category",
+      "labels": {
+        "Cash": "Cash",
+        "Panel": "Panel"
+      }
+    },
+    {
+      "values": [
+        "male",
+        "female",
+        "other",
+        "unknown"
+      ],
+      "column": "patients.gender",
+      "used_at": "POST /opd-tickets/{ticket_id}/complete.gender",
+      "labels": {
+        "male": "Male",
+        "female": "Female",
+        "other": "Other",
+        "unknown": "Unknown"
+      }
+    },
+    {
+      "values": [
+        "HospitalPharmacy",
+        "ExternalMarket"
+      ],
+      "column": "prescriptions.destination",
+      "used_at": "GET /patients/{patient_id}/master-summary.prescriptions[].destination",
+      "labels": {
+        "HospitalPharmacy": "Hospital pharmacy",
+        "ExternalMarket": "External market"
+      }
+    },
+    {
+      "values": [
+        "OPD",
+        "IPD",
+        "CodeRed",
+        "ER"
+      ],
+      "column": "prescriptions.source",
+      "used_at": "GET /patients/{patient_id}/master-summary.prescriptions[].source",
+      "labels": {
+        "OPD": "OPD",
+        "IPD": "IPD",
+        "CodeRed": "Code red",
+        "ER": "ER"
+      }
+    },
+    {
+      "values": [
+        "Active",
+        "PartiallyDispensed",
+        "FullyDispensed",
+        "Cancelled",
+        "Replaced",
+        "ExternalPrinted"
+      ],
+      "column": "prescriptions.status",
+      "used_at": "GET /patients/{patient_id}/master-summary.prescriptions[].status",
+      "labels": {
+        "Active": "Active",
+        "PartiallyDispensed": "Partially dispensed",
+        "FullyDispensed": "Fully dispensed",
+        "Cancelled": "Cancelled",
+        "Replaced": "Replaced",
+        "ExternalPrinted": "External printed"
+      }
+    },
+    {
+      "values": [
+        "Pending",
+        "Approved",
+        "Rejected",
+        "Cancelled"
+      ],
+      "column": "vip_waiver_requests.status",
+      "used_at": "POST /opd-tickets/{ticket_id}/complete.pending_approval.status",
+      "labels": {
+        "Pending": "Pending",
+        "Approved": "Approved",
+        "Rejected": "Rejected",
+        "Cancelled": "Cancelled"
+      }
+    },
+    {
+      "values": [
+        "male",
+        "female",
+        "any"
+      ],
+      "column": "wards.gender_restriction",
+      "used_at": "GET /beds/matrix.wards[].gender_restriction",
+      "labels": {
+        "male": "Male",
+        "female": "Female",
+        "any": "Any"
+      }
+    },
+    {
+      "values": [
+        "General",
+        "Private",
+        "SemiPrivate",
+        "ICU",
+        "CCU",
+        "NICU",
+        "Surgical",
+        "Pediatric",
+        "Maternity",
+        "Emergency",
+        "Isolation",
+        "Other"
+      ],
+      "column": "wards.ward_type",
+      "used_at": "GET /beds/matrix.wards[].ward_type",
+      "labels": {
+        "General": "General",
+        "Private": "Private",
+        "SemiPrivate": "Semi private",
+        "ICU": "ICU",
+        "CCU": "CCU",
+        "NICU": "NICU",
+        "Surgical": "Surgical",
+        "Pediatric": "Pediatric",
+        "Maternity": "Maternity",
+        "Emergency": "Emergency",
+        "Isolation": "Isolation",
+        "Other": "Other"
+      }
+    },
+    {
+      "values": [
+        "Refund",
+        "WaiverRefund"
+      ],
+      "column": null,
+      "used_at": "POST /opd-tickets/{ticket_id}/complete.cash_back_prompts[].kind",
+      "labels": {
+        "Refund": "Refund",
+        "WaiverRefund": "Waiver refund"
+      }
+    },
+    {
+      "values": [
+        "Standard",
+        "Emergency",
+        "Planned"
+      ],
+      "column": null,
+      "used_at": "POST /admissions body.admission_type",
+      "labels": {
+        "Standard": "Standard",
+        "Emergency": "Emergency",
+        "Planned": "Planned"
+      }
+    },
+    {
+      "values": [
+        "autopsy_order",
+        "bed_labels",
+        "blood_component_label",
+        "blood_donation_labels",
+        "clinical_note",
+        "complaint_letter",
+        "complaints_notice",
+        "consent_form",
+        "cost_estimate",
+        "cssd_labels",
+        "death_certificate",
+        "discharge_summary",
+        "dispensing_label",
+        "dose_label",
+        "id_card",
+        "imaging_report",
+        "lab_label",
+        "lab_report",
+        "mlc_intimation",
+        "opd_slip",
+        "pharmacy_receipt",
+        "prescription",
+        "referral_slip",
+        "send_out_manifest",
+        "surgical_record",
+        "triage_algorithm",
+        "wristband"
+      ],
+      "column": null,
+      "used_at": "GET /clinical-encounters/{encounter_id}/print-payload.document_type",
+      "labels": {
+        "autopsy_order": "Autopsy order",
+        "bed_labels": "Bed labels",
+        "blood_component_label": "Blood component label",
+        "blood_donation_labels": "Blood donation labels",
+        "clinical_note": "Clinical note",
+        "complaint_letter": "Complaint letter",
+        "complaints_notice": "Complaints notice",
+        "consent_form": "Consent form",
+        "cost_estimate": "Cost estimate",
+        "cssd_labels": "Cssd labels",
+        "death_certificate": "Death certificate",
+        "discharge_summary": "Discharge summary",
+        "dispensing_label": "Dispensing label",
+        "dose_label": "Dose label",
+        "id_card": "Id card",
+        "imaging_report": "Imaging report",
+        "lab_label": "Lab label",
+        "lab_report": "Lab report",
+        "mlc_intimation": "Mlc intimation",
+        "opd_slip": "Opd slip",
+        "pharmacy_receipt": "Pharmacy receipt",
+        "prescription": "Prescription",
+        "referral_slip": "Referral slip",
+        "send_out_manifest": "Send out manifest",
+        "surgical_record": "Surgical record",
+        "triage_algorithm": "Triage algorithm",
+        "wristband": "Wristband"
+      }
+    },
+    {
+      "values": [
+        "decided",
+        "missing_permission",
+        "own_request"
+      ],
+      "column": null,
+      "used_at": "POST /opd-tickets/{ticket_id}/vip-waiver-post-consult.approval.decide_blocked",
+      "labels": {
+        "decided": "Decided",
+        "missing_permission": "Missing permission",
+        "own_request": "Own request"
+      }
+    },
+    {
+      "values": [
+        "forbidden",
+        "allowed_with_note"
+      ],
+      "column": null,
+      "used_at": "POST /opd-tickets/{ticket_id}/vip-waiver-post-consult.approval.self_decision",
+      "labels": {
+        "forbidden": "Forbidden",
+        "allowed_with_note": "Allowed with note"
+      }
+    },
+    {
+      "values": [
+        "receipt",
+        "label",
+        "document",
+        "card"
+      ],
+      "column": null,
+      "used_at": "GET /clinical-encounters/{encounter_id}/print-payload.printer_role",
+      "labels": {
+        "receipt": "Receipt",
+        "label": "Label",
+        "document": "Document",
+        "card": "Card"
+      }
+    }
+  ],
+  "copy": {
+    "workspace": {
+      "en": "Clinical OPD / IPD",
+      "ur": "ڈاکٹر"
+    },
+    "error_messages": {
+      "ADMISSION_DETAILS_REQUIRED": "Record the reason for admission and the provisional diagnosis.",
+      "APPROVAL_PENDING": "This record is frozen while an approval is pending.",
+      "BED_NO_LONGER_AVAILABLE": "Bed was reserved by another terminal.",
+      "CAPABILITY_INACTIVE": "This service is not active here, so no new work of it can start (Settings, facility; GET /establishment).",
+      "CLINICAL_LOCKOUT": "Patient ticket has been refunded. Cannot add clinical data without an active billing slip.",
+      "CONSULTATION_INCOMPLETE": "A clinic consultation is finalized with the complaint, the examination findings when the patient consented, a diagnosis and the plan (treatment or referral); details.missing names what is left.",
+      "ENCOUNTER_NOT_FINAL": "Only a finalized note is printed: it carries its author's stamp.",
+      "ER_VISIT_OPEN": "The patient's ER visit is still open: record how the patient left the ER first.",
+      "EXAMINATION_CONSENT_REQUIRED": "Record the patient's consent to the examination (VCO), or that they declined or were not examined, before finalizing.",
+      "FINALIZED_RECORD_IMMUTABLE": "Finalized clinical notes cannot be edited; add a correction entry.",
+      "FORBIDDEN": "You do not have permission to do this.",
+      "ICD_CODE_UNKNOWN": "A code is not in the active ICD code list: pick it from the ICD picker.",
+      "ICD_SYSTEM_NOT_LOADED": "No code list of this classification is loaded (ICD-10: load the hospital's licensed WHO file first).",
+      "NOT_FOUND": "The requested resource was not found.",
+      "POST_CONSULT_WAIVER_REQUIRES_NOTE": "Finalize the clinical note before requesting a post-consultation waiver.",
+      "PROCEDURE_NOTE_INCOMPLETE": "Record the procedure, the findings, the specimens and the patient's condition at the end before signing the note.",
+      "QUEUE_ENTRY_CLOSED": "This queue entry is closed.",
+      "REFERENCE_NOT_FOUND": "A referenced record does not exist.",
+      "TICKET_NOT_ACTIVE": "This ticket is no longer active; a new visit needs a new ticket.",
+      "TICKET_PATIENT_MISMATCH": "The ticket belongs to another patient.",
+      "TICKET_TRANSITION_INVALID": "This ticket cannot move to the requested state.",
+      "UNAUTHENTICATED": "Authentication is required.",
+      "VALIDATION_ERROR": "The request is invalid.",
+      "VERSION_CONFLICT": "The record was changed by someone else; reload and try again.",
+      "WAIVER_NOT_ALLOWED": "A waiver is not possible in the ticket's current state."
+    },
+    "wording_quoted_in_rules": [
+      ": admission_reason and provisional_diagnosis are required (MSDS 149); pre-fill them from this note",
+      "Append correction",
+      "Not examined",
+      "Patient declined",
+      "Patient ticket has been refunded…",
+      "Procedure note",
+      "Submit consultation",
+      "Verbal consent obtained (VCO)",
+      "ward (requested_ward_id, optional: the doctor"
+    ],
+    "note": "Server-owned strings only: the error messages (English), the workspace labels (English and Urdu) and the wording the rules quote. The UI's own copy and its Urdu are yours (decision H08)."
+  },
+  "roles": {
+    "full": [
+      "doctor",
+      "clinical_specialist",
+      "surgeon",
+      "anaesthetist"
+    ],
+    "partial": [
+      "super_admin",
+      "owner",
+      "hospital_admin",
+      "hospital_director",
+      "clinic_director",
+      "receptionist",
+      "admissions_officer",
+      "triage_nurse",
+      "ward_nurse",
+      "head_nurse",
+      "radiologist",
+      "ops_admin",
+      "ipc_nurse",
+      "cssd_technician"
+    ],
+    "page_for": [
+      "doctor",
+      "clinical_specialist",
+      "surgeon",
+      "anaesthetist"
+    ],
+    "note": "page_for: the roles whose GET /meta/handbook lists this screen (its menu entry and F1 page; for a user with that one role, every service Active). A partial role outside page_for only makes some of these calls from screens of its own: never offer it this screen. Build the menu from the logged-in user's GET /meta/handbook."
+  },
+  "test_plan": {
+    "screen": "consultation",
+    "title": "Consultation (EMR)",
+    "cases": [
+      {
+        "id": "case:GET /opd-tickets/{ticket_id}/clinical-encounters",
+        "call": "GET /api/v1/opd-tickets/{ticket_id}/clinical-encounters",
+        "summary": "Notes of one OPD visit",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "billing_admin",
+            "cashier",
+            "clinic_director"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "VALIDATION_ERROR"
+        ],
+        "as_one_of": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "surgeon",
+          "ward_nurse"
+        ]
+      },
+      {
+        "id": "case:GET /clinical-encounters/{encounter_id}",
+        "call": "GET /api/v1/clinical-encounters/{encounter_id}",
+        "summary": "One note with its corrections",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "billing_admin",
+            "cashier",
+            "clinic_director"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "VALIDATION_ERROR"
+        ],
+        "as_one_of": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "surgeon",
+          "ward_nurse"
+        ]
+      },
+      {
+        "id": "case:GET /patients/{patient_id}/documents",
+        "call": "GET /api/v1/patients/{patient_id}/documents",
+        "summary": "List patient documents",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "billing_admin",
+            "cashier",
+            "clinic_director",
+            "cssd_technician"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "VALIDATION_ERROR"
+        ],
+        "as_one_of": [
+          "admissions_officer",
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "receptionist",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ]
+      },
+      {
+        "id": "case:GET /patient-documents/{document_id}/download",
+        "call": "GET /api/v1/patient-documents/{document_id}/download",
+        "summary": "Download a patient document",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "billing_admin",
+            "cashier",
+            "clinic_director",
+            "cssd_technician"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "FORBIDDEN",
+          "NOT_FOUND",
+          "VALIDATION_ERROR"
+        ],
+        "as_one_of": [
+          "admissions_officer",
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "receptionist",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ]
+      },
+      {
+        "id": "case:POST /clinical-encounters",
+        "call": "POST /api/v1/clinical-encounters",
+        "summary": "Write a clinical note (draft or finalize=true)",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "billing_admin",
+            "cashier",
+            "clinic_director"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "CAPABILITY_INACTIVE",
+          "CLINICAL_LOCKOUT",
+          "CONSULTATION_INCOMPLETE",
+          "EXAMINATION_CONSENT_REQUIRED",
+          "ICD_CODE_UNKNOWN",
+          "PROCEDURE_NOTE_INCOMPLETE",
+          "REFERENCE_NOT_FOUND",
+          "TICKET_NOT_ACTIVE",
+          "TICKET_PATIENT_MISMATCH",
+          "VALIDATION_ERROR"
+        ],
+        "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)",
+        "as_one_of": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "surgeon"
+        ]
+      },
+      {
+        "id": "case:PATCH /clinical-encounters/{encounter_id}",
+        "call": "PATCH /api/v1/clinical-encounters/{encounter_id}",
+        "summary": "Edit your DRAFT note",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "billing_admin",
+            "cashier",
+            "clinic_director"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "CAPABILITY_INACTIVE",
+          "FINALIZED_RECORD_IMMUTABLE",
+          "ICD_CODE_UNKNOWN",
+          "VALIDATION_ERROR",
+          "VERSION_CONFLICT"
+        ],
+        "concurrent_edit": "send a stale expected_version: expect 409 VERSION_CONFLICT, reload and retry",
+        "as_one_of": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "surgeon"
+        ]
+      },
+      {
+        "id": "case:POST /clinical-encounters/{encounter_id}/finalize",
+        "call": "POST /api/v1/clinical-encounters/{encounter_id}/finalize",
+        "summary": "Commit the note (immutable afterwards)",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "billing_admin",
+            "cashier",
+            "clinic_director"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "CLINICAL_LOCKOUT",
+          "CONSULTATION_INCOMPLETE",
+          "EXAMINATION_CONSENT_REQUIRED",
+          "FINALIZED_RECORD_IMMUTABLE",
+          "FORBIDDEN",
+          "NOT_FOUND",
+          "PROCEDURE_NOTE_INCOMPLETE",
+          "TICKET_NOT_ACTIVE",
+          "VALIDATION_ERROR"
+        ],
+        "as_one_of": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "surgeon"
+        ]
+      },
+      {
+        "id": "case:POST /clinical-encounters/{encounter_id}/correction",
+        "call": "POST /api/v1/clinical-encounters/{encounter_id}/correction",
+        "summary": "Append a visible correction entry",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "billing_admin",
+            "cashier",
+            "clinic_director"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "VALIDATION_ERROR"
+        ],
+        "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)",
+        "as_one_of": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "surgeon"
+        ]
+      },
+      {
+        "id": "case:GET /patients/{patient_id}/clinical-encounters",
+        "call": "GET /api/v1/patients/{patient_id}/clinical-encounters",
+        "summary": "Patient's notes (consolidated across merges)",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "billing_admin",
+            "cashier",
+            "clinic_director"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "VALIDATION_ERROR"
+        ],
+        "as_one_of": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "surgeon",
+          "ward_nurse"
+        ]
+      },
+      {
+        "id": "case:GET /patients/{patient_id}/master-summary",
+        "call": "GET /api/v1/patients/{patient_id}/master-summary",
+        "summary": "Consolidated clinical history (EMR overview)",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "billing_admin",
+            "cashier",
+            "clinic_director"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "VALIDATION_ERROR"
+        ],
+        "as_one_of": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "radiologist",
+          "surgeon",
+          "ward_nurse"
+        ]
+      },
+      {
+        "id": "case:POST /opd-tickets/{ticket_id}/complete",
+        "call": "POST /api/v1/opd-tickets/{ticket_id}/complete",
+        "summary": "Close an examined visit",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "billing_admin",
+            "cashier",
+            "cssd_technician"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "ER_VISIT_OPEN",
+          "TICKET_TRANSITION_INVALID",
+          "VALIDATION_ERROR"
+        ],
+        "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)",
+        "as_one_of": [
+          "anaesthetist",
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "receptionist",
+          "surgeon",
+          "triage_nurse"
+        ]
+      },
+      {
+        "id": "case:POST /opd-tickets/{ticket_id}/vip-waiver-post-consult",
+        "call": "POST /api/v1/opd-tickets/{ticket_id}/vip-waiver-post-consult",
+        "summary": "Doctor: Convert to VIP Waiver (after committing notes)",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "billing_admin",
+            "cashier",
+            "clinic_director"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "APPROVAL_PENDING",
+          "POST_CONSULT_WAIVER_REQUIRES_NOTE",
+          "VALIDATION_ERROR",
+          "WAIVER_NOT_ALLOWED"
+        ],
+        "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)",
+        "as_one_of": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "surgeon"
+        ]
+      },
+      {
+        "id": "case:POST /admissions",
+        "call": "POST /api/v1/admissions",
+        "summary": "Doctor: Admit Patient (→ Admission_Pending)",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "billing_admin",
+            "cashier",
+            "clinic_director"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "ADMISSION_DETAILS_REQUIRED",
+          "CAPABILITY_INACTIVE",
+          "REFERENCE_NOT_FOUND",
+          "VALIDATION_ERROR"
+        ],
+        "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)",
+        "as_one_of": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "surgeon"
+        ]
+      },
+      {
+        "id": "case:GET /beds/matrix",
+        "call": "GET /api/v1/beds/matrix",
+        "summary": "Live bed matrix (counts per ward + optional bed list)",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "billing_admin",
+            "cashier",
+            "employee_self",
+            "hr_admin"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "BED_NO_LONGER_AVAILABLE",
+          "FORBIDDEN",
+          "VALIDATION_ERROR"
+        ],
+        "as_one_of": [
+          "admissions_officer",
+          "anaesthetist",
+          "clinic_director",
+          "clinical_specialist",
+          "cssd_technician",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "ipc_nurse",
+          "ops_admin",
+          "owner",
+          "receptionist",
+          "super_admin",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ]
+      },
+      {
+        "id": "case:GET /clinical-encounters/{encounter_id}/print-payload",
+        "call": "GET /api/v1/clinical-encounters/{encounter_id}/print-payload",
+        "summary": "Printable clinical note with the author's stamp",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "billing_admin",
+            "cashier",
+            "clinic_director"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "ENCOUNTER_NOT_FINAL",
+          "VALIDATION_ERROR"
+        ],
+        "as_one_of": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "surgeon",
+          "ward_nurse"
+        ]
+      },
+      {
+        "id": "case:GET /clinical-encounters/{encounter_id}/pdf",
+        "call": "GET /api/v1/clinical-encounters/{encounter_id}/pdf",
+        "summary": "The finalized clinical note as a PDF",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "billing_admin",
+            "cashier",
+            "clinic_director"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "ENCOUNTER_NOT_FINAL",
+          "VALIDATION_ERROR"
+        ],
+        "as_one_of": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "surgeon",
+          "ward_nurse"
+        ]
+      },
+      {
+        "id": "case:GET /icd/codes",
+        "call": "GET /api/v1/icd/codes",
+        "summary": "ICD picker: search codes by code or words",
+        "denied": {
+          "as_one_of": [],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "ICD_SYSTEM_NOT_LOADED",
+          "VALIDATION_ERROR"
+        ],
+        "as_one_of": [
+          "any logged-in user"
+        ]
+      },
+      {
+        "id": "case:GET /icd/browse",
+        "call": "GET /api/v1/icd/browse",
+        "summary": "ICD picker: browse chapters, blocks, categories",
+        "denied": {
+          "as_one_of": [],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "ICD_SYSTEM_NOT_LOADED",
+          "VALIDATION_ERROR"
+        ],
+        "as_one_of": [
+          "any logged-in user"
+        ]
+      },
+      {
+        "id": "case:GET /icd/codes/{code}",
+        "call": "GET /api/v1/icd/codes/{code}",
+        "summary": "One ICD code with its place in the tree",
+        "denied": {
+          "as_one_of": [],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "ICD_SYSTEM_NOT_LOADED",
+          "NOT_FOUND",
+          "VALIDATION_ERROR"
+        ],
+        "as_one_of": [
+          "any logged-in user"
+        ]
+      },
+      {
+        "id": "case:GET /icd/releases",
+        "call": "GET /api/v1/icd/releases",
+        "summary": "The ICD code lists loaded",
+        "denied": {
+          "as_one_of": [],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [],
+        "as_one_of": [
+          "any logged-in user"
+        ]
+      },
+      {
+        "id": "case:GET /staff/lookup",
+        "call": "GET /api/v1/staff/lookup",
+        "summary": "Find a staff member for a form (badge facts only)",
+        "denied": {
+          "as_one_of": [],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "UNAUTHENTICATED",
+          "VALIDATION_ERROR"
+        ],
+        "as_one_of": [
+          "any logged-in user"
+        ]
+      },
+      {
+        "id": "case:POST /opd-queues/{queue_id}/reroute",
+        "call": "POST /api/v1/opd-queues/{queue_id}/reroute",
+        "summary": "Re-route / Refer to another doctor (top of their queue)",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "billing_admin",
+            "cashier",
+            "clinic_director"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "FORBIDDEN",
+          "QUEUE_ENTRY_CLOSED",
+          "REFERENCE_NOT_FOUND",
+          "TICKET_TRANSITION_INVALID",
+          "VALIDATION_ERROR"
+        ],
+        "as_one_of": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "surgeon"
+        ]
+      },
+      {
+        "id": "case:GET /opd-queues/doctors",
+        "call": "GET /api/v1/opd-queues/doctors",
+        "summary": "The doctors who see an OPD queue (the re-route and slip picker)",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "billing_admin",
+            "cashier",
+            "cssd_technician"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "FORBIDDEN",
+          "VALIDATION_ERROR"
+        ],
+        "as_one_of": [
+          "anaesthetist",
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "receptionist",
+          "surgeon",
+          "triage_nurse"
+        ]
+      }
+    ],
+    "service_cases": [
+      {
+        "call": "POST /api/v1/clinical-encounters",
+        "set_up": "outpatient_procedures not Active in GET /establishment",
+        "expect": "the choice for a Procedure note with its procedure, not an admission's is hidden or disabled; the rest of the action stays"
+      },
+      {
+        "call": "PATCH /api/v1/clinical-encounters/{encounter_id}",
+        "set_up": "outpatient_procedures not Active in GET /establishment",
+        "expect": "the choice for the procedure of an outpatient's Procedure note is hidden or disabled; the rest of the action stays"
+      },
+      {
+        "call": "POST /api/v1/admissions",
+        "set_up": "inpatient not Active in GET /establishment",
+        "expect": "the action is hidden"
+      }
+    ],
+    "delivery_gate": {
+      "required": true,
+      "status": "required",
+      "progress_reporting": {
+        "required": true,
+        "submit": "propose_progress",
+        "verify": "progress_proposals",
+        "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+      },
+      "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+      "compulsory": [
+        {
+          "id": "q:f1_help",
+          "label": "F1 contextual help",
+          "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+          "points": 2
+        },
+        {
+          "id": "q:role_faq",
+          "label": "Complete role-specific FAQs",
+          "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+          "points": 3
+        },
+        {
+          "id": "q:zoom",
+          "label": "Keyboard zoom: 100-250% only",
+          "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+          "points": 2
+        },
+        {
+          "id": "q:fresh_data",
+          "label": "Human review with newly created data",
+          "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+          "points": 4
+        }
+      ],
+      "zoom": {
+        "min_pct": 100,
+        "max_pct": 250,
+        "reset_pct": 100,
+        "keys": [
+          "Ctrl + or Ctrl = (zoom in)",
+          "Ctrl - (zoom out)",
+          "Ctrl 0 (reset to 100 %)",
+          "Command on macOS"
+        ],
+        "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+      },
+      "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+      "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+    },
+    "handbook_page": "screens/consultation",
+    "workspace_guide": "get_handbook_outline('doctor')",
+    "realtime": [
+      {
+        "event": "lab.result.published",
+        "check": "the screen refreshes without polling"
+      },
+      {
+        "event": "imaging.study.available",
+        "check": "the screen refreshes without polling"
+      },
+      {
+        "event": "ticket.clinical_lockout",
+        "check": "the screen refreshes without polling"
+      }
+    ],
+    "acceptance_rules": [
+      "CLINICAL_LOCKOUT: show error.message verbatim ('Patient ticket has been refunded…') and disable editing.",
+      "Finalized notes are never edited — offer 'Append correction' (reason required).",
+      "Examination consent before the examination field: three buttons, none selected — 'Verbal consent obtained (VCO)', 'Patient declined', 'Not examined' (examination_consent). Never pre-select one; Declined and Not examined disable the examination field. Under the Clinic profile (GET /establishment) the note cannot be finalized without it (EXAMINATION_CONSENT_REQUIRED). The printed note and prescription show 'VCO'.",
+      "Under the Clinic profile 'Submit consultation' also needs the complaint (or history), the examination findings when VCO was obtained, a diagnosis and the plan (treatment or referral): mark the empty fields from CONSULTATION_INCOMPLETE details.missing and keep the draft.",
+      "Under every finalized note and correction show its author_stamp.text (name, designation, PMDC number, date and time: MSDS 147); 'Print note' = print-payload (A4) or pdf_url, finalized notes only (ENCOUNTER_NOT_FINAL).",
+      "'Admit': admission_reason and provisional_diagnosis are required (MSDS 149); pre-fill them from this note's complaint and diagnosis for the doctor to confirm, and offer initial_care_plan.",
+      "'Admit' ward (requested_ward_id, optional: the doctor's preference; empty leaves it to the desk): offer only the wards of GET /beds/matrix?include_beds=false, read when the dialog opens, by name with their available beds and gender_restriction; a ward with none free may still be chosen (the desk waitlists or overflows). Never an admin ward list or a typed id. A ward closed since the read answers VALIDATION_ERROR (details.field requested_ward_id): re-read the matrix and keep everything typed.",
+      "'Procedure note' (a bedside procedure: chest drain, central line, lumbar puncture): encounter_type Procedure with `procedure` (name, site and side, indication, anaesthesia, the consent from the consent register, the assistant, start and end, technique, findings, specimens, complications, condition at the end). Mark findings, specimens ('None' if nothing was removed) and condition at the end as required; the server refuses to sign without them (PROCEDURE_NOTE_INCOMPLETE, details.missing). MSDS IMS 150.",
+      "Diagnosis codes come from the ICD picker (screen icd_picker): store the `code`, show `icd_terms` (code + title) wherever codes appear; ICD_CODE_UNKNOWN means a code not in the active list (details.unknown).",
+      "Quick-action bar: Re-route, Admit, Convert to VIP Waiver, Order lab, Order imaging, Prescribe.",
+      "Re-route (workflow §1.4: the patient was sent to the wrong doctor, or the case is not mine): instead of a diagnosis, pick the doctor from GET /opd-queues/doctors (or the department alone) and give the reason, then POST /opd-queues/{queue_id}/reroute with the queue entry the patient was called from; the patient goes back to Waiting at the TOP of the new doctor's queue with the same slip. Close the consultation screen.",
+      "POST /clinical-encounters starts new outpatient_procedures work for a Procedure note with its procedure, not an admission's: offer that choice only while outpatient_procedures is Active (GET /establishment active); the rest of the action stays.",
+      "PATCH /clinical-encounters/{encounter_id} starts new outpatient_procedures work for the procedure of an outpatient's Procedure note: offer that choice only while outpatient_procedures is Active (GET /establishment active); the rest of the action stays.",
+      "POST /admissions starts new inpatient work: offer it only while inpatient is Active (GET /establishment active)."
+    ],
+    "demo_accounts": "demo_accounts() lists a login per role; sandbox_call runs each case on the DEV server"
+  },
+  "handbook": {
+    "page": "screens/consultation",
+    "screen_id": "consultation",
+    "title": "Consultation (EMR)",
+    "purpose": "Notes, diagnosis, e-prescription, lab/imaging orders, admit, discharge; quick-action bar.",
+    "tasks": [
+      {
+        "id": "consultation::GET /opd-tickets/{ticket_id}/clinical-encounters",
+        "task": "Notes of one OPD visit",
+        "call": "GET /opd-tickets/{ticket_id}/clinical-encounters",
+        "is_action": false,
+        "permissions": [
+          "clinical.encounter.view"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "consultation::GET /clinical-encounters/{encounter_id}",
+        "task": "One note with its corrections",
+        "call": "GET /clinical-encounters/{encounter_id}",
+        "is_action": false,
+        "permissions": [
+          "clinical.encounter.view"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "consultation::GET /patients/{patient_id}/documents",
+        "task": "List patient documents",
+        "call": "GET /patients/{patient_id}/documents",
+        "is_action": false,
+        "permissions": [
+          "patient.document.view"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "consultation::GET /patient-documents/{document_id}/download",
+        "task": "Download a patient document",
+        "call": "GET /patient-documents/{document_id}/download",
+        "is_action": false,
+        "permissions": [
+          "patient.document.view"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "consultation::POST /clinical-encounters",
+        "task": "Write a clinical note (draft or finalize=true)",
+        "call": "POST /clinical-encounters",
+        "is_action": true,
+        "permissions": [
+          "clinical.encounter.create"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "consultation::PATCH /clinical-encounters/{encounter_id}",
+        "task": "Edit your DRAFT note",
+        "call": "PATCH /clinical-encounters/{encounter_id}",
+        "is_action": true,
+        "permissions": [
+          "clinical.encounter.create"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "consultation::POST /clinical-encounters/{encounter_id}/finalize",
+        "task": "Commit the note (immutable afterwards)",
+        "call": "POST /clinical-encounters/{encounter_id}/finalize",
+        "is_action": true,
+        "permissions": [
+          "clinical.encounter.create"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "consultation::POST /clinical-encounters/{encounter_id}/correction",
+        "task": "Append a visible correction entry",
+        "call": "POST /clinical-encounters/{encounter_id}/correction",
+        "is_action": true,
+        "permissions": [
+          "clinical.encounter.correct"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "consultation::GET /patients/{patient_id}/clinical-encounters",
+        "task": "Patient's notes (consolidated across merges)",
+        "call": "GET /patients/{patient_id}/clinical-encounters",
+        "is_action": false,
+        "permissions": [
+          "clinical.encounter.view"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "consultation::GET /patients/{patient_id}/master-summary",
+        "task": "Consolidated clinical history (EMR overview)",
+        "call": "GET /patients/{patient_id}/master-summary",
+        "is_action": false,
+        "permissions": [
+          "patient.emr.view"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "consultation::POST /opd-tickets/{ticket_id}/complete",
+        "task": "Close an examined visit",
+        "call": "POST /opd-tickets/{ticket_id}/complete",
+        "is_action": true,
+        "permissions": [
+          "opd.ticket.complete",
+          "opd.queue.view"
+        ],
+        "permissions_mode": "any",
+        "access": null
+      },
+      {
+        "id": "consultation::POST /opd-tickets/{ticket_id}/vip-waiver-post-consult",
+        "task": "Doctor: Convert to VIP Waiver (after committing notes)",
+        "call": "POST /opd-tickets/{ticket_id}/vip-waiver-post-consult",
+        "is_action": true,
+        "permissions": [
+          "opd.waiver.request_post_consult"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "consultation::POST /admissions",
+        "task": "Doctor: Admit Patient (→ Admission_Pending)",
+        "call": "POST /admissions",
+        "is_action": true,
+        "permissions": [
+          "ipd.admission.request"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "consultation::GET /beds/matrix",
+        "task": "Live bed matrix (counts per ward + optional bed list)",
+        "call": "GET /beds/matrix",
+        "is_action": false,
+        "permissions": [
+          "ipd.bed.view",
+          "cssd.operate",
+          "infection.control.manage"
+        ],
+        "permissions_mode": "any",
+        "access": null
+      },
+      {
+        "id": "consultation::GET /clinical-encounters/{encounter_id}/print-payload",
+        "task": "Printable clinical note with the author's stamp",
+        "call": "GET /clinical-encounters/{encounter_id}/print-payload",
+        "is_action": false,
+        "permissions": [
+          "clinical.encounter.view"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "consultation::GET /clinical-encounters/{encounter_id}/pdf",
+        "task": "The finalized clinical note as a PDF",
+        "call": "GET /clinical-encounters/{encounter_id}/pdf",
+        "is_action": false,
+        "permissions": [
+          "clinical.encounter.view"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "consultation::GET /icd/codes",
+        "task": "ICD picker: search codes by code or words",
+        "call": "GET /icd/codes",
+        "is_action": false,
+        "permissions": [],
+        "permissions_mode": "all",
+        "access": "any logged-in user"
+      },
+      {
+        "id": "consultation::GET /icd/browse",
+        "task": "ICD picker: browse chapters, blocks, categories",
+        "call": "GET /icd/browse",
+        "is_action": false,
+        "permissions": [],
+        "permissions_mode": "all",
+        "access": "any logged-in user"
+      },
+      {
+        "id": "consultation::GET /icd/codes/{code}",
+        "task": "One ICD code with its place in the tree",
+        "call": "GET /icd/codes/{code}",
+        "is_action": false,
+        "permissions": [],
+        "permissions_mode": "all",
+        "access": "any logged-in user"
+      },
+      {
+        "id": "consultation::GET /icd/releases",
+        "task": "The ICD code lists loaded",
+        "call": "GET /icd/releases",
+        "is_action": false,
+        "permissions": [],
+        "permissions_mode": "all",
+        "access": "any logged-in user"
+      },
+      {
+        "id": "consultation::GET /staff/lookup",
+        "task": "Find a staff member for a form (badge facts only)",
+        "call": "GET /staff/lookup",
+        "is_action": false,
+        "permissions": [],
+        "permissions_mode": "all",
+        "access": "any logged-in user"
+      },
+      {
+        "id": "consultation::POST /opd-queues/{queue_id}/reroute",
+        "task": "Re-route / Refer to another doctor (top of their queue)",
+        "call": "POST /opd-queues/{queue_id}/reroute",
+        "is_action": true,
+        "permissions": [
+          "opd.queue.reroute"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "consultation::GET /opd-queues/doctors",
+        "task": "The doctors who see an OPD queue (the re-route and slip picker)",
+        "call": "GET /opd-queues/doctors",
+        "is_action": false,
+        "permissions": [
+          "opd.queue.doctor",
+          "opd.queue.view"
+        ],
+        "permissions_mode": "any",
+        "access": null
+      }
+    ],
+    "rules_to_explain": [
+      "CLINICAL_LOCKOUT: show error.message verbatim ('Patient ticket has been refunded…') and disable editing.",
+      "Finalized notes are never edited — offer 'Append correction' (reason required).",
+      "Examination consent before the examination field: three buttons, none selected — 'Verbal consent obtained (VCO)', 'Patient declined', 'Not examined' (examination_consent). Never pre-select one; Declined and Not examined disable the examination field. Under the Clinic profile (GET /establishment) the note cannot be finalized without it (EXAMINATION_CONSENT_REQUIRED). The printed note and prescription show 'VCO'.",
+      "Under the Clinic profile 'Submit consultation' also needs the complaint (or history), the examination findings when VCO was obtained, a diagnosis and the plan (treatment or referral): mark the empty fields from CONSULTATION_INCOMPLETE details.missing and keep the draft.",
+      "Under every finalized note and correction show its author_stamp.text (name, designation, PMDC number, date and time: MSDS 147); 'Print note' = print-payload (A4) or pdf_url, finalized notes only (ENCOUNTER_NOT_FINAL).",
+      "'Admit': admission_reason and provisional_diagnosis are required (MSDS 149); pre-fill them from this note's complaint and diagnosis for the doctor to confirm, and offer initial_care_plan.",
+      "'Admit' ward (requested_ward_id, optional: the doctor's preference; empty leaves it to the desk): offer only the wards of GET /beds/matrix?include_beds=false, read when the dialog opens, by name with their available beds and gender_restriction; a ward with none free may still be chosen (the desk waitlists or overflows). Never an admin ward list or a typed id. A ward closed since the read answers VALIDATION_ERROR (details.field requested_ward_id): re-read the matrix and keep everything typed.",
+      "'Procedure note' (a bedside procedure: chest drain, central line, lumbar puncture): encounter_type Procedure with `procedure` (name, site and side, indication, anaesthesia, the consent from the consent register, the assistant, start and end, technique, findings, specimens, complications, condition at the end). Mark findings, specimens ('None' if nothing was removed) and condition at the end as required; the server refuses to sign without them (PROCEDURE_NOTE_INCOMPLETE, details.missing). MSDS IMS 150.",
+      "Diagnosis codes come from the ICD picker (screen icd_picker): store the `code`, show `icd_terms` (code + title) wherever codes appear; ICD_CODE_UNKNOWN means a code not in the active list (details.unknown).",
+      "Quick-action bar: Re-route, Admit, Convert to VIP Waiver, Order lab, Order imaging, Prescribe.",
+      "Re-route (workflow §1.4: the patient was sent to the wrong doctor, or the case is not mine): instead of a diagnosis, pick the doctor from GET /opd-queues/doctors (or the department alone) and give the reason, then POST /opd-queues/{queue_id}/reroute with the queue entry the patient was called from; the patient goes back to Waiting at the TOP of the new doctor's queue with the same slip. Close the consultation screen.",
+      "POST /clinical-encounters starts new outpatient_procedures work for a Procedure note with its procedure, not an admission's: offer that choice only while outpatient_procedures is Active (GET /establishment active); the rest of the action stays.",
+      "PATCH /clinical-encounters/{encounter_id} starts new outpatient_procedures work for the procedure of an outpatient's Procedure note: offer that choice only while outpatient_procedures is Active (GET /establishment active); the rest of the action stays.",
+      "POST /admissions starts new inpatient work: offer it only while inpatient is Active (GET /establishment active)."
+    ],
+    "updates_by_itself_on": [
+      "lab.result.published",
+      "imaging.study.available",
+      "ticket.clinical_lockout"
+    ],
+    "errors_the_user_can_meet": [
+      {
+        "code": "ADMISSION_DETAILS_REQUIRED",
+        "message": "Record the reason for admission and the provisional diagnosis.",
+        "ui_action": "Show field errors from details.fields / the message."
+      },
+      {
+        "code": "APPROVAL_PENDING",
+        "message": "This record is frozen while an approval is pending.",
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      },
+      {
+        "code": "BED_NO_LONGER_AVAILABLE",
+        "message": "Bed was reserved by another terminal.",
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      },
+      {
+        "code": "CAPABILITY_INACTIVE",
+        "message": "This service is not active here, so no new work of it can start (Settings, facility; GET /establishment).",
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      },
+      {
+        "code": "CLINICAL_LOCKOUT",
+        "message": "Patient ticket has been refunded. Cannot add clinical data without an active billing slip.",
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      },
+      {
+        "code": "CONSULTATION_INCOMPLETE",
+        "message": "A clinic consultation is finalized with the complaint, the examination findings when the patient consented, a diagnosis and the plan (treatment or referral); details.missing names what is left.",
+        "ui_action": "Show field errors from details.fields / the message."
+      },
+      {
+        "code": "ENCOUNTER_NOT_FINAL",
+        "message": "Only a finalized note is printed: it carries its author's stamp.",
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      },
+      {
+        "code": "ER_VISIT_OPEN",
+        "message": "The patient's ER visit is still open: record how the patient left the ER first.",
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      },
+      {
+        "code": "EXAMINATION_CONSENT_REQUIRED",
+        "message": "Record the patient's consent to the examination (VCO), or that they declined or were not examined, before finalizing.",
+        "ui_action": "Show field errors from details.fields / the message."
+      },
+      {
+        "code": "FINALIZED_RECORD_IMMUTABLE",
+        "message": "Finalized clinical notes cannot be edited; add a correction entry.",
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      },
+      {
+        "code": "FORBIDDEN",
+        "message": "You do not have permission to do this.",
+        "ui_action": "Explain and hide the action (check x-permissions)."
+      },
+      {
+        "code": "ICD_CODE_UNKNOWN",
+        "message": "A code is not in the active ICD code list: pick it from the ICD picker.",
+        "ui_action": "Show field errors from details.fields / the message."
+      },
+      {
+        "code": "ICD_SYSTEM_NOT_LOADED",
+        "message": "No code list of this classification is loaded (ICD-10: load the hospital's licensed WHO file first).",
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      },
+      {
+        "code": "NOT_FOUND",
+        "message": "The requested resource was not found.",
+        "ui_action": "Say 'not found'; refresh the list."
+      },
+      {
+        "code": "POST_CONSULT_WAIVER_REQUIRES_NOTE",
+        "message": "Finalize the clinical note before requesting a post-consultation waiver.",
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      },
+      {
+        "code": "PROCEDURE_NOTE_INCOMPLETE",
+        "message": "Record the procedure, the findings, the specimens and the patient's condition at the end before signing the note.",
+        "ui_action": "Show field errors from details.fields / the message."
+      },
+      {
+        "code": "QUEUE_ENTRY_CLOSED",
+        "message": "This queue entry is closed.",
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      },
+      {
+        "code": "REFERENCE_NOT_FOUND",
+        "message": "A referenced record does not exist.",
+        "ui_action": "Show field errors from details.fields / the message."
+      },
+      {
+        "code": "TICKET_NOT_ACTIVE",
+        "message": "This ticket is no longer active; a new visit needs a new ticket.",
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      },
+      {
+        "code": "TICKET_PATIENT_MISMATCH",
+        "message": "The ticket belongs to another patient.",
+        "ui_action": "Show field errors from details.fields / the message."
+      },
+      {
+        "code": "TICKET_TRANSITION_INVALID",
+        "message": "This ticket cannot move to the requested state.",
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      },
+      {
+        "code": "UNAUTHENTICATED",
+        "message": "Authentication is required.",
+        "ui_action": "Refresh the token once; if that fails return to login."
+      },
+      {
+        "code": "VALIDATION_ERROR",
+        "message": "The request is invalid.",
+        "ui_action": "Show field errors from details.fields / the message."
+      },
+      {
+        "code": "VERSION_CONFLICT",
+        "message": "The record was changed by someone else; reload and try again.",
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      },
+      {
+        "code": "WAIVER_NOT_ALLOWED",
+        "message": "A waiver is not possible in the ticket's current state.",
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      }
+    ],
+    "sections": [
+      "Purpose and audience",
+      "Step by step (one per task, where to click)",
+      "Every control and its effects",
+      "States and feedback",
+      "Messages, mistakes and recovery",
+      "Language and visual examples",
+      "Related help and delivery"
+    ],
+    "requirement_ids": [
+      "S1",
+      "S2",
+      "S3",
+      "S4",
+      "S5",
+      "S6",
+      "S7"
+    ],
+    "delivery": "F1 and contextual screen Help",
+    "requirements": [
+      {
+        "id": "S1",
+        "title": "Purpose and audience",
+        "instruction": "Explain what this screen accomplishes, when to use it, who uses it and how to open it. State the patient, visit,\nshift or other context the user must verify. Name the expected result in staff language."
+      },
+      {
+        "id": "S2",
+        "title": "Step by step (one per task, where to click)",
+        "instruction": "For every supported task give prerequisites, permissions or approvals, exact navigation and control labels,\nwhat to enter or select, validation, the ordered steps and how to recognize completion. Include demo screenshots,\nprinted output and the next task or handover. Link to the corresponding workspace FAQ answer."
+      },
+      {
+        "id": "S3",
+        "title": "Every control and its effects",
+        "instruction": "Maintain a control inventory covering buttons, fields, selectors, tabs, menus, filters, sorting, scanners, shortcuts,\ndialogs and navigation. For each user-facing control explain its label and purpose, when it is available, required\ninput, immediate effect, whether it saves or only changes the view, any confirmation, and what cancellation does.\nDescribe resulting data/state changes, notifications, printed output and consequences for other staff where relevant.\nInclude controls without API calls. Group repeated controls only when their behaviour is genuinely identical."
+      },
+      {
+        "id": "S4",
+        "title": "States and feedback",
+        "instruction": "Explain loading, no results, pending approval, success, stale data, denied actions and unavailable services. Describe\nautomatic realtime updates and how staff recognize that displayed information has changed. Explain disabled controls\nand how to meet their prerequisites. Document only states and effects the implemented UI and backend support."
+      },
+      {
+        "id": "S5",
+        "title": "Messages, mistakes and recovery",
+        "instruction": "Explain the messages staff can encounter, why an action is refused and the permitted next step. Cover corrections,\nduplicate clicks, a lost reply, concurrent changes, leaving unsaved work, session expiry, lost connection and printer\nor scanner problems where applicable. Say what may have been saved, what to check before retrying and whom to contact.\nNever promise unsupported undo or automatic offline submission. Use staff wording, not API paths or JSON."
+      },
+      {
+        "id": "S6",
+        "title": "Language and visual examples",
+        "instruction": "Supply English and Urdu pages matching the app's labels and reading direction, with legible demo-data screenshots\nfor each task and no real patient information. Keep terminology consistent across UI, FAQs and screenshots. Record\ntranslation review status; a draft must not be represented as approved clinical wording."
+      },
+      {
+        "id": "S7",
+        "title": "Related help and delivery",
+        "instruction": "Link to the role's workspace guide, related tasks and handovers. F1 and contextual Help must open this screen's page.\nVerify offline access, search, deep links, print-friendly output and the server's permission filtering. Update the\npage, control inventory and FAQ links in the same release as the UI; retain the review evidence required by Q6."
+      }
+    ],
+    "workspace_guide": "get_handbook_outline('doctor')"
+  },
+  "workflows": [
+    {
+      "slug": "clinical-and-prescriptions",
+      "title": "Consultation, e-prescriptions & pharmacy dispensing",
+      "recipe": "get_workflow_recipe('clinical-and-prescriptions')"
+    },
+    {
+      "slug": "consent",
+      "title": "Consent (MSDS)",
+      "recipe": "get_workflow_recipe('consent')"
+    },
+    {
+      "slug": "cost-estimates-and-tariff",
+      "title": "Cost estimates, the tariff and ward transfers (MSDS)",
+      "recipe": "get_workflow_recipe('cost-estimates-and-tariff')"
+    },
+    {
+      "slug": "diagnostic-services",
+      "title": "Diagnostic services quality (MSDS)",
+      "recipe": "get_workflow_recipe('diagnostic-services')"
+    },
+    {
+      "slug": "duty-rosters-and-attendance",
+      "title": "Duty rosters, roll call, badges & attendance",
+      "recipe": "get_workflow_recipe('duty-rosters-and-attendance')"
+    },
+    {
+      "slug": "emergency-department",
+      "title": "The emergency department (MSDS)",
+      "recipe": "get_workflow_recipe('emergency-department')"
+    },
+    {
+      "slug": "facility-and-it",
+      "title": "Facility operations, badge stations & IT administration",
+      "recipe": "get_workflow_recipe('facility-and-it')"
+    },
+    {
+      "slug": "facility-profile-and-services",
+      "title": "Facility settings: the PHC profile and the clinical services",
+      "recipe": "get_workflow_recipe('facility-profile-and-services')"
+    },
+    {
+      "slug": "icd-coding",
+      "title": "ICD coding (disease classifications)",
+      "recipe": "get_workflow_recipe('icd-coding')"
+    },
+    {
+      "slug": "incidents-and-sentinel-events",
+      "title": "Incidents, sentinel events and the action register (MSDS)",
+      "recipe": "get_workflow_recipe('incidents-and-sentinel-events')"
+    },
+    {
+      "slug": "infection-control",
+      "title": "Infection prevention and control (MSDS)",
+      "recipe": "get_workflow_recipe('infection-control')"
+    },
+    {
+      "slug": "inpatient-and-discharge",
+      "title": "Admission, beds, nursing & discharge",
+      "recipe": "get_workflow_recipe('inpatient-and-discharge')"
+    },
+    {
+      "slug": "laboratory-and-radiology",
+      "title": "Laboratory & radiology",
+      "recipe": "get_workflow_recipe('laboratory-and-radiology')"
+    },
+    {
+      "slug": "opd-reception",
+      "title": "OPD reception, queues & re-routing",
+      "recipe": "get_workflow_recipe('opd-reception')"
+    },
+    {
+      "slug": "operating-theater",
+      "title": "Operating theater",
+      "recipe": "get_workflow_recipe('operating-theater')"
+    },
+    {
+      "slug": "personnel-records",
+      "title": "Personnel records (MSDS)",
+      "recipe": "get_workflow_recipe('personnel-records')"
+    },
+    {
+      "slug": "refunds-waivers-credit",
+      "title": "Refunds, VIP waivers & credit (Udhaar)",
+      "recipe": "get_workflow_recipe('refunds-waivers-credit')"
+    },
+    {
+      "slug": "surgical-care",
+      "title": "Surgical care (MSDS)",
+      "recipe": "get_workflow_recipe('surgical-care')"
+    }
+  ],
+  "decisions": [
+    {
+      "id": "H02",
+      "question": "Digits in the Urdu UI and printouts: Latin 0-9 or Extended Arabic-Indic ۰-۹.",
+      "owner": [
+        "vendor"
+      ],
+      "affects": [
+        "every screen in Urdu"
+      ],
+      "meanwhile": "Latin digits; identifiers, doses and money stay left to right."
+    },
+    {
+      "id": "H03",
+      "question": "How dates and times are shown on screen, and a 12- or 24-hour clock.",
+      "owner": [
+        "vendor",
+        "clinical_lead"
+      ],
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "The server's print format (e.g. 27-Sep-2026) and the hospital time zone."
+    },
+    {
+      "id": "H04",
+      "question": "Money on screen: decimals shown, and digit grouping (1,234,567 or 12,34,567).",
+      "owner": [
+        "vendor"
+      ],
+      "affects": [
+        "every screen with money"
+      ],
+      "meanwhile": "The amounts as the API sends them, with the currency setting."
+    },
+    {
+      "id": "H08",
+      "question": "Who writes and signs off the Urdu text of the UI, above all clinical and consent wording.",
+      "owner": [
+        "vendor",
+        "translator",
+        "clinical_lead"
+      ],
+      "affects": [
+        "every screen in Urdu"
+      ],
+      "meanwhile": "Urdu you add is a draft: mark it so (the interview bank's pattern: a draft until a native speaker reviews it)."
+    },
+    {
+      "id": "H09",
+      "question": "One design system shared by every frontend team (who authors and approves it), or each team's own.",
+      "owner": [
+        "vendor",
+        "frontend_lead"
+      ],
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "Each team designs within the backend's constraints: themes Light and DarkHighContrast, zoom 100-250 %, Noto Nastaliq Urdu, status shown as text and icon, never colour alone. Follow the vendor's design principles (frontend guide 18, get_design_principles)."
+    },
+    {
+      "id": "H10",
+      "question": "How each realtime event is shown (interrupt, attention, inform, silent), alert sounds and which terminals play them. Only Code Red (interrupt), the licence and maintenance banners and the logout on session.revoked are prescribed (the event catalogue's `presentation`).",
+      "owner": [
+        "clinical_lead",
+        "vendor"
+      ],
+      "affects": [
+        "every screen with realtime events"
+      ],
+      "meanwhile": "Code Red interrupts; every other event updates the screen and, at most, a dismissible notice. `priority` is the delivery urgency, not a presentation rule."
+    },
+    {
+      "id": "H12",
+      "question": "Which workspaces run on web, Android and iOS, which cannot read a MAC address, discover the server by UDP or print silently; or are cash and printing Windows-only.",
+      "owner": [
+        "vendor",
+        "backend"
+      ],
+      "affects": [
+        "my_cash_shift",
+        "registration",
+        "every screen that prints"
+      ],
+      "meanwhile": "The guides describe the Windows (Electron) terminal; tell your developer when a screen needs a capability your platform lacks."
+    },
+    {
+      "id": "H18",
+      "question": "Noto Nastaliq Urdu everywhere, or the more compact Naskh in dense tables.",
+      "owner": [
+        "vendor",
+        "frontend_lead"
+      ],
+      "affects": [
+        "every table in Urdu"
+      ],
+      "meanwhile": "Noto Nastaliq Urdu, as the guides require."
+    },
+    {
+      "id": "H19",
+      "question": "Allergies: the patient record keeps free text, so it cannot tell \"no known allergies\" (asserted by a clinician) from \"not recorded\". Should it?",
+      "owner": [
+        "clinical_lead",
+        "backend"
+      ],
+      "affects": [
+        "every screen with a patient banner"
+      ],
+      "meanwhile": "Show the recorded text as recorded; an empty value is \"not recorded\", never \"none\"."
+    },
+    {
+      "id": "H20",
+      "question": "May unsaved form input be kept on the terminal (which fields, encrypted, for how long)?",
+      "owner": [
+        "vendor",
+        "hospital"
+      ],
+      "affects": [
+        "every form"
+      ],
+      "meanwhile": "In memory only; never a second checker's password."
+    },
+    {
+      "id": "H22",
+      "question": "Which documents may print on an unregistered terminal's default printer (sensitive A4 documents).",
+      "owner": [
+        "hospital",
+        "vendor"
+      ],
+      "affects": [
+        "every screen that prints"
+      ],
+      "meanwhile": "As the printing guide says: the hint, then the default printer."
+    },
+    {
+      "id": "H24",
+      "question": "Who approves frontend performance targets, alert thresholds and escalation timers.",
+      "owner": [
+        "vendor",
+        "clinical_lead"
+      ],
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "The server's own settings (e.g. critical_result_communicate_minutes)."
+    }
+  ],
+  "examples": {
+    "GET /opd-tickets/{ticket_id}/clinical-encounters": {
+      "request": {
+        "path": "/api/v1/opd-tickets/1/clinical-encounters"
+      },
+      "response": {
+        "status": 200,
+        "body_preview": "{\"status\": 200, \"body\": {\"data\": [{\"encounter_id\": 2, \"patient_id\": 1, \"mrn\": \"MRN-2026-000001\", \"patient_name\": \"Ali Khan\", \"ticket_id\": 1, \"admission_id\": null, \"doctor_id\": 1, \"doctor_name\": \"Dr Ahmed\", \"encounter_type\": \"Procedure\", \"chief_complaint\": null, \"history\": null, \"examination\": null, \"diagnosis\": null, \"icd_codes\": [], \"clinical_note\": null, \"plan\": null, \"vitals_jsonb\": {}, \"examination_consent\": null, \"examination_consent_at\": null, \"examination_consent_stamp\": null, \"status\": \"Final\", \"is_post_discharge\": false, \"is_post_death\": false, \"created_at\": \"2026-10-14T02:32:59.526120+00:00\", \"finalized_at\": \"2026-10-14T02:32:59.574899+00:00\", \"row_version\": 2, \"author_stamp\": {\"at\": \"2026-10-14T02:32:59.574899+00:00\", \"name\": \"Dr Ahmed\", \"text\": \"Dr Ahmed, Doctor, PMDC PMDC-1230, 14-Oct-2026 07:32\", \"user_id\": 1, \"designation\": \"Doctor\", \"employee_id\": 1, \"registration\": \"PMDC PMDC-1230\"}, \"icd_terms\": [], \"procedure\": {\"procedure_name\": \"Suturing of a scalp laceration\", \"site\": \"Left parietal scalp\", \"indication\": \"4 cm laceration after a fall\", \"anaesthesia\": \"Local\", \"consent_id\": null, \"consent_number\": null, \"assistant_employee_id\": null, \"assistant_name\": null, \"started_at\": null, \"ended_at\": null, \"technique\": \"5 interrupted 3-0 nylon sutures\", \"findings\": \"Clean wound, no foreign body, skull intact to palpation\", \"specimens\": \"None\", \"complications\": null, \"condition_at_end\": \"Stable and comfortable, GCS 15\", \"missing\": []}}], \"meta\": {\"server_time\": \"2026-…"
+      }
+    },
+    "GET /clinical-encounters/{encounter_id}": {
+      "request": {
+        "path": "/api/v1/clinical-encounters/1"
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": {
+            "encounter_id": 1,
+            "patient_id": 1,
+            "mrn": "MRN-2026-000001",
+            "patient_name": "Ali Khan",
+            "ticket_id": 1,
+            "admission_id": null,
+            "doctor_id": 1,
+            "doctor_name": "Dr Ahmed",
+            "encounter_type": "OPD",
+            "chief_complaint": null,
+            "history": null,
+            "examination": null,
+            "diagnosis": "Lobar pneumonia",
+            "icd_codes": [
+              "J18.1"
+            ],
+            "clinical_note": null,
+            "plan": null,
+            "vitals_jsonb": {},
+            "examination_consent": null,
+            "examination_consent_at": null,
+            "examination_consent_stamp": null,
+            "status": "Draft",
+            "is_post_discharge": false,
+            "is_post_death": false,
+            "created_at": "2026-10-14T02:22:14.583576+00:00",
+            "finalized_at": null,
+            "row_version": 1,
+            "author_stamp": null,
+            "icd_terms": [
+              {
+                "uri": null,
+                "code": "J18.1",
+                "title": "Lobar pneumonia, unspecified",
+                "system": "ICD-10"
+              }
+            ],
+            "corrections": [],
+            "procedure": null
+          },
+          "meta": {
+            "server_time": "2026-10-14T02:22:14.695162+00:00"
+          },
+          "request_id": "fd1da1b272cd433fbcce883417696138"
+        }
+      }
+    },
+    "GET /patients/{patient_id}/documents": {
+      "request": {
+        "path": "/api/v1/patients/1/documents"
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": [
+            {
+              "document_id": 2,
+              "patient_id": 1,
+              "doc_type": "Photo",
+              "title": null,
+              "content_type": "image/jpeg",
+              "size_bytes": 644,
+              "is_outside": false,
+              "source_facility": null,
+              "document_date": null,
+              "is_verified": false,
+              "uploaded_at": "2026-10-13T12:12:55.831057+00:00",
+              "uploaded_by": 3
+            },
+            {
+              "document_id": 1,
+              "patient_id": 1,
+              "doc_type": "Photo",
+              "title": "Synthetic patient photo",
+              "content_type": "image/png",
+              "size_bytes": 116,
+              "is_outside": false,
+              "source_facility": null,
+              "document_date": null,
+              "is_verified": false,
+              "uploaded_at": "2026-10-13T12:12:55.809462+00:00",
+              "uploaded_by": 3
+            }
+          ],
+          "meta": {
+            "server_time": "2026-10-13T12:12:55.869196+00:00"
+          },
+          "request_id": "afb5df5d2f324ca1ac957110ee282f2c"
+        }
+      }
+    },
+    "GET /patient-documents/{document_id}/download": {
+      "request": {
+        "path": "/api/v1/patient-documents/1/download"
+      },
+      "response": {
+        "status": 200,
+        "content_type": "application/pdf",
+        "bytes": 28
+      }
+    },
+    "POST /clinical-encounters": {
+      "request": {
+        "path": "/api/v1/clinical-encounters",
+        "body": {
+          "ticket_id": 1,
+          "chief_complaint": "Cough for 3 days",
+          "diagnosis": "Acute bronchitis",
+          "icd_codes": [
+            "CA20"
+          ],
+          "plan": "Steam inhalation, review in 5 days",
+          "vitals": {
+            "bp": "120/80",
+            "hr": 88
+          }
+        }
+      },
+      "response": {
+        "status": 201,
+        "body": {
+          "data": {
+            "encounter_id": 1,
+            "patient_id": 1,
+            "mrn": "MRN-2026-000001",
+            "patient_name": "Ali Khan",
+            "ticket_id": 1,
+            "admission_id": null,
+            "doctor_id": 1,
+            "doctor_name": "Dr Ahmed",
+            "encounter_type": "OPD",
+            "chief_complaint": "Cough for 3 days",
+            "history": null,
+            "examination": null,
+            "diagnosis": "Acute bronchitis",
+            "icd_codes": [
+              "CA20"
+            ],
+            "clinical_note": null,
+            "plan": "Steam inhalation, review in 5 days",
+            "vitals_jsonb": {
+              "bp": "120/80",
+              "hr": 88
+            },
+            "examination_consent": null,
+            "examination_consent_at": null,
+            "examination_consent_stamp": null,
+            "status": "Draft",
+            "is_post_discharge": false,
+            "is_post_death": false,
+            "created_at": "2026-10-14T01:57:12.183655+00:00",
+            "finalized_at": null,
+            "row_version": 1,
+            "author_stamp": null,
+            "icd_terms": [
+              {
+                "uri": "http://id.who.int/icd/release/11/mms/11753425",
+                "code": "CA20",
+                "title": "Bronchitis",
+                "system": "ICD-11"
+              }
+            ],
+            "corrections": [],
+            "procedure": null
+          },
+          "meta": {
+            "server_time": "2026-10-14T01:57:12.220153+00:00"
+          },
+          "request_id": "a94f91b60e8a4dc2af181513c15f6c78"
+        }
+      }
+    },
+    "PATCH /clinical-encounters/{encounter_id}": {
+      "request": {
+        "path": "/api/v1/clinical-encounters/2",
+        "body": {
+          "procedure": {
+            "technique": "5 interrupted 3-0 nylon sutures",
+            "findings": "Clean wound, no foreign body, skull intact to palpation",
+            "specimens": "None",
+            "condition_at_end": "Stable and comfortable, GCS 15"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": {
+            "encounter_id": 2,
+            "patient_id": 1,
+            "mrn": "MRN-2026-000001",
+            "patient_name": "Ali Khan",
+            "ticket_id": 1,
+            "admission_id": null,
+            "doctor_id": 1,
+            "doctor_name": "Dr Ahmed",
+            "encounter_type": "Procedure",
+            "chief_complaint": null,
+            "history": null,
+            "examination": null,
+            "diagnosis": null,
+            "icd_codes": [],
+            "clinical_note": null,
+            "plan": null,
+            "vitals_jsonb": {},
+            "examination_consent": null,
+            "examination_consent_at": null,
+            "examination_consent_stamp": null,
+            "status": "Draft",
+            "is_post_discharge": false,
+            "is_post_death": false,
+            "created_at": "2026-10-14T02:32:59.526120+00:00",
+            "finalized_at": null,
+            "row_version": 1,
+            "author_stamp": null,
+            "icd_terms": [],
+            "corrections": [],
+            "procedure": {
+              "procedure_name": "Suturing of a scalp laceration",
+              "site": "Left parietal scalp",
+              "indication": "4 cm laceration after a fall",
+              "anaesthesia": "Local",
+              "consent_id": null,
+              "consent_number": null,
+              "assistant_employee_id": null,
+              "assistant_name": null,
+              "started_at": null,
+              "ended_at": null,
+              "technique": "5 interrupted 3-0 nylon sutures",
+              "findings": "Clean wound, no foreign body, skull intact to palpation",
+              "specimens": "None",
+              "complications": null,
+              "condition_at_end": "Stable and comfortable, GCS 15",
+              "missing": []
+            }
+          },
+          "meta": {
+            "server_time": "2026-10-14T02:32:59.568934+00:00"
+          },
+          "request_id": "0f0f8f2a2b37403f8342e506af2dec22"
+        }
+      }
+    },
+    "POST /clinical-encounters/{encounter_id}/finalize": {
+      "request": {
+        "path": "/api/v1/clinical-encounters/1/finalize"
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": {
+            "encounter_id": 1,
+            "patient_id": 1,
+            "mrn": "MRN-2026-000001",
+            "patient_name": "Ali Khan",
+            "ticket_id": 1,
+            "admission_id": null,
+            "doctor_id": 1,
+            "doctor_name": "Dr Ahmed",
+            "encounter_type": "OPD",
+            "chief_complaint": "Cough for 3 days",
+            "history": null,
+            "examination": null,
+            "diagnosis": "Acute bronchitis",
+            "icd_codes": [
+              "CA20"
+            ],
+            "clinical_note": null,
+            "plan": "Steam inhalation, review in 5 days",
+            "vitals_jsonb": {
+              "bp": "120/80",
+              "hr": 88
+            },
+            "examination_consent": null,
+            "examination_consent_at": null,
+            "examination_consent_stamp": null,
+            "status": "Final",
+            "is_post_discharge": false,
+            "is_post_death": false,
+            "created_at": "2026-10-14T01:57:12.183655+00:00",
+            "finalized_at": "2026-10-14T01:57:12.252344+00:00",
+            "row_version": 2,
+            "author_stamp": {
+              "at": "2026-10-14T01:57:12.252344+00:00",
+              "name": "Dr Ahmed",
+              "text": "Dr Ahmed, Doctor, PMDC PMDC-25273, 14-Oct-2026 06:57",
+              "user_id": 1,
+              "designation": "Doctor",
+              "employee_id": 1,
+              "registration": "PMDC PMDC-25273"
+            },
+            "icd_terms": [
+              {
+                "uri": "http://id.who.int/icd/release/11/mms/11753425",
+                "code": "CA20",
+                "title": "Bronchitis",
+                "system": "ICD-11"
+              }
+            ],
+            "corrections": [],
+            "procedure": null
+          },
+          "meta": {
+            "server_time": "2026-10-14T01:57:12.280730+00:00"
+          },
+          "request_id": "6f02647792e14ee0989d8003a4136c91"
+        }
+      }
+    },
+    "POST /clinical-encounters/{encounter_id}/correction": {
+      "request": {
+        "path": "/api/v1/clinical-encounters/1/correction",
+        "body": {
+          "field": "plan",
+          "correction_text": "Review in 3 days",
+          "correction_reason": "earlier review needed"
+        }
+      },
+      "response": {
+        "status": 201,
+        "body_preview": "{\"status\": 201, \"body\": {\"data\": {\"encounter_id\": 1, \"patient_id\": 1, \"mrn\": \"MRN-2026-000001\", \"patient_name\": \"Ali Khan\", \"ticket_id\": 1, \"admission_id\": null, \"doctor_id\": 1, \"doctor_name\": \"Dr Ahmed\", \"encounter_type\": \"OPD\", \"chief_complaint\": \"Cough for 3 days\", \"history\": null, \"examination\": null, \"diagnosis\": \"Acute bronchitis\", \"icd_codes\": [\"CA20\"], \"clinical_note\": null, \"plan\": \"Steam inhalation, review in 5 days\", \"vitals_jsonb\": {\"bp\": \"120/80\", \"hr\": 88}, \"examination_consent\": null, \"examination_consent_at\": null, \"examination_consent_stamp\": null, \"status\": \"Final\", \"is_post_discharge\": false, \"is_post_death\": false, \"created_at\": \"2026-10-14T01:57:12.183655+00:00\", \"finalized_at\": \"2026-10-14T01:57:12.252344+00:00\", \"row_version\": 2, \"author_stamp\": {\"at\": \"2026-10-14T01:57:12.252344+00:00\", \"name\": \"Dr Ahmed\", \"text\": \"Dr Ahmed, Doctor, PMDC PMDC-25273, 14-Oct-2026 06:57\", \"user_id\": 1, \"designation\": \"Doctor\", \"employee_id\": 1, \"registration\": \"PMDC PMDC-25273\"}, \"icd_terms\": [{\"uri\": \"http://id.who.int/icd/release/11/mms/11753425\", \"code\": \"CA20\", \"title\": \"Bronchitis\", \"system\": \"ICD-11\"}], \"corrections\": [{\"correction_id\": 1, \"field\": \"plan\", \"correction_text\": \"Review in 3 days\", \"correction_reason\": \"earlier review needed\", \"corrected_by\": 1, \"corrected_by_name\": \"Dr Ahmed\", \"created_at\": \"2026-10-14T01:57:12.295697+00:00\", \"author_stamp\": {\"at\": \"2026-10-14T01:57:12.295697+00:00\", \"name\": \"Dr Ahmed\", \"text\": \"Dr Ahmed, Senior Registrar, PMDC PMDC-25…"
+      }
+    },
+    "GET /patients/{patient_id}/clinical-encounters": {
+      "request": {
+        "path": "/api/v1/patients/1/clinical-encounters"
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": [
+            {
+              "encounter_id": 1,
+              "patient_id": 1,
+              "mrn": "MRN-2026-000001",
+              "patient_name": "Ali Khan",
+              "ticket_id": 1,
+              "admission_id": null,
+              "doctor_id": 1,
+              "doctor_name": "Dr Ahmed",
+              "encounter_type": "OPD",
+              "chief_complaint": null,
+              "history": null,
+              "examination": null,
+              "diagnosis": "Viral fever",
+              "icd_codes": [],
+              "clinical_note": null,
+              "plan": null,
+              "vitals_jsonb": {},
+              "examination_consent": null,
+              "examination_consent_at": null,
+              "examination_consent_stamp": null,
+              "status": "Final",
+              "is_post_discharge": false,
+              "is_post_death": false,
+              "created_at": "2026-10-14T02:35:06.634385+00:00",
+              "finalized_at": "2026-10-14T02:35:06.643364+00:00",
+              "row_version": 2,
+              "author_stamp": {
+                "at": "2026-10-14T02:35:06.643364+00:00",
+                "name": "Dr Ahmed",
+                "text": "Dr Ahmed, Doctor, PMDC PMDC-47386, 14-Oct-2026 07:35",
+                "user_id": 1,
+                "designation": "Doctor",
+                "employee_id": 1,
+                "registration": "PMDC PMDC-47386"
+              },
+              "icd_terms": [],
+              "procedure": null
+            }
+          ],
+          "meta": {
+            "server_time": "2026-10-14T02:35:06.728094+00:00"
+          },
+          "request_id": "93271216c93647468c9ca855f97a1a08"
+        }
+      }
+    },
+    "GET /patients/{patient_id}/master-summary": {
+      "request": {
+        "path": "/api/v1/patients/1/master-summary"
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": {
+            "master_patient_id": 1,
+            "patient_ids": [
+              1
+            ],
+            "encounters": [
+              {
+                "encounter_id": 1,
+                "patient_id": 1,
+                "encounter_type": "OPD",
+                "status": "Final",
+                "chief_complaint": null,
+                "diagnosis": "Viral fever",
+                "created_at": "2026-09-27T17:42:06.721466+00:00",
+                "finalized_at": "2026-09-27T17:42:06.729571+00:00",
+                "doctor_name": "Dr Ahmed",
+                "corrections": 0
+              }
+            ],
+            "admissions": [],
+            "prescriptions": [],
+            "lab_results": []
+          },
+          "meta": {
+            "server_time": "2026-09-27T17:42:06.805831+00:00"
+          },
+          "request_id": "a8a92dafa4c4417ab116a43a6240e287"
+        }
+      }
+    },
+    "POST /opd-tickets/{ticket_id}/complete": {
+      "request": {
+        "path": "/api/v1/opd-tickets/1/complete"
+      },
+      "response": {
+        "status": 200,
+        "body_preview": "{\"status\": 200, \"body\": {\"data\": {\"ticket_id\": 1, \"ticket_number\": \"OPD-2026-000001\", \"patient_id\": 1, \"mrn\": \"MRN-2026-000001\", \"patient_name\": \"Ali Khan\", \"gender\": \"male\", \"age_years\": 40, \"dob\": null, \"doctor_id\": 1, \"doctor_name\": \"Dr Ahmed\", \"department_id\": 1, \"department_name\": \"General Medicine\", \"service_id\": 1, \"source\": \"WalkIn\", \"status\": \"Completed\", \"payment_status\": \"Paid\", \"approval_lock\": \"None\", \"gross_amount\": 1000.0, \"discount_amount\": 0.0, \"net_payable\": 1000.0, \"discount_reason\": null, \"issued_at\": \"2026-09-27T17:42:01.364719+00:00\", \"paid_at\": \"2026-09-27T17:42:01.364719+00:00\", \"valid_until\": \"2026-09-30T17:42:01.364719+00:00\", \"called_at\": \"2026-09-27T17:42:01.682978+00:00\", \"examined_at\": \"2026-09-27T17:42:01.685535+00:00\", \"completed_at\": \"2026-09-27T17:42:01.701326+00:00\", \"deferred_at\": null, \"reactivated_at\": null, \"expired_at\": null, \"voided_at\": null, \"void_reason\": null, \"cancelled_at\": null, \"is_clinical_locked\": false, \"clinical_lock_reason\": null, \"is_emergency_bypass\": false, \"is_ar_block_overridden\": false, \"row_version\": 7, \"queue\": {\"queue_id\": 1, \"queue_group\": \"doctor:1\", \"token_no\": 1, \"token_date\": \"2026-09-27\", \"priority\": 0, \"status\": \"Completed\", \"queued_at\": \"2026-09-27T17:42:01.364719+00:00\", \"called_at\": null, \"rerouted_from_queue_id\": null}, \"invoice\": {\"invoice_id\": 1, \"invoice_no\": \"INV-2026-0000001\", \"invoice_type\": \"OPD\", \"patient_id\": 1, \"admission_id\": null, \"ticket_id\": 1, \"panel_id\": null, \"employee_id\": null, \"walki…"
+      }
+    },
+    "POST /opd-tickets/{ticket_id}/vip-waiver-post-consult": {
+      "request": {
+        "path": "/api/v1/opd-tickets/1/vip-waiver-post-consult",
+        "body": {
+          "reason": "Trustee relative"
+        }
+      },
+      "response": {
+        "status": 201,
+        "body_preview": "{\"status\": 201, \"body\": {\"data\": {\"waiver_request_id\": 1, \"approval\": {\"request_id\": 1, \"approval_type\": \"VIPWaiverPostConsult\", \"required_permission\": \"approval.waiver.approve\", \"requester_id\": 1, \"requester_name\": \"Dr Ahmed\", \"subject_type\": \"vip_waiver_request\", \"subject_id\": 1, \"patient_id\": 1, \"amount\": 1000.0, \"summary\": \"Dr. Dr Ahmed requests a post-consultation VIP Waiver for Ticket #OPD-2026-000001 (Rs. 1000.00): Trustee relative\", \"payload_jsonb\": {\"ticket_id\": 1, \"encounter_id\": 1}, \"is_elevated\": false, \"status\": \"Pending\", \"decided_by\": null, \"decided_by_name\": null, \"decided_at\": null, \"decision_note\": null, \"solo_self_approved\": false, \"requested_at\": \"2026-10-18T11:17:06.963485+00:00\", \"can_decide\": false, \"decide_blocked\": \"missing_permission\", \"self_decision\": null}, \"ticket\": {\"ticket_id\": 1, \"ticket_number\": \"OPD-2026-000001\", \"patient_id\": 1, \"mrn\": \"MRN-2026-000001\", \"patient_name\": \"Ali Khan\", \"gender\": \"male\", \"age_years\": 40, \"dob\": null, \"doctor_id\": 1, \"doctor_name\": \"Dr Ahmed\", \"department_id\": 1, \"department_name\": \"General Medicine\", \"service_id\": 1, \"source\": \"WalkIn\", \"status\": \"Examined\", \"payment_status\": \"Paid\", \"approval_lock\": \"WaiverPending\", \"gross_amount\": 1000.0, \"discount_amount\": 0.0, \"net_payable\": 1000.0, \"discount_reason\": null, \"issued_at\": \"2026-10-18T11:17:06.583874+00:00\", \"paid_at\": \"2026-10-18T11:17:06.583874+00:00\", \"valid_until\": \"2026-10-21T11:17:06.583874+00:00\", \"called_at\": \"2026-10-18T11:17:06.858136+00:00\", \"examined…"
+      }
+    },
+    "POST /admissions": {
+      "request": {
+        "path": "/api/v1/admissions",
+        "body": {
+          "ticket_id": 1,
+          "requested_ward_id": 2,
+          "admission_reason": "Fever and productive cough for 5 days, SpO2 91% on air",
+          "provisional_diagnosis": "Community-acquired pneumonia"
+        }
+      },
+      "response": {
+        "status": 201,
+        "body": {
+          "data": {
+            "admission_id": 1,
+            "admission_number": "ADM-2026-00001",
+            "patient_id": 1,
+            "mrn": "MRN-2026-000001",
+            "patient_name": "Ali Khan",
+            "gender": "male",
+            "age_years": 40,
+            "requested_ward_id": 2,
+            "requested_ward_name": "General Ward",
+            "ward_id": null,
+            "ward_name": null,
+            "bed_id": null,
+            "bed_label": null,
+            "primary_doctor_id": 1,
+            "primary_doctor_name": "Dr Ahmed",
+            "admission_type": "Standard",
+            "status": "AdmissionPending",
+            "billing_category": "Cash",
+            "panel_id": null,
+            "is_billing_confirmed": false,
+            "is_billing_deferred": false,
+            "is_overflow": false,
+            "overflow_reason": null,
+            "eta_minutes": null,
+            "source_ticket_id": 1,
+            "admission_reason": "Fever and productive cough for 5 days, SpO2 91% on air",
+            "provisional_diagnosis": "Community-acquired pneumonia",
+            "initial_care_plan": null,
+            "photo_document_id": null,
+            "details_stamp": {
+              "at": "2026-10-13T11:21:20.260771+00:00",
+              "name": "Dr Ahmed",
+              "text": "Dr Ahmed, Doctor, PMDC PMDC-27493, 13-Oct-2026 16:21",
+              "user_id": 1,
+              "designation": "Doctor",
+              "employee_id": 1,
+              "registration": "PMDC PMDC-27493"
+            },
+            "admission_notes": null,
+            "requested_at": "2026-10-13T11:21:20.260771+00:00",
+            "reserved_at": null,
+            "admitted_at": null,
+            "discharge_initiated_at": null,
+            "discharged_at": null,
+            "row_version": 1,
+            "discharge": {
+              "stages": [],
+              "blocked_on": null,
+              "started": false,
+              "complete": false
+            },
+            "invoice": null
+          },
+          "meta": {
+            "server_time": "2026-10-13T11:21:20.316085+00:00"
+          },
+          "request_id": "bb070b39a075416f9eaae6e681b5c920"
+        }
+      }
+    },
+    "GET /beds/matrix": {
+      "request": {
+        "path": "/api/v1/beds/matrix"
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": {
+            "wards": [
+              {
+                "ward_id": 2,
+                "code": "GW",
+                "name": "General Ward",
+                "ward_type": "General",
+                "gender_restriction": "any",
+                "total_beds": 1,
+                "available": 0,
+                "reserved": 0,
+                "occupied": 1,
+                "turnover": 0,
+                "out_of_service": 0
+              },
+              {
+                "ward_id": 1,
+                "code": "ICU",
+                "name": "ICU",
+                "ward_type": "ICU",
+                "gender_restriction": "any",
+                "total_beds": 1,
+                "available": 1,
+                "reserved": 0,
+                "occupied": 0,
+                "turnover": 0,
+                "out_of_service": 0
+              }
+            ],
+            "summary": {
+              "General Ward": 0,
+              "ICU": 1
+            },
+            "beds": [
+              {
+                "bed_id": 1,
+                "ward_id": 1,
+                "label": "ICU-1",
+                "current_state": "Available",
+                "state_changed_at": "2026-09-27T17:38:22.548397+00:00",
+                "is_overflow_allowed": false,
+                "admission_id": null,
+                "patient_name": null,
+                "mrn": null,
+                "admission_status": null,
+                "is_overflow": null,
+                "discharge_blocked_on": null
+              },
+              {
+                "bed_id": 2,
+                "ward_id": 2,
+                "label": "GW-1",
+                "current_state": "Occupied",
+                "state_changed_at": "2026-09-27T17:38:22.903579+00:00",
+                "is_overflow_allowed": false,
+                "admission_id": 1,
+                "patient_name": null,
+                "mrn": null,
+                "admission_status": "Admitted",
+                "is_overflow": false,
+                "discharge_blocked_on": null
+              }
+            ]
+          },
+          "meta": {
+            "server_time": "2026-09-27T17:38:22.967241+00:00"
+          },
+          "request_id": "802131a929b14db0a0c8033474e8d271"
+        }
+      }
+    },
+    "GET /clinical-encounters/{encounter_id}/print-payload": {
+      "request": {
+        "path": "/api/v1/clinical-encounters/1/print-payload"
+      },
+      "response": {
+        "status": 200,
+        "body_preview": "{\"status\": 200, \"body\": {\"data\": {\"document_type\": \"clinical_note\", \"printer_role\": \"document\", \"paper_width_mm\": 210, \"fields\": {\"hospital\": {\"name\": \"Haspataal Hospital\", \"address\": \"\", \"phone\": \"\", \"phc_number\": \"\"}, \"title\": \"OPD CONSULTATION NOTE\", \"visit_number\": \"OPD-2026-000001\", \"encounter\": {\"encounter_id\": 1, \"patient_id\": 1, \"mrn\": \"MRN-2026-000001\", \"patient_name\": \"Ali Khan\", \"ticket_id\": 1, \"admission_id\": null, \"doctor_id\": 1, \"doctor_name\": \"Dr Ahmed\", \"encounter_type\": \"OPD\", \"chief_complaint\": \"Cough for 3 days\", \"history\": null, \"examination\": null, \"diagnosis\": \"Acute bronchitis\", \"icd_codes\": [\"CA20\"], \"clinical_note\": null, \"plan\": \"Steam inhalation, review in 5 days\", \"vitals_jsonb\": {\"bp\": \"120/80\", \"hr\": 88}, \"examination_consent\": null, \"examination_consent_at\": null, \"examination_consent_stamp\": null, \"status\": \"Final\", \"is_post_discharge\": false, \"is_post_death\": false, \"created_at\": \"2026-10-14T01:57:12.183655+00:00\", \"finalized_at\": \"2026-10-14T01:57:12.252344+00:00\", \"row_version\": 2, \"author_stamp\": {\"at\": \"2026-10-14T01:57:12.252344+00:00\", \"name\": \"Dr Ahmed\", \"text\": \"Dr Ahmed, Doctor, PMDC PMDC-25273, 14-Oct-2026 06:57\", \"user_id\": 1, \"designation\": \"Doctor\", \"employee_id\": 1, \"registration\": \"PMDC PMDC-25273\"}, \"icd_terms\": [{\"uri\": \"http://id.who.int/icd/release/11/mms/11753425\", \"code\": \"CA20\", \"title\": \"Bronchitis\", \"system\": \"ICD-11\"}], \"corrections\": [{\"correction_id\": 1, \"field\": \"plan\", \"correction_text\": \"Review in 3 days\", \"correc…"
+      }
+    },
+    "GET /clinical-encounters/{encounter_id}/pdf": {
+      "request": {
+        "path": "/api/v1/clinical-encounters/1/pdf"
+      },
+      "response": {
+        "status": 200,
+        "content_type": "application/pdf",
+        "bytes": 2759
+      }
+    },
+    "GET /icd/codes": {
+      "request": {
+        "path": "/api/v1/icd/codes",
+        "query": {
+          "q": "pneumonia"
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": {
+            "code_system": "ICD-11",
+            "release_label": "2026-01",
+            "items": [
+              {
+                "code": "CA40",
+                "kind": "category",
+                "title": "Pneumonia",
+                "uri": "http://id.who.int/icd/release/11/mms/142052508",
+                "chapter": "12",
+                "parent_code": "BlockL1-CA4",
+                "depth": 2,
+                "is_leaf": false,
+                "is_residual": false,
+                "parent_title": "Lung infections"
+              },
+              {
+                "code": "CA40.20",
+                "kind": "category",
+                "title": "Pneumonia due to pneumocystis",
+                "uri": "http://id.who.int/icd/release/11/mms/1229452918",
+                "chapter": "12",
+                "parent_code": "CA40.2",
+                "depth": 4,
+                "is_leaf": true,
+                "is_residual": false,
+                "parent_title": "Fungal pneumonia"
+              },
+              {
+                "code": "CA40.10",
+                "kind": "category",
+                "title": "Pneumonia due to Adenovirus",
+                "uri": "http://id.who.int/icd/release/11/mms/1912319301",
+                "chapter": "12",
+                "parent_code": "CA40.1",
+                "depth": 4,
+                "is_leaf": true,
+                "is_residual": false,
+                "parent_title": "Viral pneumonia"
+              }
+            ]
+          },
+          "meta": {
+            "server_time": "2026-09-29T03:46:49.443872+00:00"
+          },
+          "request_id": "10800413b3f3436fa4e2fc04674bbe93"
+        }
+      }
+    },
+    "GET /icd/browse": {
+      "request": {
+        "path": "/api/v1/icd/browse"
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": {
+            "code_system": "ICD-11",
+            "release_label": "2026-01",
+            "parent": null,
+            "items": [
+              {
+                "code": "01",
+                "kind": "chapter",
+                "title": "Certain infectious or parasitic diseases",
+                "uri": "http://id.who.int/icd/release/11/mms/1435254666",
+                "chapter": "01",
+                "parent_code": null,
+                "depth": 0,
+                "is_leaf": false,
+                "is_residual": false
+              },
+              {
+                "code": "02",
+                "kind": "chapter",
+                "title": "Neoplasms",
+                "uri": "http://id.who.int/icd/release/11/mms/1630407678",
+                "chapter": "02",
+                "parent_code": null,
+                "depth": 0,
+                "is_leaf": false,
+                "is_residual": false
+              },
+              {
+                "code": "03",
+                "kind": "chapter",
+                "title": "Diseases of the blood or blood-forming organs",
+                "uri": "http://id.who.int/icd/release/11/mms/1766440644",
+                "chapter": "03",
+                "parent_code": null,
+                "depth": 0,
+                "is_leaf": false,
+                "is_residual": false
+              }
+            ]
+          },
+          "meta": {
+            "server_time": "2026-09-29T03:46:49.483384+00:00"
+          },
+          "request_id": "68c2df8ee44340d29c4b73f89d76249e"
+        }
+      }
+    },
+    "GET /icd/codes/{code}": {
+      "request": {
+        "path": "/api/v1/icd/codes/ca40.z"
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": {
+            "code": "CA40.Z",
+            "kind": "category",
+            "title": "Pneumonia, organism unspecified",
+            "uri": "http://id.who.int/icd/release/11/mms/142052508/unspecified",
+            "chapter": "12",
+            "parent_code": "CA40",
+            "depth": 3,
+            "is_leaf": true,
+            "is_residual": true,
+            "ancestors": [
+              {
+                "code": "12",
+                "kind": "chapter",
+                "title": "Diseases of the respiratory system",
+                "uri": "http://id.who.int/icd/release/11/mms/197934298"
+              },
+              {
+                "code": "BlockL1-CA4",
+                "kind": "block",
+                "title": "Lung infections",
+                "uri": "http://id.who.int/icd/release/11/mms/915779102"
+              },
+              {
+                "code": "CA40",
+                "kind": "category",
+                "title": "Pneumonia",
+                "uri": "http://id.who.int/icd/release/11/mms/142052508"
+              }
+            ],
+            "children": [],
+            "code_system": "ICD-11",
+            "release_label": "2026-01"
+          },
+          "meta": {
+            "server_time": "2026-09-29T03:46:49.498656+00:00"
+          },
+          "request_id": "65656096cdd249db821123957d9de9fe"
+        }
+      }
+    },
+    "GET /icd/releases": {
+      "request": {
+        "path": "/api/v1/icd/releases"
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": {
+            "coding_system": "ICD-11",
+            "releases": [
+              {
+                "release_id": 1,
+                "code_system": "ICD-11",
+                "release_label": "2026-01",
+                "language": "en",
+                "source": "Bundled",
+                "source_file": "SimpleTabulation-ICD-11-MMS-en.zip",
+                "source_sha256": "f1356588f40953a83e3af2b662deab47c5e269f944d1ea4ed0cfeb2007c7cd39",
+                "licence_note": "WHO ICD-11 MMS 2026-01 (en). International Classification of Diseases, Eleventh Revision (ICD-11), World Health Organization (WHO) 2019 https://icd.who.int/browse11. Licensed under the Creative Commons Attribution-NoDerivatives 3.0 IGO licence (CC BY-ND 3.0 IGO).",
+                "code_count": 18505,
+                "is_active": true,
+                "loaded_by": null,
+                "loaded_by_name": null,
+                "loaded_at": "2026-09-29T03:41:19.034744+00:00",
+                "row_version": 2
+              }
+            ],
+            "icd11_citation": "International Classification of Diseases, Eleventh Revision (ICD-11), World Health Organization (WHO) 2019 https://icd.who.int/browse11. Licensed under the Creative Commons Attribution-NoDerivatives 3.0 IGO licence (CC BY-ND 3.0 IGO)."
+          },
+          "meta": {
+            "server_time": "2026-09-29T03:46:49.427434+00:00"
+          },
+          "request_id": "a8f189dcef0743a3bae69666cb0aed9c"
+        }
+      }
+    },
+    "GET /staff/lookup": {
+      "request": {
+        "path": "/api/v1/staff/lookup",
+        "query": {
+          "q": "sana look"
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": [
+            {
+              "employee_id": 2,
+              "emp_number": "EMP-2026-0002",
+              "full_name": "Sana Lookuptest",
+              "designation": "Officer",
+              "department_name": null,
+              "license_type": "PNC",
+              "registration": "PNC PNC-8403"
+            }
+          ],
+          "meta": {
+            "server_time": "2026-10-27T15:29:53.668901+00:00"
+          },
+          "request_id": "4e2ee3a40faa41c195bc2aa08edaa30b"
+        }
+      }
+    },
+    "POST /opd-queues/{queue_id}/reroute": {
+      "request": {
+        "path": "/api/v1/opd-queues/2/reroute",
+        "body": {
+          "target_doctor_id": 2,
+          "reason": "Needs Dr Sara"
+        }
+      },
+      "response": {
+        "status": 200,
+        "body_preview": "{\"status\": 200, \"body\": {\"data\": {\"ticket_id\": 2, \"ticket_number\": \"OPD-2026-000002\", \"patient_id\": 2, \"mrn\": \"MRN-2026-000002\", \"patient_name\": \"Ali Khan\", \"gender\": \"male\", \"age_years\": 40, \"dob\": null, \"doctor_id\": 2, \"doctor_name\": \"Dr Sara\", \"department_id\": 1, \"department_name\": \"General Medicine\", \"service_id\": 1, \"source\": \"WalkIn\", \"status\": \"Waiting\", \"payment_status\": \"Paid\", \"approval_lock\": \"None\", \"gross_amount\": 1000.0, \"discount_amount\": 0.0, \"net_payable\": 1000.0, \"discount_reason\": null, \"issued_at\": \"2026-09-27T17:41:15.209872+00:00\", \"paid_at\": \"2026-09-27T17:41:15.209872+00:00\", \"valid_until\": \"2026-09-30T17:41:15.209872+00:00\", \"called_at\": \"2026-09-27T17:41:15.255015+00:00\", \"examined_at\": null, \"completed_at\": null, \"deferred_at\": null, \"reactivated_at\": null, \"expired_at\": null, \"voided_at\": null, \"void_reason\": null, \"cancelled_at\": null, \"is_clinical_locked\": false, \"clinical_lock_reason\": null, \"is_emergency_bypass\": false, \"is_ar_block_overridden\": false, \"row_version\": 7, \"queue\": {\"queue_id\": 3, \"queue_group\": \"doctor:2\", \"token_no\": 2, \"token_date\": \"2026-09-27\", \"priority\": 100, \"status\": \"Active\", \"queued_at\": \"2026-09-27T17:41:15.268733+00:00\", \"called_at\": null, \"rerouted_from_queue_id\": 2}, \"invoice\": {\"invoice_id\": 2, \"invoice_no\": \"INV-2026-0000002\", \"invoice_type\": \"OPD\", \"patient_id\": 2, \"admission_id\": null, \"ticket_id\": 2, \"panel_id\": null, \"employee_id\": null, \"walkin_customer_name\": null, \"walkin_customer_mobile\": null, \"gross_tota…"
+      }
+    },
+    "GET /opd-queues/doctors": {
+      "request": {
+        "path": "/api/v1/opd-queues/doctors"
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": [
+            {
+              "employee_id": 1,
+              "full_name": "Dr Ahmed",
+              "designation": "Doctor",
+              "department_id": 1,
+              "department_name": "General Medicine",
+              "registration": "PMDC PMDC-14187",
+              "waiting": 0
+            },
+            {
+              "employee_id": 2,
+              "full_name": "Dr Sara",
+              "designation": "Doctor",
+              "department_id": 1,
+              "department_name": "General Medicine",
+              "registration": "PMDC PMDC-1862",
+              "waiting": 0
+            }
+          ],
+          "meta": {
+            "server_time": "2026-10-29T16:39:10.232744+00:00"
+          },
+          "request_id": "f888a058d90c470cb28eeb2f0f660954"
+        }
+      }
+    }
+  },
+  "unknowns": [
+    {
+      "what": "decision H02",
+      "owner": [
+        "vendor"
+      ],
+      "question": "Digits in the Urdu UI and printouts: Latin 0-9 or Extended Arabic-Indic ۰-۹.",
+      "affects": [
+        "every screen in Urdu"
+      ],
+      "meanwhile": "Latin digits; identifiers, doses and money stay left to right."
+    },
+    {
+      "what": "decision H03",
+      "owner": [
+        "vendor",
+        "clinical_lead"
+      ],
+      "question": "How dates and times are shown on screen, and a 12- or 24-hour clock.",
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "The server's print format (e.g. 27-Sep-2026) and the hospital time zone."
+    },
+    {
+      "what": "decision H04",
+      "owner": [
+        "vendor"
+      ],
+      "question": "Money on screen: decimals shown, and digit grouping (1,234,567 or 12,34,567).",
+      "affects": [
+        "every screen with money"
+      ],
+      "meanwhile": "The amounts as the API sends them, with the currency setting."
+    },
+    {
+      "what": "decision H08",
+      "owner": [
+        "vendor",
+        "translator",
+        "clinical_lead"
+      ],
+      "question": "Who writes and signs off the Urdu text of the UI, above all clinical and consent wording.",
+      "affects": [
+        "every screen in Urdu"
+      ],
+      "meanwhile": "Urdu you add is a draft: mark it so (the interview bank's pattern: a draft until a native speaker reviews it)."
+    },
+    {
+      "what": "decision H09",
+      "owner": [
+        "vendor",
+        "frontend_lead"
+      ],
+      "question": "One design system shared by every frontend team (who authors and approves it), or each team's own.",
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "Each team designs within the backend's constraints: themes Light and DarkHighContrast, zoom 100-250 %, Noto Nastaliq Urdu, status shown as text and icon, never colour alone. Follow the vendor's design principles (frontend guide 18, get_design_principles)."
+    },
+    {
+      "what": "decision H10",
+      "owner": [
+        "clinical_lead",
+        "vendor"
+      ],
+      "question": "How each realtime event is shown (interrupt, attention, inform, silent), alert sounds and which terminals play them. Only Code Red (interrupt), the licence and maintenance banners and the logout on session.revoked are prescribed (the event catalogue's `presentation`).",
+      "affects": [
+        "every screen with realtime events"
+      ],
+      "meanwhile": "Code Red interrupts; every other event updates the screen and, at most, a dismissible notice. `priority` is the delivery urgency, not a presentation rule."
+    },
+    {
+      "what": "decision H12",
+      "owner": [
+        "vendor",
+        "backend"
+      ],
+      "question": "Which workspaces run on web, Android and iOS, which cannot read a MAC address, discover the server by UDP or print silently; or are cash and printing Windows-only.",
+      "affects": [
+        "my_cash_shift",
+        "registration",
+        "every screen that prints"
+      ],
+      "meanwhile": "The guides describe the Windows (Electron) terminal; tell your developer when a screen needs a capability your platform lacks."
+    },
+    {
+      "what": "decision H18",
+      "owner": [
+        "vendor",
+        "frontend_lead"
+      ],
+      "question": "Noto Nastaliq Urdu everywhere, or the more compact Naskh in dense tables.",
+      "affects": [
+        "every table in Urdu"
+      ],
+      "meanwhile": "Noto Nastaliq Urdu, as the guides require."
+    },
+    {
+      "what": "decision H19",
+      "owner": [
+        "clinical_lead",
+        "backend"
+      ],
+      "question": "Allergies: the patient record keeps free text, so it cannot tell \"no known allergies\" (asserted by a clinician) from \"not recorded\". Should it?",
+      "affects": [
+        "every screen with a patient banner"
+      ],
+      "meanwhile": "Show the recorded text as recorded; an empty value is \"not recorded\", never \"none\"."
+    },
+    {
+      "what": "decision H20",
+      "owner": [
+        "vendor",
+        "hospital"
+      ],
+      "question": "May unsaved form input be kept on the terminal (which fields, encrypted, for how long)?",
+      "affects": [
+        "every form"
+      ],
+      "meanwhile": "In memory only; never a second checker's password."
+    },
+    {
+      "what": "decision H22",
+      "owner": [
+        "hospital",
+        "vendor"
+      ],
+      "question": "Which documents may print on an unregistered terminal's default printer (sensitive A4 documents).",
+      "affects": [
+        "every screen that prints"
+      ],
+      "meanwhile": "As the printing guide says: the hint, then the default printer."
+    },
+    {
+      "what": "decision H24",
+      "owner": [
+        "vendor",
+        "clinical_lead"
+      ],
+      "question": "Who approves frontend performance targets, alert thresholds and escalation timers.",
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "The server's own settings (e.g. critical_result_communicate_minutes)."
+    }
+  ],
+  "omitted_sections": [
+    "schemas"
+  ],
+  "next": "Request omitted sections separately with max_chars=200000; for an oversized endpoints/schemas section use get_endpoint / get_schema for each operation/type."
+}

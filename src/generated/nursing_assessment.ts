@@ -96,4 +96,3 @@ export function nutritionScreening(admission_id: number, body: NutritionScreenin
 export function nursingCarePlan(admission_id: number, body: NursingCarePlanIn): Promise<NursingAssessmentOut> {
   return api<NursingAssessmentOut>("PUT", `/admissions/${admission_id}/nursing-care-plan`, body);
 }
-

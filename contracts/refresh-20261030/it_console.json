@@ -1,0 +1,5262 @@
+{
+  "screen_id": "it_console",
+  "contract_fingerprint": "14824af5c60c05148994",
+  "knowledge_revision": "9250bafb1794ac12",
+  "delivery_gate": {
+    "required": true,
+    "status": "required",
+    "progress_reporting": {
+      "required": true,
+      "submit": "propose_progress",
+      "verify": "progress_proposals",
+      "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+    },
+    "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+    "compulsory": [
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+        "points": 2
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+        "points": 3
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+        "points": 2
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+        "points": 4
+      }
+    ],
+    "zoom": {
+      "min_pct": 100,
+      "max_pct": 250,
+      "reset_pct": 100,
+      "keys": [
+        "Ctrl + or Ctrl = (zoom in)",
+        "Ctrl - (zoom out)",
+        "Ctrl 0 (reset to 100 %)",
+        "Command on macOS"
+      ],
+      "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+    },
+    "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+    "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+  },
+  "screen": {
+    "id": "it_console",
+    "workspace": "super_admin",
+    "title": "Super Admin (IT)",
+    "purpose": "Provisioning queue | role matrix | terminals/printers/badge stations | server health | kill switch.",
+    "workflow": "§9",
+    "rule_objects": [
+      {
+        "id": "rule:67877c44f8",
+        "text": "Go-live: while GET /admin/first-owner says needed, the console opens on 'Create the first Owner' (POST /admin/first-owner: name, CNIC, mobile, and the roles besides owner, usually hr_admin; in a small clinic also the owner's clinical role). It is offered once: FIRST_OWNER_EXISTS afterwards, and the step disappears. Print the temporary password slip for the Owner; tell them their personnel file still needs the CNIC copy.",
+        "cites": []
+      },
+      {
+        "id": "rule:b184a46f61",
+        "text": "Temporary passwords and station keys are shown ONCE — offer print/copy, never store them client-side.",
+        "cites": []
+      },
+      {
+        "id": "rule:05369643ae",
+        "text": "No RFID hardware: register BarcodeScanner stations (a PC or tablet with a USB scanner or camera running the badge-station kiosk page); for ward cleaning kiosks print the bed QR stickers (bed-labels).",
+        "cites": []
+      },
+      {
+        "id": "rule:616f98fff0",
+        "text": "Kill switch: big red button, typed confirmation 'FORCE GLOBAL LOGOUT', clearly marked emergency-only.",
+        "cites": []
+      },
+      {
+        "id": "rule:e9ca3f6b5f",
+        "text": "ICD code lists: load the hospital's licensed WHO ICD-10 file here or in the Quality workspace (icd_code_lists); the WHO ICD-11 list ships with the server and updates with it.",
+        "cites": []
+      },
+      {
+        "id": "rule:b9dbd0ab25",
+        "text": "Control settings (is_control) and privileged roles (owner, hospital admin, billing admin, accountant, the directors) are an Owner's: an Owner's own change applies at once; IT's goes to POST /admin/change-requests and waits for an Owner in the approvals queue (PolicyChange, PrivilegedAccess); show the request as pending, never as done. Nobody changes their own roles (SELF_ROLE_CHANGE_FORBIDDEN); the last Owner keeps the role (LAST_OWNER). Maintenance mode is IT's (admin.maintenance.manage).",
+        "cites": []
+      },
+      {
+        "id": "rule:b6c546385e",
+        "text": "Terminal cash_node: map every PC where the pharmacy takes cash (dispensing, OTC) to PharmacyCounter; the pharmacy's cash goes into no other counter's drawer. A PC shared by the reception and the pharmacy is mapped PharmacyCounter: the reception's cash may go into that drawer too.",
+        "cites": []
+      },
+      {
+        "id": "rule:d0dc21da29",
+        "text": "Wards: list them with GET /admin/wards (open and closed) and edit with PUT /admin/wards/{ward_id}, every field sent. Closing a ward (is_active false) takes its beds off the bed matrix until it is reopened; offer it only when beds_in_use is empty and waitlisted is 0, and on WARD_IN_USE show details.beds_in_use and details.waitlisted (decisions 55).",
+        "cites": []
+      }
+    ],
+    "related_workflows": [
+      "consent",
+      "duty-rosters-and-attendance",
+      "facility-and-it",
+      "home-visits-and-preventive-programmes",
+      "hr-and-payroll",
+      "icd-coding",
+      "operating-theater",
+      "phc-interview-prep",
+      "surgical-care"
+    ]
+  },
+  "endpoints": [
+    {
+      "endpoint": "GET /admin/users/{user_id}",
+      "summary": "User with roles, lockout and session info",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "admin.user.manage",
+          "admin.user.provision"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of admin.user.manage or admin.user.provision",
+        "roles_allowed": [
+          "super_admin"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "user_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "User Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_UserDetailOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "object",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "POST /admin/users/{user_id}/revoke-sessions",
+      "summary": "Log a user out everywhere",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "admin.user.manage"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of admin.user.manage",
+        "roles_allowed": [
+          "super_admin"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "user_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "User Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_SessionsRevokedOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": null,
+      "write": {
+        "protection": "repeat_effect",
+        "on_lost_answer": "Repeating this call has another effect: also ends any sessions opened since the first call. Never retry automatically; reconcile the result and require a deliberate new action if still needed.",
+        "reconcile_with": "GET /admin/users/{user_id}",
+        "emits_events": [
+          "session.revoked"
+        ],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "GET /admin/login-events",
+      "summary": "Login successes / failures (security review)",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "admin.audit.view",
+          "admin.user.manage"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of admin.audit.view or admin.user.manage",
+        "roles_allowed": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "super_admin"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "failures_only",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "type": "boolean",
+            "default": false,
+            "title": "Failures Only"
+          }
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "maximum": 1000,
+            "minimum": 1,
+            "default": 200,
+            "title": "Limit"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_LoginEventOut__"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [
+          {
+            "name": "limit",
+            "required": false,
+            "type": "integer",
+            "default": 200,
+            "minimum": 1,
+            "maximum": 1000
+          }
+        ],
+        "search": [],
+        "filters": [
+          {
+            "name": "failures_only",
+            "required": false,
+            "type": "boolean",
+            "default": false
+          }
+        ],
+        "note": "Lists are bounded by `limit` (no cursor paging): ask for what the screen shows, filter on the server."
+      }
+    },
+    {
+      "endpoint": "GET /admin/departments",
+      "summary": "Departments",
+      "access": {
+        "authentication": "user",
+        "permissions": [],
+        "permissions_mode": "all",
+        "who": "any logged-in user"
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_DepartmentOut__"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "PUT /admin/departments/{department_id}",
+      "summary": "Update a department",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "admin.department.manage"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of admin.department.manage",
+        "roles_allowed": [
+          "super_admin"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "department_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Department Id"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/DepartmentIn"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_DepartmentOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "application/json",
+        "model": "DepartmentIn",
+        "fields": [
+          {
+            "pointer": "/code",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "min_length": 2,
+            "max_length": 20
+          },
+          {
+            "pointer": "/name",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "min_length": 2,
+            "max_length": 100
+          },
+          {
+            "pointer": "/is_clinical",
+            "type": "boolean",
+            "required": false,
+            "nullable": false,
+            "default": false
+          },
+          {
+            "pointer": "/is_active",
+            "type": "boolean",
+            "required": false,
+            "nullable": false,
+            "default": true
+          }
+        ],
+        "cross_field_rules": {},
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "replace",
+        "on_lost_answer": "Unversioned PUT: re-read before resubmitting. A retry may overwrite intervening edits and repeat history, timestamps or events; the HTTP method alone is not replay protection. Never retry automatically.",
+        "reconcile_with": "GET /admin/departments",
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "PUT /admin/wards/{ward_id}",
+      "summary": "Update a ward",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "admin.ward.manage"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of admin.ward.manage",
+        "roles_allowed": [
+          "super_admin"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "NOT_FOUND",
+          "http_status": 404,
+          "message": "The requested resource was not found.",
+          "retryable": false,
+          "ui_action": "Say 'not found'; refresh the list.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "resource"
+          ],
+          "details_from": "PUT /api/v1/admin/printers/{printer_id}"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        },
+        {
+          "code": "WARD_IN_USE",
+          "http_status": 409,
+          "message": "The ward still has patients in its beds or on its waitlist: move or discharge them first.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "beds_in_use",
+            "waitlisted"
+          ],
+          "details_from": "PUT /api/v1/admin/wards/{ward_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "ward_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Ward Id"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/WardIn"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_WardOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "application/json",
+        "model": "WardIn",
+        "fields": [
+          {
+            "pointer": "/code",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "min_length": 2,
+            "max_length": 20
+          },
+          {
+            "pointer": "/name",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "min_length": 2,
+            "max_length": 100
+          },
+          {
+            "pointer": "/ward_type",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "enum": [
+              "General",
+              "Private",
+              "SemiPrivate",
+              "ICU",
+              "CCU",
+              "NICU",
+              "Surgical",
+              "Pediatric",
+              "Maternity",
+              "Emergency",
+              "Isolation",
+              "Other"
+            ]
+          },
+          {
+            "pointer": "/gender_restriction",
+            "type": "string",
+            "required": false,
+            "nullable": false,
+            "enum": [
+              "male",
+              "female",
+              "any"
+            ],
+            "default": "any"
+          },
+          {
+            "pointer": "/department_id",
+            "type": "integer",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "pointer": "/room_charge_service_id",
+            "type": "integer",
+            "required": false,
+            "nullable": true,
+            "description": "Per bed-day charge (service catalog, category RoomCharge)"
+          },
+          {
+            "pointer": "/is_active",
+            "type": "boolean",
+            "required": false,
+            "nullable": false,
+            "default": true
+          }
+        ],
+        "cross_field_rules": {},
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "replace",
+        "on_lost_answer": "Unversioned PUT: re-read before resubmitting. A retry may overwrite intervening edits and repeat history, timestamps or events; the HTTP method alone is not replay protection. Never retry automatically.",
+        "reconcile_with": "GET /admin/wards",
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "PUT /admin/printers/{printer_id}",
+      "summary": "Update a printer",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "admin.printer.manage"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of admin.printer.manage",
+        "roles_allowed": [
+          "super_admin"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "NOT_FOUND",
+          "http_status": 404,
+          "message": "The requested resource was not found.",
+          "retryable": false,
+          "ui_action": "Say 'not found'; refresh the list.",
+          "source": [
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "resource"
+          ],
+          "details_from": "PUT /api/v1/admin/printers/{printer_id}"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "printer_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Printer Id"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/PrinterIn"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_PrinterOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "application/json",
+        "model": "PrinterIn",
+        "fields": [
+          {
+            "pointer": "/name",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "min_length": 2,
+            "max_length": 100
+          },
+          {
+            "pointer": "/printer_type",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "enum": [
+              "ThermalReceipt",
+              "BarcodeLabel",
+              "PVCCard",
+              "Laser",
+              "Other"
+            ]
+          },
+          {
+            "pointer": "/connection",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "enum": [
+              "USB",
+              "Network",
+              "Shared",
+              "Bluetooth",
+              "Other"
+            ]
+          },
+          {
+            "pointer": "/address",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "description": "OS printer name, \\\\PC\\Printer or 192.168.1.40:9100"
+          },
+          {
+            "pointer": "/paper_width_mm",
+            "type": "integer",
+            "required": false,
+            "nullable": true,
+            "minimum": 30,
+            "maximum": 400
+          },
+          {
+            "pointer": "/driver",
+            "type": "string",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "pointer": "/is_active",
+            "type": "boolean",
+            "required": false,
+            "nullable": false,
+            "default": true
+          }
+        ],
+        "cross_field_rules": {},
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "replace",
+        "on_lost_answer": "Unversioned PUT: re-read before resubmitting. A retry may overwrite intervening edits and repeat history, timestamps or events; the HTTP method alone is not replay protection. Never retry automatically.",
+        "reconcile_with": "GET /admin/printers",
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "PUT /admin/terminals/{terminal_id}",
+      "summary": "Update a terminal mapping",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "admin.terminal.manage"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of admin.terminal.manage",
+        "roles_allowed": [
+          "super_admin"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "terminal_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Terminal Id"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/TerminalIn"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_TerminalOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "application/json",
+        "model": "TerminalIn",
+        "fields": [
+          {
+            "pointer": "/mac",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "pattern": "^([0-9A-Fa-f]{2}[:-]){5}[0-9A-Fa-f]{2}$"
+          },
+          {
+            "pointer": "/ip",
+            "type": "string",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "pointer": "/hostname",
+            "type": "string",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "pointer": "/location_label",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "min_length": 2,
+            "max_length": 100
+          },
+          {
+            "pointer": "/department_id",
+            "type": "integer",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "pointer": "/receipt_printer_id",
+            "type": "integer",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "pointer": "/label_printer_id",
+            "type": "integer",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "pointer": "/document_printer_id",
+            "type": "integer",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "pointer": "/card_printer_id",
+            "type": "integer",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "pointer": "/cash_node",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "enum": [
+              "MainReception",
+              "PharmacyCounter",
+              "LabReception",
+              "IPDBilling",
+              "EmergencyCounter",
+              "CashierDesk"
+            ]
+          },
+          {
+            "pointer": "/is_active",
+            "type": "boolean",
+            "required": false,
+            "nullable": false,
+            "default": true
+          }
+        ],
+        "cross_field_rules": {},
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "replace",
+        "on_lost_answer": "Unversioned PUT: re-read before resubmitting. A retry may overwrite intervening edits and repeat history, timestamps or events; the HTTP method alone is not replay protection. Never retry automatically.",
+        "reconcile_with": "GET /admin/terminals",
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "GET /meta/roles",
+      "summary": "Roles with their default workspace and permissions",
+      "access": {
+        "authentication": "user",
+        "permissions": [],
+        "permissions_mode": "all",
+        "who": "any logged-in user"
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_RoleOut__"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "GET /meta/permissions",
+      "summary": "Permission catalogue",
+      "access": {
+        "authentication": "user",
+        "permissions": [],
+        "permissions_mode": "all",
+        "who": "any logged-in user"
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_PermissionOut__"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "GET /admin/provisioning-queue",
+      "summary": "Employees HR submitted, awaiting a login (pane 1)",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "admin.user.provision"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of admin.user.provision",
+        "roles_allowed": [
+          "super_admin"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_ProvisioningQueueItemOut__"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "POST /admin/users",
+      "summary": "Provision a login (temporary password shown ONCE)",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "admin.user.provision"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of admin.user.provision",
+        "roles_allowed": [
+          "super_admin"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "EMPLOYEE_ALREADY_HAS_ACCOUNT",
+          "http_status": 409,
+          "message": "The employee already has an active login.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": null
+        },
+        {
+          "code": "EMPLOYEE_NOT_READY_FOR_PROVISIONING",
+          "http_status": 409,
+          "message": "HR must submit the employee profile first.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "POST /api/v1/admin/users"
+        },
+        {
+          "code": "FORBIDDEN",
+          "http_status": 403,
+          "message": "You do not have permission to do this.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "any_of",
+            "required"
+          ],
+          "details_from": "POST /api/v1/admin/departments"
+        },
+        {
+          "code": "PRIVILEGED_ACCESS_APPROVAL_REQUIRED",
+          "http_status": 409,
+          "message": "Privileged access is granted by an Owner or with an Owner's approval (POST /admin/change-requests).",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "kind",
+            "next_step"
+          ],
+          "details_from": "POST /api/v1/admin/users",
+          "next_step": "Provision with the non-privileged roles first, then POST /admin/change-requests"
+        },
+        {
+          "code": "REFERENCE_NOT_FOUND",
+          "http_status": 422,
+          "message": "A referenced record does not exist.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "ward_id"
+          ],
+          "details_from": "POST /api/v1/pharmacy/storage-checks"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        },
+        {
+          "code": "ZERO_INTERFACE_STAFF_NO_LOGIN",
+          "http_status": 409,
+          "message": "Support staff use a badge at badge stations and never receive logins.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "POST /api/v1/admin/users"
+        }
+      ],
+      "parameters": [],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ProvisionIn"
+            }
+          }
+        }
+      },
+      "responses": {
+        "201": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_ProvisionedUserOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "application/json",
+        "model": "ProvisionIn",
+        "fields": [
+          {
+            "pointer": "/employee_id",
+            "type": "integer",
+            "required": true,
+            "nullable": false
+          },
+          {
+            "pointer": "/username",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "pattern": "^[a-z0-9._-]{3,64}$",
+            "description": "Suggested from the name if omitted"
+          },
+          {
+            "pointer": "/role_codes",
+            "type": "array",
+            "required": true,
+            "nullable": false,
+            "description": "Multi-select checklist, e.g. ['clinical_specialist','hospital_admin']",
+            "items": "string"
+          }
+        ],
+        "cross_field_rules": {},
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "state_guard",
+        "on_lost_answer": "A repeat is refused with EMPLOYEE_ALREADY_HAS_ACCOUNT: an employee has one login. The first call may have succeeded; this error does not replay its result. Never retry automatically; re-read the record, then offer the action again only if it is still needed.",
+        "reconcile_with": "GET /admin/users",
+        "refused_with": "EMPLOYEE_ALREADY_HAS_ACCOUNT",
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "GET /admin/users",
+      "summary": "Search users",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "admin.user.manage",
+          "admin.user.provision"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of admin.user.manage or admin.user.provision",
+        "roles_allowed": [
+          "super_admin"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "q",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Q"
+          }
+        },
+        {
+          "name": "active",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Active"
+          }
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "maximum": 500,
+            "minimum": 1,
+            "default": 100,
+            "title": "Limit"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_UserListItemOut__"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [
+          {
+            "name": "limit",
+            "required": false,
+            "type": "integer",
+            "default": 100,
+            "minimum": 1,
+            "maximum": 500
+          }
+        ],
+        "search": [
+          {
+            "name": "q",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "filters": [
+          {
+            "name": "active",
+            "required": false,
+            "type": "boolean"
+          }
+        ],
+        "note": "Lists are bounded by `limit` (no cursor paging): ask for what the screen shows, filter on the server."
+      }
+    },
+    {
+      "endpoint": "PUT /admin/users/{user_id}/roles",
+      "summary": "Replace a user's roles (effective on the next request)",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "admin.user.manage"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of admin.user.manage",
+        "roles_allowed": [
+          "super_admin"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "DEMO_ACCOUNT_PROTECTED",
+          "http_status": 403,
+          "message": "DEV servers only: a demo account is shared by every developer, so its password, roles and active state stay as seeded. Use a user of your own.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "change",
+            "username"
+          ],
+          "details_from": "POST /api/v1/auth/change-password"
+        },
+        {
+          "code": "FORBIDDEN",
+          "http_status": 403,
+          "message": "You do not have permission to do this.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "any_of",
+            "required"
+          ],
+          "details_from": "POST /api/v1/admin/departments"
+        },
+        {
+          "code": "LAST_OWNER",
+          "http_status": 409,
+          "message": "The last active Owner keeps the Owner role.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/users/{user_id}/roles"
+        },
+        {
+          "code": "NOT_FOUND",
+          "http_status": 404,
+          "message": "The requested resource was not found.",
+          "retryable": false,
+          "ui_action": "Say 'not found'; refresh the list.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "resource"
+          ],
+          "details_from": "PUT /api/v1/admin/printers/{printer_id}"
+        },
+        {
+          "code": "PRIVILEGED_ACCESS_APPROVAL_REQUIRED",
+          "http_status": 409,
+          "message": "Privileged access is granted by an Owner or with an Owner's approval (POST /admin/change-requests).",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "kind",
+            "next_step"
+          ],
+          "details_from": "POST /api/v1/admin/users",
+          "next_step": "Provision with the non-privileged roles first, then POST /admin/change-requests"
+        },
+        {
+          "code": "SELF_ROLE_CHANGE_FORBIDDEN",
+          "http_status": 403,
+          "message": "Nobody changes their own roles.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/users/{user_id}/roles"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "user_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "User Id"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/RolesIn"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_UserDetailOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "application/json",
+        "model": "RolesIn",
+        "fields": [
+          {
+            "pointer": "/role_codes",
+            "type": "array",
+            "required": true,
+            "nullable": false,
+            "items": "string"
+          }
+        ],
+        "cross_field_rules": {},
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "replace",
+        "on_lost_answer": "Unversioned PUT: re-read before resubmitting. A retry may overwrite intervening edits and repeat history, timestamps or events; the HTTP method alone is not replay protection. Never retry automatically.",
+        "reconcile_with": "GET /admin/users/{user_id}",
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "POST /admin/users/{user_id}/reset-password",
+      "summary": "Issue a new temporary password (all sessions end)",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "admin.user.manage"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of admin.user.manage",
+        "roles_allowed": [
+          "super_admin"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "DEMO_ACCOUNT_PROTECTED",
+          "http_status": 403,
+          "message": "DEV servers only: a demo account is shared by every developer, so its password, roles and active state stay as seeded. Use a user of your own.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "change",
+            "username"
+          ],
+          "details_from": "POST /api/v1/auth/change-password"
+        },
+        {
+          "code": "NOT_FOUND",
+          "http_status": 404,
+          "message": "The requested resource was not found.",
+          "retryable": false,
+          "ui_action": "Say 'not found'; refresh the list.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "resource"
+          ],
+          "details_from": "PUT /api/v1/admin/printers/{printer_id}"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "user_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "User Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_PasswordResetOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": null,
+      "write": {
+        "protection": "repeat_effect",
+        "on_lost_answer": "Repeating this call has another effect: issues another temporary password: only the last one works. Never retry automatically; reconcile the result and require a deliberate new action if still needed.",
+        "reconcile_with": "GET /admin/users/{user_id}",
+        "emits_events": [
+          "session.revoked"
+        ],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "POST /admin/users/{user_id}/active",
+      "summary": "Deactivate (sessions revoked) / reactivate + unlock",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "admin.user.manage"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of admin.user.manage",
+        "roles_allowed": [
+          "super_admin"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "DEMO_ACCOUNT_PROTECTED",
+          "http_status": 403,
+          "message": "DEV servers only: a demo account is shared by every developer, so its password, roles and active state stay as seeded. Use a user of your own.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "change",
+            "username"
+          ],
+          "details_from": "POST /api/v1/auth/change-password"
+        },
+        {
+          "code": "NOT_FOUND",
+          "http_status": 404,
+          "message": "The requested resource was not found.",
+          "retryable": false,
+          "ui_action": "Say 'not found'; refresh the list.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "resource"
+          ],
+          "details_from": "PUT /api/v1/admin/printers/{printer_id}"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "user_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "User Id"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ActiveIn"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_UserDetailOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "application/json",
+        "model": "ActiveIn",
+        "fields": [
+          {
+            "pointer": "/active",
+            "type": "boolean",
+            "required": true,
+            "nullable": false
+          },
+          {
+            "pointer": "/reason",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "min_length": 3,
+            "max_length": 300
+          }
+        ],
+        "cross_field_rules": {},
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "repeat_safe",
+        "on_lost_answer": "A repeat is harmless for the same state: sets the same flag again. No response is stored; re-read before resubmitting because newer data may have arrived.",
+        "reconcile_with": "GET /admin/users/{user_id}",
+        "emits_events": [
+          "session.revoked"
+        ],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "GET /admin/role-matrix",
+      "summary": "Roles × permissions (pane 2)",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "admin.roles.view",
+          "admin.role_matrix.update"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of admin.roles.view or admin.role_matrix.update",
+        "roles_allowed": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "super_admin"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_RoleMatrixOut_"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "object",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "PUT /admin/roles/{role_code}/permissions",
+      "summary": "Replace a role's permissions (pushed live to all sessions)",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "admin.role_matrix.update"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of admin.role_matrix.update",
+        "roles_allowed": [
+          "super_admin"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "NOT_FOUND",
+          "http_status": 404,
+          "message": "The requested resource was not found.",
+          "retryable": false,
+          "ui_action": "Say 'not found'; refresh the list.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "resource"
+          ],
+          "details_from": "PUT /api/v1/admin/printers/{printer_id}"
+        },
+        {
+          "code": "PRIVILEGED_ACCESS_APPROVAL_REQUIRED",
+          "http_status": 409,
+          "message": "Privileged access is granted by an Owner or with an Owner's approval (POST /admin/change-requests).",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "kind",
+            "next_step"
+          ],
+          "details_from": "POST /api/v1/admin/users",
+          "next_step": "Provision with the non-privileged roles first, then POST /admin/change-requests"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "role_code",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "string",
+            "title": "Role Code"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/PermissionsIn"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_str__"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "application/json",
+        "model": "PermissionsIn",
+        "fields": [
+          {
+            "pointer": "/permission_codes",
+            "type": "array",
+            "required": true,
+            "nullable": false,
+            "items": "string"
+          }
+        ],
+        "cross_field_rules": {},
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "replace",
+        "on_lost_answer": "Unversioned PUT: re-read before resubmitting. A retry may overwrite intervening edits and repeat history, timestamps or events; the HTTP method alone is not replay protection. Never retry automatically.",
+        "reconcile_with": null,
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "GET /admin/terminals",
+      "summary": "Terminal → location / printers / cash node mapping",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "admin.terminal.manage"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of admin.terminal.manage",
+        "roles_allowed": [
+          "super_admin"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_TerminalListItemOut__"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "POST /admin/terminals",
+      "summary": "Map a terminal (by MAC) to a location and its printers",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "admin.terminal.manage"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of admin.terminal.manage",
+        "roles_allowed": [
+          "super_admin"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": true,
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "Idempotency-Key",
+          "in": "header",
+          "required": false,
+          "description": "Unique per logical action; retries return the first result",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Unique per logical action; retries return the first result",
+            "title": "Idempotency-Key"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/TerminalIn"
+            }
+          }
+        }
+      },
+      "responses": {
+        "201": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_TerminalOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "application/json",
+        "model": "TerminalIn",
+        "fields": [
+          {
+            "pointer": "/mac",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "pattern": "^([0-9A-Fa-f]{2}[:-]){5}[0-9A-Fa-f]{2}$"
+          },
+          {
+            "pointer": "/ip",
+            "type": "string",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "pointer": "/hostname",
+            "type": "string",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "pointer": "/location_label",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "min_length": 2,
+            "max_length": 100
+          },
+          {
+            "pointer": "/department_id",
+            "type": "integer",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "pointer": "/receipt_printer_id",
+            "type": "integer",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "pointer": "/label_printer_id",
+            "type": "integer",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "pointer": "/document_printer_id",
+            "type": "integer",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "pointer": "/card_printer_id",
+            "type": "integer",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "pointer": "/cash_node",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "enum": [
+              "MainReception",
+              "PharmacyCounter",
+              "LabReception",
+              "IPDBilling",
+              "EmergencyCounter",
+              "CashierDesk"
+            ]
+          },
+          {
+            "pointer": "/is_active",
+            "type": "boolean",
+            "required": false,
+            "nullable": false,
+            "default": true
+          }
+        ],
+        "cross_field_rules": {},
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "idempotency_key",
+        "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+        "reconcile_with": "GET /admin/terminals",
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "GET /admin/printers",
+      "summary": "Printers",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "admin.printer.manage",
+          "admin.terminal.manage"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of admin.printer.manage or admin.terminal.manage",
+        "roles_allowed": [
+          "super_admin"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_PrinterOut__"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "POST /admin/printers",
+      "summary": "Add a printer",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "admin.printer.manage"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of admin.printer.manage",
+        "roles_allowed": [
+          "super_admin"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": true,
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "Idempotency-Key",
+          "in": "header",
+          "required": false,
+          "description": "Unique per logical action; retries return the first result",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Unique per logical action; retries return the first result",
+            "title": "Idempotency-Key"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/PrinterIn"
+            }
+          }
+        }
+      },
+      "responses": {
+        "201": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_PrinterOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "application/json",
+        "model": "PrinterIn",
+        "fields": [
+          {
+            "pointer": "/name",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "min_length": 2,
+            "max_length": 100
+          },
+          {
+            "pointer": "/printer_type",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "enum": [
+              "ThermalReceipt",
+              "BarcodeLabel",
+              "PVCCard",
+              "Laser",
+              "Other"
+            ]
+          },
+          {
+            "pointer": "/connection",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "enum": [
+              "USB",
+              "Network",
+              "Shared",
+              "Bluetooth",
+              "Other"
+            ]
+          },
+          {
+            "pointer": "/address",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "description": "OS printer name, \\\\PC\\Printer or 192.168.1.40:9100"
+          },
+          {
+            "pointer": "/paper_width_mm",
+            "type": "integer",
+            "required": false,
+            "nullable": true,
+            "minimum": 30,
+            "maximum": 400
+          },
+          {
+            "pointer": "/driver",
+            "type": "string",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "pointer": "/is_active",
+            "type": "boolean",
+            "required": false,
+            "nullable": false,
+            "default": true
+          }
+        ],
+        "cross_field_rules": {},
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "idempotency_key",
+        "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+        "reconcile_with": "GET /admin/printers",
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "GET /admin/badge-stations",
+      "summary": "Badge stations: RFID readers, barcode-scanner kiosks, biometric terminals (last seen)",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "admin.badge_station.manage"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of admin.badge_station.manage",
+        "roles_allowed": [
+          "super_admin"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_BadgeStationListItemOut__"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "PUT /admin/badge-stations/{station_id}",
+      "summary": "Register / update a badge station",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "admin.badge_station.manage"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of admin.badge_station.manage",
+        "roles_allowed": [
+          "super_admin"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "station_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "string",
+            "title": "Station Id"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/StationIn"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_BadgeStationOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "application/json",
+        "model": "StationIn",
+        "fields": [
+          {
+            "pointer": "/station_id",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "pattern": "^[A-Za-z0-9_.:-]{2,64}$"
+          },
+          {
+            "pointer": "/label",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "min_length": 2,
+            "max_length": 100
+          },
+          {
+            "pointer": "/device_type",
+            "type": "string",
+            "required": false,
+            "nullable": false,
+            "enum": [
+              "RFIDReader",
+              "BarcodeScanner",
+              "BiometricTerminal"
+            ],
+            "default": "RFIDReader",
+            "description": "The hardware; the API is the same for all (BarcodeScanner = kiosk PC/tablet reading printed QR badges)"
+          },
+          {
+            "pointer": "/location_type",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "enum": [
+              "Bed",
+              "Ward",
+              "Gate",
+              "OT",
+              "Pharmacy",
+              "Lab",
+              "StaffEntrance"
+            ]
+          },
+          {
+            "pointer": "/action_type",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "enum": [
+              "AttendancePunch",
+              "BedCleaned",
+              "SecurityPass",
+              "Generic"
+            ]
+          },
+          {
+            "pointer": "/ward_id",
+            "type": "integer",
+            "required": false,
+            "nullable": true,
+            "description": "BedCleaned without bed_id: the ward whose bed QR stickers this kiosk scans"
+          },
+          {
+            "pointer": "/bed_id",
+            "type": "integer",
+            "required": false,
+            "nullable": true,
+            "description": "BedCleaned: the bed this station hangs at (or leave empty for a ward kiosk)"
+          },
+          {
+            "pointer": "/is_active",
+            "type": "boolean",
+            "required": false,
+            "nullable": false,
+            "default": true
+          }
+        ],
+        "cross_field_rules": {},
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "replace",
+        "on_lost_answer": "Unversioned PUT: re-read before resubmitting. A retry may overwrite intervening edits and repeat history, timestamps or events; the HTTP method alone is not replay protection. Never retry automatically.",
+        "reconcile_with": "GET /admin/badge-stations",
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "POST /admin/badge-stations/{station_id}/rotate-key",
+      "summary": "Issue a new station key (shown ONCE)",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "admin.badge_station.manage"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of admin.badge_station.manage",
+        "roles_allowed": [
+          "super_admin"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "station_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "string",
+            "title": "Station Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_StationKeyOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": null,
+      "write": {
+        "protection": "repeat_effect",
+        "on_lost_answer": "Repeating this call has another effect: issues another key: only the newest works, use the last answer. Never retry automatically; reconcile the result and require a deliberate new action if still needed.",
+        "reconcile_with": "GET /admin/badge-stations",
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "GET /admin/wards/{ward_id}/bed-labels",
+      "summary": "Bed QR stickers for ward-level bed-cleaning stations (label printer)",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "admin.badge_station.manage",
+          "admin.ward.manage"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of admin.badge_station.manage or admin.ward.manage",
+        "roles_allowed": [
+          "super_admin"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "ward_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Ward Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_BedLabelsOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "object",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      },
+      "prints": {
+        "kind": "print_payload",
+        "document_types": [
+          "autopsy_order",
+          "bed_labels",
+          "blood_component_label",
+          "blood_donation_labels",
+          "clinical_note",
+          "complaint_letter",
+          "complaints_notice",
+          "consent_form",
+          "cost_estimate",
+          "cssd_labels",
+          "death_certificate",
+          "discharge_summary",
+          "dispensing_label",
+          "dose_label",
+          "id_card",
+          "imaging_report",
+          "lab_label",
+          "lab_report",
+          "mlc_intimation",
+          "opd_slip",
+          "pharmacy_receipt",
+          "prescription",
+          "referral_slip",
+          "send_out_manifest",
+          "surgical_record",
+          "triage_algorithm",
+          "wristband"
+        ],
+        "printer_role": "label",
+        "document_type": "bed_labels",
+        "paper_width_mm": null,
+        "server_renders": [],
+        "rule": "Print `text` as is on receipt printers, `fields` in your own layout for A4, or download `pdf_url`; route by printer_role (GET /terminals/whoami). Right-to-left printouts are laid out by the terminal."
+      }
+    },
+    {
+      "endpoint": "GET /admin/server-health",
+      "summary": "CPU/RAM, DB pool, last backup, worker heartbeat (pane 4, read-only)",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "admin.server_health.view"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of admin.server_health.view",
+        "roles_allowed": [
+          "super_admin"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_ServerHealthOut_"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "object",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "GET /admin/settings",
+      "summary": "Hospital policy settings",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "admin.settings.manage"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of admin.settings.manage",
+        "roles_allowed": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "super_admin"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_SettingOut__"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "PUT /admin/settings/{key}",
+      "summary": "Change a policy setting (type-checked, audited)",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "admin.settings.manage"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of admin.settings.manage",
+        "roles_allowed": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "super_admin"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "FORBIDDEN",
+          "http_status": 403,
+          "message": "You do not have permission to do this.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "any_of",
+            "required"
+          ],
+          "details_from": "POST /api/v1/admin/departments"
+        },
+        {
+          "code": "ICD_SYSTEM_NOT_LOADED",
+          "http_status": 409,
+          "message": "No code list of this classification is loaded (ICD-10: load the hospital's licensed WHO file first).",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "code_system"
+          ],
+          "details_from": "GET /api/v1/icd/codes"
+        },
+        {
+          "code": "NOT_FOUND",
+          "http_status": 404,
+          "message": "The requested resource was not found.",
+          "retryable": false,
+          "ui_action": "Say 'not found'; refresh the list.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "resource"
+          ],
+          "details_from": "PUT /api/v1/admin/printers/{printer_id}"
+        },
+        {
+          "code": "POLICY_CHANGE_APPROVAL_REQUIRED",
+          "http_status": 409,
+          "message": "This is a control setting: an Owner changes it or approves the change (POST /admin/change-requests).",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "kind",
+            "next_step",
+            "setting_key"
+          ],
+          "details_from": "PUT /api/v1/admin/settings/{key}",
+          "next_step": "POST /admin/change-requests"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "key",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "string",
+            "title": "Key"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/SettingIn"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_SettingRowOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "application/json",
+        "model": "SettingIn",
+        "fields": [
+          {
+            "pointer": "/value",
+            "type": null,
+            "required": true,
+            "nullable": false,
+            "description": "JSON value of the same type as the current one"
+          }
+        ],
+        "cross_field_rules": {},
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "replace",
+        "on_lost_answer": "Unversioned PUT: re-read before resubmitting. A retry may overwrite intervening edits and repeat history, timestamps or events; the HTTP method alone is not replay protection. Never retry automatically.",
+        "reconcile_with": "GET /admin/settings",
+        "emits_events": [
+          "risk.critical_event"
+        ],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "PUT /admin/maintenance",
+      "summary": "Maintenance mode on/off (non-admins get 503 MAINTENANCE)",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "admin.maintenance.manage"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of admin.maintenance.manage",
+        "roles_allowed": [
+          "super_admin"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "FORBIDDEN",
+          "http_status": 403,
+          "message": "You do not have permission to do this.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "any_of",
+            "required"
+          ],
+          "details_from": "POST /api/v1/admin/departments"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [],
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/MaintenanceIn"
+            }
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_SettingRowOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "application/json",
+        "model": "MaintenanceIn",
+        "fields": [
+          {
+            "pointer": "/enabled",
+            "type": "boolean",
+            "required": true,
+            "nullable": false
+          },
+          {
+            "pointer": "/message",
+            "type": "string",
+            "required": false,
+            "nullable": false,
+            "default": "",
+            "max_length": 300
+          }
+        ],
+        "cross_field_rules": {},
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "replace",
+        "on_lost_answer": "Unversioned PUT: re-read before resubmitting. A retry may overwrite intervening edits and repeat history, timestamps or events; the HTTP method alone is not replay protection. Never retry automatically.",
+        "reconcile_with": null,
+        "emits_events": [
+          "system.maintenance"
+        ],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "POST /admin/kill-switch",
+      "summary": "FORCE GLOBAL TOKEN EXPIRY — every session in the hospital ends (emergency)",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "admin.kill_switch"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of admin.kill_switch",
+        "roles_allowed": [
+          "super_admin"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "FORBIDDEN",
+          "http_status": 403,
+          "message": "You do not have permission to do this.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "any_of",
+            "required"
+          ],
+          "details_from": "POST /api/v1/admin/departments"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [],
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/KillSwitchIn"
+            }
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_KillSwitchOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "application/json",
+        "model": "KillSwitchIn",
+        "fields": [
+          {
+            "pointer": "/reason",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "min_length": 5,
+            "max_length": 500
+          },
+          {
+            "pointer": "/confirm",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "description": "Type exactly \"FORCE GLOBAL LOGOUT\" (dangerous, emergency only)"
+          }
+        ],
+        "cross_field_rules": {},
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "repeat_effect",
+        "on_lost_answer": "Repeating this call has another effect: also ends any sessions opened since the first call. Never retry automatically; reconcile the result and require a deliberate new action if still needed.",
+        "reconcile_with": null,
+        "emits_events": [
+          "session.revoked"
+        ],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "POST /admin/departments",
+      "summary": "Add a department",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "admin.department.manage"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of admin.department.manage",
+        "roles_allowed": [
+          "super_admin"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": true,
+      "errors": [
+        {
+          "code": "FORBIDDEN",
+          "http_status": 403,
+          "message": "You do not have permission to do this.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "any_of",
+            "required"
+          ],
+          "details_from": "POST /api/v1/admin/departments"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "Idempotency-Key",
+          "in": "header",
+          "required": false,
+          "description": "Unique per logical action; retries return the first result",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Unique per logical action; retries return the first result",
+            "title": "Idempotency-Key"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/DepartmentIn"
+            }
+          }
+        }
+      },
+      "responses": {
+        "201": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_DepartmentOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "application/json",
+        "model": "DepartmentIn",
+        "fields": [
+          {
+            "pointer": "/code",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "min_length": 2,
+            "max_length": 20
+          },
+          {
+            "pointer": "/name",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "min_length": 2,
+            "max_length": 100
+          },
+          {
+            "pointer": "/is_clinical",
+            "type": "boolean",
+            "required": false,
+            "nullable": false,
+            "default": false
+          },
+          {
+            "pointer": "/is_active",
+            "type": "boolean",
+            "required": false,
+            "nullable": false,
+            "default": true
+          }
+        ],
+        "cross_field_rules": {},
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "idempotency_key",
+        "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+        "reconcile_with": "GET /admin/departments",
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "POST /admin/wards",
+      "summary": "Add a ward",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "admin.ward.manage"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of admin.ward.manage",
+        "roles_allowed": [
+          "super_admin"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": true,
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "Idempotency-Key",
+          "in": "header",
+          "required": false,
+          "description": "Unique per logical action; retries return the first result",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Unique per logical action; retries return the first result",
+            "title": "Idempotency-Key"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/WardIn"
+            }
+          }
+        }
+      },
+      "responses": {
+        "201": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_WardOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "application/json",
+        "model": "WardIn",
+        "fields": [
+          {
+            "pointer": "/code",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "min_length": 2,
+            "max_length": 20
+          },
+          {
+            "pointer": "/name",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "min_length": 2,
+            "max_length": 100
+          },
+          {
+            "pointer": "/ward_type",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "enum": [
+              "General",
+              "Private",
+              "SemiPrivate",
+              "ICU",
+              "CCU",
+              "NICU",
+              "Surgical",
+              "Pediatric",
+              "Maternity",
+              "Emergency",
+              "Isolation",
+              "Other"
+            ]
+          },
+          {
+            "pointer": "/gender_restriction",
+            "type": "string",
+            "required": false,
+            "nullable": false,
+            "enum": [
+              "male",
+              "female",
+              "any"
+            ],
+            "default": "any"
+          },
+          {
+            "pointer": "/department_id",
+            "type": "integer",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "pointer": "/room_charge_service_id",
+            "type": "integer",
+            "required": false,
+            "nullable": true,
+            "description": "Per bed-day charge (service catalog, category RoomCharge)"
+          },
+          {
+            "pointer": "/is_active",
+            "type": "boolean",
+            "required": false,
+            "nullable": false,
+            "default": true
+          }
+        ],
+        "cross_field_rules": {},
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "idempotency_key",
+        "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+        "reconcile_with": "GET /admin/wards",
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "POST /admin/wards/{ward_id}/beds",
+      "summary": "Add beds to a ward (bulk)",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "admin.ward.manage"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of admin.ward.manage",
+        "roles_allowed": [
+          "super_admin"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": true,
+      "errors": [
+        {
+          "code": "NOT_FOUND",
+          "http_status": 404,
+          "message": "The requested resource was not found.",
+          "retryable": false,
+          "ui_action": "Say 'not found'; refresh the list.",
+          "source": [
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "resource"
+          ],
+          "details_from": "PUT /api/v1/admin/printers/{printer_id}"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "ward_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Ward Id"
+          }
+        },
+        {
+          "name": "Idempotency-Key",
+          "in": "header",
+          "required": false,
+          "description": "Unique per logical action; retries return the first result",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Unique per logical action; retries return the first result",
+            "title": "Idempotency-Key"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/BedsIn"
+            }
+          }
+        }
+      },
+      "responses": {
+        "201": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_BedOut__"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "application/json",
+        "model": "BedsIn",
+        "fields": [
+          {
+            "pointer": "/labels",
+            "type": "array",
+            "required": true,
+            "nullable": false,
+            "items": "string"
+          },
+          {
+            "pointer": "/is_overflow_allowed",
+            "type": "boolean",
+            "required": false,
+            "nullable": false,
+            "default": false
+          }
+        ],
+        "cross_field_rules": {},
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "idempotency_key",
+        "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+        "reconcile_with": "GET /admin/wards",
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "GET /admin/wards",
+      "summary": "Wards, open and closed",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "admin.ward.manage"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of admin.ward.manage",
+        "roles_allowed": [
+          "super_admin"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_WardListItemOut__"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "POST /ot/theaters",
+      "summary": "Provision an operating theater (Super Admin)",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "ot.theater.provision"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of ot.theater.provision",
+        "roles_allowed": [
+          "super_admin"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": true,
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "Idempotency-Key",
+          "in": "header",
+          "required": false,
+          "description": "Unique per logical action; retries return the first result",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Unique per logical action; retries return the first result",
+            "title": "Idempotency-Key"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/TheaterIn"
+            }
+          }
+        }
+      },
+      "responses": {
+        "201": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_TheaterOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "application/json",
+        "model": "TheaterIn",
+        "fields": [
+          {
+            "pointer": "/code",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "min_length": 2,
+            "max_length": 20
+          },
+          {
+            "pointer": "/name",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "min_length": 2,
+            "max_length": 100
+          },
+          {
+            "pointer": "/theater_type",
+            "type": "string",
+            "required": false,
+            "nullable": false,
+            "default": "General"
+          }
+        ],
+        "cross_field_rules": {},
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "idempotency_key",
+        "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+        "reconcile_with": "GET /ot/theaters",
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "GET /icd/releases",
+      "summary": "The ICD code lists loaded",
+      "access": {
+        "authentication": "user",
+        "permissions": [],
+        "permissions_mode": "all",
+        "who": "any logged-in user"
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_IcdReleasesOut_"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "object",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "POST /icd/releases",
+      "summary": "Load an ICD code list (the hospital's licensed ICD-10, or a newer WHO ICD-11 release)",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "icd.release.manage"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of icd.release.manage",
+        "roles_allowed": [
+          "quality_officer",
+          "super_admin"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "FORBIDDEN",
+          "http_status": 403,
+          "message": "You do not have permission to do this.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "any_of",
+            "required"
+          ],
+          "details_from": "POST /api/v1/admin/departments"
+        },
+        {
+          "code": "ICD_IMPORT_INVALID",
+          "http_status": 422,
+          "message": "The file is not a code list of this classification.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "examples"
+          ],
+          "details_from": "POST /api/v1/icd/releases"
+        },
+        {
+          "code": "ICD_RELEASE_EXISTS",
+          "http_status": 409,
+          "message": "This release of the classification is already loaded.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "constraint"
+          ],
+          "details_from": "POST /api/v1/icd/releases"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [],
+      "request_body": {
+        "content": {
+          "multipart/form-data": {
+            "schema": {
+              "$ref": "#/components/schemas/Body_load_release_api_v1_icd_releases_post"
+            }
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "201": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_IcdReleaseLoadedOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "multipart/form-data",
+        "model": "Body_load_release_api_v1_icd_releases_post",
+        "fields": [
+          {
+            "pointer": "/file",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "description": "ClaML XML, WHO's ICD-11 simple tabulation (.zip / .txt), or a CSV / TSV with code and title columns"
+          },
+          {
+            "pointer": "/code_system",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "enum": [
+              "ICD-11",
+              "ICD-10"
+            ]
+          },
+          {
+            "pointer": "/release_label",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "min_length": 2,
+            "max_length": 40
+          },
+          {
+            "pointer": "/language",
+            "type": "string",
+            "required": false,
+            "nullable": false,
+            "default": "en",
+            "pattern": "^[a-z]{2}$"
+          },
+          {
+            "pointer": "/licence_note",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "max_length": 1000,
+            "description": "Required for ICD-10: the WHO licence the hospital holds"
+          },
+          {
+            "pointer": "/activate",
+            "type": "boolean",
+            "required": false,
+            "nullable": false,
+            "default": true
+          }
+        ],
+        "cross_field_rules": {},
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "state_guard",
+        "on_lost_answer": "A repeat is refused with ICD_RELEASE_EXISTS: the release is loaded already. The first call may have succeeded; this error does not replay its result. Never retry automatically; re-read the record, then offer the action again only if it is still needed.",
+        "reconcile_with": "GET /icd/releases",
+        "refused_with": "ICD_RELEASE_EXISTS",
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "POST /icd/releases/{release_id}/activate",
+      "summary": "Make a release the active list of its classification",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "icd.release.manage"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of icd.release.manage",
+        "roles_allowed": [
+          "quality_officer",
+          "super_admin"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "release_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Release Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_IcdReleasesOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": null,
+      "write": {
+        "protection": "repeat_safe",
+        "on_lost_answer": "A repeat is harmless for the same state: the release is active already. No response is stored; re-read before resubmitting because newer data may have arrived.",
+        "reconcile_with": "GET /icd/releases",
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "GET /admin/first-owner",
+      "summary": "Whether this installation still needs its first Owner",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "admin.user.provision"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of admin.user.provision",
+        "roles_allowed": [
+          "super_admin"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_FirstOwnerStatusOut_"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "object",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "POST /admin/first-owner",
+      "summary": "Create the installation's first Owner (once; temporary password shown ONCE)",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "admin.user.provision"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of admin.user.provision",
+        "roles_allowed": [
+          "super_admin"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "FIRST_OWNER_EXISTS",
+          "http_status": 409,
+          "message": "The first Owner exists already: new owners come through HR and IT.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "POST /api/v1/admin/first-owner"
+        },
+        {
+          "code": "FORBIDDEN",
+          "http_status": 403,
+          "message": "You do not have permission to do this.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "any_of",
+            "required"
+          ],
+          "details_from": "POST /api/v1/admin/departments"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [],
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/FirstOwnerIn"
+            }
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "201": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_FirstOwnerOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "application/json",
+        "model": "FirstOwnerIn",
+        "fields": [
+          {
+            "pointer": "/full_name",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "min_length": 1,
+            "max_length": 200
+          },
+          {
+            "pointer": "/cnic",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "pattern": "^[0-9]{5}-?[0-9]{7}-?[0-9]$",
+            "description": "Required of every member of staff (§6.1)"
+          },
+          {
+            "pointer": "/mobile",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "pattern": "^\\+?[0-9][0-9 -]{6,19}$"
+          },
+          {
+            "pointer": "/gender",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "enum": [
+              "male",
+              "female",
+              "other"
+            ]
+          },
+          {
+            "pointer": "/dob",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "format": "date"
+          },
+          {
+            "pointer": "/email",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "max_length": 200
+          },
+          {
+            "pointer": "/designation",
+            "type": "string",
+            "required": false,
+            "nullable": false,
+            "default": "Owner",
+            "min_length": 1,
+            "max_length": 100
+          },
+          {
+            "pointer": "/username",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "pattern": "^[a-z0-9._-]{3,64}$",
+            "description": "Suggested from the name if omitted"
+          },
+          {
+            "pointer": "/roles",
+            "type": "array",
+            "required": false,
+            "nullable": false,
+            "description": "Roles besides owner (always given), e.g. ['hr_admin'] or, in a small clinic, ['hr_admin', 'doctor']; never super_admin or phc_inspector",
+            "items": "string"
+          }
+        ],
+        "cross_field_rules": {},
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "state_guard",
+        "on_lost_answer": "A repeat is refused with FIRST_OWNER_EXISTS: the first Owner exists already: a repeat creates nobody. The first call may have succeeded; this error does not replay its result. Never retry automatically; re-read the record, then offer the action again only if it is still needed.",
+        "reconcile_with": "GET /admin/first-owner",
+        "refused_with": "FIRST_OWNER_EXISTS",
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "POST /admin/change-requests",
+      "summary": "Request a control-setting or privileged-access change (applied at once for an Owner)",
+      "access": {
+        "authentication": "user",
+        "permissions": [],
+        "permissions_mode": "all",
+        "who": "admin.settings.manage for a setting, admin.user.manage for a user's roles, admin.role_matrix.update for a role's permissions (the service checks)"
+      },
+      "service_gates": [],
+      "idempotency_key": true,
+      "errors": [
+        {
+          "code": "DEMO_ACCOUNT_PROTECTED",
+          "http_status": 403,
+          "message": "DEV servers only: a demo account is shared by every developer, so its password, roles and active state stay as seeded. Use a user of your own.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "change",
+            "username"
+          ],
+          "details_from": "POST /api/v1/auth/change-password"
+        },
+        {
+          "code": "FORBIDDEN",
+          "http_status": 403,
+          "message": "You do not have permission to do this.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "any_of",
+            "required"
+          ],
+          "details_from": "POST /api/v1/admin/departments"
+        },
+        {
+          "code": "ICD_SYSTEM_NOT_LOADED",
+          "http_status": 409,
+          "message": "No code list of this classification is loaded (ICD-10: load the hospital's licensed WHO file first).",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "code_system"
+          ],
+          "details_from": "GET /api/v1/icd/codes"
+        },
+        {
+          "code": "LAST_OWNER",
+          "http_status": 409,
+          "message": "The last active Owner keeps the Owner role.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/users/{user_id}/roles"
+        },
+        {
+          "code": "REFERENCE_NOT_FOUND",
+          "http_status": 422,
+          "message": "A referenced record does not exist.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "ward_id"
+          ],
+          "details_from": "POST /api/v1/pharmacy/storage-checks"
+        },
+        {
+          "code": "SELF_ROLE_CHANGE_FORBIDDEN",
+          "http_status": 403,
+          "message": "Nobody changes their own roles.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/users/{user_id}/roles"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "Idempotency-Key",
+          "in": "header",
+          "required": false,
+          "description": "Unique per logical action; retries return the first result",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Unique per logical action; retries return the first result",
+            "title": "Idempotency-Key"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ChangeRequestIn"
+            }
+          }
+        }
+      },
+      "responses": {
+        "201": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_AdminChangeRequestOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "application/json",
+        "model": "ChangeRequestIn",
+        "fields": [
+          {
+            "pointer": "/kind",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "enum": [
+              "Setting",
+              "UserRoles",
+              "RolePermissions"
+            ]
+          },
+          {
+            "pointer": "/setting_key",
+            "type": "string",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "pointer": "/target_user_id",
+            "type": "integer",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "pointer": "/target_role_code",
+            "type": "string",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "pointer": "/requested_value",
+            "type": null,
+            "required": true,
+            "nullable": false,
+            "description": "Setting: the new value; UserRoles: role codes; RolePermissions: permission codes"
+          },
+          {
+            "pointer": "/reason",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "min_length": 3,
+            "max_length": 500
+          }
+        ],
+        "cross_field_rules": {
+          "ChangeRequestIn": [
+            "… names …, and only it",
+            "requested_value is the complete list of codes"
+          ]
+        },
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "idempotency_key",
+        "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+        "reconcile_with": "GET /admin/change-requests",
+        "emits_events": [
+          "approval.requested",
+          "notification.created"
+        ],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "GET /admin/change-requests",
+      "summary": "Control-setting and privileged-access change requests",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "admin.settings.manage",
+          "admin.user.manage",
+          "admin.role_matrix.update",
+          "approval.policy_change.approve",
+          "approval.privileged_access.approve"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of admin.settings.manage or admin.user.manage or admin.role_matrix.update or approval.policy_change.approve or approval.privileged_access.approve",
+        "roles_allowed": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "super_admin"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "status",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          }
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "maximum": 500,
+            "minimum": 1,
+            "default": 100,
+            "title": "Limit"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_AdminChangeRequestOut__"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [
+          {
+            "name": "limit",
+            "required": false,
+            "type": "integer",
+            "default": 100,
+            "minimum": 1,
+            "maximum": 500
+          }
+        ],
+        "search": [],
+        "filters": [
+          {
+            "name": "status",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "note": "Lists are bounded by `limit` (no cursor paging): ask for what the screen shows, filter on the server."
+      }
+    },
+    {
+      "endpoint": "GET /admin/change-requests/{change_request_id}",
+      "summary": "One control-setting or privileged-access change request",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "admin.settings.manage",
+          "admin.user.manage",
+          "admin.role_matrix.update",
+          "approval.policy_change.approve",
+          "approval.privileged_access.approve"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of admin.settings.manage or admin.user.manage or admin.role_matrix.update or approval.policy_change.approve or approval.privileged_access.approve",
+        "roles_allowed": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "super_admin"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "NOT_FOUND",
+          "http_status": 404,
+          "message": "The requested resource was not found.",
+          "retryable": false,
+          "ui_action": "Say 'not found'; refresh the list.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "resource"
+          ],
+          "details_from": "PUT /api/v1/admin/printers/{printer_id}"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "change_request_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Change Request Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_AdminChangeRequestOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "object",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      }
+    }
+  ],
+  "realtime": {
+    "topics": [
+      "hr.provisioning.requested",
+      "session.*",
+      "system.*",
+      "notification.created"
+    ],
+    "handlers": [
+      {
+        "event": "hr.provisioning.requested",
+        "priority": "normal",
+        "presentation": null,
+        "emitted_by_operations": [
+          "POST /hr/employees/{employee_id}/submit"
+        ],
+        "refresh": [
+          "GET /admin/login-events",
+          "GET /admin/departments",
+          "GET /meta/roles",
+          "GET /meta/permissions",
+          "GET /admin/provisioning-queue",
+          "GET /admin/users",
+          "GET /admin/role-matrix",
+          "GET /admin/terminals",
+          "GET /admin/printers",
+          "GET /admin/badge-stations",
+          "GET /admin/server-health",
+          "GET /admin/settings",
+          "GET /admin/wards",
+          "GET /icd/releases",
+          "GET /admin/first-owner",
+          "GET /admin/change-requests"
+        ]
+      }
+    ],
+    "rule": "Refresh the listed reads when the event arrives (a list without a path id: every time; a detail read: when the payload names the same id). Never poll."
+  },
+  "rules_in_force": null,
+  "decisions": [
+    {
+      "id": "H02",
+      "question": "Digits in the Urdu UI and printouts: Latin 0-9 or Extended Arabic-Indic ۰-۹.",
+      "owner": [
+        "vendor"
+      ],
+      "affects": [
+        "every screen in Urdu"
+      ],
+      "meanwhile": "Latin digits; identifiers, doses and money stay left to right."
+    },
+    {
+      "id": "H03",
+      "question": "How dates and times are shown on screen, and a 12- or 24-hour clock.",
+      "owner": [
+        "vendor",
+        "clinical_lead"
+      ],
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "The server's print format (e.g. 27-Sep-2026) and the hospital time zone."
+    },
+    {
+      "id": "H04",
+      "question": "Money on screen: decimals shown, and digit grouping (1,234,567 or 12,34,567).",
+      "owner": [
+        "vendor"
+      ],
+      "affects": [
+        "every screen with money"
+      ],
+      "meanwhile": "The amounts as the API sends them, with the currency setting."
+    },
+    {
+      "id": "H08",
+      "question": "Who writes and signs off the Urdu text of the UI, above all clinical and consent wording.",
+      "owner": [
+        "vendor",
+        "translator",
+        "clinical_lead"
+      ],
+      "affects": [
+        "every screen in Urdu"
+      ],
+      "meanwhile": "Urdu you add is a draft: mark it so (the interview bank's pattern: a draft until a native speaker reviews it)."
+    },
+    {
+      "id": "H09",
+      "question": "One design system shared by every frontend team (who authors and approves it), or each team's own.",
+      "owner": [
+        "vendor",
+        "frontend_lead"
+      ],
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "Each team designs within the backend's constraints: themes Light and DarkHighContrast, zoom 100-250 %, Noto Nastaliq Urdu, status shown as text and icon, never colour alone. Follow the vendor's design principles (frontend guide 18, get_design_principles)."
+    },
+    {
+      "id": "H10",
+      "question": "How each realtime event is shown (interrupt, attention, inform, silent), alert sounds and which terminals play them. Only Code Red (interrupt), the licence and maintenance banners and the logout on session.revoked are prescribed (the event catalogue's `presentation`).",
+      "owner": [
+        "clinical_lead",
+        "vendor"
+      ],
+      "affects": [
+        "every screen with realtime events"
+      ],
+      "meanwhile": "Code Red interrupts; every other event updates the screen and, at most, a dismissible notice. `priority` is the delivery urgency, not a presentation rule."
+    },
+    {
+      "id": "H12",
+      "question": "Which workspaces run on web, Android and iOS, which cannot read a MAC address, discover the server by UDP or print silently; or are cash and printing Windows-only.",
+      "owner": [
+        "vendor",
+        "backend"
+      ],
+      "affects": [
+        "my_cash_shift",
+        "registration",
+        "every screen that prints"
+      ],
+      "meanwhile": "The guides describe the Windows (Electron) terminal; tell your developer when a screen needs a capability your platform lacks."
+    },
+    {
+      "id": "H18",
+      "question": "Noto Nastaliq Urdu everywhere, or the more compact Naskh in dense tables.",
+      "owner": [
+        "vendor",
+        "frontend_lead"
+      ],
+      "affects": [
+        "every table in Urdu"
+      ],
+      "meanwhile": "Noto Nastaliq Urdu, as the guides require."
+    },
+    {
+      "id": "H19",
+      "question": "Allergies: the patient record keeps free text, so it cannot tell \"no known allergies\" (asserted by a clinician) from \"not recorded\". Should it?",
+      "owner": [
+        "clinical_lead",
+        "backend"
+      ],
+      "affects": [
+        "every screen with a patient banner"
+      ],
+      "meanwhile": "Show the recorded text as recorded; an empty value is \"not recorded\", never \"none\"."
+    },
+    {
+      "id": "H20",
+      "question": "May unsaved form input be kept on the terminal (which fields, encrypted, for how long)?",
+      "owner": [
+        "vendor",
+        "hospital"
+      ],
+      "affects": [
+        "every form"
+      ],
+      "meanwhile": "In memory only; never a second checker's password."
+    },
+    {
+      "id": "H22",
+      "question": "Which documents may print on an unregistered terminal's default printer (sensitive A4 documents).",
+      "owner": [
+        "hospital",
+        "vendor"
+      ],
+      "affects": [
+        "every screen that prints"
+      ],
+      "meanwhile": "As the printing guide says: the hint, then the default printer."
+    },
+    {
+      "id": "H24",
+      "question": "Who approves frontend performance targets, alert thresholds and escalation timers.",
+      "owner": [
+        "vendor",
+        "clinical_lead"
+      ],
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "The server's own settings (e.g. critical_result_communicate_minutes)."
+    }
+  ],
+  "unknowns": [
+    {
+      "what": "decision H02",
+      "owner": [
+        "vendor"
+      ],
+      "question": "Digits in the Urdu UI and printouts: Latin 0-9 or Extended Arabic-Indic ۰-۹.",
+      "affects": [
+        "every screen in Urdu"
+      ],
+      "meanwhile": "Latin digits; identifiers, doses and money stay left to right."
+    },
+    {
+      "what": "decision H03",
+      "owner": [
+        "vendor",
+        "clinical_lead"
+      ],
+      "question": "How dates and times are shown on screen, and a 12- or 24-hour clock.",
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "The server's print format (e.g. 27-Sep-2026) and the hospital time zone."
+    },
+    {
+      "what": "decision H04",
+      "owner": [
+        "vendor"
+      ],
+      "question": "Money on screen: decimals shown, and digit grouping (1,234,567 or 12,34,567).",
+      "affects": [
+        "every screen with money"
+      ],
+      "meanwhile": "The amounts as the API sends them, with the currency setting."
+    },
+    {
+      "what": "decision H08",
+      "owner": [
+        "vendor",
+        "translator",
+        "clinical_lead"
+      ],
+      "question": "Who writes and signs off the Urdu text of the UI, above all clinical and consent wording.",
+      "affects": [
+        "every screen in Urdu"
+      ],
+      "meanwhile": "Urdu you add is a draft: mark it so (the interview bank's pattern: a draft until a native speaker reviews it)."
+    },
+    {
+      "what": "decision H09",
+      "owner": [
+        "vendor",
+        "frontend_lead"
+      ],
+      "question": "One design system shared by every frontend team (who authors and approves it), or each team's own.",
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "Each team designs within the backend's constraints: themes Light and DarkHighContrast, zoom 100-250 %, Noto Nastaliq Urdu, status shown as text and icon, never colour alone. Follow the vendor's design principles (frontend guide 18, get_design_principles)."
+    },
+    {
+      "what": "decision H10",
+      "owner": [
+        "clinical_lead",
+        "vendor"
+      ],
+      "question": "How each realtime event is shown (interrupt, attention, inform, silent), alert sounds and which terminals play them. Only Code Red (interrupt), the licence and maintenance banners and the logout on session.revoked are prescribed (the event catalogue's `presentation`).",
+      "affects": [
+        "every screen with realtime events"
+      ],
+      "meanwhile": "Code Red interrupts; every other event updates the screen and, at most, a dismissible notice. `priority` is the delivery urgency, not a presentation rule."
+    },
+    {
+      "what": "decision H12",
+      "owner": [
+        "vendor",
+        "backend"
+      ],
+      "question": "Which workspaces run on web, Android and iOS, which cannot read a MAC address, discover the server by UDP or print silently; or are cash and printing Windows-only.",
+      "affects": [
+        "my_cash_shift",
+        "registration",
+        "every screen that prints"
+      ],
+      "meanwhile": "The guides describe the Windows (Electron) terminal; tell your developer when a screen needs a capability your platform lacks."
+    },
+    {
+      "what": "decision H18",
+      "owner": [
+        "vendor",
+        "frontend_lead"
+      ],
+      "question": "Noto Nastaliq Urdu everywhere, or the more compact Naskh in dense tables.",
+      "affects": [
+        "every table in Urdu"
+      ],
+      "meanwhile": "Noto Nastaliq Urdu, as the guides require."
+    },
+    {
+      "what": "decision H19",
+      "owner": [
+        "clinical_lead",
+        "backend"
+      ],
+      "question": "Allergies: the patient record keeps free text, so it cannot tell \"no known allergies\" (asserted by a clinician) from \"not recorded\". Should it?",
+      "affects": [
+        "every screen with a patient banner"
+      ],
+      "meanwhile": "Show the recorded text as recorded; an empty value is \"not recorded\", never \"none\"."
+    },
+    {
+      "what": "decision H20",
+      "owner": [
+        "vendor",
+        "hospital"
+      ],
+      "question": "May unsaved form input be kept on the terminal (which fields, encrypted, for how long)?",
+      "affects": [
+        "every form"
+      ],
+      "meanwhile": "In memory only; never a second checker's password."
+    },
+    {
+      "what": "decision H22",
+      "owner": [
+        "hospital",
+        "vendor"
+      ],
+      "question": "Which documents may print on an unregistered terminal's default printer (sensitive A4 documents).",
+      "affects": [
+        "every screen that prints"
+      ],
+      "meanwhile": "As the printing guide says: the hint, then the default printer."
+    },
+    {
+      "what": "decision H24",
+      "owner": [
+        "vendor",
+        "clinical_lead"
+      ],
+      "question": "Who approves frontend performance targets, alert thresholds and escalation timers.",
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "The server's own settings (e.g. critical_result_communicate_minutes)."
+    }
+  ]
+}

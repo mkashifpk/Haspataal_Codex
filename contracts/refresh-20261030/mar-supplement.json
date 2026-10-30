@@ -1,0 +1,3284 @@
+{
+  "screen_id": "mar",
+  "contract_fingerprint": "14824af5c60c05148994",
+  "knowledge_revision": "9250bafb1794ac12",
+  "delivery_gate": {
+    "required": true,
+    "status": "required",
+    "progress_reporting": {
+      "required": true,
+      "submit": "propose_progress",
+      "verify": "progress_proposals",
+      "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+    },
+    "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+    "compulsory": [
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+        "points": 2
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+        "points": 3
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+        "points": 2
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+        "points": 4
+      }
+    ],
+    "zoom": {
+      "min_pct": 100,
+      "max_pct": 250,
+      "reset_pct": 100,
+      "keys": [
+        "Ctrl + or Ctrl = (zoom in)",
+        "Ctrl - (zoom out)",
+        "Ctrl 0 (reset to 100 %)",
+        "Command on macOS"
+      ],
+      "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+    },
+    "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+    "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+  },
+  "decisions": [
+    {
+      "id": "H02",
+      "question": "Digits in the Urdu UI and printouts: Latin 0-9 or Extended Arabic-Indic ۰-۹.",
+      "owner": [
+        "vendor"
+      ],
+      "affects": [
+        "every screen in Urdu"
+      ],
+      "meanwhile": "Latin digits; identifiers, doses and money stay left to right."
+    },
+    {
+      "id": "H03",
+      "question": "How dates and times are shown on screen, and a 12- or 24-hour clock.",
+      "owner": [
+        "vendor",
+        "clinical_lead"
+      ],
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "The server's print format (e.g. 27-Sep-2026) and the hospital time zone."
+    },
+    {
+      "id": "H04",
+      "question": "Money on screen: decimals shown, and digit grouping (1,234,567 or 12,34,567).",
+      "owner": [
+        "vendor"
+      ],
+      "affects": [
+        "every screen with money"
+      ],
+      "meanwhile": "The amounts as the API sends them, with the currency setting."
+    },
+    {
+      "id": "H08",
+      "question": "Who writes and signs off the Urdu text of the UI, above all clinical and consent wording.",
+      "owner": [
+        "vendor",
+        "translator",
+        "clinical_lead"
+      ],
+      "affects": [
+        "every screen in Urdu"
+      ],
+      "meanwhile": "Urdu you add is a draft: mark it so (the interview bank's pattern: a draft until a native speaker reviews it)."
+    },
+    {
+      "id": "H09",
+      "question": "One design system shared by every frontend team (who authors and approves it), or each team's own.",
+      "owner": [
+        "vendor",
+        "frontend_lead"
+      ],
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "Each team designs within the backend's constraints: themes Light and DarkHighContrast, zoom 100-250 %, Noto Nastaliq Urdu, status shown as text and icon, never colour alone. Follow the vendor's design principles (frontend guide 18, get_design_principles)."
+    },
+    {
+      "id": "H10",
+      "question": "How each realtime event is shown (interrupt, attention, inform, silent), alert sounds and which terminals play them. Only Code Red (interrupt), the licence and maintenance banners and the logout on session.revoked are prescribed (the event catalogue's `presentation`).",
+      "owner": [
+        "clinical_lead",
+        "vendor"
+      ],
+      "affects": [
+        "every screen with realtime events"
+      ],
+      "meanwhile": "Code Red interrupts; every other event updates the screen and, at most, a dismissible notice. `priority` is the delivery urgency, not a presentation rule."
+    },
+    {
+      "id": "H11",
+      "question": "May the second checker of a high-alert medicine use a badge and PIN instead of a username and password?",
+      "owner": [
+        "clinical_lead",
+        "backend"
+      ],
+      "affects": [
+        "mar",
+        "dispense"
+      ],
+      "meanwhile": "Username and password, never stored by the app."
+    },
+    {
+      "id": "H12",
+      "question": "Which workspaces run on web, Android and iOS, which cannot read a MAC address, discover the server by UDP or print silently; or are cash and printing Windows-only.",
+      "owner": [
+        "vendor",
+        "backend"
+      ],
+      "affects": [
+        "my_cash_shift",
+        "registration",
+        "every screen that prints"
+      ],
+      "meanwhile": "The guides describe the Windows (Electron) terminal; tell your developer when a screen needs a capability your platform lacks."
+    },
+    {
+      "id": "H16",
+      "question": "Tall-man names for look-alike medicines (a field on the drug master).",
+      "owner": [
+        "clinical_lead",
+        "backend"
+      ],
+      "affects": [
+        "eprescription",
+        "dispense",
+        "mar"
+      ],
+      "meanwhile": "The look-alike pairs the API already returns."
+    },
+    {
+      "id": "H18",
+      "question": "Noto Nastaliq Urdu everywhere, or the more compact Naskh in dense tables.",
+      "owner": [
+        "vendor",
+        "frontend_lead"
+      ],
+      "affects": [
+        "every table in Urdu"
+      ],
+      "meanwhile": "Noto Nastaliq Urdu, as the guides require."
+    },
+    {
+      "id": "H19",
+      "question": "Allergies: the patient record keeps free text, so it cannot tell \"no known allergies\" (asserted by a clinician) from \"not recorded\". Should it?",
+      "owner": [
+        "clinical_lead",
+        "backend"
+      ],
+      "affects": [
+        "every screen with a patient banner"
+      ],
+      "meanwhile": "Show the recorded text as recorded; an empty value is \"not recorded\", never \"none\"."
+    },
+    {
+      "id": "H20",
+      "question": "May unsaved form input be kept on the terminal (which fields, encrypted, for how long)?",
+      "owner": [
+        "vendor",
+        "hospital"
+      ],
+      "affects": [
+        "every form"
+      ],
+      "meanwhile": "In memory only; never a second checker's password."
+    },
+    {
+      "id": "H22",
+      "question": "Which documents may print on an unregistered terminal's default printer (sensitive A4 documents).",
+      "owner": [
+        "hospital",
+        "vendor"
+      ],
+      "affects": [
+        "every screen that prints"
+      ],
+      "meanwhile": "As the printing guide says: the hint, then the default printer."
+    },
+    {
+      "id": "H24",
+      "question": "Who approves frontend performance targets, alert thresholds and escalation timers.",
+      "owner": [
+        "vendor",
+        "clinical_lead"
+      ],
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "The server's own settings (e.g. critical_result_communicate_minutes)."
+    }
+  ],
+  "examples": {
+    "POST /admissions/{admission_id}/discharge/{stage}/clear": {
+      "request": {
+        "path": "/api/v1/admissions/1/discharge/PharmacyClearance/clear",
+        "body": {}
+      },
+      "response": {
+        "status": 200,
+        "body_preview": "{\"status\": 200, \"body\": {\"data\": {\"admission_id\": 1, \"admission_number\": \"ADM-2026-00001\", \"patient_id\": 1, \"mrn\": \"MRN-2026-000001\", \"patient_name\": \"Ali Khan\", \"gender\": \"male\", \"age_years\": 40, \"requested_ward_id\": 2, \"requested_ward_name\": \"General Ward\", \"ward_id\": 2, \"ward_name\": \"General Ward\", \"bed_id\": 2, \"bed_label\": \"GW-1\", \"primary_doctor_id\": 1, \"primary_doctor_name\": \"Dr Ahmed\", \"admission_type\": \"Standard\", \"status\": \"DischargeInProgress\", \"billing_category\": \"Cash\", \"panel_id\": null, \"is_billing_confirmed\": true, \"is_billing_deferred\": false, \"is_overflow\": false, \"overflow_reason\": null, \"eta_minutes\": null, \"source_ticket_id\": 1, \"admission_reason\": \"Fever and productive cough for 5 days, SpO2 91% on air\", \"provisional_diagnosis\": \"Community-acquired pneumonia\", \"initial_care_plan\": null, \"photo_document_id\": null, \"details_stamp\": {\"at\": \"2026-10-13T11:58:07.001267+00:00\", \"name\": \"Dr Ahmed\", \"text\": \"Dr Ahmed, Doctor, PMDC PMDC-37440, 13-Oct-2026 16:58\", \"user_id\": 1, \"designation\": \"Doctor\", \"employee_id\": 1, \"registration\": \"PMDC PMDC-37440\"}, \"admission_notes\": null, \"requested_at\": \"2026-10-13T11:58:07.001267+00:00\", \"reserved_at\": \"2026-10-13T11:58:07.060463+00:00\", \"admitted_at\": \"2026-10-13T11:58:07.060463+00:00\", \"discharge_initiated_at\": \"2026-10-13T11:58:07.424943+00:00\", \"discharged_at\": null, \"row_version\": 5, \"discharge\": {\"stages\": [{\"clearance_id\": 1, \"stage\": \"ClinicalDischarge\", \"sequence_no\": 1, \"status\": \"Cleared\", \"cleared_by\": 1, \"clea…"
+      }
+    },
+    "GET /admissions/{admission_id}/mar": {
+      "request": {
+        "path": "/api/v1/admissions/1/mar"
+      },
+      "response": {
+        "status": 200,
+        "body_preview": "{\"status\": 200, \"body\": {\"data\": [{\"mar_id\": 1, \"prescription_item_id\": 1, \"drug_name\": \"Ceftriaxone\", \"dose_text\": \"1 g\", \"route\": \"IV\", \"frequency_code\": \"BD\", \"is_prn\": false, \"is_stat\": false, \"scheduled_at\": \"2026-09-30T14:32:51.388788+00:00\", \"status\": \"Scheduled\", \"administered_at\": null, \"administered_by\": null, \"administered_by_name\": null, \"dose_given_text\": null, \"route_given\": null, \"status_reason\": null, \"is_correction\": false, \"corrects_mar_id\": null, \"correction_reason\": null, \"created_at\": \"2026-09-30T14:37:51.390524+00:00\", \"is_overdue\": true, \"high_alert_category\": null, \"lasa_with\": [], \"self_administration\": false, \"identity_check\": null, \"identity_note\": null, \"drug_check\": null, \"second_checked_by\": null, \"second_checked_by_name\": null, \"self_administered\": false, \"variance_reason\": null, \"prepared_at\": null, \"prepared_by_name\": null, \"preparation\": null}, {\"mar_id\": 4, \"prescription_item_id\": 2, \"drug_name\": \"Amoxicillin\", \"dose_text\": \"1 capsule\", \"route\": \"Oral\", \"frequency_code\": \"TDS\", \"is_prn\": false, \"is_stat\": false, \"scheduled_at\": \"2026-09-30T14:32:51.388788+00:00\", \"status\": \"Scheduled\", \"administered_at\": null, \"administered_by\": null, \"administered_by_name\": null, \"dose_given_text\": null, \"route_given\": null, \"status_reason\": null, \"is_correction\": false, \"corrects_mar_id\": null, \"correction_reason\": null, \"created_at\": \"2026-09-30T14:37:51.390524+00:00\", \"is_overdue\": true, \"high_alert_category\": null, \"lasa_with\": [], \"self_administration\"…"
+      }
+    },
+    "POST /mar/{mar_id}/chart": {
+      "request": {
+        "path": "/api/v1/mar/1/chart",
+        "body": {
+          "status": "Administered",
+          "identity_check": "TwoIdentifiers"
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": {
+            "mar_id": 1,
+            "admission_id": 1,
+            "patient_id": 1,
+            "prescription_item_id": 1,
+            "scheduled_at": "2026-09-30T14:32:51.388788+00:00",
+            "status": "Administered",
+            "administered_at": "2026-09-30T14:37:51.474484+00:00",
+            "administered_by": 7,
+            "dose_given_text": "1 g",
+            "route_given": "IV",
+            "status_reason": null,
+            "is_correction": false,
+            "corrects_mar_id": null,
+            "correction_reason": null,
+            "identity_check": "TwoIdentifiers",
+            "identity_note": null,
+            "drug_check": "Visual",
+            "second_checked_by": null,
+            "self_administered": false,
+            "variance_reason": null,
+            "prepared_by": null,
+            "prepared_at": null,
+            "preparation": null,
+            "created_at": "2026-09-30T14:37:51.390524+00:00",
+            "row_version": 2
+          },
+          "meta": {
+            "server_time": "2026-09-30T14:37:51.481295+00:00"
+          },
+          "request_id": "6521516ac3b34453a27eb1560c0b7c52"
+        }
+      }
+    },
+    "POST /admissions/{admission_id}/mar/prn": {
+      "request": {
+        "path": "/api/v1/admissions/1/mar/prn",
+        "body": {
+          "prescription_item_id": 2,
+          "dose_given_text": "1 g",
+          "status_reason": "fever 38.9",
+          "identity_check": "TwoIdentifiers"
+        }
+      },
+      "response": {
+        "status": 201,
+        "body": {
+          "data": {
+            "mar_id": 7,
+            "admission_id": 1,
+            "patient_id": 1,
+            "prescription_item_id": 2,
+            "scheduled_at": null,
+            "status": "Administered",
+            "administered_at": "2026-09-30T14:47:43.418871+00:00",
+            "administered_by": 7,
+            "dose_given_text": "1 g",
+            "route_given": "IV",
+            "status_reason": "fever 38.9",
+            "is_correction": false,
+            "corrects_mar_id": null,
+            "correction_reason": null,
+            "identity_check": "TwoIdentifiers",
+            "identity_note": null,
+            "drug_check": "Visual",
+            "second_checked_by": null,
+            "self_administered": false,
+            "variance_reason": null,
+            "prepared_by": null,
+            "prepared_at": null,
+            "preparation": null,
+            "created_at": "2026-09-30T14:47:43.418871+00:00",
+            "row_version": 1
+          },
+          "meta": {
+            "server_time": "2026-09-30T14:47:43.515970+00:00"
+          },
+          "request_id": "bd0063688a934617a25e05866fc87580"
+        }
+      }
+    },
+    "POST /mar/{mar_id}/correction": {
+      "request": {
+        "path": "/api/v1/mar/7/correction",
+        "body": {
+          "status": "Held",
+          "correction_reason": "charted on the wrong patient"
+        }
+      },
+      "response": {
+        "status": 201,
+        "body": {
+          "data": {
+            "mar_id": 8,
+            "admission_id": 1,
+            "patient_id": 1,
+            "prescription_item_id": 2,
+            "scheduled_at": null,
+            "status": "Held",
+            "administered_at": null,
+            "administered_by": null,
+            "dose_given_text": null,
+            "route_given": null,
+            "status_reason": "charted on the wrong patient",
+            "is_correction": true,
+            "corrects_mar_id": 7,
+            "correction_reason": "charted on the wrong patient",
+            "identity_check": null,
+            "identity_note": null,
+            "drug_check": null,
+            "second_checked_by": null,
+            "self_administered": false,
+            "variance_reason": null,
+            "prepared_by": null,
+            "prepared_at": null,
+            "preparation": null,
+            "created_at": "2026-09-30T14:47:43.550922+00:00",
+            "row_version": 1
+          },
+          "meta": {
+            "server_time": "2026-09-30T14:47:43.577704+00:00"
+          },
+          "request_id": "6aff84e935684b249ba5924b96bcb986"
+        }
+      }
+    },
+    "POST /admissions/{admission_id}/mar/generate": {
+      "request": {
+        "path": "/api/v1/admissions/1/mar/generate"
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": {
+            "created": 0
+          },
+          "meta": {
+            "server_time": "2026-09-27T17:38:29.332220+00:00"
+          },
+          "request_id": "7a1df01de61e4a518adab53ad6783fac"
+        }
+      }
+    },
+    "GET /wards/{ward_id}/inventory": {
+      "request": {
+        "path": "/api/v1/wards/2/inventory"
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": [
+            {
+              "drug_id": 1,
+              "drug_name": "Paracetamol IV",
+              "batch_id": 1,
+              "batch_no": "IV1",
+              "expiry_date": "2099-01-01",
+              "qty": 3,
+              "updated_at": "2026-09-30T14:47:42.873629+00:00",
+              "is_expired": false,
+              "is_recalled": false
+            }
+          ],
+          "meta": {
+            "server_time": "2026-09-30T14:47:42.994102+00:00"
+          },
+          "request_id": "6ca8f9cb1af247c29698301eb3e365f2"
+        }
+      }
+    },
+    "POST /mar/{mar_id}/prepare": {
+      "request": {
+        "path": "/api/v1/mar/1/prepare",
+        "body": {
+          "preparation": "in 500 ml normal saline over 4 hours"
+        }
+      },
+      "response": {
+        "status": 200,
+        "body_preview": "{\"status\": 200, \"body\": {\"data\": {\"document_type\": \"dose_label\", \"printer_role\": \"label\", \"paper_width_mm\": 50, \"fields\": {\"hospital_name\": \"Haspataal Hospital\", \"mar_id\": 1, \"patient_name\": \"Ali Khan\", \"mrn\": \"MRN-2026-000001\", \"ward_name\": \"General Ward\", \"bed_label\": \"GW-1\", \"drug_name\": \"Potassium chloride 15%\", \"strength\": null, \"dose_text\": \"10 mmol\", \"route\": \"IV\", \"preparation\": \"in 500 ml normal saline over 4 hours\", \"scheduled_at\": \"2026-10-29T21:42:36.244104+00:00\", \"prepared_by_name\": \"uc1378cbc09\", \"prepared_at\": \"2026-10-29T21:47:37.053121+00:00\", \"warnings\": [\"HIGH ALERT (concentrated electrolyte): second check before use\"], \"reprint\": false}, \"text\": \"Ali Khan\\nMRN-2026-000001 General Ward\\nGW-1\\n--------------------------------\\nPotassium chloride 15%\\n10 mmol IV\\nin 500 ml normal saline over 4\\nhours\\nDue 30-Oct-2026 02:42\\nBy uc1378cbc09 30-Oct-2026 02:47\\nHIGH ALERT (concentrated\\nelectrolyte): second check\\nbefore use\\n\", \"barcode_svg\": \"<svg version=\\\"1.1\\\" xmlns=\\\"http://www.w3.org/2000/svg\\\" width=\\\"53.840mm\\\" height=\\\"12.411mm\\\">\\r\\n    <!--Autogenerated with python-barcode 0.16.1-->\\r\\n    <g id=\\\"barcode_group\\\">\\r\\n        <rect width=\\\"100%\\\" height=\\\"100%\\\" style=\\\"fill:white\\\"/>\\r\\n        <rect x=\\\"2.000mm\\\" y=\\\"1.000mm\\\" width=\\\"0.560mm\\\" height=\\\"6.000mm\\\" style=\\\"fill:black;\\\"/>\\r\\n        <rect x=\\\"2.840mm\\\" y=\\\"1.000mm\\\" width=\\\"0.280mm\\\" height=\\\"6.000mm\\\" …\", \"qr_svg\": null, \"pdf_url\": null}, \"meta\": {\"server_time\": \"2026-10-29T21:47:37.…"
+      }
+    },
+    "GET /admissions/{admission_id}/mar/prn-orders": {
+      "request": {
+        "path": "/api/v1/admissions/1/mar/prn-orders"
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": [
+            {
+              "prescription_item_id": 2,
+              "prescription_id": 1,
+              "prescription_number": "RX-2026-000001",
+              "destination": "HospitalPharmacy",
+              "drug_name": "Paracetamol IV",
+              "strength": null,
+              "dose_text": "1 g",
+              "route": "IV",
+              "interval_hours": null,
+              "instructions": null,
+              "high_alert_category": null,
+              "lasa_with": [],
+              "self_administration": false,
+              "start_at": "2026-10-29T21:19:24.449776+00:00",
+              "end_at": null,
+              "prescriber_name": "Dr Ahmed",
+              "last_given_at": null,
+              "given_last_24h": 0
+            }
+          ],
+          "meta": {
+            "server_time": "2026-10-29T21:24:24.729432+00:00"
+          },
+          "request_id": "426e856a76894215a4e9660a77476685"
+        }
+      }
+    },
+    "GET /mar/{mar_id}/dose-label": {
+      "request": {
+        "path": "/api/v1/mar/1/dose-label"
+      },
+      "response": {
+        "status": 200,
+        "body_preview": "{\"status\": 200, \"body\": {\"data\": {\"document_type\": \"dose_label\", \"printer_role\": \"label\", \"paper_width_mm\": 50, \"fields\": {\"hospital_name\": \"Haspataal Hospital\", \"mar_id\": 1, \"patient_name\": \"Ali Khan\", \"mrn\": \"MRN-2026-000001\", \"ward_name\": \"General Ward\", \"bed_label\": \"GW-1\", \"drug_name\": \"Potassium chloride 15%\", \"strength\": null, \"dose_text\": \"10 mmol\", \"route\": \"IV\", \"preparation\": \"in 500 ml normal saline over 4 hours\", \"scheduled_at\": \"2026-10-29T21:42:36.244104+00:00\", \"prepared_by_name\": \"uc1378cbc09\", \"prepared_at\": \"2026-10-29T21:47:37.053121+00:00\", \"warnings\": [\"HIGH ALERT (concentrated electrolyte): second check before use\"], \"reprint\": true}, \"text\": \"REPRINT of the label\\nAli Khan\\nMRN-2026-000001 General Ward\\nGW-1\\n--------------------------------\\nPotassium chloride 15%\\n10 mmol IV\\nin 500 ml normal saline over 4\\nhours\\nDue 30-Oct-2026 02:42\\nBy uc1378cbc09 30-Oct-2026 02:47\\nHIGH ALERT (concentrated\\nelectrolyte): second check\\nbefore use\\n\", \"barcode_svg\": \"<svg version=\\\"1.1\\\" xmlns=\\\"http://www.w3.org/2000/svg\\\" width=\\\"53.840mm\\\" height=\\\"12.411mm\\\">\\r\\n    <!--Autogenerated with python-barcode 0.16.1-->\\r\\n    <g id=\\\"barcode_group\\\">\\r\\n        <rect width=\\\"100%\\\" height=\\\"100%\\\" style=\\\"fill:white\\\"/>\\r\\n        <rect x=\\\"2.000mm\\\" y=\\\"1.000mm\\\" width=\\\"0.560mm\\\" height=\\\"6.000mm\\\" style=\\\"fill:black;\\\"/>\\r\\n        <rect x=\\\"2.840mm\\\" y=\\\"1.000mm\\\" width=\\\"0.280mm\\\" height=\\\"6.000mm\\\" …\", \"qr_svg\": null, \"pdf_url\": null}, \"meta\": {\"server_time\": …"
+      }
+    }
+  },
+  "schemas": {
+    "AdmissionDetailOut": {
+      "properties": {
+        "admission_id": {
+          "type": "integer",
+          "title": "Admission Id"
+        },
+        "admission_number": {
+          "type": "string",
+          "title": "Admission Number"
+        },
+        "patient_id": {
+          "type": "integer",
+          "title": "Patient Id"
+        },
+        "photo_document_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Photo Document Id",
+          "description": "The newest Patient Photo of the merge chain, for the identity check; null when none was taken (it is optional). GET /patient-documents/{document_id}/download"
+        },
+        "mrn": {
+          "type": "string",
+          "title": "Mrn"
+        },
+        "patient_name": {
+          "type": "string",
+          "title": "Patient Name"
+        },
+        "gender": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "male",
+                "female",
+                "other",
+                "unknown"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Gender"
+        },
+        "age_years": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Age Years"
+        },
+        "requested_ward_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Requested Ward Id"
+        },
+        "requested_ward_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Requested Ward Name"
+        },
+        "ward_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ward Id"
+        },
+        "ward_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ward Name"
+        },
+        "bed_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Bed Id"
+        },
+        "bed_label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Bed Label"
+        },
+        "primary_doctor_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Primary Doctor Id",
+          "description": "The treating doctor's employee id; null for a Code Red no doctor has taken over yet (decisions 57): show 'Doctor: waiting'"
+        },
+        "primary_doctor_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Primary Doctor Name"
+        },
+        "admission_type": {
+          "type": "string",
+          "enum": [
+            "Standard",
+            "Emergency",
+            "CodeRed",
+            "Overflow",
+            "Planned"
+          ],
+          "title": "Admission Type"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "AdmissionPending",
+            "Waitlisted",
+            "BedReserved",
+            "CodeRedActive",
+            "Admitted",
+            "DischargeInProgress",
+            "Discharged",
+            "Cancelled"
+          ],
+          "title": "Status"
+        },
+        "billing_category": {
+          "type": "string",
+          "enum": [
+            "Cash",
+            "Panel"
+          ],
+          "title": "Billing Category"
+        },
+        "panel_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Panel Id"
+        },
+        "is_billing_confirmed": {
+          "type": "boolean",
+          "title": "Is Billing Confirmed"
+        },
+        "is_billing_deferred": {
+          "type": "boolean",
+          "title": "Is Billing Deferred"
+        },
+        "is_overflow": {
+          "type": "boolean",
+          "title": "Is Overflow"
+        },
+        "overflow_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Overflow Reason"
+        },
+        "eta_minutes": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Eta Minutes"
+        },
+        "source_ticket_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Source Ticket Id"
+        },
+        "admission_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Admission Reason",
+          "description": "Why the patient was admitted (MSDS 149); null only on a Code Red admission not yet recorded"
+        },
+        "provisional_diagnosis": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Provisional Diagnosis"
+        },
+        "initial_care_plan": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Initial Care Plan"
+        },
+        "details_stamp": {
+          "anyOf": [
+            {
+              "$ref": "#/components/schemas/AuthorStampOut"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Who recorded the reason and diagnosis, and when (MSDS 147)"
+        },
+        "admission_notes": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Admission Notes",
+          "description": "For the admissions desk (not clinical)"
+        },
+        "requested_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Requested At"
+        },
+        "reserved_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Reserved At"
+        },
+        "admitted_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Admitted At"
+        },
+        "discharge_initiated_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Discharge Initiated At"
+        },
+        "discharged_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Discharged At"
+        },
+        "row_version": {
+          "type": "integer",
+          "title": "Row Version"
+        },
+        "discharge": {
+          "$ref": "#/components/schemas/DischargeStatusOut"
+        },
+        "invoice": {
+          "anyOf": [
+            {
+              "$ref": "#/components/schemas/AdmissionInvoiceOut"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The running IPD bill"
+        }
+      },
+      "type": "object",
+      "required": [
+        "admission_id",
+        "admission_number",
+        "patient_id",
+        "photo_document_id",
+        "mrn",
+        "patient_name",
+        "gender",
+        "age_years",
+        "requested_ward_id",
+        "requested_ward_name",
+        "ward_id",
+        "ward_name",
+        "bed_id",
+        "bed_label",
+        "primary_doctor_id",
+        "primary_doctor_name",
+        "admission_type",
+        "status",
+        "billing_category",
+        "panel_id",
+        "is_billing_confirmed",
+        "is_billing_deferred",
+        "is_overflow",
+        "overflow_reason",
+        "eta_minutes",
+        "source_ticket_id",
+        "admission_reason",
+        "provisional_diagnosis",
+        "initial_care_plan",
+        "details_stamp",
+        "admission_notes",
+        "requested_at",
+        "reserved_at",
+        "admitted_at",
+        "discharge_initiated_at",
+        "discharged_at",
+        "row_version",
+        "discharge",
+        "invoice"
+      ],
+      "title": "AdmissionDetailOut"
+    },
+    "AdmissionInvoiceOut": {
+      "properties": {
+        "invoice_id": {
+          "type": "integer",
+          "title": "Invoice Id"
+        },
+        "invoice_no": {
+          "type": "string",
+          "title": "Invoice No"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "Draft",
+            "Open",
+            "PartiallyPaid",
+            "Paid",
+            "CreditAuthorized",
+            "Waivered",
+            "Refunded",
+            "Cancelled"
+          ],
+          "title": "Status"
+        },
+        "gross_total": {
+          "type": "number",
+          "title": "Gross Total"
+        },
+        "net_payable": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Net Payable"
+        },
+        "amount_paid": {
+          "type": "number",
+          "title": "Amount Paid"
+        }
+      },
+      "type": "object",
+      "required": [
+        "invoice_id",
+        "invoice_no",
+        "status",
+        "gross_total",
+        "net_payable",
+        "amount_paid"
+      ],
+      "title": "AdmissionInvoiceOut"
+    },
+    "AuthorStampOut": {
+      "properties": {
+        "employee_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Employee Id"
+        },
+        "user_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "User Id"
+        },
+        "name": {
+          "type": "string",
+          "title": "Name"
+        },
+        "designation": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Designation",
+          "description": "Designation and specialty, e.g. \"Medical Officer, General Medicine\""
+        },
+        "registration": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Registration",
+          "description": "Council registration, e.g. \"PMDC 12345-P\" or \"PNC 67890\""
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "At",
+          "description": "When the entry was signed, reported or verified"
+        },
+        "text": {
+          "type": "string",
+          "title": "Text",
+          "description": "The printed line: name, designation, registration, date and time"
+        }
+      },
+      "type": "object",
+      "required": [
+        "employee_id",
+        "user_id",
+        "name",
+        "designation",
+        "registration",
+        "at",
+        "text"
+      ],
+      "title": "AuthorStampOut",
+      "description": "The author stamp of a clinical entry (MSDS IMS 147), as the author's staff record stood when they signed it\n(SQL hms_author_stamp / hms_employee_stamp, migration 0013 [STP]). Show it under the entry on screen and print\n`text` under it on paper."
+    },
+    "ChartIn": {
+      "properties": {
+        "wristband_code": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 80
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Wristband Code",
+          "description": "What the scanner read from the wristband (the MRN, or HMS:PT:<mrn>)"
+        },
+        "identity_check": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "WristbandScan",
+                "TwoIdentifiers",
+                "EmergencyOverride"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Identity Check",
+          "description": "Without a scan: TwoIdentifiers (name and date of birth or MRN asked), or EmergencyOverride (an emergency or Code Red admission; identity_note required)"
+        },
+        "identity_note": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 300
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Identity Note"
+        },
+        "drug_barcode": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 80
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Drug Barcode",
+          "description": "What the scanner read from the medicine's pack"
+        },
+        "second_checker_username": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Second Checker Username",
+          "description": "High-alert medicine: the second nurse or doctor co-signs"
+        },
+        "second_checker_password": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Second Checker Password"
+        },
+        "self_administered": {
+          "type": "boolean",
+          "title": "Self Administered",
+          "description": "The patient took it themselves (the doctor allowed it)",
+          "default": false
+        },
+        "variance_reason": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 500
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Variance Reason",
+          "description": "Required for another dose or route than ordered, or outside the time window"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "Administered",
+            "Held",
+            "Refused",
+            "Missed",
+            "Cancelled"
+          ],
+          "title": "Status"
+        },
+        "administered_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Administered At"
+        },
+        "dose_given_text": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Dose Given Text"
+        },
+        "route_given": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Route Given"
+        },
+        "status_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Status Reason",
+          "description": "Required unless Administered"
+        },
+        "ward_stock_batch_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ward Stock Batch Id",
+          "description": "Take the dose from ward-local stock (this batch)"
+        },
+        "ward_stock_qty": {
+          "anyOf": [
+            {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            {
+              "type": "string",
+              "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ward Stock Qty"
+        }
+      },
+      "type": "object",
+      "required": [
+        "status"
+      ],
+      "title": "ChartIn"
+    },
+    "ClearIn": {
+      "properties": {
+        "note": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 1000
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Note"
+        }
+      },
+      "type": "object",
+      "title": "ClearIn"
+    },
+    "DischargeStageOut": {
+      "properties": {
+        "clearance_id": {
+          "type": "integer",
+          "title": "Clearance Id"
+        },
+        "stage": {
+          "type": "string",
+          "enum": [
+            "ClinicalDischarge",
+            "PharmacyClearance",
+            "NursingMARVerification",
+            "BillingSettlement",
+            "OpsCleaning"
+          ],
+          "title": "Stage"
+        },
+        "sequence_no": {
+          "type": "integer",
+          "title": "Sequence No"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "Pending",
+            "Cleared",
+            "Cancelled"
+          ],
+          "title": "Status"
+        },
+        "cleared_by": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cleared By"
+        },
+        "cleared_by_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cleared By Name"
+        },
+        "cleared_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cleared At"
+        },
+        "note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Note"
+        },
+        "physically_cleaned_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Physically Cleaned At"
+        }
+      },
+      "type": "object",
+      "required": [
+        "clearance_id",
+        "stage",
+        "sequence_no",
+        "status",
+        "cleared_by",
+        "cleared_by_name",
+        "cleared_at",
+        "note",
+        "physically_cleaned_at"
+      ],
+      "title": "DischargeStageOut"
+    },
+    "DischargeStatusOut": {
+      "properties": {
+        "stages": {
+          "items": {
+            "$ref": "#/components/schemas/DischargeStageOut"
+          },
+          "type": "array",
+          "title": "Stages"
+        },
+        "blocked_on": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "ClinicalDischarge",
+                "PharmacyClearance",
+                "NursingMARVerification",
+                "BillingSettlement",
+                "OpsCleaning"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Blocked On",
+          "description": "The first pending stage (the one to clear next)"
+        },
+        "started": {
+          "type": "boolean",
+          "title": "Started"
+        },
+        "complete": {
+          "type": "boolean",
+          "title": "Complete"
+        }
+      },
+      "type": "object",
+      "required": [
+        "stages",
+        "blocked_on",
+        "started",
+        "complete"
+      ],
+      "title": "DischargeStatusOut"
+    },
+    "DoseLabelFieldsOut": {
+      "properties": {
+        "hospital_name": {
+          "type": "string",
+          "title": "Hospital Name"
+        },
+        "mar_id": {
+          "type": "integer",
+          "title": "Mar Id"
+        },
+        "patient_name": {
+          "type": "string",
+          "title": "Patient Name"
+        },
+        "mrn": {
+          "type": "string",
+          "title": "Mrn"
+        },
+        "ward_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ward Name"
+        },
+        "bed_label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Bed Label"
+        },
+        "drug_name": {
+          "type": "string",
+          "title": "Drug Name"
+        },
+        "strength": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Strength"
+        },
+        "dose_text": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Dose Text"
+        },
+        "route": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Route"
+        },
+        "preparation": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Preparation",
+          "description": "What it is diluted in, the volume, the rate"
+        },
+        "scheduled_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Scheduled At"
+        },
+        "prepared_by_name": {
+          "type": "string",
+          "title": "Prepared By Name"
+        },
+        "prepared_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Prepared At"
+        },
+        "warnings": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Warnings"
+        },
+        "reprint": {
+          "type": "boolean",
+          "title": "Reprint",
+          "description": "Printed again from the recorded preparation (GET /mar/{mar_id}/dose-label): the label says so; nothing was prepared again"
+        }
+      },
+      "type": "object",
+      "required": [
+        "hospital_name",
+        "mar_id",
+        "patient_name",
+        "mrn",
+        "ward_name",
+        "bed_label",
+        "drug_name",
+        "strength",
+        "dose_text",
+        "route",
+        "preparation",
+        "scheduled_at",
+        "prepared_by_name",
+        "prepared_at",
+        "warnings",
+        "reprint"
+      ],
+      "title": "DoseLabelFieldsOut",
+      "description": "The label of a dose drawn up on the ward (MSDS 63)."
+    },
+    "DosePrepareIn": {
+      "properties": {
+        "preparation": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 300
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Preparation",
+          "examples": [
+            "in 100 ml normal saline over 30 minutes"
+          ]
+        }
+      },
+      "type": "object",
+      "title": "DosePrepareIn"
+    },
+    "Envelope_AdmissionDetailOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/AdmissionDetailOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[AdmissionDetailOut]"
+    },
+    "Envelope_MarGenerateOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/MarGenerateOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[MarGenerateOut]"
+    },
+    "Envelope_MarRecordOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/MarRecordOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[MarRecordOut]"
+    },
+    "Envelope_PrintOut_DoseLabelFieldsOut__": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/PrintOut_DoseLabelFieldsOut_"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[PrintOut[DoseLabelFieldsOut]]"
+    },
+    "Envelope_list_MarEntryOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/MarEntryOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[MarEntryOut]]"
+    },
+    "Envelope_list_PrnOrderOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/PrnOrderOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[PrnOrderOut]]"
+    },
+    "Envelope_list_WardStockOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/WardStockOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[WardStockOut]]"
+    },
+    "HTTPValidationError": {
+      "properties": {
+        "detail": {
+          "items": {
+            "$ref": "#/components/schemas/ValidationError"
+          },
+          "type": "array",
+          "title": "Detail"
+        }
+      },
+      "type": "object",
+      "title": "HTTPValidationError"
+    },
+    "MarCorrectionIn": {
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "Administered",
+            "Held",
+            "Refused",
+            "Missed",
+            "Cancelled"
+          ],
+          "title": "Status"
+        },
+        "administered_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Administered At"
+        },
+        "dose_given_text": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Dose Given Text"
+        },
+        "route_given": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Route Given"
+        },
+        "status_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Status Reason"
+        },
+        "correction_reason": {
+          "type": "string",
+          "maxLength": 500,
+          "minLength": 3,
+          "title": "Correction Reason"
+        }
+      },
+      "type": "object",
+      "required": [
+        "status",
+        "correction_reason"
+      ],
+      "title": "MarCorrectionIn"
+    },
+    "MarEntryOut": {
+      "properties": {
+        "mar_id": {
+          "type": "integer",
+          "title": "Mar Id"
+        },
+        "prescription_item_id": {
+          "type": "integer",
+          "title": "Prescription Item Id"
+        },
+        "drug_name": {
+          "type": "string",
+          "title": "Drug Name"
+        },
+        "dose_text": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Dose Text"
+        },
+        "route": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "Oral",
+                "IV",
+                "IM",
+                "SC",
+                "Topical",
+                "Inhaled",
+                "PR",
+                "SL",
+                "Ophthalmic",
+                "Otic",
+                "Nasal",
+                "Other"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Route"
+        },
+        "frequency_code": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "OD",
+                "BD",
+                "TDS",
+                "QID",
+                "Q4H",
+                "Q6H",
+                "Q8H",
+                "Q12H",
+                "HS",
+                "STAT",
+                "PRN",
+                "Other"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Frequency Code"
+        },
+        "is_prn": {
+          "type": "boolean",
+          "title": "Is Prn"
+        },
+        "is_stat": {
+          "type": "boolean",
+          "title": "Is Stat"
+        },
+        "scheduled_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Scheduled At"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "Scheduled",
+            "Administered",
+            "Held",
+            "Refused",
+            "Missed",
+            "Cancelled"
+          ],
+          "title": "Status"
+        },
+        "administered_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Administered At"
+        },
+        "administered_by": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Administered By"
+        },
+        "administered_by_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Administered By Name"
+        },
+        "dose_given_text": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Dose Given Text"
+        },
+        "route_given": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Route Given"
+        },
+        "status_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Status Reason"
+        },
+        "is_correction": {
+          "type": "boolean",
+          "title": "Is Correction"
+        },
+        "corrects_mar_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Corrects Mar Id"
+        },
+        "correction_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Correction Reason"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Created At"
+        },
+        "is_overdue": {
+          "type": "boolean",
+          "title": "Is Overdue"
+        },
+        "high_alert_category": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "ConcentratedElectrolyte",
+                "Chemotherapy",
+                "Anticoagulant",
+                "Insulin",
+                "Opioid",
+                "Sedative",
+                "NeuromuscularBlocker",
+                "Inotrope",
+                "Thrombolytic",
+                "Psychotropic",
+                "HighCost",
+                "Other"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "High Alert Category",
+          "description": "Set: a second nurse or doctor checks the dose and co-signs"
+        },
+        "lasa_with": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Lasa With",
+          "description": "Medicines it looks or sounds like"
+        },
+        "self_administration": {
+          "type": "boolean",
+          "title": "Self Administration",
+          "description": "The doctor allowed the patient to take it themselves"
+        },
+        "identity_check": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "WristbandScan",
+                "TwoIdentifiers",
+                "EmergencyOverride"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Identity Check"
+        },
+        "identity_note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Identity Note"
+        },
+        "drug_check": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "BarcodeScan",
+                "Visual"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Drug Check"
+        },
+        "second_checked_by": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Second Checked By"
+        },
+        "second_checked_by_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Second Checked By Name"
+        },
+        "self_administered": {
+          "type": "boolean",
+          "title": "Self Administered"
+        },
+        "variance_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Variance Reason"
+        },
+        "prepared_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Prepared At",
+          "description": "Drawn up and labelled (POST /mar/{mar_id}/prepare)"
+        },
+        "prepared_by_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Prepared By Name"
+        },
+        "preparation": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Preparation"
+        }
+      },
+      "type": "object",
+      "required": [
+        "mar_id",
+        "prescription_item_id",
+        "drug_name",
+        "dose_text",
+        "route",
+        "frequency_code",
+        "is_prn",
+        "is_stat",
+        "scheduled_at",
+        "status",
+        "administered_at",
+        "administered_by",
+        "administered_by_name",
+        "dose_given_text",
+        "route_given",
+        "status_reason",
+        "is_correction",
+        "corrects_mar_id",
+        "correction_reason",
+        "created_at",
+        "is_overdue",
+        "high_alert_category",
+        "lasa_with",
+        "self_administration",
+        "identity_check",
+        "identity_note",
+        "drug_check",
+        "second_checked_by",
+        "second_checked_by_name",
+        "self_administered",
+        "variance_reason",
+        "prepared_at",
+        "prepared_by_name",
+        "preparation"
+      ],
+      "title": "MarEntryOut",
+      "description": "One scheduled or given dose on the MAR screen, with its prescription line."
+    },
+    "MarGenerateOut": {
+      "properties": {
+        "created": {
+          "type": "integer",
+          "title": "Created",
+          "description": "Doses added to the MAR"
+        }
+      },
+      "type": "object",
+      "required": [
+        "created"
+      ],
+      "title": "MarGenerateOut"
+    },
+    "MarRecordOut": {
+      "properties": {
+        "mar_id": {
+          "type": "integer",
+          "title": "Mar Id"
+        },
+        "admission_id": {
+          "type": "integer",
+          "title": "Admission Id"
+        },
+        "patient_id": {
+          "type": "integer",
+          "title": "Patient Id"
+        },
+        "prescription_item_id": {
+          "type": "integer",
+          "title": "Prescription Item Id"
+        },
+        "scheduled_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Scheduled At",
+          "description": "Null for a PRN dose"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "Scheduled",
+            "Administered",
+            "Held",
+            "Refused",
+            "Missed",
+            "Cancelled"
+          ],
+          "title": "Status"
+        },
+        "administered_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Administered At"
+        },
+        "administered_by": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Administered By"
+        },
+        "dose_given_text": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Dose Given Text"
+        },
+        "route_given": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Route Given"
+        },
+        "status_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Status Reason"
+        },
+        "is_correction": {
+          "type": "boolean",
+          "title": "Is Correction"
+        },
+        "corrects_mar_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Corrects Mar Id"
+        },
+        "correction_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Correction Reason"
+        },
+        "identity_check": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "WristbandScan",
+                "TwoIdentifiers",
+                "EmergencyOverride"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Identity Check",
+          "description": "How the patient was identified before the dose (MSDS 64)"
+        },
+        "identity_note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Identity Note"
+        },
+        "drug_check": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "BarcodeScan",
+                "Visual"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Drug Check",
+          "description": "How the medicine was checked (MSDS 65)"
+        },
+        "second_checked_by": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Second Checked By",
+          "description": "The second nurse or doctor of a high-alert dose (MSDS 57)"
+        },
+        "self_administered": {
+          "type": "boolean",
+          "title": "Self Administered"
+        },
+        "variance_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Variance Reason",
+          "description": "Why the dose, route or time differs from the order"
+        },
+        "prepared_by": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Prepared By"
+        },
+        "prepared_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Prepared At"
+        },
+        "preparation": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Preparation"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Created At"
+        },
+        "row_version": {
+          "type": "integer",
+          "title": "Row Version"
+        }
+      },
+      "type": "object",
+      "required": [
+        "mar_id",
+        "admission_id",
+        "patient_id",
+        "prescription_item_id",
+        "scheduled_at",
+        "status",
+        "administered_at",
+        "administered_by",
+        "dose_given_text",
+        "route_given",
+        "status_reason",
+        "is_correction",
+        "corrects_mar_id",
+        "correction_reason",
+        "identity_check",
+        "identity_note",
+        "drug_check",
+        "second_checked_by",
+        "self_administered",
+        "variance_reason",
+        "prepared_by",
+        "prepared_at",
+        "preparation",
+        "created_at",
+        "row_version"
+      ],
+      "title": "MarRecordOut"
+    },
+    "Meta": {
+      "properties": {
+        "server_time": {
+          "type": "string",
+          "title": "Server Time",
+          "description": "Server clock (UTC). Use it to detect terminal clock skew."
+        },
+        "page": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Page"
+        },
+        "page_size": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Page Size"
+        },
+        "total_count": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Total Count"
+        },
+        "next_cursor": {
+          "title": "Next Cursor"
+        }
+      },
+      "type": "object",
+      "required": [
+        "server_time"
+      ],
+      "title": "Meta"
+    },
+    "PrintOut_DoseLabelFieldsOut_": {
+      "properties": {
+        "document_type": {
+          "type": "string",
+          "enum": [
+            "autopsy_order",
+            "bed_labels",
+            "blood_component_label",
+            "blood_donation_labels",
+            "clinical_note",
+            "complaint_letter",
+            "complaints_notice",
+            "consent_form",
+            "cost_estimate",
+            "cssd_labels",
+            "death_certificate",
+            "discharge_summary",
+            "dispensing_label",
+            "dose_label",
+            "id_card",
+            "imaging_report",
+            "lab_label",
+            "lab_report",
+            "mlc_intimation",
+            "opd_slip",
+            "pharmacy_receipt",
+            "prescription",
+            "referral_slip",
+            "send_out_manifest",
+            "surgical_record",
+            "triage_algorithm",
+            "wristband"
+          ],
+          "title": "Document Type"
+        },
+        "printer_role": {
+          "type": "string",
+          "enum": [
+            "receipt",
+            "label",
+            "document",
+            "card"
+          ],
+          "title": "Printer Role",
+          "description": "Which printer of the terminal to use (GET /api/v1/terminals/whoami)"
+        },
+        "paper_width_mm": {
+          "type": "integer",
+          "title": "Paper Width Mm"
+        },
+        "fields": {
+          "$ref": "#/components/schemas/DoseLabelFieldsOut",
+          "description": "The document's data, for frontends that render their own layout"
+        },
+        "text": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Text",
+          "description": "Pre-formatted monospace text (48 columns) for ESC/POS printers, as is"
+        },
+        "barcode_svg": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Barcode Svg"
+        },
+        "qr_svg": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Qr Svg"
+        },
+        "pdf_url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Pdf Url"
+        }
+      },
+      "type": "object",
+      "required": [
+        "document_type",
+        "printer_role",
+        "paper_width_mm",
+        "fields",
+        "text",
+        "barcode_svg",
+        "qr_svg",
+        "pdf_url"
+      ],
+      "title": "PrintOut[DoseLabelFieldsOut]"
+    },
+    "PrnIn": {
+      "properties": {
+        "wristband_code": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 80
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Wristband Code",
+          "description": "What the scanner read from the wristband (the MRN, or HMS:PT:<mrn>)"
+        },
+        "identity_check": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "WristbandScan",
+                "TwoIdentifiers",
+                "EmergencyOverride"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Identity Check",
+          "description": "Without a scan: TwoIdentifiers (name and date of birth or MRN asked), or EmergencyOverride (an emergency or Code Red admission; identity_note required)"
+        },
+        "identity_note": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 300
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Identity Note"
+        },
+        "drug_barcode": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 80
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Drug Barcode",
+          "description": "What the scanner read from the medicine's pack"
+        },
+        "second_checker_username": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Second Checker Username",
+          "description": "High-alert medicine: the second nurse or doctor co-signs"
+        },
+        "second_checker_password": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Second Checker Password"
+        },
+        "self_administered": {
+          "type": "boolean",
+          "title": "Self Administered",
+          "description": "The patient took it themselves (the doctor allowed it)",
+          "default": false
+        },
+        "variance_reason": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 500
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Variance Reason",
+          "description": "Required for another dose or route than ordered, or outside the time window"
+        },
+        "prescription_item_id": {
+          "type": "integer",
+          "title": "Prescription Item Id"
+        },
+        "administered_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Administered At"
+        },
+        "dose_given_text": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Dose Given Text"
+        },
+        "route_given": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Route Given"
+        },
+        "status_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Status Reason",
+          "description": "Indication for the PRN dose"
+        }
+      },
+      "type": "object",
+      "required": [
+        "prescription_item_id"
+      ],
+      "title": "PrnIn"
+    },
+    "PrnOrderOut": {
+      "properties": {
+        "prescription_item_id": {
+          "type": "integer",
+          "title": "Prescription Item Id"
+        },
+        "prescription_id": {
+          "type": "integer",
+          "title": "Prescription Id"
+        },
+        "prescription_number": {
+          "type": "string",
+          "title": "Prescription Number"
+        },
+        "destination": {
+          "type": "string",
+          "enum": [
+            "HospitalPharmacy",
+            "ExternalMarket"
+          ],
+          "title": "Destination"
+        },
+        "drug_name": {
+          "type": "string",
+          "title": "Drug Name"
+        },
+        "strength": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Strength"
+        },
+        "dose_text": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Dose Text"
+        },
+        "route": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "Oral",
+                "IV",
+                "IM",
+                "SC",
+                "Topical",
+                "Inhaled",
+                "PR",
+                "SL",
+                "Ophthalmic",
+                "Otic",
+                "Nasal",
+                "Other"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Route"
+        },
+        "interval_hours": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Interval Hours",
+          "description": "The minimum interval between doses, when the doctor gave one"
+        },
+        "instructions": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Instructions",
+          "description": "The doctor's instructions: the indication, the maximum"
+        },
+        "high_alert_category": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "High Alert Category"
+        },
+        "lasa_with": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Lasa With",
+          "description": "Look-alike, sound-alike medicines"
+        },
+        "self_administration": {
+          "type": "boolean",
+          "title": "Self Administration"
+        },
+        "start_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Start At"
+        },
+        "end_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "End At"
+        },
+        "prescriber_name": {
+          "type": "string",
+          "title": "Prescriber Name"
+        },
+        "last_given_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Last Given At"
+        },
+        "given_last_24h": {
+          "type": "integer",
+          "title": "Given Last 24H"
+        }
+      },
+      "type": "object",
+      "required": [
+        "prescription_item_id",
+        "prescription_id",
+        "prescription_number",
+        "destination",
+        "drug_name",
+        "strength",
+        "dose_text",
+        "route",
+        "interval_hours",
+        "instructions",
+        "high_alert_category",
+        "lasa_with",
+        "self_administration",
+        "start_at",
+        "end_at",
+        "prescriber_name",
+        "last_given_at",
+        "given_last_24h"
+      ],
+      "title": "PrnOrderOut",
+      "description": "An active PRN line a dose can be given from (backend issue #45)."
+    },
+    "ValidationError": {
+      "properties": {
+        "loc": {
+          "items": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ]
+          },
+          "type": "array",
+          "title": "Location"
+        },
+        "msg": {
+          "type": "string",
+          "title": "Message"
+        },
+        "type": {
+          "type": "string",
+          "title": "Error Type"
+        },
+        "input": {
+          "title": "Input"
+        },
+        "ctx": {
+          "type": "object",
+          "title": "Context"
+        }
+      },
+      "type": "object",
+      "required": [
+        "loc",
+        "msg",
+        "type"
+      ],
+      "title": "ValidationError"
+    },
+    "WardStockOut": {
+      "properties": {
+        "drug_id": {
+          "type": "integer",
+          "title": "Drug Id"
+        },
+        "drug_name": {
+          "type": "string",
+          "title": "Drug Name"
+        },
+        "batch_id": {
+          "type": "integer",
+          "title": "Batch Id"
+        },
+        "batch_no": {
+          "type": "string",
+          "title": "Batch No"
+        },
+        "expiry_date": {
+          "type": "string",
+          "format": "date",
+          "title": "Expiry Date"
+        },
+        "qty": {
+          "type": "number",
+          "title": "Qty"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Updated At"
+        },
+        "is_expired": {
+          "type": "boolean",
+          "title": "Is Expired",
+          "description": "Expired: never given (BATCH_EXPIRED); remove it"
+        },
+        "is_recalled": {
+          "type": "boolean",
+          "title": "Is Recalled",
+          "description": "Under a recall: never given (BATCH_RECALLED); the recall removes it"
+        }
+      },
+      "type": "object",
+      "required": [
+        "drug_id",
+        "drug_name",
+        "batch_id",
+        "batch_no",
+        "expiry_date",
+        "qty",
+        "updated_at",
+        "is_expired",
+        "is_recalled"
+      ],
+      "title": "WardStockOut"
+    }
+  },
+  "unknowns": [
+    {
+      "what": "decision H02",
+      "owner": [
+        "vendor"
+      ],
+      "question": "Digits in the Urdu UI and printouts: Latin 0-9 or Extended Arabic-Indic ۰-۹.",
+      "affects": [
+        "every screen in Urdu"
+      ],
+      "meanwhile": "Latin digits; identifiers, doses and money stay left to right."
+    },
+    {
+      "what": "decision H03",
+      "owner": [
+        "vendor",
+        "clinical_lead"
+      ],
+      "question": "How dates and times are shown on screen, and a 12- or 24-hour clock.",
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "The server's print format (e.g. 27-Sep-2026) and the hospital time zone."
+    },
+    {
+      "what": "decision H04",
+      "owner": [
+        "vendor"
+      ],
+      "question": "Money on screen: decimals shown, and digit grouping (1,234,567 or 12,34,567).",
+      "affects": [
+        "every screen with money"
+      ],
+      "meanwhile": "The amounts as the API sends them, with the currency setting."
+    },
+    {
+      "what": "decision H08",
+      "owner": [
+        "vendor",
+        "translator",
+        "clinical_lead"
+      ],
+      "question": "Who writes and signs off the Urdu text of the UI, above all clinical and consent wording.",
+      "affects": [
+        "every screen in Urdu"
+      ],
+      "meanwhile": "Urdu you add is a draft: mark it so (the interview bank's pattern: a draft until a native speaker reviews it)."
+    },
+    {
+      "what": "decision H09",
+      "owner": [
+        "vendor",
+        "frontend_lead"
+      ],
+      "question": "One design system shared by every frontend team (who authors and approves it), or each team's own.",
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "Each team designs within the backend's constraints: themes Light and DarkHighContrast, zoom 100-250 %, Noto Nastaliq Urdu, status shown as text and icon, never colour alone. Follow the vendor's design principles (frontend guide 18, get_design_principles)."
+    },
+    {
+      "what": "decision H10",
+      "owner": [
+        "clinical_lead",
+        "vendor"
+      ],
+      "question": "How each realtime event is shown (interrupt, attention, inform, silent), alert sounds and which terminals play them. Only Code Red (interrupt), the licence and maintenance banners and the logout on session.revoked are prescribed (the event catalogue's `presentation`).",
+      "affects": [
+        "every screen with realtime events"
+      ],
+      "meanwhile": "Code Red interrupts; every other event updates the screen and, at most, a dismissible notice. `priority` is the delivery urgency, not a presentation rule."
+    },
+    {
+      "what": "decision H11",
+      "owner": [
+        "clinical_lead",
+        "backend"
+      ],
+      "question": "May the second checker of a high-alert medicine use a badge and PIN instead of a username and password?",
+      "affects": [
+        "mar",
+        "dispense"
+      ],
+      "meanwhile": "Username and password, never stored by the app."
+    },
+    {
+      "what": "decision H12",
+      "owner": [
+        "vendor",
+        "backend"
+      ],
+      "question": "Which workspaces run on web, Android and iOS, which cannot read a MAC address, discover the server by UDP or print silently; or are cash and printing Windows-only.",
+      "affects": [
+        "my_cash_shift",
+        "registration",
+        "every screen that prints"
+      ],
+      "meanwhile": "The guides describe the Windows (Electron) terminal; tell your developer when a screen needs a capability your platform lacks."
+    },
+    {
+      "what": "decision H16",
+      "owner": [
+        "clinical_lead",
+        "backend"
+      ],
+      "question": "Tall-man names for look-alike medicines (a field on the drug master).",
+      "affects": [
+        "eprescription",
+        "dispense",
+        "mar"
+      ],
+      "meanwhile": "The look-alike pairs the API already returns."
+    },
+    {
+      "what": "decision H18",
+      "owner": [
+        "vendor",
+        "frontend_lead"
+      ],
+      "question": "Noto Nastaliq Urdu everywhere, or the more compact Naskh in dense tables.",
+      "affects": [
+        "every table in Urdu"
+      ],
+      "meanwhile": "Noto Nastaliq Urdu, as the guides require."
+    },
+    {
+      "what": "decision H19",
+      "owner": [
+        "clinical_lead",
+        "backend"
+      ],
+      "question": "Allergies: the patient record keeps free text, so it cannot tell \"no known allergies\" (asserted by a clinician) from \"not recorded\". Should it?",
+      "affects": [
+        "every screen with a patient banner"
+      ],
+      "meanwhile": "Show the recorded text as recorded; an empty value is \"not recorded\", never \"none\"."
+    },
+    {
+      "what": "decision H20",
+      "owner": [
+        "vendor",
+        "hospital"
+      ],
+      "question": "May unsaved form input be kept on the terminal (which fields, encrypted, for how long)?",
+      "affects": [
+        "every form"
+      ],
+      "meanwhile": "In memory only; never a second checker's password."
+    },
+    {
+      "what": "decision H22",
+      "owner": [
+        "hospital",
+        "vendor"
+      ],
+      "question": "Which documents may print on an unregistered terminal's default printer (sensitive A4 documents).",
+      "affects": [
+        "every screen that prints"
+      ],
+      "meanwhile": "As the printing guide says: the hint, then the default printer."
+    },
+    {
+      "what": "decision H24",
+      "owner": [
+        "vendor",
+        "clinical_lead"
+      ],
+      "question": "Who approves frontend performance targets, alert thresholds and escalation timers.",
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "The server's own settings (e.g. critical_result_communicate_minutes)."
+    }
+  ]
+}

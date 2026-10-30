@@ -22,6 +22,7 @@ export interface AdmissionDetailOut {
   ward_name: string | null;
   bed_id: number | null;
   bed_label: string | null;
+  /** The treating doctor's employee id; null for a Code Red no doctor has taken over yet (decisions 57): show 'Doctor: waiting' */
   primary_doctor_id: number | null;
   primary_doctor_name: string | null;
   admission_type: "Standard" | "Emergency" | "CodeRed" | "Overflow" | "Planned";
@@ -285,6 +286,33 @@ export interface DoseLabelFieldsOut {
   prepared_by_name: string;
   prepared_at: string;
   warnings: string[];
+  /** Printed again from the recorded preparation (GET /mar/{mar_id}/dose-label): the label says so; nothing was prepared again */
+  reprint: boolean;
+}
+
+/** An active PRN line a dose can be given from (backend issue #45). */
+export interface PrnOrderOut {
+  prescription_item_id: number;
+  prescription_id: number;
+  prescription_number: string;
+  destination: "HospitalPharmacy" | "ExternalMarket";
+  drug_name: string;
+  strength: string | null;
+  dose_text: string | null;
+  route: "Oral" | "IV" | "IM" | "SC" | "Topical" | "Inhaled" | "PR" | "SL" | "Ophthalmic" | "Otic" | "Nasal" | "Other" | null;
+  /** The minimum interval between doses, when the doctor gave one */
+  interval_hours: number | null;
+  /** The doctor's instructions: the indication, the maximum */
+  instructions: string | null;
+  high_alert_category: string | null;
+  /** Look-alike, sound-alike medicines */
+  lasa_with: string[] | null;
+  self_administration: boolean;
+  start_at: string | null;
+  end_at: string | null;
+  prescriber_name: string;
+  last_given_at: string | null;
+  given_last_24h: number;
 }
 
 /** Clear a discharge stage (in order) — POST /api/v1/admissions/{admission_id}/discharge/{stage}/clear (who may call: the permission of the stage: ipd.discharge.clear_pharmacy, clear_nursing, clear_billing or clear_cleaning). */
@@ -327,3 +355,12 @@ export function prepareDose(mar_id: number, body: DosePrepareIn): Promise<PrintO
   return api<PrintOut_DoseLabelFieldsOut_>("POST", `/mar/${mar_id}/prepare`, body, { idempotent: true });
 }
 
+/** The PRN orders a dose can be given from — GET /api/v1/admissions/{admission_id}/mar/prn-orders (who may call: holders of ipd.mar.view). */
+export function prnOrders(admission_id: number): Promise<PrnOrderOut[]> {
+  return api<PrnOrderOut[]>("GET", `/admissions/${admission_id}/mar/prn-orders`, undefined);
+}
+
+/** Print a prepared dose's label again — GET /api/v1/mar/{mar_id}/dose-label (who may call: holders of ipd.mar.administer). */
+export function reprintDoseLabel(mar_id: number): Promise<PrintOut_DoseLabelFieldsOut_> {
+  return api<PrintOut_DoseLabelFieldsOut_>("GET", `/mar/${mar_id}/dose-label`, undefined);
+}

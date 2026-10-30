@@ -1,7 +1,7 @@
 {
   "screen_id": "doctor_inpatients",
-  "contract_fingerprint": "e90ba541e495d6487532",
-  "knowledge_revision": "e9e3dbb61b873e01",
+  "contract_fingerprint": "14824af5c60c05148994",
+  "knowledge_revision": "9250bafb1794ac12",
   "delivery_gate": {
     "required": true,
     "status": "required",
@@ -186,6 +186,11 @@
             "call": "POST /admissions/{admission_id}/admission-details",
             "summary": "Record the reason for admission and the provisional diagnosis (Code Red)",
             "screen": "doctor_inpatients"
+          },
+          {
+            "call": "POST /admissions/{admission_id}/treating-doctor",
+            "summary": "Hand an inpatient over to another doctor",
+            "screen": "doctor_inpatients"
           }
         ]
       },
@@ -241,6 +246,21 @@
         "cites": []
       },
       {
+        "id": "rule:921b51e312",
+        "text": "My patients are the admissions whose primary_doctor_id is mine. A Code Red without a doctor (primary_doctor_id null: a triage nurse pressed it) shows to every doctor under 'Waiting for a doctor' with its 'Record reason and diagnosis' task: recording them makes you its doctor. Never show the person who pressed Code Red as the doctor.",
+        "cites": []
+      },
+      {
+        "id": "rule:cb4d2eec4e",
+        "text": "vitals.due for one of my patients: mark its vitals due or overdue (overdue_minutes) and re-read GET /admissions/{admission_id}/flowsheet (is_overdue) when it is open; the server decides due and overdue, and the nurse records them (no recording here).",
+        "cites": []
+      },
+      {
+        "id": "rule:b0e5f32dc8",
+        "text": "'Hand over to another doctor' on my patient: the doctor (GET /staff/lookup?license_type=PMDC) and the reason, then POST /admissions/{admission_id}/treating-doctor with an Idempotency-Key; it takes effect at once and the patient leaves my rounds (admission.doctor_changed). 'Take this patient' on a Code Red waiting for a doctor (GET /ipd/treating-doctors?waiting=true) names me. Show who looked after the patient before (GET /admissions/{admission_id}/treating-doctor: changes). TREATING_DOCTOR_ONLY: the patient is another doctor's; ask them, or the Hospital Admin while they are away.",
+        "cites": []
+      },
+      {
         "id": "rule:2bd622ce2e",
         "text": "Exists for the service inpatient (work): show it as GET /establishment views.screens says for screen_id doctor_inpatients (full; open_work: without its new work, with the banner \"No new ... from now on\"; records: history and corrections only; setup: only from Facility settings; hidden: in no menu), after login and again on establishment.changed. Never decide it from the profile's category.",
         "cites": []
@@ -250,10 +270,17 @@
       "clinical-and-prescriptions",
       "consent",
       "deaths-and-medico-legal-cases",
+      "diagnostic-services",
+      "duty-rosters-and-attendance",
       "emergency-department",
+      "facility-and-it",
+      "incidents-and-sentinel-events",
       "inpatient-and-discharge",
+      "laboratory-and-radiology",
       "medication-safety",
-      "opd-reception"
+      "opd-reception",
+      "operating-theater",
+      "personnel-records"
     ],
     "service": {
       "services": [
@@ -277,10 +304,11 @@
     "workspace": "doctor",
     "phase": "P4",
     "position": 58,
-    "points": 74,
+    "points": 94,
     "capabilities": [
       "realtime",
       "patient_context",
+      "idempotent_writes",
       "file_downloads",
       "f1_help",
       "zoom"
@@ -308,59 +336,83 @@
     "note": "`forward`: a dependency on a later phase; use the demo data or a scenario (sandbox_scenario) until that screen exists. `ordering: false`: a hand-off or a hint, not a reason to wait."
   },
   "definition_of_done": {
-    "points": 74,
+    "points": 94,
     "items": [
       {
         "id": "ep:GET /admissions",
         "label": "GET /admissions",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:GET /admissions/{admission_id}",
         "label": "GET /admissions/{admission_id}",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:GET /admissions/{admission_id}/flowsheet",
         "label": "GET /admissions/{admission_id}/flowsheet",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:GET /admissions/{admission_id}/mar",
         "label": "GET /admissions/{admission_id}/mar",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:POST /admissions/{admission_id}/discharge",
         "label": "POST /admissions/{admission_id}/discharge",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:GET /admissions/{admission_id}/discharge-status",
         "label": "GET /admissions/{admission_id}/discharge-status",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:POST /admissions/{admission_id}/admission-details",
         "label": "POST /admissions/{admission_id}/admission-details",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:GET /patients/{patient_id}/documents",
         "label": "GET /patients/{patient_id}/documents",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ep:GET /patient-documents/{document_id}/download",
         "label": "GET /patient-documents/{document_id}/download",
+        "points": 3,
+        "claimed": true
+      },
+      {
+        "id": "ep:GET /ipd/treating-doctors",
+        "label": "GET /ipd/treating-doctors",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:GET /admissions/{admission_id}/treating-doctor",
+        "label": "GET /admissions/{admission_id}/treating-doctor",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:POST /admissions/{admission_id}/treating-doctor",
+        "label": "POST /admissions/{admission_id}/treating-doctor",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:GET /staff/lookup",
+        "label": "GET /staff/lookup",
         "points": 3,
         "claimed": false
       },
@@ -368,13 +420,13 @@
         "id": "ev:admission.discharge.stage_changed",
         "label": "admission.discharge.stage_changed",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ev:admission.overflow_assigned",
         "label": "admission.overflow_assigned",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "ev:vitals.due",
@@ -383,16 +435,22 @@
         "claimed": false
       },
       {
+        "id": "ev:admission.doctor_changed",
+        "label": "admission.doctor_changed",
+        "points": 2,
+        "claimed": false
+      },
+      {
         "id": "rule:c14c8af7df",
         "label": "Head every patient with the reason for admission and the provisional diagnosis, and who recorded them (details_stamp.text). A Code Red admission without them (admission_reason null) shows a red 'Record reason and diagnosis' task: POST .../admission-details, once; the clinical discharge needs them (ADMISSION_DETAILS_REQUIRED).",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:010f2a2af4",
         "label": "Show the Patient Photo (photo_document_id) beside the name when there is one, for the identity check; none is normal (it is optional). 'Reports brought by the patient' lists the documents with is_outside, labelled with their facility and date, apart from this hospital's results.",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "rule:d1d3689672",
@@ -409,6 +467,24 @@
       {
         "id": "rule:198687667d",
         "label": "'Discharge' does NOT free the bed; show which clearance stage it is blocked on (blocked_on).",
+        "points": 2,
+        "claimed": true
+      },
+      {
+        "id": "rule:921b51e312",
+        "label": "My patients are the admissions whose primary_doctor_id is mine. A Code Red without a doctor (primary_doctor_id null: a triage nurse pressed it) shows to every doctor under 'Waiting for a doctor' with its 'Record reason and diagnosis' task: recording them makes you its doctor. Never show the person who pressed Code Red as the doctor.",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "rule:cb4d2eec4e",
+        "label": "vitals.due for one of my patients: mark its vitals due or overdue (overdue_minutes) and re-read GET /admissions/{admission_id}/flowsheet (is_overdue) when it is open; the server decides due and overdue, and the nurse records them (no recording here).",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "rule:b0e5f32dc8",
+        "label": "'Hand over to another doctor' on my patient: the doctor (GET /staff/lookup?license_type=PMDC) and the reason, then POST /admissions/{admission_id}/treating-doctor with an Idempotency-Key; it takes effect at once and the patient leaves my rounds (admission.doctor_changed). 'Take this patient' on a Code Red waiting for a doctor (GET /ipd/treating-doctors?waiting=true) names me. Show who looked after the patient before (GET /admissions/{admission_id}/treating-doctor: changes). TREATING_DOCTOR_ONLY: the patient is another doctor's; ask them, or the Hospital Admin while they are away.",
         "points": 2,
         "claimed": false
       },
@@ -428,13 +504,13 @@
         "id": "q:permissions",
         "label": "Actions by permission",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:writes",
         "label": "Safe writes",
         "points": 2,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:tested",
@@ -446,7 +522,7 @@
         "id": "q:handbook",
         "label": "Handbook page",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:f1_help",
@@ -1298,7 +1374,9 @@
         "on_lost_answer": "A repeat is refused with ADMISSION_DETAILS_RECORDED: the details are recorded once. The first call may have succeeded; this error does not replay its result. Never retry automatically; re-read the record, then offer the action again only if it is still needed.",
         "reconcile_with": "GET /admissions/{admission_id}",
         "refused_with": "ADMISSION_DETAILS_RECORDED",
-        "emits_events": [],
+        "emits_events": [
+          "admission.doctor_changed"
+        ],
         "prints": false,
         "related_state_machine": null
       }
@@ -1321,6 +1399,7 @@
           "head_nurse",
           "receptionist",
           "surgeon",
+          "triage_nurse",
           "ward_nurse"
         ]
       },
@@ -1401,6 +1480,7 @@
           "head_nurse",
           "receptionist",
           "surgeon",
+          "triage_nurse",
           "ward_nurse"
         ]
       },
@@ -1498,11 +1578,621 @@
           "application/octet-stream"
         ]
       }
+    },
+    {
+      "endpoint": "GET /ipd/treating-doctors",
+      "summary": "The live admissions and their treating doctors",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "ipd.admission.view",
+          "ipd.admission.reassign"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of ipd.admission.view or ipd.admission.reassign",
+        "roles_allowed": [
+          "admissions_officer",
+          "anaesthetist",
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "FORBIDDEN",
+          "http_status": 403,
+          "message": "You do not have permission to do this.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "any_of",
+            "required"
+          ],
+          "details_from": "POST /api/v1/admin/departments"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "doctor_id",
+          "in": "query",
+          "required": false,
+          "description": "Only this doctor's patients (employee_id)",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Only this doctor's patients (employee_id)",
+            "title": "Doctor Id"
+          }
+        },
+        {
+          "name": "waiting",
+          "in": "query",
+          "required": false,
+          "description": "Only the admissions without a doctor: the Code Reds a triage nurse pressed",
+          "schema": {
+            "type": "boolean",
+            "description": "Only the admissions without a doctor: the Code Reds a triage nurse pressed",
+            "default": false,
+            "title": "Waiting"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_TreatingDoctorRowOut__"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [],
+        "search": [],
+        "filters": [
+          {
+            "name": "doctor_id",
+            "required": false,
+            "type": "integer",
+            "description": "Only this doctor's patients (employee_id)"
+          },
+          {
+            "name": "waiting",
+            "required": false,
+            "type": "boolean",
+            "default": false,
+            "description": "Only the admissions without a doctor: the Code Reds a triage nurse pressed"
+          }
+        ],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "GET /admissions/{admission_id}/treating-doctor",
+      "summary": "An inpatient's treating doctor and every change of it",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "ipd.admission.view",
+          "ipd.admission.reassign"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of ipd.admission.view or ipd.admission.reassign",
+        "roles_allowed": [
+          "admissions_officer",
+          "anaesthetist",
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "NOT_FOUND",
+          "http_status": 404,
+          "message": "The requested resource was not found.",
+          "retryable": false,
+          "ui_action": "Say 'not found'; refresh the list.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "resource"
+          ],
+          "details_from": "PUT /api/v1/admin/printers/{printer_id}"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "admission_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Admission Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_TreatingDoctorOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "object",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "POST /admissions/{admission_id}/treating-doctor",
+      "summary": "Hand an inpatient over to another doctor",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "ipd.admission.request",
+          "ipd.admission.reassign"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of ipd.admission.request or ipd.admission.reassign",
+        "roles_allowed": [
+          "anaesthetist",
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "surgeon"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": true,
+      "errors": [
+        {
+          "code": "ADMISSION_STATE_INVALID",
+          "http_status": 409,
+          "message": "The admission cannot move to that state.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "POST /api/v1/admissions/{admission_id}/admit"
+        },
+        {
+          "code": "FORBIDDEN",
+          "http_status": 403,
+          "message": "You do not have permission to do this.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "any_of",
+            "required"
+          ],
+          "details_from": "POST /api/v1/admin/departments"
+        },
+        {
+          "code": "NOT_FOUND",
+          "http_status": 404,
+          "message": "The requested resource was not found.",
+          "retryable": false,
+          "ui_action": "Say 'not found'; refresh the list.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "resource"
+          ],
+          "details_from": "PUT /api/v1/admin/printers/{printer_id}"
+        },
+        {
+          "code": "REFERENCE_NOT_FOUND",
+          "http_status": 422,
+          "message": "A referenced record does not exist.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "ward_id"
+          ],
+          "details_from": "POST /api/v1/pharmacy/storage-checks"
+        },
+        {
+          "code": "TREATING_DOCTOR_ONLY",
+          "http_status": 403,
+          "message": "Only the treating doctor hands this patient over; the Hospital Admin reassigns them while that doctor is away.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "POST /api/v1/admissions/{admission_id}/treating-doctor"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "admission_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Admission Id"
+          }
+        },
+        {
+          "name": "Idempotency-Key",
+          "in": "header",
+          "required": false,
+          "description": "Unique per logical action; retries return the first result",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Unique per logical action; retries return the first result",
+            "title": "Idempotency-Key"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/TreatingDoctorIn"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_TreatingDoctorOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "application/json",
+        "model": "TreatingDoctorIn",
+        "fields": [
+          {
+            "pointer": "/doctor_id",
+            "type": "integer",
+            "required": true,
+            "nullable": false,
+            "description": "The doctor who takes the patient over: an active doctor registered with the PMDC (employee_id from GET /staff/lookup?license_type=PMDC)"
+          },
+          {
+            "pointer": "/reason",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "min_length": 3,
+            "max_length": 500,
+            "description": "Why the patient changes doctor (the medico-legal record)"
+          }
+        ],
+        "cross_field_rules": {},
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "idempotency_key",
+        "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+        "reconcile_with": "GET /admissions/{admission_id}/treating-doctor",
+        "emits_events": [
+          "admission.doctor_changed",
+          "notification.created"
+        ],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "GET /staff/lookup",
+      "summary": "Find a staff member for a form (badge facts only)",
+      "access": {
+        "authentication": "user",
+        "permissions": [],
+        "permissions_mode": "all",
+        "who": "any logged-in user"
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "UNAUTHENTICATED",
+          "http_status": 401,
+          "message": "Authentication is required.",
+          "retryable": false,
+          "ui_action": "Refresh the token once; if that fails return to login.",
+          "source": [
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "GET /api/v1/settings/sections"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "q",
+          "in": "query",
+          "required": true,
+          "description": "Part of the name, or the start of the employee number",
+          "schema": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 80,
+            "description": "Part of the name, or the start of the employee number",
+            "title": "Q"
+          }
+        },
+        {
+          "name": "department_id",
+          "in": "query",
+          "required": false,
+          "description": "Only this department",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Only this department",
+            "title": "Department Id"
+          }
+        },
+        {
+          "name": "license_type",
+          "in": "query",
+          "required": false,
+          "description": "Only clinical staff registered with this council, their number on file: PMDC for a doctor (the doctor present at contrast, a second doctor)",
+          "schema": {
+            "anyOf": [
+              {
+                "enum": [
+                  "PMDC",
+                  "PNC"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Only clinical staff registered with this council, their number on file: PMDC for a doctor (the doctor present at contrast, a second doctor)",
+            "title": "License Type"
+          }
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "maximum": 20,
+            "minimum": 1,
+            "default": 20,
+            "title": "Limit"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_StaffLookupOut__"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [
+          {
+            "name": "limit",
+            "required": false,
+            "type": "integer",
+            "default": 20,
+            "minimum": 1,
+            "maximum": 20
+          }
+        ],
+        "search": [
+          {
+            "name": "q",
+            "required": true,
+            "type": "string",
+            "min_length": 2,
+            "description": "Part of the name, or the start of the employee number"
+          }
+        ],
+        "filters": [
+          {
+            "name": "department_id",
+            "required": false,
+            "type": "integer",
+            "description": "Only this department"
+          },
+          {
+            "name": "license_type",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "PMDC",
+              "PNC"
+            ],
+            "description": "Only clinical staff registered with this council, their number on file: PMDC for a doctor (the doctor present at contrast, a second doctor)"
+          }
+        ],
+        "note": "Lists are bounded by `limit` (no cursor paging): ask for what the screen shows, filter on the server."
+      }
     }
   ],
   "realtime": {
     "topics": [
       "admission.discharge.stage_changed",
+      "admission.doctor_changed",
       "admission.overflow_assigned",
       "vitals.due",
       "session.*",
@@ -1524,7 +2214,10 @@
           "GET /admissions/{admission_id}",
           "GET /admissions/{admission_id}/flowsheet",
           "GET /admissions/{admission_id}/mar",
-          "GET /admissions/{admission_id}/discharge-status"
+          "GET /admissions/{admission_id}/discharge-status",
+          "GET /ipd/treating-doctors",
+          "GET /admissions/{admission_id}/treating-doctor",
+          "GET /staff/lookup"
         ]
       },
       {
@@ -1539,7 +2232,10 @@
           "GET /admissions/{admission_id}",
           "GET /admissions/{admission_id}/flowsheet",
           "GET /admissions/{admission_id}/mar",
-          "GET /admissions/{admission_id}/discharge-status"
+          "GET /admissions/{admission_id}/discharge-status",
+          "GET /ipd/treating-doctors",
+          "GET /admissions/{admission_id}/treating-doctor",
+          "GET /staff/lookup"
         ]
       },
       {
@@ -1552,7 +2248,30 @@
           "GET /admissions/{admission_id}",
           "GET /admissions/{admission_id}/flowsheet",
           "GET /admissions/{admission_id}/mar",
-          "GET /admissions/{admission_id}/discharge-status"
+          "GET /admissions/{admission_id}/discharge-status",
+          "GET /ipd/treating-doctors",
+          "GET /admissions/{admission_id}/treating-doctor",
+          "GET /staff/lookup"
+        ]
+      },
+      {
+        "event": "admission.doctor_changed",
+        "priority": "high",
+        "presentation": null,
+        "emitted_by_operations": [
+          "POST /admissions/{admission_id}/admission-details",
+          "POST /admissions/{admission_id}/treating-doctor"
+        ],
+        "refresh": [
+          "GET /admissions",
+          "GET /admissions/{admission_id}",
+          "GET /admissions/{admission_id}/flowsheet",
+          "GET /admissions/{admission_id}/mar",
+          "GET /admissions/{admission_id}/discharge-status",
+          "GET /patients/{patient_id}/documents",
+          "GET /ipd/treating-doctors",
+          "GET /admissions/{admission_id}/treating-doctor",
+          "GET /staff/lookup"
         ]
       }
     ],
@@ -1566,6 +2285,55 @@
       "reaches_screens": [
         "bed_matrix",
         "ward_transfer"
+      ]
+    },
+    {
+      "call": "POST /admissions/{admission_id}/admission-details",
+      "emits": "admission.doctor_changed",
+      "audience": "permissions ipd.admission.view, ipd.admission.reassign + the previous and the new doctor",
+      "reaches_screens": [
+        "treating_doctors"
+      ]
+    },
+    {
+      "call": "POST /admissions/{admission_id}/treating-doctor",
+      "emits": "admission.doctor_changed",
+      "audience": "permissions ipd.admission.view, ipd.admission.reassign + the previous and the new doctor",
+      "reaches_screens": [
+        "treating_doctors"
+      ]
+    },
+    {
+      "call": "POST /admissions/{admission_id}/treating-doctor",
+      "emits": "notification.created",
+      "audience": "the target user, or every holder of the target permission",
+      "reaches_screens": [
+        "my_investigations",
+        "my_complaint_investigations",
+        "my_actions",
+        "notifications",
+        "mlc_cases_doctor",
+        "er_board_doctor",
+        "mlc_cases",
+        "er_board",
+        "medication_orders_doctor",
+        "self_service",
+        "death_register",
+        "mlc_register",
+        "mortality_review",
+        "infection_cases",
+        "committees_quality",
+        "committees_owner",
+        "committees_ipc",
+        "qa_rounds",
+        "qa_rounds_owner",
+        "patient_feedback",
+        "action_register",
+        "facility_profile",
+        "record_review_worklist_doctor",
+        "record_review_worklist_nursing",
+        "record_deficiencies_doctor",
+        "record_deficiencies_nursing"
       ]
     }
   ],
@@ -1621,6 +2389,20 @@
     "rule": "Every screen that acts on a patient keeps at least two identifiers (name and MRN, with age or date of birth) and the flags visible; bed and room are location, not identity."
   },
   "value_lists": [
+    {
+      "values": [
+        "TakeOver",
+        "Handover",
+        "Reassigned"
+      ],
+      "column": "admission_doctor_changes.kind",
+      "used_at": "GET /admissions/{admission_id}/treating-doctor.changes[].kind",
+      "labels": {
+        "TakeOver": "Take over",
+        "Handover": "Handover",
+        "Reassigned": "Reassigned"
+      }
+    },
     {
       "values": [
         "Standard",
@@ -1724,6 +2506,20 @@
         "Thrombolytic": "Thrombolytic",
         "Psychotropic": "Psychotropic",
         "HighCost": "High cost",
+        "Other": "Other"
+      }
+    },
+    {
+      "values": [
+        "PMDC",
+        "PNC",
+        "Other"
+      ],
+      "column": "employees.license_type",
+      "used_at": "GET /staff/lookup[].license_type",
+      "labels": {
+        "PMDC": "PMDC",
+        "PNC": "PNC",
         "Other": "Other"
       }
     },
@@ -1985,13 +2781,19 @@
       "DISCHARGE_SUMMARY_REQUIRED": "Sign the discharge summary before the clinical discharge.",
       "FORBIDDEN": "You do not have permission to do this.",
       "NOT_FOUND": "The requested resource was not found.",
+      "REFERENCE_NOT_FOUND": "A referenced record does not exist.",
+      "TREATING_DOCTOR_ONLY": "Only the treating doctor hands this patient over; the Hospital Admin reassigns them while that doctor is away.",
+      "UNAUTHENTICATED": "Authentication is required.",
       "VALIDATION_ERROR": "The request is invalid."
     },
     "wording_quoted_in_rules": [
+      "Hand over to another doctor",
       "No new ... from now on",
       "Record death",
       "Record reason and diagnosis",
-      "Reports brought by the patient"
+      "Reports brought by the patient",
+      "Take this patient",
+      "Waiting for a doctor"
     ],
     "note": "Server-owned strings only: the error messages (English), the workspace labels (English and Urdu) and the wording the rules quote. The UI's own copy and its Urdu are yours (decision H08)."
   },
@@ -2004,6 +2806,10 @@
       "anaesthetist"
     ],
     "partial": [
+      "owner",
+      "hospital_admin",
+      "hospital_director",
+      "clinic_director",
       "receptionist",
       "admissions_officer",
       "triage_nurse",
@@ -2037,14 +2843,39 @@
       "recipe": "get_workflow_recipe('deaths-and-medico-legal-cases')"
     },
     {
+      "slug": "diagnostic-services",
+      "title": "Diagnostic services quality (MSDS)",
+      "recipe": "get_workflow_recipe('diagnostic-services')"
+    },
+    {
+      "slug": "duty-rosters-and-attendance",
+      "title": "Duty rosters, roll call, badges & attendance",
+      "recipe": "get_workflow_recipe('duty-rosters-and-attendance')"
+    },
+    {
       "slug": "emergency-department",
       "title": "The emergency department (MSDS)",
       "recipe": "get_workflow_recipe('emergency-department')"
     },
     {
+      "slug": "facility-and-it",
+      "title": "Facility operations, badge stations & IT administration",
+      "recipe": "get_workflow_recipe('facility-and-it')"
+    },
+    {
+      "slug": "incidents-and-sentinel-events",
+      "title": "Incidents, sentinel events and the action register (MSDS)",
+      "recipe": "get_workflow_recipe('incidents-and-sentinel-events')"
+    },
+    {
       "slug": "inpatient-and-discharge",
       "title": "Admission, beds, nursing & discharge",
       "recipe": "get_workflow_recipe('inpatient-and-discharge')"
+    },
+    {
+      "slug": "laboratory-and-radiology",
+      "title": "Laboratory & radiology",
+      "recipe": "get_workflow_recipe('laboratory-and-radiology')"
     },
     {
       "slug": "medication-safety",
@@ -2055,6 +2886,16 @@
       "slug": "opd-reception",
       "title": "OPD reception, queues & re-routing",
       "recipe": "get_workflow_recipe('opd-reception')"
+    },
+    {
+      "slug": "operating-theater",
+      "title": "Operating theater",
+      "recipe": "get_workflow_recipe('operating-theater')"
+    },
+    {
+      "slug": "personnel-records",
+      "title": "Personnel records (MSDS)",
+      "recipe": "get_workflow_recipe('personnel-records')"
     }
   ],
   "scenarios": [],
@@ -2064,11 +2905,9 @@
       "owner": [
         "vendor"
       ],
-      "question": "Digits in the Urdu UI and printouts: Latin 0-9 or Extended Arabic-Indic ۰-۹.",
       "affects": [
         "every screen in Urdu"
-      ],
-      "meanwhile": "Latin digits; identifiers, doses and money stay left to right."
+      ]
     },
     {
       "what": "decision H03",
@@ -2076,22 +2915,18 @@
         "vendor",
         "clinical_lead"
       ],
-      "question": "How dates and times are shown on screen, and a 12- or 24-hour clock.",
       "affects": [
         "every screen"
-      ],
-      "meanwhile": "The server's print format (e.g. 27-Sep-2026) and the hospital time zone."
+      ]
     },
     {
       "what": "decision H04",
       "owner": [
         "vendor"
       ],
-      "question": "Money on screen: decimals shown, and digit grouping (1,234,567 or 12,34,567).",
       "affects": [
         "every screen with money"
-      ],
-      "meanwhile": "The amounts as the API sends them, with the currency setting."
+      ]
     },
     {
       "what": "decision H08",
@@ -2100,11 +2935,9 @@
         "translator",
         "clinical_lead"
       ],
-      "question": "Who writes and signs off the Urdu text of the UI, above all clinical and consent wording.",
       "affects": [
         "every screen in Urdu"
-      ],
-      "meanwhile": "Urdu you add is a draft: mark it so (the interview bank's pattern: a draft until a native speaker reviews it)."
+      ]
     },
     {
       "what": "decision H09",
@@ -2112,11 +2945,9 @@
         "vendor",
         "frontend_lead"
       ],
-      "question": "One design system shared by every frontend team (who authors and approves it), or each team's own.",
       "affects": [
         "every screen"
-      ],
-      "meanwhile": "Each team designs within the backend's constraints: themes Light and DarkHighContrast, zoom 100-250 %, Noto Nastaliq Urdu, status shown as text and icon, never colour alone. Follow the vendor's design principles (frontend guide 18, get_design_principles)."
+      ]
     },
     {
       "what": "decision H10",
@@ -2124,11 +2955,9 @@
         "clinical_lead",
         "vendor"
       ],
-      "question": "How each realtime event is shown (interrupt, attention, inform, silent), alert sounds and which terminals play them. Only Code Red (interrupt), the licence and maintenance banners and the logout on session.revoked are prescribed (the event catalogue's `presentation`).",
       "affects": [
         "every screen with realtime events"
-      ],
-      "meanwhile": "Code Red interrupts; every other event updates the screen and, at most, a dismissible notice. `priority` is the delivery urgency, not a presentation rule."
+      ]
     },
     {
       "what": "decision H12",
@@ -2136,13 +2965,11 @@
         "vendor",
         "backend"
       ],
-      "question": "Which workspaces run on web, Android and iOS, which cannot read a MAC address, discover the server by UDP or print silently; or are cash and printing Windows-only.",
       "affects": [
         "my_cash_shift",
         "registration",
         "every screen that prints"
-      ],
-      "meanwhile": "The guides describe the Windows (Electron) terminal; tell your developer when a screen needs a capability your platform lacks."
+      ]
     },
     {
       "what": "decision H18",
@@ -2150,11 +2977,9 @@
         "vendor",
         "frontend_lead"
       ],
-      "question": "Noto Nastaliq Urdu everywhere, or the more compact Naskh in dense tables.",
       "affects": [
         "every table in Urdu"
-      ],
-      "meanwhile": "Noto Nastaliq Urdu, as the guides require."
+      ]
     },
     {
       "what": "decision H19",
@@ -2162,11 +2987,9 @@
         "clinical_lead",
         "backend"
       ],
-      "question": "Allergies: the patient record keeps free text, so it cannot tell \"no known allergies\" (asserted by a clinician) from \"not recorded\". Should it?",
       "affects": [
         "every screen with a patient banner"
-      ],
-      "meanwhile": "Show the recorded text as recorded; an empty value is \"not recorded\", never \"none\"."
+      ]
     },
     {
       "what": "decision H20",
@@ -2174,11 +2997,9 @@
         "vendor",
         "hospital"
       ],
-      "question": "May unsaved form input be kept on the terminal (which fields, encrypted, for how long)?",
       "affects": [
         "every form"
-      ],
-      "meanwhile": "In memory only; never a second checker's password."
+      ]
     },
     {
       "what": "decision H22",
@@ -2186,11 +3007,9 @@
         "hospital",
         "vendor"
       ],
-      "question": "Which documents may print on an unregistered terminal's default printer (sensitive A4 documents).",
       "affects": [
         "every screen that prints"
-      ],
-      "meanwhile": "As the printing guide says: the hint, then the default printer."
+      ]
     },
     {
       "what": "decision H24",
@@ -2198,16 +3017,12 @@
         "vendor",
         "clinical_lead"
       ],
-      "question": "Who approves frontend performance targets, alert thresholds and escalation timers.",
       "affects": [
         "every screen"
-      ],
-      "meanwhile": "The server's own settings (e.g. critical_result_communicate_minutes)."
+      ]
     }
   ],
   "omitted_sections": [
-    "test_plan",
-    "handbook",
     "decisions",
     "examples",
     "schemas"
@@ -2440,6 +3255,7 @@
           "head_nurse",
           "receptionist",
           "surgeon",
+          "triage_nurse",
           "ward_nurse"
         ]
       },
@@ -2470,7 +3286,124 @@
           "head_nurse",
           "receptionist",
           "surgeon",
+          "triage_nurse",
           "ward_nurse"
+        ]
+      },
+      {
+        "id": "case:GET /ipd/treating-doctors",
+        "call": "GET /api/v1/ipd/treating-doctors",
+        "summary": "The live admissions and their treating doctors",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "billing_admin",
+            "cashier",
+            "cssd_technician",
+            "employee_self"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "FORBIDDEN",
+          "VALIDATION_ERROR"
+        ],
+        "as_one_of": [
+          "admissions_officer",
+          "anaesthetist",
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ]
+      },
+      {
+        "id": "case:GET /admissions/{admission_id}/treating-doctor",
+        "call": "GET /api/v1/admissions/{admission_id}/treating-doctor",
+        "summary": "An inpatient's treating doctor and every change of it",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "billing_admin",
+            "cashier",
+            "cssd_technician",
+            "employee_self"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "NOT_FOUND",
+          "VALIDATION_ERROR"
+        ],
+        "as_one_of": [
+          "admissions_officer",
+          "anaesthetist",
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ]
+      },
+      {
+        "id": "case:POST /admissions/{admission_id}/treating-doctor",
+        "call": "POST /api/v1/admissions/{admission_id}/treating-doctor",
+        "summary": "Hand an inpatient over to another doctor",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "billing_admin",
+            "cashier",
+            "cssd_technician"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "ADMISSION_STATE_INVALID",
+          "FORBIDDEN",
+          "NOT_FOUND",
+          "REFERENCE_NOT_FOUND",
+          "TREATING_DOCTOR_ONLY",
+          "VALIDATION_ERROR"
+        ],
+        "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)",
+        "as_one_of": [
+          "anaesthetist",
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "surgeon"
+        ]
+      },
+      {
+        "id": "case:GET /staff/lookup",
+        "call": "GET /api/v1/staff/lookup",
+        "summary": "Find a staff member for a form (badge facts only)",
+        "denied": {
+          "as_one_of": [],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "UNAUTHENTICATED",
+          "VALIDATION_ERROR"
+        ],
+        "as_one_of": [
+          "any logged-in user"
         ]
       }
     ],
@@ -2555,6 +3488,10 @@
         "check": "the screen refreshes without polling"
       },
       {
+        "event": "admission.doctor_changed",
+        "check": "the screen refreshes without polling"
+      },
+      {
         "event": "admission.discharge.stage_changed",
         "check": "the screen refreshes without polling"
       },
@@ -2569,6 +3506,9 @@
       "A patient who died: open the death record screen ('Record death'); later clinical edits are flagged for review.",
       "'Discharge' needs the signed discharge summary (DISCHARGE_SUMMARY_REQUIRED: open the summary screen) and the general consent of the admission (CONSENT_REQUIRED: open the consents screen).",
       "'Discharge' does NOT free the bed; show which clearance stage it is blocked on (blocked_on).",
+      "My patients are the admissions whose primary_doctor_id is mine. A Code Red without a doctor (primary_doctor_id null: a triage nurse pressed it) shows to every doctor under 'Waiting for a doctor' with its 'Record reason and diagnosis' task: recording them makes you its doctor. Never show the person who pressed Code Red as the doctor.",
+      "vitals.due for one of my patients: mark its vitals due or overdue (overdue_minutes) and re-read GET /admissions/{admission_id}/flowsheet (is_overdue) when it is open; the server decides due and overdue, and the nurse records them (no recording here).",
+      "'Hand over to another doctor' on my patient: the doctor (GET /staff/lookup?license_type=PMDC) and the reason, then POST /admissions/{admission_id}/treating-doctor with an Idempotency-Key; it takes effect at once and the patient leaves my rounds (admission.doctor_changed). 'Take this patient' on a Code Red waiting for a doctor (GET /ipd/treating-doctors?waiting=true) names me. Show who looked after the patient before (GET /admissions/{admission_id}/treating-doctor: changes). TREATING_DOCTOR_ONLY: the patient is another doctor's; ask them, or the Hospital Admin while they are away.",
       "Exists for the service inpatient (work): show it as GET /establishment views.screens says for screen_id doctor_inpatients (full; open_work: without its new work, with the banner \"No new ... from now on\"; records: history and corrections only; setup: only from Facility settings; hidden: in no menu), after login and again on establishment.changed. Never decide it from the profile's category."
     ],
     "demo_accounts": "demo_accounts() lists a login per role; sandbox_call runs each case on the DEV server"
@@ -2682,6 +3622,51 @@
         ],
         "permissions_mode": "all",
         "access": null
+      },
+      {
+        "id": "doctor_inpatients::GET /ipd/treating-doctors",
+        "task": "The live admissions and their treating doctors",
+        "call": "GET /ipd/treating-doctors",
+        "is_action": false,
+        "permissions": [
+          "ipd.admission.view",
+          "ipd.admission.reassign"
+        ],
+        "permissions_mode": "any",
+        "access": null
+      },
+      {
+        "id": "doctor_inpatients::GET /admissions/{admission_id}/treating-doctor",
+        "task": "An inpatient's treating doctor and every change of it",
+        "call": "GET /admissions/{admission_id}/treating-doctor",
+        "is_action": false,
+        "permissions": [
+          "ipd.admission.view",
+          "ipd.admission.reassign"
+        ],
+        "permissions_mode": "any",
+        "access": null
+      },
+      {
+        "id": "doctor_inpatients::POST /admissions/{admission_id}/treating-doctor",
+        "task": "Hand an inpatient over to another doctor",
+        "call": "POST /admissions/{admission_id}/treating-doctor",
+        "is_action": true,
+        "permissions": [
+          "ipd.admission.request",
+          "ipd.admission.reassign"
+        ],
+        "permissions_mode": "any",
+        "access": null
+      },
+      {
+        "id": "doctor_inpatients::GET /staff/lookup",
+        "task": "Find a staff member for a form (badge facts only)",
+        "call": "GET /staff/lookup",
+        "is_action": false,
+        "permissions": [],
+        "permissions_mode": "all",
+        "access": "any logged-in user"
       }
     ],
     "rules_to_explain": [
@@ -2690,12 +3675,16 @@
       "A patient who died: open the death record screen ('Record death'); later clinical edits are flagged for review.",
       "'Discharge' needs the signed discharge summary (DISCHARGE_SUMMARY_REQUIRED: open the summary screen) and the general consent of the admission (CONSENT_REQUIRED: open the consents screen).",
       "'Discharge' does NOT free the bed; show which clearance stage it is blocked on (blocked_on).",
+      "My patients are the admissions whose primary_doctor_id is mine. A Code Red without a doctor (primary_doctor_id null: a triage nurse pressed it) shows to every doctor under 'Waiting for a doctor' with its 'Record reason and diagnosis' task: recording them makes you its doctor. Never show the person who pressed Code Red as the doctor.",
+      "vitals.due for one of my patients: mark its vitals due or overdue (overdue_minutes) and re-read GET /admissions/{admission_id}/flowsheet (is_overdue) when it is open; the server decides due and overdue, and the nurse records them (no recording here).",
+      "'Hand over to another doctor' on my patient: the doctor (GET /staff/lookup?license_type=PMDC) and the reason, then POST /admissions/{admission_id}/treating-doctor with an Idempotency-Key; it takes effect at once and the patient leaves my rounds (admission.doctor_changed). 'Take this patient' on a Code Red waiting for a doctor (GET /ipd/treating-doctors?waiting=true) names me. Show who looked after the patient before (GET /admissions/{admission_id}/treating-doctor: changes). TREATING_DOCTOR_ONLY: the patient is another doctor's; ask them, or the Hospital Admin while they are away.",
       "Exists for the service inpatient (work): show it as GET /establishment views.screens says for screen_id doctor_inpatients (full; open_work: without its new work, with the banner \"No new ... from now on\"; records: history and corrections only; setup: only from Facility settings; hidden: in no menu), after login and again on establishment.changed. Never decide it from the profile's category."
     ],
     "updates_by_itself_on": [
       "admission.discharge.stage_changed",
       "admission.overflow_assigned",
-      "vitals.due"
+      "vitals.due",
+      "admission.doctor_changed"
     ],
     "errors_the_user_can_meet": [
       {
@@ -2737,6 +3726,21 @@
         "code": "NOT_FOUND",
         "message": "The requested resource was not found.",
         "ui_action": "Say 'not found'; refresh the list."
+      },
+      {
+        "code": "REFERENCE_NOT_FOUND",
+        "message": "A referenced record does not exist.",
+        "ui_action": "Show field errors from details.fields / the message."
+      },
+      {
+        "code": "TREATING_DOCTOR_ONLY",
+        "message": "Only the treating doctor hands this patient over; the Hospital Admin reassigns them while that doctor is away.",
+        "ui_action": "Explain and hide the action (check x-permissions)."
+      },
+      {
+        "code": "UNAUTHENTICATED",
+        "message": "Authentication is required.",
+        "ui_action": "Refresh the token once; if that fails return to login."
       },
       {
         "code": "VALIDATION_ERROR",
@@ -3245,6 +4249,153 @@
         "content_type": "application/pdf",
         "bytes": 28
       }
+    },
+    "GET /ipd/treating-doctors": {
+      "request": {
+        "path": "/api/v1/ipd/treating-doctors",
+        "query": {
+          "doctor_id": 11
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": [
+            {
+              "admission_id": 1,
+              "admission_number": "ADM-2026-00001",
+              "admission_type": "Standard",
+              "status": "Admitted",
+              "patient_id": 1,
+              "mrn": "MRN-2026-000001",
+              "patient_name": "Ali Khan",
+              "ward_name": "General Ward",
+              "bed_label": "GW-1",
+              "primary_doctor_id": 11,
+              "primary_doctor_name": "Staff 61311",
+              "doctor_since": "2026-10-29T17:28:21.190993+00:00"
+            }
+          ],
+          "meta": {
+            "server_time": "2026-10-29T17:28:21.337189+00:00"
+          },
+          "request_id": "372629e7c158472d80465057ab6695a9"
+        }
+      }
+    },
+    "GET /admissions/{admission_id}/treating-doctor": {
+      "request": {
+        "path": "/api/v1/admissions/2/treating-doctor"
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": {
+            "admission_id": 2,
+            "admission_number": "ADM-2026-00002",
+            "admission_type": "CodeRed",
+            "status": "CodeRedActive",
+            "patient_id": 2,
+            "mrn": "MRN-2026-000002",
+            "patient_name": "Unknown Female 2",
+            "ward_name": "General Ward",
+            "bed_label": "GW-1",
+            "primary_doctor_id": 11,
+            "primary_doctor_name": "Staff 15498",
+            "doctor_since": "2026-10-29T16:52:47.426333+00:00",
+            "changes": [
+              {
+                "change_id": 1,
+                "kind": "TakeOver",
+                "from_doctor_id": null,
+                "from_doctor_name": null,
+                "to_doctor_id": 11,
+                "to_doctor_name": "Staff 15498",
+                "reason": "Recorded the reason for admission and the provisional diagnosis",
+                "changed_by_name": "u6cab4e36ad",
+                "changed_at": "2026-10-29T16:52:47.426333+00:00"
+              }
+            ]
+          },
+          "meta": {
+            "server_time": "2026-10-29T16:52:47.476647+00:00"
+          },
+          "request_id": "ec89c289b7604a03b10973589e3cc919"
+        }
+      }
+    },
+    "POST /admissions/{admission_id}/treating-doctor": {
+      "request": {
+        "path": "/api/v1/admissions/1/treating-doctor",
+        "body": {
+          "doctor_id": 11,
+          "reason": "On leave from tomorrow"
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": {
+            "admission_id": 1,
+            "admission_number": "ADM-2026-00001",
+            "admission_type": "Standard",
+            "status": "Admitted",
+            "patient_id": 1,
+            "mrn": "MRN-2026-000001",
+            "patient_name": "Ali Khan",
+            "ward_name": "General Ward",
+            "bed_label": "GW-1",
+            "primary_doctor_id": 11,
+            "primary_doctor_name": "Staff 61311",
+            "doctor_since": "2026-10-29T17:28:21.190993+00:00",
+            "changes": [
+              {
+                "change_id": 1,
+                "kind": "Handover",
+                "from_doctor_id": 1,
+                "from_doctor_name": "Dr Ahmed",
+                "to_doctor_id": 11,
+                "to_doctor_name": "Staff 61311",
+                "reason": "On leave from tomorrow",
+                "changed_by_name": "Dr Ahmed",
+                "changed_at": "2026-10-29T17:28:21.190993+00:00"
+              }
+            ]
+          },
+          "meta": {
+            "server_time": "2026-10-29T17:28:21.209940+00:00"
+          },
+          "request_id": "78c753bfa13345e5929ed9fdaaee3d51"
+        }
+      }
+    },
+    "GET /staff/lookup": {
+      "request": {
+        "path": "/api/v1/staff/lookup",
+        "query": {
+          "q": "sana look"
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": [
+            {
+              "employee_id": 2,
+              "emp_number": "EMP-2026-0002",
+              "full_name": "Sana Lookuptest",
+              "designation": "Officer",
+              "department_name": null,
+              "license_type": "PNC",
+              "registration": "PNC PNC-8403"
+            }
+          ],
+          "meta": {
+            "server_time": "2026-10-27T15:29:53.668901+00:00"
+          },
+          "request_id": "4e2ee3a40faa41c195bc2aa08edaa30b"
+        }
+      }
     }
   },
   "schemas": {
@@ -3385,7 +4536,8 @@
               "type": "null"
             }
           ],
-          "title": "Primary Doctor Id"
+          "title": "Primary Doctor Id",
+          "description": "The treating doctor's employee id; null for a Code Red no doctor has taken over yet (decisions 57): show 'Doctor: waiting'"
         },
         "primary_doctor_name": {
           "anyOf": [
@@ -3886,7 +5038,8 @@
               "type": "null"
             }
           ],
-          "title": "Primary Doctor Id"
+          "title": "Primary Doctor Id",
+          "description": "The treating doctor's employee id; null for a Code Red no doctor has taken over yet (decisions 57): show 'Doctor: waiting'"
         },
         "primary_doctor_name": {
           "anyOf": [
@@ -4477,6 +5630,82 @@
       "title": "DischargeStatusViewOut",
       "description": "Identity and clearance progress for the staff clearing a stage, without the full clinical admission."
     },
+    "DoctorChangeOut": {
+      "properties": {
+        "change_id": {
+          "type": "integer",
+          "title": "Change Id"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "TakeOver",
+            "Handover",
+            "Reassigned"
+          ],
+          "title": "Kind",
+          "description": "TakeOver: a doctor gave an admission without one its doctor; Handover: the treating doctor handed the patient over; Reassigned: the Hospital Admin, while the treating doctor was away"
+        },
+        "from_doctor_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "From Doctor Id",
+          "description": "Null when the admission had no doctor"
+        },
+        "from_doctor_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "From Doctor Name"
+        },
+        "to_doctor_id": {
+          "type": "integer",
+          "title": "To Doctor Id"
+        },
+        "to_doctor_name": {
+          "type": "string",
+          "title": "To Doctor Name"
+        },
+        "reason": {
+          "type": "string",
+          "title": "Reason"
+        },
+        "changed_by_name": {
+          "type": "string",
+          "title": "Changed By Name"
+        },
+        "changed_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Changed At"
+        }
+      },
+      "type": "object",
+      "required": [
+        "change_id",
+        "kind",
+        "from_doctor_id",
+        "from_doctor_name",
+        "to_doctor_id",
+        "to_doctor_name",
+        "reason",
+        "changed_by_name",
+        "changed_at"
+      ],
+      "title": "DoctorChangeOut",
+      "description": "One change of the treating doctor (decisions 58), kept for the medico-legal record."
+    },
     "Envelope_AdmissionDetailOut_": {
       "properties": {
         "data": {
@@ -4539,6 +5768,27 @@
         "request_id"
       ],
       "title": "Envelope[FlowsheetOut]"
+    },
+    "Envelope_TreatingDoctorOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/TreatingDoctorOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[TreatingDoctorOut]"
     },
     "Envelope_list_AdmissionOut__": {
       "properties": {
@@ -4614,6 +5864,56 @@
         "request_id"
       ],
       "title": "Envelope[list[PatientDocumentOut]]"
+    },
+    "Envelope_list_StaffLookupOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/StaffLookupOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[StaffLookupOut]]"
+    },
+    "Envelope_list_TreatingDoctorRowOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/TreatingDoctorRowOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[TreatingDoctorRowOut]]"
     },
     "FlowsheetNoteOut": {
       "properties": {
@@ -5529,6 +6829,360 @@
         "uploaded_by"
       ],
       "title": "PatientDocumentOut"
+    },
+    "StaffLookupOut": {
+      "properties": {
+        "employee_id": {
+          "type": "integer",
+          "title": "Employee Id",
+          "description": "The id a form's staff field takes (contrast_doctor_id, employee_id, ...)"
+        },
+        "emp_number": {
+          "type": "string",
+          "title": "Emp Number"
+        },
+        "full_name": {
+          "type": "string",
+          "title": "Full Name"
+        },
+        "designation": {
+          "type": "string",
+          "title": "Designation"
+        },
+        "department_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Department Name"
+        },
+        "license_type": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "PMDC",
+                "PNC",
+                "Other"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "License Type",
+          "description": "The council they are registered with (PMDC: a doctor or dentist; PNC: a nurse); null: none"
+        },
+        "registration": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Registration",
+          "description": "As their stamp prints it, e.g. \"PMDC 12345-P\"; null: no number on file"
+        }
+      },
+      "type": "object",
+      "required": [
+        "employee_id",
+        "emp_number",
+        "full_name",
+        "designation",
+        "department_name",
+        "license_type",
+        "registration"
+      ],
+      "title": "StaffLookupOut",
+      "description": "One active staff member as a picker shows them (GET /staff/lookup): the facts on their badge and the registration\ntheir stamp prints, nothing else."
+    },
+    "TreatingDoctorIn": {
+      "properties": {
+        "doctor_id": {
+          "type": "integer",
+          "title": "Doctor Id",
+          "description": "The doctor who takes the patient over: an active doctor registered with the PMDC (employee_id from GET /staff/lookup?license_type=PMDC)"
+        },
+        "reason": {
+          "type": "string",
+          "maxLength": 500,
+          "minLength": 3,
+          "title": "Reason",
+          "description": "Why the patient changes doctor (the medico-legal record)",
+          "examples": [
+            "On leave from tomorrow: handed over to the cardiologist on call"
+          ]
+        }
+      },
+      "type": "object",
+      "required": [
+        "doctor_id",
+        "reason"
+      ],
+      "title": "TreatingDoctorIn"
+    },
+    "TreatingDoctorOut": {
+      "properties": {
+        "admission_id": {
+          "type": "integer",
+          "title": "Admission Id"
+        },
+        "admission_number": {
+          "type": "string",
+          "title": "Admission Number"
+        },
+        "admission_type": {
+          "type": "string",
+          "enum": [
+            "Standard",
+            "Emergency",
+            "CodeRed",
+            "Overflow",
+            "Planned"
+          ],
+          "title": "Admission Type"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "AdmissionPending",
+            "Waitlisted",
+            "BedReserved",
+            "CodeRedActive",
+            "Admitted",
+            "DischargeInProgress",
+            "Discharged",
+            "Cancelled"
+          ],
+          "title": "Status"
+        },
+        "patient_id": {
+          "type": "integer",
+          "title": "Patient Id"
+        },
+        "mrn": {
+          "type": "string",
+          "title": "Mrn"
+        },
+        "patient_name": {
+          "type": "string",
+          "title": "Patient Name"
+        },
+        "ward_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ward Name"
+        },
+        "bed_label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Bed Label"
+        },
+        "primary_doctor_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Primary Doctor Id",
+          "description": "Null: a Code Red waiting for a doctor (decisions 57)"
+        },
+        "primary_doctor_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Primary Doctor Name"
+        },
+        "doctor_since": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Doctor Since",
+          "description": "When the treating doctor took the patient; null without one"
+        },
+        "changes": {
+          "items": {
+            "$ref": "#/components/schemas/DoctorChangeOut"
+          },
+          "type": "array",
+          "title": "Changes",
+          "description": "Every change of the treating doctor, oldest first"
+        }
+      },
+      "type": "object",
+      "required": [
+        "admission_id",
+        "admission_number",
+        "admission_type",
+        "status",
+        "patient_id",
+        "mrn",
+        "patient_name",
+        "ward_name",
+        "bed_label",
+        "primary_doctor_id",
+        "primary_doctor_name",
+        "doctor_since",
+        "changes"
+      ],
+      "title": "TreatingDoctorOut"
+    },
+    "TreatingDoctorRowOut": {
+      "properties": {
+        "admission_id": {
+          "type": "integer",
+          "title": "Admission Id"
+        },
+        "admission_number": {
+          "type": "string",
+          "title": "Admission Number"
+        },
+        "admission_type": {
+          "type": "string",
+          "enum": [
+            "Standard",
+            "Emergency",
+            "CodeRed",
+            "Overflow",
+            "Planned"
+          ],
+          "title": "Admission Type"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "AdmissionPending",
+            "Waitlisted",
+            "BedReserved",
+            "CodeRedActive",
+            "Admitted",
+            "DischargeInProgress",
+            "Discharged",
+            "Cancelled"
+          ],
+          "title": "Status"
+        },
+        "patient_id": {
+          "type": "integer",
+          "title": "Patient Id"
+        },
+        "mrn": {
+          "type": "string",
+          "title": "Mrn"
+        },
+        "patient_name": {
+          "type": "string",
+          "title": "Patient Name"
+        },
+        "ward_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ward Name"
+        },
+        "bed_label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Bed Label"
+        },
+        "primary_doctor_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Primary Doctor Id",
+          "description": "Null: a Code Red waiting for a doctor (decisions 57)"
+        },
+        "primary_doctor_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Primary Doctor Name"
+        },
+        "doctor_since": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Doctor Since",
+          "description": "When the treating doctor took the patient; null without one"
+        }
+      },
+      "type": "object",
+      "required": [
+        "admission_id",
+        "admission_number",
+        "admission_type",
+        "status",
+        "patient_id",
+        "mrn",
+        "patient_name",
+        "ward_name",
+        "bed_label",
+        "primary_doctor_id",
+        "primary_doctor_name",
+        "doctor_since"
+      ],
+      "title": "TreatingDoctorRowOut",
+      "description": "Who looks after a live admission: where the patient is and the treating doctor, never the clinical record."
     },
     "ValidationError": {
       "properties": {

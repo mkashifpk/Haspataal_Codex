@@ -21,11 +21,6 @@ import {
 import { bilingual as t } from "../i18n";
 import { formatHospitalTime, hospitalTimeToUtc } from "../hospital-time";
 import * as a from "../generated/mar";
-import { masterSummary } from "../generated/consultation";
-import type {
-  PrescriptionDetailOut,
-  PrescriptionItemOut,
-} from "../generated/verbal_orders_ward";
 import { dischargeStatus } from "../generated/dispense";
 import {
   marCanWrite,
@@ -33,7 +28,7 @@ import {
   marStopCodes,
   marRereadCodes,
 } from "../mar-policy";
-type OrderChoice = { prescription_id: number; item: PrescriptionItemOut };
+type OrderChoice = { prescription_id: number; item: a.PrnOrderOut };
 type Draft = {
   order?: OrderChoice;
   kind: "chart" | "prn" | "prepare" | "correct" | "generate" | "clear";
@@ -99,37 +94,13 @@ function MarForm({
     [password, setPassword] = useState(""),
     [independent, setIndependent] = useState(false),
     [printBusy, setPrintBusy] = useState(false),
-    [printMessage, setPrintMessage] = useState(""),
-    [labels, setLabels] = useState<a.PrintOut_DoseLabelFieldsOut_[]>([]);
+    [printMessage, setPrintMessage] = useState("");
   const can = (p: string) => user.permissions.includes(p),
     live = connected && stream === "Live";
-  const [prescription, setPrescription] = useState<number>();
-  const summaries = useLoad(
-    () =>
-      can("patient.emr.view")
-        ? masterSummary(ctx.patient.patient_id)
-        : Promise.resolve(undefined),
+  const orders = useLoad(
+    () => (can("ipd.mar.view") ? a.prnOrders(id) : Promise.resolve([])),
     [id, tick, ctx.revision],
   );
-  const order = useLoad(async () => {
-    if (
-      !prescription ||
-      !summaries.data?.prescriptions.some(
-        (r) => r.prescription_id === prescription,
-      ) ||
-      !can("prescription.view")
-    )
-      return undefined;
-    const r = await api<PrescriptionDetailOut>(
-      "GET",
-      `/prescriptions/${prescription}`,
-    );
-    if (r.admission_id !== id || r.patient_id !== ctx.patient.patient_id)
-      throw Error(
-        "This prescription is not for the selected patient and stay. Choose another returned order.",
-      );
-    return r;
-  }, [prescription, summaries.data, id, tick]);
   const rows = useLoad(
     () => (can("ipd.mar.view") ? a.mar(id) : Promise.resolve([])),
     [id, tick, ctx.revision],
@@ -167,10 +138,6 @@ function MarForm({
         result.fields?.mar_id !== draft?.row?.mar_id
       )
         throw Error("Dose label identity differs. Read before printing.");
-      setLabels((list) => [
-        ...list.filter((l) => l.fields.mar_id !== result.fields.mar_id),
-        result,
-      ]);
       setPrintMessage(
         t(
           "Preparation recorded. Print its label before preparing another dose. A print failure does not undo preparation.",
@@ -511,22 +478,12 @@ function MarForm({
           }
         }
         if (d.order) {
-          const p = await api<PrescriptionDetailOut>(
-              "GET",
-              `/prescriptions/${d.order.prescription_id}`,
-            ),
-            item = p.items.find(
-              (i) =>
-                i.prescription_item_id === d.order!.item.prescription_item_id,
-            );
-          if (
-            p.admission_id !== id ||
-            p.patient_id !== ctx.patient.patient_id ||
-            ["Cancelled", "Replaced"].includes(p.status) ||
-            !item ||
-            !["Active", "FullyDispensed"].includes(item.item_status) ||
-            JSON.stringify(item) !== JSON.stringify(d.order.item)
-          ) {
+          const current = await a.prnOrders(id);
+          const item = current.find(
+            (i) =>
+              i.prescription_item_id === d.order!.item.prescription_item_id,
+          );
+          if (!item || JSON.stringify(item) !== JSON.stringify(d.order.item)) {
             setStale(true);
             throw Error(
               "The source medication order changed. Read and select the current line before reviewing.",
@@ -555,11 +512,11 @@ function MarForm({
       transient,
     );
   }
-  async function printLabel(label: a.PrintOut_DoseLabelFieldsOut_ | number) {
+  async function printLabel(marId: number) {
     setPrintBusy(true);
     setPrintMessage("");
     try {
-      const r = await call("print-dose-label", { marId: typeof label === 'number' ? label : label.fields.mar_id });
+      const r = await call("print-dose-label", { marId });
       setPrintMessage(
         r.printed
           ? t(
@@ -743,7 +700,19 @@ function MarForm({
             </p>
           )}
           <div className="actions">
-            {r.prepared_at && <button data-help="mar.print" disabled={write.blocked || printBusy} onClick={()=>void printLabel(r.mar_id)}>{t('Reprint recorded preparation','درج تیاری کا لیبل پھر چھاپیں')} #{r.mar_id}</button>}
+            {r.prepared_at && (
+              <button
+                data-help="mar.print"
+                disabled={write.blocked || printBusy}
+                onClick={() => void printLabel(r.mar_id)}
+              >
+                {t(
+                  "Reprint recorded preparation",
+                  "درج تیاری کا لیبل پھر چھاپیں",
+                )}{" "}
+                #{r.mar_id}
+              </button>
+            )}
             {r.status === "Scheduled" && !r.is_correction ? (
               <>
                 <button
@@ -770,85 +739,65 @@ function MarForm({
                 {t("Correct dose record", "خوراک ریکارڈ کی تصحیح")} #{r.mar_id}
               </button>
             )}
-            <button
-              data-help="mar.prn"
-              disabled={write.blocked || !writable()}
-              onClick={() => begin("prn", r)}
-            >
-              {t(
-                "Record ad-hoc dose from this order",
-                "اسی حکم کی اضافی خوراک درج کریں",
-              )}{" "}
-              #{r.mar_id}
-            </button>
           </div>
         </article>
       ))}
       <section className="card">
         <h2>
-          {t("PRN and ad-hoc ordered medicines", "حسب ضرورت دوا کے اصل احکام")}
+          {t("Active PRN orders", "حسب ضرورت فعال احکام")}
         </h2>
-        <LoadState {...summaries} retry={summaries.reload} />
-        {!can("patient.emr.view") && (
+        <button
+          data-help="mar.orders"
+          disabled={write.blocked || printBusy}
+          onClick={() => void orders.reload()}
+        >
+          {t("Refresh PRN orders", "حسب ضرورت احکام تازہ کریں")}
+        </button>
+        <LoadState {...orders} retry={orders.reload} />
+        {!orders.loading && !orders.error && !orders.data?.length && (
           <p>
             {t(
-              "Reading order history needs patient EMR permission. Ask the responsible prescriber; never type a line identifier.",
-              "اصل حکم پڑھنے کی اجازت درکار۔ ذمہ دار ڈاکٹر سے کہیں، سطر نمبر نہ لکھیں۔",
+              "No active PRN orders for this admission.",
+              "اس داخلے میں حسب ضرورت فعال حکم نہیں۔",
             )}
           </p>
         )}
-        {summaries.data?.prescriptions.map((p) => (
-          <button
-            data-help="mar.orders"
-            key={p.prescription_id}
-            disabled={write.blocked}
-            onClick={() => setPrescription(p.prescription_id)}
-          >
-            {p.prescription_number} · {p.source} · {p.status}
-          </button>
-        ))}
-        <LoadState {...order} retry={order.reload} />
-        {order.data?.items
-          .filter(
-            (i) =>
-              ["Active", "FullyDispensed"].includes(i.item_status) &&
-              !["Cancelled", "Replaced"].includes(order.data!.status),
-          )
-          .map((item) => (
-            <div key={item.prescription_item_id}>
+        {orders.data?.map((item) => (
+          <article key={item.prescription_item_id}>
+            <p>
+              {item.prescription_number} · {item.drug_name} · {item.strength} ·{" "}
+              {item.dose_text} · {item.route} · {item.instructions}
+            </p>
+            <p>
+              {t("Minimum interval (hours)", "کم از کم وقفہ (گھنٹے)")}:{" "}
+              {item.interval_hours ?? t("Not recorded", "درج نہیں")} ·{" "}
+              {t("Last given", "آخری خوراک")}: {stamp(item.last_given_at)} ·{" "}
+              {t("Doses in last 24 hours", "گزشتہ24گھنٹے کی خوراکیں")}:{" "}
+              {item.given_last_24h}
+            </p>
+            {item.high_alert_category && (
+              <p className="error">HIGH ALERT: {item.high_alert_category}</p>
+            )}
+            {!!item.lasa_with?.length && (
               <p>
-                {item.drug_name} · {item.dose_text} · {item.route} ·{" "}
-                {item.frequency_code} · {item.instructions}
+                {t("Looks or sounds like", "ملتا جلتا نام")}:{" "}
+                {item.lasa_with.join(", ")}
               </p>
-              {item.high_alert_category && (
-                <p className="error">HIGH ALERT: {item.high_alert_category}</p>
-              )}
-              {!!item.lasa_with.length && (
-                <p>
-                  {t("Looks or sounds like", "ملتا جلتا نام")}:{" "}
-                  {item.lasa_with.join(", ")}
-                </p>
-              )}
-              <button
-                data-help="mar.prn"
-                disabled={write.blocked || !writable()}
-                onClick={() =>
-                  begin("prn", undefined, {
-                    prescription_id: order.data!.prescription_id,
-                    item,
-                  })
-                }
-              >
-                {item.is_prn
-                  ? t("Record ordered PRN dose", "حکم کی حسب ضرورت خوراک درج")
-                  : t(
-                      "Record ordered ad-hoc dose",
-                      "حکم کی اضافی خوراک درج",
-                    )}{" "}
-                · {item.drug_name}
-              </button>
-            </div>
-          ))}
+            )}
+            <button
+              data-help="mar.prn"
+              disabled={write.blocked || !writable() || orders.loading || !!orders.error}
+              onClick={() =>
+                begin("prn", undefined, {
+                  prescription_id: item.prescription_id,
+                  item,
+                })
+              }
+            >
+              {t("Give a PRN dose", "حسب ضرورت خوراک دیں")} · {item.drug_name}
+            </button>
+          </article>
+        ))}
       </section>
       <section className="card">
         <h2>{t("Ward stock", "وارڈ اسٹاک")}</h2>
@@ -866,24 +815,6 @@ function MarForm({
           </p>
         ))}
       </section>
-      {!!labels.length && (
-        <section className="card">
-          <h2>{t("Prepared dose labels", "تیار دوا کے لیبل")}</h2>
-          {labels.map((label) => (
-            <div key={label.fields.mar_id}>
-              <Details value={label.fields} />
-              <button
-                data-help="mar.print"
-                disabled={printBusy || write.blocked}
-                onClick={() => void printLabel(label)}
-              >
-                {t("Print / reprint saved label", "محفوظ لیبل چھاپیں")} #
-                {label.fields.mar_id}
-              </button>
-            </div>
-          ))}
-        </section>
-      )}
       {printMessage && <p role="status">{printMessage}</p>}
       {can("ipd.discharge.clear_nursing") && (
         <section className="card">

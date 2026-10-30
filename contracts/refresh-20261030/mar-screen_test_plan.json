@@ -1,0 +1,972 @@
+{
+  "screen": "mar",
+  "title": "Medication administration record",
+  "cases": [
+    {
+      "id": "case:POST /admissions/{admission_id}/discharge/{stage}/clear",
+      "call": "POST /api/v1/admissions/{admission_id}/discharge/{stage}/clear",
+      "summary": "Clear a discharge stage (in order)",
+      "happy_path": {
+        "as_one_of": [
+          "any logged-in user"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/admissions/1/discharge/PharmacyClearance/clear",
+            "body": {}
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "admission_id": 1,
+                "admission_number": "ADM-2026-00001",
+                "patient_id": 1,
+                "mrn": "MRN-2026-000001",
+                "patient_name": "Ali Khan",
+                "gender": "male",
+                "age_years": 40,
+                "requested_ward_id": 2,
+                "requested_ward_name": "General Ward",
+                "ward_id": 2,
+                "ward_name": "General Ward",
+                "bed_id": 2,
+                "bed_label": "GW-1",
+                "primary_doctor_id": 1,
+                "primary_doctor_name": "Dr Ahmed",
+                "admission_type": "Standard",
+                "status": "DischargeInProgress",
+                "billing_category": "Cash",
+                "panel_id": null,
+                "is_billing_confirmed": true,
+                "is_billing_deferred": false,
+                "is_overflow": false,
+                "overflow_reason": null,
+                "eta_minutes": null,
+                "source_ticket_id": 1,
+                "admission_reason": "Fever and productive cough for 5 days, SpO2 91% on air",
+                "provisional_diagnosis": "Community-acquired pneumonia",
+                "initial_care_plan": null,
+                "photo_document_id": null,
+                "details_stamp": {
+                  "at": "2026-10-13T11:58:07.001267+00:00",
+                  "name": "Dr Ahmed",
+                  "text": "Dr Ahmed, Doctor, PMDC PMDC-37440, 13-Oct-2026 16:58",
+                  "user_id": 1,
+                  "designation": "Doctor",
+                  "employee_id": 1,
+                  "registration": "PMDC PMDC-37440"
+                },
+                "admission_notes": null,
+                "requested_at": "2026-10-13T11:58:07.001267+00:00",
+                "reserved_at": "2026-10-13T11:58:07.060463+00:00",
+                "admitted_at": "2026-10-13T11:58:07.060463+00:00",
+                "discharge_initiated_at": "2026-10-13T11:58:07.424943+00:00",
+                "discharged_at": null,
+                "row_version": 5,
+                "discharge": {
+                  "stages": [
+                    {
+                      "clearance_id": 1,
+                      "stage": "ClinicalDischarge",
+                      "sequence_no": 1,
+                      "status": "Cleared",
+                      "cleared_by": 1,
+                      "cleared_by_name": "Dr Ahmed",
+                      "cleared_at": "2026-10-13T11:58:07.424943+00:00",
+                      "note": "Going home",
+                      "physically_cleaned_at": null
+                    },
+                    {
+                      "clearance_id": 2,
+                      "stage": "PharmacyClearance",
+                      "sequence_no": 2,
+                      "status": "Cleared",
+                      "cleared_by": 9,
+                      "cleared_by_name": "u265073991d",
+                      "cleared_at": "2026-10-13T11:58:07.473641+00:00",
+                      "note": null,
+                      "physically_cleaned_at": null
+                    },
+                    {
+                      "clearance_id": 3,
+                      "stage": "NursingMARVerification",
+                      "sequence_no": 3,
+                      "status": "Pending",
+                      "cleared_by": null,
+                      "cleared_by_name": null,
+                      "cleared_at": null,
+                      "note": null,
+                      "physically_cleaned_at": null
+                    }
+                  ],
+                  "blocked_on": "NursingMARVerification",
+                  "started": true,
+                  "complete": false
+                },
+                "invoice": {
+                  "invoice_id": 2,
+                  "invoice_no": "INV-2026-0000002",
+                  "status": "Draft",
+                  "gross_total": 0,
+                  "net_payable": 0,
+                  "amount_paid": 0
+                }
+              },
+              "meta": {
+                "server_time": "2026-10-13T11:58:07.484215+00:00"
+              },
+              "request_id": "696bdefb9b164ecb86b8e643687bdde3"
+            }
+          },
+          "errors_seen": [
+            "BILLING_DEFERRED",
+            "DISCHARGE_NOT_ALLOWED",
+            "DISCHARGE_STAGE_IMMUTABLE",
+            "DISCHARGE_STAGE_OUT_OF_ORDER",
+            "OWN_MEDICINES_HELD",
+            "VALIDATION_ERROR"
+          ],
+          "events_emitted": [
+            "admission.discharge.stage_changed"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "BILLING_DEFERRED",
+        "DISCHARGE_NOT_ALLOWED",
+        "DISCHARGE_STAGE_IMMUTABLE",
+        "DISCHARGE_STAGE_OUT_OF_ORDER",
+        "OWN_MEDICINES_HELD",
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /admissions/{admission_id}/mar",
+      "call": "GET /api/v1/admissions/{admission_id}/mar",
+      "summary": "Medication Administration Record (checklist)",
+      "happy_path": {
+        "as_one_of": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "surgeon",
+          "ward_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/admissions/1/mar"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "mar_id": 1,
+                  "prescription_item_id": 1,
+                  "drug_name": "Ceftriaxone",
+                  "dose_text": "1 g",
+                  "route": "IV",
+                  "frequency_code": "BD",
+                  "is_prn": false,
+                  "is_stat": false,
+                  "scheduled_at": "2026-09-30T14:32:51.388788+00:00",
+                  "status": "Scheduled",
+                  "administered_at": null,
+                  "administered_by": null,
+                  "administered_by_name": null,
+                  "dose_given_text": null,
+                  "route_given": null,
+                  "status_reason": null,
+                  "is_correction": false,
+                  "corrects_mar_id": null,
+                  "correction_reason": null,
+                  "created_at": "2026-09-30T14:37:51.390524+00:00",
+                  "is_overdue": true,
+                  "high_alert_category": null,
+                  "lasa_with": [],
+                  "self_administration": false,
+                  "identity_check": null,
+                  "identity_note": null,
+                  "drug_check": null,
+                  "second_checked_by": null,
+                  "second_checked_by_name": null,
+                  "self_administered": false,
+                  "variance_reason": null,
+                  "prepared_at": null,
+                  "prepared_by_name": null,
+                  "preparation": null
+                },
+                {
+                  "mar_id": 4,
+                  "prescription_item_id": 2,
+                  "drug_name": "Amoxicillin",
+                  "dose_text": "1 capsule",
+                  "route": "Oral",
+                  "frequency_code": "TDS",
+                  "is_prn": false,
+                  "is_stat": false,
+                  "scheduled_at": "2026-09-30T14:32:51.388788+00:00",
+                  "status": "Scheduled",
+                  "administered_at": null,
+                  "administered_by": null,
+                  "administered_by_name": null,
+                  "dose_given_text": null,
+                  "route_given": null,
+                  "status_reason": null,
+                  "is_correction": false,
+                  "corrects_mar_id": null,
+                  "correction_reason": null,
+                  "created_at": "2026-09-30T14:37:51.390524+00:00",
+                  "is_overdue": true,
+                  "high_alert_category": null,
+                  "lasa_with": [],
+                  "self_administration": false,
+                  "identity_check": null,
+                  "identity_note": null,
+                  "drug_check": null,
+                  "second_checked_by": null,
+                  "second_checked_by_name": null,
+                  "self_administered": false,
+                  "variance_reason": null,
+                  "prepared_at": null,
+                  "prepared_by_name": null,
+                  "preparation": null
+                },
+                {
+                  "mar_id": 5,
+                  "prescription_item_id": 2,
+                  "drug_name": "Amoxicillin",
+                  "dose_text": "1 capsule",
+                  "route": "Oral",
+                  "frequency_code": "TDS",
+                  "is_prn": false,
+                  "is_stat": false,
+                  "scheduled_at": "2026-09-30T22:32:51.388788+00:00",
+                  "status": "Scheduled",
+                  "administered_at": null,
+                  "administered_by": null,
+                  "administered_by_name": null,
+                  "dose_given_text": null,
+                  "route_given": null,
+                  "status_reason": null,
+                  "is_correction": false,
+                  "corrects_mar_id": null,
+                  "correction_reason": null,
+                  "created_at": "2026-09-30T14:37:51.390524+00:00",
+                  "is_overdue": false,
+                  "high_alert_category": null,
+                  "lasa_with": [],
+                  "self_administration": false,
+                  "identity_check": null,
+                  "identity_note": null,
+                  "drug_check": null,
+                  "second_checked_by": null,
+                  "second_checked_by_name": null,
+                  "self_administered": false,
+                  "variance_reason": null,
+                  "prepared_at": null,
+                  "prepared_by_name": null,
+                  "preparation": null
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-30T14:37:51.469490+00:00"
+              },
+              "request_id": "f6486811b7b44e26b313ced0a8cde610"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "billing_admin",
+          "cashier",
+          "clinic_director"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:POST /mar/{mar_id}/chart",
+      "call": "POST /api/v1/mar/{mar_id}/chart",
+      "summary": "Chart a scheduled dose (Administered / Held / Refused / Missed)",
+      "happy_path": {
+        "as_one_of": [
+          "head_nurse",
+          "ward_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/mar/1/chart",
+            "body": {
+              "status": "Administered",
+              "identity_check": "TwoIdentifiers"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "mar_id": 1,
+                "admission_id": 1,
+                "patient_id": 1,
+                "prescription_item_id": 1,
+                "scheduled_at": "2026-09-30T14:32:51.388788+00:00",
+                "status": "Administered",
+                "administered_at": "2026-09-30T14:37:51.474484+00:00",
+                "administered_by": 7,
+                "dose_given_text": "1 g",
+                "route_given": "IV",
+                "status_reason": null,
+                "is_correction": false,
+                "corrects_mar_id": null,
+                "correction_reason": null,
+                "identity_check": "TwoIdentifiers",
+                "identity_note": null,
+                "drug_check": "Visual",
+                "second_checked_by": null,
+                "self_administered": false,
+                "variance_reason": null,
+                "prepared_by": null,
+                "prepared_at": null,
+                "preparation": null,
+                "created_at": "2026-09-30T14:37:51.390524+00:00",
+                "row_version": 2
+              },
+              "meta": {
+                "server_time": "2026-09-30T14:37:51.481295+00:00"
+              },
+              "request_id": "6521516ac3b34453a27eb1560c0b7c52"
+            }
+          },
+          "errors_seen": [
+            "ADMINISTRATION_NOT_AUTHORIZED",
+            "ADMINISTRATION_VARIANCE_REASON_REQUIRED",
+            "BATCH_EXPIRED",
+            "BATCH_RECALLED",
+            "DRUG_MISMATCH",
+            "HIGH_ALERT_CHECK_REQUIRED",
+            "INSUFFICIENT_STOCK",
+            "MAR_STATE_INVALID",
+            "PATIENT_IDENTITY_MISMATCH",
+            "PATIENT_IDENTITY_REQUIRED",
+            "SELF_ADMINISTRATION_INVALID",
+            "VALIDATION_ERROR"
+          ],
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "ACCOUNT_LOCKED",
+        "ADMINISTRATION_NOT_AUTHORIZED",
+        "ADMINISTRATION_VARIANCE_REASON_REQUIRED",
+        "BATCH_EXPIRED",
+        "BATCH_RECALLED",
+        "DRUG_MISMATCH",
+        "DUAL_CONTROL_SAME_PERSON",
+        "HIGH_ALERT_CHECK_REQUIRED",
+        "INSUFFICIENT_STOCK",
+        "MAR_STATE_INVALID",
+        "PATIENT_IDENTITY_MISMATCH",
+        "PATIENT_IDENTITY_REQUIRED",
+        "SELF_ADMINISTRATION_INVALID",
+        "STEP_UP_REQUIRED",
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:POST /admissions/{admission_id}/mar/prn",
+      "call": "POST /api/v1/admissions/{admission_id}/mar/prn",
+      "summary": "Chart a PRN / ad-hoc dose",
+      "happy_path": {
+        "as_one_of": [
+          "head_nurse",
+          "ward_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/admissions/1/mar/prn",
+            "body": {
+              "prescription_item_id": 2,
+              "dose_given_text": "1 g",
+              "status_reason": "fever 38.9",
+              "identity_check": "TwoIdentifiers"
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "mar_id": 7,
+                "admission_id": 1,
+                "patient_id": 1,
+                "prescription_item_id": 2,
+                "scheduled_at": null,
+                "status": "Administered",
+                "administered_at": "2026-09-30T14:47:43.418871+00:00",
+                "administered_by": 7,
+                "dose_given_text": "1 g",
+                "route_given": "IV",
+                "status_reason": "fever 38.9",
+                "is_correction": false,
+                "corrects_mar_id": null,
+                "correction_reason": null,
+                "identity_check": "TwoIdentifiers",
+                "identity_note": null,
+                "drug_check": "Visual",
+                "second_checked_by": null,
+                "self_administered": false,
+                "variance_reason": null,
+                "prepared_by": null,
+                "prepared_at": null,
+                "preparation": null,
+                "created_at": "2026-09-30T14:47:43.418871+00:00",
+                "row_version": 1
+              },
+              "meta": {
+                "server_time": "2026-09-30T14:47:43.515970+00:00"
+              },
+              "request_id": "bd0063688a934617a25e05866fc87580"
+            }
+          },
+          "errors_seen": [
+            "MEDICATION_ORDER_STOPPED",
+            "PATIENT_IDENTITY_REQUIRED"
+          ],
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "ACCOUNT_LOCKED",
+        "ADMINISTRATION_NOT_AUTHORIZED",
+        "ADMINISTRATION_VARIANCE_REASON_REQUIRED",
+        "DRUG_MISMATCH",
+        "DUAL_CONTROL_SAME_PERSON",
+        "HIGH_ALERT_CHECK_REQUIRED",
+        "MEDICATION_ORDER_INVALID",
+        "MEDICATION_ORDER_STOPPED",
+        "PATIENT_IDENTITY_MISMATCH",
+        "PATIENT_IDENTITY_REQUIRED",
+        "REFERENCE_NOT_FOUND",
+        "SELF_ADMINISTRATION_INVALID",
+        "STEP_UP_REQUIRED",
+        "VALIDATION_ERROR"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:POST /mar/{mar_id}/correction",
+      "call": "POST /api/v1/mar/{mar_id}/correction",
+      "summary": "Correction entry for a charted dose",
+      "happy_path": {
+        "as_one_of": [
+          "head_nurse",
+          "ward_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/mar/7/correction",
+            "body": {
+              "status": "Held",
+              "correction_reason": "charted on the wrong patient"
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "mar_id": 8,
+                "admission_id": 1,
+                "patient_id": 1,
+                "prescription_item_id": 2,
+                "scheduled_at": null,
+                "status": "Held",
+                "administered_at": null,
+                "administered_by": null,
+                "dose_given_text": null,
+                "route_given": null,
+                "status_reason": "charted on the wrong patient",
+                "is_correction": true,
+                "corrects_mar_id": 7,
+                "correction_reason": "charted on the wrong patient",
+                "identity_check": null,
+                "identity_note": null,
+                "drug_check": null,
+                "second_checked_by": null,
+                "self_administered": false,
+                "variance_reason": null,
+                "prepared_by": null,
+                "prepared_at": null,
+                "preparation": null,
+                "created_at": "2026-09-30T14:47:43.550922+00:00",
+                "row_version": 1
+              },
+              "meta": {
+                "server_time": "2026-09-30T14:47:43.577704+00:00"
+              },
+              "request_id": "6aff84e935684b249ba5924b96bcb986"
+            }
+          },
+          "errors_seen": [
+            "NOT_FOUND"
+          ],
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "NOT_FOUND",
+        "VALIDATION_ERROR"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:POST /admissions/{admission_id}/mar/generate",
+      "call": "POST /api/v1/admissions/{admission_id}/mar/generate",
+      "summary": "Generate scheduled doses from active IPD orders (idempotent)",
+      "happy_path": {
+        "as_one_of": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "surgeon",
+          "ward_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/admissions/1/mar/generate"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "created": 0
+              },
+              "meta": {
+                "server_time": "2026-09-27T17:38:29.332220+00:00"
+              },
+              "request_id": "7a1df01de61e4a518adab53ad6783fac"
+            }
+          },
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "billing_admin",
+          "cashier",
+          "clinic_director"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /wards/{ward_id}/inventory",
+      "call": "GET /api/v1/wards/{ward_id}/inventory",
+      "summary": "Ward-local stock",
+      "happy_path": {
+        "as_one_of": [
+          "head_nurse",
+          "pharmacist",
+          "pharmacy_admin",
+          "ward_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/wards/2/inventory"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "drug_id": 1,
+                  "drug_name": "Paracetamol IV",
+                  "batch_id": 1,
+                  "batch_no": "IV1",
+                  "expiry_date": "2099-01-01",
+                  "qty": 3,
+                  "updated_at": "2026-09-30T14:47:42.873629+00:00",
+                  "is_expired": false,
+                  "is_recalled": false
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-30T14:47:42.994102+00:00"
+              },
+              "request_id": "6ca8f9cb1af247c29698301eb3e365f2"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "BATCH_EXPIRED",
+        "BATCH_RECALLED",
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:POST /mar/{mar_id}/prepare",
+      "call": "POST /api/v1/mar/{mar_id}/prepare",
+      "summary": "Prepare a dose and print its label",
+      "happy_path": {
+        "as_one_of": [
+          "head_nurse",
+          "ward_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/mar/1/prepare",
+            "body": {
+              "preparation": "in 500 ml normal saline over 4 hours"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "document_type": "dose_label",
+                "printer_role": "label",
+                "paper_width_mm": 50,
+                "fields": {
+                  "hospital_name": "Haspataal Hospital",
+                  "mar_id": 1,
+                  "patient_name": "Ali Khan",
+                  "mrn": "MRN-2026-000001",
+                  "ward_name": "General Ward",
+                  "bed_label": "GW-1",
+                  "drug_name": "Potassium chloride 15%",
+                  "strength": null,
+                  "dose_text": "10 mmol",
+                  "route": "IV",
+                  "preparation": "in 500 ml normal saline over 4 hours",
+                  "scheduled_at": "2026-10-29T21:42:36.244104+00:00",
+                  "prepared_by_name": "uc1378cbc09",
+                  "prepared_at": "2026-10-29T21:47:37.053121+00:00",
+                  "warnings": [
+                    "HIGH ALERT (concentrated electrolyte): second check before use"
+                  ],
+                  "reprint": false
+                },
+                "text": "Ali Khan\nMRN-2026-000001 General Ward\nGW-1\n--------------------------------\nPotassium chloride 15%\n10 mmol IV\nin 500 ml normal saline over 4\nhours\nDue 30-Oct-2026 02:42\nBy uc1378cbc09 30-Oct-2026 02:47\nHIGH ALERT (concentrated\nelectrolyte): second check\nbefore use\n",
+                "barcode_svg": "<svg version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" width=\"53.840mm\" height=\"12.411mm\">\r\n    <!--Autogenerated with python-barcode 0.16.1-->\r\n    <g id=\"barcode_group\">\r\n        <rect width=\"100%\" height=\"100%\" style=\"fill:white\"/>\r\n        <rect x=\"2.000mm\" y=\"1.000mm\" width=\"0.560mm\" height=\"6.000mm\" style=\"fill:black;\"/>\r\n        <rect x=\"2.840mm\" y=\"1.000mm\" width=\"0.280mm\" height=\"6.000mm\" …",
+                "qr_svg": null,
+                "pdf_url": null
+              },
+              "meta": {
+                "server_time": "2026-10-29T21:47:37.074390+00:00"
+              },
+              "request_id": "b9c22c20b47f4f63ac7637cdae767d51"
+            }
+          },
+          "errors_seen": [
+            "MAR_STATE_INVALID"
+          ],
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "MAR_STATE_INVALID",
+        "VALIDATION_ERROR"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:GET /admissions/{admission_id}/mar/prn-orders",
+      "call": "GET /api/v1/admissions/{admission_id}/mar/prn-orders",
+      "summary": "The PRN orders a dose can be given from",
+      "happy_path": {
+        "as_one_of": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "surgeon",
+          "ward_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/admissions/1/mar/prn-orders"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "prescription_item_id": 2,
+                  "prescription_id": 1,
+                  "prescription_number": "RX-2026-000001",
+                  "destination": "HospitalPharmacy",
+                  "drug_name": "Paracetamol IV",
+                  "strength": null,
+                  "dose_text": "1 g",
+                  "route": "IV",
+                  "interval_hours": null,
+                  "instructions": null,
+                  "high_alert_category": null,
+                  "lasa_with": [],
+                  "self_administration": false,
+                  "start_at": "2026-10-29T21:19:24.449776+00:00",
+                  "end_at": null,
+                  "prescriber_name": "Dr Ahmed",
+                  "last_given_at": null,
+                  "given_last_24h": 0
+                }
+              ],
+              "meta": {
+                "server_time": "2026-10-29T21:24:24.729432+00:00"
+              },
+              "request_id": "426e856a76894215a4e9660a77476685"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "billing_admin",
+          "cashier",
+          "clinic_director"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "NOT_FOUND",
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /mar/{mar_id}/dose-label",
+      "call": "GET /api/v1/mar/{mar_id}/dose-label",
+      "summary": "Print a prepared dose's label again",
+      "happy_path": {
+        "as_one_of": [
+          "head_nurse",
+          "ward_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/mar/1/dose-label"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "document_type": "dose_label",
+                "printer_role": "label",
+                "paper_width_mm": 50,
+                "fields": {
+                  "hospital_name": "Haspataal Hospital",
+                  "mar_id": 1,
+                  "patient_name": "Ali Khan",
+                  "mrn": "MRN-2026-000001",
+                  "ward_name": "General Ward",
+                  "bed_label": "GW-1",
+                  "drug_name": "Potassium chloride 15%",
+                  "strength": null,
+                  "dose_text": "10 mmol",
+                  "route": "IV",
+                  "preparation": "in 500 ml normal saline over 4 hours",
+                  "scheduled_at": "2026-10-29T21:42:36.244104+00:00",
+                  "prepared_by_name": "uc1378cbc09",
+                  "prepared_at": "2026-10-29T21:47:37.053121+00:00",
+                  "warnings": [
+                    "HIGH ALERT (concentrated electrolyte): second check before use"
+                  ],
+                  "reprint": true
+                },
+                "text": "REPRINT of the label\nAli Khan\nMRN-2026-000001 General Ward\nGW-1\n--------------------------------\nPotassium chloride 15%\n10 mmol IV\nin 500 ml normal saline over 4\nhours\nDue 30-Oct-2026 02:42\nBy uc1378cbc09 30-Oct-2026 02:47\nHIGH ALERT (concentrated\nelectrolyte): second check\nbefore use\n",
+                "barcode_svg": "<svg version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" width=\"53.840mm\" height=\"12.411mm\">\r\n    <!--Autogenerated with python-barcode 0.16.1-->\r\n    <g id=\"barcode_group\">\r\n        <rect width=\"100%\" height=\"100%\" style=\"fill:white\"/>\r\n        <rect x=\"2.000mm\" y=\"1.000mm\" width=\"0.560mm\" height=\"6.000mm\" style=\"fill:black;\"/>\r\n        <rect x=\"2.840mm\" y=\"1.000mm\" width=\"0.280mm\" height=\"6.000mm\" …",
+                "qr_svg": null,
+                "pdf_url": null
+              },
+              "meta": {
+                "server_time": "2026-10-29T21:47:37.116525+00:00"
+              },
+              "request_id": "a6825fb8ff724f8b904126d7d5c2631f"
+            }
+          },
+          "errors_seen": [
+            "DOSE_NOT_PREPARED"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "DOSE_NOT_PREPARED",
+        "NOT_FOUND",
+        "VALIDATION_ERROR"
+      ]
+    }
+  ],
+  "service_cases": [
+    {
+      "view": "full",
+      "set_up": "GET /establishment answers views.screens[screen_id=mar].view = full (inpatient): stub that answer, or have the DEV server's admin move the service on Facility settings",
+      "expect": "Show it; every action the user's permissions allow."
+    },
+    {
+      "view": "open_work",
+      "set_up": "GET /establishment answers views.screens[screen_id=mar].view = open_work (inpatient): stub that answer, or have the DEV server's admin move the service on Facility settings",
+      "expect": "The service is Retiring: show it with the banner 'No new <new_work> from now on' and its open work; hide the actions that start new work of it (x-capability-gates; continues_while_retiring ones stay); keep every other action (completing, transferring, settling, correcting)."
+    },
+    {
+      "view": "records",
+      "set_up": "GET /establishment answers views.screens[screen_id=mar].view = records (inpatient): stub that answer, or have the DEV server's admin move the service on Facility settings",
+      "expect": "The service is Retired (or Preparing after it ran): show it as records only, under a 'Records' marker: lists, details, prints and the corrections the server still accepts; no action that starts new work."
+    },
+    {
+      "view": "hidden",
+      "set_up": "GET /establishment answers views.screens[screen_id=mar].view = hidden (inpatient): stub that answer, or have the DEV server's admin move the service on Facility settings",
+      "expect": "Not in any menu: the service has never run here, so the screen has nothing to show."
+    }
+  ],
+  "delivery_gate": {
+    "required": true,
+    "status": "required",
+    "progress_reporting": {
+      "required": true,
+      "submit": "propose_progress",
+      "verify": "progress_proposals",
+      "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+    },
+    "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+    "compulsory": [
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+        "points": 2
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+        "points": 3
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+        "points": 2
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+        "points": 4
+      }
+    ],
+    "zoom": {
+      "min_pct": 100,
+      "max_pct": 250,
+      "reset_pct": 100,
+      "keys": [
+        "Ctrl + or Ctrl = (zoom in)",
+        "Ctrl - (zoom out)",
+        "Ctrl 0 (reset to 100 %)",
+        "Command on macOS"
+      ],
+      "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+    },
+    "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+    "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+  },
+  "handbook_page": "screens/mar",
+  "workspace_guide": "get_handbook_outline('ward_nurse')",
+  "realtime": [
+    {
+      "event": "medication.due",
+      "check": "the screen refreshes without polling"
+    }
+  ],
+  "acceptance_rules": [
+    "Clear the NursingMARVerification discharge stage from the ward once every due dose is charted and the patient's own medicines are handed back (OWN_MEDICINES_HELD lists them).",
+    "'Give' walks the rights (MSDS 64-68): 1) scan the wristband into wristband_code (no scanner: ask the name and the date of birth or MRN, identity_check TwoIdentifiers; an unidentified emergency patient: EmergencyOverride with identity_note); PATIENT_IDENTITY_MISMATCH: STOP, another patient's band. 2) scan the medicine into drug_barcode (DRUG_MISMATCH: STOP) or read its label. 3) the dose, route and time as ordered; anything else (or more than the time window) needs variance_reason (ADMINISTRATION_VARIANCE_REASON_REQUIRED).",
+    "A high-alert medicine (high_alert_category set: red badge; lasa_with: 'looks like …') needs a second nurse or doctor at the bedside: they check independently and type their username and password (second_checker_username/_password; HIGH_ALERT_CHECK_REQUIRED without). A nurse without a PNC registration cannot give doses (ADMINISTRATION_NOT_AUTHORIZED).",
+    "'Prepare' before drawing up an injection or infusion: POST /mar/{mar_id}/prepare (what it is diluted in) prints the label to stick on the syringe or bag before preparing the next one (MSDS 63).",
+    "self_administration lines: the patient takes it; chart it with self_administered true.",
+    "Anything other than Administered requires status_reason.",
+    "Doses given from ward stock: pass ward_stock_batch_id + qty (BATCH_EXPIRED, BATCH_RECALLED: take another batch).",
+    "'Give a PRN dose': pick the line from GET /admissions/{admission_id}/mar/prn-orders (the medicine, dose, route, interval_hours, instructions, last_given_at and given_last_24h: show them before giving), never a typed id; then the same rights as a scheduled dose, POST /admissions/{admission_id}/mar/prn with an Idempotency-Key. MEDICATION_ORDER_STOPPED: the order was stopped meanwhile, refresh the list.",
+    "'Reprint label' on a prepared dose (prepared_at set): GET /mar/{mar_id}/dose-label prints the recorded label again, marked REPRINT; never prepare the dose again to get a label, and never rebuild one on the terminal. DOSE_NOT_PREPARED: prepare it first.",
+    "Exists for the service inpatient (work): show it as GET /establishment views.screens says for screen_id mar (full; open_work: without its new work, with the banner \"No new ... from now on\"; records: history and corrections only; setup: only from Facility settings; hidden: in no menu), after login and again on establishment.changed. Never decide it from the profile's category."
+  ],
+  "demo_accounts": "demo_accounts() lists a login per role; sandbox_call runs each case on the DEV server"
+}

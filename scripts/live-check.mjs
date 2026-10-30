@@ -10,6 +10,7 @@ let token;
 const { validate } = require("../electron/contract.cjs");
 const bundles = fs
   .readdirSync("contracts")
+  .filter(n=>n.endsWith('.json'))
   .map((n) => JSON.parse(fs.readFileSync("contracts/" + n, "utf8")));
 const schemas = Object.assign({}, ...bundles.map((b) => b.schemas || {}));
 const operations = bundles.flatMap((b) => b.endpoints || []);

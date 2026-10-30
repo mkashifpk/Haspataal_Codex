@@ -16,193 +16,193 @@ mar: {
   purpose: "At the bedside the registered nurse checks the actual patient and ordered medicine, charts the actual outcome and preserves its history. A label is prepared before the next medicine. Draft Urdu needs native clinical review.",
   purposeUr: "مریض کے پاس رجسٹرڈ نرس اصل شناخت اور دوا کا حکم چیک، اصل نتیجہ درج اور تاریخ محفوظ کرے۔ اگلی دوا سے پہلے لیبل بنائیں۔ اردو طبی جائزے تک مسودہ ہے۔",
   steps: [
-    "Open Medication administration record from Ward Nursing or the actual patient on My beds this shift. Choose a ward patient or Other permitted live admissions; filter by name/MRN. Verify name/MRN, age or date of birth, allergies and flags; bed is location, never identity. Refresh medication record rereads MAR, orders, stock and discharge. Due/Overdue comes from the server. Empty means no returned doses, not that no medicine was ordered. Errors remain visible. Events refresh without polling; an open draft remains but must be rereviewed.",
-    "PRN and ad-hoc ordered medicines lists prescriptions from the patient's real clinical history. Select its returned prescription number: the app verifies this patient and this admission before showing active lines. A prescription from another stay is refused as a source. Read medicine, dose, route, frequency, instructions, high-alert and look-alike warnings. Choose Record ordered PRN dose or Record ordered ad-hoc dose on that line; never type an order identifier or substitute a different line because it has the same medicine. If history permission is missing, ask the responsible prescriber.",
-    "Generate missing scheduled doses uses actual active inpatient orders and adds only missing scheduled doses. It never writes a prescription or repeats an administration. Review and Confirm MAR action once. A lost reply is reconciled with Read current result; do not repeatedly generate to recover another failed action. PRN orders have no schedule: use the ordered-medicine picker.",
-    "For an Administered or PRN dose choose Patient identity method. Scan wristband focuses the dedicated field: scan its actual code. Without a scanner, ask name and date of birth or MRN, then choose Asked name and DOB or MRN. For an unidentified Emergency or Code Red admission only, Emergency override needs the actual explanation. Identity mismatch means STOP: do not give the dose; recheck the patient and order. Never copy a band from a different patient.",
-    "Scan medicine pack in its dedicated field or tick I checked the actual medicine label after checking it. Drug mismatch means STOP and recheck. Actual dose text and Actual route start from the selected order; review them against what actually happened. A different dose/route or time outside the hospital window needs a Dose / route / time variance reason; the server decides its window. High-alert and Looks or sounds like warnings stay visible on the source line.",
-    "Chart scheduled dose opens the selected actual row. Choose Actual dose outcome: Administered, Held, Refused, Missed or Cancelled. Every outcome except Administered requires the reason. For Administered complete the patient and medicine checks, confirm ordered self-administration where applicable, and record any variance. This records an actual outcome; pressing a button never gives a medicine. Confirm once. A scheduled chart is state guarded: after a lost reply only reread and reconcile, never automatic replay. MAR_STATE_INVALID means read its current status and append a correction if needed.",
-    "Choose the exact active order line, preferably from PRN and ad-hoc ordered medicines, and read its frequency and instructions. Record the actual indication in Outcome reason / PRN indication / clearance note, then the same patient/medicine/second-check requirements as scheduled administration. This creates one new dose with its own action key. After a lost reply Retry original request only for the unchanged action; a new key is another dose. High-alert co-signer credentials are never kept for retry: read and reconcile its result instead.",
-    "At the bedside a different registered nurse or doctor independently checks the high-alert dose. In the confirmation dialog they tick the independent check and type their own Second checker username and password. The app clears both immediately on submission/close; neither belongs in notes, stored preferences, logs or a retry draft. Same person, missing check, wrong password, locked account or missing clinical authorisation remain visible server refusals. Do not repeatedly guess a password or borrow another identity.",
-    "Only the doctor can allow self-administration on the source order. The patient takes it: tick The patient took this medicine themselves as ordered. An ordinary nurse-administered line cannot be made self-administered here. The server may refuse with SELF_ADMINISTRATION_INVALID; keep the input and ask the prescriber to clarify the allowed order. Never change the checkbox to hide what actually happened.",
-    "Ward stock lists actual batch number, quantity and expiry, including Expired and Recalled warnings. For a scheduled Administered dose choose Ward stock batch (optional) only when actually taking it from that stock, then a positive Ward stock quantity. Expired/recalled/empty rows are unavailable. The backend checks medicine identity and availability. BATCH_EXPIRED, BATCH_RECALLED or INSUFFICIENT_STOCK rereads stock, preserves input and requires another reviewed choice; no automatic retry. PRN does not accept ward-stock fields in its contract.",
-    "Before drawing up an injection or infusion, Prepare and label selects that actual scheduled dose. Enter Preparation / diluent / rate as actually ordered; review and confirm once. The server returns its patient, medicine, dose, route, preparation, preparer/time and warnings label. Print / reprint saved label before preparing the next one. Preparation is not administration. A repeat preparation is refused; a lost reply uses the original key, never a new preparation.",
-    "Print / reprint saved label uses only the original authenticated server label, with the terminal's label-printer mapping. A cancelled or unavailable printer does not undo preparation or chart a dose. Check whether a label already emerged, correct the printer and reprint this same label. Never press Prepare again or administer again to print. If the original label is unavailable after a session restart, stop and ask the responsible team to reconcile; no guessed label is generated.",
-    "Correct dose record copies the actual order context into a separate correction draft. Choose the corrected outcome and actual dose/route/time, explain the status and supply Correction reason3–500characters. Review and confirm: the server appends a new record linked to the original. All authors/times/reasons remain; the superseded original is struck. No Edit/Delete and no replacement medication administration. Permitted corrections remain in Records view.",
-    "Enter actual hospital administration time uses the hospital timezone shown by the terminal, not the laptop timezone. Otherwise the backend supplies server time. Use the actual administration time and explain a variance when required; never infer administration from the scheduled time. A correction is a new factual documentation entry. The app refuses unavailable or ambiguous hospital time instead of guessing.",
-    "Outcome reason / PRN indication / clearance note means the factual reason for Held/Refused/Missed/Cancelled, the actual indication for PRN, or the nursing clearance note for a discharge. It does not replace a variance reason, identity explanation or correction reason: those are separate checks. A validation error stays beside its field and typed values remain.",
-    "Nursing discharge verification shows whether discharge started, its blocked stage and the current Nursing stage, officer and time. Clear only when NursingMARVerification is due, every due dose has an actual outcome and the patient's own medicines are handed back or properly disposed of in the separate own-medicines workflow. OWN_MEDICINES_HELD lists what remains. Already Cleared means already done; DISCHARGE_STAGE_IMMUTABLE rereads who/when. OUT_OF_ORDER means another stage is waiting, not already cleared. A not-started/cancelled discharge is not allowed. No automatic retry, including a lost answer: read current discharge status.",
-    "Tick I verified this patient, order and actual outcome, Review MAR action, compare patient/line/body, then Confirm MAR action once. Back to MAR input retains values; Close asks before discarding. Navigation and fields lock while an outcome is unknown. Read current result, compare actual status/history, then Result reviewed; return to draft. Read latest MAR and keep input adopts fresh context and requires a new acknowledgement; it never sends a write. Scheduled chart/generation/clearance never offer replay. PRN/correction/preparation without transient co-signing use only the original action key.",
-    "Every refusal is handled by its code, never message wording. State, identity, medicine and batch refusals reread the record and keep input. Correct the cause and review afresh; a server answer can still refuse after local checks. No offline queue or automatic clinical retry. A true high-alert co-signature is never saved for replay. F1 opens this page from fields/dialogs without losing the draft, restores focus; shared keyboard/Settings zoom is100–250%. Urdu and human journey acceptance are pending."
-  ],
+  "Open Medication administration record from Ward Nursing or the actual patient on My beds this shift. Choose a ward patient or Other permitted live admissions; filter by name/MRN. Verify name/MRN, age or date of birth, allergies and flags; bed is location, never identity. Refresh medication record rereads MAR, orders, stock and discharge. Due/Overdue comes from the server. Empty means no returned doses, not that no medicine was ordered. Errors remain visible. Events refresh without polling; an open draft remains but must be rereviewed.",
+  "Give a PRN dose lists this admission’s active PRN orders directly. Read the medicine, strength, dose, route, instructions, minimum interval_hours, last_given_at and given_last_24h before choosing the returned line. No patient-history or prescription lookup and no typed identifier is needed. MEDICATION_ORDER_STOPPED means refresh the list and select a current order; never give from the stopped line. Patient identity, medicine and high-alert checks still apply.",
+  "Generate missing scheduled doses uses actual active inpatient orders and adds only missing scheduled doses. It never writes a prescription or repeats an administration. Review and Confirm MAR action once. A lost reply is reconciled with Read current result; do not repeatedly generate to recover another failed action. PRN orders have no schedule: use the ordered-medicine picker.",
+  "For an Administered or PRN dose choose Patient identity method. Scan wristband focuses the dedicated field: scan its actual code. Without a scanner, ask name and date of birth or MRN, then choose Asked name and DOB or MRN. For an unidentified Emergency or Code Red admission only, Emergency override needs the actual explanation. Identity mismatch means STOP: do not give the dose; recheck the patient and order. Never copy a band from a different patient.",
+  "Scan medicine pack in its dedicated field or tick I checked the actual medicine label after checking it. Drug mismatch means STOP and recheck. Actual dose text and Actual route start from the selected order; review them against what actually happened. A different dose/route or time outside the hospital window needs a Dose / route / time variance reason; the server decides its window. High-alert and Looks or sounds like warnings stay visible on the source line.",
+  "Chart scheduled dose opens the selected actual row. Choose Actual dose outcome: Administered, Held, Refused, Missed or Cancelled. Every outcome except Administered requires the reason. For Administered complete the patient and medicine checks, confirm ordered self-administration where applicable, and record any variance. This records an actual outcome; pressing a button never gives a medicine. Confirm once. A scheduled chart is state guarded: after a lost reply only reread and reconcile, never automatic replay. MAR_STATE_INVALID means read its current status and append a correction if needed.",
+  "Give a PRN dose lists this admission’s active PRN orders directly. Read the medicine, strength, dose, route, instructions, minimum interval_hours, last_given_at and given_last_24h before choosing the returned line. No patient-history or prescription lookup and no typed identifier is needed. MEDICATION_ORDER_STOPPED means refresh the list and select a current order; never give from the stopped line. Patient identity, medicine and high-alert checks still apply.",
+  "At the bedside a different registered nurse or doctor independently checks the high-alert dose. In the confirmation dialog they tick the independent check and type their own Second checker username and password. The app clears both immediately on submission/close; neither belongs in notes, stored preferences, logs or a retry draft. Same person, missing check, wrong password, locked account or missing clinical authorisation remain visible server refusals. Do not repeatedly guess a password or borrow another identity.",
+  "Only the doctor can allow self-administration on the source order. The patient takes it: tick The patient took this medicine themselves as ordered. An ordinary nurse-administered line cannot be made self-administered here. The server may refuse with SELF_ADMINISTRATION_INVALID; keep the input and ask the prescriber to clarify the allowed order. Never change the checkbox to hide what actually happened.",
+  "Ward stock lists actual batch number, quantity and expiry, including Expired and Recalled warnings. For a scheduled Administered dose choose Ward stock batch (optional) only when actually taking it from that stock, then a positive Ward stock quantity. Expired/recalled/empty rows are unavailable. The backend checks medicine identity and availability. BATCH_EXPIRED, BATCH_RECALLED or INSUFFICIENT_STOCK rereads stock, preserves input and requires another reviewed choice; no automatic retry. PRN does not accept ward-stock fields in its contract.",
+  "Prepare and label records the actual preparation once and returns the original server label. Preparation is separate from administration. The prepared row then offers Reprint recorded preparation; printing uses the read-only server label and never repeats preparation.",
+  "Reprint recorded preparation reads the server’s prepared-dose label, including after signing out or restarting the terminal. It is marked REPRINT and keeps the recorded preparer, time and preparation. A printer cancellation or failure changes no clinical record: fix the printer and reprint. No terminal label cache or preparation key is needed. DOSE_NOT_PREPARED means prepare first; never repeat preparation or administration to recover paper.",
+  "Correct dose record copies the actual order context into a separate correction draft. Choose the corrected outcome and actual dose/route/time, explain the status and supply Correction reason3–500characters. Review and confirm: the server appends a new record linked to the original. All authors/times/reasons remain; the superseded original is struck. No Edit/Delete and no replacement medication administration. Permitted corrections remain in Records view.",
+  "Enter actual hospital administration time uses the hospital timezone shown by the terminal, not the laptop timezone. Otherwise the backend supplies server time. Use the actual administration time and explain a variance when required; never infer administration from the scheduled time. A correction is a new factual documentation entry. The app refuses unavailable or ambiguous hospital time instead of guessing.",
+  "Outcome reason / PRN indication / clearance note means the factual reason for Held/Refused/Missed/Cancelled, the actual indication for PRN, or the nursing clearance note for a discharge. It does not replace a variance reason, identity explanation or correction reason: those are separate checks. A validation error stays beside its field and typed values remain.",
+  "Nursing discharge verification shows whether discharge started, its blocked stage and the current Nursing stage, officer and time. Clear only when NursingMARVerification is due, every due dose has an actual outcome and the patient's own medicines are handed back or properly disposed of in the separate own-medicines workflow. OWN_MEDICINES_HELD lists what remains. Already Cleared means already done; DISCHARGE_STAGE_IMMUTABLE rereads who/when. OUT_OF_ORDER means another stage is waiting, not already cleared. A not-started/cancelled discharge is not allowed. No automatic retry, including a lost answer: read current discharge status.",
+  "Tick I verified this patient, order and actual outcome, Review MAR action, compare patient/line/body, then Confirm MAR action once. Back to MAR input retains values; Close asks before discarding. Navigation and fields lock while an outcome is unknown. Read current result, compare actual status/history, then Result reviewed; return to draft. Read latest MAR and keep input adopts fresh context and requires a new acknowledgement; it never sends a write. Scheduled chart/generation/clearance never offer replay. PRN/correction/preparation without transient co-signing use only the original action key.",
+  "Every refusal is handled by its code, never message wording. State, identity, medicine and batch refusals reread the record and keep input. Correct the cause and review afresh; a server answer can still refuse after local checks. No offline queue or automatic clinical retry. A true high-alert co-signature is never saved for replay. F1 opens this page from fields/dialogs without losing the draft, restores focus; shared keyboard/Settings zoom is100–250%. Urdu and human journey acceptance are pending."
+],
   stepsUr: [
-    "وارڈ نرسنگ یا میرے بستر کے اصل مریض سے دوا ریکارڈ کھولیں۔ مریض یا مجاز جاری داخلہ چنیں؛ نام یا ایم آر این سے تلاش۔ شناخت، عمر یا پیدائش، الرجی اور علامات چیک؛ بستر شناخت نہیں۔ تازہ دوا ریکارڈ اصل چارٹ، احکام، اسٹاک اور ڈسچارج پڑھے۔ تاخیر سرور سے۔ خالی یعنی خوراک نہیں آئی، دوا کا حکم نہ ہونا نہیں۔ غلطی نظر آئے، واقعے پر بغیر پولنگ تازہ، مسودہ محفوظ مگر نیا جائزہ لازم۔",
-    "حسب ضرورت احکام مریض کی اصل طبی تاریخ سے آئیں۔ واپس آیا نسخہ نمبر چنیں؛ مریض اور یہی داخلہ ملنے کے بعد جاری سطور دکھیں۔ دوسرے داخلے کا نسخہ بطور اصل نہیں۔ دوا، خوراک، راستہ، تکرار، ہدایات اور خطرہ چیک۔ عین حکم کی حسب ضرورت یا اضافی خوراک چنیں؛ نمبر خود نہ لکھیں اور یکساں دوا کی دوسری سطر نہ بدلیں۔ تاریخ کی اجازت نہ ہو تو ذمہ دار ڈاکٹر سے کہیں۔",
-    "غائب مقرر خوراکیں اصل جاری داخلہ احکام سے صرف غائب شیڈول بناتی ہیں۔ نیا نسخہ یا دوا دینا نہیں۔ جائزہ پھر ایک بار تصدیق۔ گم جواب پر موجودہ نتیجہ پڑھیں؛ دوسرے ناکام عمل کی بحالی کو اسے نہ دہرائیں۔ حسب ضرورت کا شیڈول نہیں، اصل حکم چنیں۔",
-    "دی گئی یا حسب ضرورت خوراک میں شناخت کا طریقہ چنیں۔ پٹی کا اصل کوڈ اسی خانے میں اسکین کریں۔ اسکینر نہ ہو تو نام اور پیدائش یا ایم آر این پوچھ کر متعلقہ انتخاب کریں۔ صرف نامعلوم ہنگامی یا کوڈ ریڈ داخلے میں وجہ سمیت ہنگامی شناخت۔ شناخت مختلف تو رکیں، خوراک نہ دیں، مریض اور حکم پھر چیک؛ دوسری پٹی نقل نہیں۔",
-    "دوا پیک متعلقہ خانے میں اسکین یا اصل لیبل چیک کے بعد نشان لگائیں۔ دوا مختلف تو رک کر پھر چیک۔ خوراک اور راستہ اصل حکم سے شروع، اصل نتیجے سے ملائیں۔ خوراک، راستہ یا ہسپتال کی وقت حد سے فرق پر وجہ لکھیں؛ حد سرور طے کرے۔ زیادہ خطرہ اور ملتے نام اصل سطر پر رہیں۔",
-    "مقرر خوراک کی اصل سطر کھول کر دی گئی، روکی، انکار، چھوٹی یا منسوخ کا اصل نتیجہ چنیں۔ دی گئی کے سوا وجہ لازم۔ دی گئی میں شناخت، دوا اور مجاز خود لینے کی تصدیق و فرق کی وجہ۔ بٹن دوا نہیں دیتا، اصل نتیجہ درج کرتا ہے۔ ایک تصدیق۔ گم جواب پر صرف پڑھ کر نتیجہ ملائیں، خودکار تکرار نہیں۔ حالت انکار پر اصل حالت پڑھیں، ضرورت پر الگ تصحیح۔",
-    "عین جاری حکم، اس کی تکرار اور ہدایات چیک کرکے حسب ضرورت خوراک چنیں۔ اصل ضرورت وجہ والے خانے میں لکھیں، پھر مقرر خوراک والی شناخت، دوا اور دوسری جانچ۔ ایک نئی خوراک اپنی اصل کلید سے۔ گم جواب پر صرف وہی غیر تبدیل درخواست، نئی کلید نئی خوراک ہے۔ زیادہ خطرے کی دوسری تصدیق محفوظ نہیں ہوتی؛ نتیجہ پڑھ کر ملائیں۔",
-    "مریض کے پاس الگ رجسٹرڈ نرس یا ڈاکٹر خود جانچ کرے۔ تصدیق مکالمے میں جانچ کا نشان اور اپنا صارف نام و پاس ورڈ لکھے۔ ارسال یا بند پر فوراً خالی؛ نوٹ، ترتیب، لاگ یا دوبارہ مسودے میں نہیں۔ وہی شخص، نامکمل جانچ، غلط پاس ورڈ، بند اکاؤنٹ یا طبی اجازت نہ ہونا سرور کے انکار ہیں۔ پاس ورڈ اندازہ یا دوسری شناخت نہ لیں۔",
-    "صرف ڈاکٹر اصل حکم میں خود لینے کی اجازت دے۔ مریض نے خود لی تو اسی اصل انتخاب کی تصدیق کریں۔ عام نرس والی سطر یہاں خود لینے میں بدل نہیں سکتی۔ سرور انکار کرے تو معلومات رکھ کر ڈاکٹر سے مجاز حکم واضح کرائیں۔ اصل نتیجہ چھپانے کو نشان نہ بدلیں۔",
-    "وارڈ اسٹاک میں اصل بیچ، مقدار، میعاد اور ختم یا واپس طلب خطرے دکھیں۔ واقعی اسی اسٹاک سے مقرر دی گئی خوراک میں اصل بیچ اور مثبت مقدار چنیں۔ ختم، واپس طلب یا خالی بند۔ دوا اور مقدار سرور چیک کرے۔ انکار پر تازہ اسٹاک، محفوظ معلومات، نئے جائزے سے دوسرا انتخاب؛ خودکار ارسال نہیں۔ حسب ضرورت درخواست وارڈ بیچ نہیں لیتی۔",
-    "انجیکشن یا محلول تیار کرنے سے پہلے اصل مقرر خوراک کی تیاری اور لیبل چنیں۔ اصل تیاری، محلول و رفتار لکھ کر ایک تصدیق۔ سرور اصل مریض، دوا، خوراک، راستہ، تیار کنندہ و وقت اور خطرے کا لیبل دے۔ اگلی تیاری سے پہلے محفوظ لیبل چھاپیں۔ تیاری دوا دینا نہیں۔ دوبارہ تیاری انکار؛ گم جواب اصل کلید سے، نئی تیاری نہیں۔",
-    "محفوظ لیبل صرف اصل سرور جواب اور ٹرمینل کے لیبل پرنٹر سے چھپتا ہے۔ منسوخ یا خراب پرنٹر تیاری واپس یا خوراک درج نہیں کرتا۔ نکلے کاغذ کو چیک، پرنٹر درست، یہی لیبل دوبارہ۔ پرنٹ کے لیے تیاری یا دوا نہ دہرائیں۔ سیشن بدلنے پر اصل لیبل نہ ملے تو رک کر متعلقہ ٹیم سے نتیجہ ملائیں، فرضی لیبل نہیں۔",
-    "خوراک کی تصحیح اصل حکم کے ساتھ الگ مسودہ بناتی ہے۔ درست نتیجہ، اصل خوراک، راستہ و وقت، حالت کی وضاحت اور3تا500حروف وجہ لکھیں۔ جائزہ و تصدیق الگ مربوط اندراج بڑھائے۔ تمام مصنف، وقت و وجہ، پرانا لکیر سمیت برقرار۔ ترمیم یا حذف اور دوا دوبارہ دینا نہیں۔ ریکارڈ حالت میں مجاز تصحیح برقرار۔",
-    "اصل دوا وقت ہسپتال کے علاقے سے، لیپ ٹاپ سے نہیں۔ ورنہ سرور وقت دے۔ اصل وقت اور لازم فرق کی وجہ لکھیں؛ مقرر وقت سے دی گئی دوا فرض نہیں۔ تصحیح نئی اصل دستاویز۔ نامعلوم یا مبہم وقت اندازہ نہیں۔",
-    "نتیجے یا کلیئرنس نوٹ میں روک، انکار، چھوٹی یا منسوخ کی اصل وجہ، حسب ضرورت کی اصل ضرورت یا ڈسچارج نرسنگ نوٹ لکھیں۔ یہ فرق، شناخت یا تصحیح کی الگ وجہ کی جگہ نہیں۔ خانے کی غلطی اسی جگہ، قدریں محفوظ۔",
-    "ڈسچارج نرسنگ حصہ آغاز، رکا مرحلہ، اصل نرسنگ حالت، افسر ووقت دکھائے۔ اپنی باری، ہر واجب خوراک کا اصل نتیجہ، اور ذاتی دواؤں کی واپسی یا الگ مجاز تلفی کے بعد کلیئر کریں۔ ذاتی دوا انکار میں باقی فہرست آئے۔ پہلے کلیئر یعنی کام ہو چکا، افسر ووقت پھر پڑھیں۔ ترتیب انکار یعنی دوسرا مرحلہ باقی، پہلے کلیئر نہیں۔ غیر شروع یا منسوخ ڈسچارج نہیں۔ گم جواب سمیت خودکار تکرار نہیں، اصل حالت پڑھیں۔",
-    "مریض، حکم اور اصل نتیجہ چیک کا نشان، دوا عمل جائزہ، شناخت و سطر ملائیں، پھر ایک تصدیق۔ واپس معلومات رکھے، بند پر چھوڑنے کی تصدیق۔ نامعلوم نتیجے پر خانے اور جگہ بدلنا مقفل۔ موجودہ نتیجہ اور تاریخ ملائیں، پھر مسودے پر واپس۔ تازہ ریکارڈ صرف پڑھتا، نیا نشان لازم، ارسال نہیں۔ مقرر خوراک، شیڈول اور کلیئرنس دوبارہ نہیں۔ حسب ضرورت، تصحیح و تیاری اصل کلید سے، دوسری تصدیق محفوظ نہیں۔",
-    "انکار ہمیشہ کوڈ سے، متن سے اندازہ نہیں۔ حالت، شناخت، دوا یا بیچ پر اصل ریکارڈ پڑھیں، معلومات رکھیں۔ وجہ درست کرکے تازہ جائزہ؛ مقامی جانچ کے بعد بھی سرور روک سکتا ہے۔ آف لائن قطار یا خودکار طبی ارسال نہیں۔ دوسری تصدیق دوبارہ کے لیے محفوظ نہیں۔ ایف ون خانے و مکالمے سے مسودہ و فوکس رکھے؛ مشترک سائز100تا250۔ اردو اور انسانی قبولیت باقی۔"
-  ],
+  "وارڈ نرسنگ یا میرے بستر کے اصل مریض سے دوا ریکارڈ کھولیں۔ مریض یا مجاز جاری داخلہ چنیں؛ نام یا ایم آر این سے تلاش۔ شناخت، عمر یا پیدائش، الرجی اور علامات چیک؛ بستر شناخت نہیں۔ تازہ دوا ریکارڈ اصل چارٹ، احکام، اسٹاک اور ڈسچارج پڑھے۔ تاخیر سرور سے۔ خالی یعنی خوراک نہیں آئی، دوا کا حکم نہ ہونا نہیں۔ غلطی نظر آئے، واقعے پر بغیر پولنگ تازہ، مسودہ محفوظ مگر نیا جائزہ لازم۔",
+  "حسب ضرورت خوراک اسی داخلے کے فعال احکام سے چنیں۔ دوا، طاقت، خوراک، راستہ، ہدایت، کم از کم وقفہ، آخری خوراک اور گزشتہ24گھنٹے کی تعداد پڑھیں۔ تاریخ یا نسخہ تلاش اور نمبر ٹائپ کرنا لازم نہیں۔ بند حکم کے انکار پر فہرست تازہ کریں؛ اس سطر سے خوراک نہ دیں۔ مریض، دوا اور خطرے کی جانچ لازم ہے۔",
+  "غائب مقرر خوراکیں اصل جاری داخلہ احکام سے صرف غائب شیڈول بناتی ہیں۔ نیا نسخہ یا دوا دینا نہیں۔ جائزہ پھر ایک بار تصدیق۔ گم جواب پر موجودہ نتیجہ پڑھیں؛ دوسرے ناکام عمل کی بحالی کو اسے نہ دہرائیں۔ حسب ضرورت کا شیڈول نہیں، اصل حکم چنیں۔",
+  "دی گئی یا حسب ضرورت خوراک میں شناخت کا طریقہ چنیں۔ پٹی کا اصل کوڈ اسی خانے میں اسکین کریں۔ اسکینر نہ ہو تو نام اور پیدائش یا ایم آر این پوچھ کر متعلقہ انتخاب کریں۔ صرف نامعلوم ہنگامی یا کوڈ ریڈ داخلے میں وجہ سمیت ہنگامی شناخت۔ شناخت مختلف تو رکیں، خوراک نہ دیں، مریض اور حکم پھر چیک؛ دوسری پٹی نقل نہیں۔",
+  "دوا پیک متعلقہ خانے میں اسکین یا اصل لیبل چیک کے بعد نشان لگائیں۔ دوا مختلف تو رک کر پھر چیک۔ خوراک اور راستہ اصل حکم سے شروع، اصل نتیجے سے ملائیں۔ خوراک، راستہ یا ہسپتال کی وقت حد سے فرق پر وجہ لکھیں؛ حد سرور طے کرے۔ زیادہ خطرہ اور ملتے نام اصل سطر پر رہیں۔",
+  "مقرر خوراک کی اصل سطر کھول کر دی گئی، روکی، انکار، چھوٹی یا منسوخ کا اصل نتیجہ چنیں۔ دی گئی کے سوا وجہ لازم۔ دی گئی میں شناخت، دوا اور مجاز خود لینے کی تصدیق و فرق کی وجہ۔ بٹن دوا نہیں دیتا، اصل نتیجہ درج کرتا ہے۔ ایک تصدیق۔ گم جواب پر صرف پڑھ کر نتیجہ ملائیں، خودکار تکرار نہیں۔ حالت انکار پر اصل حالت پڑھیں، ضرورت پر الگ تصحیح۔",
+  "حسب ضرورت خوراک اسی داخلے کے فعال احکام سے چنیں۔ دوا، طاقت، خوراک، راستہ، ہدایت، کم از کم وقفہ، آخری خوراک اور گزشتہ24گھنٹے کی تعداد پڑھیں۔ تاریخ یا نسخہ تلاش اور نمبر ٹائپ کرنا لازم نہیں۔ بند حکم کے انکار پر فہرست تازہ کریں؛ اس سطر سے خوراک نہ دیں۔ مریض، دوا اور خطرے کی جانچ لازم ہے۔",
+  "مریض کے پاس الگ رجسٹرڈ نرس یا ڈاکٹر خود جانچ کرے۔ تصدیق مکالمے میں جانچ کا نشان اور اپنا صارف نام و پاس ورڈ لکھے۔ ارسال یا بند پر فوراً خالی؛ نوٹ، ترتیب، لاگ یا دوبارہ مسودے میں نہیں۔ وہی شخص، نامکمل جانچ، غلط پاس ورڈ، بند اکاؤنٹ یا طبی اجازت نہ ہونا سرور کے انکار ہیں۔ پاس ورڈ اندازہ یا دوسری شناخت نہ لیں۔",
+  "صرف ڈاکٹر اصل حکم میں خود لینے کی اجازت دے۔ مریض نے خود لی تو اسی اصل انتخاب کی تصدیق کریں۔ عام نرس والی سطر یہاں خود لینے میں بدل نہیں سکتی۔ سرور انکار کرے تو معلومات رکھ کر ڈاکٹر سے مجاز حکم واضح کرائیں۔ اصل نتیجہ چھپانے کو نشان نہ بدلیں۔",
+  "وارڈ اسٹاک میں اصل بیچ، مقدار، میعاد اور ختم یا واپس طلب خطرے دکھیں۔ واقعی اسی اسٹاک سے مقرر دی گئی خوراک میں اصل بیچ اور مثبت مقدار چنیں۔ ختم، واپس طلب یا خالی بند۔ دوا اور مقدار سرور چیک کرے۔ انکار پر تازہ اسٹاک، محفوظ معلومات، نئے جائزے سے دوسرا انتخاب؛ خودکار ارسال نہیں۔ حسب ضرورت درخواست وارڈ بیچ نہیں لیتی۔",
+  "تیاری اور لیبل اصل تیاری ایک بار درج اور اصل سرور لیبل واپس دیتا ہے۔ تیاری دوا دینا نہیں۔ تیار سطر سے درج تیاری کا لیبل دوبارہ پڑھیں؛ پرنٹ صرف سرور سے پڑھتا اور تیاری نہیں دہراتا۔",
+  "درج تیاری کا لیبل دوبارہ سرور سے پڑھیں، نشست یا ٹرمینل دوبارہ کھولنے کے بعد بھی۔ لیبل پر REPRINT اور اصل تیار کرنے والا، وقت و تیاری رہتی ہے۔ پرنٹر کی منسوخی یا خرابی طبی ریکارڈ نہیں بدلتی؛ پرنٹر درست کر کے لیبل دوبارہ۔ مقامی محفوظ لیبل یا تیاری کلید لازم نہیں۔ غیر تیار خوراک پہلے تیار کریں؛ کاغذ کے لیے تیاری یا دوا نہ دہرائیں۔",
+  "خوراک کی تصحیح اصل حکم کے ساتھ الگ مسودہ بناتی ہے۔ درست نتیجہ، اصل خوراک، راستہ و وقت، حالت کی وضاحت اور3تا500حروف وجہ لکھیں۔ جائزہ و تصدیق الگ مربوط اندراج بڑھائے۔ تمام مصنف، وقت و وجہ، پرانا لکیر سمیت برقرار۔ ترمیم یا حذف اور دوا دوبارہ دینا نہیں۔ ریکارڈ حالت میں مجاز تصحیح برقرار۔",
+  "اصل دوا وقت ہسپتال کے علاقے سے، لیپ ٹاپ سے نہیں۔ ورنہ سرور وقت دے۔ اصل وقت اور لازم فرق کی وجہ لکھیں؛ مقرر وقت سے دی گئی دوا فرض نہیں۔ تصحیح نئی اصل دستاویز۔ نامعلوم یا مبہم وقت اندازہ نہیں۔",
+  "نتیجے یا کلیئرنس نوٹ میں روک، انکار، چھوٹی یا منسوخ کی اصل وجہ، حسب ضرورت کی اصل ضرورت یا ڈسچارج نرسنگ نوٹ لکھیں۔ یہ فرق، شناخت یا تصحیح کی الگ وجہ کی جگہ نہیں۔ خانے کی غلطی اسی جگہ، قدریں محفوظ۔",
+  "ڈسچارج نرسنگ حصہ آغاز، رکا مرحلہ، اصل نرسنگ حالت، افسر ووقت دکھائے۔ اپنی باری، ہر واجب خوراک کا اصل نتیجہ، اور ذاتی دواؤں کی واپسی یا الگ مجاز تلفی کے بعد کلیئر کریں۔ ذاتی دوا انکار میں باقی فہرست آئے۔ پہلے کلیئر یعنی کام ہو چکا، افسر ووقت پھر پڑھیں۔ ترتیب انکار یعنی دوسرا مرحلہ باقی، پہلے کلیئر نہیں۔ غیر شروع یا منسوخ ڈسچارج نہیں۔ گم جواب سمیت خودکار تکرار نہیں، اصل حالت پڑھیں۔",
+  "مریض، حکم اور اصل نتیجہ چیک کا نشان، دوا عمل جائزہ، شناخت و سطر ملائیں، پھر ایک تصدیق۔ واپس معلومات رکھے، بند پر چھوڑنے کی تصدیق۔ نامعلوم نتیجے پر خانے اور جگہ بدلنا مقفل۔ موجودہ نتیجہ اور تاریخ ملائیں، پھر مسودے پر واپس۔ تازہ ریکارڈ صرف پڑھتا، نیا نشان لازم، ارسال نہیں۔ مقرر خوراک، شیڈول اور کلیئرنس دوبارہ نہیں۔ حسب ضرورت، تصحیح و تیاری اصل کلید سے، دوسری تصدیق محفوظ نہیں۔",
+  "انکار ہمیشہ کوڈ سے، متن سے اندازہ نہیں۔ حالت، شناخت، دوا یا بیچ پر اصل ریکارڈ پڑھیں، معلومات رکھیں۔ وجہ درست کرکے تازہ جائزہ؛ مقامی جانچ کے بعد بھی سرور روک سکتا ہے۔ آف لائن قطار یا خودکار طبی ارسال نہیں۔ دوسری تصدیق دوبارہ کے لیے محفوظ نہیں۔ ایف ون خانے و مکالمے سے مسودہ و فوکس رکھے؛ مشترک سائز100تا250۔ اردو اور انسانی قبولیت باقی۔"
+],
   faq: [
-    [
-      "How do I find and refresh the correct medication chart?",
-      "Open Medication administration record from Ward Nursing or the actual patient on My beds this shift. Choose a ward patient or Other permitted live admissions; filter by name/MRN. Verify name/MRN, age or date of birth, allergies and flags; bed is location, never identity. Refresh medication record rereads MAR, orders, stock and discharge. Due/Overdue comes from the server. Empty means no returned doses, not that no medicine was ordered. Errors remain visible. Events refresh without polling; an open draft remains but must be rereviewed."
-    ],
-    [
-      "How do I find an ordered PRN line before its first dose?",
-      "PRN and ad-hoc ordered medicines lists prescriptions from the patient's real clinical history. Select its returned prescription number: the app verifies this patient and this admission before showing active lines. A prescription from another stay is refused as a source. Read medicine, dose, route, frequency, instructions, high-alert and look-alike warnings. Choose Record ordered PRN dose or Record ordered ad-hoc dose on that line; never type an order identifier or substitute a different line because it has the same medicine. If history permission is missing, ask the responsible prescriber."
-    ],
-    [
-      "What does Generate missing scheduled doses do?",
-      "Generate missing scheduled doses uses actual active inpatient orders and adds only missing scheduled doses. It never writes a prescription or repeats an administration. Review and Confirm MAR action once. A lost reply is reconciled with Read current result; do not repeatedly generate to recover another failed action. PRN orders have no schedule: use the ordered-medicine picker."
-    ],
-    [
-      "How do I identify the patient at the bedside?",
-      "For an Administered or PRN dose choose Patient identity method. Scan wristband focuses the dedicated field: scan its actual code. Without a scanner, ask name and date of birth or MRN, then choose Asked name and DOB or MRN. For an unidentified Emergency or Code Red admission only, Emergency override needs the actual explanation. Identity mismatch means STOP: do not give the dose; recheck the patient and order. Never copy a band from a different patient."
-    ],
-    [
-      "How do I check the medicine, dose and route?",
-      "Scan medicine pack in its dedicated field or tick I checked the actual medicine label after checking it. Drug mismatch means STOP and recheck. Actual dose text and Actual route start from the selected order; review them against what actually happened. A different dose/route or time outside the hospital window needs a Dose / route / time variance reason; the server decides its window. High-alert and Looks or sounds like warnings stay visible on the source line."
-    ],
-    [
-      "How do I chart a scheduled dose or explain why it was not given?",
-      "Chart scheduled dose opens the selected actual row. Choose Actual dose outcome: Administered, Held, Refused, Missed or Cancelled. Every outcome except Administered requires the reason. For Administered complete the patient and medicine checks, confirm ordered self-administration where applicable, and record any variance. This records an actual outcome; pressing a button never gives a medicine. Confirm once. A scheduled chart is state guarded: after a lost reply only reread and reconcile, never automatic replay. MAR_STATE_INVALID means read its current status and append a correction if needed."
-    ],
-    [
-      "How do I record one PRN or ad-hoc dose without duplicating it?",
-      "Choose the exact active order line, preferably from PRN and ad-hoc ordered medicines, and read its frequency and instructions. Record the actual indication in Outcome reason / PRN indication / clearance note, then the same patient/medicine/second-check requirements as scheduled administration. This creates one new dose with its own action key. After a lost reply Retry original request only for the unchanged action; a new key is another dose. High-alert co-signer credentials are never kept for retry: read and reconcile its result instead."
-    ],
-    [
-      "How does the second person check a high-alert dose?",
-      "At the bedside a different registered nurse or doctor independently checks the high-alert dose. In the confirmation dialog they tick the independent check and type their own Second checker username and password. The app clears both immediately on submission/close; neither belongs in notes, stored preferences, logs or a retry draft. Same person, missing check, wrong password, locked account or missing clinical authorisation remain visible server refusals. Do not repeatedly guess a password or borrow another identity."
-    ],
-    [
-      "How do I document an ordered self-administered medicine?",
-      "Only the doctor can allow self-administration on the source order. The patient takes it: tick The patient took this medicine themselves as ordered. An ordinary nurse-administered line cannot be made self-administered here. The server may refuse with SELF_ADMINISTRATION_INVALID; keep the input and ask the prescriber to clarify the allowed order. Never change the checkbox to hide what actually happened."
-    ],
-    [
-      "How do I take a dose from ward stock?",
-      "Ward stock lists actual batch number, quantity and expiry, including Expired and Recalled warnings. For a scheduled Administered dose choose Ward stock batch (optional) only when actually taking it from that stock, then a positive Ward stock quantity. Expired/recalled/empty rows are unavailable. The backend checks medicine identity and availability. BATCH_EXPIRED, BATCH_RECALLED or INSUFFICIENT_STOCK rereads stock, preserves input and requires another reviewed choice; no automatic retry. PRN does not accept ward-stock fields in its contract."
-    ],
-    [
-      "When should I prepare and label a dose?",
-      "Before drawing up an injection or infusion, Prepare and label selects that actual scheduled dose. Enter Preparation / diluent / rate as actually ordered; review and confirm once. The server returns its patient, medicine, dose, route, preparation, preparer/time and warnings label. Print / reprint saved label before preparing the next one. Preparation is not administration. A repeat preparation is refused; a lost reply uses the original key, never a new preparation."
-    ],
-    [
-      "What if a prepared-dose label does not print?",
-      "Print / reprint saved label uses only the original authenticated server label, with the terminal's label-printer mapping. A cancelled or unavailable printer does not undo preparation or chart a dose. Check whether a label already emerged, correct the printer and reprint this same label. Never press Prepare again or administer again to print. If the original label is unavailable after a session restart, stop and ask the responsible team to reconcile; no guessed label is generated."
-    ],
-    [
-      "How do I correct a committed dose record?",
-      "Correct dose record copies the actual order context into a separate correction draft. Choose the corrected outcome and actual dose/route/time, explain the status and supply Correction reason3–500characters. Review and confirm: the server appends a new record linked to the original. All authors/times/reasons remain; the superseded original is struck. No Edit/Delete and no replacement medication administration. Permitted corrections remain in Records view."
-    ],
-    [
-      "Which time should I record?",
-      "Enter actual hospital administration time uses the hospital timezone shown by the terminal, not the laptop timezone. Otherwise the backend supplies server time. Use the actual administration time and explain a variance when required; never infer administration from the scheduled time. A correction is a new factual documentation entry. The app refuses unavailable or ambiguous hospital time instead of guessing."
-    ],
-    [
-      "What belongs in the outcome or clearance note?",
-      "Outcome reason / PRN indication / clearance note means the factual reason for Held/Refused/Missed/Cancelled, the actual indication for PRN, or the nursing clearance note for a discharge. It does not replace a variance reason, identity explanation or correction reason: those are separate checks. A validation error stays beside its field and typed values remain."
-    ],
-    [
-      "When may I clear Nursing MAR verification for discharge?",
-      "Nursing discharge verification shows whether discharge started, its blocked stage and the current Nursing stage, officer and time. Clear only when NursingMARVerification is due, every due dose has an actual outcome and the patient's own medicines are handed back or properly disposed of in the separate own-medicines workflow. OWN_MEDICINES_HELD lists what remains. Already Cleared means already done; DISCHARGE_STAGE_IMMUTABLE rereads who/when. OUT_OF_ORDER means another stage is waiting, not already cleared. A not-started/cancelled discharge is not allowed. No automatic retry, including a lost answer: read current discharge status."
-    ],
-    [
-      "How do I review, keep input and recover an uncertain action?",
-      "Tick I verified this patient, order and actual outcome, Review MAR action, compare patient/line/body, then Confirm MAR action once. Back to MAR input retains values; Close asks before discarding. Navigation and fields lock while an outcome is unknown. Read current result, compare actual status/history, then Result reviewed; return to draft. Read latest MAR and keep input adopts fresh context and requires a new acknowledgement; it never sends a write. Scheduled chart/generation/clearance never offer replay. PRN/correction/preparation without transient co-signing use only the original action key."
-    ],
-    [
-      "What do a refusal or lost reply mean?",
-      "Every refusal is handled by its code, never message wording. State, identity, medicine and batch refusals reread the record and keep input. Correct the cause and review afresh; a server answer can still refuse after local checks. No offline queue or automatic clinical retry. A true high-alert co-signature is never saved for replay. F1 opens this page from fields/dialogs without losing the draft, restores focus; shared keyboard/Settings zoom is100–250%. Urdu and human journey acceptance are pending."
-    ]
+  [
+    "How do I find and refresh the correct medication chart?",
+    "Open Medication administration record from Ward Nursing or the actual patient on My beds this shift. Choose a ward patient or Other permitted live admissions; filter by name/MRN. Verify name/MRN, age or date of birth, allergies and flags; bed is location, never identity. Refresh medication record rereads MAR, orders, stock and discharge. Due/Overdue comes from the server. Empty means no returned doses, not that no medicine was ordered. Errors remain visible. Events refresh without polling; an open draft remains but must be rereviewed."
   ],
-  faqUr: [
-    [
-      "درست دوا چارٹ کیسے تلاش اور تازہ کروں؟",
-      "وارڈ نرسنگ یا میرے بستر کے اصل مریض سے دوا ریکارڈ کھولیں۔ مریض یا مجاز جاری داخلہ چنیں؛ نام یا ایم آر این سے تلاش۔ شناخت، عمر یا پیدائش، الرجی اور علامات چیک؛ بستر شناخت نہیں۔ تازہ دوا ریکارڈ اصل چارٹ، احکام، اسٹاک اور ڈسچارج پڑھے۔ تاخیر سرور سے۔ خالی یعنی خوراک نہیں آئی، دوا کا حکم نہ ہونا نہیں۔ غلطی نظر آئے، واقعے پر بغیر پولنگ تازہ، مسودہ محفوظ مگر نیا جائزہ لازم۔"
-    ],
-    [
-      "پہلی خوراک سے پہلے اصل حسب ضرورت حکم کیسے ملے؟",
-      "حسب ضرورت احکام مریض کی اصل طبی تاریخ سے آئیں۔ واپس آیا نسخہ نمبر چنیں؛ مریض اور یہی داخلہ ملنے کے بعد جاری سطور دکھیں۔ دوسرے داخلے کا نسخہ بطور اصل نہیں۔ دوا، خوراک، راستہ، تکرار، ہدایات اور خطرہ چیک۔ عین حکم کی حسب ضرورت یا اضافی خوراک چنیں؛ نمبر خود نہ لکھیں اور یکساں دوا کی دوسری سطر نہ بدلیں۔ تاریخ کی اجازت نہ ہو تو ذمہ دار ڈاکٹر سے کہیں۔"
-    ],
-    [
-      "غائب مقرر خوراکیں بنانے کا کیا اثر ہے؟",
-      "غائب مقرر خوراکیں اصل جاری داخلہ احکام سے صرف غائب شیڈول بناتی ہیں۔ نیا نسخہ یا دوا دینا نہیں۔ جائزہ پھر ایک بار تصدیق۔ گم جواب پر موجودہ نتیجہ پڑھیں؛ دوسرے ناکام عمل کی بحالی کو اسے نہ دہرائیں۔ حسب ضرورت کا شیڈول نہیں، اصل حکم چنیں۔"
-    ],
-    [
-      "مریض کے پاس شناخت کیسے کروں؟",
-      "دی گئی یا حسب ضرورت خوراک میں شناخت کا طریقہ چنیں۔ پٹی کا اصل کوڈ اسی خانے میں اسکین کریں۔ اسکینر نہ ہو تو نام اور پیدائش یا ایم آر این پوچھ کر متعلقہ انتخاب کریں۔ صرف نامعلوم ہنگامی یا کوڈ ریڈ داخلے میں وجہ سمیت ہنگامی شناخت۔ شناخت مختلف تو رکیں، خوراک نہ دیں، مریض اور حکم پھر چیک؛ دوسری پٹی نقل نہیں۔"
-    ],
-    [
-      "دوا، خوراک اور راستہ کیسے چیک کروں؟",
-      "دوا پیک متعلقہ خانے میں اسکین یا اصل لیبل چیک کے بعد نشان لگائیں۔ دوا مختلف تو رک کر پھر چیک۔ خوراک اور راستہ اصل حکم سے شروع، اصل نتیجے سے ملائیں۔ خوراک، راستہ یا ہسپتال کی وقت حد سے فرق پر وجہ لکھیں؛ حد سرور طے کرے۔ زیادہ خطرہ اور ملتے نام اصل سطر پر رہیں۔"
-    ],
-    [
-      "مقرر خوراک یا نہ دینے کی وجہ کیسے درج کروں؟",
-      "مقرر خوراک کی اصل سطر کھول کر دی گئی، روکی، انکار، چھوٹی یا منسوخ کا اصل نتیجہ چنیں۔ دی گئی کے سوا وجہ لازم۔ دی گئی میں شناخت، دوا اور مجاز خود لینے کی تصدیق و فرق کی وجہ۔ بٹن دوا نہیں دیتا، اصل نتیجہ درج کرتا ہے۔ ایک تصدیق۔ گم جواب پر صرف پڑھ کر نتیجہ ملائیں، خودکار تکرار نہیں۔ حالت انکار پر اصل حالت پڑھیں، ضرورت پر الگ تصحیح۔"
-    ],
-    [
-      "حسب ضرورت یا اضافی خوراک نقل کے بغیر کیسے درج کروں؟",
-      "عین جاری حکم، اس کی تکرار اور ہدایات چیک کرکے حسب ضرورت خوراک چنیں۔ اصل ضرورت وجہ والے خانے میں لکھیں، پھر مقرر خوراک والی شناخت، دوا اور دوسری جانچ۔ ایک نئی خوراک اپنی اصل کلید سے۔ گم جواب پر صرف وہی غیر تبدیل درخواست، نئی کلید نئی خوراک ہے۔ زیادہ خطرے کی دوسری تصدیق محفوظ نہیں ہوتی؛ نتیجہ پڑھ کر ملائیں۔"
-    ],
-    [
-      "زیادہ خطرہ دوا کی دوسری جانچ کیسے ہو؟",
-      "مریض کے پاس الگ رجسٹرڈ نرس یا ڈاکٹر خود جانچ کرے۔ تصدیق مکالمے میں جانچ کا نشان اور اپنا صارف نام و پاس ورڈ لکھے۔ ارسال یا بند پر فوراً خالی؛ نوٹ، ترتیب، لاگ یا دوبارہ مسودے میں نہیں۔ وہی شخص، نامکمل جانچ، غلط پاس ورڈ، بند اکاؤنٹ یا طبی اجازت نہ ہونا سرور کے انکار ہیں۔ پاس ورڈ اندازہ یا دوسری شناخت نہ لیں۔"
-    ],
-    [
-      "مریض کی خود لی گئی مجاز دوا کیسے درج کروں؟",
-      "صرف ڈاکٹر اصل حکم میں خود لینے کی اجازت دے۔ مریض نے خود لی تو اسی اصل انتخاب کی تصدیق کریں۔ عام نرس والی سطر یہاں خود لینے میں بدل نہیں سکتی۔ سرور انکار کرے تو معلومات رکھ کر ڈاکٹر سے مجاز حکم واضح کرائیں۔ اصل نتیجہ چھپانے کو نشان نہ بدلیں۔"
-    ],
-    [
-      "وارڈ اسٹاک سے خوراک کیسے لوں؟",
-      "وارڈ اسٹاک میں اصل بیچ، مقدار، میعاد اور ختم یا واپس طلب خطرے دکھیں۔ واقعی اسی اسٹاک سے مقرر دی گئی خوراک میں اصل بیچ اور مثبت مقدار چنیں۔ ختم، واپس طلب یا خالی بند۔ دوا اور مقدار سرور چیک کرے۔ انکار پر تازہ اسٹاک، محفوظ معلومات، نئے جائزے سے دوسرا انتخاب؛ خودکار ارسال نہیں۔ حسب ضرورت درخواست وارڈ بیچ نہیں لیتی۔"
-    ],
-    [
-      "خوراک کب تیار اور لیبل کروں؟",
-      "انجیکشن یا محلول تیار کرنے سے پہلے اصل مقرر خوراک کی تیاری اور لیبل چنیں۔ اصل تیاری، محلول و رفتار لکھ کر ایک تصدیق۔ سرور اصل مریض، دوا، خوراک، راستہ، تیار کنندہ و وقت اور خطرے کا لیبل دے۔ اگلی تیاری سے پہلے محفوظ لیبل چھاپیں۔ تیاری دوا دینا نہیں۔ دوبارہ تیاری انکار؛ گم جواب اصل کلید سے، نئی تیاری نہیں۔"
-    ],
-    [
-      "تیار خوراک کا لیبل نہ چھپے تو کیا کروں؟",
-      "محفوظ لیبل صرف اصل سرور جواب اور ٹرمینل کے لیبل پرنٹر سے چھپتا ہے۔ منسوخ یا خراب پرنٹر تیاری واپس یا خوراک درج نہیں کرتا۔ نکلے کاغذ کو چیک، پرنٹر درست، یہی لیبل دوبارہ۔ پرنٹ کے لیے تیاری یا دوا نہ دہرائیں۔ سیشن بدلنے پر اصل لیبل نہ ملے تو رک کر متعلقہ ٹیم سے نتیجہ ملائیں، فرضی لیبل نہیں۔"
-    ],
-    [
-      "محفوظ خوراک کا ریکارڈ کیسے درست کروں؟",
-      "خوراک کی تصحیح اصل حکم کے ساتھ الگ مسودہ بناتی ہے۔ درست نتیجہ، اصل خوراک، راستہ و وقت، حالت کی وضاحت اور3تا500حروف وجہ لکھیں۔ جائزہ و تصدیق الگ مربوط اندراج بڑھائے۔ تمام مصنف، وقت و وجہ، پرانا لکیر سمیت برقرار۔ ترمیم یا حذف اور دوا دوبارہ دینا نہیں۔ ریکارڈ حالت میں مجاز تصحیح برقرار۔"
-    ],
-    [
-      "کون سا وقت درج کروں؟",
-      "اصل دوا وقت ہسپتال کے علاقے سے، لیپ ٹاپ سے نہیں۔ ورنہ سرور وقت دے۔ اصل وقت اور لازم فرق کی وجہ لکھیں؛ مقرر وقت سے دی گئی دوا فرض نہیں۔ تصحیح نئی اصل دستاویز۔ نامعلوم یا مبہم وقت اندازہ نہیں۔"
-    ],
-    [
-      "نتیجے یا کلیئرنس نوٹ میں کیا لکھوں؟",
-      "نتیجے یا کلیئرنس نوٹ میں روک، انکار، چھوٹی یا منسوخ کی اصل وجہ، حسب ضرورت کی اصل ضرورت یا ڈسچارج نرسنگ نوٹ لکھیں۔ یہ فرق، شناخت یا تصحیح کی الگ وجہ کی جگہ نہیں۔ خانے کی غلطی اسی جگہ، قدریں محفوظ۔"
-    ],
-    [
-      "ڈسچارج کی نرسنگ دوا تصدیق کب کلیئر کروں؟",
-      "ڈسچارج نرسنگ حصہ آغاز، رکا مرحلہ، اصل نرسنگ حالت، افسر ووقت دکھائے۔ اپنی باری، ہر واجب خوراک کا اصل نتیجہ، اور ذاتی دواؤں کی واپسی یا الگ مجاز تلفی کے بعد کلیئر کریں۔ ذاتی دوا انکار میں باقی فہرست آئے۔ پہلے کلیئر یعنی کام ہو چکا، افسر ووقت پھر پڑھیں۔ ترتیب انکار یعنی دوسرا مرحلہ باقی، پہلے کلیئر نہیں۔ غیر شروع یا منسوخ ڈسچارج نہیں۔ گم جواب سمیت خودکار تکرار نہیں، اصل حالت پڑھیں۔"
-    ],
-    [
-      "جائزہ، محفوظ معلومات اور نامعلوم نتیجہ کیسے سنبھالوں؟",
-      "مریض، حکم اور اصل نتیجہ چیک کا نشان، دوا عمل جائزہ، شناخت و سطر ملائیں، پھر ایک تصدیق۔ واپس معلومات رکھے، بند پر چھوڑنے کی تصدیق۔ نامعلوم نتیجے پر خانے اور جگہ بدلنا مقفل۔ موجودہ نتیجہ اور تاریخ ملائیں، پھر مسودے پر واپس۔ تازہ ریکارڈ صرف پڑھتا، نیا نشان لازم، ارسال نہیں۔ مقرر خوراک، شیڈول اور کلیئرنس دوبارہ نہیں۔ حسب ضرورت، تصحیح و تیاری اصل کلید سے، دوسری تصدیق محفوظ نہیں۔"
-    ],
-    [
-      "انکار یا گم جواب کا کیا مطلب ہے؟",
-      "انکار ہمیشہ کوڈ سے، متن سے اندازہ نہیں۔ حالت، شناخت، دوا یا بیچ پر اصل ریکارڈ پڑھیں، معلومات رکھیں۔ وجہ درست کرکے تازہ جائزہ؛ مقامی جانچ کے بعد بھی سرور روک سکتا ہے۔ آف لائن قطار یا خودکار طبی ارسال نہیں۔ دوسری تصدیق دوبارہ کے لیے محفوظ نہیں۔ ایف ون خانے و مکالمے سے مسودہ و فوکس رکھے؛ مشترک سائز100تا250۔ اردو اور انسانی قبولیت باقی۔"
-    ]
+  [
+    "How do I find an ordered PRN line before its first dose?",
+    "Give a PRN dose lists this admission’s active PRN orders directly. Read the medicine, strength, dose, route, instructions, minimum interval_hours, last_given_at and given_last_24h before choosing the returned line. No patient-history or prescription lookup and no typed identifier is needed. MEDICATION_ORDER_STOPPED means refresh the list and select a current order; never give from the stopped line. Patient identity, medicine and high-alert checks still apply."
+  ],
+  [
+    "What does Generate missing scheduled doses do?",
+    "Generate missing scheduled doses uses actual active inpatient orders and adds only missing scheduled doses. It never writes a prescription or repeats an administration. Review and Confirm MAR action once. A lost reply is reconciled with Read current result; do not repeatedly generate to recover another failed action. PRN orders have no schedule: use the ordered-medicine picker."
+  ],
+  [
+    "How do I identify the patient at the bedside?",
+    "For an Administered or PRN dose choose Patient identity method. Scan wristband focuses the dedicated field: scan its actual code. Without a scanner, ask name and date of birth or MRN, then choose Asked name and DOB or MRN. For an unidentified Emergency or Code Red admission only, Emergency override needs the actual explanation. Identity mismatch means STOP: do not give the dose; recheck the patient and order. Never copy a band from a different patient."
+  ],
+  [
+    "How do I check the medicine, dose and route?",
+    "Scan medicine pack in its dedicated field or tick I checked the actual medicine label after checking it. Drug mismatch means STOP and recheck. Actual dose text and Actual route start from the selected order; review them against what actually happened. A different dose/route or time outside the hospital window needs a Dose / route / time variance reason; the server decides its window. High-alert and Looks or sounds like warnings stay visible on the source line."
+  ],
+  [
+    "How do I chart a scheduled dose or explain why it was not given?",
+    "Chart scheduled dose opens the selected actual row. Choose Actual dose outcome: Administered, Held, Refused, Missed or Cancelled. Every outcome except Administered requires the reason. For Administered complete the patient and medicine checks, confirm ordered self-administration where applicable, and record any variance. This records an actual outcome; pressing a button never gives a medicine. Confirm once. A scheduled chart is state guarded: after a lost reply only reread and reconcile, never automatic replay. MAR_STATE_INVALID means read its current status and append a correction if needed."
+  ],
+  [
+    "How do I record one PRN or ad-hoc dose without duplicating it?",
+    "Give a PRN dose lists this admission’s active PRN orders directly. Read the medicine, strength, dose, route, instructions, minimum interval_hours, last_given_at and given_last_24h before choosing the returned line. No patient-history or prescription lookup and no typed identifier is needed. MEDICATION_ORDER_STOPPED means refresh the list and select a current order; never give from the stopped line. Patient identity, medicine and high-alert checks still apply."
+  ],
+  [
+    "How does the second person check a high-alert dose?",
+    "At the bedside a different registered nurse or doctor independently checks the high-alert dose. In the confirmation dialog they tick the independent check and type their own Second checker username and password. The app clears both immediately on submission/close; neither belongs in notes, stored preferences, logs or a retry draft. Same person, missing check, wrong password, locked account or missing clinical authorisation remain visible server refusals. Do not repeatedly guess a password or borrow another identity."
+  ],
+  [
+    "How do I document an ordered self-administered medicine?",
+    "Only the doctor can allow self-administration on the source order. The patient takes it: tick The patient took this medicine themselves as ordered. An ordinary nurse-administered line cannot be made self-administered here. The server may refuse with SELF_ADMINISTRATION_INVALID; keep the input and ask the prescriber to clarify the allowed order. Never change the checkbox to hide what actually happened."
+  ],
+  [
+    "How do I take a dose from ward stock?",
+    "Ward stock lists actual batch number, quantity and expiry, including Expired and Recalled warnings. For a scheduled Administered dose choose Ward stock batch (optional) only when actually taking it from that stock, then a positive Ward stock quantity. Expired/recalled/empty rows are unavailable. The backend checks medicine identity and availability. BATCH_EXPIRED, BATCH_RECALLED or INSUFFICIENT_STOCK rereads stock, preserves input and requires another reviewed choice; no automatic retry. PRN does not accept ward-stock fields in its contract."
+  ],
+  [
+    "When should I prepare and label a dose?",
+    "Prepare and label records the actual preparation once and returns the original server label. Preparation is separate from administration. The prepared row then offers Reprint recorded preparation; printing uses the read-only server label and never repeats preparation."
+  ],
+  [
+    "What if a prepared-dose label does not print?",
+    "Reprint recorded preparation reads the server’s prepared-dose label, including after signing out or restarting the terminal. It is marked REPRINT and keeps the recorded preparer, time and preparation. A printer cancellation or failure changes no clinical record: fix the printer and reprint. No terminal label cache or preparation key is needed. DOSE_NOT_PREPARED means prepare first; never repeat preparation or administration to recover paper."
+  ],
+  [
+    "How do I correct a committed dose record?",
+    "Correct dose record copies the actual order context into a separate correction draft. Choose the corrected outcome and actual dose/route/time, explain the status and supply Correction reason3–500characters. Review and confirm: the server appends a new record linked to the original. All authors/times/reasons remain; the superseded original is struck. No Edit/Delete and no replacement medication administration. Permitted corrections remain in Records view."
+  ],
+  [
+    "Which time should I record?",
+    "Enter actual hospital administration time uses the hospital timezone shown by the terminal, not the laptop timezone. Otherwise the backend supplies server time. Use the actual administration time and explain a variance when required; never infer administration from the scheduled time. A correction is a new factual documentation entry. The app refuses unavailable or ambiguous hospital time instead of guessing."
+  ],
+  [
+    "What belongs in the outcome or clearance note?",
+    "Outcome reason / PRN indication / clearance note means the factual reason for Held/Refused/Missed/Cancelled, the actual indication for PRN, or the nursing clearance note for a discharge. It does not replace a variance reason, identity explanation or correction reason: those are separate checks. A validation error stays beside its field and typed values remain."
+  ],
+  [
+    "When may I clear Nursing MAR verification for discharge?",
+    "Nursing discharge verification shows whether discharge started, its blocked stage and the current Nursing stage, officer and time. Clear only when NursingMARVerification is due, every due dose has an actual outcome and the patient's own medicines are handed back or properly disposed of in the separate own-medicines workflow. OWN_MEDICINES_HELD lists what remains. Already Cleared means already done; DISCHARGE_STAGE_IMMUTABLE rereads who/when. OUT_OF_ORDER means another stage is waiting, not already cleared. A not-started/cancelled discharge is not allowed. No automatic retry, including a lost answer: read current discharge status."
+  ],
+  [
+    "How do I review, keep input and recover an uncertain action?",
+    "Tick I verified this patient, order and actual outcome, Review MAR action, compare patient/line/body, then Confirm MAR action once. Back to MAR input retains values; Close asks before discarding. Navigation and fields lock while an outcome is unknown. Read current result, compare actual status/history, then Result reviewed; return to draft. Read latest MAR and keep input adopts fresh context and requires a new acknowledgement; it never sends a write. Scheduled chart/generation/clearance never offer replay. PRN/correction/preparation without transient co-signing use only the original action key."
+  ],
+  [
+    "What do a refusal or lost reply mean?",
+    "Every refusal is handled by its code, never message wording. State, identity, medicine and batch refusals reread the record and keep input. Correct the cause and review afresh; a server answer can still refuse after local checks. No offline queue or automatic clinical retry. A true high-alert co-signature is never saved for replay. F1 opens this page from fields/dialogs without losing the draft, restores focus; shared keyboard/Settings zoom is100–250%. Urdu and human journey acceptance are pending."
   ]
+],
+  faqUr: [
+  [
+    "درست دوا چارٹ کیسے تلاش اور تازہ کروں؟",
+    "وارڈ نرسنگ یا میرے بستر کے اصل مریض سے دوا ریکارڈ کھولیں۔ مریض یا مجاز جاری داخلہ چنیں؛ نام یا ایم آر این سے تلاش۔ شناخت، عمر یا پیدائش، الرجی اور علامات چیک؛ بستر شناخت نہیں۔ تازہ دوا ریکارڈ اصل چارٹ، احکام، اسٹاک اور ڈسچارج پڑھے۔ تاخیر سرور سے۔ خالی یعنی خوراک نہیں آئی، دوا کا حکم نہ ہونا نہیں۔ غلطی نظر آئے، واقعے پر بغیر پولنگ تازہ، مسودہ محفوظ مگر نیا جائزہ لازم۔"
+  ],
+  [
+    "پہلی خوراک سے پہلے اصل حسب ضرورت حکم کیسے ملے؟",
+    "حسب ضرورت خوراک اسی داخلے کے فعال احکام سے چنیں۔ دوا، طاقت، خوراک، راستہ، ہدایت، کم از کم وقفہ، آخری خوراک اور گزشتہ24گھنٹے کی تعداد پڑھیں۔ تاریخ یا نسخہ تلاش اور نمبر ٹائپ کرنا لازم نہیں۔ بند حکم کے انکار پر فہرست تازہ کریں؛ اس سطر سے خوراک نہ دیں۔ مریض، دوا اور خطرے کی جانچ لازم ہے۔"
+  ],
+  [
+    "غائب مقرر خوراکیں بنانے کا کیا اثر ہے؟",
+    "غائب مقرر خوراکیں اصل جاری داخلہ احکام سے صرف غائب شیڈول بناتی ہیں۔ نیا نسخہ یا دوا دینا نہیں۔ جائزہ پھر ایک بار تصدیق۔ گم جواب پر موجودہ نتیجہ پڑھیں؛ دوسرے ناکام عمل کی بحالی کو اسے نہ دہرائیں۔ حسب ضرورت کا شیڈول نہیں، اصل حکم چنیں۔"
+  ],
+  [
+    "مریض کے پاس شناخت کیسے کروں؟",
+    "دی گئی یا حسب ضرورت خوراک میں شناخت کا طریقہ چنیں۔ پٹی کا اصل کوڈ اسی خانے میں اسکین کریں۔ اسکینر نہ ہو تو نام اور پیدائش یا ایم آر این پوچھ کر متعلقہ انتخاب کریں۔ صرف نامعلوم ہنگامی یا کوڈ ریڈ داخلے میں وجہ سمیت ہنگامی شناخت۔ شناخت مختلف تو رکیں، خوراک نہ دیں، مریض اور حکم پھر چیک؛ دوسری پٹی نقل نہیں۔"
+  ],
+  [
+    "دوا، خوراک اور راستہ کیسے چیک کروں؟",
+    "دوا پیک متعلقہ خانے میں اسکین یا اصل لیبل چیک کے بعد نشان لگائیں۔ دوا مختلف تو رک کر پھر چیک۔ خوراک اور راستہ اصل حکم سے شروع، اصل نتیجے سے ملائیں۔ خوراک، راستہ یا ہسپتال کی وقت حد سے فرق پر وجہ لکھیں؛ حد سرور طے کرے۔ زیادہ خطرہ اور ملتے نام اصل سطر پر رہیں۔"
+  ],
+  [
+    "مقرر خوراک یا نہ دینے کی وجہ کیسے درج کروں؟",
+    "مقرر خوراک کی اصل سطر کھول کر دی گئی، روکی، انکار، چھوٹی یا منسوخ کا اصل نتیجہ چنیں۔ دی گئی کے سوا وجہ لازم۔ دی گئی میں شناخت، دوا اور مجاز خود لینے کی تصدیق و فرق کی وجہ۔ بٹن دوا نہیں دیتا، اصل نتیجہ درج کرتا ہے۔ ایک تصدیق۔ گم جواب پر صرف پڑھ کر نتیجہ ملائیں، خودکار تکرار نہیں۔ حالت انکار پر اصل حالت پڑھیں، ضرورت پر الگ تصحیح۔"
+  ],
+  [
+    "حسب ضرورت یا اضافی خوراک نقل کے بغیر کیسے درج کروں؟",
+    "حسب ضرورت خوراک اسی داخلے کے فعال احکام سے چنیں۔ دوا، طاقت، خوراک، راستہ، ہدایت، کم از کم وقفہ، آخری خوراک اور گزشتہ24گھنٹے کی تعداد پڑھیں۔ تاریخ یا نسخہ تلاش اور نمبر ٹائپ کرنا لازم نہیں۔ بند حکم کے انکار پر فہرست تازہ کریں؛ اس سطر سے خوراک نہ دیں۔ مریض، دوا اور خطرے کی جانچ لازم ہے۔"
+  ],
+  [
+    "زیادہ خطرہ دوا کی دوسری جانچ کیسے ہو؟",
+    "مریض کے پاس الگ رجسٹرڈ نرس یا ڈاکٹر خود جانچ کرے۔ تصدیق مکالمے میں جانچ کا نشان اور اپنا صارف نام و پاس ورڈ لکھے۔ ارسال یا بند پر فوراً خالی؛ نوٹ، ترتیب، لاگ یا دوبارہ مسودے میں نہیں۔ وہی شخص، نامکمل جانچ، غلط پاس ورڈ، بند اکاؤنٹ یا طبی اجازت نہ ہونا سرور کے انکار ہیں۔ پاس ورڈ اندازہ یا دوسری شناخت نہ لیں۔"
+  ],
+  [
+    "مریض کی خود لی گئی مجاز دوا کیسے درج کروں؟",
+    "صرف ڈاکٹر اصل حکم میں خود لینے کی اجازت دے۔ مریض نے خود لی تو اسی اصل انتخاب کی تصدیق کریں۔ عام نرس والی سطر یہاں خود لینے میں بدل نہیں سکتی۔ سرور انکار کرے تو معلومات رکھ کر ڈاکٹر سے مجاز حکم واضح کرائیں۔ اصل نتیجہ چھپانے کو نشان نہ بدلیں۔"
+  ],
+  [
+    "وارڈ اسٹاک سے خوراک کیسے لوں؟",
+    "وارڈ اسٹاک میں اصل بیچ، مقدار، میعاد اور ختم یا واپس طلب خطرے دکھیں۔ واقعی اسی اسٹاک سے مقرر دی گئی خوراک میں اصل بیچ اور مثبت مقدار چنیں۔ ختم، واپس طلب یا خالی بند۔ دوا اور مقدار سرور چیک کرے۔ انکار پر تازہ اسٹاک، محفوظ معلومات، نئے جائزے سے دوسرا انتخاب؛ خودکار ارسال نہیں۔ حسب ضرورت درخواست وارڈ بیچ نہیں لیتی۔"
+  ],
+  [
+    "خوراک کب تیار اور لیبل کروں؟",
+    "تیاری اور لیبل اصل تیاری ایک بار درج اور اصل سرور لیبل واپس دیتا ہے۔ تیاری دوا دینا نہیں۔ تیار سطر سے درج تیاری کا لیبل دوبارہ پڑھیں؛ پرنٹ صرف سرور سے پڑھتا اور تیاری نہیں دہراتا۔"
+  ],
+  [
+    "تیار خوراک کا لیبل نہ چھپے تو کیا کروں؟",
+    "درج تیاری کا لیبل دوبارہ سرور سے پڑھیں، نشست یا ٹرمینل دوبارہ کھولنے کے بعد بھی۔ لیبل پر REPRINT اور اصل تیار کرنے والا، وقت و تیاری رہتی ہے۔ پرنٹر کی منسوخی یا خرابی طبی ریکارڈ نہیں بدلتی؛ پرنٹر درست کر کے لیبل دوبارہ۔ مقامی محفوظ لیبل یا تیاری کلید لازم نہیں۔ غیر تیار خوراک پہلے تیار کریں؛ کاغذ کے لیے تیاری یا دوا نہ دہرائیں۔"
+  ],
+  [
+    "محفوظ خوراک کا ریکارڈ کیسے درست کروں؟",
+    "خوراک کی تصحیح اصل حکم کے ساتھ الگ مسودہ بناتی ہے۔ درست نتیجہ، اصل خوراک، راستہ و وقت، حالت کی وضاحت اور3تا500حروف وجہ لکھیں۔ جائزہ و تصدیق الگ مربوط اندراج بڑھائے۔ تمام مصنف، وقت و وجہ، پرانا لکیر سمیت برقرار۔ ترمیم یا حذف اور دوا دوبارہ دینا نہیں۔ ریکارڈ حالت میں مجاز تصحیح برقرار۔"
+  ],
+  [
+    "کون سا وقت درج کروں؟",
+    "اصل دوا وقت ہسپتال کے علاقے سے، لیپ ٹاپ سے نہیں۔ ورنہ سرور وقت دے۔ اصل وقت اور لازم فرق کی وجہ لکھیں؛ مقرر وقت سے دی گئی دوا فرض نہیں۔ تصحیح نئی اصل دستاویز۔ نامعلوم یا مبہم وقت اندازہ نہیں۔"
+  ],
+  [
+    "نتیجے یا کلیئرنس نوٹ میں کیا لکھوں؟",
+    "نتیجے یا کلیئرنس نوٹ میں روک، انکار، چھوٹی یا منسوخ کی اصل وجہ، حسب ضرورت کی اصل ضرورت یا ڈسچارج نرسنگ نوٹ لکھیں۔ یہ فرق، شناخت یا تصحیح کی الگ وجہ کی جگہ نہیں۔ خانے کی غلطی اسی جگہ، قدریں محفوظ۔"
+  ],
+  [
+    "ڈسچارج کی نرسنگ دوا تصدیق کب کلیئر کروں؟",
+    "ڈسچارج نرسنگ حصہ آغاز، رکا مرحلہ، اصل نرسنگ حالت، افسر ووقت دکھائے۔ اپنی باری، ہر واجب خوراک کا اصل نتیجہ، اور ذاتی دواؤں کی واپسی یا الگ مجاز تلفی کے بعد کلیئر کریں۔ ذاتی دوا انکار میں باقی فہرست آئے۔ پہلے کلیئر یعنی کام ہو چکا، افسر ووقت پھر پڑھیں۔ ترتیب انکار یعنی دوسرا مرحلہ باقی، پہلے کلیئر نہیں۔ غیر شروع یا منسوخ ڈسچارج نہیں۔ گم جواب سمیت خودکار تکرار نہیں، اصل حالت پڑھیں۔"
+  ],
+  [
+    "جائزہ، محفوظ معلومات اور نامعلوم نتیجہ کیسے سنبھالوں؟",
+    "مریض، حکم اور اصل نتیجہ چیک کا نشان، دوا عمل جائزہ، شناخت و سطر ملائیں، پھر ایک تصدیق۔ واپس معلومات رکھے، بند پر چھوڑنے کی تصدیق۔ نامعلوم نتیجے پر خانے اور جگہ بدلنا مقفل۔ موجودہ نتیجہ اور تاریخ ملائیں، پھر مسودے پر واپس۔ تازہ ریکارڈ صرف پڑھتا، نیا نشان لازم، ارسال نہیں۔ مقرر خوراک، شیڈول اور کلیئرنس دوبارہ نہیں۔ حسب ضرورت، تصحیح و تیاری اصل کلید سے، دوسری تصدیق محفوظ نہیں۔"
+  ],
+  [
+    "انکار یا گم جواب کا کیا مطلب ہے؟",
+    "انکار ہمیشہ کوڈ سے، متن سے اندازہ نہیں۔ حالت، شناخت، دوا یا بیچ پر اصل ریکارڈ پڑھیں، معلومات رکھیں۔ وجہ درست کرکے تازہ جائزہ؛ مقامی جانچ کے بعد بھی سرور روک سکتا ہے۔ آف لائن قطار یا خودکار طبی ارسال نہیں۔ دوسری تصدیق دوبارہ کے لیے محفوظ نہیں۔ ایف ون خانے و مکالمے سے مسودہ و فوکس رکھے؛ مشترک سائز100تا250۔ اردو اور انسانی قبولیت باقی۔"
+  ]
+]
 },
 verbal_orders_ward: {
   title: "Verbal and telephone orders",
@@ -210,133 +210,143 @@ verbal_orders_ward: {
   purpose: "The ward nurse records an exceptional inpatient verbal/telephone order as heard, reads every line back to its actual prescriber and tracks countersignature. Draft Urdu requires native clinical review.",
   purposeUr: "وارڈ نرس غیر معمولی داخلہ زبانی یا فون حکم جیسا سنے لکھے، اصل ڈاکٹر کو ہر سطر دہرا کر تصدیق اور دستخط کی پیروی کرے۔ اردو طبی جائزے تک مسودہ۔",
   steps: [
-    "Open Verbal and telephone orders in Ward Nursing or from the actual My beds patient. Verify name/MRN, age/DOB, flags and admission before work. The list is scoped to that admission; Pending countersignature only changes its read filter. Orders to retrieve sets50/200/1000, and a reached limit is not complete history. Read each line, prescriber, receiver, due time, countersigner/time and late/overdue status. Refresh rereads; saving never pretends the doctor countersigned.",
-    "Record a verbal or telephone order starts an empty draft for this inpatient. Confirm Emergency or the doctor cannot write this order, choose Verbal or Telephone, and record the actual circumstances in Order notes. Never use it for an ordinary outpatient or chemotherapy; ask for a written order. This Ward Nursing screen uses the selected admission; the separate ER journey uses its actual ER visit. No guessed patient or ticket identifiers.",
-    "Find prescribing doctor needs at least2characters. Search registered doctors returns actual active PMDC doctors with full name, employee number and registration. Select the doctor who gave this order. Changing the search clears the chosen doctor and read-back; there is no typed ID field. The backend still checks prescribing authorisation and restricted privileges; PRESCRIBER_NOT_AUTHORIZED keeps the order for clarification. Never nominate another person to get past a refusal.",
-    "Order destination is Hospital Pharmacy or External/local market. Hospital Pharmacy is offered only while the server's dispensing service is Active; no facility-category branch. External Market can use a known formulary medicine (retaining safety flags) or an outside medicine with its exact name/strength/form. Do not turn a known high-alert medicine into an unflagged typed name to evade checks. CAPABILITY_INACTIVE keeps the draft and requires a current destination review.",
-    "Find medicine for the order and Search formulary return stock status, quantity, form, strength, restricted and high-alert/look-alike warnings. Add ordered medicine creates an unsent line, never a saved order. Inactive/chemotherapy cannot be added; OutOfStock is unavailable for Hospital Pharmacy but a known formulary medicine can remain on an external slip. Stock events refresh availability without polling and require read-back again. At most40lines per order.",
-    "Only External Market offers Add medicine outside the formulary. Enter the actual Outside medicine name and any stated Outside strength/form; it has no inferred high-alert flag. For a medicine already on the hospital list select that actual row instead so its safety warnings follow it. Switching back to Hospital Pharmacy requires replacing every outside line with a returned formulary medicine.",
-    "Enter Quantity in lowest units as a positive amount, exact Ordered dose text, Ordered route and Ordered frequency as heard. Optional interval1–168whole hours, duration1–365whole days and instructions up to500characters are not inferred from an abbreviation. PRN and STAT set their corresponding order flags; do not guess a schedule. Remove unsent line removes only that draft line; committed clinical content cannot be edited here. Any change clears read-back and acknowledgement.",
-    "Order starts (hospital time) is required for inpatient scheduling. Enter the actual ordered hospital date/time; the optional end cannot precede start. The app uses the supplied hospital timezone and refuses unknown or ambiguous times. It never silently uses the laptop clock or infers start from submission. Ask the prescriber if the time is unclear.",
-    "Tick Doctor allowed the patient to take this themselves only for that actual instruction. The control permits oral, inhaled or topical non-high-alert medicines; the server remains authoritative and may refuse SELF_ADMINISTRATION_INVALID. This is a prescribing instruction, not a charted dose or proof the patient took anything.",
-    "After writing all lines, read every medicine/dose/route/frequency/time back to the selected prescriber and obtain their confirmation, then tick I read every line back to this prescriber and they confirmed it. A line/doctor/mode/destination change clears this check. A stock/order event also requires a new review. Never pre-tick before the actual communication; saving notifies the prescriber but does not perform the conversation.",
-    "Tick I verified this patient and this exact order then Review verbal order. Compare patient/MRN/admission, selected doctor/registration and every ordered line before Confirm verbal order once. Back to order lines preserves the draft; Close asks before discarding. The app rereads patient, permission, service, doctor and medicine safety before sending. No clinical edit/delete after save: ask the prescriber for a documented correction or changed order through their workflow.",
+  "Open Verbal and telephone orders in Ward Nursing or from the actual My beds patient. Verify name/MRN, age/DOB, flags and admission before work. The list is scoped to that admission; Pending countersignature only changes its read filter. Orders to retrieve sets50/200/1000, and a reached limit is not complete history. Read each line, prescriber, receiver, due time, countersigner/time and late/overdue status. Refresh rereads; saving never pretends the doctor countersigned.",
+  "Record a verbal or telephone order starts an empty draft for this inpatient. Confirm Emergency or the doctor cannot write this order, choose Verbal or Telephone, and record the actual circumstances in Order notes. Never use it for an ordinary outpatient or chemotherapy; ask for a written order. This Ward Nursing screen uses the selected admission; the separate ER journey uses its actual ER visit. No guessed patient or ticket identifiers.",
+  "Find prescribing doctor needs at least2characters. Search registered doctors returns actual active PMDC doctors with full name, employee number and registration. Select the doctor who gave this order. Changing the search clears the chosen doctor and read-back; there is no typed ID field. The backend still checks prescribing authorisation and restricted privileges; PRESCRIBER_NOT_AUTHORIZED keeps the order for clarification. Never nominate another person to get past a refusal.",
+  "Order destination is Hospital Pharmacy or External/local market. Hospital Pharmacy is offered only while the server's dispensing service is Active; no facility-category branch. External Market can use a known formulary medicine (retaining safety flags) or an outside medicine with its exact name/strength/form. Do not turn a known high-alert medicine into an unflagged typed name to evade checks. CAPABILITY_INACTIVE keeps the draft and requires a current destination review.",
+  "Find medicine for the order and Search formulary return stock status, quantity, form, strength, restricted and high-alert/look-alike warnings. Add ordered medicine creates an unsent line, never a saved order. Inactive/chemotherapy cannot be added; OutOfStock is unavailable for Hospital Pharmacy but a known formulary medicine can remain on an external slip. Stock events refresh availability without polling and require read-back again. At most40lines per order.",
+  "Only External Market offers Add medicine outside the formulary. Enter the actual Outside medicine name and any stated Outside strength/form; it has no inferred high-alert flag. For a medicine already on the hospital list select that actual row instead so its safety warnings follow it. Switching back to Hospital Pharmacy requires replacing every outside line with a returned formulary medicine.",
+  "Enter Quantity in lowest units as a positive amount, exact Ordered dose text, Ordered route and Ordered frequency as heard. Optional interval1–168whole hours, duration1–365whole days and instructions up to500characters are not inferred from an abbreviation. PRN and STAT set their corresponding order flags; do not guess a schedule. Remove unsent line removes only that draft line; committed clinical content cannot be edited here. Any change clears read-back and acknowledgement.",
+  "Order starts (hospital time) is required for inpatient scheduling. Enter the actual ordered hospital date/time; the optional end cannot precede start. The app uses the supplied hospital timezone and refuses unknown or ambiguous times. It never silently uses the laptop clock or infers start from submission. Ask the prescriber if the time is unclear.",
+  "Tick Doctor allowed the patient to take this themselves only for that actual instruction. The control permits oral, inhaled or topical non-high-alert medicines; the server remains authoritative and may refuse SELF_ADMINISTRATION_INVALID. This is a prescribing instruction, not a charted dose or proof the patient took anything.",
+  "After writing all lines, read every medicine/dose/route/frequency/time back to the selected prescriber and obtain their confirmation, then tick I read every line back to this prescriber and they confirmed it. A line/doctor/mode/destination change clears this check. A stock/order event also requires a new review. Never pre-tick before the actual communication; saving notifies the prescriber but does not perform the conversation.",
+  "Tick I verified this patient and this exact order then Review verbal order. Compare patient/MRN/admission, selected doctor/registration and every ordered line before Confirm verbal order once. Back to order lines preserves the draft; Close asks before discarding. The app rereads patient, permission, service, doctor and medicine safety before sending. No clinical edit/delete after save: ask the prescriber for a documented correction or changed order through their workflow.",
+  "Refusals are handled by code, with field details and typed lines retained. Read latest and keep order lines refreshes list/safety/context and clears read-back and acknowledgement; if safety changed, re-select the medicine from current search and read back again. A lost write locks its exact action/actor/key/body and navigation: explicit Retry original request only within retention, never a new key for the same order. No automatic replay/offline queue. Countersignature is shown only from the server, overdue remains visible until signed. F1 and shared100–250% zoom preserve work; Urdu/human role acceptance remains pending.",
+  "An inpatient ExternalMarket line offers self-administration only for a drug chosen from the hospital list. A typed medicine name has unknown high-alert status and cannot be self-administered. The route must be Oral, SL, Topical, Inhaled, Ophthalmic, Otic or Nasal and the drug must not be high-alert. SELF_ADMINISTRATION_INVALID remains the server’s refusal."
+],
+  stepsUr: [
+  "وارڈ نرسنگ یا اصل بستر سے زبانی احکام کھولیں۔ نام، ایم آر این، عمر یا پیدائش، علامات و داخلہ چیک۔ فہرست اسی داخلے کی، صرف منتظر نشان پڑھائی کا فلٹر۔ حد50،200یا1000، پوری حد مکمل تاریخ نہیں۔ سطور، ڈاکٹر، وصول کنندہ، مقرر دستخط، اصل افسر ووقت اور تاخیر پڑھیں۔ تازہ دوبارہ پڑھے؛ محفوظ کرنا ڈاکٹر کے دستخط نہیں۔",
+  "اس داخلے کا نیا خالی حکم مسودہ کھولیں۔ ہنگامی حالت یا ڈاکٹر کے نہ لکھ سکنے کی تصدیق، زبانی یا فون چنیں، اصل حالت نوٹ میں۔ عام او پی ڈی یا کیموتھراپی نہیں، تحریری حکم لیں۔ یہ وارڈ صفحہ اصل داخلے کا، ای آر کا الگ اصل دورہ؛ مریض یا ٹکٹ نمبر اندازہ نہیں۔",
+  "ڈاکٹر تلاش میں کم ازکم2حروف۔ رجسٹرڈ ڈاکٹر تلاش اصل فعال پی ایم ڈی سی ڈاکٹر، نام، ملازم نمبر اور رجسٹریشن دے۔ وہی حکم دینے والا چنیں۔ تلاش بدلنے پر ڈاکٹر اور دہرا تصدیق خالی، آئی ڈی خانہ نہیں۔ اصل تجویز و محدود اختیار سرور چیک کرے؛ انکار پر حکم رکھ کر وضاحت لیں، دوسرا نام لگا کر نہ گزریں۔",
+  "منزل ہسپتال فارمیسی یا بیرونی مارکیٹ۔ ہسپتال انتخاب صرف سرور کی فعال فارمیسی خدمت میں، ادارہ قسم سے فیصلہ نہیں۔ باہر معلوم فہرست دوا خطرے سمیت یا اصل بیرونی نام، طاقت و شکل۔ زیادہ خطرہ دوا کو بلا نشان ٹائپ کرکے جانچ سے نہ بچیں۔ خدمت انکار پر مسودہ رکھ کر منزل پھر دیکھیں۔",
+  "دوا تلاش و فہرست سے مقدار، دستیابی، شکل، طاقت، محدود تجویز اور زیادہ خطرہ و ملتے نام آئیں۔ شامل کرنا غیر ارسال سطر ہے، محفوظ حکم نہیں۔ غیر فعال یا کیموتھراپی بند، ہسپتال کے لیے خالی اسٹاک بند مگر بیرونی پر معلوم دوا رکھی جا سکے۔ اسٹاک واقعہ بغیر پولنگ تازہ، دوبارہ دہرا تصدیق لازم۔ زیادہ سے زیادہ40سطور۔",
+  "صرف بیرونی منزل میں بیرونی دوا شامل۔ اصل نام اور بتائی طاقت و شکل لکھیں؛ خود ساختہ خطرہ نشان نہیں۔ ہسپتال فہرست میں موجود ہو تو وہی اصل سطر لیں تاکہ حفاظت ساتھ ہو۔ واپس ہسپتال منزل پر ہر بیرونی سطر اصل فہرست سے بدلنی لازم۔",
+  "کم ترین اکائی کی مثبت مقدار، عین خوراک، راستہ اور تکرار جیسا سنا لکھیں۔ اختیاری وقفہ1تا168پورے گھنٹے، مدت1تا365پورے دن، ہدایات500حروف؛ مخفف سے اندازہ نہیں۔ حسب ضرورت و فوری کے اپنے نشان، شیڈول فرض نہیں۔ غیر ارسال سطر ہٹانا صرف مسودہ، محفوظ طبی متن یہاں ترمیم نہیں۔ ہر تبدیلی دہرا تصدیق اور جائزہ نشان ہٹائے۔",
+  "داخلہ شیڈول کے لیے اصل حکم کا آغاز ہسپتال وقت لازم۔ اختیاری اختتام آغاز سے پہلے نہیں۔ دکھائے ہسپتال وقت سے، نامعلوم یا مبہم وقت انکار۔ لیپ ٹاپ یا ارسال وقت سے آغاز فرض نہیں۔ وقت واضح نہ ہو تو ڈاکٹر سے پوچھیں۔",
+  "صرف ڈاکٹر کی اصل ہدایت پر مریض خود لینے کی اجازت نشان۔ منہ، سانس یا جلد کی کم خطرہ دوا کا انتخاب، آخری فیصلہ سرور، انکار ممکن۔ یہ حکم ہے، خوراک دینے کا اندراج یا مریض کے لینے کا ثبوت نہیں۔",
+  "تمام سطور کے بعد ہر دوا، خوراک، راستہ، تکرار اور وقت اصل ڈاکٹر کو دہرا کر ان کی تصدیق لیں، تب نشان۔ سطر، ڈاکٹر، طریقہ یا منزل بدلنے پر نشان خالی۔ اسٹاک یا حکم واقعہ نیا جائزہ لازم کرے۔ پہلے سے نشان نہیں؛ محفوظ اطلاع اصل گفتگو نہیں کرتی۔",
+  "مریض اور یہی حکم چیک کا نشان، پھر زبانی حکم جائزہ۔ مریض، داخلہ، اصل ڈاکٹر رجسٹریشن اور ہر سطر ملائیں، ایک تصدیق۔ واپس مسودہ رکھے، بند پر پوچھے۔ ارسال سے پہلے مریض، اجازت، خدمت، ڈاکٹر و حفاظت پھر پڑھے۔ محفوظ طبی حکم یہاں ترمیم یا حذف نہیں، ڈاکٹر سے ان کے طریقے کا نیا یا درست حکم لیں۔",
+  "انکار کوڈ سے، خانے کی تفصیل اور سطور محفوظ۔ تازہ پڑھیں اصل فہرست، حفاظت و سیاق تازہ، دہرا تصدیق و جائزہ نشان خالی؛ حفاظت بدلے تو نئی تلاش سے دوا پھر چن کر دہرا لیں۔ گم جواب اصل عمل، صارف، کلید و معلومات اور جگہ مقفل؛ وقت کے اندر واضح اصل درخواست، اسی حکم کی نئی کلید نہیں۔ خودکار یا آف لائن ارسال نہیں۔ دستخط صرف سرور سے، تب تک تاخیر دکھے۔ ایف ون،100تا250سائز محفوظ؛ اردو و انسانی کردار قبولیت باقی۔",
+  "داخل مریض کی بیرونی دوا میں خود لینے کی اجازت صرف ہسپتال کی فہرست سے منتخب دوا پر ہے۔ ٹائپ نام کا خطرہ نامعلوم؛ خود لینے کی اجازت نہیں۔ منہ، زیر زبان، جلد، سانس، آنکھ، کان یا ناک کا راستہ اور غیر خطرناک دوا لازم۔ سرور کا انکار اصل فیصلہ ہے۔"
+],
+  faq: [
+  [
+    "How do I find and follow a verbal order?",
+    "Open Verbal and telephone orders in Ward Nursing or from the actual My beds patient. Verify name/MRN, age/DOB, flags and admission before work. The list is scoped to that admission; Pending countersignature only changes its read filter. Orders to retrieve sets50/200/1000, and a reached limit is not complete history. Read each line, prescriber, receiver, due time, countersigner/time and late/overdue status. Refresh rereads; saving never pretends the doctor countersigned."
+  ],
+  [
+    "When may I record an exceptional verbal or telephone order?",
+    "Record a verbal or telephone order starts an empty draft for this inpatient. Confirm Emergency or the doctor cannot write this order, choose Verbal or Telephone, and record the actual circumstances in Order notes. Never use it for an ordinary outpatient or chemotherapy; ask for a written order. This Ward Nursing screen uses the selected admission; the separate ER journey uses its actual ER visit. No guessed patient or ticket identifiers."
+  ],
+  [
+    "How do I choose the doctor who actually gave the order?",
+    "Find prescribing doctor needs at least2characters. Search registered doctors returns actual active PMDC doctors with full name, employee number and registration. Select the doctor who gave this order. Changing the search clears the chosen doctor and read-back; there is no typed ID field. The backend still checks prescribing authorisation and restricted privileges; PRESCRIBER_NOT_AUTHORIZED keeps the order for clarification. Never nominate another person to get past a refusal."
+  ],
+  [
+    "How do I choose pharmacy or an outside destination?",
+    "Order destination is Hospital Pharmacy or External/local market. Hospital Pharmacy is offered only while the server's dispensing service is Active; no facility-category branch. External Market can use a known formulary medicine (retaining safety flags) or an outside medicine with its exact name/strength/form. Do not turn a known high-alert medicine into an unflagged typed name to evade checks. CAPABILITY_INACTIVE keeps the draft and requires a current destination review."
+  ],
+  [
+    "How do I add medicines and recognise safety warnings?",
+    "Find medicine for the order and Search formulary return stock status, quantity, form, strength, restricted and high-alert/look-alike warnings. Add ordered medicine creates an unsent line, never a saved order. Inactive/chemotherapy cannot be added; OutOfStock is unavailable for Hospital Pharmacy but a known formulary medicine can remain on an external slip. Stock events refresh availability without polling and require read-back again. At most40lines per order."
+  ],
+  [
+    "How do I record a medicine outside the formulary?",
+    "Only External Market offers Add medicine outside the formulary. Enter the actual Outside medicine name and any stated Outside strength/form; it has no inferred high-alert flag. For a medicine already on the hospital list select that actual row instead so its safety warnings follow it. Switching back to Hospital Pharmacy requires replacing every outside line with a returned formulary medicine."
+  ],
+  [
+    "What should each order line contain?",
+    "Enter Quantity in lowest units as a positive amount, exact Ordered dose text, Ordered route and Ordered frequency as heard. Optional interval1–168whole hours, duration1–365whole days and instructions up to500characters are not inferred from an abbreviation. PRN and STAT set their corresponding order flags; do not guess a schedule. Remove unsent line removes only that draft line; committed clinical content cannot be edited here. Any change clears read-back and acknowledgement."
+  ],
+  [
+    "How do I record the start and end of the order?",
+    "Order starts (hospital time) is required for inpatient scheduling. Enter the actual ordered hospital date/time; the optional end cannot precede start. The app uses the supplied hospital timezone and refuses unknown or ambiguous times. It never silently uses the laptop clock or infers start from submission. Ask the prescriber if the time is unclear."
+  ],
+  [
+    "How do I record the doctor's self-administration permission?",
+    "Tick Doctor allowed the patient to take this themselves only for that actual instruction. The control permits oral, inhaled or topical non-high-alert medicines; the server remains authoritative and may refuse SELF_ADMINISTRATION_INVALID. This is a prescribing instruction, not a charted dose or proof the patient took anything."
+  ],
+  [
+    "When do I tick read-back?",
+    "After writing all lines, read every medicine/dose/route/frequency/time back to the selected prescriber and obtain their confirmation, then tick I read every line back to this prescriber and they confirmed it. A line/doctor/mode/destination change clears this check. A stock/order event also requires a new review. Never pre-tick before the actual communication; saving notifies the prescriber but does not perform the conversation."
+  ],
+  [
+    "How do I review or leave an unsent order?",
+    "Tick I verified this patient and this exact order then Review verbal order. Compare patient/MRN/admission, selected doctor/registration and every ordered line before Confirm verbal order once. Back to order lines preserves the draft; Close asks before discarding. The app rereads patient, permission, service, doctor and medicine safety before sending. No clinical edit/delete after save: ask the prescriber for a documented correction or changed order through their workflow."
+  ],
+  [
+    "What should I do after a refusal, event or lost reply?",
     "Refusals are handled by code, with field details and typed lines retained. Read latest and keep order lines refreshes list/safety/context and clears read-back and acknowledgement; if safety changed, re-select the medicine from current search and read back again. A lost write locks its exact action/actor/key/body and navigation: explicit Retry original request only within retention, never a new key for the same order. No automatic replay/offline queue. Countersignature is shown only from the server, overdue remains visible until signed. F1 and shared100–250% zoom preserve work; Urdu/human role acceptance remains pending."
   ],
-  stepsUr: [
-    "وارڈ نرسنگ یا اصل بستر سے زبانی احکام کھولیں۔ نام، ایم آر این، عمر یا پیدائش، علامات و داخلہ چیک۔ فہرست اسی داخلے کی، صرف منتظر نشان پڑھائی کا فلٹر۔ حد50،200یا1000، پوری حد مکمل تاریخ نہیں۔ سطور، ڈاکٹر، وصول کنندہ، مقرر دستخط، اصل افسر ووقت اور تاخیر پڑھیں۔ تازہ دوبارہ پڑھے؛ محفوظ کرنا ڈاکٹر کے دستخط نہیں۔",
-    "اس داخلے کا نیا خالی حکم مسودہ کھولیں۔ ہنگامی حالت یا ڈاکٹر کے نہ لکھ سکنے کی تصدیق، زبانی یا فون چنیں، اصل حالت نوٹ میں۔ عام او پی ڈی یا کیموتھراپی نہیں، تحریری حکم لیں۔ یہ وارڈ صفحہ اصل داخلے کا، ای آر کا الگ اصل دورہ؛ مریض یا ٹکٹ نمبر اندازہ نہیں۔",
-    "ڈاکٹر تلاش میں کم ازکم2حروف۔ رجسٹرڈ ڈاکٹر تلاش اصل فعال پی ایم ڈی سی ڈاکٹر، نام، ملازم نمبر اور رجسٹریشن دے۔ وہی حکم دینے والا چنیں۔ تلاش بدلنے پر ڈاکٹر اور دہرا تصدیق خالی، آئی ڈی خانہ نہیں۔ اصل تجویز و محدود اختیار سرور چیک کرے؛ انکار پر حکم رکھ کر وضاحت لیں، دوسرا نام لگا کر نہ گزریں۔",
-    "منزل ہسپتال فارمیسی یا بیرونی مارکیٹ۔ ہسپتال انتخاب صرف سرور کی فعال فارمیسی خدمت میں، ادارہ قسم سے فیصلہ نہیں۔ باہر معلوم فہرست دوا خطرے سمیت یا اصل بیرونی نام، طاقت و شکل۔ زیادہ خطرہ دوا کو بلا نشان ٹائپ کرکے جانچ سے نہ بچیں۔ خدمت انکار پر مسودہ رکھ کر منزل پھر دیکھیں۔",
-    "دوا تلاش و فہرست سے مقدار، دستیابی، شکل، طاقت، محدود تجویز اور زیادہ خطرہ و ملتے نام آئیں۔ شامل کرنا غیر ارسال سطر ہے، محفوظ حکم نہیں۔ غیر فعال یا کیموتھراپی بند، ہسپتال کے لیے خالی اسٹاک بند مگر بیرونی پر معلوم دوا رکھی جا سکے۔ اسٹاک واقعہ بغیر پولنگ تازہ، دوبارہ دہرا تصدیق لازم۔ زیادہ سے زیادہ40سطور۔",
-    "صرف بیرونی منزل میں بیرونی دوا شامل۔ اصل نام اور بتائی طاقت و شکل لکھیں؛ خود ساختہ خطرہ نشان نہیں۔ ہسپتال فہرست میں موجود ہو تو وہی اصل سطر لیں تاکہ حفاظت ساتھ ہو۔ واپس ہسپتال منزل پر ہر بیرونی سطر اصل فہرست سے بدلنی لازم۔",
-    "کم ترین اکائی کی مثبت مقدار، عین خوراک، راستہ اور تکرار جیسا سنا لکھیں۔ اختیاری وقفہ1تا168پورے گھنٹے، مدت1تا365پورے دن، ہدایات500حروف؛ مخفف سے اندازہ نہیں۔ حسب ضرورت و فوری کے اپنے نشان، شیڈول فرض نہیں۔ غیر ارسال سطر ہٹانا صرف مسودہ، محفوظ طبی متن یہاں ترمیم نہیں۔ ہر تبدیلی دہرا تصدیق اور جائزہ نشان ہٹائے۔",
-    "داخلہ شیڈول کے لیے اصل حکم کا آغاز ہسپتال وقت لازم۔ اختیاری اختتام آغاز سے پہلے نہیں۔ دکھائے ہسپتال وقت سے، نامعلوم یا مبہم وقت انکار۔ لیپ ٹاپ یا ارسال وقت سے آغاز فرض نہیں۔ وقت واضح نہ ہو تو ڈاکٹر سے پوچھیں۔",
-    "صرف ڈاکٹر کی اصل ہدایت پر مریض خود لینے کی اجازت نشان۔ منہ، سانس یا جلد کی کم خطرہ دوا کا انتخاب، آخری فیصلہ سرور، انکار ممکن۔ یہ حکم ہے، خوراک دینے کا اندراج یا مریض کے لینے کا ثبوت نہیں۔",
-    "تمام سطور کے بعد ہر دوا، خوراک، راستہ، تکرار اور وقت اصل ڈاکٹر کو دہرا کر ان کی تصدیق لیں، تب نشان۔ سطر، ڈاکٹر، طریقہ یا منزل بدلنے پر نشان خالی۔ اسٹاک یا حکم واقعہ نیا جائزہ لازم کرے۔ پہلے سے نشان نہیں؛ محفوظ اطلاع اصل گفتگو نہیں کرتی۔",
-    "مریض اور یہی حکم چیک کا نشان، پھر زبانی حکم جائزہ۔ مریض، داخلہ، اصل ڈاکٹر رجسٹریشن اور ہر سطر ملائیں، ایک تصدیق۔ واپس مسودہ رکھے، بند پر پوچھے۔ ارسال سے پہلے مریض، اجازت، خدمت، ڈاکٹر و حفاظت پھر پڑھے۔ محفوظ طبی حکم یہاں ترمیم یا حذف نہیں، ڈاکٹر سے ان کے طریقے کا نیا یا درست حکم لیں۔",
+  [
+    "When may an outside medicine be self-administered?",
+    "An inpatient ExternalMarket line offers self-administration only for a drug chosen from the hospital list. A typed medicine name has unknown high-alert status and cannot be self-administered. The route must be Oral, SL, Topical, Inhaled, Ophthalmic, Otic or Nasal and the drug must not be high-alert. SELF_ADMINISTRATION_INVALID remains the server’s refusal."
+  ]
+],
+  faqUr: [
+  [
+    "زبانی حکم اور اس کے دستخط کیسے دیکھوں؟",
+    "وارڈ نرسنگ یا اصل بستر سے زبانی احکام کھولیں۔ نام، ایم آر این، عمر یا پیدائش، علامات و داخلہ چیک۔ فہرست اسی داخلے کی، صرف منتظر نشان پڑھائی کا فلٹر۔ حد50،200یا1000، پوری حد مکمل تاریخ نہیں۔ سطور، ڈاکٹر، وصول کنندہ، مقرر دستخط، اصل افسر ووقت اور تاخیر پڑھیں۔ تازہ دوبارہ پڑھے؛ محفوظ کرنا ڈاکٹر کے دستخط نہیں۔"
+  ],
+  [
+    "غیر معمولی زبانی یا فون حکم کب درج ہو؟",
+    "اس داخلے کا نیا خالی حکم مسودہ کھولیں۔ ہنگامی حالت یا ڈاکٹر کے نہ لکھ سکنے کی تصدیق، زبانی یا فون چنیں، اصل حالت نوٹ میں۔ عام او پی ڈی یا کیموتھراپی نہیں، تحریری حکم لیں۔ یہ وارڈ صفحہ اصل داخلے کا، ای آر کا الگ اصل دورہ؛ مریض یا ٹکٹ نمبر اندازہ نہیں۔"
+  ],
+  [
+    "اصل حکم دینے والا ڈاکٹر کیسے چنوں؟",
+    "ڈاکٹر تلاش میں کم ازکم2حروف۔ رجسٹرڈ ڈاکٹر تلاش اصل فعال پی ایم ڈی سی ڈاکٹر، نام، ملازم نمبر اور رجسٹریشن دے۔ وہی حکم دینے والا چنیں۔ تلاش بدلنے پر ڈاکٹر اور دہرا تصدیق خالی، آئی ڈی خانہ نہیں۔ اصل تجویز و محدود اختیار سرور چیک کرے؛ انکار پر حکم رکھ کر وضاحت لیں، دوسرا نام لگا کر نہ گزریں۔"
+  ],
+  [
+    "فارمیسی یا بیرونی منزل کیسے چنوں؟",
+    "منزل ہسپتال فارمیسی یا بیرونی مارکیٹ۔ ہسپتال انتخاب صرف سرور کی فعال فارمیسی خدمت میں، ادارہ قسم سے فیصلہ نہیں۔ باہر معلوم فہرست دوا خطرے سمیت یا اصل بیرونی نام، طاقت و شکل۔ زیادہ خطرہ دوا کو بلا نشان ٹائپ کرکے جانچ سے نہ بچیں۔ خدمت انکار پر مسودہ رکھ کر منزل پھر دیکھیں۔"
+  ],
+  [
+    "دوا اور حفاظتی خطرے کیسے شامل کروں؟",
+    "دوا تلاش و فہرست سے مقدار، دستیابی، شکل، طاقت، محدود تجویز اور زیادہ خطرہ و ملتے نام آئیں۔ شامل کرنا غیر ارسال سطر ہے، محفوظ حکم نہیں۔ غیر فعال یا کیموتھراپی بند، ہسپتال کے لیے خالی اسٹاک بند مگر بیرونی پر معلوم دوا رکھی جا سکے۔ اسٹاک واقعہ بغیر پولنگ تازہ، دوبارہ دہرا تصدیق لازم۔ زیادہ سے زیادہ40سطور۔"
+  ],
+  [
+    "فہرست سے باہر دوا کیسے لکھوں؟",
+    "صرف بیرونی منزل میں بیرونی دوا شامل۔ اصل نام اور بتائی طاقت و شکل لکھیں؛ خود ساختہ خطرہ نشان نہیں۔ ہسپتال فہرست میں موجود ہو تو وہی اصل سطر لیں تاکہ حفاظت ساتھ ہو۔ واپس ہسپتال منزل پر ہر بیرونی سطر اصل فہرست سے بدلنی لازم۔"
+  ],
+  [
+    "ہر حکم سطر میں کیا درج ہو؟",
+    "کم ترین اکائی کی مثبت مقدار، عین خوراک، راستہ اور تکرار جیسا سنا لکھیں۔ اختیاری وقفہ1تا168پورے گھنٹے، مدت1تا365پورے دن، ہدایات500حروف؛ مخفف سے اندازہ نہیں۔ حسب ضرورت و فوری کے اپنے نشان، شیڈول فرض نہیں۔ غیر ارسال سطر ہٹانا صرف مسودہ، محفوظ طبی متن یہاں ترمیم نہیں۔ ہر تبدیلی دہرا تصدیق اور جائزہ نشان ہٹائے۔"
+  ],
+  [
+    "حکم کا آغاز اور اختتام کیسے درج کروں؟",
+    "داخلہ شیڈول کے لیے اصل حکم کا آغاز ہسپتال وقت لازم۔ اختیاری اختتام آغاز سے پہلے نہیں۔ دکھائے ہسپتال وقت سے، نامعلوم یا مبہم وقت انکار۔ لیپ ٹاپ یا ارسال وقت سے آغاز فرض نہیں۔ وقت واضح نہ ہو تو ڈاکٹر سے پوچھیں۔"
+  ],
+  [
+    "ڈاکٹر کی خود دوا لینے کی اجازت کیسے لکھوں؟",
+    "صرف ڈاکٹر کی اصل ہدایت پر مریض خود لینے کی اجازت نشان۔ منہ، سانس یا جلد کی کم خطرہ دوا کا انتخاب، آخری فیصلہ سرور، انکار ممکن۔ یہ حکم ہے، خوراک دینے کا اندراج یا مریض کے لینے کا ثبوت نہیں۔"
+  ],
+  [
+    "حکم دہرانے کا نشان کب لگاؤں؟",
+    "تمام سطور کے بعد ہر دوا، خوراک، راستہ، تکرار اور وقت اصل ڈاکٹر کو دہرا کر ان کی تصدیق لیں، تب نشان۔ سطر، ڈاکٹر، طریقہ یا منزل بدلنے پر نشان خالی۔ اسٹاک یا حکم واقعہ نیا جائزہ لازم کرے۔ پہلے سے نشان نہیں؛ محفوظ اطلاع اصل گفتگو نہیں کرتی۔"
+  ],
+  [
+    "غیر ارسال حکم کا جائزہ یا بند کیسے ہو؟",
+    "مریض اور یہی حکم چیک کا نشان، پھر زبانی حکم جائزہ۔ مریض، داخلہ، اصل ڈاکٹر رجسٹریشن اور ہر سطر ملائیں، ایک تصدیق۔ واپس مسودہ رکھے، بند پر پوچھے۔ ارسال سے پہلے مریض، اجازت، خدمت، ڈاکٹر و حفاظت پھر پڑھے۔ محفوظ طبی حکم یہاں ترمیم یا حذف نہیں، ڈاکٹر سے ان کے طریقے کا نیا یا درست حکم لیں۔"
+  ],
+  [
+    "انکار، واقعہ یا گم جواب پر کیا کروں؟",
     "انکار کوڈ سے، خانے کی تفصیل اور سطور محفوظ۔ تازہ پڑھیں اصل فہرست، حفاظت و سیاق تازہ، دہرا تصدیق و جائزہ نشان خالی؛ حفاظت بدلے تو نئی تلاش سے دوا پھر چن کر دہرا لیں۔ گم جواب اصل عمل، صارف، کلید و معلومات اور جگہ مقفل؛ وقت کے اندر واضح اصل درخواست، اسی حکم کی نئی کلید نہیں۔ خودکار یا آف لائن ارسال نہیں۔ دستخط صرف سرور سے، تب تک تاخیر دکھے۔ ایف ون،100تا250سائز محفوظ؛ اردو و انسانی کردار قبولیت باقی۔"
   ],
-  faq: [
-    [
-      "How do I find and follow a verbal order?",
-      "Open Verbal and telephone orders in Ward Nursing or from the actual My beds patient. Verify name/MRN, age/DOB, flags and admission before work. The list is scoped to that admission; Pending countersignature only changes its read filter. Orders to retrieve sets50/200/1000, and a reached limit is not complete history. Read each line, prescriber, receiver, due time, countersigner/time and late/overdue status. Refresh rereads; saving never pretends the doctor countersigned."
-    ],
-    [
-      "When may I record an exceptional verbal or telephone order?",
-      "Record a verbal or telephone order starts an empty draft for this inpatient. Confirm Emergency or the doctor cannot write this order, choose Verbal or Telephone, and record the actual circumstances in Order notes. Never use it for an ordinary outpatient or chemotherapy; ask for a written order. This Ward Nursing screen uses the selected admission; the separate ER journey uses its actual ER visit. No guessed patient or ticket identifiers."
-    ],
-    [
-      "How do I choose the doctor who actually gave the order?",
-      "Find prescribing doctor needs at least2characters. Search registered doctors returns actual active PMDC doctors with full name, employee number and registration. Select the doctor who gave this order. Changing the search clears the chosen doctor and read-back; there is no typed ID field. The backend still checks prescribing authorisation and restricted privileges; PRESCRIBER_NOT_AUTHORIZED keeps the order for clarification. Never nominate another person to get past a refusal."
-    ],
-    [
-      "How do I choose pharmacy or an outside destination?",
-      "Order destination is Hospital Pharmacy or External/local market. Hospital Pharmacy is offered only while the server's dispensing service is Active; no facility-category branch. External Market can use a known formulary medicine (retaining safety flags) or an outside medicine with its exact name/strength/form. Do not turn a known high-alert medicine into an unflagged typed name to evade checks. CAPABILITY_INACTIVE keeps the draft and requires a current destination review."
-    ],
-    [
-      "How do I add medicines and recognise safety warnings?",
-      "Find medicine for the order and Search formulary return stock status, quantity, form, strength, restricted and high-alert/look-alike warnings. Add ordered medicine creates an unsent line, never a saved order. Inactive/chemotherapy cannot be added; OutOfStock is unavailable for Hospital Pharmacy but a known formulary medicine can remain on an external slip. Stock events refresh availability without polling and require read-back again. At most40lines per order."
-    ],
-    [
-      "How do I record a medicine outside the formulary?",
-      "Only External Market offers Add medicine outside the formulary. Enter the actual Outside medicine name and any stated Outside strength/form; it has no inferred high-alert flag. For a medicine already on the hospital list select that actual row instead so its safety warnings follow it. Switching back to Hospital Pharmacy requires replacing every outside line with a returned formulary medicine."
-    ],
-    [
-      "What should each order line contain?",
-      "Enter Quantity in lowest units as a positive amount, exact Ordered dose text, Ordered route and Ordered frequency as heard. Optional interval1–168whole hours, duration1–365whole days and instructions up to500characters are not inferred from an abbreviation. PRN and STAT set their corresponding order flags; do not guess a schedule. Remove unsent line removes only that draft line; committed clinical content cannot be edited here. Any change clears read-back and acknowledgement."
-    ],
-    [
-      "How do I record the start and end of the order?",
-      "Order starts (hospital time) is required for inpatient scheduling. Enter the actual ordered hospital date/time; the optional end cannot precede start. The app uses the supplied hospital timezone and refuses unknown or ambiguous times. It never silently uses the laptop clock or infers start from submission. Ask the prescriber if the time is unclear."
-    ],
-    [
-      "How do I record the doctor's self-administration permission?",
-      "Tick Doctor allowed the patient to take this themselves only for that actual instruction. The control permits oral, inhaled or topical non-high-alert medicines; the server remains authoritative and may refuse SELF_ADMINISTRATION_INVALID. This is a prescribing instruction, not a charted dose or proof the patient took anything."
-    ],
-    [
-      "When do I tick read-back?",
-      "After writing all lines, read every medicine/dose/route/frequency/time back to the selected prescriber and obtain their confirmation, then tick I read every line back to this prescriber and they confirmed it. A line/doctor/mode/destination change clears this check. A stock/order event also requires a new review. Never pre-tick before the actual communication; saving notifies the prescriber but does not perform the conversation."
-    ],
-    [
-      "How do I review or leave an unsent order?",
-      "Tick I verified this patient and this exact order then Review verbal order. Compare patient/MRN/admission, selected doctor/registration and every ordered line before Confirm verbal order once. Back to order lines preserves the draft; Close asks before discarding. The app rereads patient, permission, service, doctor and medicine safety before sending. No clinical edit/delete after save: ask the prescriber for a documented correction or changed order through their workflow."
-    ],
-    [
-      "What should I do after a refusal, event or lost reply?",
-      "Refusals are handled by code, with field details and typed lines retained. Read latest and keep order lines refreshes list/safety/context and clears read-back and acknowledgement; if safety changed, re-select the medicine from current search and read back again. A lost write locks its exact action/actor/key/body and navigation: explicit Retry original request only within retention, never a new key for the same order. No automatic replay/offline queue. Countersignature is shown only from the server, overdue remains visible until signed. F1 and shared100–250% zoom preserve work; Urdu/human role acceptance remains pending."
-    ]
-  ],
-  faqUr: [
-    [
-      "زبانی حکم اور اس کے دستخط کیسے دیکھوں؟",
-      "وارڈ نرسنگ یا اصل بستر سے زبانی احکام کھولیں۔ نام، ایم آر این، عمر یا پیدائش، علامات و داخلہ چیک۔ فہرست اسی داخلے کی، صرف منتظر نشان پڑھائی کا فلٹر۔ حد50،200یا1000، پوری حد مکمل تاریخ نہیں۔ سطور، ڈاکٹر، وصول کنندہ، مقرر دستخط، اصل افسر ووقت اور تاخیر پڑھیں۔ تازہ دوبارہ پڑھے؛ محفوظ کرنا ڈاکٹر کے دستخط نہیں۔"
-    ],
-    [
-      "غیر معمولی زبانی یا فون حکم کب درج ہو؟",
-      "اس داخلے کا نیا خالی حکم مسودہ کھولیں۔ ہنگامی حالت یا ڈاکٹر کے نہ لکھ سکنے کی تصدیق، زبانی یا فون چنیں، اصل حالت نوٹ میں۔ عام او پی ڈی یا کیموتھراپی نہیں، تحریری حکم لیں۔ یہ وارڈ صفحہ اصل داخلے کا، ای آر کا الگ اصل دورہ؛ مریض یا ٹکٹ نمبر اندازہ نہیں۔"
-    ],
-    [
-      "اصل حکم دینے والا ڈاکٹر کیسے چنوں؟",
-      "ڈاکٹر تلاش میں کم ازکم2حروف۔ رجسٹرڈ ڈاکٹر تلاش اصل فعال پی ایم ڈی سی ڈاکٹر، نام، ملازم نمبر اور رجسٹریشن دے۔ وہی حکم دینے والا چنیں۔ تلاش بدلنے پر ڈاکٹر اور دہرا تصدیق خالی، آئی ڈی خانہ نہیں۔ اصل تجویز و محدود اختیار سرور چیک کرے؛ انکار پر حکم رکھ کر وضاحت لیں، دوسرا نام لگا کر نہ گزریں۔"
-    ],
-    [
-      "فارمیسی یا بیرونی منزل کیسے چنوں؟",
-      "منزل ہسپتال فارمیسی یا بیرونی مارکیٹ۔ ہسپتال انتخاب صرف سرور کی فعال فارمیسی خدمت میں، ادارہ قسم سے فیصلہ نہیں۔ باہر معلوم فہرست دوا خطرے سمیت یا اصل بیرونی نام، طاقت و شکل۔ زیادہ خطرہ دوا کو بلا نشان ٹائپ کرکے جانچ سے نہ بچیں۔ خدمت انکار پر مسودہ رکھ کر منزل پھر دیکھیں۔"
-    ],
-    [
-      "دوا اور حفاظتی خطرے کیسے شامل کروں؟",
-      "دوا تلاش و فہرست سے مقدار، دستیابی، شکل، طاقت، محدود تجویز اور زیادہ خطرہ و ملتے نام آئیں۔ شامل کرنا غیر ارسال سطر ہے، محفوظ حکم نہیں۔ غیر فعال یا کیموتھراپی بند، ہسپتال کے لیے خالی اسٹاک بند مگر بیرونی پر معلوم دوا رکھی جا سکے۔ اسٹاک واقعہ بغیر پولنگ تازہ، دوبارہ دہرا تصدیق لازم۔ زیادہ سے زیادہ40سطور۔"
-    ],
-    [
-      "فہرست سے باہر دوا کیسے لکھوں؟",
-      "صرف بیرونی منزل میں بیرونی دوا شامل۔ اصل نام اور بتائی طاقت و شکل لکھیں؛ خود ساختہ خطرہ نشان نہیں۔ ہسپتال فہرست میں موجود ہو تو وہی اصل سطر لیں تاکہ حفاظت ساتھ ہو۔ واپس ہسپتال منزل پر ہر بیرونی سطر اصل فہرست سے بدلنی لازم۔"
-    ],
-    [
-      "ہر حکم سطر میں کیا درج ہو؟",
-      "کم ترین اکائی کی مثبت مقدار، عین خوراک، راستہ اور تکرار جیسا سنا لکھیں۔ اختیاری وقفہ1تا168پورے گھنٹے، مدت1تا365پورے دن، ہدایات500حروف؛ مخفف سے اندازہ نہیں۔ حسب ضرورت و فوری کے اپنے نشان، شیڈول فرض نہیں۔ غیر ارسال سطر ہٹانا صرف مسودہ، محفوظ طبی متن یہاں ترمیم نہیں۔ ہر تبدیلی دہرا تصدیق اور جائزہ نشان ہٹائے۔"
-    ],
-    [
-      "حکم کا آغاز اور اختتام کیسے درج کروں؟",
-      "داخلہ شیڈول کے لیے اصل حکم کا آغاز ہسپتال وقت لازم۔ اختیاری اختتام آغاز سے پہلے نہیں۔ دکھائے ہسپتال وقت سے، نامعلوم یا مبہم وقت انکار۔ لیپ ٹاپ یا ارسال وقت سے آغاز فرض نہیں۔ وقت واضح نہ ہو تو ڈاکٹر سے پوچھیں۔"
-    ],
-    [
-      "ڈاکٹر کی خود دوا لینے کی اجازت کیسے لکھوں؟",
-      "صرف ڈاکٹر کی اصل ہدایت پر مریض خود لینے کی اجازت نشان۔ منہ، سانس یا جلد کی کم خطرہ دوا کا انتخاب، آخری فیصلہ سرور، انکار ممکن۔ یہ حکم ہے، خوراک دینے کا اندراج یا مریض کے لینے کا ثبوت نہیں۔"
-    ],
-    [
-      "حکم دہرانے کا نشان کب لگاؤں؟",
-      "تمام سطور کے بعد ہر دوا، خوراک، راستہ، تکرار اور وقت اصل ڈاکٹر کو دہرا کر ان کی تصدیق لیں، تب نشان۔ سطر، ڈاکٹر، طریقہ یا منزل بدلنے پر نشان خالی۔ اسٹاک یا حکم واقعہ نیا جائزہ لازم کرے۔ پہلے سے نشان نہیں؛ محفوظ اطلاع اصل گفتگو نہیں کرتی۔"
-    ],
-    [
-      "غیر ارسال حکم کا جائزہ یا بند کیسے ہو؟",
-      "مریض اور یہی حکم چیک کا نشان، پھر زبانی حکم جائزہ۔ مریض، داخلہ، اصل ڈاکٹر رجسٹریشن اور ہر سطر ملائیں، ایک تصدیق۔ واپس مسودہ رکھے، بند پر پوچھے۔ ارسال سے پہلے مریض، اجازت، خدمت، ڈاکٹر و حفاظت پھر پڑھے۔ محفوظ طبی حکم یہاں ترمیم یا حذف نہیں، ڈاکٹر سے ان کے طریقے کا نیا یا درست حکم لیں۔"
-    ],
-    [
-      "انکار، واقعہ یا گم جواب پر کیا کروں؟",
-      "انکار کوڈ سے، خانے کی تفصیل اور سطور محفوظ۔ تازہ پڑھیں اصل فہرست، حفاظت و سیاق تازہ، دہرا تصدیق و جائزہ نشان خالی؛ حفاظت بدلے تو نئی تلاش سے دوا پھر چن کر دہرا لیں۔ گم جواب اصل عمل، صارف، کلید و معلومات اور جگہ مقفل؛ وقت کے اندر واضح اصل درخواست، اسی حکم کی نئی کلید نہیں۔ خودکار یا آف لائن ارسال نہیں۔ دستخط صرف سرور سے، تب تک تاخیر دکھے۔ ایف ون،100تا250سائز محفوظ؛ اردو و انسانی کردار قبولیت باقی۔"
-    ]
+  [
+    "باہر سے لی دوا خود کب لی جا سکتی ہے؟",
+    "داخل مریض کی بیرونی دوا میں خود لینے کی اجازت صرف ہسپتال کی فہرست سے منتخب دوا پر ہے۔ ٹائپ نام کا خطرہ نامعلوم؛ خود لینے کی اجازت نہیں۔ منہ، زیر زبان، جلد، سانس، آنکھ، کان یا ناک کا راستہ اور غیر خطرناک دوا لازم۔ سرور کا انکار اصل فیصلہ ہے۔"
   ]
+]
 },
 
  vitals_tracker: {
@@ -695,65 +705,85 @@ nursing_assessment: {
   purpose: "During rounds, the doctor, clinical specialist or surgeon opens Doctor → Inpatient rounds & discharge, verifies the patient and treating doctor, reads observations and medicines, records missing admission details once, and begins clinical discharge when the prerequisites exist. Reading never administers medicine or frees a bed. Urdu is a draft awaiting native review.",
   purposeUr: "معائنے کے وقت ڈاکٹر، ماہر یا سرجن ڈاکٹر سے داخل مریضوں کا معائنہ و ڈسچارج کھول کر مریض و معالج، مشاہدات و دوا ریکارڈ پڑھے، غائب داخلہ تفصیل ایک بار لکھے اور شرائط پوری ہونے پر طبی ڈسچارج شروع کرے۔ پڑھنے سے دوا یا بستر خالی نہیں ہوتا۔ اردو مقامی جائزے تک مسودہ۔",
   steps: [
-    "During rounds, the doctor, clinical specialist or surgeon opens Doctor → Inpatient rounds & discharge, verifies the patient and treating doctor, reads observations and medicines, records missing admission details once, and begins clinical discharge when the prerequisites exist. Reading never administers medicine or frees a bed.",
-    "All live admissions available to the account appear initially; this is not a claim that each belongs to the signed-in doctor. Find inpatient by name, MRN or doctor filters the returned rows locally. Admission status filter reads that state from the server, including history. Choose the returned row or use Known admission reference and Read this admission. Refresh inpatient records reads current data; no matches means check the filter. Switching patient asks before discarding an unsent draft and is blocked for an unknown write result.",
-    "Check name and MRN with age/date of birth, ward/bed and actual treating doctor. A bed is location, not identity. A photo appears beside the name when available; none is normal. Read recorded allergy text, blood group, temporary/medico-legal identity and Outstanding dues and linked identity. An unverified/merged identity disables clinical actions. A deceased patient shows no-new-orders and later-entry review guidance; Record death hands over to the authorised doctor until that later screen is delivered.",
-    "Read the reason, provisional diagnosis, initial care plan and who recorded them. A Code Red without admission_reason shows Record reason and diagnosis. With permission and Live connection, enter Admission reason (3–4000 characters), Provisional diagnosis (2–1000), optional Initial care plan (up to4000). This is recorded once under your author stamp. Later correction belongs in the inpatient note workflow, not overwriting these details.",
-    "Vitals and nursing observations shows the recorded times, values, next due time, Overdue and each separate correction with author/time. No readings or notes is an honest empty state. The Medication administration record is read-only: prescribed dose, due time, given/held/refused/missed state, actual giver, checks and corrections. No medication administration or new order happens here.",
-    "Reports brought by the patient is separate from Hospital documents. Each outside report shows its issuing facility and date. Open its returned document: images preview, PDFs use a save dialog; cancellation saves nothing. An unavailable download stays an error; never substitute a local example. This screen uploads no document. A failed document action never repeats a clinical write.",
-    "Initiate clinical discharge is offered for Admitted records with permission, Live and verified identity. Enter optional Clinical discharge note (up to1000 characters). It needs recorded reason/diagnosis, a signed discharge summary and the admission general-consent decision. The server refusal keeps your note. Open the permitted summary/consent screen if delivered; otherwise hand over to the authorised doctor or Admissions. Those editors are later screens, not a local override.",
-    "Check I checked this patient, admission and clinical action, then Review inpatient action. Confirmation shows the exact identity and frozen body; Confirm this inpatient action sends once. Back to inpatient input retains values; Close inpatient draft asks before discarding. Clinical Discharge starts the sequence, never frees the bed. Discharge clearance progress shows Blocked on and who cleared each stage and when: Pharmacy, Nursing MAR, Billing, Operations cleaning. This screen does not clear those stages or cancel a completed clinical entry.",
-    "State refusals reread the exact admission and clearance progress and keep your input. VALIDATION_ERROR shows details.fields beside fields. Read latest and keep input requires checking the patient again. Admission details already recorded means read the author and close the retained draft; a discharge already started means read the stages, never repeat it. Neither operation has safe replay: an unknown reply locks the draft; Read current result, compare the actual state, then Result reviewed; return to draft. No automatic resend, offline queue or invented success. Events/reconnect refresh and stop stale reviews.",
-    "Explain this admission estimate opens the existing Doctor estimate page filtered to that real admission; select the Draft estimate, explain and obtain factual signed-paper acknowledgement there. Return to inpatient chart preserves the selected admission, not an unsent write. If no estimate exists ask Admissions/Billing to prepare it. F1 and visible Help preserve input/focus; English/Urdu and shared keyboard/Settings zoom100–250% apply. Urdu, physical printing and named human fresh-data review remain pending."
-  ],
+  "During rounds, the doctor, clinical specialist or surgeon opens Doctor → Inpatient rounds & discharge, verifies the patient and treating doctor, reads observations and medicines, records missing admission details once, and begins clinical discharge when the prerequisites exist. Reading never administers medicine or frees a bed.",
+  "My patients are the admissions whose primary_doctor_id matches my employee ID. Waiting for a doctor shows admissions with no treating doctor to every doctor. A nurse’s Code Red says Doctor: waiting; the nurse who pressed it is never presented as its doctor. Search filters the selected round; status reads the requested server state. A known admission remains a permitted read, not evidence it belongs to me.",
+  "Check name and MRN with age/date of birth, ward/bed and actual treating doctor. A bed is location, not identity. A photo appears beside the name when available; none is normal. Read recorded allergy text, blood group, temporary/medico-legal identity and Outstanding dues and linked identity. An unverified/merged identity disables clinical actions. A deceased patient shows no-new-orders and later-entry review guidance; Record death hands over to the authorised doctor until that later screen is delivered.",
+  "Read the reason, provisional diagnosis, initial care plan and who recorded them. A Code Red without admission_reason shows Record reason and diagnosis. With permission and Live connection, enter Admission reason (3–4000 characters), Provisional diagnosis (2–1000), optional Initial care plan (up to4000). This is recorded once under your author stamp. Later correction belongs in the inpatient note workflow, not overwriting these details.",
+  "Vitals and nursing observations shows the recorded times, values, next due time, Overdue and each separate correction with author/time. No readings or notes is an honest empty state. The Medication administration record is read-only: prescribed dose, due time, given/held/refused/missed state, actual giver, checks and corrections. No medication administration or new order happens here.",
+  "Reports brought by the patient is separate from Hospital documents. Each outside report shows its issuing facility and date. Open its returned document: images preview, PDFs use a save dialog; cancellation saves nothing. An unavailable download stays an error; never substitute a local example. This screen uploads no document. A failed document action never repeats a clinical write.",
+  "Initiate clinical discharge is offered for Admitted records with permission, Live and verified identity. Enter optional Clinical discharge note (up to1000 characters). It needs recorded reason/diagnosis, a signed discharge summary and the admission general-consent decision. The server refusal keeps your note. Open the permitted summary/consent screen if delivered; otherwise hand over to the authorised doctor or Admissions. Those editors are later screens, not a local override.",
+  "Check I checked this patient, admission and clinical action, then Review inpatient action. Confirmation shows the exact identity and frozen body; Confirm this inpatient action sends once. Back to inpatient input retains values; Close inpatient draft asks before discarding. Clinical Discharge starts the sequence, never frees the bed. Discharge clearance progress shows Blocked on and who cleared each stage and when: Pharmacy, Nursing MAR, Billing, Operations cleaning. This screen does not clear those stages or cancel a completed clinical entry.",
+  "State refusals reread the exact admission and clearance progress and keep your input. VALIDATION_ERROR shows details.fields beside fields. Read latest and keep input requires checking the patient again. Admission details already recorded means read the author and close the retained draft; a discharge already started means read the stages, never repeat it. Neither operation has safe replay: an unknown reply locks the draft; Read current result, compare the actual state, then Result reviewed; return to draft. No automatic resend, offline queue or invented success. Events/reconnect refresh and stop stale reviews.",
+  "Explain this admission estimate opens the existing Doctor estimate page filtered to that real admission; select the Draft estimate, explain and obtain factual signed-paper acknowledgement there. Return to inpatient chart preserves the selected admission, not an unsent write. If no estimate exists ask Admissions/Billing to prepare it. F1 and visible Help preserve input/focus; English/Urdu and shared keyboard/Settings zoom100–250% apply. Urdu, physical printing and named human fresh-data review remain pending.",
+  "Take this patient records a reason and immediately assigns the waiting patient to me. Recording the Code Red reason and provisional diagnosis also takes over. Hand over to another doctor selects an active PMDC doctor and a 3–500 character reason, then review and confirm once. No receiving acceptance is required. Read the complete TakeOver/Handover/Reassigned history. Only the treating doctor hands over; a Hospital Admin or Director reassigns while that doctor is away. TREATING_DOCTOR_ONLY means reread the doctor/history; VALIDATION_ERROR doctor_id means choose a current PMDC doctor who is not already treating. Events move patients between rounds.",
+  "Vitals due and overdue minutes are server event facts, shown for my patients and those waiting for a doctor. A vitals.due event rereads an open flowsheet, including is_overdue. The doctor never records observations here; ask the nurse to measure and record. No timer guesses clinical alerts and the screen never polls."
+],
   stepsUr: [
-    "معائنے کے وقت ڈاکٹر، ماہر یا سرجن ڈاکٹر سے داخل مریضوں کا معائنہ و ڈسچارج کھول کر مریض و معالج، مشاہدات و دوا ریکارڈ پڑھے، غائب داخلہ تفصیل ایک بار لکھے اور شرائط پوری ہونے پر طبی ڈسچارج شروع کرے۔ پڑھنے سے دوا یا بستر خالی نہیں ہوتا۔",
-    "ابتدا میں اس صارف کو دستیاب تمام جاری داخلے ہیں، ہر مریض کو موجودہ ڈاکٹر کا نہ سمجھیں۔ نام، ایم آر این یا معالج سے تلاش مقامی فلٹر؛ حالت فلٹر سرور سے تاریخ سمیت پڑھتا ہے۔ اصل سطر یا معلوم حوالہ سے یہ داخلہ پڑھیں۔ تازہ کریں موجودہ پڑھے؛ نتیجہ نہ ہو تو فلٹر دیکھیں۔ مریض بدلنے سے پہلے غیر ارسال مسودہ چھوڑنے پر پوچھے؛ نامعلوم ارسال پر جگہ بدلنا بند۔",
-    "نام و ایم آر این، عمر/تاریخ پیدائش، وارڈ/بستر و اصل معالج چیک کریں۔ بستر جگہ ہے شناخت نہیں۔ تصویر ہو تو نام کے پاس؛ نہ ہونا معمول۔ اصل الرجی، خون، عارضی/میڈیکو لیگل شناخت اور بقایا و متعلقہ شناخت دیکھیں۔ نامکمل یا ضم شناخت پر طبی عمل بند۔ وفات پر نئے احکامات نہیں و بعد کے اندراج کا جائزہ؛ وفات سکرین بننے تک مجاز ڈاکٹر کو دیں۔",
-    "وجہ، ابتدائی تشخیص، نگہداشت و درج کرنے والا دیکھیں۔ کوڈ ریڈ میں وجہ نہ ہو تو وجہ و تشخیص درج کریں۔ اجازت و جاری رابطہ پر وجہ3تا4000حروف، ابتدائی تشخیص2تا1000، اختیاری منصوبہ4000۔ ایک بار مصنف مہر کے ساتھ اندراج۔ بعد کی تصحیح داخلہ نوٹ میں، اصل تفصیل تبدیل نہیں۔",
-    "حیاتیاتی پیمائش و نرسنگ میں اصل وقت، قدر، اگلی پیمائش، تاخیر اور ہر الگ تصحیح و مصنف/وقت۔ خالی کا مطلب ریکارڈ نہیں۔ دوا دینے کا ریکارڈ صرف پڑھیں: تجویز، وقت، دی/روکی/انکار/چھوٹی خوراک، اصل دینے والا، جانچ و تصحیح۔ یہاں دوا دینا یا نیا حکم نہیں۔",
-    "مریض کے لائے رپورٹس ہسپتال کی دستاویز سے الگ، ادارہ و تاریخ نمایاں۔ اصل دستاویز کھولیں: تصویر جائزہ، پی ڈی ایف فائل محفوظ کرنے کا مکالمہ؛ منسوخی کچھ محفوظ نہیں کرتی۔ ناکامی غلطی رہے، مقامی مثال نہ بنائیں۔ یہاں اپلوڈ نہیں۔ فائل خرابی سے طبی ارسال نہ دہرائیں۔",
-    "صرف داخل مریض، اجازت، جاری رابطہ و تصدیق شناخت پر طبی ڈسچارج شروع کریں۔ اختیاری نوٹ1000حروف۔ وجہ/تشخیص، دستخط شدہ خلاصہ اور عمومی رضامندی فیصلہ لازم۔ سرور انکار پر نوٹ محفوظ۔ متعلقہ مجاز سکرین ہو تو کھولیں ورنہ ڈاکٹر یا داخلہ ڈیسک کو دیں؛ بعد کی سکرین کی جگہ مقامی استثنا نہیں۔",
-    "میں نے مریض، داخلہ و طبی عمل چیک کیا نشان، پھر جائزہ۔ اصل شناخت و منجمد معلومات کی ایک تصدیق ارسال کرے۔ واپس معلومات رکھے، مسودہ بند پر پوچھے۔ طبی ڈسچارج صرف مراحل شروع کرتا ہے، بستر خالی نہیں۔ کلیئرنس میں منتظر مرحلہ، کس نے کب مکمل کیا: فارمیسی، نرسنگ، بلنگ، صفائی۔ یہاں ان مراحل کی منظوری یا حتمی اندراج کی منسوخی نہیں۔",
-    "حالت انکار پر عین داخلہ و مراحل پڑھیں، معلومات محفوظ۔ خانے کی غلطی خانے کے پاس۔ تازہ پڑھ کر معلومات رکھنے کے بعد مریض دوبارہ چیک۔ تفصیل پہلےدرج تو مصنف پڑھ کر مسودہ بند؛ ڈسچارج شروع ہو تو مراحل پڑھیں، نہ دہرائیں۔ دونوں محفوظ دوبارہ ارسال نہیں؛ جواب گم پر مسودہ مقفل، موجودہ نتیجہ پڑھ کر حالت دیکھیں پھر نتیجہ چیک ہو گیا؛ واپس مسودہ۔ خودکار ارسال، آف لائن قطار یا فرضی کامیابی نہیں۔ واقعہ/رابطہ بحالی پر پرانا جائزہ رکتا ہے۔",
-    "اس داخلے کا تخمینہ سمجھائیں اصل داخلے سے موجود ڈاکٹر تخمینہ سکرین فلٹر کھولتا ہے؛ مسودہ چن کر اصل گفتگو و دستخط کا اندراج وہاں۔ واپس چارٹ منتخب داخلہ رکھے، غیر ارسال طبی عمل نہیں۔ تخمینہ نہ ہو تو داخلہ/بلنگ سے تیار کرائیں۔ ایف ون و مدد معلومات/فوکس رکھتے؛ دو زبان اور کی بورڈ/ترتیب زوم100تا250مشترک۔ اردو، کاغذ و نامزد انسانی جائزہ باقی۔"
-  ],
+  "معائنے کے وقت ڈاکٹر، ماہر یا سرجن ڈاکٹر سے داخل مریضوں کا معائنہ و ڈسچارج کھول کر مریض و معالج، مشاہدات و دوا ریکارڈ پڑھے، غائب داخلہ تفصیل ایک بار لکھے اور شرائط پوری ہونے پر طبی ڈسچارج شروع کرے۔ پڑھنے سے دوا یا بستر خالی نہیں ہوتا۔",
+  "میرے مریض وہ داخلے ہیں جن کا معالج میرے ملازم نمبر سے ملتا ہے۔ ڈاکٹر کے منتظر میں بغیر معالج داخلے ہر ڈاکٹر کو نظر آتے ہیں۔ نرس کے کوڈ ریڈ میں ڈاکٹر منتظر ہے؛ بٹن دبانے والی نرس معالج نہیں۔ تلاش منتخب فہرست میں اور حالت سرور سے پڑھی جاتی ہے۔ معلوم داخلہ پڑھنے کی اجازت اسے میرا مریض نہیں بناتی۔",
+  "نام و ایم آر این، عمر/تاریخ پیدائش، وارڈ/بستر و اصل معالج چیک کریں۔ بستر جگہ ہے شناخت نہیں۔ تصویر ہو تو نام کے پاس؛ نہ ہونا معمول۔ اصل الرجی، خون، عارضی/میڈیکو لیگل شناخت اور بقایا و متعلقہ شناخت دیکھیں۔ نامکمل یا ضم شناخت پر طبی عمل بند۔ وفات پر نئے احکامات نہیں و بعد کے اندراج کا جائزہ؛ وفات سکرین بننے تک مجاز ڈاکٹر کو دیں۔",
+  "وجہ، ابتدائی تشخیص، نگہداشت و درج کرنے والا دیکھیں۔ کوڈ ریڈ میں وجہ نہ ہو تو وجہ و تشخیص درج کریں۔ اجازت و جاری رابطہ پر وجہ3تا4000حروف، ابتدائی تشخیص2تا1000، اختیاری منصوبہ4000۔ ایک بار مصنف مہر کے ساتھ اندراج۔ بعد کی تصحیح داخلہ نوٹ میں، اصل تفصیل تبدیل نہیں۔",
+  "حیاتیاتی پیمائش و نرسنگ میں اصل وقت، قدر، اگلی پیمائش، تاخیر اور ہر الگ تصحیح و مصنف/وقت۔ خالی کا مطلب ریکارڈ نہیں۔ دوا دینے کا ریکارڈ صرف پڑھیں: تجویز، وقت، دی/روکی/انکار/چھوٹی خوراک، اصل دینے والا، جانچ و تصحیح۔ یہاں دوا دینا یا نیا حکم نہیں۔",
+  "مریض کے لائے رپورٹس ہسپتال کی دستاویز سے الگ، ادارہ و تاریخ نمایاں۔ اصل دستاویز کھولیں: تصویر جائزہ، پی ڈی ایف فائل محفوظ کرنے کا مکالمہ؛ منسوخی کچھ محفوظ نہیں کرتی۔ ناکامی غلطی رہے، مقامی مثال نہ بنائیں۔ یہاں اپلوڈ نہیں۔ فائل خرابی سے طبی ارسال نہ دہرائیں۔",
+  "صرف داخل مریض، اجازت، جاری رابطہ و تصدیق شناخت پر طبی ڈسچارج شروع کریں۔ اختیاری نوٹ1000حروف۔ وجہ/تشخیص، دستخط شدہ خلاصہ اور عمومی رضامندی فیصلہ لازم۔ سرور انکار پر نوٹ محفوظ۔ متعلقہ مجاز سکرین ہو تو کھولیں ورنہ ڈاکٹر یا داخلہ ڈیسک کو دیں؛ بعد کی سکرین کی جگہ مقامی استثنا نہیں۔",
+  "میں نے مریض، داخلہ و طبی عمل چیک کیا نشان، پھر جائزہ۔ اصل شناخت و منجمد معلومات کی ایک تصدیق ارسال کرے۔ واپس معلومات رکھے، مسودہ بند پر پوچھے۔ طبی ڈسچارج صرف مراحل شروع کرتا ہے، بستر خالی نہیں۔ کلیئرنس میں منتظر مرحلہ، کس نے کب مکمل کیا: فارمیسی، نرسنگ، بلنگ، صفائی۔ یہاں ان مراحل کی منظوری یا حتمی اندراج کی منسوخی نہیں۔",
+  "حالت انکار پر عین داخلہ و مراحل پڑھیں، معلومات محفوظ۔ خانے کی غلطی خانے کے پاس۔ تازہ پڑھ کر معلومات رکھنے کے بعد مریض دوبارہ چیک۔ تفصیل پہلےدرج تو مصنف پڑھ کر مسودہ بند؛ ڈسچارج شروع ہو تو مراحل پڑھیں، نہ دہرائیں۔ دونوں محفوظ دوبارہ ارسال نہیں؛ جواب گم پر مسودہ مقفل، موجودہ نتیجہ پڑھ کر حالت دیکھیں پھر نتیجہ چیک ہو گیا؛ واپس مسودہ۔ خودکار ارسال، آف لائن قطار یا فرضی کامیابی نہیں۔ واقعہ/رابطہ بحالی پر پرانا جائزہ رکتا ہے۔",
+  "اس داخلے کا تخمینہ سمجھائیں اصل داخلے سے موجود ڈاکٹر تخمینہ سکرین فلٹر کھولتا ہے؛ مسودہ چن کر اصل گفتگو و دستخط کا اندراج وہاں۔ واپس چارٹ منتخب داخلہ رکھے، غیر ارسال طبی عمل نہیں۔ تخمینہ نہ ہو تو داخلہ/بلنگ سے تیار کرائیں۔ ایف ون و مدد معلومات/فوکس رکھتے؛ دو زبان اور کی بورڈ/ترتیب زوم100تا250مشترک۔ اردو، کاغذ و نامزد انسانی جائزہ باقی۔",
+  "اس مریض کی ذمہ داری لیں سے وجہ درج کرکے فوراً مریض میرا ہو جاتا ہے۔ کوڈ ریڈ کی وجہ و تشخیص درج کرنا بھی ذمہ داری لینا ہے۔ دوسرے ڈاکٹر کو حوالہ میں فعال پی ایم ڈی سی ڈاکٹر اور3تا500حروف وجہ چن کر جائزہ و ایک تصدیق۔ دوسرے ڈاکٹر کی منظوری لازم نہیں۔ پوری ذمہ داری، حوالگی اور دوبارہ تعیناتی تاریخ پڑھیں۔ صرف معالج حوالہ دیتا ہے؛ غیر موجودگی میں ایڈمن یا ڈائریکٹر تعینات کرتے ہیں۔ دوسرے معالج کے انکار پر تاریخ تازہ؛ ڈاکٹر فیلڈ کی غلطی پر فعال پی ایم ڈی سی ڈاکٹر چنیں جو پہلے معالج نہ ہو۔ اطلاعات سے فہرست بدلتی ہے۔",
+  "پیمائش واجب اور تاخیر کے منٹ سرور کی اطلاع ہیں؛ میرے مریض اور ڈاکٹر کے منتظر پر دکھتے ہیں۔ اطلاع کھلے مشاہدات و تاخیر کی حالت دوبارہ پڑھتی ہے۔ ڈاکٹر یہاں پیمائش درج نہیں کرتا؛ نرس پیمائش و اندراج کرتی ہے۔ کوئی ٹائمر فرضی طبی اطلاع یا مسلسل درخواست نہیں بھیجتا۔"
+],
   faq: [
-    [
-      "Doctor: what do I check before a round?",
-      "All live admissions available to the account appear initially; this is not a claim that each belongs to the signed-in doctor. Find inpatient by name, MRN or doctor filters the returned rows locally. Admission status filter reads that state from the server, including history. Choose the returned row or use Known admission reference and Read this admission. Refresh inpatient records reads current data; no matches means check the filter. Switching patient asks before discarding an unsent draft and is blocked for an unknown write result. Check name and MRN with age/date of birth, ward/bed and actual treating doctor. A bed is location, not identity. A photo appears beside the name when available; none is normal. Read recorded allergy text, blood group, temporary/medico-legal identity and Outstanding dues and linked identity. An unverified/merged identity disables clinical actions. A deceased patient shows no-new-orders and later-entry review guidance; Record death hands over to the authorised doctor until that later screen is delivered. Vitals and nursing observations shows the recorded times, values, next due time, Overdue and each separate correction with author/time. No readings or notes is an honest empty state. The Medication administration record is read-only: prescribed dose, due time, given/held/refused/missed state, actual giver, checks and corrections. No medication administration or new order happens here."
-    ],
-    [
-      "Clinical specialist: how do I record missing Code Red details?",
-      "Read the reason, provisional diagnosis, initial care plan and who recorded them. A Code Red without admission_reason shows Record reason and diagnosis. With permission and Live connection, enter Admission reason (3–4000 characters), Provisional diagnosis (2–1000), optional Initial care plan (up to4000). This is recorded once under your author stamp. Later correction belongs in the inpatient note workflow, not overwriting these details. Check I checked this patient, admission and clinical action, then Review inpatient action. Confirmation shows the exact identity and frozen body; Confirm this inpatient action sends once. Back to inpatient input retains values; Close inpatient draft asks before discarding. Clinical Discharge starts the sequence, never frees the bed. Discharge clearance progress shows Blocked on and who cleared each stage and when: Pharmacy, Nursing MAR, Billing, Operations cleaning. This screen does not clear those stages or cancel a completed clinical entry. State refusals reread the exact admission and clearance progress and keep your input. VALIDATION_ERROR shows details.fields beside fields. Read latest and keep input requires checking the patient again. Admission details already recorded means read the author and close the retained draft; a discharge already started means read the stages, never repeat it. Neither operation has safe replay: an unknown reply locks the draft; Read current result, compare the actual state, then Result reviewed; return to draft. No automatic resend, offline queue or invented success. Events/reconnect refresh and stop stale reviews."
-    ],
-    [
-      "Surgeon: why did discharge stop, and did the bed become free?",
-      "Initiate clinical discharge is offered for Admitted records with permission, Live and verified identity. Enter optional Clinical discharge note (up to1000 characters). It needs recorded reason/diagnosis, a signed discharge summary and the admission general-consent decision. The server refusal keeps your note. Open the permitted summary/consent screen if delivered; otherwise hand over to the authorised doctor or Admissions. Those editors are later screens, not a local override. Check I checked this patient, admission and clinical action, then Review inpatient action. Confirmation shows the exact identity and frozen body; Confirm this inpatient action sends once. Back to inpatient input retains values; Close inpatient draft asks before discarding. Clinical Discharge starts the sequence, never frees the bed. Discharge clearance progress shows Blocked on and who cleared each stage and when: Pharmacy, Nursing MAR, Billing, Operations cleaning. This screen does not clear those stages or cancel a completed clinical entry. State refusals reread the exact admission and clearance progress and keep your input. VALIDATION_ERROR shows details.fields beside fields. Read latest and keep input requires checking the patient again. Admission details already recorded means read the author and close the retained draft; a discharge already started means read the stages, never repeat it. Neither operation has safe replay: an unknown reply locks the draft; Read current result, compare the actual state, then Result reviewed; return to draft. No automatic resend, offline queue or invented success. Events/reconnect refresh and stop stale reviews."
-    ],
-    [
-      "How do I read an outside report and explain the cost?",
-      "Reports brought by the patient is separate from Hospital documents. Each outside report shows its issuing facility and date. Open its returned document: images preview, PDFs use a save dialog; cancellation saves nothing. An unavailable download stays an error; never substitute a local example. This screen uploads no document. A failed document action never repeats a clinical write. Explain this admission estimate opens the existing Doctor estimate page filtered to that real admission; select the Draft estimate, explain and obtain factual signed-paper acknowledgement there. Return to inpatient chart preserves the selected admission, not an unsent write. If no estimate exists ask Admissions/Billing to prepare it. F1 and visible Help preserve input/focus; English/Urdu and shared keyboard/Settings zoom100–250% apply. Urdu, physical printing and named human fresh-data review remain pending."
-    ]
+  [
+    "Doctor: what do I check before a round?",
+    "All live admissions available to the account appear initially; this is not a claim that each belongs to the signed-in doctor. Find inpatient by name, MRN or doctor filters the returned rows locally. Admission status filter reads that state from the server, including history. Choose the returned row or use Known admission reference and Read this admission. Refresh inpatient records reads current data; no matches means check the filter. Switching patient asks before discarding an unsent draft and is blocked for an unknown write result. Check name and MRN with age/date of birth, ward/bed and actual treating doctor. A bed is location, not identity. A photo appears beside the name when available; none is normal. Read recorded allergy text, blood group, temporary/medico-legal identity and Outstanding dues and linked identity. An unverified/merged identity disables clinical actions. A deceased patient shows no-new-orders and later-entry review guidance; Record death hands over to the authorised doctor until that later screen is delivered. Vitals and nursing observations shows the recorded times, values, next due time, Overdue and each separate correction with author/time. No readings or notes is an honest empty state. The Medication administration record is read-only: prescribed dose, due time, given/held/refused/missed state, actual giver, checks and corrections. No medication administration or new order happens here."
   ],
-  faqUr: [
-    [
-      "ڈاکٹر: معائنے سے پہلے کیا چیک کروں؟",
-      "ابتدا میں اس صارف کو دستیاب تمام جاری داخلے ہیں، ہر مریض کو موجودہ ڈاکٹر کا نہ سمجھیں۔ نام، ایم آر این یا معالج سے تلاش مقامی فلٹر؛ حالت فلٹر سرور سے تاریخ سمیت پڑھتا ہے۔ اصل سطر یا معلوم حوالہ سے یہ داخلہ پڑھیں۔ تازہ کریں موجودہ پڑھے؛ نتیجہ نہ ہو تو فلٹر دیکھیں۔ مریض بدلنے سے پہلے غیر ارسال مسودہ چھوڑنے پر پوچھے؛ نامعلوم ارسال پر جگہ بدلنا بند۔ نام و ایم آر این، عمر/تاریخ پیدائش، وارڈ/بستر و اصل معالج چیک کریں۔ بستر جگہ ہے شناخت نہیں۔ تصویر ہو تو نام کے پاس؛ نہ ہونا معمول۔ اصل الرجی، خون، عارضی/میڈیکو لیگل شناخت اور بقایا و متعلقہ شناخت دیکھیں۔ نامکمل یا ضم شناخت پر طبی عمل بند۔ وفات پر نئے احکامات نہیں و بعد کے اندراج کا جائزہ؛ وفات سکرین بننے تک مجاز ڈاکٹر کو دیں۔ حیاتیاتی پیمائش و نرسنگ میں اصل وقت، قدر، اگلی پیمائش، تاخیر اور ہر الگ تصحیح و مصنف/وقت۔ خالی کا مطلب ریکارڈ نہیں۔ دوا دینے کا ریکارڈ صرف پڑھیں: تجویز، وقت، دی/روکی/انکار/چھوٹی خوراک، اصل دینے والا، جانچ و تصحیح۔ یہاں دوا دینا یا نیا حکم نہیں۔"
-    ],
-    [
-      "ماہر: کوڈ ریڈ کی غائب تفصیل کیسے لکھوں؟",
-      "وجہ، ابتدائی تشخیص، نگہداشت و درج کرنے والا دیکھیں۔ کوڈ ریڈ میں وجہ نہ ہو تو وجہ و تشخیص درج کریں۔ اجازت و جاری رابطہ پر وجہ3تا4000حروف، ابتدائی تشخیص2تا1000، اختیاری منصوبہ4000۔ ایک بار مصنف مہر کے ساتھ اندراج۔ بعد کی تصحیح داخلہ نوٹ میں، اصل تفصیل تبدیل نہیں۔ میں نے مریض، داخلہ و طبی عمل چیک کیا نشان، پھر جائزہ۔ اصل شناخت و منجمد معلومات کی ایک تصدیق ارسال کرے۔ واپس معلومات رکھے، مسودہ بند پر پوچھے۔ طبی ڈسچارج صرف مراحل شروع کرتا ہے، بستر خالی نہیں۔ کلیئرنس میں منتظر مرحلہ، کس نے کب مکمل کیا: فارمیسی، نرسنگ، بلنگ، صفائی۔ یہاں ان مراحل کی منظوری یا حتمی اندراج کی منسوخی نہیں۔ حالت انکار پر عین داخلہ و مراحل پڑھیں، معلومات محفوظ۔ خانے کی غلطی خانے کے پاس۔ تازہ پڑھ کر معلومات رکھنے کے بعد مریض دوبارہ چیک۔ تفصیل پہلےدرج تو مصنف پڑھ کر مسودہ بند؛ ڈسچارج شروع ہو تو مراحل پڑھیں، نہ دہرائیں۔ دونوں محفوظ دوبارہ ارسال نہیں؛ جواب گم پر مسودہ مقفل، موجودہ نتیجہ پڑھ کر حالت دیکھیں پھر نتیجہ چیک ہو گیا؛ واپس مسودہ۔ خودکار ارسال، آف لائن قطار یا فرضی کامیابی نہیں۔ واقعہ/رابطہ بحالی پر پرانا جائزہ رکتا ہے۔"
-    ],
-    [
-      "سرجن: ڈسچارج کیوں رکا، بستر خالی ہوا؟",
-      "صرف داخل مریض، اجازت، جاری رابطہ و تصدیق شناخت پر طبی ڈسچارج شروع کریں۔ اختیاری نوٹ1000حروف۔ وجہ/تشخیص، دستخط شدہ خلاصہ اور عمومی رضامندی فیصلہ لازم۔ سرور انکار پر نوٹ محفوظ۔ متعلقہ مجاز سکرین ہو تو کھولیں ورنہ ڈاکٹر یا داخلہ ڈیسک کو دیں؛ بعد کی سکرین کی جگہ مقامی استثنا نہیں۔ میں نے مریض، داخلہ و طبی عمل چیک کیا نشان، پھر جائزہ۔ اصل شناخت و منجمد معلومات کی ایک تصدیق ارسال کرے۔ واپس معلومات رکھے، مسودہ بند پر پوچھے۔ طبی ڈسچارج صرف مراحل شروع کرتا ہے، بستر خالی نہیں۔ کلیئرنس میں منتظر مرحلہ، کس نے کب مکمل کیا: فارمیسی، نرسنگ، بلنگ، صفائی۔ یہاں ان مراحل کی منظوری یا حتمی اندراج کی منسوخی نہیں۔ حالت انکار پر عین داخلہ و مراحل پڑھیں، معلومات محفوظ۔ خانے کی غلطی خانے کے پاس۔ تازہ پڑھ کر معلومات رکھنے کے بعد مریض دوبارہ چیک۔ تفصیل پہلےدرج تو مصنف پڑھ کر مسودہ بند؛ ڈسچارج شروع ہو تو مراحل پڑھیں، نہ دہرائیں۔ دونوں محفوظ دوبارہ ارسال نہیں؛ جواب گم پر مسودہ مقفل، موجودہ نتیجہ پڑھ کر حالت دیکھیں پھر نتیجہ چیک ہو گیا؛ واپس مسودہ۔ خودکار ارسال، آف لائن قطار یا فرضی کامیابی نہیں۔ واقعہ/رابطہ بحالی پر پرانا جائزہ رکتا ہے۔"
-    ],
-    [
-      "باہر کی رپورٹ و خرچ کیسے سمجھاؤں؟",
-      "مریض کے لائے رپورٹس ہسپتال کی دستاویز سے الگ، ادارہ و تاریخ نمایاں۔ اصل دستاویز کھولیں: تصویر جائزہ، پی ڈی ایف فائل محفوظ کرنے کا مکالمہ؛ منسوخی کچھ محفوظ نہیں کرتی۔ ناکامی غلطی رہے، مقامی مثال نہ بنائیں۔ یہاں اپلوڈ نہیں۔ فائل خرابی سے طبی ارسال نہ دہرائیں۔ اس داخلے کا تخمینہ سمجھائیں اصل داخلے سے موجود ڈاکٹر تخمینہ سکرین فلٹر کھولتا ہے؛ مسودہ چن کر اصل گفتگو و دستخط کا اندراج وہاں۔ واپس چارٹ منتخب داخلہ رکھے، غیر ارسال طبی عمل نہیں۔ تخمینہ نہ ہو تو داخلہ/بلنگ سے تیار کرائیں۔ ایف ون و مدد معلومات/فوکس رکھتے؛ دو زبان اور کی بورڈ/ترتیب زوم100تا250مشترک۔ اردو، کاغذ و نامزد انسانی جائزہ باقی۔"
-    ]
+  [
+    "Clinical specialist: how do I record missing Code Red details?",
+    "Read the reason, provisional diagnosis, initial care plan and who recorded them. A Code Red without admission_reason shows Record reason and diagnosis. With permission and Live connection, enter Admission reason (3–4000 characters), Provisional diagnosis (2–1000), optional Initial care plan (up to4000). This is recorded once under your author stamp. Later correction belongs in the inpatient note workflow, not overwriting these details. Check I checked this patient, admission and clinical action, then Review inpatient action. Confirmation shows the exact identity and frozen body; Confirm this inpatient action sends once. Back to inpatient input retains values; Close inpatient draft asks before discarding. Clinical Discharge starts the sequence, never frees the bed. Discharge clearance progress shows Blocked on and who cleared each stage and when: Pharmacy, Nursing MAR, Billing, Operations cleaning. This screen does not clear those stages or cancel a completed clinical entry. State refusals reread the exact admission and clearance progress and keep your input. VALIDATION_ERROR shows details.fields beside fields. Read latest and keep input requires checking the patient again. Admission details already recorded means read the author and close the retained draft; a discharge already started means read the stages, never repeat it. Neither operation has safe replay: an unknown reply locks the draft; Read current result, compare the actual state, then Result reviewed; return to draft. No automatic resend, offline queue or invented success. Events/reconnect refresh and stop stale reviews."
+  ],
+  [
+    "Surgeon: why did discharge stop, and did the bed become free?",
+    "Initiate clinical discharge is offered for Admitted records with permission, Live and verified identity. Enter optional Clinical discharge note (up to1000 characters). It needs recorded reason/diagnosis, a signed discharge summary and the admission general-consent decision. The server refusal keeps your note. Open the permitted summary/consent screen if delivered; otherwise hand over to the authorised doctor or Admissions. Those editors are later screens, not a local override. Check I checked this patient, admission and clinical action, then Review inpatient action. Confirmation shows the exact identity and frozen body; Confirm this inpatient action sends once. Back to inpatient input retains values; Close inpatient draft asks before discarding. Clinical Discharge starts the sequence, never frees the bed. Discharge clearance progress shows Blocked on and who cleared each stage and when: Pharmacy, Nursing MAR, Billing, Operations cleaning. This screen does not clear those stages or cancel a completed clinical entry. State refusals reread the exact admission and clearance progress and keep your input. VALIDATION_ERROR shows details.fields beside fields. Read latest and keep input requires checking the patient again. Admission details already recorded means read the author and close the retained draft; a discharge already started means read the stages, never repeat it. Neither operation has safe replay: an unknown reply locks the draft; Read current result, compare the actual state, then Result reviewed; return to draft. No automatic resend, offline queue or invented success. Events/reconnect refresh and stop stale reviews."
+  ],
+  [
+    "How do I read an outside report and explain the cost?",
+    "Reports brought by the patient is separate from Hospital documents. Each outside report shows its issuing facility and date. Open its returned document: images preview, PDFs use a save dialog; cancellation saves nothing. An unavailable download stays an error; never substitute a local example. This screen uploads no document. A failed document action never repeats a clinical write. Explain this admission estimate opens the existing Doctor estimate page filtered to that real admission; select the Draft estimate, explain and obtain factual signed-paper acknowledgement there. Return to inpatient chart preserves the selected admission, not an unsent write. If no estimate exists ask Admissions/Billing to prepare it. F1 and visible Help preserve input/focus; English/Urdu and shared keyboard/Settings zoom100–250% apply. Urdu, physical printing and named human fresh-data review remain pending."
+  ],
+  [
+    "How do I take over, hand over or arrange cover?",
+    "Take this patient records a reason and immediately assigns the waiting patient to me. Recording the Code Red reason and provisional diagnosis also takes over. Hand over to another doctor selects an active PMDC doctor and a 3–500 character reason, then review and confirm once. No receiving acceptance is required. Read the complete TakeOver/Handover/Reassigned history. Only the treating doctor hands over; a Hospital Admin or Director reassigns while that doctor is away. TREATING_DOCTOR_ONLY means reread the doctor/history; VALIDATION_ERROR doctor_id means choose a current PMDC doctor who is not already treating. Events move patients between rounds."
+  ],
+  [
+    "What should I do when vitals are due on rounds?",
+    "Vitals due and overdue minutes are server event facts, shown for my patients and those waiting for a doctor. A vitals.due event rereads an open flowsheet, including is_overdue. The doctor never records observations here; ask the nurse to measure and record. No timer guesses clinical alerts and the screen never polls."
   ]
+],
+  faqUr: [
+  [
+    "ڈاکٹر: معائنے سے پہلے کیا چیک کروں؟",
+    "ابتدا میں اس صارف کو دستیاب تمام جاری داخلے ہیں، ہر مریض کو موجودہ ڈاکٹر کا نہ سمجھیں۔ نام، ایم آر این یا معالج سے تلاش مقامی فلٹر؛ حالت فلٹر سرور سے تاریخ سمیت پڑھتا ہے۔ اصل سطر یا معلوم حوالہ سے یہ داخلہ پڑھیں۔ تازہ کریں موجودہ پڑھے؛ نتیجہ نہ ہو تو فلٹر دیکھیں۔ مریض بدلنے سے پہلے غیر ارسال مسودہ چھوڑنے پر پوچھے؛ نامعلوم ارسال پر جگہ بدلنا بند۔ نام و ایم آر این، عمر/تاریخ پیدائش، وارڈ/بستر و اصل معالج چیک کریں۔ بستر جگہ ہے شناخت نہیں۔ تصویر ہو تو نام کے پاس؛ نہ ہونا معمول۔ اصل الرجی، خون، عارضی/میڈیکو لیگل شناخت اور بقایا و متعلقہ شناخت دیکھیں۔ نامکمل یا ضم شناخت پر طبی عمل بند۔ وفات پر نئے احکامات نہیں و بعد کے اندراج کا جائزہ؛ وفات سکرین بننے تک مجاز ڈاکٹر کو دیں۔ حیاتیاتی پیمائش و نرسنگ میں اصل وقت، قدر، اگلی پیمائش، تاخیر اور ہر الگ تصحیح و مصنف/وقت۔ خالی کا مطلب ریکارڈ نہیں۔ دوا دینے کا ریکارڈ صرف پڑھیں: تجویز، وقت، دی/روکی/انکار/چھوٹی خوراک، اصل دینے والا، جانچ و تصحیح۔ یہاں دوا دینا یا نیا حکم نہیں۔"
+  ],
+  [
+    "ماہر: کوڈ ریڈ کی غائب تفصیل کیسے لکھوں؟",
+    "وجہ، ابتدائی تشخیص، نگہداشت و درج کرنے والا دیکھیں۔ کوڈ ریڈ میں وجہ نہ ہو تو وجہ و تشخیص درج کریں۔ اجازت و جاری رابطہ پر وجہ3تا4000حروف، ابتدائی تشخیص2تا1000، اختیاری منصوبہ4000۔ ایک بار مصنف مہر کے ساتھ اندراج۔ بعد کی تصحیح داخلہ نوٹ میں، اصل تفصیل تبدیل نہیں۔ میں نے مریض، داخلہ و طبی عمل چیک کیا نشان، پھر جائزہ۔ اصل شناخت و منجمد معلومات کی ایک تصدیق ارسال کرے۔ واپس معلومات رکھے، مسودہ بند پر پوچھے۔ طبی ڈسچارج صرف مراحل شروع کرتا ہے، بستر خالی نہیں۔ کلیئرنس میں منتظر مرحلہ، کس نے کب مکمل کیا: فارمیسی، نرسنگ، بلنگ، صفائی۔ یہاں ان مراحل کی منظوری یا حتمی اندراج کی منسوخی نہیں۔ حالت انکار پر عین داخلہ و مراحل پڑھیں، معلومات محفوظ۔ خانے کی غلطی خانے کے پاس۔ تازہ پڑھ کر معلومات رکھنے کے بعد مریض دوبارہ چیک۔ تفصیل پہلےدرج تو مصنف پڑھ کر مسودہ بند؛ ڈسچارج شروع ہو تو مراحل پڑھیں، نہ دہرائیں۔ دونوں محفوظ دوبارہ ارسال نہیں؛ جواب گم پر مسودہ مقفل، موجودہ نتیجہ پڑھ کر حالت دیکھیں پھر نتیجہ چیک ہو گیا؛ واپس مسودہ۔ خودکار ارسال، آف لائن قطار یا فرضی کامیابی نہیں۔ واقعہ/رابطہ بحالی پر پرانا جائزہ رکتا ہے۔"
+  ],
+  [
+    "سرجن: ڈسچارج کیوں رکا، بستر خالی ہوا؟",
+    "صرف داخل مریض، اجازت، جاری رابطہ و تصدیق شناخت پر طبی ڈسچارج شروع کریں۔ اختیاری نوٹ1000حروف۔ وجہ/تشخیص، دستخط شدہ خلاصہ اور عمومی رضامندی فیصلہ لازم۔ سرور انکار پر نوٹ محفوظ۔ متعلقہ مجاز سکرین ہو تو کھولیں ورنہ ڈاکٹر یا داخلہ ڈیسک کو دیں؛ بعد کی سکرین کی جگہ مقامی استثنا نہیں۔ میں نے مریض، داخلہ و طبی عمل چیک کیا نشان، پھر جائزہ۔ اصل شناخت و منجمد معلومات کی ایک تصدیق ارسال کرے۔ واپس معلومات رکھے، مسودہ بند پر پوچھے۔ طبی ڈسچارج صرف مراحل شروع کرتا ہے، بستر خالی نہیں۔ کلیئرنس میں منتظر مرحلہ، کس نے کب مکمل کیا: فارمیسی، نرسنگ، بلنگ، صفائی۔ یہاں ان مراحل کی منظوری یا حتمی اندراج کی منسوخی نہیں۔ حالت انکار پر عین داخلہ و مراحل پڑھیں، معلومات محفوظ۔ خانے کی غلطی خانے کے پاس۔ تازہ پڑھ کر معلومات رکھنے کے بعد مریض دوبارہ چیک۔ تفصیل پہلےدرج تو مصنف پڑھ کر مسودہ بند؛ ڈسچارج شروع ہو تو مراحل پڑھیں، نہ دہرائیں۔ دونوں محفوظ دوبارہ ارسال نہیں؛ جواب گم پر مسودہ مقفل، موجودہ نتیجہ پڑھ کر حالت دیکھیں پھر نتیجہ چیک ہو گیا؛ واپس مسودہ۔ خودکار ارسال، آف لائن قطار یا فرضی کامیابی نہیں۔ واقعہ/رابطہ بحالی پر پرانا جائزہ رکتا ہے۔"
+  ],
+  [
+    "باہر کی رپورٹ و خرچ کیسے سمجھاؤں؟",
+    "مریض کے لائے رپورٹس ہسپتال کی دستاویز سے الگ، ادارہ و تاریخ نمایاں۔ اصل دستاویز کھولیں: تصویر جائزہ، پی ڈی ایف فائل محفوظ کرنے کا مکالمہ؛ منسوخی کچھ محفوظ نہیں کرتی۔ ناکامی غلطی رہے، مقامی مثال نہ بنائیں۔ یہاں اپلوڈ نہیں۔ فائل خرابی سے طبی ارسال نہ دہرائیں۔ اس داخلے کا تخمینہ سمجھائیں اصل داخلے سے موجود ڈاکٹر تخمینہ سکرین فلٹر کھولتا ہے؛ مسودہ چن کر اصل گفتگو و دستخط کا اندراج وہاں۔ واپس چارٹ منتخب داخلہ رکھے، غیر ارسال طبی عمل نہیں۔ تخمینہ نہ ہو تو داخلہ/بلنگ سے تیار کرائیں۔ ایف ون و مدد معلومات/فوکس رکھتے؛ دو زبان اور کی بورڈ/ترتیب زوم100تا250مشترک۔ اردو، کاغذ و نامزد انسانی جائزہ باقی۔"
+  ],
+  [
+    "ذمہ داری، حوالگی یا غیر موجودگی کا انتظام کیسے ہو؟",
+    "اس مریض کی ذمہ داری لیں سے وجہ درج کرکے فوراً مریض میرا ہو جاتا ہے۔ کوڈ ریڈ کی وجہ و تشخیص درج کرنا بھی ذمہ داری لینا ہے۔ دوسرے ڈاکٹر کو حوالہ میں فعال پی ایم ڈی سی ڈاکٹر اور3تا500حروف وجہ چن کر جائزہ و ایک تصدیق۔ دوسرے ڈاکٹر کی منظوری لازم نہیں۔ پوری ذمہ داری، حوالگی اور دوبارہ تعیناتی تاریخ پڑھیں۔ صرف معالج حوالہ دیتا ہے؛ غیر موجودگی میں ایڈمن یا ڈائریکٹر تعینات کرتے ہیں۔ دوسرے معالج کے انکار پر تاریخ تازہ؛ ڈاکٹر فیلڈ کی غلطی پر فعال پی ایم ڈی سی ڈاکٹر چنیں جو پہلے معالج نہ ہو۔ اطلاعات سے فہرست بدلتی ہے۔"
+  ],
+  [
+    "معائنے میں پیمائش واجب ہو تو کیا کروں؟",
+    "پیمائش واجب اور تاخیر کے منٹ سرور کی اطلاع ہیں؛ میرے مریض اور ڈاکٹر کے منتظر پر دکھتے ہیں۔ اطلاع کھلے مشاہدات و تاخیر کی حالت دوبارہ پڑھتی ہے۔ ڈاکٹر یہاں پیمائش درج نہیں کرتا؛ نرس پیمائش و اندراج کرتی ہے۔ کوئی ٹائمر فرضی طبی اطلاع یا مسلسل درخواست نہیں بھیجتا۔"
+  ]
+]
 },
 
  explain_estimate: {
@@ -815,51 +845,61 @@ nursing_assessment: {
   purpose: "During billing discussions, the Billing Administrator prepares tariff-based estimates, explains costs and retains a factual signed-paper acknowledgement. This screen records estimates and never collects payment. Urdu is a draft pending native review.",
   purposeUr: "بلنگ گفتگو میں بلنگ منتظم اصل نرخ سے تخمینہ، خرچ کی وضاحت و اصل دستخط کا اندراج کرتا ہے۔ یہ تخمینہ ہے، رقم وصول نہیں ہوتی۔ اردو مقامی جائزے تک مسودہ۔",
   steps: [
-    "Open Billing → Cost estimates. Work waiting comes first, including a changed ward rate. Check the patient name, MRN, admission and actual transfer; overdue work says Overdue and its time. Refresh rereads work, register, tariff and moves.",
-    "Billing has estimate permissions without the full clinical admission chart. Prepare from an authorised current work item, or Find patient for estimate with name or MRN, then choose the returned patient row for an estimate before admission. Never type a patient or transfer id. ChangeOfWard preparation is disabled because the recorded transfer lookup is forbidden for Billing; backend issue41 is pending. Ask Admissions to handle that move; existing estimates can still be read and printed.",
-    "Ward to price shows published daily charges. Expected days is a whole0–365. Add tariff service picks published items and quantities greater than0 up to1000; its unit price cannot be typed. Remove service removes only the unsent line. Add allowance records the kind, description3–300characters and positive amount; remove it before saving if unnecessary. This estimates costs, never dispenses or charges medicine.",
-    "Blank Deposit and Payment terms use the hospital defaults when prepared. Optional Estimate note is up to2000characters. Check the patient/action tick, Review estimate action freezes the input, then Confirm this estimate action once. Back keeps input; Close estimate draft asks before discarding. The server prices the lines and returns the total and deposit; compare Billed so far beside them.",
-    "Choose the returned estimate in the register or Read this estimate by a known reference. Search matches name/MRN/number locally within the latest1000 filtered records; Estimate status filters on the server. Preview estimate form shows original bilingual notes; Print estimate or Save terminal estimate PDF uses the selected app language, A4 and version checks. Download English server PDF saves original server bytes. Check the actual paper; cancelling a file dialog or a printer error never repeats preparation.",
-    "After explaining in the family’s language and obtaining the actual signed or thumb-printed paper, Mark explained records who heard it, relationship, language, questions/deposit agreement and the signed-paper tick. A final explanation cannot be edited; Prepare a revision creates another estimate and keeps history. Cancel estimate needs5–1000characters and applies to Draft or an incorrect Explained estimate. There is no delete.",
-    "State refusals reread the exact record and keep input; field errors appear beside fields. A transfer event or reconnect refreshes and stops a stale review. Read latest and keep input resets acknowledgements before another review. After a lost reply, keep the original request: explicit Retry original request uses the same key/body within retention; never automatically retry. Reading a matching list is not proof of this preparation. If retry is unavailable, ask IT; do not create a replacement. F1 restores focus; EN/Urdu and shared keyboard/Settings zoom100–250 apply. Native Urdu, physical paper and signed human review remain pending."
-  ],
+  "Open Billing → Cost estimates. Work waiting comes first, including a changed ward rate. Check the patient name, MRN, admission and actual transfer; overdue work says Overdue and its time. Refresh rereads work, register, tariff and moves.",
+  "For ChangeOfWard use the work item’s transfer_id or choose the returned ward move. Billing’s moves show from/to wards and both daily charges, with rate changes first, without the clinical reason, bed labels or mover. A Draft opens the existing estimate instead of preparing another. Explained means the family was already told; do not prepare a duplicate. Never type a transfer ID or open clinical transfer history from Billing.",
+  "Ward to price shows published daily charges. Expected days is a whole0–365. Add tariff service picks published items and quantities greater than0 up to1000; its unit price cannot be typed. Remove service removes only the unsent line. Add allowance records the kind, description3–300characters and positive amount; remove it before saving if unnecessary. This estimates costs, never dispenses or charges medicine.",
+  "Blank Deposit and Payment terms use the hospital defaults when prepared. Optional Estimate note is up to2000characters. Check the patient/action tick, Review estimate action freezes the input, then Confirm this estimate action once. Back keeps input; Close estimate draft asks before discarding. The server prices the lines and returns the total and deposit; compare Billed so far beside them.",
+  "Choose the returned estimate in the register or Read this estimate by a known reference. Search matches name/MRN/number locally within the latest1000 filtered records; Estimate status filters on the server. Preview estimate form shows original bilingual notes; Print estimate or Save terminal estimate PDF uses the selected app language, A4 and version checks. Download English server PDF saves original server bytes. Check the actual paper; cancelling a file dialog or a printer error never repeats preparation.",
+  "After explaining in the family’s language and obtaining the actual signed or thumb-printed paper, Mark explained records who heard it, relationship, language, questions/deposit agreement and the signed-paper tick. A final explanation cannot be edited; Prepare a revision creates another estimate and keeps history. Cancel estimate needs5–1000characters and applies to Draft or an incorrect Explained estimate. There is no delete.",
+  "State refusals reread the exact record and keep input; field errors appear beside fields. A transfer event or reconnect refreshes and stops a stale review. Read latest and keep input resets acknowledgements before another review. After a lost reply, keep the original request: explicit Retry original request uses the same key/body within retention; never automatically retry. Reading a matching list is not proof of this preparation. If retry is unavailable, ask IT; do not create a replacement. F1 restores focus; EN/Urdu and shared keyboard/Settings zoom100–250 apply. Native Urdu, physical paper and signed human review remain pending.",
+  "For ChangeOfWard use the work item’s transfer_id or choose the returned ward move. Billing’s moves show from/to wards and both daily charges, with rate changes first, without the clinical reason, bed labels or mover. A Draft opens the existing estimate instead of preparing another. Explained means the family was already told; do not prepare a duplicate. Never type a transfer ID or open clinical transfer history from Billing."
+],
   stepsUr: [
-    "بلنگ سے متوقع اخراجات کھولیں۔ منتظر کام پہلے، بدلے وارڈ نرخ سمیت۔ مریض، ایم آر این، داخلہ اور اصل منتقلی چیک کریں؛ تاخیر و وقت نمایاں۔ تازہ سے کام، رجسٹر، نرخ و منتقلی دوبارہ پڑھی جاتی ہے۔",
-    "بلنگ کو تخمینے کی اجازت ہے، مکمل طبی داخلہ چارٹ نہیں۔ اصل منتظر کام سے تیار کریں یا تخمینے کا مریض نام/ایم آر این سے تلاش کر کے واپس سطر چنیں۔ آئی ڈی نہ ٹائپ۔ وارڈ تبدیلی کی اصل منتقلی بلنگ کو ممنوع، اس کی تیاری بند؛ مسئلہ41زیر غور، داخلہ ڈیسک سے کہیں۔ موجودہ تخمینے پڑھے و پرنٹ ہو سکتے ہیں۔",
-    "وارڈ کے شائع روزانہ نرخ، متوقع دن0تا365پورے۔ نرخ کی خدمت اصل سطر و مقدار صفر سے زیادہ تا1000؛ فی اکائی نرخ ٹائپ نہیں۔ ہٹانے سے صرف غیر ارسال سطر ہٹے۔ مد میں قسم، تفصیل3تا300حروف و مثبت رقم؛ غیر ضروری ہٹا دیں۔ یہ خرچ کا اندازہ ہے، دوا یا رقم وصول نہیں۔",
-    "خالی پیشگی رقم و ادائیگی شرائط تیاری پر ہسپتال کی طے شدہ۔ اختیاری نوٹ2000حروف۔ مریض/عمل نشان، جائزہ معلومات منجمد، پھر ایک تصدیق۔ واپس معلومات رکھے؛ بند کرنے پر پوچھے۔ سرور نرخ، کل و پیشگی رقم دے؛ ساتھ اب تک بل کا موازنہ کریں۔",
-    "رجسٹر یا معلوم حوالہ سے پڑھیں۔ تلاش تازہ1000مشروط سطروں میں نام/ایم آر این/نمبر، حالت سرور فلٹر۔ جائزہ اصل دو زبان نوٹس؛ پرنٹ/ٹرمینل پی ڈی ایف ایپ زبان و اے فور و ورژن چیک۔ سرور انگریزی پی ڈی ایف اصل بائٹس۔ اصل کاغذ چیک؛ فائل منسوخ یا پرنٹر خرابی سے تیاری نہیں دہرائی جاتی۔",
-    "خاندان کی زبان میں سمجھا کر اصل دستخط/انگوٹھے کے بعد سمجھایا گیا درج کریں: سننے والا، رشتہ، زبان، سوالات/پیشگی اتفاق و کاغذ نشان۔ حتمی وضاحت ترمیم نہیں؛ نیا تخمینہ تاریخ رکھتا۔ منسوخی5تا1000حروف؛ مسودہ یا غلط سمجھایا تخمینہ، تاریخ باقی۔ حذف نہیں۔",
-    "حالت انکار پر عین ریکارڈ پڑھیں و معلومات رکھیں، غلطی خانے کے پاس۔ منتقلی/رابطہ بحالی تازہ کرے و پرانا جائزہ روکے۔ تازہ پڑھ کر معلومات رکھنے سے نئے جائزے کا نشان لازم۔ جواب گم تو اصل درخواست رکھیں؛ واضح اصل کوشش وہی کلید/معلومات وقت کے اندر، خودکار نہیں۔ ملتی سطر اصل تیاری کا ثبوت نہیں۔ کوشش دستیاب نہیں تو آئی ٹی، متبادل نہیں۔ ایف ون فوکس واپس؛ دو زبان و زوم100تا250مشترک۔ مقامی اردو، کاغذ و انسانی جائزہ باقی۔"
-  ],
+  "بلنگ سے متوقع اخراجات کھولیں۔ منتظر کام پہلے، بدلے وارڈ نرخ سمیت۔ مریض، ایم آر این، داخلہ اور اصل منتقلی چیک کریں؛ تاخیر و وقت نمایاں۔ تازہ سے کام، رجسٹر، نرخ و منتقلی دوبارہ پڑھی جاتی ہے۔",
+  "وارڈ تبدیلی میں کام کی اصل منتقلی یا فہرست کی منتقلی چنیں۔ بلنگ کو دونوں وارڈ و روزانہ نرخ اور پہلے بدلے نرخ دکھتے ہیں؛ طبی وجہ، بستر یا منتقل کرنے والا نہیں۔ مسودہ ہو تو موجودہ تخمینہ کھلتا ہے، دوسرا نہیں بنتا۔ سمجھایا گیا یعنی خاندان کو بتایا جا چکا؛ نقل نہ بنائیں۔ نمبر ٹائپ یا بلنگ سے طبی تاریخ نہ پڑھیں۔",
+  "وارڈ کے شائع روزانہ نرخ، متوقع دن0تا365پورے۔ نرخ کی خدمت اصل سطر و مقدار صفر سے زیادہ تا1000؛ فی اکائی نرخ ٹائپ نہیں۔ ہٹانے سے صرف غیر ارسال سطر ہٹے۔ مد میں قسم، تفصیل3تا300حروف و مثبت رقم؛ غیر ضروری ہٹا دیں۔ یہ خرچ کا اندازہ ہے، دوا یا رقم وصول نہیں۔",
+  "خالی پیشگی رقم و ادائیگی شرائط تیاری پر ہسپتال کی طے شدہ۔ اختیاری نوٹ2000حروف۔ مریض/عمل نشان، جائزہ معلومات منجمد، پھر ایک تصدیق۔ واپس معلومات رکھے؛ بند کرنے پر پوچھے۔ سرور نرخ، کل و پیشگی رقم دے؛ ساتھ اب تک بل کا موازنہ کریں۔",
+  "رجسٹر یا معلوم حوالہ سے پڑھیں۔ تلاش تازہ1000مشروط سطروں میں نام/ایم آر این/نمبر، حالت سرور فلٹر۔ جائزہ اصل دو زبان نوٹس؛ پرنٹ/ٹرمینل پی ڈی ایف ایپ زبان و اے فور و ورژن چیک۔ سرور انگریزی پی ڈی ایف اصل بائٹس۔ اصل کاغذ چیک؛ فائل منسوخ یا پرنٹر خرابی سے تیاری نہیں دہرائی جاتی۔",
+  "خاندان کی زبان میں سمجھا کر اصل دستخط/انگوٹھے کے بعد سمجھایا گیا درج کریں: سننے والا، رشتہ، زبان، سوالات/پیشگی اتفاق و کاغذ نشان۔ حتمی وضاحت ترمیم نہیں؛ نیا تخمینہ تاریخ رکھتا۔ منسوخی5تا1000حروف؛ مسودہ یا غلط سمجھایا تخمینہ، تاریخ باقی۔ حذف نہیں۔",
+  "حالت انکار پر عین ریکارڈ پڑھیں و معلومات رکھیں، غلطی خانے کے پاس۔ منتقلی/رابطہ بحالی تازہ کرے و پرانا جائزہ روکے۔ تازہ پڑھ کر معلومات رکھنے سے نئے جائزے کا نشان لازم۔ جواب گم تو اصل درخواست رکھیں؛ واضح اصل کوشش وہی کلید/معلومات وقت کے اندر، خودکار نہیں۔ ملتی سطر اصل تیاری کا ثبوت نہیں۔ کوشش دستیاب نہیں تو آئی ٹی، متبادل نہیں۔ ایف ون فوکس واپس؛ دو زبان و زوم100تا250مشترک۔ مقامی اردو، کاغذ و انسانی جائزہ باقی۔",
+  "وارڈ تبدیلی میں کام کی اصل منتقلی یا فہرست کی منتقلی چنیں۔ بلنگ کو دونوں وارڈ و روزانہ نرخ اور پہلے بدلے نرخ دکھتے ہیں؛ طبی وجہ، بستر یا منتقل کرنے والا نہیں۔ مسودہ ہو تو موجودہ تخمینہ کھلتا ہے، دوسرا نہیں بنتا۔ سمجھایا گیا یعنی خاندان کو بتایا جا چکا؛ نقل نہ بنائیں۔ نمبر ٹائپ یا بلنگ سے طبی تاریخ نہ پڑھیں۔"
+],
   faq: [
-    [
-      "Billing Administrator: how do I prepare without clinical admission access?",
-      "Billing has estimate permissions without the full clinical admission chart. Prepare from an authorised current work item, or Find patient for estimate with name or MRN, then choose the returned patient row for an estimate before admission. Never type a patient or transfer id. ChangeOfWard preparation is disabled because the recorded transfer lookup is forbidden for Billing; backend issue41 is pending. Ask Admissions to handle that move; existing estimates can still be read and printed."
-    ],
-    [
-      "Why can I not change an explained estimate?",
-      "It records what the family was told. Prepare a revision; old records remain. A Draft or an incorrect Explained estimate can be cancelled with a reason; history stays."
-    ],
-    [
-      "What if the result or printer reply is lost?",
-      "Keep the draft and original request. Read the current result; only explicit original-key replay can resolve an uncertain preparation. A PDF or print failure is separate and never repeats the estimate."
-    ]
+  [
+    "Billing Administrator: how do I prepare without clinical admission access?",
+    "For ChangeOfWard use the work item’s transfer_id or choose the returned ward move. Billing’s moves show from/to wards and both daily charges, with rate changes first, without the clinical reason, bed labels or mover. A Draft opens the existing estimate instead of preparing another. Explained means the family was already told; do not prepare a duplicate. Never type a transfer ID or open clinical transfer history from Billing."
   ],
-  faqUr: [
-    [
-      "بلنگ منتظم: طبی داخلہ اجازت کے بغیر کیسے تیار کروں؟",
-      "بلنگ کو تخمینے کی اجازت ہے، مکمل طبی داخلہ چارٹ نہیں۔ اصل منتظر کام سے تیار کریں یا تخمینے کا مریض نام/ایم آر این سے تلاش کر کے واپس سطر چنیں۔ آئی ڈی نہ ٹائپ۔ وارڈ تبدیلی کی اصل منتقلی بلنگ کو ممنوع، اس کی تیاری بند؛ مسئلہ41زیر غور، داخلہ ڈیسک سے کہیں۔ موجودہ تخمینے پڑھے و پرنٹ ہو سکتے ہیں۔"
-    ],
-    [
-      "سمجھایا تخمینہ کیوں نہیں بدلتا؟",
-      "خاندان کو بتائی بات ریکارڈ ہے۔ نیا تیار کریں، پرانا رہے۔ مسودہ یا غلط سمجھایا تخمینہ وجہ سے منسوخ، تاریخ باقی۔"
-    ],
-    [
-      "جواب یا پرنٹ گم ہو؟",
-      "مسودہ و اصل درخواست رکھیں، موجودہ پڑھیں؛ صرف اصل کلید کی کوشش نامعلوم تیاری حل کرتی ہے۔ پی ڈی ایف/پرنٹ الگ، تخمینہ نہ دہرائیں۔"
-    ]
+  [
+    "Why can I not change an explained estimate?",
+    "It records what the family was told. Prepare a revision; old records remain. A Draft or an incorrect Explained estimate can be cancelled with a reason; history stays."
+  ],
+  [
+    "What if the result or printer reply is lost?",
+    "Keep the draft and original request. Read the current result; only explicit original-key replay can resolve an uncertain preparation. A PDF or print failure is separate and never repeats the estimate."
+  ],
+  [
+    "Why does Billing see ward moves without the clinical reason?",
+    "For ChangeOfWard use the work item’s transfer_id or choose the returned ward move. Billing’s moves show from/to wards and both daily charges, with rate changes first, without the clinical reason, bed labels or mover. A Draft opens the existing estimate instead of preparing another. Explained means the family was already told; do not prepare a duplicate. Never type a transfer ID or open clinical transfer history from Billing."
   ]
+],
+  faqUr: [
+  [
+    "بلنگ ایڈمن طبی داخلہ اجازت کے بغیر تخمینہ کیسے بنائے؟",
+    "وارڈ تبدیلی میں کام کی اصل منتقلی یا فہرست کی منتقلی چنیں۔ بلنگ کو دونوں وارڈ و روزانہ نرخ اور پہلے بدلے نرخ دکھتے ہیں؛ طبی وجہ، بستر یا منتقل کرنے والا نہیں۔ مسودہ ہو تو موجودہ تخمینہ کھلتا ہے، دوسرا نہیں بنتا۔ سمجھایا گیا یعنی خاندان کو بتایا جا چکا؛ نقل نہ بنائیں۔ نمبر ٹائپ یا بلنگ سے طبی تاریخ نہ پڑھیں۔"
+  ],
+  [
+    "سمجھایا تخمینہ کیوں نہیں بدلتا؟",
+    "خاندان کو بتائی بات ریکارڈ ہے۔ نیا تیار کریں، پرانا رہے۔ مسودہ یا غلط سمجھایا تخمینہ وجہ سے منسوخ، تاریخ باقی۔"
+  ],
+  [
+    "جواب یا پرنٹ گم ہو؟",
+    "مسودہ و اصل درخواست رکھیں، موجودہ پڑھیں؛ صرف اصل کلید کی کوشش نامعلوم تیاری حل کرتی ہے۔ پی ڈی ایف/پرنٹ الگ، تخمینہ نہ دہرائیں۔"
+  ],
+  [
+    "بلنگ کو طبی وجہ کے بغیر وارڈ منتقلی کیوں دکھتی ہے؟",
+    "وارڈ تبدیلی میں کام کی اصل منتقلی یا فہرست کی منتقلی چنیں۔ بلنگ کو دونوں وارڈ و روزانہ نرخ اور پہلے بدلے نرخ دکھتے ہیں؛ طبی وجہ، بستر یا منتقل کرنے والا نہیں۔ مسودہ ہو تو موجودہ تخمینہ کھلتا ہے، دوسرا نہیں بنتا۔ سمجھایا گیا یعنی خاندان کو بتایا جا چکا؛ نقل نہ بنائیں۔ نمبر ٹائپ یا بلنگ سے طبی تاریخ نہ پڑھیں۔"
+  ]
+]
 },
  cost_estimates_admissions: {
   title: "Cost estimates",
@@ -867,51 +907,61 @@ nursing_assessment: {
   purpose: "During admission or a ward-rate change, the admissions officer prepares a tariff-based estimate, explains it to the family and records the signed acknowledgement. The expected result is a server-confirmed estimate and explanation, never a payment. Urdu is a draft pending native review.",
   purposeUr: "داخلہ یا وارڈ نرخ بدلنے پر افسر اصل نرخ سے تخمینہ، خاندان کو وضاحت اور اصل دستخط کا اندراج کرتا ہے۔ نتیجہ سرور تصدیق شدہ تخمینہ و وضاحت ہے، ادائیگی نہیں۔ اردو مقامی جائزے تک مسودہ۔",
   steps: [
-    "Open Admissions Desk → Cost estimates. Work waiting comes first, including a changed ward rate. Check the patient name, MRN, admission and actual transfer; overdue work says Overdue and its time. Refresh rereads work, register, tariff and moves.",
-    "Prepare for this admission or choose Admission for estimate. Choose the reason. ChangeOfWard requires the actual recorded move; choose it from Actual ward transfer, never type a reference. Before-admission patient-only estimates are not yet offered in this version.",
-    "Ward to price shows published daily charges. Expected days is a whole0–365. Add tariff service picks published items and quantities greater than0 up to1000; its unit price cannot be typed. Remove service removes only the unsent line. Add allowance records the kind, description3–300characters and positive amount; remove it before saving if unnecessary. This estimates costs, never dispenses or charges medicine.",
-    "Blank Deposit and Payment terms use the hospital defaults when prepared. Optional Estimate note is up to2000characters. Check the patient/action tick, Review estimate action freezes the input, then Confirm this estimate action once. Back keeps input; Close estimate draft asks before discarding. The server prices the lines and returns the total and deposit; compare Billed so far beside them.",
-    "Choose the returned estimate in the register or Read this estimate by a known reference. Search matches name/MRN/number locally within the latest1000 filtered records; Estimate status filters on the server. Preview estimate form shows original bilingual notes; Print estimate or Save terminal estimate PDF uses the selected app language, A4 and version checks. Download English server PDF saves original server bytes. Check the actual paper; cancelling a file dialog or a printer error never repeats preparation.",
-    "After explaining in the family’s language and obtaining the actual signed or thumb-printed paper, Mark explained records who heard it, relationship, language, questions/deposit agreement and the signed-paper tick. A final explanation cannot be edited; Prepare a revision creates another estimate and keeps history. Cancel estimate needs5–1000characters and applies to Draft or an incorrect Explained estimate. There is no delete.",
-    "State refusals reread the exact record and keep input; field errors appear beside fields. A transfer event or reconnect refreshes and stops a stale review. Read latest and keep input resets acknowledgements before another review. After a lost reply, keep the original request: explicit Retry original request uses the same key/body within retention; never automatically retry. Reading a matching list is not proof of this preparation. If retry is unavailable, ask IT; do not create a replacement. F1 restores focus; EN/Urdu and shared keyboard/Settings zoom100–250 apply. Native Urdu, physical paper and signed human review remain pending."
-  ],
+  "Open Admissions Desk → Cost estimates. Work waiting comes first, including a changed ward rate. Check the patient name, MRN, admission and actual transfer; overdue work says Overdue and its time. Refresh rereads work, register, tariff and moves.",
+  "For ChangeOfWard use the work item’s transfer_id or choose the returned ward move. Billing’s moves show from/to wards and both daily charges, with rate changes first, without the clinical reason, bed labels or mover. A Draft opens the existing estimate instead of preparing another. Explained means the family was already told; do not prepare a duplicate. Never type a transfer ID or open clinical transfer history from Billing.",
+  "Ward to price shows published daily charges. Expected days is a whole0–365. Add tariff service picks published items and quantities greater than0 up to1000; its unit price cannot be typed. Remove service removes only the unsent line. Add allowance records the kind, description3–300characters and positive amount; remove it before saving if unnecessary. This estimates costs, never dispenses or charges medicine.",
+  "Blank Deposit and Payment terms use the hospital defaults when prepared. Optional Estimate note is up to2000characters. Check the patient/action tick, Review estimate action freezes the input, then Confirm this estimate action once. Back keeps input; Close estimate draft asks before discarding. The server prices the lines and returns the total and deposit; compare Billed so far beside them.",
+  "Choose the returned estimate in the register or Read this estimate by a known reference. Search matches name/MRN/number locally within the latest1000 filtered records; Estimate status filters on the server. Preview estimate form shows original bilingual notes; Print estimate or Save terminal estimate PDF uses the selected app language, A4 and version checks. Download English server PDF saves original server bytes. Check the actual paper; cancelling a file dialog or a printer error never repeats preparation.",
+  "After explaining in the family’s language and obtaining the actual signed or thumb-printed paper, Mark explained records who heard it, relationship, language, questions/deposit agreement and the signed-paper tick. A final explanation cannot be edited; Prepare a revision creates another estimate and keeps history. Cancel estimate needs5–1000characters and applies to Draft or an incorrect Explained estimate. There is no delete.",
+  "State refusals reread the exact record and keep input; field errors appear beside fields. A transfer event or reconnect refreshes and stops a stale review. Read latest and keep input resets acknowledgements before another review. After a lost reply, keep the original request: explicit Retry original request uses the same key/body within retention; never automatically retry. Reading a matching list is not proof of this preparation. If retry is unavailable, ask IT; do not create a replacement. F1 restores focus; EN/Urdu and shared keyboard/Settings zoom100–250 apply. Native Urdu, physical paper and signed human review remain pending.",
+  "For ChangeOfWard use the work item’s transfer_id or choose the returned ward move. Billing’s moves show from/to wards and both daily charges, with rate changes first, without the clinical reason, bed labels or mover. A Draft opens the existing estimate instead of preparing another. Explained means the family was already told; do not prepare a duplicate. Never type a transfer ID or open clinical transfer history from Billing."
+],
   stepsUr: [
-    "داخلہ ڈیسک سے متوقع اخراجات کھولیں۔ منتظر کام پہلے، بدلے وارڈ نرخ سمیت۔ مریض، ایم آر این، داخلہ اور اصل منتقلی چیک کریں؛ تاخیر و وقت نمایاں۔ تازہ سے کام، رجسٹر، نرخ و منتقلی دوبارہ پڑھی جاتی ہے۔",
-    "اسی داخلے سے تیاری یا تخمینے کا داخلہ چنیں۔ وجہ چنیں؛ وارڈ بدلنے پر اصل درج منتقلی چنیں، حوالہ نہ ٹائپ کریں۔ اس ورژن میں داخلے سے پہلے صرف مریض کا تخمینہ نہیں۔",
-    "وارڈ کے شائع روزانہ نرخ، متوقع دن0تا365پورے۔ نرخ کی خدمت اصل سطر و مقدار صفر سے زیادہ تا1000؛ فی اکائی نرخ ٹائپ نہیں۔ ہٹانے سے صرف غیر ارسال سطر ہٹے۔ مد میں قسم، تفصیل3تا300حروف و مثبت رقم؛ غیر ضروری ہٹا دیں۔ یہ خرچ کا اندازہ ہے، دوا یا رقم وصول نہیں۔",
-    "خالی پیشگی رقم و ادائیگی شرائط تیاری پر ہسپتال کی طے شدہ۔ اختیاری نوٹ2000حروف۔ مریض/عمل نشان، جائزہ معلومات منجمد، پھر ایک تصدیق۔ واپس معلومات رکھے؛ بند کرنے پر پوچھے۔ سرور نرخ، کل و پیشگی رقم دے؛ ساتھ اب تک بل کا موازنہ کریں۔",
-    "رجسٹر یا معلوم حوالہ سے پڑھیں۔ تلاش تازہ1000مشروط سطروں میں نام/ایم آر این/نمبر، حالت سرور فلٹر۔ جائزہ اصل دو زبان نوٹس؛ پرنٹ/ٹرمینل پی ڈی ایف ایپ زبان و اے فور و ورژن چیک۔ سرور انگریزی پی ڈی ایف اصل بائٹس۔ اصل کاغذ چیک؛ فائل منسوخ یا پرنٹر خرابی سے تیاری نہیں دہرائی جاتی۔",
-    "خاندان کی زبان میں سمجھا کر اصل دستخط/انگوٹھے کے بعد سمجھایا گیا درج کریں: سننے والا، رشتہ، زبان، سوالات/پیشگی اتفاق و کاغذ نشان۔ حتمی وضاحت ترمیم نہیں؛ نیا تخمینہ تاریخ رکھتا۔ منسوخی5تا1000حروف؛ مسودہ یا غلط سمجھایا تخمینہ، تاریخ باقی۔ حذف نہیں۔",
-    "حالت انکار پر عین ریکارڈ پڑھیں و معلومات رکھیں، غلطی خانے کے پاس۔ منتقلی/رابطہ بحالی تازہ کرے و پرانا جائزہ روکے۔ تازہ پڑھ کر معلومات رکھنے سے نئے جائزے کا نشان لازم۔ جواب گم تو اصل درخواست رکھیں؛ واضح اصل کوشش وہی کلید/معلومات وقت کے اندر، خودکار نہیں۔ ملتی سطر اصل تیاری کا ثبوت نہیں۔ کوشش دستیاب نہیں تو آئی ٹی، متبادل نہیں۔ ایف ون فوکس واپس؛ دو زبان و زوم100تا250مشترک۔ مقامی اردو، کاغذ و انسانی جائزہ باقی۔"
-  ],
+  "داخلہ ڈیسک سے متوقع اخراجات کھولیں۔ منتظر کام پہلے، بدلے وارڈ نرخ سمیت۔ مریض، ایم آر این، داخلہ اور اصل منتقلی چیک کریں؛ تاخیر و وقت نمایاں۔ تازہ سے کام، رجسٹر، نرخ و منتقلی دوبارہ پڑھی جاتی ہے۔",
+  "وارڈ تبدیلی میں کام کی اصل منتقلی یا فہرست کی منتقلی چنیں۔ بلنگ کو دونوں وارڈ و روزانہ نرخ اور پہلے بدلے نرخ دکھتے ہیں؛ طبی وجہ، بستر یا منتقل کرنے والا نہیں۔ مسودہ ہو تو موجودہ تخمینہ کھلتا ہے، دوسرا نہیں بنتا۔ سمجھایا گیا یعنی خاندان کو بتایا جا چکا؛ نقل نہ بنائیں۔ نمبر ٹائپ یا بلنگ سے طبی تاریخ نہ پڑھیں۔",
+  "وارڈ کے شائع روزانہ نرخ، متوقع دن0تا365پورے۔ نرخ کی خدمت اصل سطر و مقدار صفر سے زیادہ تا1000؛ فی اکائی نرخ ٹائپ نہیں۔ ہٹانے سے صرف غیر ارسال سطر ہٹے۔ مد میں قسم، تفصیل3تا300حروف و مثبت رقم؛ غیر ضروری ہٹا دیں۔ یہ خرچ کا اندازہ ہے، دوا یا رقم وصول نہیں۔",
+  "خالی پیشگی رقم و ادائیگی شرائط تیاری پر ہسپتال کی طے شدہ۔ اختیاری نوٹ2000حروف۔ مریض/عمل نشان، جائزہ معلومات منجمد، پھر ایک تصدیق۔ واپس معلومات رکھے؛ بند کرنے پر پوچھے۔ سرور نرخ، کل و پیشگی رقم دے؛ ساتھ اب تک بل کا موازنہ کریں۔",
+  "رجسٹر یا معلوم حوالہ سے پڑھیں۔ تلاش تازہ1000مشروط سطروں میں نام/ایم آر این/نمبر، حالت سرور فلٹر۔ جائزہ اصل دو زبان نوٹس؛ پرنٹ/ٹرمینل پی ڈی ایف ایپ زبان و اے فور و ورژن چیک۔ سرور انگریزی پی ڈی ایف اصل بائٹس۔ اصل کاغذ چیک؛ فائل منسوخ یا پرنٹر خرابی سے تیاری نہیں دہرائی جاتی۔",
+  "خاندان کی زبان میں سمجھا کر اصل دستخط/انگوٹھے کے بعد سمجھایا گیا درج کریں: سننے والا، رشتہ، زبان، سوالات/پیشگی اتفاق و کاغذ نشان۔ حتمی وضاحت ترمیم نہیں؛ نیا تخمینہ تاریخ رکھتا۔ منسوخی5تا1000حروف؛ مسودہ یا غلط سمجھایا تخمینہ، تاریخ باقی۔ حذف نہیں۔",
+  "حالت انکار پر عین ریکارڈ پڑھیں و معلومات رکھیں، غلطی خانے کے پاس۔ منتقلی/رابطہ بحالی تازہ کرے و پرانا جائزہ روکے۔ تازہ پڑھ کر معلومات رکھنے سے نئے جائزے کا نشان لازم۔ جواب گم تو اصل درخواست رکھیں؛ واضح اصل کوشش وہی کلید/معلومات وقت کے اندر، خودکار نہیں۔ ملتی سطر اصل تیاری کا ثبوت نہیں۔ کوشش دستیاب نہیں تو آئی ٹی، متبادل نہیں۔ ایف ون فوکس واپس؛ دو زبان و زوم100تا250مشترک۔ مقامی اردو، کاغذ و انسانی جائزہ باقی۔",
+  "وارڈ تبدیلی میں کام کی اصل منتقلی یا فہرست کی منتقلی چنیں۔ بلنگ کو دونوں وارڈ و روزانہ نرخ اور پہلے بدلے نرخ دکھتے ہیں؛ طبی وجہ، بستر یا منتقل کرنے والا نہیں۔ مسودہ ہو تو موجودہ تخمینہ کھلتا ہے، دوسرا نہیں بنتا۔ سمجھایا گیا یعنی خاندان کو بتایا جا چکا؛ نقل نہ بنائیں۔ نمبر ٹائپ یا بلنگ سے طبی تاریخ نہ پڑھیں۔"
+],
   faq: [
-    [
-      "Admissions officer: how do I explain a ward change?",
-      "Open the changed-ward work item, verify its recorded transfer and select ChangeOfWard. Prepare from the current tariff, print and explain in the family’s language, then record the actual recipient and signed paper. A read or print alone is not an explanation."
-    ],
-    [
-      "Why can I not change an explained estimate?",
-      "It records what the family was told. Prepare a revision; old records remain. A Draft or an incorrect Explained estimate can be cancelled with a reason; history stays."
-    ],
-    [
-      "What if the result or printer reply is lost?",
-      "Keep the draft and original request. Read the current result; only explicit original-key replay can resolve an uncertain preparation. A PDF or print failure is separate and never repeats the estimate."
-    ]
+  [
+    "Admissions officer: how do I explain a ward change?",
+    "Open the changed-ward work item, verify its recorded transfer and select ChangeOfWard. Prepare from the current tariff, print and explain in the family’s language, then record the actual recipient and signed paper. A read or print alone is not an explanation."
   ],
-  faqUr: [
-    [
-      "داخلہ افسر: وارڈ بدلنے کا خرچ کیسے سمجھاؤں؟",
-      "منتقل وارڈ کا کام کھول کر اصل منتقلی و وجہ چنیں۔ تازہ نرخ سے تیار، پرنٹ و خاندان کی زبان میں سمجھائیں، اصل وصول کنندہ و دستخط درج۔ پڑھنا/پرنٹ اکیلے وضاحت نہیں۔"
-    ],
-    [
-      "سمجھایا تخمینہ کیوں نہیں بدلتا؟",
-      "خاندان کو بتائی بات ریکارڈ ہے۔ نیا تیار کریں، پرانا رہے۔ مسودہ یا غلط سمجھایا تخمینہ وجہ سے منسوخ، تاریخ باقی۔"
-    ],
-    [
-      "جواب یا پرنٹ گم ہو؟",
-      "مسودہ و اصل درخواست رکھیں، موجودہ پڑھیں؛ صرف اصل کلید کی کوشش نامعلوم تیاری حل کرتی ہے۔ پی ڈی ایف/پرنٹ الگ، تخمینہ نہ دہرائیں۔"
-    ]
+  [
+    "Why can I not change an explained estimate?",
+    "It records what the family was told. Prepare a revision; old records remain. A Draft or an incorrect Explained estimate can be cancelled with a reason; history stays."
+  ],
+  [
+    "What if the result or printer reply is lost?",
+    "Keep the draft and original request. Read the current result; only explicit original-key replay can resolve an uncertain preparation. A PDF or print failure is separate and never repeats the estimate."
+  ],
+  [
+    "Why does Billing see ward moves without the clinical reason?",
+    "For ChangeOfWard use the work item’s transfer_id or choose the returned ward move. Billing’s moves show from/to wards and both daily charges, with rate changes first, without the clinical reason, bed labels or mover. A Draft opens the existing estimate instead of preparing another. Explained means the family was already told; do not prepare a duplicate. Never type a transfer ID or open clinical transfer history from Billing."
   ]
+],
+  faqUr: [
+  [
+    "داخلہ افسر: وارڈ بدلنے کا خرچ کیسے سمجھاؤں؟",
+    "منتقل وارڈ کا کام کھول کر اصل منتقلی و وجہ چنیں۔ تازہ نرخ سے تیار، پرنٹ و خاندان کی زبان میں سمجھائیں، اصل وصول کنندہ و دستخط درج۔ پڑھنا/پرنٹ اکیلے وضاحت نہیں۔"
+  ],
+  [
+    "سمجھایا تخمینہ کیوں نہیں بدلتا؟",
+    "خاندان کو بتائی بات ریکارڈ ہے۔ نیا تیار کریں، پرانا رہے۔ مسودہ یا غلط سمجھایا تخمینہ وجہ سے منسوخ، تاریخ باقی۔"
+  ],
+  [
+    "جواب یا پرنٹ گم ہو؟",
+    "مسودہ و اصل درخواست رکھیں، موجودہ پڑھیں؛ صرف اصل کلید کی کوشش نامعلوم تیاری حل کرتی ہے۔ پی ڈی ایف/پرنٹ الگ، تخمینہ نہ دہرائیں۔"
+  ],
+  [
+    "بلنگ کو طبی وجہ کے بغیر وارڈ منتقلی کیوں دکھتی ہے؟",
+    "وارڈ تبدیلی میں کام کی اصل منتقلی یا فہرست کی منتقلی چنیں۔ بلنگ کو دونوں وارڈ و روزانہ نرخ اور پہلے بدلے نرخ دکھتے ہیں؛ طبی وجہ، بستر یا منتقل کرنے والا نہیں۔ مسودہ ہو تو موجودہ تخمینہ کھلتا ہے، دوسرا نہیں بنتا۔ سمجھایا گیا یعنی خاندان کو بتایا جا چکا؛ نقل نہ بنائیں۔ نمبر ٹائپ یا بلنگ سے طبی تاریخ نہ پڑھیں۔"
+  ]
+]
 },
  consents_admissions: {
   title: "General consent at admission",
@@ -2201,14 +2251,89 @@ nursing_assessment: {
   faqUr:[["ایک سطر یا پورے حکم پر سوال؟","فراہمی کا عین بٹن یا اصل نمبر، شناخت چیک، اصل ہدف و وجہ اور حقیقی سوال۔ جائزہ و ایک تصدیق۔ فی ہدف ایک کھلا سوال، سرور دوہرا روکتا۔"],["میرے سے کیا مراد؟","اسی صارف کے تجویز حکم، فارماسسٹ کے اٹھائے سوال نہیں۔ عام رجسٹر میں نشان بند۔ چھانٹی خود لاگو، مقامی تلاش موصولہ قطار پر۔"],["فراہمی کب شروع ہو؟","اصل دستخط جواب پڑھیں۔ جیسے لکھا یہ سوال حل؛ تبدیلی میں ڈاکٹر کا بند/متبادل حکم۔ باقی سوال، طبی بندش و اسٹاک لازم۔ واپس جانا دوا نہیں دیتا۔"],["غلط سوال کیسے واپس؟","عین کھلے سوال پر واپسی، اصل غلطی/حل کی وجہ، مریض/متن چیک اور تصدیق۔ تاریخ رہتی؛ دوران جواب پر پرانا عمل روکتا۔"],["جواب یا رابطہ گم؟","نیا سوال/واپسی نہیں۔ مقفل اصل صارف، ہدف، کلید و مواد؛ نتیجہ پڑھیں یا24گھنٹے میں وہی کوشش۔ خطا پر پرانا نہیں؛ بحالی پر تازہ۔ چھانٹی/تازہ مسودہ رکھتے۔"],["کون جواب اور جزوی کردار؟","مجاز معالج الگ ڈاکٹر طریقے سے، یہاں دستخط جواب پڑھا جاتا۔ ناظر/ریکارڈ تبدیلی نہیں؛ حکم سے سوال کو تفصیل اجازت۔ مینو/مدد مجاز۔ انسانی کردار، اردو، ایڈیٹر و آلات جائزہ باقی۔"]],
  },
  dispense:{
-  title:"Dispense",titleUr:"دوا فراہم کریں",
-  purpose:"At the pharmacy counter the pharmacist verifies the exact patient, remaining medicine quantities and payment, obtains the required second person's check, supplies once and retrieves the server's receipt/labels. Partial supply keeps the remainder; the server chooses FEFO batches. This is a real stock/financial action, separate from printing.",
-  purposeUr:"فارمیسی کاؤنٹر پر فارماسسٹ اصل مریض، باقی مقدار و ادائیگی چیک، دوسرے فرد کی لازم جانچ لے، ایک بار فراہم اور اصل رسید/لیبل پڑھے۔ جزوی کے بعد باقی، سرور بیچ چنتا۔ اصل اسٹاک/مالی عمل پرنٹ سے الگ۔ اردو مقامی جائزے تک مسودہ۔",
-  steps:["Open the reviewed prescription from Prescription queue → Open dispensing, or enter its actual numeric Prescription ID. Verify patient/MRN/visit/admission, original prescriber stamp and allergies. Refresh dispensing only reads; errors hide stale details. F1 and shared keyboard/Settings zoom100–250 preserve the draft.","Enter Dispense Now quantities only for the lines being supplied, positive and within server remaining quantity. Blank omits a line. Queried, stopped, cancelled or external lines are unavailable. Review high-alert/Looks like warnings and actual directions. There is no batch picker; server FEFO excludes recalled stock.","For OPD choose Cash or Card, with Card reference; approved CharityZakat/SocialWelfare needs its actual approved request ID. No ordinary credit override. Cash requires your own open Pharmacy Counter shift; Cash stays disabled until the server confirms it, while Card remains available. Open My cash shift from Pharmacy; only IT maps the PC to Pharmacy Counter. The server bills admission orders directly. Review dispensing shows quantities/payment, not a locally calculated price.","Confirm pharmacy action after patient/order/quantity/payment verification. High-alert needs a different authorized person's username/password after checking order and medicine. Fields clear at submit/close, secrets are never persisted. A new clinical/patient version requires fresh review. Server refusals stay visible.","Unknown result locks input/navigation: Read current result, inspect actual dispensations, or explicitly Retry original request with identical key/body within24hours. Never submit a replacement supply/payment. A confirmed result stays confirmed if refresh or printing fails. Stop/clear use read reconciliation rather than automatic replay.","Select the actual D-number in history for server receipt and labels. Print receipt and Print medicine labels use separate mapped printer roles. Save receipt PDF/Save label PDFs produce separate native PDF saves, never ZIP. Check which labels printed before retry; printing never repeats stock/payment.","Read the linked admission's actual discharge stages and held own medicines. Returned or authorized destruction must actually be confirmed before Review Pharmacy clearance. DISCHARGE_STAGE_IMMUTABLE means already cleared: the automatic discharge-status read shows cleared_by_name and cleared_at. Keep your note; never clear again. DISCHARGE_STAGE_OUT_OF_ORDER means this pending stage waits for details.blocked_on; DISCHARGE_NOT_ALLOWED means discharge not started or cancelled. Neither means already cleared. Lost replies use Read current result; no automatic clearance retry. The limited status identity shows patient/MRN/admission without granting full admission access."],
-  stepsUr:["قطار کے جائزے سے فراہمی کھولیں، یا اصل عددی نسخہ نمبر۔ مریض، ایم آر این، وزٹ/داخلہ، مہر و الرجی چیک۔ تازہ صرف پڑھتا؛ خطا پر پرانا نہیں۔ ایف۱ و مشترک زوم100تا250مسودہ رکھتے۔","صرف دی جانے والی سطروں کی مثبت مقدار، باقی سے زیادہ نہیں۔ خالی شامل نہیں۔ سوال، بند، منسوخ یا بیرونی سطر دستیاب نہیں۔ خطرہ، ملتی دوا اور اصل ہدایت چیک۔ بیچ نہیں چنتے؛ سرور میعاد و ریکال دیکھتا۔","او پی ڈی نقد یا کارڈ و حوالہ؛ زکات/سماجی فلاح میں اصل منظور درخواست۔ عام ادھار نہیں۔ نقد صرف اپنی کھلی فارمیسی کاؤنٹر شفٹ سے؛ تصدیق تک نقد بند، کارڈ دستیاب۔ فارمیسی سے میری کیش شفٹ کھولیں؛ کمپیوٹر کا کاؤنٹر آئی ٹی مقرر کرے۔ داخلے کا بل سرور۔ جائزہ مقدار/طریقہ ہے، مقامی قیمت نہیں۔","مریض، حکم، مقدار و طریقہ چیک کرکے تصدیق۔ خطرناک دوا میں دوسرا مجاز جانچنے والا نام/پاس ورڈ دے۔ ارسال/بند پر خانے صاف، اسناد محفوظ نہیں۔ ورژن بدلے تو نیا جائزہ۔ اصل خطا واضح۔","نامعلوم جواب پر خانہ/جگہ مقفل؛ اصل نتیجہ اور فراہمی دیکھیں یا24گھنٹے میں عین درخواست کوشش۔ متبادل دوا/رقم نہیں۔ تصدیق کے بعد پڑھائی/پرنٹ خرابی کامیابی نہیں مٹاتی۔ بند/کلیئر میں پہلے پڑھیں۔","تاریخ سے اصل Dنمبر کی رسید و لیبل۔ الگ نقش شدہ پرنٹر۔ پی ڈی ایف محفوظ ہرلیبل الگ، زپ نہیں۔ دوبارہ سے پہلے چھپے لیبل چیک؛ اسٹاک/رقم نہیں دہرتی۔","منسلک داخلے کے اصل مراحل اور رکھی دوا دیکھیں۔ واپسی یا مجاز تلفی واقعی مکمل ہو تو جائزہ لیں۔ مرحلہ ناقابل تبدیلی یعنی پہلے کلیئر؛ خودکار تازہ حالت میں کرنے والا اور وقت دیکھیں۔ نوٹ رکھیں، دوبارہ کلیئر نہیں۔ غلط ترتیب یعنی منتظر مرحلہ بتائے گئے دوسرے مرحلے کے بعد ہے؛ ڈسچارج ممنوع یعنی شروع نہیں یا منسوخ۔ یہ پہلے مکمل کا مطلب نہیں۔ گم جواب پر موجودہ نتیجہ پڑھیں؛ خودکار کلیئرنس نہیں۔ محدود شناخت نام، ایم آر این اور داخلہ دکھاتی ہے۔"],
-  faq:[["How do I supply only part?","Enter just that positive quantity in Dispense Now and leave other lines blank. Review the exact patient/payment and confirm once. The server preserves the remainder; no new prescription is needed for it."],["Why is a line blocked?","Read its current status and query. Open queries wait for the doctor; stopped/cancelled/external lines cannot be supplied. High-alert requires a different authorized checker. Refresh after stock/recall updates; do not pick another batch yourself."],["How do I pay and handle a refusal?","OPD Cash needs your own Pharmacy Counter shift; Card needs reference; charity needs an approved pharmacy request. Server validates stock, approval, co-signer and service status. A definitive refusal permits correction, while a lost reply requires the original-key recovery."],["What if print or connection fails?","Do not repeat dispensing/payment. Read the actual D-number and retry only its receipt/labels. Some labels may already have printed. Offline/reconnecting prevents writes; actual reconnect refreshes current data."],["How do I stop a medicine or clear discharge?","Only the appropriate permission exposes a stop or PharmacyClearance action. Check actual patient/line/reason or admission next stage and returned own medicines. Unknown state requires a read; read limited discharge status without full admission access, verify the exact identity/stage and reconcile a lost answer using the cleared officer/time; never retry automatically."],["Can this screen complete the whole Pharmacy workspace?","This screen supplies an existing order and retrieves its receipt/labels. Queue, order queries, OTC and charity-request authoring have their separate journeys. Full role FAQ/Urdu/editor/device and fresh-data human reviews remain required."],["What does an already-cleared stage mean?","DISCHARGE_STAGE_IMMUTABLE says already done: read who cleared it and when in the fresh discharge status. OUT_OF_ORDER only waits behind blocked_on; NOT_ALLOWED means discharge not started/cancelled. Keep the note; no automatic retry."]],
-  faqUr:[["جزوی دوا کیسے دوں؟","صرف وہ مثبت مقدار، باقی سطریں خالی۔ اصل مریض و طریقہ چیک، ایک بار تصدیق۔ سرور باقی رکھتا، نیا نسخہ نہیں۔"],["سطر بند کیوں ہے؟","اصل حالت و سوال دیکھیں۔ کھلا سوال ڈاکٹر کے جواب تک؛ بند/منسوخ/بیرونی نہیں۔ زیادہ خطرے میں مختلف مجاز فرد لازم۔ اسٹاک/ریکال کے بعد تازہ؛ بیچ خود نہیں۔"],["ادائیگی یا انکار کیسے؟","نقد اپنی نقش شدہ کاؤنٹر شفٹ، کارڈ حوالہ، فلاحی منظور درخواست۔ سرور اسٹاک، اجازت، فرد و خدمت چیک۔ قطعی انکار درست ہوسکتا؛ گم جواب میں اصل کلید بحالی۔"],["پرنٹ یا رابطہ خطا؟","دوا/رقم نہ دہرائیں۔ اصل Dنمبر کی رسید/لیبل دوبارہ پڑھیں؛ کچھ چھپ سکتے۔ آف لائن تبدیلی نہیں، بحالی پر تازہ۔"],["دوا بند یا ڈسچارج کلیئر کیسے؟","مجاز اجازت، اصل مریض/سطر/وجہ یا داخلہ اگلا مرحلہ و اپنی دوا واپسی چیک۔ نامعلوم میں پہلے پڑھیں؛ پڑھنے کی اجازت درست، فرضی کلیئرنس نہیں۔"],["کیا پورا فارمیسی کام مکمل؟","یہ موجودہ حکم فراہم اور رسید/لیبل دیتا۔ قطار، سوال، عام فروخت و فلاحی درخواست الگ ہیں۔ پورا کردار، اردو، ایڈیٹر، آلات و نیا ڈیٹا انسانی جائزہ لازم۔"],["پہلے کلیئر مرحلے کا کیا مطلب ہے؟","مرحلہ ناقابل تبدیلی یعنی پہلے مکمل: تازہ حالت میں کرنے والا اور وقت پڑھیں۔ غلط ترتیب صرف بتائے پچھلے مرحلے کی منتظر؛ ممنوع یعنی شروع نہیں یا منسوخ۔ نوٹ رکھیں؛ خودکار تکرار نہیں۔"]],
- },
+  title: "Dispense",
+  titleUr: "دوا فراہم کریں",
+  purpose: "At the pharmacy counter the pharmacist verifies the exact patient, remaining medicine quantities and payment, obtains the required second person's check, supplies once and retrieves the server's receipt/labels. Partial supply keeps the remainder; the server chooses FEFO batches. This is a real stock/financial action, separate from printing.",
+  purposeUr: "فارمیسی کاؤنٹر پر فارماسسٹ اصل مریض، باقی مقدار و ادائیگی چیک، دوسرے فرد کی لازم جانچ لے، ایک بار فراہم اور اصل رسید/لیبل پڑھے۔ جزوی کے بعد باقی، سرور بیچ چنتا۔ اصل اسٹاک/مالی عمل پرنٹ سے الگ۔ اردو مقامی جائزے تک مسودہ۔",
+  steps: [
+  "Open the reviewed prescription from Prescription queue → Open dispensing, or enter its actual numeric Prescription ID. Verify patient/MRN/visit/admission, original prescriber stamp and allergies. Refresh dispensing only reads; errors hide stale details. F1 and shared keyboard/Settings zoom100–250 preserve the draft.",
+  "Enter Dispense Now quantities only for the lines being supplied, positive and within server remaining quantity. Blank omits a line. Queried, stopped, cancelled or external lines are unavailable. Review high-alert/Looks like warnings and actual directions. There is no batch picker; server FEFO excludes recalled stock.",
+  "For OPD choose Cash or Card, with Card reference; approved CharityZakat/SocialWelfare needs its actual approved request ID. No ordinary credit override. Cash requires your own open Pharmacy Counter shift; Cash stays disabled until the server confirms it, while Card remains available. Open My cash shift from Pharmacy; only IT maps the PC to Pharmacy Counter. The server bills admission orders directly. Review dispensing shows quantities/payment, not a locally calculated price.",
+  "Confirm pharmacy action after patient/order/quantity/payment verification. High-alert needs a different authorized person's username/password after checking order and medicine. Fields clear at submit/close, secrets are never persisted. A new clinical/patient version requires fresh review. Server refusals stay visible.",
+  "Unknown result locks input/navigation: Read current result, inspect actual dispensations, or explicitly Retry original request with identical key/body within24hours. Never submit a replacement supply/payment. A confirmed result stays confirmed if refresh or printing fails. Stop/clear use read reconciliation rather than automatic replay.",
+  "Select the actual D-number in history for server receipt and labels. Print receipt and Print medicine labels use separate mapped printer roles. Save receipt PDF/Save label PDFs produce separate native PDF saves, never ZIP. Check which labels printed before retry; printing never repeats stock/payment.",
+  "Read the linked admission's actual discharge stages and held own medicines. Returned or authorized destruction must actually be confirmed before Review Pharmacy clearance. DISCHARGE_STAGE_IMMUTABLE means already cleared: the automatic discharge-status read shows cleared_by_name and cleared_at. Keep your note; never clear again. DISCHARGE_STAGE_OUT_OF_ORDER means this pending stage waits for details.blocked_on; DISCHARGE_NOT_ALLOWED means discharge not started or cancelled. Neither means already cleared. Lost replies use Read current result; no automatic clearance retry. The limited status identity shows patient/MRN/admission without granting full admission access."
+],
+  stepsUr: [
+  "قطار کے جائزے سے فراہمی کھولیں، یا اصل عددی نسخہ نمبر۔ مریض، ایم آر این، وزٹ/داخلہ، مہر و الرجی چیک۔ تازہ صرف پڑھتا؛ خطا پر پرانا نہیں۔ ایف۱ و مشترک زوم100تا250مسودہ رکھتے۔",
+  "صرف دی جانے والی سطروں کی مثبت مقدار، باقی سے زیادہ نہیں۔ خالی شامل نہیں۔ سوال، بند، منسوخ یا بیرونی سطر دستیاب نہیں۔ خطرہ، ملتی دوا اور اصل ہدایت چیک۔ بیچ نہیں چنتے؛ سرور میعاد و ریکال دیکھتا۔",
+  "او پی ڈی نقد یا کارڈ و حوالہ؛ زکات/سماجی فلاح میں اصل منظور درخواست۔ عام ادھار نہیں۔ نقد صرف اپنی کھلی فارمیسی کاؤنٹر شفٹ سے؛ تصدیق تک نقد بند، کارڈ دستیاب۔ فارمیسی سے میری کیش شفٹ کھولیں؛ کمپیوٹر کا کاؤنٹر آئی ٹی مقرر کرے۔ داخلے کا بل سرور۔ جائزہ مقدار/طریقہ ہے، مقامی قیمت نہیں۔",
+  "مریض، حکم، مقدار و طریقہ چیک کرکے تصدیق۔ خطرناک دوا میں دوسرا مجاز جانچنے والا نام/پاس ورڈ دے۔ ارسال/بند پر خانے صاف، اسناد محفوظ نہیں۔ ورژن بدلے تو نیا جائزہ۔ اصل خطا واضح۔",
+  "نامعلوم جواب پر خانہ/جگہ مقفل؛ اصل نتیجہ اور فراہمی دیکھیں یا24گھنٹے میں عین درخواست کوشش۔ متبادل دوا/رقم نہیں۔ تصدیق کے بعد پڑھائی/پرنٹ خرابی کامیابی نہیں مٹاتی۔ بند/کلیئر میں پہلے پڑھیں۔",
+  "تاریخ سے اصل Dنمبر کی رسید و لیبل۔ الگ نقش شدہ پرنٹر۔ پی ڈی ایف محفوظ ہرلیبل الگ، زپ نہیں۔ دوبارہ سے پہلے چھپے لیبل چیک؛ اسٹاک/رقم نہیں دہرتی۔",
+  "منسلک داخلے کے اصل مراحل اور رکھی دوا دیکھیں۔ واپسی یا مجاز تلفی واقعی مکمل ہو تو جائزہ لیں۔ مرحلہ ناقابل تبدیلی یعنی پہلے کلیئر؛ خودکار تازہ حالت میں کرنے والا اور وقت دیکھیں۔ نوٹ رکھیں، دوبارہ کلیئر نہیں۔ غلط ترتیب یعنی منتظر مرحلہ بتائے گئے دوسرے مرحلے کے بعد ہے؛ ڈسچارج ممنوع یعنی شروع نہیں یا منسوخ۔ یہ پہلے مکمل کا مطلب نہیں۔ گم جواب پر موجودہ نتیجہ پڑھیں؛ خودکار کلیئرنس نہیں۔ محدود شناخت نام، ایم آر این اور داخلہ دکھاتی ہے۔"
+],
+  faq: [
+  [
+    "How do I supply only part?",
+    "Enter just that positive quantity in Dispense Now and leave other lines blank. Review the exact patient/payment and confirm once. The server preserves the remainder; no new prescription is needed for it."
+  ],
+  [
+    "Why is a line blocked?",
+    "Read its current status and query. Open queries wait for the doctor; stopped/cancelled/external lines cannot be supplied. High-alert requires a different authorized checker. Refresh after stock/recall updates; do not pick another batch yourself."
+  ],
+  [
+    "How do I pay and handle a refusal?",
+    "OPD Cash needs your own Pharmacy Counter shift; Card needs reference; charity needs an approved pharmacy request. Server validates stock, approval, co-signer and service status. A definitive refusal permits correction, while a lost reply requires the original-key recovery."
+  ],
+  [
+    "What if print or connection fails?",
+    "Do not repeat dispensing/payment. Read the actual D-number and retry only its receipt/labels. Some labels may already have printed. Offline/reconnecting prevents writes; actual reconnect refreshes current data."
+  ],
+  [
+    "How do I stop a medicine or clear discharge?",
+    "Ask the prescriber to review and stop an order; dispensing never stops a prescription line. Pharmacy clearance remains a separate permitted discharge stage, after checking the actual stage and held own medicines."
+  ],
+  [
+    "Can this screen complete the whole Pharmacy workspace?",
+    "This screen supplies an existing order and retrieves its receipt/labels. Queue, order queries, OTC and charity-request authoring have their separate journeys. Full role FAQ/Urdu/editor/device and fresh-data human reviews remain required."
+  ],
+  [
+    "What does an already-cleared stage mean?",
+    "DISCHARGE_STAGE_IMMUTABLE says already done: read who cleared it and when in the fresh discharge status. OUT_OF_ORDER only waits behind blocked_on; NOT_ALLOWED means discharge not started/cancelled. Keep the note; no automatic retry."
+  ]
+],
+  faqUr: [
+  [
+    "جزوی دوا کیسے دوں؟",
+    "صرف وہ مثبت مقدار، باقی سطریں خالی۔ اصل مریض و طریقہ چیک، ایک بار تصدیق۔ سرور باقی رکھتا، نیا نسخہ نہیں۔"
+  ],
+  [
+    "سطر بند کیوں ہے؟",
+    "اصل حالت و سوال دیکھیں۔ کھلا سوال ڈاکٹر کے جواب تک؛ بند/منسوخ/بیرونی نہیں۔ زیادہ خطرے میں مختلف مجاز فرد لازم۔ اسٹاک/ریکال کے بعد تازہ؛ بیچ خود نہیں۔"
+  ],
+  [
+    "ادائیگی یا انکار کیسے؟",
+    "نقد اپنی نقش شدہ کاؤنٹر شفٹ، کارڈ حوالہ، فلاحی منظور درخواست۔ سرور اسٹاک، اجازت، فرد و خدمت چیک۔ قطعی انکار درست ہوسکتا؛ گم جواب میں اصل کلید بحالی۔"
+  ],
+  [
+    "پرنٹ یا رابطہ خطا؟",
+    "دوا/رقم نہ دہرائیں۔ اصل Dنمبر کی رسید/لیبل دوبارہ پڑھیں؛ کچھ چھپ سکتے۔ آف لائن تبدیلی نہیں، بحالی پر تازہ۔"
+  ],
+  [
+    "دوا بند یا فارمیسی کلیئر کیسے ہو؟",
+    "معالج سے حکم کا جائزہ و بندش کہیں؛ فراہمی سے نسخہ بند نہیں ہوتا۔ اصل مرحلہ و مریض کی زیر تحویل دوا چیک کرکے فارمیسی کلیئر الگ مجاز عمل ہے۔"
+  ],
+  [
+    "کیا پورا فارمیسی کام مکمل؟",
+    "یہ موجودہ حکم فراہم اور رسید/لیبل دیتا۔ قطار، سوال، عام فروخت و فلاحی درخواست الگ ہیں۔ پورا کردار، اردو، ایڈیٹر، آلات و نیا ڈیٹا انسانی جائزہ لازم۔"
+  ],
+  [
+    "پہلے کلیئر مرحلے کا کیا مطلب ہے؟",
+    "مرحلہ ناقابل تبدیلی یعنی پہلے مکمل: تازہ حالت میں کرنے والا اور وقت پڑھیں۔ غلط ترتیب صرف بتائے پچھلے مرحلے کی منتظر؛ ممنوع یعنی شروع نہیں یا منسوخ۔ نوٹ رکھیں؛ خودکار تکرار نہیں۔"
+  ]
+]
+},
   rx_queue: {
     title: "Prescription queue", titleUr: "نسخوں کی قطار",
     purpose: "At the pharmacy counter the pharmacist finds the next pending hospital prescription, verifies the patient and safety conditions, and finishes with a current, correctly identified order ready for the separate dispensing workflow. Code Red first, then oldest first; no medicine or payment is recorded by reading this screen.",
@@ -2332,21 +2457,187 @@ nursing_assessment: {
    faqUr:[["کس حصے میں کون کام کرتا ہے؟","مجاز ڈاکٹر، ماہر و سرجن احکامات؛ نتائج و عکس کی اجازت اصل پڑھائی دیتی ہے۔ لیب نمونہ و تصدیق، شعبہ عکس ترتیب و رپورٹ اور کیشیئر بیرونی ٹیسٹ کی ادائیگی لیتا ہے۔ معالج دوسرے کردار کی شناخت نہیں لیتا۔ سرور کی اجازت و خدمت، ہسپتال کی قسم نہیں، رسائی طے کرتی ہے۔"],["کیا لیب یا عکس آرڈر منسوخ ہو سکتا ہے؟","اپنی منسوخی کی اجازت والا حکم دینے والا صرف اپنا لیب آرڈر کسی نمونے سے پہلے وجہ سے منسوخ کرتا ہے۔ دوسرے کا لیب ایڈمن۔ لیا نمونہ یہاں منسوخ نہیں۔ عکس کی منسوخی شعبہ عکس کے اپنے معاہدے میں؛ یہاں غیر مجاز ترمیم، حذف یا واپسی نہیں۔"],["بیرونی ٹیسٹ یا تاخیر پر مریض کو کیا بتاؤں؟","اصل ٹیسٹ، شراکت دار اور مدت دکھائیں۔ بیرونی کو فعال بیرونی تشخیص، اندرونی کو فعال لیب لازم۔ مسترد نمونہ نیا نمونہ اور لیب رابطہ مانگتا ہے۔ غیر درج وقت واضح ہے؛ فرضی وعدہ یا بیرونی رپورٹ کو اپنی لیب نہ کہیں۔"],["تصدیق باقی یا واپس انتہائی اہم نتیجے کا مطلب؟","جاری قدر ابھی غیر مصدقہ ہے، سرخ نشان اور پرنٹ منع۔ طبی ٹیم سے رابطہ اور مجاز انتہائی اہم نتائج میں وصولی درج کریں۔ واپس ہو تو اس قدر پر عمل نہ کریں؛ ہٹ کر پیغام اور تازہ پڑھائی آتی ہے۔ عام غیر جاری، مسترد یا بدلا ریکارڈ براؤزر میں ہونے سے نتیجہ نہیں بنتا۔"],["کاغذ پر کیا آئے اور ویور نہ ہو تو؟","مصدقہ لیب رپورٹ میں شناخت، جنس کی حد، نشان، کرنے/تصدیق کی مہر، مرکز و تصحیح کی وجہ؛ نامکمل سیٹ جزوی ہے۔ رپورٹ شدہ عکس میں معالج کی مہر۔ صرف سرور کا اصل پتہ الگ کھلتا؛ خالی ربط شعبہ عکس چیک کرے۔ پرنٹر یا ویور خرابی آرڈر، ادائیگی یا وصولی نہیں دہراتی۔"],["نام زد جائزہ لینے والا کیا چیک کرے؟","اس بلڈ پر نئے فرضی لیب و عکس احکامات، نمبر و وصول قطار، اپنی منسوخی/نمونہ پر انکار، جاری/عارضی/واپس انتہائی اہم نتیجہ و رجحان، سمت/ساتھ والا، ویور اور اصل اے4/سرور پی ڈی ایف چیک کریں۔ دونوں زبان/تھیم250فیصد، ایف۱، اجازت و خدمت بندش اور گم جواب پر عدم تکرار چیک کریں۔ اصل نمبر انسانی شیٹ میں؛ اردو، الگ مدیر و اصل پرنٹر انسانی کام ہیں۔"]]
   },
   eprescription:{
-    title:"E-prescription builder",titleUr:"دوائی کا نسخہ",
-    purpose:"Doctors, clinical specialists, surgeons and anaesthetists prescribe with real formulary stock and safety information, or issue an external-market slip. Nurses/pharmacists with permission inspect orders and actual handovers. Content is immutable after saving; cancellation, dispensing and handover are distinct actions.",purposeUr:"ڈاکٹر، ماہر، سرجن اور بے ہوشی کے ڈاکٹر اصل فہرست، اسٹاک اور خطرات کے ساتھ دوائی یا بیرونی بازار کی پرچی لکھتے ہیں۔ مجاز نرس و فارماسسٹ احکامات اور اصل حوالگی پڑھتے ہیں۔ محفوظ مواد نہیں بدلتا؛ منسوخی، فراہمی اور حوالگی الگ عمل ہیں۔ اردو مقامی جائزے تک مسودہ ہے۔",
-    steps:["Open E-prescription builder from the clinical workspace or the consultation handoff. Scan/open the actual OPD slip or select your live-queue patient. Verify name/MRN/age and all allergy, death, MLC, temporary-identity, merge and outstanding flags. A clinical lock, pending approval, records-only view or lost context blocks new actions.","Select New prescription, deliberately choose Hospital pharmacy (only when dispensing is Active) or External/local market. Choose OPD/ER or IPD/CodeRed with the patient's real admission. Link the relevant consultation so its complaint, findings, diagnosis, advice and VCO appear on the slip.","Search at least2characters; inspect name, strength, form, schedule, live stock text/colour, high-alert/restricted/looks-like warnings and stock detail. Add medicine creates an unsent line. External market can instead use a free-text name, strength and form; it never creates hospital-pharmacy work.","Enter dose with units, route, frequency and quantity. OPD/ER also needs whole days except a single STAT dose. Inpatient medication requires hospital-time start; Other frequency needs interval hours. Self-administration is only explicitly allowed inpatient oral/inhaled/topical non-high-alert medicine. Confirm each safety warning; the server independently checks prescribing privileges.","Create prescription once. If PRESCRIPTION_INCOMPLETE, retain and correct the marked line fields. A lost reply freezes edits/navigation for the identical original-key retry within24hours. Read-only reconciliation handles non-idempotent cancellation; never replace a potentially saved prescription. Changing patient or discarding asks before losing draft text.","Read the saved prescription, stamp, pharmacist queries, dispensed amounts and handover history. Print prescription or Save prescription PDF separately using the actual issued payload; printing does not record handover. A failed/cancelled print leaves the prescription saved and can be retried without prescribing again.","Only after actually giving the slip, Record handover to Patient or a named Attendant and choose Electronic/Carbon copy/Scan. Scan selects the patient's uploaded Prescription document. A prescriber may Cancel eligible open lines with a reason; saved clinical content is never edited/deleted. F1 preserves draft/focus, and Settings/keyboard share100–250%zoom."],
-    stepsUr:["طبی جگہ یا معائنے کی حوالگی سے نسخہ کھولیں۔ اصل پرچی اسکین یا اپنی قطار کا مریض چنیں۔ نام، ایم آر این، عمر، الرجی، وفات، قانونی کیس، عارضی شناخت، انضمام اور بقایا چیک کریں۔ طبی پابندی، منتظر منظوری، صرف ریکارڈ یا گم شناخت پر نیا عمل بند ہے۔","نیا نسخہ اور خود منزل چنیں؛ ہسپتال کی فارمیسی صرف خدمت فعال ہو تو، ورنہ بیرونی بازار۔ بیرونی یا داخل علاج کی جگہ اور اصل داخلہ چنیں۔ متعلقہ نوٹ سے شکایت، معائنہ، تشخیص، مشورہ اور رضامندی پرنٹ میں آتی ہے۔","کم از کم2حروف سے تلاش کریں؛ نام، طاقت، شکل، شیڈول، اسٹاک کے لفظ و رنگ اور خطرات پڑھیں۔ شامل کرنا صرف غیر ارسال دوائی ہے۔ بیرونی بازار میں آزاد نام، طاقت، شکل لکھ سکتے ہیں؛ ہسپتال کی قطار نہیں بنتی۔","اکائی سمیت خوراک، راستہ، وقفہ اور مقدار لکھیں۔ بیرونی مریض کو فوری ایک خوراک کے سوا پورے دن لازم۔ داخل مریض کا آغاز ہسپتال کے وقت میں، دیگر وقفے کو گھنٹے لازم۔ خود لینا صرف مجاز غیر خطرناک منہ، سانس یا جلد کی دوائی ہے۔ خطرات تصدیق کریں؛ سرور اجازت بھی چیک کرتا ہے۔","ایک بار نسخہ بنائیں۔ نامکمل دوائی پر مسودہ رکھ کر نمایاں خانے درست کریں۔ جواب گم ہو تو24گھنٹے میں اصل درخواست اسی نمبر سے چیک؛ ترمیم اور جگہ بدلنا بند۔ منسوخی صرف پڑھ کر چیک ہے۔ ممکنہ محفوظ نسخے کا بدل نہ بنائیں۔ مریض بدلنا یا مسودہ چھوڑنا پہلے پوچھتا ہے۔","محفوظ نسخہ، مہر، فارماسسٹ کے سوال، فراہم مقدار اور حوالگی پڑھیں۔ اصل معلومات سے پرنٹ یا پی ڈی ایف الگ کریں؛ پرنٹ حوالگی نہیں۔ پرنٹ ناکام یا منسوخ ہو تو نسخہ محفوظ اور صرف پرنٹ دوبارہ ہے۔","اصل دینے کے بعد مریض یا نام زد تیماردار اور برقی، کاربن یا اسکین نقل کی حوالگی درج کریں۔ اسکین اسی مریض کی اپ لوڈ نسخہ دستاویز ہو۔ معالج وجہ سے کھلی دوائی منسوخ کر سکتا ہے؛ محفوظ مواد بدلنا یا حذف نہیں۔ ایف۱مسودہ و فوکس اور ترتیب و کلید100تا250فیصد ایک زوم رکھتی ہیں۔"],
-    faq:[["Who can prescribe or inspect this screen?","Doctors, clinical specialists, surgeons and anaesthetists need prescription.create plus current PMDC registration or Prescribing privilege. Restricted medicine also needs RestrictedPrescribing. Nurses/pharmacists with prescription.view read saved orders; only a permitted person who actually handed the slip records handover. Permission decisions come from the server, never role-name bypasses."],["What does each stock colour mean?","Green InStock, amber Low and red OutOfStock also display words and quantity. Stock details returns batches in earliest-expiry order. Events/reconnect refresh reads without polling; a failed read remains an error. Stock availability is not permission to dispense or a promised reservation."],["Can I change a saved medicine or send an external prescription to pharmacy?","No content edit/delete is offered. Your eligible open order can be cancelled with a reason; another intentional order is separate. ExternalMarket accepts free text and prints a local-market slip without entering the hospital queue; HospitalPharmacy only appears while dispensing is Active."],["What if a doctor sees an incomplete-line or privilege refusal?","Keep the draft and read the exact message/reference. Each outpatient line needs dose, route, frequency and days (single STAT: dose/route); inpatient needs start time too. Highlighted fields come from server line details. A privilege refusal must be resolved by authorized credentialing staff; never substitute a different identity or hide the warning."],["What should the person handing the prescription do?","Print/read the confirmed slip, actually give it to Patient or a named Attendant, keep the stated Electronic/CarbonCopy/Scan copy, then record handover. Scan requires this patient's uploaded Prescription document. Printing alone proves nothing; no agent should assert physical handover that did not occur."],["What remains for manual acceptance?","On the identified build, a named doctor/specialist/surgeon/anaesthetist and receiving nurse/pharmacist review fresh synthetic orders, permitted cancellation, refused/unknown outcomes, safety alerts, inpatient MAR handoff and actual handover. Record IDs in the doctor worksheet. Check native Urdu/independent editor, real receipt printer, EN/UR250%layouts, contextual F1 and zoom persistence. Automated checks never fill a human worksheet."]],
-    faqUr:[["یہاں نسخہ کون لکھ یا پڑھ سکتا ہے؟","ڈاکٹر، ماہر، سرجن اور بے ہوشی کے ڈاکٹر کو نسخہ اجازت اور موجودہ رجسٹریشن یا خصوصی تجویز اجازت چاہیے۔ محدود دوائی کو مزید خصوصی اجازت لازم۔ مجاز نرس و فارماسسٹ محفوظ حکم پڑھتے ہیں؛ اصل دینے والا مجاز شخص حوالگی درج کرتا ہے۔ فیصلہ سرور کی اجازت سے، کردار کے نام سے نہیں۔"],["اسٹاک کے رنگ کا مطلب؟","سبز دستیاب، زرد کم، سرخ ختم کے ساتھ لفظ اور مقدار بھی ہے۔ تفصیل جلد ختم ہونے کے بیچ دکھاتی ہے۔ واقعہ و دوبارہ رابطہ پڑھائی تازہ کرتے، ٹائمر نہیں۔ ناکام پڑھائی خرابی ہے۔ اسٹاک دوائی دینے کی اجازت یا بکنگ نہیں۔"],["محفوظ دوائی بدل یا بیرونی نسخہ ہسپتال بھیج سکتا ہوں؟","مواد بدلنا یا حذف نہیں۔ اپنا موزوں کھلا حکم وجہ سے منسوخ اور الگ سوچا ہوا نیا حکم بنایا جا سکتا ہے۔ بیرونی بازار آزاد نام کی پرچی ہے، ہسپتال کی قطار نہیں۔ ہسپتال کی منزل صرف فعال فراہمی میں ہے۔"],["نامکمل دوائی یا خصوصی اجازت کا انکار ہو تو؟","مسودہ رکھ کر اصل پیغام و حوالہ پڑھیں۔ بیرونی دوائی کو خوراک، راستہ، وقفہ و دن، فوری ایک خوراک کو خوراک و راستہ؛ داخل مریض کو آغاز بھی لازم۔ نمایاں خانے سرور کی تفصیل سے ہیں۔ خصوصی اجازت مجاز اسناد عملہ حل کرے؛ دوسرے کی شناخت یا خطرہ چھپانا نہیں۔"],["نسخہ دینے والا کیا کرے؟","مصدقہ پرچی پڑھ/پرنٹ کرکے اصل مریض یا نام زد تیماردار کو دے، بتائی ہوئی برقی، کاربن یا اسکین نقل رکھے، پھر حوالگی درج کرے۔ اسکین اسی مریض کے اپ لوڈ نسخے سے ہو۔ صرف پرنٹ ثبوت نہیں؛ ایجنٹ غیر حقیقی حوالگی درج نہ کرے۔"],["انسانی قبولیت میں کیا باقی ہے؟","نام زد معالج اور وصول کرنے والی نرس/فارماسسٹ نئے فرضی احکامات، مجاز منسوخی، انکار و گم جواب، خطرات، داخل چارٹ اور اصل حوالگی چیک کریں۔ نمبر ڈاکٹر کی جائزہ شیٹ میں لکھیں۔ اردو، آزاد مدیر، اصل رسید پرنٹر، دونوں زبان250فیصد، ایف۱ اور محفوظ زوم چیک کریں۔ خودکار ٹیسٹ انسانی شیٹ نہیں بھرتا۔"]]
-  },
+  title: "E-prescription builder",
+  titleUr: "دوائی کا نسخہ",
+  purpose: "Doctors, clinical specialists, surgeons and anaesthetists prescribe with real formulary stock and safety information, or issue an external-market slip. Nurses/pharmacists with permission inspect orders and actual handovers. Content is immutable after saving; cancellation, dispensing and handover are distinct actions.",
+  purposeUr: "ڈاکٹر، ماہر، سرجن اور بے ہوشی کے ڈاکٹر اصل فہرست، اسٹاک اور خطرات کے ساتھ دوائی یا بیرونی بازار کی پرچی لکھتے ہیں۔ مجاز نرس و فارماسسٹ احکامات اور اصل حوالگی پڑھتے ہیں۔ محفوظ مواد نہیں بدلتا؛ منسوخی، فراہمی اور حوالگی الگ عمل ہیں۔ اردو مقامی جائزے تک مسودہ ہے۔",
+  steps: [
+  "Open E-prescription builder from the clinical workspace or the consultation handoff. Scan/open the actual OPD slip or select your live-queue patient. Verify name/MRN/age and all allergy, death, MLC, temporary-identity, merge and outstanding flags. A clinical lock, pending approval, records-only view or lost context blocks new actions.",
+  "Select New prescription, deliberately choose Hospital pharmacy (only when dispensing is Active) or External/local market. Choose OPD/ER or IPD/CodeRed with the patient's real admission. Link the relevant consultation so its complaint, findings, diagnosis, advice and VCO appear on the slip.",
+  "Search at least2characters; inspect name, strength, form, schedule, live stock text/colour, high-alert/restricted/looks-like warnings and stock detail. Add medicine creates an unsent line. External market can instead use a free-text name, strength and form; it never creates hospital-pharmacy work.",
+  "Enter dose with units, route, frequency and quantity. OPD/ER also needs whole days except a single STAT dose. Inpatient medication requires hospital-time start; Other frequency needs interval hours. Self-administration is only explicitly allowed inpatient oral/inhaled/topical non-high-alert medicine. Confirm each safety warning; the server independently checks prescribing privileges.",
+  "Create prescription once. If PRESCRIPTION_INCOMPLETE, retain and correct the marked line fields. A lost reply freezes edits/navigation for the identical original-key retry within24hours. Read-only reconciliation handles non-idempotent cancellation; never replace a potentially saved prescription. Changing patient or discarding asks before losing draft text.",
+  "Read the saved prescription, stamp, pharmacist queries, dispensed amounts and handover history. Print prescription or Save prescription PDF separately using the actual issued payload; printing does not record handover. A failed/cancelled print leaves the prescription saved and can be retried without prescribing again.",
+  "Only after actually giving the slip, Record handover to Patient or a named Attendant and choose Electronic/Carbon copy/Scan. Scan selects the patient's uploaded Prescription document. A prescriber may Cancel eligible open lines with a reason; saved clinical content is never edited/deleted. F1 preserves draft/focus, and Settings/keyboard share100–250%zoom.",
+  "An inpatient ExternalMarket line offers self-administration only for a drug chosen from the hospital list. A typed medicine name has unknown high-alert status and cannot be self-administered. The route must be Oral, SL, Topical, Inhaled, Ophthalmic, Otic or Nasal and the drug must not be high-alert. SELF_ADMINISTRATION_INVALID remains the server’s refusal."
+],
+  stepsUr: [
+  "طبی جگہ یا معائنے کی حوالگی سے نسخہ کھولیں۔ اصل پرچی اسکین یا اپنی قطار کا مریض چنیں۔ نام، ایم آر این، عمر، الرجی، وفات، قانونی کیس، عارضی شناخت، انضمام اور بقایا چیک کریں۔ طبی پابندی، منتظر منظوری، صرف ریکارڈ یا گم شناخت پر نیا عمل بند ہے۔",
+  "نیا نسخہ اور خود منزل چنیں؛ ہسپتال کی فارمیسی صرف خدمت فعال ہو تو، ورنہ بیرونی بازار۔ بیرونی یا داخل علاج کی جگہ اور اصل داخلہ چنیں۔ متعلقہ نوٹ سے شکایت، معائنہ، تشخیص، مشورہ اور رضامندی پرنٹ میں آتی ہے۔",
+  "کم از کم2حروف سے تلاش کریں؛ نام، طاقت، شکل، شیڈول، اسٹاک کے لفظ و رنگ اور خطرات پڑھیں۔ شامل کرنا صرف غیر ارسال دوائی ہے۔ بیرونی بازار میں آزاد نام، طاقت، شکل لکھ سکتے ہیں؛ ہسپتال کی قطار نہیں بنتی۔",
+  "اکائی سمیت خوراک، راستہ، وقفہ اور مقدار لکھیں۔ بیرونی مریض کو فوری ایک خوراک کے سوا پورے دن لازم۔ داخل مریض کا آغاز ہسپتال کے وقت میں، دیگر وقفے کو گھنٹے لازم۔ خود لینا صرف مجاز غیر خطرناک منہ، سانس یا جلد کی دوائی ہے۔ خطرات تصدیق کریں؛ سرور اجازت بھی چیک کرتا ہے۔",
+  "ایک بار نسخہ بنائیں۔ نامکمل دوائی پر مسودہ رکھ کر نمایاں خانے درست کریں۔ جواب گم ہو تو24گھنٹے میں اصل درخواست اسی نمبر سے چیک؛ ترمیم اور جگہ بدلنا بند۔ منسوخی صرف پڑھ کر چیک ہے۔ ممکنہ محفوظ نسخے کا بدل نہ بنائیں۔ مریض بدلنا یا مسودہ چھوڑنا پہلے پوچھتا ہے۔",
+  "محفوظ نسخہ، مہر، فارماسسٹ کے سوال، فراہم مقدار اور حوالگی پڑھیں۔ اصل معلومات سے پرنٹ یا پی ڈی ایف الگ کریں؛ پرنٹ حوالگی نہیں۔ پرنٹ ناکام یا منسوخ ہو تو نسخہ محفوظ اور صرف پرنٹ دوبارہ ہے۔",
+  "اصل دینے کے بعد مریض یا نام زد تیماردار اور برقی، کاربن یا اسکین نقل کی حوالگی درج کریں۔ اسکین اسی مریض کی اپ لوڈ نسخہ دستاویز ہو۔ معالج وجہ سے کھلی دوائی منسوخ کر سکتا ہے؛ محفوظ مواد بدلنا یا حذف نہیں۔ ایف۱مسودہ و فوکس اور ترتیب و کلید100تا250فیصد ایک زوم رکھتی ہیں۔",
+  "داخل مریض کی بیرونی دوا میں خود لینے کی اجازت صرف ہسپتال کی فہرست سے منتخب دوا پر ہے۔ ٹائپ نام کا خطرہ نامعلوم؛ خود لینے کی اجازت نہیں۔ منہ، زیر زبان، جلد، سانس، آنکھ، کان یا ناک کا راستہ اور غیر خطرناک دوا لازم۔ سرور کا انکار اصل فیصلہ ہے۔"
+],
+  faq: [
+  [
+    "Who can prescribe or inspect this screen?",
+    "Doctors, clinical specialists, surgeons and anaesthetists need prescription.create plus current PMDC registration or Prescribing privilege. Restricted medicine also needs RestrictedPrescribing. Nurses/pharmacists with prescription.view read saved orders; only a permitted person who actually handed the slip records handover. Permission decisions come from the server, never role-name bypasses."
+  ],
+  [
+    "What does each stock colour mean?",
+    "Green InStock, amber Low and red OutOfStock also display words and quantity. Stock details returns batches in earliest-expiry order. Events/reconnect refresh reads without polling; a failed read remains an error. Stock availability is not permission to dispense or a promised reservation."
+  ],
+  [
+    "Can I change a saved medicine or send an external prescription to pharmacy?",
+    "No content edit/delete is offered. Your eligible open order can be cancelled with a reason; another intentional order is separate. ExternalMarket accepts free text and prints a local-market slip without entering the hospital queue; HospitalPharmacy only appears while dispensing is Active."
+  ],
+  [
+    "What if a doctor sees an incomplete-line or privilege refusal?",
+    "Keep the draft and read the exact message/reference. Each outpatient line needs dose, route, frequency and days (single STAT: dose/route); inpatient needs start time too. Highlighted fields come from server line details. A privilege refusal must be resolved by authorized credentialing staff; never substitute a different identity or hide the warning."
+  ],
+  [
+    "What should the person handing the prescription do?",
+    "Print/read the confirmed slip, actually give it to Patient or a named Attendant, keep the stated Electronic/CarbonCopy/Scan copy, then record handover. Scan requires this patient's uploaded Prescription document. Printing alone proves nothing; no agent should assert physical handover that did not occur."
+  ],
+  [
+    "What remains for manual acceptance?",
+    "On the identified build, a named doctor/specialist/surgeon/anaesthetist and receiving nurse/pharmacist review fresh synthetic orders, permitted cancellation, refused/unknown outcomes, safety alerts, inpatient MAR handoff and actual handover. Record IDs in the doctor worksheet. Check native Urdu/independent editor, real receipt printer, EN/UR250%layouts, contextual F1 and zoom persistence. Automated checks never fill a human worksheet."
+  ],
+  [
+    "When may an outside medicine be self-administered?",
+    "An inpatient ExternalMarket line offers self-administration only for a drug chosen from the hospital list. A typed medicine name has unknown high-alert status and cannot be self-administered. The route must be Oral, SL, Topical, Inhaled, Ophthalmic, Otic or Nasal and the drug must not be high-alert. SELF_ADMINISTRATION_INVALID remains the server’s refusal."
+  ]
+],
+  faqUr: [
+  [
+    "یہاں نسخہ کون لکھ یا پڑھ سکتا ہے؟",
+    "ڈاکٹر، ماہر، سرجن اور بے ہوشی کے ڈاکٹر کو نسخہ اجازت اور موجودہ رجسٹریشن یا خصوصی تجویز اجازت چاہیے۔ محدود دوائی کو مزید خصوصی اجازت لازم۔ مجاز نرس و فارماسسٹ محفوظ حکم پڑھتے ہیں؛ اصل دینے والا مجاز شخص حوالگی درج کرتا ہے۔ فیصلہ سرور کی اجازت سے، کردار کے نام سے نہیں۔"
+  ],
+  [
+    "اسٹاک کے رنگ کا مطلب؟",
+    "سبز دستیاب، زرد کم، سرخ ختم کے ساتھ لفظ اور مقدار بھی ہے۔ تفصیل جلد ختم ہونے کے بیچ دکھاتی ہے۔ واقعہ و دوبارہ رابطہ پڑھائی تازہ کرتے، ٹائمر نہیں۔ ناکام پڑھائی خرابی ہے۔ اسٹاک دوائی دینے کی اجازت یا بکنگ نہیں۔"
+  ],
+  [
+    "محفوظ دوائی بدل یا بیرونی نسخہ ہسپتال بھیج سکتا ہوں؟",
+    "مواد بدلنا یا حذف نہیں۔ اپنا موزوں کھلا حکم وجہ سے منسوخ اور الگ سوچا ہوا نیا حکم بنایا جا سکتا ہے۔ بیرونی بازار آزاد نام کی پرچی ہے، ہسپتال کی قطار نہیں۔ ہسپتال کی منزل صرف فعال فراہمی میں ہے۔"
+  ],
+  [
+    "نامکمل دوائی یا خصوصی اجازت کا انکار ہو تو؟",
+    "مسودہ رکھ کر اصل پیغام و حوالہ پڑھیں۔ بیرونی دوائی کو خوراک، راستہ، وقفہ و دن، فوری ایک خوراک کو خوراک و راستہ؛ داخل مریض کو آغاز بھی لازم۔ نمایاں خانے سرور کی تفصیل سے ہیں۔ خصوصی اجازت مجاز اسناد عملہ حل کرے؛ دوسرے کی شناخت یا خطرہ چھپانا نہیں۔"
+  ],
+  [
+    "نسخہ دینے والا کیا کرے؟",
+    "مصدقہ پرچی پڑھ/پرنٹ کرکے اصل مریض یا نام زد تیماردار کو دے، بتائی ہوئی برقی، کاربن یا اسکین نقل رکھے، پھر حوالگی درج کرے۔ اسکین اسی مریض کے اپ لوڈ نسخے سے ہو۔ صرف پرنٹ ثبوت نہیں؛ ایجنٹ غیر حقیقی حوالگی درج نہ کرے۔"
+  ],
+  [
+    "انسانی قبولیت میں کیا باقی ہے؟",
+    "نام زد معالج اور وصول کرنے والی نرس/فارماسسٹ نئے فرضی احکامات، مجاز منسوخی، انکار و گم جواب، خطرات، داخل چارٹ اور اصل حوالگی چیک کریں۔ نمبر ڈاکٹر کی جائزہ شیٹ میں لکھیں۔ اردو، آزاد مدیر، اصل رسید پرنٹر، دونوں زبان250فیصد، ایف۱ اور محفوظ زوم چیک کریں۔ خودکار ٹیسٹ انسانی شیٹ نہیں بھرتا۔"
+  ],
+  [
+    "باہر سے لی دوا خود کب لی جا سکتی ہے؟",
+    "داخل مریض کی بیرونی دوا میں خود لینے کی اجازت صرف ہسپتال کی فہرست سے منتخب دوا پر ہے۔ ٹائپ نام کا خطرہ نامعلوم؛ خود لینے کی اجازت نہیں۔ منہ، زیر زبان، جلد، سانس، آنکھ، کان یا ناک کا راستہ اور غیر خطرناک دوا لازم۔ سرور کا انکار اصل فیصلہ ہے۔"
+  ]
+]
+},
   consultation:{
-    title:"Consultation (EMR)",titleUr:"معائنہ (طبی ریکارڈ)",
-    purpose:"During a clinical session the doctor, specialist, surgeon or anaesthetist verifies the patient's identity and flags, documents the encounter with deliberate consent and coded diagnoses, signs it once and hands over orders or admission. A final note is immutable and carries the clinician's recorded author stamp.",purposeUr:"طبی نشست میں ڈاکٹر، ماہر، سرجن یا بے ہوشی کا ڈاکٹر شناخت اور نشان چیک، واضح رضامندی اور کوڈ والی تشخیص سے ملاقات درج، ایک بار حتمی اور احکامات یا داخلہ سپرد کرتا ہے۔ حتمی نوٹ نہیں بدلتا اور مصنف کی اصل مہر رکھتا ہے۔ اردو متن مقامی جائزے تک مسودہ ہے۔",
-    steps:["Open Consultation (EMR) from the clinical workspace, or Open consultation on the real doctor's queue row. Scan/open the complete slip or choose from your live queue. Check name/MRN/age, allergies (not recorded is not none), death, medico-legal/temp/merge flags and ticket state. A failed or changed context pauses writes and preserves the draft.","Choose New note and its type; IPD/CodeRed needs a real patient admission from consolidated history. Enter complaint/history, diagnosis/plan and observations. Ask before examination: Verbal consent obtained (VCO), Patient declined or Not examined; none is preselected. Declined/Not examined disables findings. Add diagnosis code uses the current ICD picker and sends only verified codes.","For Procedure, confirm the active outpatient service (or actual admission), enter name/site/side/indication/anaesthesia, real given consent link if available, staff assistant, hospital-time start/end, technique/findings/specimens/complications/condition at end. Findings, specimens (explicit None when none removed) and condition are required to sign.","Save draft note creates a draft. Save draft changes includes the version actually edited; a conflict preserves your draft for explicit comparison/reload. Submit consultation signs a new note atomically, or save an existing draft then Finalize saved note. Active Clinic rules from the server are explained before signing; complaint or history, VCO findings, diagnosis and plan are needed. Drafts can remain incomplete. Missing-field/consent errors are visible with draft retained. No autosave/offline write queue.","Read finalized notes and their author stamps. Append correction requires its field, text and reason; it appends instead of editing/deleting the original. Print note/Save note PDF use the fresh finalized print payload and document printer; Download server PDF is separate. Printer/save failures never repeat a clinical or financial write.","Quick actions carry the same verified visit to queue/re-route, prescribing, investigations, referral, education and programmes when permitted. Admit proposes the complaint/diagnosis/plan for your confirmation and creates an admissions request; VIP waiver creates approval, not a cash handover. Complete visit is separate after reviewing all handovers. Cancel unsent edited actions asks first.","A lost reply locks input/navigation. Only an idempotent operation can Retry original request within24hours with its exact original key/body. For version/state operations Read current result, compare status/version, return after review then explicitly reload the note before more editing. Unknown results never imply success. F1 retains fields, including the embedded ICD picker's own help; English/Urdu and shared100–250% zoom are available."],
-    stepsUr:["ڈاکٹر کی جگہ سے معائنہ یا جاری قطار سے معائنہ کھولیں۔ مکمل پرچی اسکین یا اپنی قطار سے چنیں۔ نام، ایم آر این، عمر، الرجی، وفات، میڈیکو لیگل، عارضی یا ضم شناخت اور پرچی کی حالت چیک کریں۔ ناکام یا بدلی معلومات پر عمل رکتا، مسودہ رہتا ہے۔","نیا نوٹ اور قسم چنیں؛ داخلے کی قسم کے لیے مریض کا اصل داخلہ مجموعی تاریخ سے چنیں۔ شکایت، تاریخ، تشخیص، منصوبہ اور مشاہدات لکھیں۔ معائنے سے پہلے زبانی رضامندی، انکار یا معائنہ نہیں کیا خود چنیں؛ پہلے سے کچھ منتخب نہیں۔ انکار یا نہ کیا پر نتائج بند ہیں۔ کوڈ کا انتخاب اصل کوڈ ہی بھیجتا ہے۔","طریقہ کار کے لیے فعال بیرونی خدمت یا اصل داخلہ، نام، جگہ و سمت، وجہ، بے ہوشی، دستیاب اصل رضامندی، معاون، ہسپتال کے وقت شروع و ختم، طریقہ، نتائج، نمونے، پیچیدگیاں اور اختتامی حالت لکھیں۔ حتمی کرنے کو نتائج، نمونے اور اختتامی حالت لازم ہیں؛ کچھ نہ نکالا ہو تو واضح None لکھیں۔","مسودہ محفوظ نیا ریکارڈ ہے۔ تبدیلی اسی اصل نسخے سے جاتی ہے؛ تنازع پر مسودہ موازنہ کے لیے رہتا ہے۔ معائنہ جمع نیا نوٹ ایک بار حتمی کرتا ہے؛ پرانے مسودے کی تبدیلی پہلے محفوظ پھر حتمی کریں۔ خالی خانہ یا رضامندی کی خرابی واضح، مسودہ برقرار ہے۔ خودکار یا آف لائن لکھائی نہیں۔","حتمی نوٹ اور مصنف کی مہر پڑھیں۔ تصحیح کو خانہ، متن اور وجہ لازم ہیں؛ اصل بدلنے یا حذف کی بجائے الگ ہے۔ نوٹ پرنٹ اور پی ڈی ایف تازہ حتمی معلومات اور دستاویز پرنٹر لیتے ہیں؛ سرور پی ڈی ایف الگ ہے۔ پرنٹ یا محفوظ کرنے کی ناکامی طبی یا مالی عمل نہیں دہراتی۔","فوری بٹن اسی پرچی کو مجاز قطار، نسخہ، تحقیقات، حوالہ، تعلیم اور پروگرام تک لے جاتے ہیں۔ داخلہ وجہ، تشخیص و منصوبہ تصدیق کو دیتا اور درخواست بناتا ہے؛ رعایت منظوری مانگتی ہے، نقد نہیں دیتی۔ ملاقات مکمل کرنا منتقلی چیک کرکے الگ ہے۔ غیر ارسال ترمیم منسوخ سے پہلے پوچھتا ہے۔","جواب گم ہو تو معلومات اور جگہ بدلنا مقفل ہے۔ صرف محفوظ شناخت والا عمل24گھنٹے میں اصل کلید اور معلومات سے دہرا سکتا ہے۔ نسخے یا حالت کے عمل پر موجودہ نتیجہ پڑھ، موازنہ اور واضح نوٹ تازہ کرکے مزید ترمیم کریں۔ نامعلوم نتیجہ کامیابی نہیں۔ ایف۱ خانے اور کوڈ کے جزو کا متعلقہ رہنما رکھتا ہے؛ اردو اور مشترک100تا250فیصد زوم ہیں۔"],
-    faq:[["Which clinician can edit or correct a note?","A permitted author edits their own Draft with its original version. Another author's or historical other-visit note is read-only in this context. Final notes are never edited or deleted; clinical.encounter.correct appends a reasoned correction and stamp. The server remains authoritative on access."],["What if this is a Clinic, another facility profile, or a service is retiring?","The app uses establishment views and Active services at runtime. It does not branch on a facility category. The server enforces profile-specific examination consent/completeness and returns missing fields. Outpatient procedures/admissions cannot start unless their service is Active; records-only views block writes."],["What happens on a refund, patient merge/death or a published result?","Re-read current identity/flags and clinical locks when events arrive; the server's clinical lockout message remains verbatim. A changed identity pauses writes for reconciliation, never silently moves a draft to another patient. Death blocks new orders; late documentation is identified. Lab/imaging events refresh the history; a nullable imaging viewer URL never becomes an invented link."],["Are outside uploads the same as published laboratory results?","No. Patient documents show the outside source/date and are labelled outside. Only published results are hospital results. Files open only on deliberate choice through secure native download; no upload repeats registration/payment."],["How do I recover a lost save, finalization or print?","Keep the same patient and draft. Replay only an original idempotent action within retention; PATCH/finalize require read-only result reconciliation and explicit note reload. A later read/print failure cannot undo a confirmed save, and reprint cannot create a note or charge."],["What should a human test before acceptance?","A named clinician uses NEW synthetic intake and records note/draft/final/correction/order/admission IDs in the doctor worksheet. Check all supported create/read/update/correction/cancel alternatives, refusal and handover paths, F1/draft/focus,100–250% zoom, English/Urdu/native printer. An independent editor and native Urdu reviewer sign their own results; three editor iterations are required for this busy screen. Agent tests do not fill this worksheet."]],
-    faqUr:[["کون نوٹ بدل یا درست کر سکتا ہے؟","مجاز مصنف اپنا مسودہ اصل نسخے سے بدلتا ہے۔ اس شناخت میں دوسرے یا دوسری ملاقات کا نوٹ صرف پڑھیں۔ حتمی نوٹ بدل یا حذف نہیں ہوتا؛ مجاز تصحیح الگ وجہ اور مہر سے ہے۔ اصل اجازت سرور کی ہے۔"],["کلینک، دوسرے ہسپتال یا بند ہوتی خدمت پر کیا ہو؟","ایپ سرور کے دکھائے کام اور فعال خدمات لیتی ہے؛ سہولت کی قسم سے شاخ نہیں بنتی۔ سرور متعلقہ رضامندی اور نامکمل خانہ چیک کرتا ہے۔ غیر فعال خدمت پر نیا طریقہ کار یا داخلہ نہیں؛ صرف ریکارڈ میں لکھائی بند ہے۔"],["واپسی، ضم شناخت، وفات یا نئے نتیجے پر کیا ہو؟","واقعات پر شناخت، نشان اور مقفل حالت تازہ پڑھیں؛ اصل طبی مقفل پیغام برقرار ہے۔ شناخت بدلنے پر نتیجہ چیک تک عمل رکتا ہے؛ مسودہ دوسرے مریض کو خود نہیں جاتا۔ وفات نئے احکامات روکتی، بعد کی دستاویز پہچانی جاتی ہے۔ نئے نتائج تاریخ تازہ کرتے ہیں؛ خالی عکس ناظر کا فرضی ربط نہ بنائیں۔"],["کیا باہر کی اپ لوڈ لیب کا شائع نتیجہ ہے؟","نہیں۔ مریض کی دستاویز ماخذ، تاریخ اور بیرونی نشان رکھتی ہے۔ صرف ہسپتال کا شائع نتیجہ الگ ہے۔ خود چننے پر محفوظ مقامی فائل کھلتی ہے؛ اپ لوڈ رجسٹریشن یا ادائیگی نہیں دہراتا۔"],["گم محفوظ، حتمی یا پرنٹ کا نتیجہ کیسے چیک ہو؟","وہی مریض اور مسودہ رکھیں۔ صرف اصل محفوظ شناخت والا عمل مقررہ وقت میں دہرائیں؛ ترمیم یا حتمی پر صرف پڑھ کر نتیجہ چیک اور نوٹ واضح تازہ کریں۔ بعد کی خرابی تصدیق شدہ محفوظ کو واپس نہیں کرتی؛ دوبارہ پرنٹ نوٹ یا رقم نہیں بناتا۔"],["انسانی منظوری سے پہلے کیا چیک ہو؟","نامزد ڈاکٹر نیا فرضی مریض، مسودہ، حتمی نوٹ، تصحیح، احکامات اور داخلے کے نمبر جائزہ شیٹ میں لکھے۔ تمام مجاز اعمال، انکار، منتقلی، ایف۱، فوکس، زوم، اردو اور اصل پرنٹر چیک کرے۔ الگ مدیر اور مقامی اردو جائزہ کار اپنے نتائج دیں؛ اس مصروف جگہ کی تین مدیر ترمیمیں لازم ہیں۔ خودکار ٹیسٹ انسانی شیٹ نہیں بھرتے۔"]],
-  },
+  title: "Consultation (EMR)",
+  titleUr: "معائنہ (طبی ریکارڈ)",
+  purpose: "During a clinical session the doctor, specialist, surgeon or anaesthetist verifies the patient's identity and flags, documents the encounter with deliberate consent and coded diagnoses, signs it once and hands over orders or admission. A final note is immutable and carries the clinician's recorded author stamp.",
+  purposeUr: "طبی نشست میں ڈاکٹر، ماہر، سرجن یا بے ہوشی کا ڈاکٹر شناخت اور نشان چیک، واضح رضامندی اور کوڈ والی تشخیص سے ملاقات درج، ایک بار حتمی اور احکامات یا داخلہ سپرد کرتا ہے۔ حتمی نوٹ نہیں بدلتا اور مصنف کی اصل مہر رکھتا ہے۔ اردو متن مقامی جائزے تک مسودہ ہے۔",
+  steps: [
+  "Open Consultation (EMR) from the clinical workspace, or Open consultation on the real doctor's queue row. Scan/open the complete slip or choose from your live queue. Check name/MRN/age, allergies (not recorded is not none), death, medico-legal/temp/merge flags and ticket state. A failed or changed context pauses writes and preserves the draft.",
+  "Choose New note and its type; IPD/CodeRed needs a real patient admission from consolidated history. Enter complaint/history, diagnosis/plan and observations. Ask before examination: Verbal consent obtained (VCO), Patient declined or Not examined; none is preselected. Declined/Not examined disables findings. Add diagnosis code uses the current ICD picker and sends only verified codes.",
+  "For Procedure, confirm the active outpatient service (or actual admission), enter name/site/side/indication/anaesthesia, real given consent link if available, staff assistant, hospital-time start/end, technique/findings/specimens/complications/condition at end. Findings, specimens (explicit None when none removed) and condition are required to sign.",
+  "Save draft note creates a draft. Save draft changes includes the version actually edited; a conflict preserves your draft for explicit comparison/reload. Submit consultation signs a new note atomically, or save an existing draft then Finalize saved note. Active Clinic rules from the server are explained before signing; complaint or history, VCO findings, diagnosis and plan are needed. Drafts can remain incomplete. Missing-field/consent errors are visible with draft retained. No autosave/offline write queue.",
+  "Read finalized notes and their author stamps. Append correction requires its field, text and reason; it appends instead of editing/deleting the original. Print note/Save note PDF use the fresh finalized print payload and document printer; Download server PDF is separate. Printer/save failures never repeat a clinical or financial write.",
+  "Quick actions carry the same verified visit to queue/re-route, prescribing, investigations, referral, education and programmes when permitted. Admit proposes the complaint/diagnosis/plan for your confirmation and creates an admissions request; VIP waiver creates approval, not a cash handover. Complete visit is separate after reviewing all handovers. Cancel unsent edited actions asks first.",
+  "A lost reply locks input/navigation. Only an idempotent operation can Retry original request within24hours with its exact original key/body. For version/state operations Read current result, compare status/version, return after review then explicitly reload the note before more editing. Unknown results never imply success. F1 retains fields, including the embedded ICD picker's own help; English/Urdu and shared100–250% zoom are available.",
+  "Re-route / Refer sends the called queue entry to an OPD doctor from the current department list (with waiting counts), or to the department alone. Enter the reason, review the same patient/slip and confirm once. The patient leaves my queue and goes to the top of the destination using the same slip: no payment or refund. Successful re-route closes the consultation; review or save any unsent note before confirming. QUEUE_ENTRY_CLOSED means refresh the queue; field validation, missing reference and FORBIDDEN remain visible and keep the reason. Reception gives the original slip to a listed OPD doctor but does not re-route it.",
+  "Admit may name a treating doctor from the active PMDC lookup, or leave it empty for the requesting doctor. VALIDATION_ERROR on primary_doctor_id means that doctor is not an active PMDC doctor; keep the reason/diagnosis and choose again."
+],
+  stepsUr: [
+  "ڈاکٹر کی جگہ سے معائنہ یا جاری قطار سے معائنہ کھولیں۔ مکمل پرچی اسکین یا اپنی قطار سے چنیں۔ نام، ایم آر این، عمر، الرجی، وفات، میڈیکو لیگل، عارضی یا ضم شناخت اور پرچی کی حالت چیک کریں۔ ناکام یا بدلی معلومات پر عمل رکتا، مسودہ رہتا ہے۔",
+  "نیا نوٹ اور قسم چنیں؛ داخلے کی قسم کے لیے مریض کا اصل داخلہ مجموعی تاریخ سے چنیں۔ شکایت، تاریخ، تشخیص، منصوبہ اور مشاہدات لکھیں۔ معائنے سے پہلے زبانی رضامندی، انکار یا معائنہ نہیں کیا خود چنیں؛ پہلے سے کچھ منتخب نہیں۔ انکار یا نہ کیا پر نتائج بند ہیں۔ کوڈ کا انتخاب اصل کوڈ ہی بھیجتا ہے۔",
+  "طریقہ کار کے لیے فعال بیرونی خدمت یا اصل داخلہ، نام، جگہ و سمت، وجہ، بے ہوشی، دستیاب اصل رضامندی، معاون، ہسپتال کے وقت شروع و ختم، طریقہ، نتائج، نمونے، پیچیدگیاں اور اختتامی حالت لکھیں۔ حتمی کرنے کو نتائج، نمونے اور اختتامی حالت لازم ہیں؛ کچھ نہ نکالا ہو تو واضح None لکھیں۔",
+  "مسودہ محفوظ نیا ریکارڈ ہے۔ تبدیلی اسی اصل نسخے سے جاتی ہے؛ تنازع پر مسودہ موازنہ کے لیے رہتا ہے۔ معائنہ جمع نیا نوٹ ایک بار حتمی کرتا ہے؛ پرانے مسودے کی تبدیلی پہلے محفوظ پھر حتمی کریں۔ خالی خانہ یا رضامندی کی خرابی واضح، مسودہ برقرار ہے۔ خودکار یا آف لائن لکھائی نہیں۔",
+  "حتمی نوٹ اور مصنف کی مہر پڑھیں۔ تصحیح کو خانہ، متن اور وجہ لازم ہیں؛ اصل بدلنے یا حذف کی بجائے الگ ہے۔ نوٹ پرنٹ اور پی ڈی ایف تازہ حتمی معلومات اور دستاویز پرنٹر لیتے ہیں؛ سرور پی ڈی ایف الگ ہے۔ پرنٹ یا محفوظ کرنے کی ناکامی طبی یا مالی عمل نہیں دہراتی۔",
+  "فوری بٹن اسی پرچی کو مجاز قطار، نسخہ، تحقیقات، حوالہ، تعلیم اور پروگرام تک لے جاتے ہیں۔ داخلہ وجہ، تشخیص و منصوبہ تصدیق کو دیتا اور درخواست بناتا ہے؛ رعایت منظوری مانگتی ہے، نقد نہیں دیتی۔ ملاقات مکمل کرنا منتقلی چیک کرکے الگ ہے۔ غیر ارسال ترمیم منسوخ سے پہلے پوچھتا ہے۔",
+  "جواب گم ہو تو معلومات اور جگہ بدلنا مقفل ہے۔ صرف محفوظ شناخت والا عمل24گھنٹے میں اصل کلید اور معلومات سے دہرا سکتا ہے۔ نسخے یا حالت کے عمل پر موجودہ نتیجہ پڑھ، موازنہ اور واضح نوٹ تازہ کرکے مزید ترمیم کریں۔ نامعلوم نتیجہ کامیابی نہیں۔ ایف۱ خانے اور کوڈ کے جزو کا متعلقہ رہنما رکھتا ہے؛ اردو اور مشترک100تا250فیصد زوم ہیں۔",
+  "دوسرے ڈاکٹر کو حوالہ سے بلائی گئی قطار کی سطر موجودہ او پی ڈی ڈاکٹر، انتظار کی تعداد سمیت، یا صرف شعبے کو بھیجیں۔ وجہ، وہی مریض و پرچی چیک کرکے ایک تصدیق۔ مریض میری قطار سے نکل کر نئی قطار میں سب سے اوپر اسی پرچی پر جاتا ہے؛ ادائیگی یا واپسی نہیں۔ کامیاب حوالگی معائنہ بند کرتی ہے؛ تصدیق سے پہلے غیر محفوظ نوٹ چیک یا محفوظ کریں۔ بند سطر پر قطار تازہ؛ فیلڈ، حوالہ یا اجازت کا انکار واضح اور وجہ محفوظ۔ استقبالیہ اصل پرچی مجاز او پی ڈی ڈاکٹر کو دیتا ہے، حوالگی نہیں کرتا۔",
+  "داخلے میں فعال پی ایم ڈی سی معالج چنیں یا درخواست کرنے والے ڈاکٹر کے لیے خالی چھوڑیں۔ معالج فیلڈ کی غلطی یعنی فعال پی ایم ڈی سی ڈاکٹر نہیں؛ وجہ و تشخیص رکھ کر دوبارہ چنیں۔"
+],
+  faq: [
+  [
+    "Which clinician can edit or correct a note?",
+    "A permitted author edits their own Draft with its original version. Another author's or historical other-visit note is read-only in this context. Final notes are never edited or deleted; clinical.encounter.correct appends a reasoned correction and stamp. The server remains authoritative on access."
+  ],
+  [
+    "What if this is a Clinic, another facility profile, or a service is retiring?",
+    "The app uses establishment views and Active services at runtime. It does not branch on a facility category. The server enforces profile-specific examination consent/completeness and returns missing fields. Outpatient procedures/admissions cannot start unless their service is Active; records-only views block writes."
+  ],
+  [
+    "What happens on a refund, patient merge/death or a published result?",
+    "Re-read current identity/flags and clinical locks when events arrive; the server's clinical lockout message remains verbatim. A changed identity pauses writes for reconciliation, never silently moves a draft to another patient. Death blocks new orders; late documentation is identified. Lab/imaging events refresh the history; a nullable imaging viewer URL never becomes an invented link."
+  ],
+  [
+    "Are outside uploads the same as published laboratory results?",
+    "No. Patient documents show the outside source/date and are labelled outside. Only published results are hospital results. Files open only on deliberate choice through secure native download; no upload repeats registration/payment."
+  ],
+  [
+    "How do I recover a lost save, finalization or print?",
+    "Keep the same patient and draft. Replay only an original idempotent action within retention; PATCH/finalize require read-only result reconciliation and explicit note reload. A later read/print failure cannot undo a confirmed save, and reprint cannot create a note or charge."
+  ],
+  [
+    "What should a human test before acceptance?",
+    "A named clinician uses NEW synthetic intake and records note/draft/final/correction/order/admission IDs in the doctor worksheet. Check all supported create/read/update/correction/cancel alternatives, refusal and handover paths, F1/draft/focus,100–250% zoom, English/Urdu/native printer. An independent editor and native Urdu reviewer sign their own results; three editor iterations are required for this busy screen. Agent tests do not fill this worksheet."
+  ],
+  [
+    "How do I refer a misdirected patient without charging again?",
+    "Re-route / Refer sends the called queue entry to an OPD doctor from the current department list (with waiting counts), or to the department alone. Enter the reason, review the same patient/slip and confirm once. The patient leaves my queue and goes to the top of the destination using the same slip: no payment or refund. QUEUE_ENTRY_CLOSED means refresh the queue; field validation, missing reference and FORBIDDEN remain visible and keep the reason. Reception gives the original slip to a listed OPD doctor but does not re-route it."
+  ],
+  [
+    "Which doctor may be named on admission?",
+    "Admit may name a treating doctor from the active PMDC lookup, or leave it empty for the requesting doctor. VALIDATION_ERROR on primary_doctor_id means that doctor is not an active PMDC doctor; keep the reason/diagnosis and choose again."
+  ]
+],
+  faqUr: [
+  [
+    "کون نوٹ بدل یا درست کر سکتا ہے؟",
+    "مجاز مصنف اپنا مسودہ اصل نسخے سے بدلتا ہے۔ اس شناخت میں دوسرے یا دوسری ملاقات کا نوٹ صرف پڑھیں۔ حتمی نوٹ بدل یا حذف نہیں ہوتا؛ مجاز تصحیح الگ وجہ اور مہر سے ہے۔ اصل اجازت سرور کی ہے۔"
+  ],
+  [
+    "کلینک، دوسرے ہسپتال یا بند ہوتی خدمت پر کیا ہو؟",
+    "ایپ سرور کے دکھائے کام اور فعال خدمات لیتی ہے؛ سہولت کی قسم سے شاخ نہیں بنتی۔ سرور متعلقہ رضامندی اور نامکمل خانہ چیک کرتا ہے۔ غیر فعال خدمت پر نیا طریقہ کار یا داخلہ نہیں؛ صرف ریکارڈ میں لکھائی بند ہے۔"
+  ],
+  [
+    "واپسی، ضم شناخت، وفات یا نئے نتیجے پر کیا ہو؟",
+    "واقعات پر شناخت، نشان اور مقفل حالت تازہ پڑھیں؛ اصل طبی مقفل پیغام برقرار ہے۔ شناخت بدلنے پر نتیجہ چیک تک عمل رکتا ہے؛ مسودہ دوسرے مریض کو خود نہیں جاتا۔ وفات نئے احکامات روکتی، بعد کی دستاویز پہچانی جاتی ہے۔ نئے نتائج تاریخ تازہ کرتے ہیں؛ خالی عکس ناظر کا فرضی ربط نہ بنائیں۔"
+  ],
+  [
+    "کیا باہر کی اپ لوڈ لیب کا شائع نتیجہ ہے؟",
+    "نہیں۔ مریض کی دستاویز ماخذ، تاریخ اور بیرونی نشان رکھتی ہے۔ صرف ہسپتال کا شائع نتیجہ الگ ہے۔ خود چننے پر محفوظ مقامی فائل کھلتی ہے؛ اپ لوڈ رجسٹریشن یا ادائیگی نہیں دہراتا۔"
+  ],
+  [
+    "گم محفوظ، حتمی یا پرنٹ کا نتیجہ کیسے چیک ہو؟",
+    "وہی مریض اور مسودہ رکھیں۔ صرف اصل محفوظ شناخت والا عمل مقررہ وقت میں دہرائیں؛ ترمیم یا حتمی پر صرف پڑھ کر نتیجہ چیک اور نوٹ واضح تازہ کریں۔ بعد کی خرابی تصدیق شدہ محفوظ کو واپس نہیں کرتی؛ دوبارہ پرنٹ نوٹ یا رقم نہیں بناتا۔"
+  ],
+  [
+    "انسانی منظوری سے پہلے کیا چیک ہو؟",
+    "نامزد ڈاکٹر نیا فرضی مریض، مسودہ، حتمی نوٹ، تصحیح، احکامات اور داخلے کے نمبر جائزہ شیٹ میں لکھے۔ تمام مجاز اعمال، انکار، منتقلی، ایف۱، فوکس، زوم، اردو اور اصل پرنٹر چیک کرے۔ الگ مدیر اور مقامی اردو جائزہ کار اپنے نتائج دیں؛ اس مصروف جگہ کی تین مدیر ترمیمیں لازم ہیں۔ خودکار ٹیسٹ انسانی شیٹ نہیں بھرتے۔"
+  ],
+  [
+    "غلط سمت آئے مریض کو نئی رقم کے بغیر کیسے حوالہ دوں؟",
+    "دوسرے ڈاکٹر کو حوالہ سے بلائی گئی قطار کی سطر موجودہ او پی ڈی ڈاکٹر، انتظار کی تعداد سمیت، یا صرف شعبے کو بھیجیں۔ وجہ، وہی مریض و پرچی چیک کرکے ایک تصدیق۔ مریض میری قطار سے نکل کر نئی قطار میں سب سے اوپر اسی پرچی پر جاتا ہے؛ ادائیگی یا واپسی نہیں۔ بند سطر پر قطار تازہ؛ فیلڈ، حوالہ یا اجازت کا انکار واضح اور وجہ محفوظ۔ استقبالیہ اصل پرچی مجاز او پی ڈی ڈاکٹر کو دیتا ہے، حوالگی نہیں کرتا۔"
+  ],
+  [
+    "داخلے میں کس ڈاکٹر کا نام دے سکتے ہیں؟",
+    "داخلے میں فعال پی ایم ڈی سی معالج چنیں یا درخواست کرنے والے ڈاکٹر کے لیے خالی چھوڑیں۔ معالج فیلڈ کی غلطی یعنی فعال پی ایم ڈی سی ڈاکٹر نہیں؛ وجہ و تشخیص رکھ کر دوبارہ چنیں۔"
+  ]
+]
+},
   icd_picker: {
     title:"ICD code picker",titleUr:"تشخیصی کوڈ کا انتخاب",
     purpose:"During documentation, doctors and other authorized staff find the most specific diagnosis supported by the record, verify its title and classification, and return its code to the clinical form without saving that form.",purposeUr:"دستاویز بناتے وقت ڈاکٹر اور مجاز عملہ ریکارڈ سے ثابت مخصوص تشخیص تلاش، عنوان اور درجہ بندی چیک اور فارم کو کوڈ دیتے ہیں؛ فارم خود محفوظ نہیں ہوتا۔ اردو رہنما مقامی جائزے تک مسودہ ہے۔",
@@ -2356,14 +2647,81 @@ nursing_assessment: {
     faqUr:[["درجہ بندی تازہ کرنے سے کیا بدلتا ہے؟","ہسپتال کی درجہ بندی اور موجودہ فہرست دوبارہ پڑھی جاتی ہیں، پچھلی تفصیل اور انتخاب صاف ہوتے ہیں، تلاش اور سطح برقرار رہتی ہیں۔ موجودہ کوڈ دوبارہ چیک کرکے چنیں؛ محفوظ نوٹ نہیں بدلتا۔"],["کیا فہرست کے باہر کوڈ لکھ سکتا ہوں؟","نہیں۔ ہسپتال کی فعال درجہ بندی سے اصلی کوڈ چیک کریں۔ فہرست لوڈ نہ ہو تو آئی ٹی مجاز فہرست لوڈ کرے؛ مقامی متبادل یا فرضی کوڈ نہیں۔"],["ملتی تشخیصوں کے مختلف عنوان کیوں ہیں؟","اصل عنوان اور راستہ فرق بتاتے ہیں۔ دیگر مخصوص یا غیر متعین کوڈ مخصوص کوڈ کے بعد ہیں۔ صرف طبی دستاویز سے انتخاب کریں؛ یہ جزو تشخیص نہیں کرتا۔"],["کیا انتخاب سے نوٹ محفوظ ہو گیا؟","نہیں۔ صرف کوڈ اصل فارم کو جاتا ہے، جس کی اپنی جانچ، محفوظ اور حتمی کرنے کی کارروائی ہے۔ بند کرنے سے محفوظ ریکارڈ نہیں بدلتا۔ پرانے ریکارڈ سرور کے کوڈ اور عنوان دکھاتے ہیں۔"],["اس جزو کا جائزہ کون لے؟","ڈاکٹر نئے معائنے، رخصت اور وفات کے راستوں میں مخصوص کوڈ، لائسنس کے عنوان اور صرف کوڈ کی ارسال چیک کرے۔ مقامی اردو جائزہ کار اور الگ مدیر الفاظ، کی بورڈ، ایف۱، زوم اور پرنٹ چیک کریں۔ انسانی نتائج ابھی باقی ہیں۔"]],
   },
   doctor_queue: {
-    title: "My live queue", titleUr: "میری جاری قطار",
-    purpose: "During OPD, doctors, specialists, surgeons and anaesthetists verify the next patient's token and identity, call them once and hand a re-routed patient to the correct clinician with a reason. Success is a server-confirmed call or visible receiving-queue handover.",
-    purposeUr: "او پی ڈی میں ڈاکٹر، ماہر، سرجن اور بے ہوشی کا ڈاکٹر اگلے مریض کا ٹوکن اور شناخت چیک کرکے ایک بار بلاتے اور وجہ کے ساتھ درست ڈاکٹر کو منتقل کرتے ہیں۔ کامیابی سرور کی تصدیق یا وصول کرنے والی قطار میں واضح منتقلی ہے۔ اردو متن مقامی جائزے تک مسودہ ہے۔",
-    steps: ["Open Clinical OPD / IPD → My live queue. Verify token date, MRN, slip and patient name. Keep the server's order; a current consultation precedes waiting patients, and re-routed arrivals show ↪ and the reason.", "Select Call patient, verify identity in the dialog and Confirm. The server marks InConsultation and announces the patient. Call again deliberately repeats the announcement. Pending approvals, closed entries, records-only access and a disconnected realtime stream prevent new actions.", "With re-route permission, choose Re-route patient, select an active doctor or department from the catalogue, enter 3–500 characters explaining why, tell the patient the destination and Confirm. Reception and the destination queue update; department assignment may need reception.", "A lost reply freezes the action and blocks navigation. Re-read queue to reconcile, inspect status/last-call time and verify the handover with reception. Finish reconciliation only returns to the queue; it never retries or asserts a missing outcome.", "Cancel/Close/Escape discards an unsent action; drafted destinations/reasons ask before discarding. F1 from the field or dialog opens this permitted handbook page, keeps input and returns focus. Refresh reloads reads; events and reconnect update automatically, never on a timer.", "Use Settings or Ctrl plus/minus/0 for the same 100–250% zoom. Help → Print handbook page prints this guidance. The queue has no clinical document/slip print endpoint, edit or delete; reception prints the slip and consultation owns its finalized clinical documents. A print failure must not repeat a call or registration."],
-    stepsUr: ["ڈاکٹر کی جگہ سے میری جاری قطار کھولیں۔ ٹوکن کی تاریخ، ایم آر این، پرچی اور نام چیک کریں۔ سرور کی ترتیب رکھیں؛ جاری معائنہ پہلے اور منتقل مریض پر تیر اور وجہ ہیں۔", "مریض کو بلائیں چنیں، شناخت چیک اور تصدیق کریں۔ سرور معائنہ جاری کرتا اور اعلان کرتا ہے۔ دوبارہ بلائیں اعلان دہراتا ہے۔ زیر منظوری، بند اندراج، صرف ریکارڈ اور غیر مربوط رابطے پر نیا عمل بند ہے۔", "اجازت سے مریض منتقل کریں چنیں، فعال ڈاکٹر یا شعبہ منتخب، 3 تا 500 حروف کی وجہ لکھیں، مریض کو منزل بتائیں اور تصدیق کریں۔ استقبالیہ اور نئی قطار تازہ ہوتے ہیں؛ شعبے میں ڈاکٹر کی تعیین استقبالیہ سے ہو سکتی ہے۔", "جواب گم ہو تو عمل اور جگہ بدلنا بند ہیں۔ نتیجہ چیک کرنے کے لیے قطار پڑھیں، حالت اور آخری اعلان دیکھیں اور استقبالیہ سے تصدیق کریں۔ نتیجہ چیک مکمل کرنے سے صرف قطار پر واپسی ہوتی ہے؛ دوبارہ ارسال یا نامعلوم کامیابی کا دعویٰ نہیں۔", "منسوخ، بند یا ایسکیپ غیر ارسال عمل چھوڑتے ہیں؛ مسودے سے پہلے پوچھا جاتا ہے۔ خانہ یا مکالمے میں ایف۱ مجاز رہنما کھولتا، معلومات اور فوکس رکھتا ہے۔ تازہ کریں صرف پڑھتا ہے؛ واقعات اور دوبارہ رابطے سے خود تازگی ہوتی ہے، ٹائمر سے نہیں۔", "ترتیبات یا کنٹرول پلس، مائنس اور صفر سے ایک ہی 100 تا 250 فیصد زوم ہے۔ مدد سے رہنما پرنٹ کریں۔ قطار میں طبی دستاویز، پرچی، ترمیم یا حذف کا عمل نہیں؛ پرچی استقبالیہ اور حتمی طبی دستاویز معائنے میں ہیں۔ پرنٹ کی خرابی پر مریض دوبارہ نہ بلائیں یا رجسٹر کریں۔"],
-    faq: [["Who can use this queue?", "Doctors, clinical specialists, surgeons and anaesthetists with opd.queue.doctor see their own server-assigned queue. Re-route requires its separate permission. IT must correct missing assignments; never select another clinician by guessing an ID."], ["Why did a transferred patient appear ahead of another token?", "The server places re-routed patients at the top with is_rerouted and a reason. Keep the returned order, including any ongoing consultation; never sort by token number locally."], ["What if confirmation fails or the reply is lost?", "Read the visible error and reference. A definite refusal refreshes the queue for a new review; an uncertain result locks the dialog for read-only reconciliation. Call repeats announce again, so never use a replay loop. Check source status and the receiving clinician before another deliberate action."], ["Can I undo a call, delete a queue row or print a clinical note here?", "There is no undo/delete or clinical printing contract on this screen. A permitted re-route is a separate reasoned handover. Reception owns deferral/cancellation and slip printing; finalized note printing belongs to consultation. Help can print this handbook."], ["What must a reviewer check?", "Use a newly registered synthetic patient, record ticket/queue IDs and build in the portal's doctor worksheet. Check call, deliberate re-call, re-route at the destination, refused/unknown results, both languages/themes at250%, F1 draft/focus and print-help cancellation. A native Urdu reviewer and independent editor must sign their own results; automated checks do not fill those results."]],
-    faqUr: [["یہ قطار کون استعمال کر سکتا ہے؟", "قطار کی اجازت رکھنے والے ڈاکٹر، ماہر، سرجن اور بے ہوشی کے ڈاکٹر اپنی مقررہ قطار دیکھتے ہیں۔ منتقلی الگ اجازت ہے۔ غلط تعین آئی ٹی درست کرے؛ خود سے ڈاکٹر کا نمبر نہ لکھیں۔"], ["منتقل مریض پہلے کیوں آ گیا؟", "سرور منتقل مریض کو وجہ کے ساتھ اوپر رکھتا ہے۔ جاری معائنے سمیت واپس آئی ترتیب رکھیں؛ مقامی طور پر ٹوکن سے ترتیب نہ بدلیں۔"], ["تصدیق ناکام یا جواب گم ہو تو؟", "واضح خرابی اور حوالہ پڑھیں۔ قطعی انکار قطار تازہ کرتا ہے؛ غیر یقینی نتیجہ صرف پڑھ کر چیک کرنے تک مقفل ہے۔ دوبارہ بلانا اعلان دہراتا ہے؛ خودکار کوشش نہ کریں۔ اصل حالت اور وصول کرنے والے ڈاکٹر سے تصدیق کے بعد نیا عمل کریں۔"], ["کیا بلانا واپس، اندراج حذف یا نوٹ پرنٹ ہو سکتا ہے؟", "یہاں واپسی، حذف یا طبی پرنٹ کا معاہدہ نہیں۔ مجاز منتقلی الگ وجہ کے ساتھ ہے۔ مؤخر، منسوخ اور پرچی استقبالیہ میں؛ حتمی نوٹ معائنے میں ہے۔ مدد سے رہنما پرنٹ ہو سکتا ہے۔"], ["جائزہ لینے والے کو کیا چیک کرنا ہے؟", "نیا فرضی مریض رجسٹر کرکے پرچی، قطار اور بلڈ ڈاکٹر کی جائزہ شیٹ میں لکھیں۔ بلانا، دوبارہ اعلان، نئی قطار میں منتقلی، انکار، گم جواب، دونوں زبان و تھیم، 250 فیصد، ایف۱ مسودہ و فوکس اور رہنما پرنٹ منسوخی چیک کریں۔ مقامی اردو جائزہ کار اور الگ مدیر اپنے نتائج لکھیں؛ خودکار ٹیسٹ انسانی نتائج نہیں بھرتے۔"]],
-  },
+  title: "My live queue",
+  titleUr: "میری جاری قطار",
+  purpose: "During OPD, doctors, specialists, surgeons and anaesthetists verify the next patient's token and identity, call them once and hand a re-routed patient to the correct clinician with a reason. Success is a server-confirmed call or visible receiving-queue handover.",
+  purposeUr: "او پی ڈی میں ڈاکٹر، ماہر، سرجن اور بے ہوشی کا ڈاکٹر اگلے مریض کا ٹوکن اور شناخت چیک کرکے ایک بار بلاتے اور وجہ کے ساتھ درست ڈاکٹر کو منتقل کرتے ہیں۔ کامیابی سرور کی تصدیق یا وصول کرنے والی قطار میں واضح منتقلی ہے۔ اردو متن مقامی جائزے تک مسودہ ہے۔",
+  steps: [
+  "Open Clinical OPD / IPD → My live queue. Verify token date, MRN, slip and patient name. Keep the server's order; a current consultation precedes waiting patients, and re-routed arrivals show ↪ and the reason.",
+  "Select Call patient, verify identity in the dialog and Confirm. The server marks InConsultation and announces the patient. Call again deliberately repeats the announcement. Pending approvals, closed entries, records-only access and a disconnected realtime stream prevent new actions.",
+  "With re-route permission, choose Re-route patient, select an active doctor or department from the catalogue, enter 3–500 characters explaining why, tell the patient the destination and Confirm. Reception and the destination queue update; department assignment may need reception.",
+  "A lost reply freezes the action and blocks navigation. Re-read queue to reconcile, inspect status/last-call time and verify the handover with reception. Finish reconciliation only returns to the queue; it never retries or asserts a missing outcome.",
+  "Cancel/Close/Escape discards an unsent action; drafted destinations/reasons ask before discarding. F1 from the field or dialog opens this permitted handbook page, keeps input and returns focus. Refresh reloads reads; events and reconnect update automatically, never on a timer.",
+  "Use Settings or Ctrl plus/minus/0 for the same 100–250% zoom. Help → Print handbook page prints this guidance. The queue has no clinical document/slip print endpoint, edit or delete; reception prints the slip and consultation owns its finalized clinical documents. A print failure must not repeat a call or registration.",
+  "Re-route / Refer sends the called queue entry to an OPD doctor from the current department list (with waiting counts), or to the department alone. Enter the reason, review the same patient/slip and confirm once. The patient leaves my queue and goes to the top of the destination using the same slip: no payment or refund. QUEUE_ENTRY_CLOSED means refresh the queue; field validation, missing reference and FORBIDDEN remain visible and keep the reason. Reception gives the original slip to a listed OPD doctor but does not re-route it."
+],
+  stepsUr: [
+  "ڈاکٹر کی جگہ سے میری جاری قطار کھولیں۔ ٹوکن کی تاریخ، ایم آر این، پرچی اور نام چیک کریں۔ سرور کی ترتیب رکھیں؛ جاری معائنہ پہلے اور منتقل مریض پر تیر اور وجہ ہیں۔",
+  "مریض کو بلائیں چنیں، شناخت چیک اور تصدیق کریں۔ سرور معائنہ جاری کرتا اور اعلان کرتا ہے۔ دوبارہ بلائیں اعلان دہراتا ہے۔ زیر منظوری، بند اندراج، صرف ریکارڈ اور غیر مربوط رابطے پر نیا عمل بند ہے۔",
+  "اجازت سے مریض منتقل کریں چنیں، فعال ڈاکٹر یا شعبہ منتخب، 3 تا 500 حروف کی وجہ لکھیں، مریض کو منزل بتائیں اور تصدیق کریں۔ استقبالیہ اور نئی قطار تازہ ہوتے ہیں؛ شعبے میں ڈاکٹر کی تعیین استقبالیہ سے ہو سکتی ہے۔",
+  "جواب گم ہو تو عمل اور جگہ بدلنا بند ہیں۔ نتیجہ چیک کرنے کے لیے قطار پڑھیں، حالت اور آخری اعلان دیکھیں اور استقبالیہ سے تصدیق کریں۔ نتیجہ چیک مکمل کرنے سے صرف قطار پر واپسی ہوتی ہے؛ دوبارہ ارسال یا نامعلوم کامیابی کا دعویٰ نہیں۔",
+  "منسوخ، بند یا ایسکیپ غیر ارسال عمل چھوڑتے ہیں؛ مسودے سے پہلے پوچھا جاتا ہے۔ خانہ یا مکالمے میں ایف۱ مجاز رہنما کھولتا، معلومات اور فوکس رکھتا ہے۔ تازہ کریں صرف پڑھتا ہے؛ واقعات اور دوبارہ رابطے سے خود تازگی ہوتی ہے، ٹائمر سے نہیں۔",
+  "ترتیبات یا کنٹرول پلس، مائنس اور صفر سے ایک ہی 100 تا 250 فیصد زوم ہے۔ مدد سے رہنما پرنٹ کریں۔ قطار میں طبی دستاویز، پرچی، ترمیم یا حذف کا عمل نہیں؛ پرچی استقبالیہ اور حتمی طبی دستاویز معائنے میں ہیں۔ پرنٹ کی خرابی پر مریض دوبارہ نہ بلائیں یا رجسٹر کریں۔",
+  "دوسرے ڈاکٹر کو حوالہ سے بلائی گئی قطار کی سطر موجودہ او پی ڈی ڈاکٹر، انتظار کی تعداد سمیت، یا صرف شعبے کو بھیجیں۔ وجہ، وہی مریض و پرچی چیک کرکے ایک تصدیق۔ مریض میری قطار سے نکل کر نئی قطار میں سب سے اوپر اسی پرچی پر جاتا ہے؛ ادائیگی یا واپسی نہیں۔ بند سطر پر قطار تازہ؛ فیلڈ، حوالہ یا اجازت کا انکار واضح اور وجہ محفوظ۔ استقبالیہ اصل پرچی مجاز او پی ڈی ڈاکٹر کو دیتا ہے، حوالگی نہیں کرتا۔"
+],
+  faq: [
+  [
+    "Who can use this queue?",
+    "Doctors, clinical specialists, surgeons and anaesthetists with opd.queue.doctor see their own server-assigned queue. Re-route requires its separate permission. IT must correct missing assignments; never select another clinician by guessing an ID."
+  ],
+  [
+    "Why did a transferred patient appear ahead of another token?",
+    "The server places re-routed patients at the top with is_rerouted and a reason. Keep the returned order, including any ongoing consultation; never sort by token number locally."
+  ],
+  [
+    "What if confirmation fails or the reply is lost?",
+    "Read the visible error and reference. A definite refusal refreshes the queue for a new review; an uncertain result locks the dialog for read-only reconciliation. Call repeats announce again, so never use a replay loop. Check source status and the receiving clinician before another deliberate action."
+  ],
+  [
+    "Can I undo a call, delete a queue row or print a clinical note here?",
+    "There is no undo/delete or clinical printing contract on this screen. A permitted re-route is a separate reasoned handover. Reception owns deferral/cancellation and slip printing; finalized note printing belongs to consultation. Help can print this handbook."
+  ],
+  [
+    "What must a reviewer check?",
+    "Use a newly registered synthetic patient, record ticket/queue IDs and build in the portal's doctor worksheet. Check call, deliberate re-call, re-route at the destination, refused/unknown results, both languages/themes at250%, F1 draft/focus and print-help cancellation. A native Urdu reviewer and independent editor must sign their own results; automated checks do not fill those results."
+  ],
+  [
+    "How do I refer a misdirected patient without charging again?",
+    "Re-route / Refer sends the called queue entry to an OPD doctor from the current department list (with waiting counts), or to the department alone. Enter the reason, review the same patient/slip and confirm once. The patient leaves my queue and goes to the top of the destination using the same slip: no payment or refund. QUEUE_ENTRY_CLOSED means refresh the queue; field validation, missing reference and FORBIDDEN remain visible and keep the reason. Reception gives the original slip to a listed OPD doctor but does not re-route it."
+  ]
+],
+  faqUr: [
+  [
+    "یہ قطار کون استعمال کر سکتا ہے؟",
+    "قطار کی اجازت رکھنے والے ڈاکٹر، ماہر، سرجن اور بے ہوشی کے ڈاکٹر اپنی مقررہ قطار دیکھتے ہیں۔ منتقلی الگ اجازت ہے۔ غلط تعین آئی ٹی درست کرے؛ خود سے ڈاکٹر کا نمبر نہ لکھیں۔"
+  ],
+  [
+    "منتقل مریض پہلے کیوں آ گیا؟",
+    "سرور منتقل مریض کو وجہ کے ساتھ اوپر رکھتا ہے۔ جاری معائنے سمیت واپس آئی ترتیب رکھیں؛ مقامی طور پر ٹوکن سے ترتیب نہ بدلیں۔"
+  ],
+  [
+    "تصدیق ناکام یا جواب گم ہو تو؟",
+    "واضح خرابی اور حوالہ پڑھیں۔ قطعی انکار قطار تازہ کرتا ہے؛ غیر یقینی نتیجہ صرف پڑھ کر چیک کرنے تک مقفل ہے۔ دوبارہ بلانا اعلان دہراتا ہے؛ خودکار کوشش نہ کریں۔ اصل حالت اور وصول کرنے والے ڈاکٹر سے تصدیق کے بعد نیا عمل کریں۔"
+  ],
+  [
+    "کیا بلانا واپس، اندراج حذف یا نوٹ پرنٹ ہو سکتا ہے؟",
+    "یہاں واپسی، حذف یا طبی پرنٹ کا معاہدہ نہیں۔ مجاز منتقلی الگ وجہ کے ساتھ ہے۔ مؤخر، منسوخ اور پرچی استقبالیہ میں؛ حتمی نوٹ معائنے میں ہے۔ مدد سے رہنما پرنٹ ہو سکتا ہے۔"
+  ],
+  [
+    "جائزہ لینے والے کو کیا چیک کرنا ہے؟",
+    "نیا فرضی مریض رجسٹر کرکے پرچی، قطار اور بلڈ ڈاکٹر کی جائزہ شیٹ میں لکھیں۔ بلانا، دوبارہ اعلان، نئی قطار میں منتقلی، انکار، گم جواب، دونوں زبان و تھیم، 250 فیصد، ایف۱ مسودہ و فوکس اور رہنما پرنٹ منسوخی چیک کریں۔ مقامی اردو جائزہ کار اور الگ مدیر اپنے نتائج لکھیں؛ خودکار ٹیسٹ انسانی نتائج نہیں بھرتے۔"
+  ],
+  [
+    "غلط سمت آئے مریض کو نئی رقم کے بغیر کیسے حوالہ دوں؟",
+    "دوسرے ڈاکٹر کو حوالہ سے بلائی گئی قطار کی سطر موجودہ او پی ڈی ڈاکٹر، انتظار کی تعداد سمیت، یا صرف شعبے کو بھیجیں۔ وجہ، وہی مریض و پرچی چیک کرکے ایک تصدیق۔ مریض میری قطار سے نکل کر نئی قطار میں سب سے اوپر اسی پرچی پر جاتا ہے؛ ادائیگی یا واپسی نہیں۔ بند سطر پر قطار تازہ؛ فیلڈ، حوالہ یا اجازت کا انکار واضح اور وجہ محفوظ۔ استقبالیہ اصل پرچی مجاز او پی ڈی ڈاکٹر کو دیتا ہے، حوالگی نہیں کرتا۔"
+  ]
+]
+},
   receivables: {
     title: "Outstanding dues (Udhaar)",
     titleUr: "بقایا جات (ادھار)",
@@ -2535,55 +2893,53 @@ nursing_assessment: {
     ],
   },
   refund_waiver_credit: {
-    title: "Refund / waiver / credit requests",
-    titleUr: "واپسی، رعایت اور ادھار کی درخواستیں",
-    purpose:
-      "Authorized staff request a change on an actual visit; an eligible approver decides and any cash handover is a separate action.",
-    purposeUr:
-      "مجاز عملہ اصل وزٹ کی تبدیلی مانگتا، اہل منظور کنندہ فیصلہ کرتا اور نقد کی واپسی الگ عمل ہے۔",
-    steps: [
-      "Open Refund / waiver / credit, scan the slip, and verify patient/MRN, payment, clinical activity and pending approval. Refresh requests reads the current ticket and up to100 of your own requests without discarding the reason.",
-      "Choose the permitted Request type and a factual Reason. Refund: reason code plus optional positive amount (blank requests the remaining refundable amount). Pre-consult waiver: percentage greater than0 up to100. Void unpaid slip is risk-monitored, never a way to undo payment.",
-      "Only an authorized doctor can request post-consult waiver after a finalized note; the server uses the latest finalized note. It ends Waivered, not Refunded. A refund after clinical activity requires elevated approval and carries a risk flag; discuss the appropriate waiver with the doctor.",
-      "Credit collects Amount paid now immediately using the selected Payment method; cash requires your own open shift. Enter an optional due date. The remaining balance waits for authorization and can become outstanding dues. Check these values in Review request before Confirm request.",
-      "Pending approval freezes the visit and removes it from the doctor's queue. My requests shows actual status/decision notes; request submission is not approval or a cash handover. After a lost reply, check current slip/requests and only deliberately retry the original retained action within24 hours; never a new payment key.",
-    ],
-    stepsUr: [
-      "واپسی، رعایت اور ادھار کھول کر اصل پرچی اسکین کریں۔ مریض، ایم آر این، ادائیگی، طبی کام اور منظوری دیکھیں۔ تازہ کریں وجہ رکھ کر پرچی اور اپنی سو تک درخواستیں پڑھتا ہے۔",
-      "مجاز قسم اور حقیقی وجہ چنیں۔ ریفنڈ میں وجہ کا انتخاب اور مثبت اختیاری رقم، خالی پر باقی قابل واپسی رقم۔ پہلے معائنے کی رعایت صفر سے زیادہ سو تک۔ غیر ادا پرچی کی منسوخی نگرانی میں، ادائیگی واپس کرنے کا راستہ نہیں۔",
-      "مجاز ڈاکٹر حتمی نوٹ کے بعد رعایت مانگتا، سرور تازہ حتمی نوٹ لیتا ہے۔ نتیجہ رعایت ہے، ریفنڈ نہیں۔ طبی کام کے بعد ریفنڈ بڑی منظوری اور خطرے کا نشان رکھتا؛ مناسب رعایت ڈاکٹر سے پوچھیں۔",
-      "ادھار میں ابھی ادا رقم اصل طریقے سے فوراً وصول ہوتی، نقد پر اپنی کھلی شفٹ لازم۔ تاریخ اختیاری ہے۔ باقی رقم منظوری اور بعد میں بقایا بن سکتی ہے۔ جائزے میں قدریں چیک کرکے تصدیق کریں۔",
-      "زیر التوا منظوری وزٹ بند اور ڈاکٹر کی قطار سے خارج کرتی ہے۔ میری درخواستیں اصل فیصلہ دکھاتی، جمع کرانا منظوری یا رقم دینا نہیں۔ گم جواب پر پرچی اور درخواستیں دیکھ کر اصل محفوظ عمل ہی جان بوجھ کر دوبارہ کریں، نئی ادائیگی کی کلید نہیں۔",
-    ],
-    faq: [
-      [
-        "Can I hand money back after submitting a refund?",
-        "No. Wait for actual approval and the exact mandatory cash-back prompt. Only the authorized cashier with their own open drawer confirms a physical handover, once.",
-      ],
-      [
-        "Why is my request action missing?",
-        "Your permissions, ticket/payment state, a pending approval, cash-back or records-only service can prevent new requests. Refresh and inspect the current state; a role name alone never authorizes a change.",
-      ],
-      [
-        "Does a failed refresh undo a submitted request?",
-        "No. Saved on the server confirms its write. Refresh reads the pending ticket and own requests; never repeat a confirmed request or immediate credit collection merely to clear a read error.",
-      ],
-    ],
-    faqUr: [
-      [
-        "ریفنڈ بھیج کر رقم دے سکتا ہوں؟",
-        "نہیں، اصل منظوری اور لازمی عین رقم کے پیغام کا انتظار کریں۔ اپنی کھلی دراز کا مجاز کیشیئر حقیقی واپسی ایک بار تصدیق کرتا ہے۔",
-      ],
-      [
-        "درخواست کا عمل غائب کیوں؟",
-        "اجازت، پرچی اور ادائیگی کی حالت، زیر التوا منظوری، باقی واپسی یا صرف ریکارڈ خدمت نیا عمل روک سکتی ہے۔ تازہ حالت دیکھیں؛ صرف کردار کا نام اختیار نہیں۔",
-      ],
-      [
-        "تازہ کرنے کی خطا درخواست واپس کرتی ہے؟",
-        "نہیں، سرور پر محفوظ پیغام اصل تبدیلی کی تصدیق ہے۔ پرچی اور درخواستیں دوبارہ پڑھیں؛ خطا دور کرنے کو تصدیق شدہ درخواست یا فوری ادھار وصولی نہ دہرائیں۔",
-      ],
-    ],
-  },
+  title: "Refund / waiver / credit requests",
+  titleUr: "واپسی، رعایت اور ادھار کی درخواستیں",
+  purpose: "Authorized staff request a change on an actual visit; an eligible approver decides and any cash handover is a separate action.",
+  purposeUr: "مجاز عملہ اصل وزٹ کی تبدیلی مانگتا، اہل منظور کنندہ فیصلہ کرتا اور نقد کی واپسی الگ عمل ہے۔",
+  steps: [
+  "Open Refund / waiver / credit, scan the slip, and verify patient/MRN, payment, clinical activity and pending approval. Refresh requests reads the current ticket and up to100 of your own requests without discarding the reason.",
+  "Choose the permitted Request type and a factual Reason. Refund: reason code plus optional positive amount (blank requests the remaining refundable amount). Pre-consult waiver: percentage greater than0 up to100. Void unpaid slip is risk-monitored, never a way to undo payment.",
+  "Clinical activity makes a refund require elevated approval and a risk flag. A post-consultation waiver belongs to the doctor’s Consultation action after a finalized note; this Reception screen does not offer that write.",
+  "Credit collects Amount paid now immediately using the selected Payment method; cash requires your own open shift. Enter an optional due date. The remaining balance waits for authorization and can become outstanding dues. Check these values in Review request before Confirm request.",
+  "Pending approval freezes the visit and removes it from the doctor's queue. My requests shows actual status/decision notes; request submission is not approval or a cash handover. After a lost reply, check current slip/requests and only deliberately retry the original retained action within24 hours; never a new payment key."
+],
+  stepsUr: [
+  "واپسی، رعایت اور ادھار کھول کر اصل پرچی اسکین کریں۔ مریض، ایم آر این، ادائیگی، طبی کام اور منظوری دیکھیں۔ تازہ کریں وجہ رکھ کر پرچی اور اپنی سو تک درخواستیں پڑھتا ہے۔",
+  "مجاز قسم اور حقیقی وجہ چنیں۔ ریفنڈ میں وجہ کا انتخاب اور مثبت اختیاری رقم، خالی پر باقی قابل واپسی رقم۔ پہلے معائنے کی رعایت صفر سے زیادہ سو تک۔ غیر ادا پرچی کی منسوخی نگرانی میں، ادائیگی واپس کرنے کا راستہ نہیں۔",
+  "طبی عمل کے بعد رقم واپسی میں اعلیٰ منظوری اور خطرہ نشان لازم۔ معائنے کے بعد رعایت حتمی نوٹ کے ساتھ ڈاکٹر کی معائنہ سکرین میں ہے؛ استقبالیہ یہاں وہ عمل نہیں دیتا۔",
+  "ادھار میں ابھی ادا رقم اصل طریقے سے فوراً وصول ہوتی، نقد پر اپنی کھلی شفٹ لازم۔ تاریخ اختیاری ہے۔ باقی رقم منظوری اور بعد میں بقایا بن سکتی ہے۔ جائزے میں قدریں چیک کرکے تصدیق کریں۔",
+  "زیر التوا منظوری وزٹ بند اور ڈاکٹر کی قطار سے خارج کرتی ہے۔ میری درخواستیں اصل فیصلہ دکھاتی، جمع کرانا منظوری یا رقم دینا نہیں۔ گم جواب پر پرچی اور درخواستیں دیکھ کر اصل محفوظ عمل ہی جان بوجھ کر دوبارہ کریں، نئی ادائیگی کی کلید نہیں۔"
+],
+  faq: [
+  [
+    "Can I hand money back after submitting a refund?",
+    "No. Wait for actual approval and the exact mandatory cash-back prompt. Only the authorized cashier with their own open drawer confirms a physical handover, once."
+  ],
+  [
+    "Why is my request action missing?",
+    "Your permissions, ticket/payment state, a pending approval, cash-back or records-only service can prevent new requests. Refresh and inspect the current state; a role name alone never authorizes a change."
+  ],
+  [
+    "Does a failed refresh undo a submitted request?",
+    "No. Saved on the server confirms its write. Refresh reads the pending ticket and own requests; never repeat a confirmed request or immediate credit collection merely to clear a read error."
+  ]
+],
+  faqUr: [
+  [
+    "ریفنڈ بھیج کر رقم دے سکتا ہوں؟",
+    "نہیں، اصل منظوری اور لازمی عین رقم کے پیغام کا انتظار کریں۔ اپنی کھلی دراز کا مجاز کیشیئر حقیقی واپسی ایک بار تصدیق کرتا ہے۔"
+  ],
+  [
+    "درخواست کا عمل غائب کیوں؟",
+    "اجازت، پرچی اور ادائیگی کی حالت، زیر التوا منظوری، باقی واپسی یا صرف ریکارڈ خدمت نیا عمل روک سکتی ہے۔ تازہ حالت دیکھیں؛ صرف کردار کا نام اختیار نہیں۔"
+  ],
+  [
+    "تازہ کرنے کی خطا درخواست واپس کرتی ہے؟",
+    "نہیں، سرور پر محفوظ پیغام اصل تبدیلی کی تصدیق ہے۔ پرچی اور درخواستیں دوبارہ پڑھیں؛ خطا دور کرنے کو تصدیق شدہ درخواست یا فوری ادھار وصولی نہ دہرائیں۔"
+  ]
+]
+},
   cash_back_prompts: {
     title: "Mandatory cash-back",
     titleUr: "رقم کی لازمی واپسی",

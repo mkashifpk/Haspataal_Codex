@@ -1,4 +1,5 @@
-import type { PrescriptionDetailOut, DispenseLineIn } from "./generated/dispense";
+import type { PrescriptionDetailOut } from "./generated/rx_queue";
+import type { DispenseLineIn } from "./generated/dispense";
 export function dispenseQuantity(value: string) {
   if (!/^\d+(\.\d+)?$/.test(value.trim())) return undefined;
   const n = Number(value);return Number.isFinite(n) && n > 0 ? n : undefined;

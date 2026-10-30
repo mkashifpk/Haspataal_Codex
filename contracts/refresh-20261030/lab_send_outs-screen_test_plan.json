@@ -1,0 +1,775 @@
+{
+  "screen": "lab_send_outs",
+  "title": "Samples sent to partner laboratories",
+  "cases": [
+    {
+      "id": "case:GET /lab/send-outs/pending",
+      "call": "GET /api/v1/lab/send-outs/pending",
+      "summary": "Samples waiting to be sent to a partner laboratory",
+      "happy_path": {
+        "as_one_of": [
+          "lab_admin",
+          "lab_technician"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/lab/send-outs/pending"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "sample_id": 3,
+                  "barcode": "LB-2026-0000003",
+                  "sample_type": "Blood",
+                  "sample_status": "Collected",
+                  "collected_at": "2026-09-30T20:02:52.497014+00:00",
+                  "received_at": null,
+                  "rejection_code": null,
+                  "lab_requisition_item_id": 3,
+                  "item_status": "SampleCollected",
+                  "code": "VITD",
+                  "test_name": "Vitamin D",
+                  "requisition_id": 2,
+                  "requisition_number": "LR-2026-000002",
+                  "priority": "Routine",
+                  "patient_name": "Ali Khan",
+                  "mrn": "MRN-2026-000001",
+                  "gender": "male",
+                  "age_years": 40,
+                  "partner_id": 1,
+                  "partner_name": "City Reference Laboratory"
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-30T20:02:52.598262+00:00"
+              },
+              "request_id": "a460efd0d73640c0baa8eeb180e5ce33"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": []
+    },
+    {
+      "id": "case:POST /lab/send-outs",
+      "call": "POST /api/v1/lab/send-outs",
+      "summary": "Send samples to a partner laboratory (the manifest)",
+      "happy_path": {
+        "as_one_of": [
+          "lab_admin",
+          "lab_technician"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/lab/send-outs",
+            "body": {
+              "partner_id": 1,
+              "sample_ids": [
+                3
+              ],
+              "courier": "Rider Asif"
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "send_out_id": 2,
+                "manifest_number": "SOM-2026-00001",
+                "partner_id": 1,
+                "partner_name": "City Reference Laboratory",
+                "phc_registration": "PHC-R-123",
+                "contact": null,
+                "turnaround_hours": 48,
+                "dispatched_by": 7,
+                "dispatched_by_name": "u44f4b53b3b",
+                "dispatched_at": "2026-09-30T20:02:52.685690+00:00",
+                "courier": "Rider Asif",
+                "note": null,
+                "due_at": "2026-10-02T20:02:52.685690+00:00",
+                "samples": 1,
+                "returned": 0,
+                "rejected": 0,
+                "outstanding": 1,
+                "items": [
+                  {
+                    "sample_id": 3,
+                    "barcode": "LB-2026-0000003",
+                    "sample_type": "Blood",
+                    "sample_status": "Dispatched",
+                    "collected_at": "2026-09-30T20:02:52.497014+00:00",
+                    "received_at": null,
+                    "rejection_code": null,
+                    "lab_requisition_item_id": 3,
+                    "item_status": "Processing",
+                    "code": "VITD",
+                    "test_name": "Vitamin D",
+                    "requisition_id": 2,
+                    "requisition_number": "LR-2026-000002",
+                    "priority": "Routine",
+                    "patient_name": "Ali Khan",
+                    "mrn": "MRN-2026-000001",
+                    "gender": "male",
+                    "age_years": 40,
+                    "result_entered_at": null,
+                    "partner_reported_at": null,
+                    "partner_report_ref": null
+                  }
+                ]
+              },
+              "meta": {
+                "server_time": "2026-09-30T20:02:52.699740+00:00"
+              },
+              "request_id": "f22c3022ec5746789c2c9c3509127eea"
+            }
+          },
+          "errors_seen": [
+            "DIAGNOSTIC_PARTNER_INVALID",
+            "LAB_SAMPLE_STATE_INVALID"
+          ],
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "DIAGNOSTIC_PARTNER_INVALID",
+        "LAB_SAMPLE_STATE_INVALID",
+        "REFERENCE_NOT_FOUND",
+        "VALIDATION_ERROR"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:GET /lab/send-outs",
+      "call": "GET /api/v1/lab/send-outs",
+      "summary": "Send-out manifests",
+      "happy_path": {
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "lab_admin",
+          "lab_technician",
+          "lab_verifier",
+          "owner",
+          "quality_officer",
+          "radiologist"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/lab/send-outs",
+            "query": {
+              "outstanding": true
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "send_out_id": 2,
+                  "manifest_number": "SOM-2026-00001",
+                  "partner_id": 1,
+                  "partner_name": "City Reference Laboratory",
+                  "phc_registration": "PHC-R-123",
+                  "contact": null,
+                  "turnaround_hours": 48,
+                  "dispatched_by": 7,
+                  "dispatched_by_name": "u44f4b53b3b",
+                  "dispatched_at": "2026-09-30T20:02:52.685690+00:00",
+                  "courier": "Rider Asif",
+                  "note": null,
+                  "due_at": "2026-10-02T20:02:52.685690+00:00",
+                  "samples": 1,
+                  "returned": 0,
+                  "rejected": 0,
+                  "outstanding": 1
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-30T20:02:52.711514+00:00"
+              },
+              "request_id": "f91f1eeee6624fa281afa9beb1a1ae61"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /lab/send-outs/{send_out_id}",
+      "call": "GET /api/v1/lab/send-outs/{send_out_id}",
+      "summary": "A send-out manifest",
+      "happy_path": {
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "lab_admin",
+          "lab_technician",
+          "lab_verifier",
+          "owner",
+          "quality_officer",
+          "radiologist"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/lab/send-outs/2"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "send_out_id": 2,
+                "manifest_number": "SOM-2026-00001",
+                "partner_id": 1,
+                "partner_name": "City Reference Laboratory",
+                "phc_registration": "PHC-R-123",
+                "contact": null,
+                "turnaround_hours": 48,
+                "dispatched_by": 7,
+                "dispatched_by_name": "u44f4b53b3b",
+                "dispatched_at": "2026-09-30T20:02:52.685690+00:00",
+                "courier": "Rider Asif",
+                "note": null,
+                "due_at": "2026-10-02T20:02:52.685690+00:00",
+                "samples": 1,
+                "returned": 1,
+                "rejected": 0,
+                "outstanding": 0,
+                "items": [
+                  {
+                    "sample_id": 3,
+                    "barcode": "LB-2026-0000003",
+                    "sample_type": "Blood",
+                    "sample_status": "Consumed",
+                    "collected_at": "2026-09-30T20:02:52.497014+00:00",
+                    "received_at": null,
+                    "rejection_code": null,
+                    "lab_requisition_item_id": 3,
+                    "item_status": "Published",
+                    "code": "VITD",
+                    "test_name": "Vitamin D",
+                    "requisition_id": 2,
+                    "requisition_number": "LR-2026-000002",
+                    "priority": "Routine",
+                    "patient_name": "Ali Khan",
+                    "mrn": "MRN-2026-000001",
+                    "gender": "male",
+                    "age_years": 40,
+                    "result_entered_at": "2026-09-30T20:02:52.726947+00:00",
+                    "partner_reported_at": "2026-09-30T20:02:52.723376+00:00",
+                    "partner_report_ref": "CRL-889"
+                  }
+                ]
+              },
+              "meta": {
+                "server_time": "2026-09-30T20:02:52.816549+00:00"
+              },
+              "request_id": "32559795239c45eca64f792d57f6ee1b"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /lab/send-outs/{send_out_id}/print-payload",
+      "call": "GET /api/v1/lab/send-outs/{send_out_id}/print-payload",
+      "summary": "The manifest to print for the courier",
+      "happy_path": {
+        "as_one_of": [
+          "lab_admin",
+          "lab_technician"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/lab/send-outs/2/print-payload"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "document_type": "send_out_manifest",
+                "printer_role": "document",
+                "paper_width_mm": 210,
+                "fields": {
+                  "send_out_id": 2,
+                  "manifest_number": "SOM-2026-00001",
+                  "partner_name": "City Reference Laboratory",
+                  "phc_registration": "PHC-R-123",
+                  "contact": null,
+                  "dispatched_at": "2026-10-14T10:38:04.981182+00:00",
+                  "dispatched_by_name": "u4eda149745",
+                  "courier": "Rider Asif",
+                  "note": null,
+                  "due_at": "2026-10-16T10:38:04.981182+00:00",
+                  "items": [
+                    {
+                      "sample_id": 3,
+                      "barcode": "LB-2026-0000003",
+                      "sample_type": "Blood",
+                      "sample_status": "Dispatched",
+                      "collected_at": "2026-10-14T10:38:04.756408+00:00",
+                      "received_at": null,
+                      "rejection_code": null,
+                      "lab_requisition_item_id": 3,
+                      "item_status": "Processing",
+                      "code": "VITD",
+                      "test_name": "Vitamin D",
+                      "requisition_id": 2,
+                      "requisition_number": "LR-2026-000002",
+                      "priority": "Routine",
+                      "patient_name": "Ali Khan",
+                      "mrn": "MRN-2026-000001",
+                      "gender": "male",
+                      "age_years": 40,
+                      "result_entered_at": null,
+                      "partner_reported_at": null,
+                      "partner_report_ref": null
+                    }
+                  ],
+                  "hospital_name": "Haspataal Hospital",
+                  "hospital": {
+                    "name": "Haspataal Hospital",
+                    "address": "",
+                    "phone": "",
+                    "phc_number": "",
+                    "issue_line": ""
+                  }
+                },
+                "text": "                                    Haspataal Hospital\n                           SAMPLES SENT TO A PARTNER LABORATORY\n------------------------------------------------------------------------------------------\nManifest                                                                    SOM-2026-00001\nPartner                                          City Reference Laboratory (PHC PHC-R-123)\nDispatch…",
+                "barcode_svg": "<svg version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" width=\"56.920mm\" height=\"18.411mm\">\r\n    <!--Autogenerated with python-barcode 0.16.1-->\r\n    <g id=\"barcode_group\">\r\n        <rect width=\"100%\" height=\"100%\" style=\"fill:white\"/>\r\n        <rect x=\"2.000mm\" y=\"1.000mm\" width=\"0.560mm\" height=\"12.000mm\" style=\"fill:black;\"/>\r\n        <rect x=\"2.840mm\" y=\"1.000mm\" width=\"0.280mm\" height=\"12.000mm…",
+                "qr_svg": null,
+                "pdf_url": null
+              },
+              "meta": {
+                "server_time": "2026-10-14T10:38:05.012291+00:00"
+              },
+              "request_id": "19fbedb1af7b4e9a992a4dd39a16a75f"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /diagnostic-partners",
+      "call": "GET /api/v1/diagnostic-partners",
+      "summary": "Partner laboratories and imaging centres",
+      "happy_path": {
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "lab_admin",
+          "lab_technician",
+          "lab_verifier",
+          "owner",
+          "quality_officer",
+          "radiographer",
+          "radiologist"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/diagnostic-partners",
+            "query": {
+              "services": "Lab"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "partner_id": 1,
+                  "name": "City Reference Laboratory",
+                  "services": "Lab",
+                  "phc_registration": "PHC-R-123",
+                  "accreditation": "PNAC ISO 15189",
+                  "pnra_licence": null,
+                  "mou_reference": "MOU-1",
+                  "mou_valid_from": "2026-09-01",
+                  "mou_valid_until": "2027-07-28",
+                  "turnaround_hours": 48,
+                  "quality_note": null,
+                  "contact": null,
+                  "address": null,
+                  "is_active": true,
+                  "row_version": 3,
+                  "mou_expired": false,
+                  "tests_sent_out": 1
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-30T20:02:52.680109+00:00"
+              },
+              "request_id": "59c031ca9932490794cc0f09ba7a33fe"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:POST /lab/items/{item_id}/results",
+      "call": "POST /api/v1/lab/items/{item_id}/results",
+      "summary": "Submit & Broadcast a result (goes to the verifier)",
+      "happy_path": {
+        "as_one_of": [
+          "lab_technician"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/lab/items/1/results",
+            "body": {
+              "metrics": {
+                "hb": 11.2,
+                "wbc": 7.4,
+                "comment": "Mild anaemia"
+              }
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "result_id": 1,
+                "lab_requisition_item_id": 1,
+                "sample_id": 1,
+                "metrics_jsonb": {
+                  "hb": 11.2,
+                  "wbc": 7.4,
+                  "comment": "Mild anaemia"
+                },
+                "flags_jsonb": {
+                  "hb": "L",
+                  "wbc": "N"
+                },
+                "has_critical_value": false,
+                "interpretation": null,
+                "status": "PendingVerification",
+                "entered_by": 7,
+                "entered_at": "2026-10-16T09:29:48.110932+00:00",
+                "published_at": null,
+                "provisionally_released_at": null,
+                "is_correction": false,
+                "corrects_result_id": null,
+                "correction_reason": null,
+                "partner_id": null,
+                "partner_report_ref": null,
+                "partner_reported_at": null,
+                "row_version": 1
+              },
+              "meta": {
+                "server_time": "2026-10-16T09:29:48.128416+00:00"
+              },
+              "request_id": "9167796f73124ad1bf0b4b8b65b982ce"
+            }
+          },
+          "errors_seen": [
+            "LAB_METRICS_INVALID",
+            "LAB_REAGENT_BOM_MISSING",
+            "VALIDATION_ERROR"
+          ],
+          "events_emitted": [
+            "lab.result.critical_pending",
+            "lab.result.pending_verification"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "INSUFFICIENT_STOCK",
+        "LAB_ITEM_STATE_INVALID",
+        "LAB_METRICS_INVALID",
+        "LAB_REAGENT_BOM_MISSING",
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:POST /lab/samples/{sample_id}/reject",
+      "call": "POST /api/v1/lab/samples/{sample_id}/reject",
+      "summary": "Reject an unusable sample (the test goes back to collection)",
+      "happy_path": {
+        "as_one_of": [
+          "lab_admin",
+          "lab_technician"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/lab/samples/2/reject",
+            "body": {
+              "code": "Haemolysed"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "requisition_id": 1,
+                "requisition_number": "LR-2026-000001",
+                "patient_id": 1,
+                "ticket_id": 1,
+                "admission_id": null,
+                "requester_type": "Doctor",
+                "requester_user_id": 1,
+                "requester_doctor_id": 1,
+                "is_lab_only_walkin": false,
+                "priority": "STAT",
+                "clinical_notes": null,
+                "status": "InProgress",
+                "cancel_reason": null,
+                "ordered_at": "2026-09-30T20:02:52.102950+00:00",
+                "row_version": 2,
+                "patient_name": "Ali Khan",
+                "mrn": "MRN-2026-000001",
+                "gender": "male",
+                "age_years": 40,
+                "dob": null,
+                "doctor_name": "Dr Ahmed",
+                "items": [
+                  {
+                    "lab_requisition_item_id": 1,
+                    "test_id": 1,
+                    "code": "KP",
+                    "test_name": "Serum potassium",
+                    "section": "Biochemistry",
+                    "price_at_order": 500,
+                    "status": "SampleCollected",
+                    "rerun_of_item_id": null,
+                    "is_billable": true,
+                    "sample_id": 1,
+                    "barcode": "LB-2026-0000001",
+                    "sample_status": "Collected",
+                    "collected_at": "2026-09-30T20:02:52.454010+00:00",
+                    "received_at": null,
+                    "identity_check": "WristbandScan",
+                    "is_send_out": false,
+                    "partner_name": null,
+                    "due_at": "2026-09-30T21:02:52.454010+00:00"
+                  },
+                  {
+                    "lab_requisition_item_id": 2,
+                    "test_id": 2,
+                    "code": "NS1",
+                    "test_name": "Dengue NS1 antigen",
+                    "section": "Serology",
+                    "price_at_order": 1200,
+                    "status": "Ordered",
+                    "rerun_of_item_id": null,
+                    "is_billable": true,
+                    "sample_id": 4,
+                    "barcode": "LB-2026-0000004",
+                    "sample_status": "Pending",
+                    "collected_at": null,
+                    "received_at": null,
+                    "identity_check": null,
+                    "is_send_out": false,
+                    "partner_name": null,
+                    "due_at": null
+                  }
+                ],
+                "results": [],
+                "invoice": {
+                  "invoice_id": 2,
+                  "invoice_no": "INV-2026-0000002",
+                  "invoice_type": "Lab",
+                  "status": "Paid",
+                  "balance_due": 0
+                }
+              },
+              "meta": {
+                "server_time": "2026-09-30T20:02:52.533190+00:00"
+              },
+              "request_id": "236b66a303d24905a1f6d737a01901e2"
+            }
+          },
+          "errors_seen": [
+            "LAB_SAMPLE_STATE_INVALID",
+            "VALIDATION_ERROR"
+          ],
+          "events_emitted": [
+            "notification.created"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "LAB_SAMPLE_STATE_INVALID",
+        "VALIDATION_ERROR"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    }
+  ],
+  "service_cases": [
+    {
+      "view": "full",
+      "set_up": "GET /establishment answers views.screens[screen_id=lab_send_outs].view = full (outsourced_diagnostics): stub that answer, or have the DEV server's admin move the service on Facility settings",
+      "expect": "Show it; every action the user's permissions allow."
+    },
+    {
+      "view": "open_work",
+      "set_up": "GET /establishment answers views.screens[screen_id=lab_send_outs].view = open_work (outsourced_diagnostics): stub that answer, or have the DEV server's admin move the service on Facility settings",
+      "expect": "The service is Retiring: show it with the banner 'No new <new_work> from now on' and its open work; hide the actions that start new work of it (x-capability-gates; continues_while_retiring ones stay); keep every other action (completing, transferring, settling, correcting)."
+    },
+    {
+      "view": "records",
+      "set_up": "GET /establishment answers views.screens[screen_id=lab_send_outs].view = records (outsourced_diagnostics): stub that answer, or have the DEV server's admin move the service on Facility settings",
+      "expect": "The service is Retired (or Preparing after it ran): show it as records only, under a 'Records' marker: lists, details, prints and the corrections the server still accepts; no action that starts new work."
+    },
+    {
+      "view": "hidden",
+      "set_up": "GET /establishment answers views.screens[screen_id=lab_send_outs].view = hidden (outsourced_diagnostics): stub that answer, or have the DEV server's admin move the service on Facility settings",
+      "expect": "Not in any menu: the service has never run here, so the screen has nothing to show."
+    }
+  ],
+  "delivery_gate": {
+    "required": true,
+    "status": "required",
+    "progress_reporting": {
+      "required": true,
+      "submit": "propose_progress",
+      "verify": "progress_proposals",
+      "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+    },
+    "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+    "compulsory": [
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+        "points": 2
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+        "points": 3
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+        "points": 2
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+        "points": 4
+      }
+    ],
+    "zoom": {
+      "min_pct": 100,
+      "max_pct": 250,
+      "reset_pct": 100,
+      "keys": [
+        "Ctrl + or Ctrl = (zoom in)",
+        "Ctrl - (zoom out)",
+        "Ctrl 0 (reset to 100 %)",
+        "Command on macOS"
+      ],
+      "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+    },
+    "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+    "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+  },
+  "handbook_page": "screens/lab_send_outs",
+  "workspace_guide": "get_handbook_outline('lab_tech')",
+  "realtime": [],
+  "acceptance_rules": [
+    "Pending: tick the samples for one partner (partner_id defaults to each test's partner), add the courier, POST /lab/send-outs, then print the manifest (A4) for the courier to sign.",
+    "Outstanding manifests (outstanding=true): due_at is the MOU's turnaround; each sample shows when its result was entered.",
+    "The partner's result: the usual result entry with partner_report_ref and partner_reported_at; a sample the partner could not use: reject it with RejectedByPartner (a new sample to collect).",
+    "Exists for the service outsourced_diagnostics (work): show it as GET /establishment views.screens says for screen_id lab_send_outs (full; open_work: without its new work, with the banner \"No new ... from now on\"; records: history and corrections only; setup: only from Facility settings; hidden: in no menu), after login and again on establishment.changed. Never decide it from the profile's category."
+  ],
+  "demo_accounts": "demo_accounts() lists a login per role; sandbox_call runs each case on the DEV server"
+}

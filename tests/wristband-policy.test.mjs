@@ -14,3 +14,7 @@ test('records view can reprint but cannot issue, hidden/setup have no work; only
 test('scanner input accepts patient code only within declared bounds; no global keystroke interception',()=>{
  assert.equal(bandScanCode(' HMS:PT:policy-only '),'HMS:PT:policy-only');assert.throws(()=>bandScanCode('x'),/3–80/);assert.throws(()=>bandScanCode('x'.repeat(81)),/3–80/);
 });
+test('admissions wristband permission opens its missing-band worklist without medication safety access',()=>{
+ assert.equal(bandAccess('full',['patient.view','patient.wristband.print']).worklist,true);
+ assert.equal(bandAccess('hidden',['patient.wristband.print']).worklist,false);
+});

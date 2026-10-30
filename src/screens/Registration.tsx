@@ -39,6 +39,8 @@ export function Registration({
     [revision],
   );
   const [queueRevision, setQueueRevision] = useState(0);
+  const doctors=useLoad(()=>registration.opdDoctors(),[revision,queueRevision]);
+  const [doctorId,setDoctorId]=useState('');
   const dashboard = useLoad(
     () =>
       user.permissions.includes("opd.queue.view")
@@ -221,6 +223,9 @@ export function Registration({
       );
       return;
     }
+    if(!onlyPatient&&doctorId&&!doctors.data?.some(d=>String(d.employee_id)===doctorId)){
+      setError(new Error(t('Choose a doctor from the current OPD list.','موجودہ او پی ڈی فہرست سے ڈاکٹر چنیں۔')));return;
+    }
     if (mode === "returning" && !selected) {
       setError(
         new Error(
@@ -283,8 +288,8 @@ export function Registration({
           }
         : { patient_id: selected!.patient_id }),
       service_id: service!.service_id,
-      doctor_id: service!.doctor_id,
-      department_id: service!.department_id,
+      doctor_id: doctorId?Number(doctorId):null,
+      department_id: doctorId?doctors.data?.find(d=>String(d.employee_id)===doctorId)?.department_id:service!.department_id,
       source,
       discount_amount: discount,
       ...(Number(discount) > 0 ? { discount_reason: discountReason } : {}),
@@ -334,6 +339,7 @@ export function Registration({
     setSelected(undefined);
     setQuery("");
     setServiceId("");
+    setDoctorId('');
     setOnlyPatient(false);
     setMode("new");
     setError(undefined);
@@ -824,7 +830,7 @@ export function Registration({
                         ].includes(String(referenceField))}
                         required
                         value={serviceId}
-                        onChange={(e) => setServiceId(e.target.value)}
+                        onChange={(e) => {setServiceId(e.target.value);setDoctorId('');}}
                       >
                         <option value="">{tr("Choose a service")}</option>
                         {activeServices.map((item) => (
@@ -834,6 +840,8 @@ export function Registration({
                         ))}
                       </select>
                     </Field>
+                    <LoadState {...doctors} retry={doctors.reload}/>
+                    <Field label={t('OPD doctor (or department queue)','او پی ڈی ڈاکٹر (یا شعبے کی قطار)')}><select data-help="registration.intake" data-field="doctor_id" value={doctorId} onChange={e=>setDoctorId(e.target.value)}><option value="">{t('Department queue','شعبے کی قطار')}</option>{doctors.data?.filter(d=>!activeServices.find(s=>String(s.service_id)===serviceId)?.department_id||d.department_id===activeServices.find(s=>String(s.service_id)===serviceId)?.department_id).map(d=><option key={d.employee_id} value={d.employee_id}>{d.full_name} · {d.department_name} · {d.waiting} {t('waiting','منتظر')}</option>)}</select></Field>
                     <Field label={tr("Visit source")}>
                       <select data-field="source" data-help="registration.intake"
                         aria-label={tr("Visit source")}

@@ -1,0 +1,684 @@
+{
+  "screen": "lab_only_walkin",
+  "title": "Lab-only walk-in",
+  "cases": [
+    {
+      "id": "case:POST /patients/lab-only-walk-in",
+      "call": "POST /api/v1/patients/lab-only-walk-in",
+      "summary": "Lab-only walk-in (name + mobile only)",
+      "happy_path": {
+        "as_one_of": [
+          "receptionist"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/patients/lab-only-walk-in",
+            "body": {
+              "full_name": "Walk In",
+              "mobile": "03001112233",
+              "test_ids": [
+                1
+              ],
+              "referring_doctor_name": "Dr Outside"
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "patient": {
+                  "patient_id": 2,
+                  "mrn": "MRN-2026-000002",
+                  "registration_type": "LabOnly",
+                  "full_name": "Walk In",
+                  "father_or_husband_name": null,
+                  "gender": "unknown",
+                  "dob": null,
+                  "age_years": null,
+                  "age_recorded_on": null,
+                  "mobile": "03001112233",
+                  "cnic": null,
+                  "upmrn": null,
+                  "address": null,
+                  "emergency_contact_name": null,
+                  "emergency_contact_phone": null,
+                  "blood_group": null,
+                  "allergies": null,
+                  "billing_category": "Cash",
+                  "panel_id": null,
+                  "panel_name": null,
+                  "panel_member_no": null,
+                  "temp_identifier": null,
+                  "merged_into_id": null,
+                  "linked_employee_id": null,
+                  "is_deceased": false,
+                  "created_at": "2026-10-23T19:22:39.632323+00:00",
+                  "row_version": 1,
+                  "death_id": null,
+                  "death_at": null,
+                  "photo_document_id": null,
+                  "mlc_numbers": [],
+                  "outstanding": {
+                    "has_outstanding_ar": false,
+                    "outstanding_ar_balance": 0,
+                    "ar_block_applies": false,
+                    "banner_text": null
+                  },
+                  "master_patient_id": 2,
+                  "merged_profiles": []
+                },
+                "requisition": {
+                  "requisition_id": 1,
+                  "requisition_number": "LR-2026-000001",
+                  "patient_id": 2,
+                  "ticket_id": null,
+                  "admission_id": null,
+                  "requester_type": "Receptionist",
+                  "requester_user_id": 3,
+                  "requester_doctor_id": null,
+                  "is_lab_only_walkin": true,
+                  "priority": "Routine",
+                  "clinical_notes": "[Referred by: Dr Outside]",
+                  "status": "Pending",
+                  "cancel_reason": null,
+                  "ordered_at": "2026-10-23T19:22:39.632323+00:00",
+                  "row_version": 1,
+                  "patient_name": "Walk In",
+                  "mrn": "MRN-2026-000002",
+                  "gender": "unknown",
+                  "age_years": null,
+                  "dob": null,
+                  "doctor_name": null,
+                  "items": [
+                    {
+                      "lab_requisition_item_id": 1,
+                      "test_id": 1,
+                      "code": "CBC",
+                      "test_name": "Complete Blood Count",
+                      "section": "Hematology",
+                      "price_at_order": 800,
+                      "status": "Ordered",
+                      "rerun_of_item_id": null,
+                      "is_billable": true,
+                      "sample_id": 1,
+                      "barcode": "LB-2026-0000001",
+                      "sample_status": "Pending",
+                      "collected_at": null,
+                      "received_at": null,
+                      "identity_check": null,
+                      "is_send_out": false,
+                      "partner_name": null,
+                      "due_at": null
+                    }
+                  ],
+                  "results": [],
+                  "invoice": {
+                    "invoice_id": 2,
+                    "invoice_no": "INV-2026-0000002",
+                    "invoice_type": "Lab",
+                    "status": "Open",
+                    "balance_due": 800
+                  }
+                }
+              },
+              "meta": {
+                "server_time": "2026-10-23T19:22:39.720392+00:00"
+              },
+              "request_id": "a29a5f970d874d40bd80959656047a75"
+            }
+          },
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "CAPABILITY_INACTIVE",
+        "VALIDATION_ERROR"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:GET /lab/tests",
+      "call": "GET /api/v1/lab/tests",
+      "summary": "Active lab test catalogue (for the ordering picker)",
+      "happy_path": {
+        "as_one_of": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "lab_admin",
+          "lab_technician",
+          "lab_verifier",
+          "receptionist",
+          "surgeon"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/lab/tests",
+            "query": {
+              "q": "Vitamin"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "test_id": 3,
+                  "code": "VITD",
+                  "name": "Vitamin D",
+                  "section": "Biochemistry",
+                  "sample_type": "Blood",
+                  "price": 3500,
+                  "turnaround_minutes": null,
+                  "emergency_turnaround_minutes": null,
+                  "availability": "SendOut",
+                  "send_out_partner_id": 1,
+                  "send_out_partner_name": "City Reference Laboratory",
+                  "available_24h": false,
+                  "notifiable_disease": null,
+                  "is_active": true,
+                  "row_version": 1,
+                  "metric_schema": [
+                    {
+                      "key": "vitd",
+                      "ref": {
+                        "default": [
+                          30,
+                          100
+                        ]
+                      },
+                      "type": "number",
+                      "unit": "ng/mL",
+                      "label": "25-OH vitamin D",
+                      "required": true
+                    }
+                  ]
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-30T20:02:52.094403+00:00"
+              },
+              "request_id": "38924faef3f943f7b883e6717d06e91e"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "billing_admin",
+          "cashier",
+          "clinic_director"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:POST /finance/invoices/{invoice_id}/payments",
+      "call": "POST /api/v1/finance/invoices/{invoice_id}/payments",
+      "summary": "Collect a payment (lab / pharmacy / final IPD bill ...)",
+      "happy_path": {
+        "as_one_of": [
+          "cashier",
+          "pharmacist",
+          "receptionist"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/finance/invoices/2/payments",
+            "body": {
+              "method": "Cash"
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "payment": {
+                  "payment_id": 2,
+                  "receipt_no": "RCT-2026-0000002",
+                  "payment_type": "Collection",
+                  "amount": 800,
+                  "method": "Cash",
+                  "invoice_id": 2,
+                  "shift_id": 1,
+                  "collected_at": "2026-09-27T17:39:01.791148+00:00"
+                },
+                "invoice": {
+                  "invoice_id": 2,
+                  "invoice_no": "INV-2026-0000002",
+                  "invoice_type": "Lab",
+                  "patient_id": 1,
+                  "admission_id": null,
+                  "ticket_id": null,
+                  "panel_id": null,
+                  "employee_id": null,
+                  "walkin_customer_name": null,
+                  "walkin_customer_mobile": null,
+                  "gross_total": 800,
+                  "discount_total": 0,
+                  "net_payable": 800,
+                  "amount_paid": 800,
+                  "amount_refunded": 0,
+                  "waiver_amount": 0,
+                  "waiver_dispensed_amount": 0,
+                  "credit_amount": 0,
+                  "status": "Paid",
+                  "is_locked": false,
+                  "locked_reason": null,
+                  "finalized_at": "2026-09-27T17:39:01.719670+00:00",
+                  "business_date": "2026-09-27",
+                  "created_at": "2026-09-27T17:39:01.719670+00:00",
+                  "row_version": 5,
+                  "lines": [
+                    {
+                      "invoice_item_id": 2,
+                      "line_type": "LabTest",
+                      "description": "Complete Blood Count",
+                      "qty": 1,
+                      "unit_price": 800,
+                      "line_total": 800,
+                      "bed_day": null,
+                      "reverses_item_id": null,
+                      "reversal_reason": null,
+                      "created_at": "2026-09-27T17:39:01.719670+00:00"
+                    }
+                  ],
+                  "balance_due": 0
+                }
+              },
+              "meta": {
+                "server_time": "2026-09-27T17:39:01.797927+00:00"
+              },
+              "request_id": "a4d0e467e7384074a72f9669de1f0472"
+            }
+          },
+          "events_emitted": [
+            "opd.ticket.status_changed"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "clinic_director"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "INVOICE_LOCKED",
+        "OVERPAYMENT",
+        "SHIFT_NOT_OPEN",
+        "VALIDATION_ERROR"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:GET /lab/requisitions",
+      "call": "GET /api/v1/lab/requisitions",
+      "summary": "Requisitions of one patient (newest first)",
+      "happy_path": {
+        "as_one_of": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "lab_admin",
+          "lab_technician",
+          "lab_verifier",
+          "radiologist",
+          "receptionist",
+          "surgeon",
+          "ward_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/lab/requisitions",
+            "query": {
+              "patient_id": 1
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "requisition_id": 2,
+                  "requisition_number": "LR-2026-000002",
+                  "priority": "Urgent",
+                  "status": "Pending",
+                  "ordered_at": "2026-09-27T17:39:47.877337+00:00",
+                  "is_lab_only_walkin": false,
+                  "tests": 1,
+                  "published": 0
+                },
+                {
+                  "requisition_id": 1,
+                  "requisition_number": "LR-2026-000001",
+                  "priority": "Routine",
+                  "status": "Pending",
+                  "ordered_at": "2026-09-27T17:39:47.815583+00:00",
+                  "is_lab_only_walkin": false,
+                  "tests": 1,
+                  "published": 0
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-27T17:39:47.893968+00:00"
+              },
+              "request_id": "8709876fb2174177870c7fac7767c519"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "billing_admin",
+          "cashier",
+          "clinic_director"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /lab/requisitions/{requisition_id}/report/print-payload",
+      "call": "GET /api/v1/lab/requisitions/{requisition_id}/report/print-payload",
+      "summary": "Printable lab report with who performed and who verified each test",
+      "happy_path": {
+        "as_one_of": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "lab_admin",
+          "lab_technician",
+          "lab_verifier",
+          "radiologist",
+          "receptionist",
+          "surgeon",
+          "ward_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/lab/requisitions/1/report/print-payload"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "document_type": "lab_report",
+                "printer_role": "document",
+                "paper_width_mm": 210,
+                "fields": {
+                  "hospital": {
+                    "name": "Haspataal Hospital",
+                    "address": "",
+                    "phone": ""
+                  },
+                  "requisition_number": "LR-2026-000001",
+                  "patient_name": "Ali Khan",
+                  "mrn": "MRN-2026-000001",
+                  "gender": "male",
+                  "age_years": 40,
+                  "doctor_name": "Dr Ahmed",
+                  "ordered_at": "2026-09-30T19:59:44.971373+00:00",
+                  "complete": true,
+                  "results": [
+                    {
+                      "result_id": 1,
+                      "code": "CBC",
+                      "test_name": "Complete Blood Count",
+                      "section": "Hematology",
+                      "interpretation": null,
+                      "has_critical_value": false,
+                      "is_correction": false,
+                      "correction_reason": null,
+                      "published_at": "2026-09-30T19:59:45.090086+00:00",
+                      "performed_by_partner": null,
+                      "performed_stamp": {
+                        "at": "2026-09-30T19:59:45.067016+00:00",
+                        "name": "Staff 4343",
+                        "text": "Staff 4343, Officer, 01-Oct-2026 00:59",
+                        "user_id": 7,
+                        "designation": "Officer",
+                        "employee_id": 7,
+                        "registration": null
+                      },
+                      "verified_stamp": {
+                        "at": "2026-09-30T19:59:45.090086+00:00",
+                        "name": "Staff 58278",
+                        "text": "Staff 58278, Officer, 01-Oct-2026 00:59",
+                        "user_id": 8,
+                        "designation": "Officer",
+                        "employee_id": 8,
+                        "registration": null
+                      },
+                      "rows": [
+                        {
+                          "key": "hb",
+                          "label": "Hemoglobin",
+                          "value": 11.2,
+                          "unit": "g/dL",
+                          "reference": "13.5 - 17.5",
+                          "flag": "L"
+                        },
+                        {
+                          "key": "wbc",
+                          "label": "WBC",
+                          "value": 7.4,
+                          "unit": "10^9/L",
+                          "reference": "4 - 11",
+                          "flag": "N"
+                        },
+                        {
+                          "key": "comment",
+                          "label": "Comment",
+                          "value": "Mild anaemia",
+                          "unit": null,
+                          "reference": null,
+                          "flag": null
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "text": "                                    Haspataal Hospital\n                                    LABORATORY REPORT\n------------------------------------------------------------------------------------------\nPatient                                                     Ali Khan (MRN MRN-2026-000001)\nAge / sex                                                                        40 / male\nRequisition       …",
+                "barcode_svg": "<svg version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" width=\"50.760mm\" height=\"18.411mm\">\r\n    <!--Autogenerated with python-barcode 0.16.1-->\r\n    <g id=\"barcode_group\">\r\n        <rect width=\"100%\" height=\"100%\" style=\"fill:white\"/>\r\n        <rect x=\"2.000mm\" y=\"1.000mm\" width=\"0.560mm\" height=\"12.000mm\" style=\"fill:black;\"/>\r\n        <rect x=\"2.840mm\" y=\"1.000mm\" width=\"0.280mm\" height=\"12.000mm…",
+                "qr_svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"116\" height=\"116\" class=\"segno\"><path transform=\"scale(4)\" class=\"qrline\" stroke=\"#000\" d=\"M2 2.5h7m1 0h1m1 0h2m2 0h3m1 0h7m-25 1h1m5 0h1m1 0h1m1 0h1m2 0h1m1 0h1m2 0h1m5 0h1m-25 1h1m1 0h3m1 0h1m2 0h2m1 0h1m5 0h1m1 0h3m1 0h1m-25 1h1m1 0h3m1 0h1m1 0h1m2 0h6m1 0h1m1 0h3m1 0h1m-25 1h1m1 0h3m1 0h1m2 0h2m1 0h1m1 0h1m3 0h1m1 0h3m1 0h1m-25 1h1m5 0h1m2 0h1m4 0…",
+                "pdf_url": "/api/v1/lab/requisitions/1/report/pdf"
+              },
+              "meta": {
+                "server_time": "2026-09-30T19:59:45.137533+00:00"
+              },
+              "request_id": "7a458503e11b47b6ad7595893a1ddbbf"
+            }
+          },
+          "errors_seen": [
+            "LAB_REPORT_NOT_READY"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "billing_admin",
+          "cashier",
+          "clinic_director"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "LAB_REPORT_NOT_READY",
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /lab/requisitions/{requisition_id}/report/pdf",
+      "call": "GET /api/v1/lab/requisitions/{requisition_id}/report/pdf",
+      "summary": "The lab report as a PDF",
+      "happy_path": {
+        "as_one_of": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "lab_admin",
+          "lab_technician",
+          "lab_verifier",
+          "radiologist",
+          "receptionist",
+          "surgeon",
+          "ward_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/lab/requisitions/1/report/pdf"
+          },
+          "response": {
+            "status": 200,
+            "content_type": "application/pdf",
+            "bytes": 2522
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "billing_admin",
+          "cashier",
+          "clinic_director"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "LAB_REPORT_NOT_READY",
+        "VALIDATION_ERROR"
+      ]
+    }
+  ],
+  "service_cases": [
+    {
+      "view": "full",
+      "set_up": "GET /establishment answers views.screens[screen_id=lab_only_walkin].view = full (laboratory or outsourced_diagnostics): stub that answer, or have the DEV server's admin move the service on Facility settings",
+      "expect": "Show it; every action the user's permissions allow."
+    },
+    {
+      "view": "open_work",
+      "set_up": "GET /establishment answers views.screens[screen_id=lab_only_walkin].view = open_work (laboratory or outsourced_diagnostics): stub that answer, or have the DEV server's admin move the service on Facility settings",
+      "expect": "The service is Retiring: show it with the banner 'No new <new_work> from now on' and its open work; hide the actions that start new work of it (x-capability-gates; continues_while_retiring ones stay); keep every other action (completing, transferring, settling, correcting)."
+    },
+    {
+      "view": "records",
+      "set_up": "GET /establishment answers views.screens[screen_id=lab_only_walkin].view = records (laboratory or outsourced_diagnostics): stub that answer, or have the DEV server's admin move the service on Facility settings",
+      "expect": "The service is Retired (or Preparing after it ran): show it as records only, under a 'Records' marker: lists, details, prints and the corrections the server still accepts; no action that starts new work."
+    },
+    {
+      "view": "hidden",
+      "set_up": "GET /establishment answers views.screens[screen_id=lab_only_walkin].view = hidden (laboratory or outsourced_diagnostics): stub that answer, or have the DEV server's admin move the service on Facility settings",
+      "expect": "Not in any menu: the service has never run here, so the screen has nothing to show."
+    },
+    {
+      "call": "POST /api/v1/patients/lab-only-walk-in",
+      "set_up": "outsourced_diagnostics not Active in GET /establishment",
+      "expect": "the choice for a send-out test (availability SendOut) is hidden or disabled; the rest of the action stays"
+    },
+    {
+      "call": "POST /api/v1/patients/lab-only-walk-in",
+      "set_up": "laboratory not Active in GET /establishment",
+      "expect": "the choice for an in-house test (availability InHouse) is hidden or disabled; the rest of the action stays"
+    }
+  ],
+  "delivery_gate": {
+    "required": true,
+    "status": "required",
+    "progress_reporting": {
+      "required": true,
+      "submit": "propose_progress",
+      "verify": "progress_proposals",
+      "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+    },
+    "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+    "compulsory": [
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+        "points": 2
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+        "points": 3
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+        "points": 2
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+        "points": 4
+      }
+    ],
+    "zoom": {
+      "min_pct": 100,
+      "max_pct": 250,
+      "reset_pct": 100,
+      "keys": [
+        "Ctrl + or Ctrl = (zoom in)",
+        "Ctrl - (zoom out)",
+        "Ctrl 0 (reset to 100 %)",
+        "Command on macOS"
+      ],
+      "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+    },
+    "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+    "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+  },
+  "handbook_page": "screens/lab_only_walkin",
+  "workspace_guide": "get_handbook_outline('reception')",
+  "realtime": [
+    {
+      "event": "lab.result.published",
+      "check": "the screen refreshes without polling"
+    }
+  ],
+  "acceptance_rules": [
+    "Only full_name and mobile are required.",
+    "Collect the lab bill at reception/cashier; lab staff never take cash.",
+    "Report collection: find the patient's requisitions (GET /lab/requisitions?patient_id=…) and print the signed report (A4); LAB_REPORT_NOT_READY = nothing verified yet, complete false = some tests are still running.",
+    "lab.result.published reaches the walk-in desk (users holding patient.create and lab.requisition.create) for lab-only walk-ins only: when its patient_id or requisition_id is the one on screen, read GET /lab/requisitions?patient_id=… again and offer the report. It is a hint, never the result: the report is ready only when its print-payload read answers. Show no value from the event.",
+    "Exists for the service laboratory or outsourced_diagnostics (work): show it as GET /establishment views.screens says for screen_id lab_only_walkin (full; open_work: without its new work, with the banner \"No new ... from now on\"; records: history and corrections only; setup: only from Facility settings; hidden: in no menu), after login and again on establishment.changed. Never decide it from the profile's category.",
+    "POST /patients/lab-only-walk-in starts new outsourced_diagnostics work for a send-out test (availability SendOut): offer that choice only while outsourced_diagnostics is Active (GET /establishment active); the rest of the action stays.",
+    "POST /patients/lab-only-walk-in starts new laboratory work for an in-house test (availability InHouse): offer that choice only while laboratory is Active (GET /establishment active); the rest of the action stays."
+  ],
+  "demo_accounts": "demo_accounts() lists a login per role; sandbox_call runs each case on the DEV server"
+}

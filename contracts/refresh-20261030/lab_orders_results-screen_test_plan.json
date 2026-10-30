@@ -1,0 +1,1422 @@
+{
+  "screen": "lab_orders_results",
+  "title": "Lab & imaging orders + results",
+  "cases": [
+    {
+      "id": "case:GET /lab/requisitions",
+      "call": "GET /api/v1/lab/requisitions",
+      "summary": "Requisitions of one patient (newest first)",
+      "happy_path": {
+        "as_one_of": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "lab_admin",
+          "lab_technician",
+          "lab_verifier",
+          "radiologist",
+          "receptionist",
+          "surgeon",
+          "ward_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/lab/requisitions",
+            "query": {
+              "patient_id": 1
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "requisition_id": 2,
+                  "requisition_number": "LR-2026-000002",
+                  "priority": "Urgent",
+                  "status": "Pending",
+                  "ordered_at": "2026-09-27T17:39:47.877337+00:00",
+                  "is_lab_only_walkin": false,
+                  "tests": 1,
+                  "published": 0
+                },
+                {
+                  "requisition_id": 1,
+                  "requisition_number": "LR-2026-000001",
+                  "priority": "Routine",
+                  "status": "Pending",
+                  "ordered_at": "2026-09-27T17:39:47.815583+00:00",
+                  "is_lab_only_walkin": false,
+                  "tests": 1,
+                  "published": 0
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-27T17:39:47.893968+00:00"
+              },
+              "request_id": "8709876fb2174177870c7fac7767c519"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "billing_admin",
+          "cashier",
+          "clinic_director"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:POST /lab/requisitions/{requisition_id}/cancel",
+      "call": "POST /api/v1/lab/requisitions/{requisition_id}/cancel",
+      "summary": "Cancel tests not yet sampled (voids an unpaid lab bill)",
+      "happy_path": {
+        "as_one_of": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "lab_admin",
+          "surgeon"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/lab/requisitions/1/cancel",
+            "body": {
+              "reason": "wrong test ordered"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "requisition_id": 1,
+                "requisition_number": "LR-2026-000001",
+                "patient_id": 1,
+                "ticket_id": 1,
+                "admission_id": null,
+                "requester_type": "Doctor",
+                "requester_user_id": 1,
+                "requester_doctor_id": 1,
+                "is_lab_only_walkin": false,
+                "priority": "Routine",
+                "clinical_notes": null,
+                "status": "Cancelled",
+                "cancel_reason": "wrong test ordered",
+                "ordered_at": "2026-09-30T20:12:18.605371+00:00",
+                "row_version": 2,
+                "patient_name": "Ali Khan",
+                "mrn": "MRN-2026-000001",
+                "gender": "male",
+                "age_years": 40,
+                "dob": null,
+                "doctor_name": "Dr Ahmed",
+                "items": [
+                  {
+                    "lab_requisition_item_id": 1,
+                    "test_id": 1,
+                    "code": "CBC",
+                    "test_name": "Complete Blood Count",
+                    "section": "Hematology",
+                    "price_at_order": 800,
+                    "status": "Cancelled",
+                    "rerun_of_item_id": null,
+                    "is_billable": true,
+                    "sample_id": null,
+                    "barcode": null,
+                    "sample_status": null,
+                    "collected_at": null,
+                    "received_at": null,
+                    "identity_check": null,
+                    "is_send_out": false,
+                    "partner_name": null,
+                    "due_at": null
+                  }
+                ],
+                "results": [],
+                "invoice": {
+                  "invoice_id": 2,
+                  "invoice_no": "INV-2026-0000002",
+                  "invoice_type": "Lab",
+                  "status": "Cancelled",
+                  "balance_due": 0
+                }
+              },
+              "meta": {
+                "server_time": "2026-09-30T20:12:18.690365+00:00"
+              },
+              "request_id": "6f1b8d6320ae4b7ca89bf84eb09f2ba5"
+            }
+          },
+          "errors_seen": [
+            "FORBIDDEN",
+            "LAB_ITEM_STATE_INVALID"
+          ],
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "billing_admin",
+          "cashier",
+          "clinic_director"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "FORBIDDEN",
+        "INVOICE_HAS_PAYMENTS",
+        "LAB_ITEM_STATE_INVALID",
+        "NOT_FOUND",
+        "VALIDATION_ERROR"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:GET /lab/tests",
+      "call": "GET /api/v1/lab/tests",
+      "summary": "Active lab test catalogue (for the ordering picker)",
+      "happy_path": {
+        "as_one_of": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "lab_admin",
+          "lab_technician",
+          "lab_verifier",
+          "receptionist",
+          "surgeon"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/lab/tests",
+            "query": {
+              "q": "Vitamin"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "test_id": 3,
+                  "code": "VITD",
+                  "name": "Vitamin D",
+                  "section": "Biochemistry",
+                  "sample_type": "Blood",
+                  "price": 3500,
+                  "turnaround_minutes": null,
+                  "emergency_turnaround_minutes": null,
+                  "availability": "SendOut",
+                  "send_out_partner_id": 1,
+                  "send_out_partner_name": "City Reference Laboratory",
+                  "available_24h": false,
+                  "notifiable_disease": null,
+                  "is_active": true,
+                  "row_version": 1,
+                  "metric_schema": [
+                    {
+                      "key": "vitd",
+                      "ref": {
+                        "default": [
+                          30,
+                          100
+                        ]
+                      },
+                      "type": "number",
+                      "unit": "ng/mL",
+                      "label": "25-OH vitamin D",
+                      "required": true
+                    }
+                  ]
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-30T20:02:52.094403+00:00"
+              },
+              "request_id": "38924faef3f943f7b883e6717d06e91e"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "billing_admin",
+          "cashier",
+          "clinic_director"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:POST /lab/requisitions",
+      "call": "POST /api/v1/lab/requisitions",
+      "summary": "Order lab tests for an OPD visit or an inpatient",
+      "happy_path": {
+        "as_one_of": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "receptionist",
+          "surgeon"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/lab/requisitions",
+            "body": {
+              "ticket_id": 1,
+              "test_ids": [
+                1
+              ]
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "requisition_id": 1,
+                "requisition_number": "LR-2026-000001",
+                "patient_id": 1,
+                "ticket_id": 1,
+                "admission_id": null,
+                "requester_type": "Doctor",
+                "requester_user_id": 1,
+                "requester_doctor_id": 1,
+                "is_lab_only_walkin": false,
+                "priority": "Routine",
+                "clinical_notes": null,
+                "status": "Pending",
+                "cancel_reason": null,
+                "ordered_at": "2026-09-30T19:59:44.971373+00:00",
+                "row_version": 1,
+                "patient_name": "Ali Khan",
+                "mrn": "MRN-2026-000001",
+                "gender": "male",
+                "age_years": 40,
+                "dob": null,
+                "doctor_name": "Dr Ahmed",
+                "items": [
+                  {
+                    "lab_requisition_item_id": 1,
+                    "test_id": 1,
+                    "code": "CBC",
+                    "test_name": "Complete Blood Count",
+                    "section": "Hematology",
+                    "price_at_order": 800,
+                    "status": "Ordered",
+                    "rerun_of_item_id": null,
+                    "is_billable": true,
+                    "sample_id": 1,
+                    "barcode": "LB-2026-0000001",
+                    "sample_status": "Pending",
+                    "collected_at": null,
+                    "received_at": null,
+                    "identity_check": null,
+                    "is_send_out": false,
+                    "partner_name": null,
+                    "due_at": null
+                  }
+                ],
+                "results": [],
+                "invoice": {
+                  "invoice_id": 2,
+                  "invoice_no": "INV-2026-0000002",
+                  "invoice_type": "Lab",
+                  "status": "Open",
+                  "balance_due": 800
+                }
+              },
+              "meta": {
+                "server_time": "2026-09-30T19:59:45.011927+00:00"
+              },
+              "request_id": "5eb5af0300444aa9bb91610ff36dc718"
+            }
+          },
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "billing_admin",
+          "cashier",
+          "clinic_director"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "AR_OUTSTANDING_BLOCK",
+        "CAPABILITY_INACTIVE",
+        "REFERENCE_NOT_FOUND",
+        "VALIDATION_ERROR"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:GET /lab/requisitions/{requisition_id}",
+      "call": "GET /api/v1/lab/requisitions/{requisition_id}",
+      "summary": "Requisition with items, samples, results and bill status",
+      "happy_path": {
+        "as_one_of": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "lab_admin",
+          "lab_technician",
+          "lab_verifier",
+          "radiologist",
+          "receptionist",
+          "surgeon",
+          "ward_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/lab/requisitions/1"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "requisition_id": 1,
+                "requisition_number": "LR-2026-000001",
+                "patient_id": 1,
+                "ticket_id": 1,
+                "admission_id": null,
+                "requester_type": "Doctor",
+                "requester_user_id": 1,
+                "requester_doctor_id": 1,
+                "is_lab_only_walkin": false,
+                "priority": "Routine",
+                "clinical_notes": null,
+                "status": "Completed",
+                "cancel_reason": null,
+                "ordered_at": "2026-10-16T09:29:48.014835+00:00",
+                "row_version": 3,
+                "patient_name": "Ali Khan",
+                "mrn": "MRN-2026-000001",
+                "gender": "male",
+                "age_years": 40,
+                "dob": null,
+                "doctor_name": "Dr Ahmed",
+                "items": [
+                  {
+                    "lab_requisition_item_id": 1,
+                    "test_id": 1,
+                    "code": "CBC",
+                    "test_name": "Complete Blood Count",
+                    "section": "Hematology",
+                    "price_at_order": 800,
+                    "status": "Published",
+                    "rerun_of_item_id": null,
+                    "is_billable": true,
+                    "sample_id": 1,
+                    "barcode": "LB-2026-0000001",
+                    "sample_status": "Consumed",
+                    "collected_at": "2026-10-16T09:29:48.091781+00:00",
+                    "received_at": null,
+                    "identity_check": "TwoIdentifiers",
+                    "is_send_out": false,
+                    "partner_name": null,
+                    "due_at": "2026-10-16T13:29:48.091781+00:00"
+                  }
+                ],
+                "results": [
+                  {
+                    "result_id": 1,
+                    "lab_requisition_item_id": 1,
+                    "metrics_jsonb": {
+                      "hb": 11.2,
+                      "wbc": 7.4,
+                      "comment": "Mild anaemia"
+                    },
+                    "flags_jsonb": {
+                      "hb": "L",
+                      "wbc": "N"
+                    },
+                    "has_critical_value": false,
+                    "interpretation": null,
+                    "status": "Published",
+                    "entered_at": "2026-10-16T09:29:48.110932+00:00",
+                    "published_at": "2026-10-16T09:29:48.133822+00:00",
+                    "provisionally_released_at": null,
+                    "is_correction": false,
+                    "corrects_result_id": null,
+                    "correction_reason": null,
+                    "partner_name": null,
+                    "partner_report_ref": null,
+                    "performed_stamp": {
+                      "at": "2026-10-16T09:29:48.110932+00:00",
+                      "name": "Staff 21985",
+                      "text": "Staff 21985, Officer, 16-Oct-2026 14:29",
+                      "user_id": 7,
+                      "designation": "Officer",
+                      "employee_id": 7,
+                      "registration": null
+                    },
+                    "verified_stamp": {
+                      "at": "2026-10-16T09:29:48.133822+00:00",
+                      "name": "Staff 15248",
+                      "text": "Staff 15248, Officer, 16-Oct-2026 14:29",
+                      "user_id": 8,
+                      "designation": "Officer",
+                      "employee_id": 8,
+                      "registration": null
+                    }
+                  }
+                ],
+                "invoice": {
+                  "invoice_id": 2,
+                  "invoice_no": "INV-2026-0000002",
+                  "invoice_type": "Lab",
+                  "status": "Paid",
+                  "balance_due": 0
+                }
+              },
+              "meta": {
+                "server_time": "2026-10-16T09:29:48.162620+00:00"
+              },
+              "request_id": "14d720746a604b44a7dc97e0284e3d3c"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "billing_admin",
+          "cashier",
+          "clinic_director"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /lab/patients/{patient_id}/results",
+      "call": "GET /api/v1/lab/patients/{patient_id}/results",
+      "summary": "Published results timeline of a patient (EMR)",
+      "happy_path": {
+        "as_one_of": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "lab_admin",
+          "lab_technician",
+          "lab_verifier",
+          "radiologist",
+          "surgeon",
+          "ward_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/lab/patients/1/results"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "result_id": 1,
+                  "requisition_number": "LR-2026-000001",
+                  "test_id": 1,
+                  "code": "CBC",
+                  "test_name": "Complete Blood Count",
+                  "metrics": {
+                    "hb": 11.2,
+                    "wbc": 7.4,
+                    "comment": "Mild anaemia"
+                  },
+                  "flags": {
+                    "hb": "L",
+                    "wbc": "N"
+                  },
+                  "has_critical_value": false,
+                  "interpretation": null,
+                  "status": "Published",
+                  "published_at": "2026-10-16T09:29:48.133822+00:00",
+                  "provisionally_released_at": null,
+                  "is_correction": false,
+                  "verified_stamp": {
+                    "at": "2026-10-16T09:29:48.133822+00:00",
+                    "name": "Staff 15248",
+                    "text": "Staff 15248, Officer, 16-Oct-2026 14:29",
+                    "user_id": 8,
+                    "designation": "Officer",
+                    "employee_id": 8,
+                    "registration": null
+                  }
+                }
+              ],
+              "meta": {
+                "server_time": "2026-10-16T09:29:48.168839+00:00"
+              },
+              "request_id": "ec831cee7d7f4f0abf8cf24ae08ab108"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "billing_admin",
+          "cashier",
+          "clinic_director"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:POST /imaging/orders",
+      "call": "POST /api/v1/imaging/orders",
+      "summary": "Order imaging (doctor)",
+      "happy_path": {
+        "as_one_of": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "surgeon"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/imaging/orders",
+            "body": {
+              "ticket_id": 1,
+              "modality": "XRay",
+              "body_part": "Chest PA",
+              "service_id": 2,
+              "clinical_indication": "Cough for 3 weeks"
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "imaging_order_id": 1,
+                "order_number": "IMG-2026-00001",
+                "accession_number": "AEF50A7A1CEF9",
+                "patient_id": 1,
+                "ticket_id": 1,
+                "admission_id": null,
+                "requester_doctor_id": 1,
+                "modality": "XRay",
+                "body_part": "Chest PA",
+                "clinical_indication": "Cough for 3 weeks",
+                "service_id": 2,
+                "price_at_order": 1500,
+                "priority": "Routine",
+                "laterality": null,
+                "transport": null,
+                "escort": null,
+                "status": "Ordered",
+                "identity_check": null,
+                "identity_note": null,
+                "site_confirmed": false,
+                "pregnancy_status": null,
+                "pregnancy_note": null,
+                "checked_by": null,
+                "started_at": null,
+                "contrast": null,
+                "contrast_doctor_id": null,
+                "completed_at": null,
+                "orthanc_study_id": null,
+                "study_instance_uid": null,
+                "partner_id": null,
+                "outsourced_at": null,
+                "external_reporter": null,
+                "report_text": null,
+                "reported_by": null,
+                "reported_at": null,
+                "critical_finding_id": null,
+                "critical_finding_note": null,
+                "cancel_reason": null,
+                "ordered_by": 1,
+                "ordered_at": "2026-09-30T19:59:54.677771+00:00",
+                "perform_alerted_at": null,
+                "report_alerted_at": null,
+                "row_version": 1
+              },
+              "meta": {
+                "server_time": "2026-09-30T19:59:54.708442+00:00"
+              },
+              "request_id": "aa906f90f6864706af9c54a406f00ba5"
+            }
+          },
+          "events_emitted": [
+            "imaging.order.created"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "billing_admin",
+          "cashier",
+          "clinic_director"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "CAPABILITY_INACTIVE",
+        "REFERENCE_NOT_FOUND",
+        "VALIDATION_ERROR"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:GET /imaging/orders",
+      "call": "GET /api/v1/imaging/orders",
+      "summary": "Imaging orders of a patient",
+      "happy_path": {
+        "as_one_of": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "radiographer",
+          "radiologist",
+          "surgeon"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/imaging/orders",
+            "query": {
+              "patient_id": 1
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "imaging_order_id": 2,
+                  "order_number": "IMG-2026-00002",
+                  "accession_number": "A6D791896F1AF",
+                  "patient_id": 1,
+                  "ticket_id": 1,
+                  "admission_id": null,
+                  "requester_doctor_id": 1,
+                  "modality": "XRay",
+                  "body_part": "Knee",
+                  "clinical_indication": null,
+                  "service_id": 2,
+                  "price_at_order": 1500,
+                  "priority": "Routine",
+                  "laterality": null,
+                  "transport": null,
+                  "escort": null,
+                  "status": "Ordered",
+                  "identity_check": null,
+                  "identity_note": null,
+                  "site_confirmed": false,
+                  "pregnancy_status": null,
+                  "pregnancy_note": null,
+                  "checked_by": null,
+                  "started_at": null,
+                  "contrast": null,
+                  "contrast_doctor_id": null,
+                  "completed_at": null,
+                  "orthanc_study_id": null,
+                  "study_instance_uid": null,
+                  "partner_id": null,
+                  "outsourced_at": null,
+                  "external_reporter": null,
+                  "report_text": null,
+                  "reported_by": null,
+                  "reported_at": null,
+                  "critical_finding_id": null,
+                  "critical_finding_note": null,
+                  "cancel_reason": null,
+                  "ordered_by": 1,
+                  "ordered_at": "2026-09-30T20:09:07.648427+00:00",
+                  "perform_alerted_at": null,
+                  "report_alerted_at": null,
+                  "row_version": 1,
+                  "doctor_name": "Dr Ahmed",
+                  "viewer_url": null
+                },
+                {
+                  "imaging_order_id": 1,
+                  "order_number": "IMG-2026-00001",
+                  "accession_number": "A8939E33A1EBA",
+                  "patient_id": 1,
+                  "ticket_id": 1,
+                  "admission_id": null,
+                  "requester_doctor_id": 1,
+                  "modality": "XRay",
+                  "body_part": "Chest PA",
+                  "clinical_indication": null,
+                  "service_id": 2,
+                  "price_at_order": 1500,
+                  "priority": "Routine",
+                  "laterality": null,
+                  "transport": null,
+                  "escort": null,
+                  "status": "Ordered",
+                  "identity_check": null,
+                  "identity_note": null,
+                  "site_confirmed": false,
+                  "pregnancy_status": null,
+                  "pregnancy_note": null,
+                  "checked_by": null,
+                  "started_at": null,
+                  "contrast": null,
+                  "contrast_doctor_id": null,
+                  "completed_at": null,
+                  "orthanc_study_id": "abc-123",
+                  "study_instance_uid": "1.2.3.4",
+                  "partner_id": null,
+                  "outsourced_at": null,
+                  "external_reporter": null,
+                  "report_text": null,
+                  "reported_by": null,
+                  "reported_at": null,
+                  "critical_finding_id": null,
+                  "critical_finding_note": null,
+                  "cancel_reason": null,
+                  "ordered_by": 1,
+                  "ordered_at": "2026-09-30T20:09:07.565456+00:00",
+                  "perform_alerted_at": null,
+                  "report_alerted_at": null,
+                  "row_version": 2,
+                  "doctor_name": "Dr Ahmed",
+                  "viewer_url": "http://pacs.hospital.lan:8042/stone-webviewer/index.html?study=1.2.3.4"
+                }
+              ],
+              "meta": {
+                "server_time": "2026-09-30T20:09:07.682082+00:00"
+              },
+              "request_id": "a333d5e97cc44b7282fe2988f6261f71"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "billing_admin",
+          "cashier",
+          "clinic_director"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /imaging/orders/{order_id}",
+      "call": "GET /api/v1/imaging/orders/{order_id}",
+      "summary": "Imaging order with viewer URL",
+      "happy_path": {
+        "as_one_of": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "radiographer",
+          "radiologist",
+          "surgeon"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/imaging/orders/1"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "imaging_order_id": 1,
+                "order_number": "IMG-2026-00001",
+                "accession_number": "AEF50A7A1CEF9",
+                "patient_id": 1,
+                "ticket_id": 1,
+                "admission_id": null,
+                "requester_doctor_id": 1,
+                "modality": "XRay",
+                "body_part": "Chest PA",
+                "clinical_indication": "Cough for 3 weeks",
+                "service_id": 2,
+                "price_at_order": 1500,
+                "priority": "Routine",
+                "laterality": null,
+                "transport": null,
+                "escort": null,
+                "status": "Reported",
+                "identity_check": "TwoIdentifiers",
+                "identity_note": null,
+                "site_confirmed": true,
+                "pregnancy_status": null,
+                "pregnancy_note": null,
+                "checked_by": 7,
+                "started_at": "2026-09-30T19:59:54.751251+00:00",
+                "contrast": null,
+                "contrast_doctor_id": null,
+                "completed_at": "2026-09-30T19:59:54.767417+00:00",
+                "orthanc_study_id": "s-1",
+                "study_instance_uid": "1.2",
+                "partner_id": null,
+                "outsourced_at": null,
+                "external_reporter": null,
+                "report_text": "No active lung lesion.",
+                "reported_by": 6,
+                "reported_at": "2026-09-30T19:59:54.781647+00:00",
+                "critical_finding_id": null,
+                "critical_finding_note": null,
+                "cancel_reason": null,
+                "ordered_by": 1,
+                "ordered_at": "2026-09-30T19:59:54.677771+00:00",
+                "perform_alerted_at": null,
+                "report_alerted_at": null,
+                "row_version": 4,
+                "patient_name": "Ali Khan",
+                "mrn": "MRN-2026-000001",
+                "gender": "male",
+                "age_years": 40,
+                "doctor_name": "Dr Ahmed",
+                "reported_by_name": "Dr Hamza Radiologist",
+                "reported_stamp": {
+                  "at": "2026-09-30T19:59:54.781647+00:00",
+                  "name": "Dr Hamza Radiologist",
+                  "text": "Dr Hamza Radiologist, Doctor, PMDC PMDC-51447, 01-Oct-2026 00:59",
+                  "user_id": 6,
+                  "designation": "Doctor",
+                  "employee_id": 6,
+                  "registration": "PMDC PMDC-51447"
+                },
+                "checked_by_name": "u98c91315b4",
+                "contrast_doctor_name": null,
+                "partner_name": null,
+                "critical_finding_name": null,
+                "critical_result_id": null,
+                "perform_due_at": "2026-09-30T23:59:54.677771+00:00",
+                "report_due_at": "2026-10-01T19:59:54.767417+00:00",
+                "pregnancy_check_needed": false,
+                "viewer_url": null
+              },
+              "meta": {
+                "server_time": "2026-09-30T19:59:54.805684+00:00"
+              },
+              "request_id": "d9339d088ba24e2ea18fff49bd978ed1"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "billing_admin",
+          "cashier",
+          "clinic_director"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /lab/requisitions/{requisition_id}/report/print-payload",
+      "call": "GET /api/v1/lab/requisitions/{requisition_id}/report/print-payload",
+      "summary": "Printable lab report with who performed and who verified each test",
+      "happy_path": {
+        "as_one_of": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "lab_admin",
+          "lab_technician",
+          "lab_verifier",
+          "radiologist",
+          "receptionist",
+          "surgeon",
+          "ward_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/lab/requisitions/1/report/print-payload"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "document_type": "lab_report",
+                "printer_role": "document",
+                "paper_width_mm": 210,
+                "fields": {
+                  "hospital": {
+                    "name": "Haspataal Hospital",
+                    "address": "",
+                    "phone": ""
+                  },
+                  "requisition_number": "LR-2026-000001",
+                  "patient_name": "Ali Khan",
+                  "mrn": "MRN-2026-000001",
+                  "gender": "male",
+                  "age_years": 40,
+                  "doctor_name": "Dr Ahmed",
+                  "ordered_at": "2026-09-30T19:59:44.971373+00:00",
+                  "complete": true,
+                  "results": [
+                    {
+                      "result_id": 1,
+                      "code": "CBC",
+                      "test_name": "Complete Blood Count",
+                      "section": "Hematology",
+                      "interpretation": null,
+                      "has_critical_value": false,
+                      "is_correction": false,
+                      "correction_reason": null,
+                      "published_at": "2026-09-30T19:59:45.090086+00:00",
+                      "performed_by_partner": null,
+                      "performed_stamp": {
+                        "at": "2026-09-30T19:59:45.067016+00:00",
+                        "name": "Staff 4343",
+                        "text": "Staff 4343, Officer, 01-Oct-2026 00:59",
+                        "user_id": 7,
+                        "designation": "Officer",
+                        "employee_id": 7,
+                        "registration": null
+                      },
+                      "verified_stamp": {
+                        "at": "2026-09-30T19:59:45.090086+00:00",
+                        "name": "Staff 58278",
+                        "text": "Staff 58278, Officer, 01-Oct-2026 00:59",
+                        "user_id": 8,
+                        "designation": "Officer",
+                        "employee_id": 8,
+                        "registration": null
+                      },
+                      "rows": [
+                        {
+                          "key": "hb",
+                          "label": "Hemoglobin",
+                          "value": 11.2,
+                          "unit": "g/dL",
+                          "reference": "13.5 - 17.5",
+                          "flag": "L"
+                        },
+                        {
+                          "key": "wbc",
+                          "label": "WBC",
+                          "value": 7.4,
+                          "unit": "10^9/L",
+                          "reference": "4 - 11",
+                          "flag": "N"
+                        },
+                        {
+                          "key": "comment",
+                          "label": "Comment",
+                          "value": "Mild anaemia",
+                          "unit": null,
+                          "reference": null,
+                          "flag": null
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "text": "                                    Haspataal Hospital\n                                    LABORATORY REPORT\n------------------------------------------------------------------------------------------\nPatient                                                     Ali Khan (MRN MRN-2026-000001)\nAge / sex                                                                        40 / male\nRequisition       …",
+                "barcode_svg": "<svg version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" width=\"50.760mm\" height=\"18.411mm\">\r\n    <!--Autogenerated with python-barcode 0.16.1-->\r\n    <g id=\"barcode_group\">\r\n        <rect width=\"100%\" height=\"100%\" style=\"fill:white\"/>\r\n        <rect x=\"2.000mm\" y=\"1.000mm\" width=\"0.560mm\" height=\"12.000mm\" style=\"fill:black;\"/>\r\n        <rect x=\"2.840mm\" y=\"1.000mm\" width=\"0.280mm\" height=\"12.000mm…",
+                "qr_svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"116\" height=\"116\" class=\"segno\"><path transform=\"scale(4)\" class=\"qrline\" stroke=\"#000\" d=\"M2 2.5h7m1 0h1m1 0h2m2 0h3m1 0h7m-25 1h1m5 0h1m1 0h1m1 0h1m2 0h1m1 0h1m2 0h1m5 0h1m-25 1h1m1 0h3m1 0h1m2 0h2m1 0h1m5 0h1m1 0h3m1 0h1m-25 1h1m1 0h3m1 0h1m1 0h1m2 0h6m1 0h1m1 0h3m1 0h1m-25 1h1m1 0h3m1 0h1m2 0h2m1 0h1m1 0h1m3 0h1m1 0h3m1 0h1m-25 1h1m5 0h1m2 0h1m4 0…",
+                "pdf_url": "/api/v1/lab/requisitions/1/report/pdf"
+              },
+              "meta": {
+                "server_time": "2026-09-30T19:59:45.137533+00:00"
+              },
+              "request_id": "7a458503e11b47b6ad7595893a1ddbbf"
+            }
+          },
+          "errors_seen": [
+            "LAB_REPORT_NOT_READY"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "billing_admin",
+          "cashier",
+          "clinic_director"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "LAB_REPORT_NOT_READY",
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /lab/requisitions/{requisition_id}/report/pdf",
+      "call": "GET /api/v1/lab/requisitions/{requisition_id}/report/pdf",
+      "summary": "The lab report as a PDF",
+      "happy_path": {
+        "as_one_of": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "lab_admin",
+          "lab_technician",
+          "lab_verifier",
+          "radiologist",
+          "receptionist",
+          "surgeon",
+          "ward_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/lab/requisitions/1/report/pdf"
+          },
+          "response": {
+            "status": 200,
+            "content_type": "application/pdf",
+            "bytes": 2522
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "billing_admin",
+          "cashier",
+          "clinic_director"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "LAB_REPORT_NOT_READY",
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /imaging/orders/{order_id}/report/print-payload",
+      "call": "GET /api/v1/imaging/orders/{order_id}/report/print-payload",
+      "summary": "Printable radiology report with the reporter's stamp",
+      "happy_path": {
+        "as_one_of": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "radiographer",
+          "radiologist",
+          "surgeon"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/imaging/orders/1/report/print-payload"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "document_type": "imaging_report",
+                "printer_role": "document",
+                "paper_width_mm": 210,
+                "fields": {
+                  "hospital": {
+                    "name": "Haspataal Hospital",
+                    "address": "",
+                    "phone": ""
+                  },
+                  "order": {
+                    "imaging_order_id": 1,
+                    "order_number": "IMG-2026-00001",
+                    "accession_number": "AEF50A7A1CEF9",
+                    "patient_id": 1,
+                    "ticket_id": 1,
+                    "admission_id": null,
+                    "requester_doctor_id": 1,
+                    "modality": "XRay",
+                    "body_part": "Chest PA",
+                    "clinical_indication": "Cough for 3 weeks",
+                    "service_id": 2,
+                    "price_at_order": 1500,
+                    "priority": "Routine",
+                    "laterality": null,
+                    "transport": null,
+                    "escort": null,
+                    "status": "Reported",
+                    "identity_check": "TwoIdentifiers",
+                    "identity_note": null,
+                    "site_confirmed": true,
+                    "pregnancy_status": null,
+                    "pregnancy_note": null,
+                    "checked_by": 7,
+                    "started_at": "2026-09-30T19:59:54.751251+00:00",
+                    "contrast": null,
+                    "contrast_doctor_id": null,
+                    "completed_at": "2026-09-30T19:59:54.767417+00:00",
+                    "orthanc_study_id": "s-1",
+                    "study_instance_uid": "1.2",
+                    "partner_id": null,
+                    "outsourced_at": null,
+                    "external_reporter": null,
+                    "report_text": "No active lung lesion.",
+                    "reported_by": 6,
+                    "reported_at": "2026-09-30T19:59:54.781647+00:00",
+                    "critical_finding_id": null,
+                    "critical_finding_note": null,
+                    "cancel_reason": null,
+                    "ordered_by": 1,
+                    "ordered_at": "2026-09-30T19:59:54.677771+00:00",
+                    "perform_alerted_at": null,
+                    "report_alerted_at": null,
+                    "row_version": 4,
+                    "patient_name": "Ali Khan",
+                    "mrn": "MRN-2026-000001",
+                    "gender": "male",
+                    "age_years": 40,
+                    "doctor_name": "Dr Ahmed",
+                    "reported_by_name": "Dr Hamza Radiologist",
+                    "reported_stamp": {
+                      "at": "2026-09-30T19:59:54.781647+00:00",
+                      "name": "Dr Hamza Radiologist",
+                      "text": "Dr Hamza Radiologist, Doctor, PMDC PMDC-51447, 01-Oct-2026 00:59",
+                      "user_id": 6,
+                      "designation": "Doctor",
+                      "employee_id": 6,
+                      "registration": "PMDC PMDC-51447"
+                    },
+                    "checked_by_name": "u98c91315b4",
+                    "contrast_doctor_name": null,
+                    "partner_name": null,
+                    "critical_finding_name": null,
+                    "critical_result_id": null,
+                    "perform_due_at": "2026-09-30T23:59:54.677771+00:00",
+                    "report_due_at": "2026-10-01T19:59:54.767417+00:00",
+                    "pregnancy_check_needed": false,
+                    "viewer_url": null
+                  }
+                },
+                "text": "                                    Haspataal Hospital\n                                     RADIOLOGY REPORT\n------------------------------------------------------------------------------------------\nPatient                                                     Ali Khan (MRN MRN-2026-000001)\nAge / sex                                                                        40 / male\nStudy             …",
+                "barcode_svg": "<svg version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" width=\"53.840mm\" height=\"18.411mm\">\r\n    <!--Autogenerated with python-barcode 0.16.1-->\r\n    <g id=\"barcode_group\">\r\n        <rect width=\"100%\" height=\"100%\" style=\"fill:white\"/>\r\n        <rect x=\"2.000mm\" y=\"1.000mm\" width=\"0.560mm\" height=\"12.000mm\" style=\"fill:black;\"/>\r\n        <rect x=\"2.840mm\" y=\"1.000mm\" width=\"0.280mm\" height=\"12.000mm…",
+                "qr_svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"116\" height=\"116\" class=\"segno\"><path transform=\"scale(4)\" class=\"qrline\" stroke=\"#000\" d=\"M2 2.5h7m5 0h1m2 0h2m1 0h7m-25 1h1m5 0h1m1 0h2m1 0h5m2 0h1m5 0h1m-25 1h1m1 0h3m1 0h1m2 0h4m1 0h1m3 0h1m1 0h3m1 0h1m-25 1h1m1 0h3m1 0h1m2 0h1m3 0h1m4 0h1m1 0h3m1 0h1m-25 1h1m1 0h3m1 0h1m1 0h2m1 0h4m3 0h1m1 0h3m1 0h1m-25 1h1m5 0h1m5 0h1m3 0h1m1 0h1m5 0h1m-25 1h7m1…",
+                "pdf_url": "/api/v1/imaging/orders/1/report/pdf"
+              },
+              "meta": {
+                "server_time": "2026-09-30T19:59:54.827075+00:00"
+              },
+              "request_id": "2d595f892c06456cbc3025ac44704e77"
+            }
+          },
+          "errors_seen": [
+            "IMAGING_REPORT_NOT_READY"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "billing_admin",
+          "cashier",
+          "clinic_director"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "IMAGING_REPORT_NOT_READY",
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /imaging/orders/{order_id}/report/pdf",
+      "call": "GET /api/v1/imaging/orders/{order_id}/report/pdf",
+      "summary": "The radiology report as a PDF",
+      "happy_path": {
+        "as_one_of": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "radiographer",
+          "radiologist",
+          "surgeon"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/imaging/orders/1/report/pdf"
+          },
+          "response": {
+            "status": 200,
+            "content_type": "application/pdf",
+            "bytes": 2394
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "billing_admin",
+          "cashier",
+          "clinic_director"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "IMAGING_REPORT_NOT_READY",
+        "VALIDATION_ERROR"
+      ]
+    }
+  ],
+  "service_cases": [
+    {
+      "view": "full",
+      "set_up": "GET /establishment answers views.screens[screen_id=lab_orders_results].view = full (laboratory or outsourced_diagnostics or imaging): stub that answer, or have the DEV server's admin move the service on Facility settings",
+      "expect": "Show it; every action the user's permissions allow."
+    },
+    {
+      "view": "open_work",
+      "set_up": "GET /establishment answers views.screens[screen_id=lab_orders_results].view = open_work (laboratory or outsourced_diagnostics or imaging): stub that answer, or have the DEV server's admin move the service on Facility settings",
+      "expect": "The service is Retiring: show it with the banner 'No new <new_work> from now on' and its open work; hide the actions that start new work of it (x-capability-gates; continues_while_retiring ones stay); keep every other action (completing, transferring, settling, correcting)."
+    },
+    {
+      "view": "records",
+      "set_up": "GET /establishment answers views.screens[screen_id=lab_orders_results].view = records (laboratory or outsourced_diagnostics or imaging): stub that answer, or have the DEV server's admin move the service on Facility settings",
+      "expect": "The service is Retired (or Preparing after it ran): show it as records only, under a 'Records' marker: lists, details, prints and the corrections the server still accepts; no action that starts new work."
+    },
+    {
+      "view": "hidden",
+      "set_up": "GET /establishment answers views.screens[screen_id=lab_orders_results].view = hidden (laboratory or outsourced_diagnostics or imaging): stub that answer, or have the DEV server's admin move the service on Facility settings",
+      "expect": "Not in any menu: the service has never run here, so the screen has nothing to show."
+    },
+    {
+      "call": "POST /api/v1/lab/requisitions",
+      "set_up": "outsourced_diagnostics not Active in GET /establishment",
+      "expect": "the choice for a send-out test (availability SendOut) is hidden or disabled; the rest of the action stays"
+    },
+    {
+      "call": "POST /api/v1/lab/requisitions",
+      "set_up": "laboratory not Active in GET /establishment",
+      "expect": "the choice for an in-house test (availability InHouse) is hidden or disabled; the rest of the action stays"
+    },
+    {
+      "call": "POST /api/v1/imaging/orders",
+      "set_up": "imaging not Active in GET /establishment",
+      "expect": "the action is hidden"
+    }
+  ],
+  "delivery_gate": {
+    "required": true,
+    "status": "required",
+    "progress_reporting": {
+      "required": true,
+      "submit": "propose_progress",
+      "verify": "progress_proposals",
+      "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+    },
+    "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+    "compulsory": [
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+        "points": 2
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+        "points": 3
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+        "points": 2
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+        "points": 4
+      }
+    ],
+    "zoom": {
+      "min_pct": 100,
+      "max_pct": 250,
+      "reset_pct": 100,
+      "keys": [
+        "Ctrl + or Ctrl = (zoom in)",
+        "Ctrl - (zoom out)",
+        "Ctrl 0 (reset to 100 %)",
+        "Command on macOS"
+      ],
+      "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+    },
+    "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+    "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+  },
+  "handbook_page": "screens/lab_orders_results",
+  "workspace_guide": "get_handbook_outline('doctor')",
+  "realtime": [
+    {
+      "event": "lab.result.published",
+      "check": "the screen refreshes without polling"
+    },
+    {
+      "event": "lab.result.critical_pending",
+      "check": "the screen refreshes without polling"
+    },
+    {
+      "event": "lab.result.provisional",
+      "check": "the screen refreshes without polling"
+    },
+    {
+      "event": "lab.result.provisional_withdrawn",
+      "check": "the screen refreshes without polling"
+    },
+    {
+      "event": "imaging.study.available",
+      "check": "the screen refreshes without polling"
+    },
+    {
+      "event": "imaging.report.ready",
+      "check": "the screen refreshes without polling"
+    }
+  ],
+  "acceptance_rules": [
+    "Doctors only ever see PUBLISHED results (after lab verification), apart from a critical value released provisionally (the next rule).",
+    "A result with provisionally_released_at is an unverified critical value: show it in red with 'Pending verification', never print it; lab.result.provisional_withdrawn means do not act on it.",
+    "Cancel an order of your own while no test is sampled: POST /lab/requisitions/{requisition_id}/cancel with the reason (another doctor's order: FORBIDDEN, the lab admin cancels it; a sampled test: LAB_ITEM_STATE_INVALID, so hide the button once a sample is collected).",
+    "Critical values (has_critical_value) → red, sticky alert; acknowledge them on the critical results screen.",
+    "Show each test's is_send_out / partner_name (tell the patient it goes to that laboratory) and due_at; a rejected sample means a new one to take (the doctor is notified).",
+    "Imaging order: give the side (laterality) of a limb or paired organ; for an inpatient how they come (transport: Walking, Wheelchair, Trolley, Bed, Portable) and escort (a Doctor for special and interventional procedures). Urgent and STAT run against the emergency turnaround.",
+    "Under each result show who verified it (verified_stamp.text); under an imaging report who reported it (reported_stamp.text): MSDS 147.",
+    "'Print report': the lab report (GET /lab/requisitions/{id}/report/print-payload: published tests, reference ranges, flags, performed and verified stamps; complete false = partial) and the radiology report (GET /imaging/orders/{id}/report/print-payload), A4 or pdf_url.",
+    "Open viewer_url in a separate BrowserWindow when imaging.study.available arrives.",
+    "Exists for the service laboratory or outsourced_diagnostics or imaging (work): show it as GET /establishment views.screens says for screen_id lab_orders_results (full; open_work: without its new work, with the banner \"No new ... from now on\"; records: history and corrections only; setup: only from Facility settings; hidden: in no menu), after login and again on establishment.changed. Never decide it from the profile's category.",
+    "POST /lab/requisitions starts new outsourced_diagnostics work for a send-out test (availability SendOut): offer that choice only while outsourced_diagnostics is Active (GET /establishment active); the rest of the action stays.",
+    "POST /lab/requisitions starts new laboratory work for an in-house test (availability InHouse): offer that choice only while laboratory is Active (GET /establishment active); the rest of the action stays.",
+    "POST /imaging/orders starts new imaging work: offer it only while imaging is Active (GET /establishment active)."
+  ],
+  "demo_accounts": "demo_accounts() lists a login per role; sandbox_call runs each case on the DEV server"
+}

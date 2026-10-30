@@ -1,3 +1,4 @@
+import {ConsultationReroute} from './ConsultationReroute';
 import {validationFields} from '../validation-fields';
 import { useEffect, useState } from "react";
 import { api, ApiError, call } from "../bridge";
@@ -176,6 +177,7 @@ function ConsultationEditor({
     [interval, setInterval] = useState(""),
     [actionDirty, setActionDirty] = useState(false);
   const admissionWards=useLoad(()=>action==='admit'&&can('ipd.bed.view')?bedMatrix({include_beds:false}):Promise.resolve(undefined),[action,revision,user.permissions.join(',')]);
+  const [primaryDoctor,setPrimaryDoctor]=useState<number|null>(null);
   function accept(value: emr.EncounterDetailOut) {
     setBase(value);
     setKind(value.encounter_type);
@@ -213,7 +215,11 @@ function ConsultationEditor({
       ctx.reload(),
     ]);
   });
-  const locked =
+  const [rerouteBusy,setRerouteBusy]=useState(false);
+  const [rerouted,setRerouted]=useState(false);
+  useEffect(()=>{if(rerouted){setDirty(false);setActionDirty(false);}},[rerouted]);
+  useEffect(()=>{if(rerouted&&!dirty&&!actionDirty&&!rerouteBusy)onRoute('doctor_queue',ctx.ticket.ticket_id);},[rerouted,dirty,actionDirty,rerouteBusy]);
+  const locked = rerouteBusy ||
     readOnly ||
     !connected ||
     !ctx.ready ||
@@ -466,6 +472,7 @@ function ConsultationEditor({
     setCarePlan(form.plan);
     setAdmitNotes("");
     setRequestedWard('');
+    setPrimaryDoctor(null);
     setInterval("");
     setCorrectionText("");
     setCorrectionField("general");
@@ -549,6 +556,7 @@ function ConsultationEditor({
         initial_care_plan: carePlan || null,
         notes: admitNotes || null,
         requested_ward_id:requestedWard?Number(requestedWard):null,
+        primary_doctor_id:primaryDoctor,
       };
       if(requestedWard&&!admissionWards.data?.wards.some(w=>String(w.ward_id)===requestedWard)){
         setReadError(new Error(t('Choose an open ward from the current matrix, or leave the preference empty.','موجودہ فہرست سے کھلا وارڈ چنیں یا ترجیح خالی چھوڑ دیں۔')));return;
@@ -676,6 +684,7 @@ function ConsultationEditor({
             {t(en, ur)}
           </button>
         ))}
+        <ConsultationReroute ticket={ctx.ticket} user={user} locked={readOnly||!connected||!ctx.ready||write.blocked||loadingNote} onBusy={setRerouteBusy} onChanged={ctx.reload} onRerouted={()=>setRerouted(true)}/>
         {can("ipd.admission.request") && (
           <button
             data-help="consultation.admit"
@@ -1354,6 +1363,8 @@ function ConsultationEditor({
             )}
             {action === "admit" && (
               <>
+                <p>{t('Leave the treating doctor empty to use the requesting doctor. A named doctor must be active and registered with PMDC.','درخواست کرنے والے ڈاکٹر کے لیے معالج خالی چھوڑیں۔ نامزد ڈاکٹر فعال اور پی ایم ڈی سی رجسٹرڈ ہو۔')}</p>
+                <StaffPicker label={t('Treating doctor (optional)','معالج (اختیاری)')} value={primaryDoctor} onSelect={id=>{setPrimaryDoctor(id);actionMark();}} licenseType="PMDC" field="primary_doctor_id"/>
                 <LoadState {...admissionWards} retry={admissionWards.reload}/>
                 <Field label={t('Requested open ward (optional)','مطلوبہ کھلا وارڈ، اختیاری')}><select data-help="consultation.admit" name="requested_ward_id" value={requestedWard} disabled={admissionWards.loading||!!admissionWards.error||!can('ipd.bed.view')} onChange={e=>{setRequestedWard(e.target.value);actionMark();}}><option value="">{t('No ward preference','وارڈ کی ترجیح نہیں')}</option>{admissionWards.data?.wards.map(w=><option key={w.ward_id} value={w.ward_id}>{w.name} · {t("Available beds","دستیاب بستر")}: {w.available} · {t("Gender","جنس")}: {w.gender_restriction}</option>)}</select></Field>
                 <Field label={t("Provisional diagnosis", "ابتدائی تشخیص")}>

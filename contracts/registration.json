@@ -1,7 +1,7 @@
 {
   "screen_id": "registration",
-  "contract_fingerprint": "a48efc9c8254ac5137e2",
-  "knowledge_revision": "5d997abd8847f89d",
+  "contract_fingerprint": "14824af5c60c05148994",
+  "knowledge_revision": "9250bafb1794ac12",
   "delivery_gate": {
     "required": true,
     "status": "required",
@@ -55,7 +55,7 @@
   },
   "ui_quality": {
     "source": "frontend-docs/guides/16-ui-quality.md",
-    "standard_revision": "721dd86027802160",
+    "standard_revision": "5980e5c3b1817f4e",
     "context": {
       "workspace": "reception",
       "purpose": "One atomic call: patient → OPD ticket → invoice → payment → queue token → print payload.",
@@ -161,7 +161,7 @@
           "instruction": "- [ ] Every applicable task and mandatory quality check must pass. A blocker, missing FAQ, broken F1, out-of-bounds\n  zoom or untested fresh-data lifecycle keeps the screen/workspace pending. Partial item acceptance remains possible.\n- [ ] The named human signs the review for this build (its *Sign* step: every question answered or decided by the\n  server, the declaration that the writes with the code are theirs, not their agent's), clears the code from the app,\n  accepts only tested proposal items or reports them manually, and returns failures: the agent reads the signed\n  review's failures and notes (`progress_proposals` → `human_reviews`). Agents cannot start, fill or sign a review, nor\n  approve their own claims. Backend inspection can confirm or withdraw accepted claims; verified points are a subset of\n  completion, never an additional award.\n- [ ] Retest affected tasks after fixes or backend changes; stale evidence does not establish the new build's behavior."
         }
       ],
-      "workspace_checklist": "- [ ] **Create:** open your cash shift; register a new patient with *Register + OPD slip* (and one with the full\n  intake form), skip the optional Patient Photo on one and take it on the other; upload a synthetic outside report\n  with its facility and date; a lab-only walk-in; a complaint.\n- [ ] **Read:** find each new patient by MRN, mobile and name; the slip, the queue token, the documents (the outside\n  report labelled as outside) and the dues banner.\n- [ ] **Update / correct:** edit the new patient's demographics, and from a second session the same patient\n  (`VERSION_CONFLICT`); defer the ticket and reactivate it.\n- [ ] **Cancel / delete:** cancel or void an unpaid ticket; request the refund of a paid one, then hand the cash back\n  once approved; merge a trauma profile made in this review into the new patient. Nothing is deleted.\n- [ ] **Refused:** a discount above your ceiling (`DISCOUNT_CEILING_EXCEEDED`, then request the waiver); a PDF as the\n  photo (`UNSUPPORTED_MEDIA_TYPE`); an outside report without its facility (`VALIDATION_ERROR`).\n- [ ] **Hand over:** the ticket reaches the doctor's live queue; the refund and the waiver reach the approval queue;\n  the closed shift reaches the accountant.",
+      "workspace_checklist": "- [ ] **Create:** open your cash shift; register a new patient with *Register + OPD slip* (and one with the full\n  intake form), skip the optional Patient Photo on one and take it on the other; upload a synthetic outside report\n  with its facility and date; a lab-only walk-in; a complaint.\n- [ ] **Read:** find each new patient by MRN, mobile and name; the slip, the queue token, the documents (the outside\n  report labelled as outside) and the dues banner.\n- [ ] **Update / correct:** edit the new patient's demographics, and from a second session the same patient\n  (`VERSION_CONFLICT`); defer the ticket and reactivate it.\n- [ ] **Cancel / delete:** cancel or void an unpaid ticket; request the refund of a paid one, then hand the cash back\n  once approved; merge a trauma profile made in this review into the new patient. Nothing is deleted.\n- [ ] **Refused:** a discount above your ceiling (`DISCOUNT_CEILING_EXCEEDED`, then request the waiver); a PDF as the\n  photo (`UNSUPPORTED_MEDIA_TYPE`); an outside report without its facility (`VALIDATION_ERROR`).\n- [ ] **Hand over:** the ticket reaches the doctor's live queue; the refund and the waiver reach the approval queue;\n  the closed shift reaches the accountant; once the lab verifies the walk-in's result, the open screen refreshes by\n  itself (`lab.result.published`) and the desk prints the report.",
       "operations": {
         "create": [
           {
@@ -252,6 +252,11 @@
         "cites": []
       },
       {
+        "id": "rule:5dd63f4d3b",
+        "text": "The doctor: from GET /opd-queues/doctors (by department, with how many wait), or the department alone; a colleague who sees no OPD queue answers VALIDATION_ERROR (details.field doctor_id). A patient sent to the wrong doctor is re-routed by that doctor: the dashboard moves the patient by itself (opd.queue.updated).",
+        "cites": []
+      },
+      {
         "id": "rule:937add537d",
         "text": "POST /reception/registrations starts new emergency_department work for an emergency patient (source Emergency) without an open emergency visit: offer that choice only while emergency_department is Active (GET /establishment active); the rest of the action stays.",
         "cites": []
@@ -260,6 +265,7 @@
     "related_workflows": [
       "clinical-and-prescriptions",
       "consent",
+      "diagnostic-services",
       "duty-rosters-and-attendance",
       "emergency-department",
       "facility-and-it",
@@ -279,7 +285,7 @@
     "workspace": "reception",
     "phase": "P2",
     "position": 14,
-    "points": 77,
+    "points": 82,
     "capabilities": [
       "realtime",
       "patient_context",
@@ -344,7 +350,7 @@
     "note": "`forward`: a dependency on a later phase; use the demo data or a scenario (sandbox_scenario) until that screen exists. `ordering: false`: a hand-off or a hint, not a reason to wait."
   },
   "definition_of_done": {
-    "points": 77,
+    "points": 82,
     "items": [
       {
         "id": "ep:POST /patients/{patient_id}/documents",
@@ -407,6 +413,12 @@
         "claimed": true
       },
       {
+        "id": "ep:GET /opd-queues/doctors",
+        "label": "GET /opd-queues/doctors",
+        "points": 3,
+        "claimed": false
+      },
+      {
         "id": "ev:opd.queue.updated",
         "label": "opd.queue.updated",
         "points": 2,
@@ -451,6 +463,12 @@
       {
         "id": "rule:f7c9c90eea",
         "label": "Print print_payload.text on the 80 mm thermal printer mapped to this terminal (GET /terminals/whoami).",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "rule:5dd63f4d3b",
+        "label": "The doctor: from GET /opd-queues/doctors (by department, with how many wait), or the department alone; a colleague who sees no OPD queue answers VALIDATION_ERROR (details.field doctor_id). A patient sent to the wrong doctor is re-routed by that doctor: the dashboard moves the patient by itself (opd.queue.updated).",
         "points": 2,
         "claimed": false
       },
@@ -796,12 +814,26 @@
           "head_nurse",
           "receptionist",
           "surgeon",
+          "triage_nurse",
           "ward_nurse"
         ]
       },
       "service_gates": [],
       "idempotency_key": false,
-      "errors": [],
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
       "parameters": [
         {
           "name": "patient_id",
@@ -863,6 +895,7 @@
           "head_nurse",
           "receptionist",
           "surgeon",
+          "triage_nurse",
           "ward_nurse"
         ]
       },
@@ -897,6 +930,18 @@
             "resource"
           ],
           "details_from": "PUT /api/v1/admin/printers/{printer_id}"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
         }
       ],
       "parameters": [
@@ -1017,6 +1062,7 @@
           "retryable": false,
           "ui_action": "Show field errors from details.fields / the message.",
           "source": [
+            "documented",
             "seen_in_tests"
           ],
           "details_fields": [],
@@ -1272,6 +1318,30 @@
       "idempotency_key": true,
       "errors": [
         {
+          "code": "INVOICE_LOCKED",
+          "http_status": 409,
+          "message": "The invoice is locked pending approval.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": null
+        },
+        {
+          "code": "OVERPAYMENT",
+          "http_status": 422,
+          "message": "The payment exceeds the balance due.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": null
+        },
+        {
           "code": "SHIFT_NOT_OPEN",
           "http_status": 409,
           "message": "Open a cash shift before handling cash.",
@@ -1284,6 +1354,30 @@
             "status"
           ],
           "details_from": "POST /api/v1/finance/cash-shifts/{shift_id}/close"
+        },
+        {
+          "code": "TICKET_NOT_ACTIVE",
+          "http_status": 409,
+          "message": "This ticket is no longer active; a new visit needs a new ticket.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": null
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
         }
       ],
       "parameters": [
@@ -1478,6 +1572,30 @@
           "details_from": "POST /api/v1/reception/registrations"
         },
         {
+          "code": "LAB_ONLY_QUEUE_FORBIDDEN",
+          "http_status": 409,
+          "message": "Lab-only walk-in patients cannot enter doctor queues.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": null
+        },
+        {
+          "code": "OVERPAYMENT",
+          "http_status": 422,
+          "message": "The payment exceeds the balance due.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": null
+        },
+        {
           "code": "PATIENT_MERGED_CANNOT_TRANSACT",
           "http_status": 409,
           "message": "This patient record was merged; use the master record.",
@@ -1517,6 +1635,19 @@
             "status"
           ],
           "details_from": "POST /api/v1/finance/cash-shifts/{shift_id}/close"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
         }
       ],
       "parameters": [
@@ -1850,7 +1981,20 @@
       },
       "service_gates": [],
       "idempotency_key": false,
-      "errors": [],
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
       "parameters": [
         {
           "name": "category",
@@ -1930,7 +2074,20 @@
       },
       "service_gates": [],
       "idempotency_key": false,
-      "errors": [],
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
       "parameters": [
         {
           "name": "ticket_id",
@@ -2130,6 +2287,28 @@
           }
         },
         {
+          "name": "license_type",
+          "in": "query",
+          "required": false,
+          "description": "Only clinical staff registered with this council, their number on file: PMDC for a doctor (the doctor present at contrast, a second doctor)",
+          "schema": {
+            "anyOf": [
+              {
+                "enum": [
+                  "PMDC",
+                  "PNC"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Only clinical staff registered with this council, their number on file: PMDC for a doctor (the doctor present at contrast, a second doctor)",
+            "title": "License Type"
+          }
+        },
+        {
           "name": "limit",
           "in": "query",
           "required": false,
@@ -2193,9 +2372,132 @@
             "required": false,
             "type": "integer",
             "description": "Only this department"
+          },
+          {
+            "name": "license_type",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "PMDC",
+              "PNC"
+            ],
+            "description": "Only clinical staff registered with this council, their number on file: PMDC for a doctor (the doctor present at contrast, a second doctor)"
           }
         ],
         "note": "Lists are bounded by `limit` (no cursor paging): ask for what the screen shows, filter on the server."
+      }
+    },
+    {
+      "endpoint": "GET /opd-queues/doctors",
+      "summary": "The doctors who see an OPD queue (the re-route and slip picker)",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "opd.queue.doctor",
+          "opd.queue.view"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of opd.queue.doctor or opd.queue.view",
+        "roles_allowed": [
+          "anaesthetist",
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "receptionist",
+          "surgeon",
+          "triage_nurse"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "FORBIDDEN",
+          "http_status": 403,
+          "message": "You do not have permission to do this.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "any_of",
+            "required"
+          ],
+          "details_from": "POST /api/v1/admin/departments"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "department_id",
+          "in": "query",
+          "required": false,
+          "description": "Only this department",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Only this department",
+            "title": "Department Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_OpdDoctorOut__"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [],
+        "search": [],
+        "filters": [
+          {
+            "name": "department_id",
+            "required": false,
+            "type": "integer",
+            "description": "Only this department"
+          }
+        ],
+        "note": null
       }
     }
   ],
@@ -2231,7 +2533,8 @@
           "GET /finance/service-catalog",
           "GET /opd-tickets/{ticket_id}/print-payload",
           "GET /opd-queues/reception-dashboard",
-          "GET /staff/lookup"
+          "GET /staff/lookup",
+          "GET /opd-queues/doctors"
         ]
       }
     ],
@@ -2241,7 +2544,7 @@
     {
       "call": "POST /opd-tickets/{ticket_id}/pay",
       "emits": "opd.queue.updated",
-      "audience": "permission opd.queue.view + the assigned doctor",
+      "audience": "permission opd.queue.view + the assigned doctor (a department's queue: its doctors)",
       "reaches_screens": [
         "queue_management",
         "doctor_queue"
@@ -2269,7 +2572,7 @@
     {
       "call": "POST /reception/registrations",
       "emits": "opd.queue.updated",
-      "audience": "permission opd.queue.view + the assigned doctor",
+      "audience": "permission opd.queue.view + the assigned doctor (a department's queue: its doctors)",
       "reaches_screens": [
         "queue_management",
         "doctor_queue"
@@ -2376,6 +2679,20 @@
         "Cash": "Cash",
         "Card": "Card",
         "BankTransfer": "Bank transfer"
+      }
+    },
+    {
+      "values": [
+        "PMDC",
+        "PNC",
+        "Other"
+      ],
+      "column": "employees.license_type",
+      "used_at": "GET /staff/lookup[].license_type",
+      "labels": {
+        "PMDC": "PMDC",
+        "PNC": "PNC",
+        "Other": "Other"
       }
     },
     {
@@ -2958,13 +3275,17 @@
       "DISCOUNT_CEILING_EXCEEDED": "The discount exceeds your ceiling: issue the ticket within it and request a VIP waiver for the rest.",
       "FORBIDDEN": "You do not have permission to do this.",
       "IDEMPOTENCY_CONFLICT": "Idempotency-Key was reused with a different request body.",
+      "INVOICE_LOCKED": "The invoice is locked pending approval.",
+      "LAB_ONLY_QUEUE_FORBIDDEN": "Lab-only walk-in patients cannot enter doctor queues.",
       "NOT_FOUND": "The requested resource was not found.",
+      "OVERPAYMENT": "The payment exceeds the balance due.",
       "PATIENT_CNIC_EXISTS": "A patient with this CNIC already exists.",
       "PATIENT_MERGED_CANNOT_TRANSACT": "This patient record was merged; use the master record.",
       "PATIENT_UPMRN_EXISTS": "A patient with this universal patient medical record number (UPMRN) already exists: search for it instead of registering again.",
       "PAYLOAD_TOO_LARGE": "The uploaded file is too large.",
       "REFERENCE_NOT_FOUND": "A referenced record does not exist.",
       "SHIFT_NOT_OPEN": "Open a cash shift before handling cash.",
+      "TICKET_NOT_ACTIVE": "This ticket is no longer active; a new visit needs a new ticket.",
       "UNAUTHENTICATED": "Authentication is required.",
       "UNSUPPORTED_MEDIA_TYPE": "This file type is not allowed.",
       "VALIDATION_ERROR": "The request is invalid.",
@@ -3003,7 +3324,10 @@
       "head_nurse",
       "pharmacist"
     ],
-    "note": null
+    "page_for": [
+      "receptionist"
+    ],
+    "note": "page_for: the roles whose GET /meta/handbook lists this screen (its menu entry and F1 page; for a user with that one role, every service Active). A partial role outside page_for only makes some of these calls from screens of its own: never offer it this screen. Build the menu from the logged-in user's GET /meta/handbook."
   },
   "test_plan": {
     "screen": "registration",
@@ -3058,7 +3382,9 @@
           ],
           "expect": "403 FORBIDDEN"
         },
-        "errors_to_handle": [],
+        "errors_to_handle": [
+          "VALIDATION_ERROR"
+        ],
         "as_one_of": [
           "admissions_officer",
           "anaesthetist",
@@ -3067,6 +3393,7 @@
           "head_nurse",
           "receptionist",
           "surgeon",
+          "triage_nurse",
           "ward_nurse"
         ]
       },
@@ -3086,7 +3413,8 @@
         },
         "errors_to_handle": [
           "FORBIDDEN",
-          "NOT_FOUND"
+          "NOT_FOUND",
+          "VALIDATION_ERROR"
         ],
         "as_one_of": [
           "admissions_officer",
@@ -3096,6 +3424,7 @@
           "head_nurse",
           "receptionist",
           "surgeon",
+          "triage_nurse",
           "ward_nurse"
         ]
       },
@@ -3142,7 +3471,11 @@
           "expect": "403 FORBIDDEN"
         },
         "errors_to_handle": [
-          "SHIFT_NOT_OPEN"
+          "INVOICE_LOCKED",
+          "OVERPAYMENT",
+          "SHIFT_NOT_OPEN",
+          "TICKET_NOT_ACTIVE",
+          "VALIDATION_ERROR"
         ],
         "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)",
         "as_one_of": [
@@ -3170,9 +3503,12 @@
           "CAPABILITY_INACTIVE",
           "DISCOUNT_CEILING_EXCEEDED",
           "IDEMPOTENCY_CONFLICT",
+          "LAB_ONLY_QUEUE_FORBIDDEN",
+          "OVERPAYMENT",
           "PATIENT_MERGED_CANNOT_TRANSACT",
           "REFERENCE_NOT_FOUND",
-          "SHIFT_NOT_OPEN"
+          "SHIFT_NOT_OPEN",
+          "VALIDATION_ERROR"
         ],
         "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)",
         "as_one_of": [
@@ -3187,7 +3523,9 @@
           "as_one_of": [],
           "expect": "403 FORBIDDEN"
         },
-        "errors_to_handle": [],
+        "errors_to_handle": [
+          "VALIDATION_ERROR"
+        ],
         "as_one_of": [
           "any logged-in user"
         ]
@@ -3206,7 +3544,9 @@
           ],
           "expect": "403 FORBIDDEN"
         },
-        "errors_to_handle": [],
+        "errors_to_handle": [
+          "VALIDATION_ERROR"
+        ],
         "as_one_of": [
           "accountant",
           "anaesthetist",
@@ -3256,6 +3596,37 @@
         ],
         "as_one_of": [
           "any logged-in user"
+        ]
+      },
+      {
+        "id": "case:GET /opd-queues/doctors",
+        "call": "GET /api/v1/opd-queues/doctors",
+        "summary": "The doctors who see an OPD queue (the re-route and slip picker)",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "billing_admin",
+            "cashier",
+            "cssd_technician"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "FORBIDDEN",
+          "VALIDATION_ERROR"
+        ],
+        "as_one_of": [
+          "anaesthetist",
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "receptionist",
+          "surgeon",
+          "triage_nurse"
         ]
       }
     ],
@@ -3333,6 +3704,7 @@
       "Discount above the user's ceiling → DISCOUNT_CEILING_EXCEEDED (details.max_pct): issue the ticket within the ceiling, then offer 'Request VIP waiver' with waiver_pct for the rest (Billing Admin / Owner approve).",
       "AR_OUTSTANDING_BLOCK: show the dues banner; Emergency source bypasses the block.",
       "Print print_payload.text on the 80 mm thermal printer mapped to this terminal (GET /terminals/whoami).",
+      "The doctor: from GET /opd-queues/doctors (by department, with how many wait), or the department alone; a colleague who sees no OPD queue answers VALIDATION_ERROR (details.field doctor_id). A patient sent to the wrong doctor is re-routed by that doctor: the dashboard moves the patient by itself (opd.queue.updated).",
       "POST /reception/registrations starts new emergency_department work for an emergency patient (source Emergency) without an open emergency visit: offer that choice only while emergency_department is Active (GET /establishment active); the rest of the action stays."
     ],
     "demo_accounts": "demo_accounts() lists a login per role; sandbox_call runs each case on the DEV server"
@@ -3347,6 +3719,11 @@
       "slug": "consent",
       "title": "Consent (MSDS)",
       "recipe": "get_workflow_recipe('consent')"
+    },
+    {
+      "slug": "diagnostic-services",
+      "title": "Diagnostic services quality (MSDS)",
+      "recipe": "get_workflow_recipe('diagnostic-services')"
     },
     {
       "slug": "duty-rosters-and-attendance",
@@ -3431,11 +3808,9 @@
       "owner": [
         "vendor"
       ],
-      "question": "Digits in the Urdu UI and printouts: Latin 0-9 or Extended Arabic-Indic ۰-۹.",
       "affects": [
         "every screen in Urdu"
-      ],
-      "meanwhile": "Latin digits; identifiers, doses and money stay left to right."
+      ]
     },
     {
       "what": "decision H03",
@@ -3443,22 +3818,18 @@
         "vendor",
         "clinical_lead"
       ],
-      "question": "How dates and times are shown on screen, and a 12- or 24-hour clock.",
       "affects": [
         "every screen"
-      ],
-      "meanwhile": "The server's print format (e.g. 27-Sep-2026) and the hospital time zone."
+      ]
     },
     {
       "what": "decision H04",
       "owner": [
         "vendor"
       ],
-      "question": "Money on screen: decimals shown, and digit grouping (1,234,567 or 12,34,567).",
       "affects": [
         "every screen with money"
-      ],
-      "meanwhile": "The amounts as the API sends them, with the currency setting."
+      ]
     },
     {
       "what": "decision H08",
@@ -3467,11 +3838,9 @@
         "translator",
         "clinical_lead"
       ],
-      "question": "Who writes and signs off the Urdu text of the UI, above all clinical and consent wording.",
       "affects": [
         "every screen in Urdu"
-      ],
-      "meanwhile": "Urdu you add is a draft: mark it so (the interview bank's pattern: a draft until a native speaker reviews it)."
+      ]
     },
     {
       "what": "decision H09",
@@ -3479,11 +3848,9 @@
         "vendor",
         "frontend_lead"
       ],
-      "question": "One design system shared by every frontend team (who authors and approves it), or each team's own.",
       "affects": [
         "every screen"
-      ],
-      "meanwhile": "Each team designs within the backend's constraints: themes Light and DarkHighContrast, zoom 100-250 %, Noto Nastaliq Urdu, status shown as text and icon, never colour alone. Follow the vendor's design principles (frontend guide 18, get_design_principles)."
+      ]
     },
     {
       "what": "decision H10",
@@ -3491,11 +3858,9 @@
         "clinical_lead",
         "vendor"
       ],
-      "question": "How each realtime event is shown (interrupt, attention, inform, silent), alert sounds and which terminals play them. Only Code Red (interrupt), the licence and maintenance banners and the logout on session.revoked are prescribed (the event catalogue's `presentation`).",
       "affects": [
         "every screen with realtime events"
-      ],
-      "meanwhile": "Code Red interrupts; every other event updates the screen and, at most, a dismissible notice. `priority` is the delivery urgency, not a presentation rule."
+      ]
     },
     {
       "what": "decision H12",
@@ -3503,13 +3868,11 @@
         "vendor",
         "backend"
       ],
-      "question": "Which workspaces run on web, Android and iOS, which cannot read a MAC address, discover the server by UDP or print silently; or are cash and printing Windows-only.",
       "affects": [
         "my_cash_shift",
         "registration",
         "every screen that prints"
-      ],
-      "meanwhile": "The guides describe the Windows (Electron) terminal; tell your developer when a screen needs a capability your platform lacks."
+      ]
     },
     {
       "what": "decision H17",
@@ -3517,12 +3880,10 @@
         "vendor",
         "hospital"
       ],
-      "question": "How a CNIC is masked on screen.",
       "affects": [
         "patient_search",
         "registration"
-      ],
-      "meanwhile": "Shown in full to users who may see the patient, as the API returns it."
+      ]
     },
     {
       "what": "decision H18",
@@ -3530,11 +3891,9 @@
         "vendor",
         "frontend_lead"
       ],
-      "question": "Noto Nastaliq Urdu everywhere, or the more compact Naskh in dense tables.",
       "affects": [
         "every table in Urdu"
-      ],
-      "meanwhile": "Noto Nastaliq Urdu, as the guides require."
+      ]
     },
     {
       "what": "decision H19",
@@ -3542,11 +3901,9 @@
         "clinical_lead",
         "backend"
       ],
-      "question": "Allergies: the patient record keeps free text, so it cannot tell \"no known allergies\" (asserted by a clinician) from \"not recorded\". Should it?",
       "affects": [
         "every screen with a patient banner"
-      ],
-      "meanwhile": "Show the recorded text as recorded; an empty value is \"not recorded\", never \"none\"."
+      ]
     },
     {
       "what": "decision H20",
@@ -3554,11 +3911,9 @@
         "vendor",
         "hospital"
       ],
-      "question": "May unsaved form input be kept on the terminal (which fields, encrypted, for how long)?",
       "affects": [
         "every form"
-      ],
-      "meanwhile": "In memory only; never a second checker's password."
+      ]
     },
     {
       "what": "decision H22",
@@ -3566,11 +3921,9 @@
         "hospital",
         "vendor"
       ],
-      "question": "Which documents may print on an unregistered terminal's default printer (sensitive A4 documents).",
       "affects": [
         "every screen that prints"
-      ],
-      "meanwhile": "As the printing guide says: the hint, then the default printer."
+      ]
     },
     {
       "what": "decision H24",
@@ -3578,15 +3931,12 @@
         "vendor",
         "clinical_lead"
       ],
-      "question": "Who approves frontend performance targets, alert thresholds and escalation timers.",
       "affects": [
         "every screen"
-      ],
-      "meanwhile": "The server's own settings (e.g. critical_result_communicate_minutes)."
+      ]
     }
   ],
   "omitted_sections": [
-    "handbook",
     "decisions",
     "examples",
     "schemas"
@@ -3703,6 +4053,18 @@
         "permissions": [],
         "permissions_mode": "all",
         "access": "any logged-in user"
+      },
+      {
+        "id": "registration::GET /opd-queues/doctors",
+        "task": "The doctors who see an OPD queue (the re-route and slip picker)",
+        "call": "GET /opd-queues/doctors",
+        "is_action": false,
+        "permissions": [
+          "opd.queue.doctor",
+          "opd.queue.view"
+        ],
+        "permissions_mode": "any",
+        "access": null
       }
     ],
     "rules_to_explain": [
@@ -3713,6 +4075,7 @@
       "Discount above the user's ceiling → DISCOUNT_CEILING_EXCEEDED (details.max_pct): issue the ticket within the ceiling, then offer 'Request VIP waiver' with waiver_pct for the rest (Billing Admin / Owner approve).",
       "AR_OUTSTANDING_BLOCK: show the dues banner; Emergency source bypasses the block.",
       "Print print_payload.text on the 80 mm thermal printer mapped to this terminal (GET /terminals/whoami).",
+      "The doctor: from GET /opd-queues/doctors (by department, with how many wait), or the department alone; a colleague who sees no OPD queue answers VALIDATION_ERROR (details.field doctor_id). A patient sent to the wrong doctor is re-routed by that doctor: the dashboard moves the patient by itself (opd.queue.updated).",
       "POST /reception/registrations starts new emergency_department work for an emergency patient (source Emergency) without an open emergency visit: offer that choice only while emergency_department is Active (GET /establishment active); the rest of the action stays."
     ],
     "updates_by_itself_on": [
@@ -3745,9 +4108,24 @@
         "ui_action": "Show field errors from details.fields / the message."
       },
       {
+        "code": "INVOICE_LOCKED",
+        "message": "The invoice is locked pending approval.",
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      },
+      {
+        "code": "LAB_ONLY_QUEUE_FORBIDDEN",
+        "message": "Lab-only walk-in patients cannot enter doctor queues.",
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      },
+      {
         "code": "NOT_FOUND",
         "message": "The requested resource was not found.",
         "ui_action": "Say 'not found'; refresh the list."
+      },
+      {
+        "code": "OVERPAYMENT",
+        "message": "The payment exceeds the balance due.",
+        "ui_action": "Show field errors from details.fields / the message."
       },
       {
         "code": "PATIENT_CNIC_EXISTS",
@@ -3777,6 +4155,11 @@
       {
         "code": "SHIFT_NOT_OPEN",
         "message": "Open a cash shift before handling cash.",
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      },
+      {
+        "code": "TICKET_NOT_ACTIVE",
+        "message": "This ticket is no longer active; a new visit needs a new ticket.",
         "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
       },
       {
@@ -4297,13 +4680,49 @@
               "emp_number": "EMP-2026-0002",
               "full_name": "Sana Lookuptest",
               "designation": "Officer",
-              "department_name": null
+              "department_name": null,
+              "license_type": "PNC",
+              "registration": "PNC PNC-8403"
             }
           ],
           "meta": {
-            "server_time": "2026-10-18T11:40:23.634678+00:00"
+            "server_time": "2026-10-27T15:29:53.668901+00:00"
           },
-          "request_id": "d101388fcfb7459b8049d5fca80fe22d"
+          "request_id": "4e2ee3a40faa41c195bc2aa08edaa30b"
+        }
+      }
+    },
+    "GET /opd-queues/doctors": {
+      "request": {
+        "path": "/api/v1/opd-queues/doctors"
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": [
+            {
+              "employee_id": 1,
+              "full_name": "Dr Ahmed",
+              "designation": "Doctor",
+              "department_id": 1,
+              "department_name": "General Medicine",
+              "registration": "PMDC PMDC-14187",
+              "waiting": 0
+            },
+            {
+              "employee_id": 2,
+              "full_name": "Dr Sara",
+              "designation": "Doctor",
+              "department_id": 1,
+              "department_name": "General Medicine",
+              "registration": "PMDC PMDC-1862",
+              "waiting": 0
+            }
+          ],
+          "meta": {
+            "server_time": "2026-10-29T16:39:10.232744+00:00"
+          },
+          "request_id": "f888a058d90c470cb28eeb2f0f660954"
         }
       }
     }
@@ -4601,6 +5020,31 @@
         "request_id"
       ],
       "title": "Envelope[TicketPaymentOut]"
+    },
+    "Envelope_list_OpdDoctorOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/OpdDoctorOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[OpdDoctorOut]]"
     },
     "Envelope_list_PatientDocumentOut__": {
       "properties": {
@@ -5121,6 +5565,73 @@
         "server_time"
       ],
       "title": "Meta"
+    },
+    "OpdDoctorOut": {
+      "properties": {
+        "employee_id": {
+          "type": "integer",
+          "title": "Employee Id"
+        },
+        "full_name": {
+          "type": "string",
+          "title": "Full Name"
+        },
+        "designation": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Designation"
+        },
+        "department_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Department Id"
+        },
+        "department_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Department Name"
+        },
+        "registration": {
+          "type": "string",
+          "title": "Registration",
+          "description": "The council registration as the author stamp prints it, e.g. 'PMDC 12345-P'"
+        },
+        "waiting": {
+          "type": "integer",
+          "title": "Waiting",
+          "description": "Patients waiting for this doctor now, their department's unassigned ones included"
+        }
+      },
+      "type": "object",
+      "required": [
+        "employee_id",
+        "full_name",
+        "designation",
+        "department_id",
+        "department_name",
+        "registration",
+        "waiting"
+      ],
+      "title": "OpdDoctorOut",
+      "description": "A doctor who sees an OPD queue: a re-route's target, a slip's doctor (workflow §1.4)."
     },
     "OpdQueueEntryOut": {
       "properties": {
@@ -8244,7 +8755,8 @@
       "properties": {
         "employee_id": {
           "type": "integer",
-          "title": "Employee Id"
+          "title": "Employee Id",
+          "description": "The id a form's staff field takes (contrast_doctor_id, employee_id, ...)"
         },
         "emp_number": {
           "type": "string",
@@ -8268,6 +8780,35 @@
             }
           ],
           "title": "Department Name"
+        },
+        "license_type": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "PMDC",
+                "PNC",
+                "Other"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "License Type",
+          "description": "The council they are registered with (PMDC: a doctor or dentist; PNC: a nurse); null: none"
+        },
+        "registration": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Registration",
+          "description": "As their stamp prints it, e.g. \"PMDC 12345-P\"; null: no number on file"
         }
       },
       "type": "object",
@@ -8276,10 +8817,12 @@
         "emp_number",
         "full_name",
         "designation",
-        "department_name"
+        "department_name",
+        "license_type",
+        "registration"
       ],
       "title": "StaffLookupOut",
-      "description": "One active staff member as a picker shows them (GET /staff/lookup): the facts on their badge, nothing else."
+      "description": "One active staff member as a picker shows them (GET /staff/lookup): the facts on their badge and the registration\ntheir stamp prints, nothing else."
     },
     "TicketPayIn": {
       "properties": {

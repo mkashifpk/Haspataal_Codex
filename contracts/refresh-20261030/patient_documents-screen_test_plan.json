@@ -1,0 +1,266 @@
+{
+  "screen": "patient_documents",
+  "title": "Patient document vault",
+  "cases": [
+    {
+      "id": "case:GET /patients/{patient_id}/documents",
+      "call": "GET /api/v1/patients/{patient_id}/documents",
+      "summary": "List patient documents",
+      "happy_path": {
+        "as_one_of": [
+          "admissions_officer",
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "receptionist",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/patients/1/documents"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "document_id": 2,
+                  "patient_id": 1,
+                  "doc_type": "Photo",
+                  "title": null,
+                  "content_type": "image/jpeg",
+                  "size_bytes": 644,
+                  "is_outside": false,
+                  "source_facility": null,
+                  "document_date": null,
+                  "is_verified": false,
+                  "uploaded_at": "2026-10-13T12:12:55.831057+00:00",
+                  "uploaded_by": 3
+                },
+                {
+                  "document_id": 1,
+                  "patient_id": 1,
+                  "doc_type": "Photo",
+                  "title": "Synthetic patient photo",
+                  "content_type": "image/png",
+                  "size_bytes": 116,
+                  "is_outside": false,
+                  "source_facility": null,
+                  "document_date": null,
+                  "is_verified": false,
+                  "uploaded_at": "2026-10-13T12:12:55.809462+00:00",
+                  "uploaded_by": 3
+                }
+              ],
+              "meta": {
+                "server_time": "2026-10-13T12:12:55.869196+00:00"
+              },
+              "request_id": "afb5df5d2f324ca1ac957110ee282f2c"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "billing_admin",
+          "cashier",
+          "clinic_director",
+          "cssd_technician"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:POST /patients/{patient_id}/documents",
+      "call": "POST /api/v1/patients/{patient_id}/documents",
+      "summary": "Upload a patient document (PDF/JPEG/PNG)",
+      "happy_path": {
+        "as_one_of": [
+          "admissions_officer",
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "receptionist",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/patients/1/documents",
+            "multipart": {
+              "file": "<file>",
+              "doc_type": "CNIC"
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "document_id": 1,
+                "patient_id": 1,
+                "doc_type": "CNIC",
+                "title": null,
+                "content_type": "application/pdf",
+                "size_bytes": 31,
+                "is_outside": false,
+                "source_facility": null,
+                "document_date": null,
+                "uploaded_at": "2026-10-13T11:27:11.017375+00:00"
+              },
+              "meta": {
+                "server_time": "2026-10-13T11:27:11.028856+00:00"
+              },
+              "request_id": "16803b23adfa4ca89f6674d80ff160a0"
+            }
+          },
+          "errors_seen": [
+            "FORBIDDEN",
+            "IDEMPOTENCY_CONFLICT",
+            "NOT_FOUND",
+            "PAYLOAD_TOO_LARGE",
+            "UNSUPPORTED_MEDIA_TYPE",
+            "VALIDATION_ERROR"
+          ],
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "billing_admin",
+          "cashier",
+          "clinic_director",
+          "cssd_technician"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "FORBIDDEN",
+        "IDEMPOTENCY_CONFLICT",
+        "NOT_FOUND",
+        "PAYLOAD_TOO_LARGE",
+        "UNSUPPORTED_MEDIA_TYPE",
+        "VALIDATION_ERROR"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:GET /patient-documents/{document_id}/download",
+      "call": "GET /api/v1/patient-documents/{document_id}/download",
+      "summary": "Download a patient document",
+      "happy_path": {
+        "as_one_of": [
+          "admissions_officer",
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "receptionist",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/patient-documents/1/download"
+          },
+          "response": {
+            "status": 200,
+            "content_type": "application/pdf",
+            "bytes": 28
+          },
+          "errors_seen": [
+            "FORBIDDEN",
+            "NOT_FOUND"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "billing_admin",
+          "cashier",
+          "clinic_director",
+          "cssd_technician"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "FORBIDDEN",
+        "NOT_FOUND",
+        "VALIDATION_ERROR"
+      ]
+    }
+  ],
+  "service_cases": [],
+  "delivery_gate": {
+    "required": true,
+    "status": "required",
+    "progress_reporting": {
+      "required": true,
+      "submit": "propose_progress",
+      "verify": "progress_proposals",
+      "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+    },
+    "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+    "compulsory": [
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+        "points": 2
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+        "points": 3
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+        "points": 2
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+        "points": 4
+      }
+    ],
+    "zoom": {
+      "min_pct": 100,
+      "max_pct": 250,
+      "reset_pct": 100,
+      "keys": [
+        "Ctrl + or Ctrl = (zoom in)",
+        "Ctrl - (zoom out)",
+        "Ctrl 0 (reset to 100 %)",
+        "Command on macOS"
+      ],
+      "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+    },
+    "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+    "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+  },
+  "handbook_page": "screens/patient_documents",
+  "workspace_guide": "get_handbook_outline('reception')",
+  "realtime": [],
+  "acceptance_rules": [
+    "Upload PDF, JPEG or PNG (multipart/form-data, at most MAX_UPLOAD_MB): UNSUPPORTED_MEDIA_TYPE for another type, a PDF as the Photo or a file that is not what it claims; VALIDATION_ERROR for a damaged image, an outside document without its facility or a future date; PAYLOAD_TOO_LARGE (details.max_bytes) above the limit.",
+    "'Reports brought by the patient' (optional, any number): file (PDF, or a JPEG/PNG scan or photo of the paper), type (LabReport, Imaging, DischargeSummary, Prescription, ReferralLetter, Other), title (the test or report, e.g. 'CBC'), issued by (source_facility, required) and the date on it (document_date) → POST /patients/{patient_id}/documents with is_outside=true. List them labelled 'Outside: <facility>, <date>', apart from this hospital's own results: they are never shown or counted as this hospital's lab or imaging results.",
+    "Patient Photo is OPTIONAL here and everywhere (never a required field, never a blocker): offer 'Take photo' (camera) or 'Choose file' (JPEG or PNG), preview, retake, and 'Skip' needing no reason. Ask first; respect a refusal (purdah, privacy) and never delay an emergency, an injured face or a patient who cannot cooperate. Upload it after the patient exists: POST /patients/{patient_id}/documents doc_type=Photo, its own Idempotency-Key, so a failed upload never repeats a registration, a payment or an admission. Show photo_document_id (patient, admission) through GET /patient-documents/{document_id}/download.",
+    "Every download is logged as a patient-data read: open documents only when the user asks for them."
+  ],
+  "demo_accounts": "demo_accounts() lists a login per role; sandbox_call runs each case on the DEV server"
+}

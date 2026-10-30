@@ -1,7 +1,7 @@
 {
   "screen_id": "duty_roster",
-  "contract_fingerprint": "58db76bf7d59ef6d9870",
-  "knowledge_revision": "51c8fe699d47d046",
+  "contract_fingerprint": "14824af5c60c05148994",
+  "knowledge_revision": "9250bafb1794ac12",
   "delivery_gate": {
     "required": true,
     "status": "required",
@@ -294,6 +294,7 @@
       "duty-rosters-and-attendance",
       "facility-and-it",
       "hr-and-payroll",
+      "infection-control",
       "inpatient-and-discharge"
     ]
   },
@@ -304,7 +305,7 @@
     "workspace": "head_nurse",
     "phase": "P4",
     "position": 49,
-    "points": 94,
+    "points": 91,
     "capabilities": [
       "realtime",
       "idempotent_writes",
@@ -312,16 +313,7 @@
       "f1_help",
       "zoom"
     ],
-    "depends_on": [
-      {
-        "from": "duty_roster",
-        "to": "duty_roster_hr",
-        "kind": "data_candidate",
-        "evidence": "it reads hr/shift-patterns, which POST /hr/shift-patterns on duty_roster_hr creates",
-        "ordering": false,
-        "forward": true
-      }
-    ],
+    "depends_on": [],
     "needed_by": [
       {
         "from": "roll_call",
@@ -335,7 +327,7 @@
     "note": "`forward`: a dependency on a later phase; use the demo data or a scenario (sandbox_scenario) until that screen exists. `ordering: false`: a hand-off or a hint, not a reason to wait."
   },
   "definition_of_done": {
-    "points": 94,
+    "points": 91,
     "items": [
       {
         "id": "ep:GET /rosters",
@@ -370,12 +362,6 @@
       {
         "id": "ep:POST /rosters/copy",
         "label": "POST /rosters/copy",
-        "points": 3,
-        "claimed": false
-      },
-      {
-        "id": "ep:GET /hr/shift-patterns",
-        "label": "GET /hr/shift-patterns",
         "points": 3,
         "claimed": false
       },
@@ -521,7 +507,7 @@
         "id": "q:handbook",
         "label": "Handbook page",
         "points": 3,
-        "claimed": false
+        "claimed": true
       },
       {
         "id": "q:f1_help",
@@ -603,6 +589,18 @@
             "required"
           ],
           "details_from": "POST /api/v1/admin/departments"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
         }
       ],
       "parameters": [
@@ -826,7 +824,20 @@
       },
       "service_gates": [],
       "idempotency_key": false,
-      "errors": [],
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
       "parameters": [
         {
           "name": "date_from",
@@ -1120,6 +1131,7 @@
           "retryable": false,
           "ui_action": "Show field errors from details.fields / the message.",
           "source": [
+            "documented",
             "seen_in_tests"
           ],
           "details_fields": [],
@@ -1241,6 +1253,24 @@
           "details_from": "POST /api/v1/pharmacy/storage-checks"
         },
         {
+          "code": "ROSTER_CONFLICT",
+          "http_status": 409,
+          "message": "This duty overlaps another duty of the same employee.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "employee_id",
+            "entry_index",
+            "roster_date",
+            "roster_id",
+            "shift_name"
+          ],
+          "details_from": "POST /api/v1/rosters"
+        },
+        {
           "code": "ROSTER_DATE_CLOSED",
           "http_status": 409,
           "message": "Rosters of past days can only be changed by HR.",
@@ -1256,6 +1286,22 @@
           "details_from": "POST /api/v1/rosters"
         },
         {
+          "code": "ROSTER_EMPLOYEE_INACTIVE",
+          "http_status": 409,
+          "message": "Only active staff can be rostered.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "employee_id",
+            "entry_index",
+            "status"
+          ],
+          "details_from": "POST /api/v1/rosters"
+        },
+        {
           "code": "ROSTER_ENTRY_CANCELLED",
           "http_status": 409,
           "message": "This duty was cancelled: create a new one.",
@@ -1266,6 +1312,50 @@
           ],
           "details_fields": [],
           "details_from": "POST /api/v1/rosters/{roster_id}/cancel"
+        },
+        {
+          "code": "ROSTER_ON_LEAVE",
+          "http_status": 409,
+          "message": "The employee is on approved leave that day.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "employee_id",
+            "entry_index",
+            "roster_date"
+          ],
+          "details_from": "POST /api/v1/rosters"
+        },
+        {
+          "code": "ROSTER_OUT_OF_SCOPE",
+          "http_status": 403,
+          "message": "You may not roster this employee (outside your staff scope).",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "employee_id",
+            "entry_index",
+            "staff_category"
+          ],
+          "details_from": "POST /api/v1/rosters"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
         },
         {
           "code": "VERSION_CONFLICT",
@@ -1468,6 +1558,34 @@
           ],
           "details_fields": [],
           "details_from": "POST /api/v1/rosters/{roster_id}/cancel"
+        },
+        {
+          "code": "ROSTER_OUT_OF_SCOPE",
+          "http_status": 403,
+          "message": "You may not roster this employee (outside your staff scope).",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "employee_id",
+            "entry_index",
+            "staff_category"
+          ],
+          "details_from": "POST /api/v1/rosters"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
         }
       ],
       "parameters": [
@@ -1565,6 +1683,24 @@
       "idempotency_key": true,
       "errors": [
         {
+          "code": "ROSTER_CONFLICT",
+          "http_status": 409,
+          "message": "This duty overlaps another duty of the same employee.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "employee_id",
+            "entry_index",
+            "roster_date",
+            "roster_id",
+            "shift_name"
+          ],
+          "details_from": "POST /api/v1/rosters"
+        },
+        {
           "code": "ROSTER_DATE_CLOSED",
           "http_status": 409,
           "message": "Rosters of past days can only be changed by HR.",
@@ -1580,12 +1716,61 @@
           "details_from": "POST /api/v1/rosters"
         },
         {
+          "code": "ROSTER_EMPLOYEE_INACTIVE",
+          "http_status": 409,
+          "message": "Only active staff can be rostered.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "employee_id",
+            "entry_index",
+            "status"
+          ],
+          "details_from": "POST /api/v1/rosters"
+        },
+        {
+          "code": "ROSTER_ON_LEAVE",
+          "http_status": 409,
+          "message": "The employee is on approved leave that day.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "employee_id",
+            "entry_index",
+            "roster_date"
+          ],
+          "details_from": "POST /api/v1/rosters"
+        },
+        {
+          "code": "ROSTER_OUT_OF_SCOPE",
+          "http_status": 403,
+          "message": "You may not roster this employee (outside your staff scope).",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "employee_id",
+            "entry_index",
+            "staff_category"
+          ],
+          "details_from": "POST /api/v1/rosters"
+        },
+        {
           "code": "VALIDATION_ERROR",
           "http_status": 422,
           "message": "The request is invalid.",
           "retryable": false,
           "ui_action": "Show field errors from details.fields / the message.",
           "source": [
+            "documented",
             "seen_in_tests"
           ],
           "details_fields": [],
@@ -1727,51 +1912,6 @@
       }
     },
     {
-      "endpoint": "GET /hr/shift-patterns",
-      "summary": "Shift patterns",
-      "access": {
-        "authentication": "user",
-        "permissions": [
-          "hr.employee.view",
-          "hr.shift.manage"
-        ],
-        "permissions_mode": "any",
-        "who": "holders of hr.employee.view or hr.shift.manage",
-        "roles_allowed": [
-          "clinic_director",
-          "hospital_admin",
-          "hospital_director",
-          "hr_admin",
-          "owner",
-          "super_admin"
-        ]
-      },
-      "service_gates": [],
-      "idempotency_key": false,
-      "errors": [],
-      "parameters": [],
-      "request_body": null,
-      "responses": {
-        "200": {
-          "description": "Successful Response",
-          "content": {
-            "application/json; charset=utf-8": {
-              "schema": {
-                "$ref": "#/components/schemas/Envelope_list_ShiftPatternOut__"
-              }
-            }
-          }
-        }
-      },
-      "list": {
-        "returns": "list",
-        "paging": [],
-        "search": [],
-        "filters": [],
-        "note": null
-      }
-    },
-    {
       "endpoint": "GET /rosters/week",
       "summary": "Week check: rest days per person, staff per day and shift",
       "access": {
@@ -1796,7 +1936,20 @@
       },
       "service_gates": [],
       "idempotency_key": false,
-      "errors": [],
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
       "parameters": [
         {
           "name": "week_of",
@@ -1958,7 +2111,20 @@
       },
       "service_gates": [],
       "idempotency_key": false,
-      "errors": [],
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
       "parameters": [
         {
           "name": "status",
@@ -2073,6 +2239,22 @@
           "details_from": "POST /api/v1/rosters"
         },
         {
+          "code": "ROSTER_EMPLOYEE_INACTIVE",
+          "http_status": 409,
+          "message": "Only active staff can be rostered.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "employee_id",
+            "entry_index",
+            "status"
+          ],
+          "details_from": "POST /api/v1/rosters"
+        },
+        {
           "code": "ROSTER_ON_LEAVE",
           "http_status": 409,
           "message": "The employee is on approved leave that day.",
@@ -2161,6 +2343,18 @@
           ],
           "details_fields": [],
           "details_from": "POST /api/v1/rosters/swaps"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
         }
       ],
       "parameters": [
@@ -2286,6 +2480,40 @@
       "idempotency_key": false,
       "errors": [
         {
+          "code": "ROSTER_CONFLICT",
+          "http_status": 409,
+          "message": "This duty overlaps another duty of the same employee.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "employee_id",
+            "entry_index",
+            "roster_date",
+            "roster_id",
+            "shift_name"
+          ],
+          "details_from": "POST /api/v1/rosters"
+        },
+        {
+          "code": "ROSTER_ON_LEAVE",
+          "http_status": 409,
+          "message": "The employee is on approved leave that day.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "employee_id",
+            "entry_index",
+            "roster_date"
+          ],
+          "details_from": "POST /api/v1/rosters"
+        },
+        {
           "code": "ROSTER_OUT_OF_SCOPE",
           "http_status": 403,
           "message": "You may not roster this employee (outside your staff scope).",
@@ -2341,6 +2569,18 @@
             "status"
           ],
           "details_from": "POST /api/v1/rosters/swaps/{swap_id}/reject"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
         }
       ],
       "parameters": [
@@ -2479,6 +2719,18 @@
             "status"
           ],
           "details_from": "POST /api/v1/rosters/swaps/{swap_id}/reject"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
         }
       ],
       "parameters": [
@@ -2578,19 +2830,23 @@
       "access": {
         "authentication": "user",
         "permissions": [
-          "ipd.bed.view"
+          "ipd.bed.view",
+          "cssd.operate",
+          "infection.control.manage"
         ],
-        "permissions_mode": "all",
-        "who": "holders of ipd.bed.view",
+        "permissions_mode": "any",
+        "who": "holders of ipd.bed.view or cssd.operate or infection.control.manage",
         "roles_allowed": [
           "admissions_officer",
           "anaesthetist",
           "clinic_director",
           "clinical_specialist",
+          "cssd_technician",
           "doctor",
           "head_nurse",
           "hospital_admin",
           "hospital_director",
+          "ipc_nurse",
           "ops_admin",
           "owner",
           "receptionist",
@@ -2602,7 +2858,50 @@
       },
       "service_gates": [],
       "idempotency_key": false,
-      "errors": [],
+      "errors": [
+        {
+          "code": "BED_NO_LONGER_AVAILABLE",
+          "http_status": 409,
+          "message": "Bed was reserved by another terminal.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "bed_id",
+            "current_state"
+          ],
+          "details_from": "POST /api/v1/admissions/{admission_id}/allocate-bed"
+        },
+        {
+          "code": "FORBIDDEN",
+          "http_status": 403,
+          "message": "You do not have permission to do this.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "any_of",
+            "required"
+          ],
+          "details_from": "POST /api/v1/admin/departments"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
       "parameters": [
         {
           "name": "include_beds",
@@ -2680,7 +2979,6 @@
         "refresh": [
           "GET /rosters",
           "GET /rosters/staff",
-          "GET /hr/shift-patterns",
           "GET /rosters/week",
           "GET /rosters/swaps",
           "GET /beds/matrix"
@@ -2702,7 +3000,6 @@
         "refresh": [
           "GET /rosters",
           "GET /rosters/staff",
-          "GET /hr/shift-patterns",
           "GET /rosters/week",
           "GET /rosters/swaps",
           "GET /beds/matrix"
@@ -3303,6 +3600,7 @@
       "ur": "ہیڈ نرس"
     },
     "error_messages": {
+      "BED_NO_LONGER_AVAILABLE": "Bed was reserved by another terminal.",
       "FORBIDDEN": "You do not have permission to do this.",
       "REFERENCE_NOT_FOUND": "A referenced record does not exist.",
       "ROSTER_CONFLICT": "This duty overlaps another duty of the same employee.",
@@ -3328,7 +3626,10 @@
   },
   "same_component_as": [],
   "roles": {
-    "full": [],
+    "full": [
+      "head_nurse",
+      "ops_admin"
+    ],
     "partial": [
       "super_admin",
       "owner",
@@ -3343,12 +3644,13 @@
       "surgeon",
       "anaesthetist",
       "ward_nurse",
-      "head_nurse",
       "hr_admin",
-      "ops_admin"
+      "ipc_nurse",
+      "cssd_technician"
     ],
     "page_for": [
-      "head_nurse"
+      "head_nurse",
+      "ops_admin"
     ],
     "note": "page_for: the roles whose GET /meta/handbook lists this screen (its menu entry and F1 page; for a user with that one role, every service Active). A partial role outside page_for only makes some of these calls from screens of its own: never offer it this screen. Build the menu from the logged-in user's GET /meta/handbook."
   },
@@ -3371,7 +3673,8 @@
           "expect": "403 FORBIDDEN"
         },
         "errors_to_handle": [
-          "FORBIDDEN"
+          "FORBIDDEN",
+          "VALIDATION_ERROR"
         ],
         "as_one_of": [
           "clinic_director",
@@ -3397,7 +3700,9 @@
           ],
           "expect": "403 FORBIDDEN"
         },
-        "errors_to_handle": [],
+        "errors_to_handle": [
+          "VALIDATION_ERROR"
+        ],
         "as_one_of": [
           "head_nurse",
           "hr_admin",
@@ -3450,8 +3755,13 @@
         },
         "errors_to_handle": [
           "REFERENCE_NOT_FOUND",
+          "ROSTER_CONFLICT",
           "ROSTER_DATE_CLOSED",
+          "ROSTER_EMPLOYEE_INACTIVE",
           "ROSTER_ENTRY_CANCELLED",
+          "ROSTER_ON_LEAVE",
+          "ROSTER_OUT_OF_SCOPE",
+          "VALIDATION_ERROR",
           "VERSION_CONFLICT"
         ],
         "concurrent_edit": "send a stale expected_version: expect 409 VERSION_CONFLICT, reload and retry",
@@ -3477,7 +3787,9 @@
         },
         "errors_to_handle": [
           "ROSTER_DATE_CLOSED",
-          "ROSTER_ENTRY_CANCELLED"
+          "ROSTER_ENTRY_CANCELLED",
+          "ROSTER_OUT_OF_SCOPE",
+          "VALIDATION_ERROR"
         ],
         "as_one_of": [
           "head_nurse",
@@ -3500,7 +3812,11 @@
           "expect": "403 FORBIDDEN"
         },
         "errors_to_handle": [
+          "ROSTER_CONFLICT",
           "ROSTER_DATE_CLOSED",
+          "ROSTER_EMPLOYEE_INACTIVE",
+          "ROSTER_ON_LEAVE",
+          "ROSTER_OUT_OF_SCOPE",
           "VALIDATION_ERROR"
         ],
         "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)",
@@ -3508,30 +3824,6 @@
           "head_nurse",
           "hr_admin",
           "ops_admin"
-        ]
-      },
-      {
-        "id": "case:GET /hr/shift-patterns",
-        "call": "GET /api/v1/hr/shift-patterns",
-        "summary": "Shift patterns",
-        "denied": {
-          "as_one_of": [
-            "accountant",
-            "admissions_officer",
-            "anaesthetist",
-            "billing_admin",
-            "cashier"
-          ],
-          "expect": "403 FORBIDDEN"
-        },
-        "errors_to_handle": [],
-        "as_one_of": [
-          "clinic_director",
-          "hospital_admin",
-          "hospital_director",
-          "hr_admin",
-          "owner",
-          "super_admin"
         ]
       },
       {
@@ -3548,7 +3840,9 @@
           ],
           "expect": "403 FORBIDDEN"
         },
-        "errors_to_handle": [],
+        "errors_to_handle": [
+          "VALIDATION_ERROR"
+        ],
         "as_one_of": [
           "clinic_director",
           "head_nurse",
@@ -3573,7 +3867,9 @@
           ],
           "expect": "403 FORBIDDEN"
         },
-        "errors_to_handle": [],
+        "errors_to_handle": [
+          "VALIDATION_ERROR"
+        ],
         "as_one_of": [
           "head_nurse",
           "hr_admin",
@@ -3596,12 +3892,14 @@
         },
         "errors_to_handle": [
           "ROSTER_CONFLICT",
+          "ROSTER_EMPLOYEE_INACTIVE",
           "ROSTER_ON_LEAVE",
           "ROSTER_OUT_OF_SCOPE",
           "SWAP_COLLEAGUE_INELIGIBLE",
           "SWAP_DUTY_STARTED",
           "SWAP_EXISTS",
-          "SWAP_SELF_APPROVAL"
+          "SWAP_SELF_APPROVAL",
+          "VALIDATION_ERROR"
         ],
         "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)",
         "as_one_of": [
@@ -3625,9 +3923,13 @@
           "expect": "403 FORBIDDEN"
         },
         "errors_to_handle": [
+          "ROSTER_CONFLICT",
+          "ROSTER_ON_LEAVE",
           "ROSTER_OUT_OF_SCOPE",
           "SWAP_DUTY_STARTED",
-          "SWAP_SELF_APPROVAL"
+          "SWAP_SELF_APPROVAL",
+          "SWAP_TRANSITION_INVALID",
+          "VALIDATION_ERROR"
         ],
         "as_one_of": [
           "head_nurse",
@@ -3652,7 +3954,8 @@
         "errors_to_handle": [
           "ROSTER_OUT_OF_SCOPE",
           "SWAP_SELF_APPROVAL",
-          "SWAP_TRANSITION_INVALID"
+          "SWAP_TRANSITION_INVALID",
+          "VALIDATION_ERROR"
         ],
         "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)",
         "as_one_of": [
@@ -3670,21 +3973,27 @@
             "accountant",
             "billing_admin",
             "cashier",
-            "cssd_technician",
-            "employee_self"
+            "employee_self",
+            "hr_admin"
           ],
           "expect": "403 FORBIDDEN"
         },
-        "errors_to_handle": [],
+        "errors_to_handle": [
+          "BED_NO_LONGER_AVAILABLE",
+          "FORBIDDEN",
+          "VALIDATION_ERROR"
+        ],
         "as_one_of": [
           "admissions_officer",
           "anaesthetist",
           "clinic_director",
           "clinical_specialist",
+          "cssd_technician",
           "doctor",
           "head_nurse",
           "hospital_admin",
           "hospital_director",
+          "ipc_nurse",
           "ops_admin",
           "owner",
           "receptionist",
@@ -3860,18 +4169,6 @@
         "access": null
       },
       {
-        "id": "duty_roster::GET /hr/shift-patterns",
-        "task": "Shift patterns",
-        "call": "GET /hr/shift-patterns",
-        "is_action": false,
-        "permissions": [
-          "hr.employee.view",
-          "hr.shift.manage"
-        ],
-        "permissions_mode": "any",
-        "access": null
-      },
-      {
         "id": "duty_roster::GET /rosters/week",
         "task": "Week check: rest days per person, staff per day and shift",
         "call": "GET /rosters/week",
@@ -3943,9 +4240,11 @@
         "call": "GET /beds/matrix",
         "is_action": false,
         "permissions": [
-          "ipd.bed.view"
+          "ipd.bed.view",
+          "cssd.operate",
+          "infection.control.manage"
         ],
-        "permissions_mode": "all",
+        "permissions_mode": "any",
         "access": null
       }
     ],
@@ -3967,6 +4266,11 @@
       "roster.swap.updated"
     ],
     "errors_the_user_can_meet": [
+      {
+        "code": "BED_NO_LONGER_AVAILABLE",
+        "message": "Bed was reserved by another terminal.",
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      },
       {
         "code": "FORBIDDEN",
         "message": "You do not have permission to do this.",
@@ -4121,6 +4425,11 @@
       "slug": "hr-and-payroll",
       "title": "HR onboarding, IT provisioning, attendance, leave & payroll",
       "recipe": "get_workflow_recipe('hr-and-payroll')"
+    },
+    {
+      "slug": "infection-control",
+      "title": "Infection prevention and control (MSDS)",
+      "recipe": "get_workflow_recipe('infection-control')"
     },
     {
       "slug": "inpatient-and-discharge",
@@ -4490,52 +4799,6 @@
       "response": {
         "status": 201,
         "body_preview": "{\"status\": 201, \"body\": {\"data\": {\"created\": [{\"roster_id\": 14, \"employee_id\": 1, \"emp_number\": \"EMP-2026-0001\", \"full_name\": \"Nurse Amna\", \"designation\": \"Officer\", \"staff_category\": \"Nursing\", \"roster_date\": \"2026-10-13\", \"shift_pattern_id\": 1, \"shift_name\": \"Morning\", \"start_time\": \"08:00:00\", \"end_time\": \"14:00:00\", \"duty_area\": \"Ward\", \"ward_id\": 1, \"ward_name\": \"Roster Ward\", \"department_id\": null, \"department_name\": null, \"zone_label\": null, \"is_on_call\": false, \"notes\": null, \"status\": \"Active\", \"cancel_reason\": null, \"swap_id\": null, \"row_version\": 1, \"bed_ids\": []}, {\"roster_id\": 15, \"employee_id\": 7, \"emp_number\": \"EMP-2026-0007\", \"full_name\": \"Nurse Bushra\", \"designation\": \"Officer\", \"staff_category\": \"Nursing\", \"roster_date\": \"2026-10-13\", \"shift_pattern_id\": 2, \"shift_name\": \"Evening\", \"start_time\": \"14:00:00\", \"end_time\": \"20:00:00\", \"duty_area\": \"Ward\", \"ward_id\": 1, \"ward_name\": \"Roster Ward\", \"department_id\": null, \"department_name\": null, \"zone_label\": null, \"is_on_call\": false, \"notes\": null, \"status\": \"Active\", \"cancel_reason\": null, \"swap_id\": null, \"row_version\": 1, \"bed_ids\": []}, {\"roster_id\": 16, \"employee_id\": 1, \"emp_number\": \"EMP-2026-0001\", \"full_name\": \"Nurse Amna\", \"designation\": \"Officer\", \"staff_category\": \"Nursing\", \"roster_date\": \"2026-10-14\", \"shift_pattern_id\": 1, \"shift_name\": \"Morning\", \"start_time\": \"08:00:00\", \"end_time\": \"14:00:00\", \"duty_area\": \"Ward\", \"ward_id\": 1, \"ward_name\": \"Roster Ward\", \"department_id\": null, \"department_name…"
-      }
-    },
-    "GET /hr/shift-patterns": {
-      "request": {
-        "path": "/api/v1/hr/shift-patterns"
-      },
-      "response": {
-        "status": 200,
-        "body": {
-          "data": [
-            {
-              "shift_pattern_id": 1,
-              "name": "Morning",
-              "start_time": "08:00:00",
-              "end_time": "14:00:00",
-              "grace_minutes": 10,
-              "half_day_after_minutes": 120,
-              "is_active": true,
-              "row_version": 1
-            },
-            {
-              "shift_pattern_id": 4,
-              "name": "Morning 08-16",
-              "start_time": "08:00:00",
-              "end_time": "16:00:00",
-              "grace_minutes": 15,
-              "half_day_after_minutes": 120,
-              "is_active": true,
-              "row_version": 1
-            },
-            {
-              "shift_pattern_id": 2,
-              "name": "Evening",
-              "start_time": "14:00:00",
-              "end_time": "20:00:00",
-              "grace_minutes": 10,
-              "half_day_after_minutes": 120,
-              "is_active": true,
-              "row_version": 1
-            }
-          ],
-          "meta": {
-            "server_time": "2026-09-27T17:37:45.304301+00:00"
-          },
-          "request_id": "e83330e10908494aa41763cac64ee681"
-        }
       }
     },
     "GET /rosters/week": {
@@ -5285,7 +5548,7 @@
         "shift_pattern_id": {
           "type": "integer",
           "title": "Shift Pattern Id",
-          "description": "GET /hr/shift-patterns or GET /rosters/staff → shift_patterns"
+          "description": "GET /rosters/staff → shift_patterns (HR: GET /hr/shift-patterns)"
         },
         "duty_area": {
           "type": "string",
@@ -5703,31 +5966,6 @@
         "request_id"
       ],
       "title": "Envelope[list[RosterEntryOut]]"
-    },
-    "Envelope_list_ShiftPatternOut__": {
-      "properties": {
-        "data": {
-          "items": {
-            "$ref": "#/components/schemas/ShiftPatternOut"
-          },
-          "type": "array",
-          "title": "Data"
-        },
-        "meta": {
-          "$ref": "#/components/schemas/Meta"
-        },
-        "request_id": {
-          "type": "string",
-          "title": "Request Id"
-        }
-      },
-      "type": "object",
-      "required": [
-        "data",
-        "meta",
-        "request_id"
-      ],
-      "title": "Envelope[list[ShiftPatternOut]]"
     },
     "HTTPValidationError": {
       "properties": {
@@ -6775,151 +7013,11 @@
       "description": "One person's roster week."
     }
   },
-  "unknowns": [
-    {
-      "what": "decision H02",
-      "owner": [
-        "vendor"
-      ],
-      "question": "Digits in the Urdu UI and printouts: Latin 0-9 or Extended Arabic-Indic ۰-۹.",
-      "affects": [
-        "every screen in Urdu"
-      ],
-      "meanwhile": "Latin digits; identifiers, doses and money stay left to right."
-    },
-    {
-      "what": "decision H03",
-      "owner": [
-        "vendor",
-        "clinical_lead"
-      ],
-      "question": "How dates and times are shown on screen, and a 12- or 24-hour clock.",
-      "affects": [
-        "every screen"
-      ],
-      "meanwhile": "The server's print format (e.g. 27-Sep-2026) and the hospital time zone."
-    },
-    {
-      "what": "decision H04",
-      "owner": [
-        "vendor"
-      ],
-      "question": "Money on screen: decimals shown, and digit grouping (1,234,567 or 12,34,567).",
-      "affects": [
-        "every screen with money"
-      ],
-      "meanwhile": "The amounts as the API sends them, with the currency setting."
-    },
-    {
-      "what": "decision H08",
-      "owner": [
-        "vendor",
-        "translator",
-        "clinical_lead"
-      ],
-      "question": "Who writes and signs off the Urdu text of the UI, above all clinical and consent wording.",
-      "affects": [
-        "every screen in Urdu"
-      ],
-      "meanwhile": "Urdu you add is a draft: mark it so (the interview bank's pattern: a draft until a native speaker reviews it)."
-    },
-    {
-      "what": "decision H09",
-      "owner": [
-        "vendor",
-        "frontend_lead"
-      ],
-      "question": "One design system shared by every frontend team (who authors and approves it), or each team's own.",
-      "affects": [
-        "every screen"
-      ],
-      "meanwhile": "Each team designs within the backend's constraints: themes Light and DarkHighContrast, zoom 100-250 %, Noto Nastaliq Urdu, status shown as text and icon, never colour alone. Follow the vendor's design principles (frontend guide 18, get_design_principles)."
-    },
-    {
-      "what": "decision H10",
-      "owner": [
-        "clinical_lead",
-        "vendor"
-      ],
-      "question": "How each realtime event is shown (interrupt, attention, inform, silent), alert sounds and which terminals play them. Only Code Red (interrupt), the licence and maintenance banners and the logout on session.revoked are prescribed (the event catalogue's `presentation`).",
-      "affects": [
-        "every screen with realtime events"
-      ],
-      "meanwhile": "Code Red interrupts; every other event updates the screen and, at most, a dismissible notice. `priority` is the delivery urgency, not a presentation rule."
-    },
-    {
-      "what": "decision H12",
-      "owner": [
-        "vendor",
-        "backend"
-      ],
-      "question": "Which workspaces run on web, Android and iOS, which cannot read a MAC address, discover the server by UDP or print silently; or are cash and printing Windows-only.",
-      "affects": [
-        "my_cash_shift",
-        "registration",
-        "every screen that prints"
-      ],
-      "meanwhile": "The guides describe the Windows (Electron) terminal; tell your developer when a screen needs a capability your platform lacks."
-    },
-    {
-      "what": "decision H18",
-      "owner": [
-        "vendor",
-        "frontend_lead"
-      ],
-      "question": "Noto Nastaliq Urdu everywhere, or the more compact Naskh in dense tables.",
-      "affects": [
-        "every table in Urdu"
-      ],
-      "meanwhile": "Noto Nastaliq Urdu, as the guides require."
-    },
-    {
-      "what": "decision H19",
-      "owner": [
-        "clinical_lead",
-        "backend"
-      ],
-      "question": "Allergies: the patient record keeps free text, so it cannot tell \"no known allergies\" (asserted by a clinician) from \"not recorded\". Should it?",
-      "affects": [
-        "every screen with a patient banner"
-      ],
-      "meanwhile": "Show the recorded text as recorded; an empty value is \"not recorded\", never \"none\"."
-    },
-    {
-      "what": "decision H20",
-      "owner": [
-        "vendor",
-        "hospital"
-      ],
-      "question": "May unsaved form input be kept on the terminal (which fields, encrypted, for how long)?",
-      "affects": [
-        "every form"
-      ],
-      "meanwhile": "In memory only; never a second checker's password."
-    },
-    {
-      "what": "decision H22",
-      "owner": [
-        "hospital",
-        "vendor"
-      ],
-      "question": "Which documents may print on an unregistered terminal's default printer (sensitive A4 documents).",
-      "affects": [
-        "every screen that prints"
-      ],
-      "meanwhile": "As the printing guide says: the hint, then the default printer."
-    },
-    {
-      "what": "decision H24",
-      "owner": [
-        "vendor",
-        "clinical_lead"
-      ],
-      "question": "Who approves frontend performance targets, alert thresholds and escalation timers.",
-      "affects": [
-        "every screen"
-      ],
-      "meanwhile": "The server's own settings (e.g. critical_result_communicate_minutes)."
-    }
-  ]
+  "unknowns": [],
+  "omitted_sections": [
+    "decisions",
+    "examples",
+    "schemas"
+  ],
+  "next": "Request omitted sections separately with max_chars=200000; for an oversized endpoints/schemas section use get_endpoint / get_schema for each operation/type."
 }

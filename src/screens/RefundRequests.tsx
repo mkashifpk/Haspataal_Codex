@@ -18,7 +18,6 @@ const names: Record<string, string> = {
   void: "Void unpaid slip",
   "refund-request": "Request refund",
   "vip-waiver-request": "Request pre-consult waiver",
-  "vip-waiver-post-consult": "Request post-consult waiver",
   "credit-request": "Request credit",
 };
 export function RefundRequests({
@@ -100,7 +99,6 @@ export function RefundRequests({
     | requests.OpdReasonIn
     | requests.RefundRequestIn
     | requests.WaiverRequestIn
-    | requests.PostConsultWaiverIn
     | requests.CreditRequestIn {
     if (kind === "refund-request")
       return {
@@ -175,7 +173,7 @@ export function RefundRequests({
             {(!!t?.called_at || !!t?.examined_at || !!t?.completed_at) && (
               <p className="notice">
                 {tr(
-                  "Clinical activity is recorded. A refund needs elevated approval and is risk-flagged. Ask the authorized doctor about a post-consult waiver after a finalized note.",
+                  "Clinical activity is recorded. A refund needs elevated approval and is risk-flagged.",
                 )}
               </p>
             )}
@@ -283,13 +281,6 @@ export function RefundRequests({
                             onChange={(e) => setPct(e.target.value)}
                           />
                         </Field>
-                      )}
-                      {kind === "vip-waiver-post-consult" && (
-                        <p>
-                          {tr(
-                            "The server uses the latest finalized note of this visit. Approval ends as Waivered, never Refunded.",
-                          )}
-                        </p>
                       )}
                       {kind === "credit-request" && (
                         <>

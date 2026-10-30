@@ -1,0 +1,1222 @@
+{
+  "screen": "facility_profile",
+  "title": "Facility settings: PHC profile and services",
+  "cases": [
+    {
+      "id": "case:GET /establishment",
+      "call": "GET /api/v1/establishment",
+      "summary": "The establishment's profile and services, with the configuration revision",
+      "happy_path": {
+        "as_one_of": [
+          "any logged-in user"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/establishment"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "revision": 0,
+                "profile": null,
+                "active": [
+                  "dispensing",
+                  "outsourced_diagnostics",
+                  "laboratory"
+                ],
+                "rules_in_force": [
+                  {
+                    "code": "consultation_requires_vco",
+                    "description": "A clinic's outpatient or follow-up note records whether the patient gave verbal consent to the examination (VCO), declined it, or was not examined, before it is finalized (clinic manual, indicator 41).",
+                    "applies": false,
+                    "profiles": [
+                      "Clinic"
+                    ],
+                    "error_code": "EXAMINATION_CONSENT_REQUIRED",
+                    "operations": [
+                      "POST /clinical-encounters/{encounter_id}/finalize"
+                    ],
+                    "screens": [
+                      "consultation"
+                    ],
+                    "source": "clinical/service.py finalize; 0013, the clinical encounter guard"
+                  },
+                  {
+                    "code": "consultation_complete_record",
+                    "description": "A clinic's outpatient or follow-up note has the complaint or history, the examination (when the patient consented), the diagnosis and the plan before it is finalized (clinic manual, indicator 28).",
+                    "applies": false,
+                    "profiles": [
+                      "Clinic"
+                    ],
+                    "error_code": "CONSULTATION_INCOMPLETE",
+                    "operations": [
+                      "POST /clinical-encounters/{encounter_id}/finalize"
+                    ],
+                    "screens": [
+                      "consultation"
+                    ],
+                    "source": "clinical/service.py finalize; 0013, the clinical encounter guard"
+                  },
+                  {
+                    "code": "high_risk_pregnancy_nutrition",
+                    "description": "In a Category I hospital, a high-risk obstetric assessment includes the nutritional assessment.",
+                    "applies": false,
+                    "profiles": [
+                      "I"
+                    ],
+                    "error_code": "MATERNAL_NUTRITION_REQUIRED",
+                    "operations": [
+                      "POST /maternity/assessments"
+                    ],
+                    "screens": [
+                      "obstetric_assessment"
+                    ],
+                    "source": "maternity/service.py assess; 0013, the obstetric assessment guard"
+                  }
+                ],
+                "capabilities": [
+                  {
+                    "phc_declared": [],
+                    "declaration_note": "Running here but not in the services declared to the PHC: add it to the declaration (PUT /phc/services)",
+                    "capability": "dispensing",
+                    "label": "Pharmacy dispensing",
+                    "purpose": "Medicines dispensed from the facility's own stock (otherwise prescriptions are printed for the patient to buy outside).",
+                    "state": "Active",
+                    "state_since": "2026-10-17T02:32:44.107770+00:00",
+                    "changed_by_name": null,
+                    "requires": [],
+                    "hospital_only": false,
+                    "implemented": true,
+                    "new_work": "dispensings",
+                    "operations": [
+                      {
+                        "operation": "POST /prescriptions",
+                        "when": "for the hospital pharmacy (destination HospitalPharmacy)",
+                        "continues_while_retiring": false
+                      },
+                      {
+                        "operation": "POST /prescriptions/verbal",
+                        "when": "for the hospital pharmacy (destination HospitalPharmacy)",
+                        "continues_while_retiring": false
+                      },
+                      {
+                        "operation": "POST /prescriptions/{prescription_id}/dispense",
+                        "when": null,
+                        "continues_while_retiring": true
+                      }
+                    ],
+                    "outstanding": []
+                  },
+                  {
+                    "phc_declared": [],
+                    "declaration_note": "Running here but not in the services declared to the PHC: add it to the declaration (PUT /phc/services)",
+                    "capability": "outsourced_diagnostics",
+                    "label": "Tests sent to partner laboratories",
+                    "purpose": "Samples taken here and sent to a laboratory under an MOU (lab tests marked SendOut).",
+                    "state": "Active",
+                    "state_since": "2026-10-17T02:32:44.114876+00:00",
+                    "changed_by_name": null,
+                    "requires": [],
+                    "hospital_only": false,
+                    "implemented": true,
+                    "new_work": "orders for send-out tests",
+                    "operations": [
+                      {
+                        "operation": "POST /lab/requisitions",
+                        "when": "for a send-out test (availability SendOut)",
+                        "continues_while_retiring": false
+                      },
+                      {
+                        "operation": "POST /patients/lab-only-walk-in",
+                        "when": "for a send-out test (availability SendOut)",
+                        "continues_while_retiring": false
+                      }
+                    ],
+                    "outstanding": []
+                  },
+                  {
+                    "phc_declared": [],
+                    "declaration_note": "Running here but not in the services declared to the PHC: add it to the declaration (PUT /phc/services)",
+                    "capability": "laboratory",
+                    "label": "In-house laboratory",
+                    "purpose": "Tests done in the facility's own laboratory.",
+                    "state": "Active",
+                    "state_since": "2026-10-17T02:32:44.115519+00:00",
+                    "changed_by_name": null,
+                    "requires": [],
+                    "hospital_only": false,
+                    "implemented": true,
+                    "new_work": "orders for in-house tests",
+                    "operations": [
+                      {
+                        "operation": "POST /lab/requisitions",
+                        "when": "for an in-house test (availability InHouse)",
+                        "continues_while_retiring": false
+                      },
+                      {
+                        "operation": "POST /patients/lab-only-walk-in",
+                        "when": "for an in-house test (availability InHouse)",
+                        "continues_while_retiring": false
+                      }
+                    ],
+                    "outstanding": []
+                  }
+                ],
+                "views": {
+                  "workspaces": [
+                    {
+                      "workspace": "admissions",
+                      "services": [
+                        "inpatient"
+                      ],
+                      "view": "full"
+                    },
+                    {
+                      "workspace": "ward_nurse",
+                      "services": [
+                        "inpatient"
+                      ],
+                      "view": "full"
+                    },
+                    {
+                      "workspace": "triage",
+                      "services": [
+                        "emergency_department"
+                      ],
+                      "view": "full"
+                    }
+                  ],
+                  "screens": [
+                    {
+                      "screen_id": "lab_only_walkin",
+                      "workspace": "reception",
+                      "services": [
+                        "laboratory",
+                        "outsourced_diagnostics"
+                      ],
+                      "role": "work",
+                      "view": "full"
+                    },
+                    {
+                      "screen_id": "lab_orders_results",
+                      "workspace": "doctor",
+                      "services": [
+                        "laboratory",
+                        "outsourced_diagnostics",
+                        "imaging"
+                      ],
+                      "role": "work",
+                      "view": "full"
+                    },
+                    {
+                      "screen_id": "critical_results_doctor",
+                      "workspace": "doctor",
+                      "services": [
+                        "laboratory",
+                        "outsourced_diagnostics",
+                        "imaging"
+                      ],
+                      "role": "work",
+                      "view": "full"
+                    }
+                  ]
+                }
+              },
+              "meta": {
+                "server_time": "2026-10-17T02:34:09.036684+00:00"
+              },
+              "request_id": "8100a82786a54502ac2f2c72c0a842ae"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": []
+    },
+    {
+      "id": "case:GET /establishment/profiles",
+      "call": "GET /api/v1/establishment/profiles",
+      "summary": "The profiles an establishment can have, each with its framework and suggested services",
+      "happy_path": {
+        "as_one_of": [
+          "any logged-in user"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/establishment/profiles"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "code": "Clinic",
+                  "label": "Clinic (general practitioner, family physician or specialist)",
+                  "establishment": "Clinic",
+                  "beds": "no inpatient beds",
+                  "framework": "Clinic",
+                  "framework_edition": "MSDS Reference Manual for General Practitioners, Family Physicians and Specialist Clinics, 2017",
+                  "indicators": 47,
+                  "preset": [
+                    "outsourced_diagnostics"
+                  ]
+                },
+                {
+                  "code": "IIC",
+                  "label": "Hospital, Category II C",
+                  "establishment": "Hospital",
+                  "beds": "up to 15 beds",
+                  "framework": "IIC",
+                  "framework_edition": "MSDS and Reference Manual for Category II C HCEs, 2017",
+                  "indicators": 118,
+                  "preset": [
+                    "inpatient",
+                    "outsourced_diagnostics",
+                    "dispensing"
+                  ]
+                },
+                {
+                  "code": "IIB",
+                  "label": "Hospital, Category II B",
+                  "establishment": "Hospital",
+                  "beds": "16 to 30 beds",
+                  "framework": "IIB",
+                  "framework_edition": "MSDS and Reference Manual for Category II B HCEs, 2017 (amended 2018)",
+                  "indicators": 122,
+                  "preset": [
+                    "inpatient",
+                    "emergency_department",
+                    "laboratory"
+                  ]
+                }
+              ],
+              "meta": {
+                "server_time": "2026-10-14T02:11:48.678607+00:00"
+              },
+              "request_id": "28152b9e58844c03baa265f4420f5396"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": []
+    },
+    {
+      "id": "case:POST /establishment/changes/preview",
+      "call": "POST /api/v1/establishment/changes/preview",
+      "summary": "Preview a change of profile or services (nothing is saved)",
+      "happy_path": {
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/establishment/changes/preview",
+            "body": {
+              "profile": {
+                "category": "Clinic",
+                "registration_number": "PHC-C-5",
+                "reason": "Licensed as a clinic",
+                "effective_from": "2026-10-14"
+              },
+              "capabilities": [
+                {
+                  "capability": "surgery",
+                  "state": "Retired"
+                },
+                {
+                  "capability": "emergency_department",
+                  "state": "Retired"
+                },
+                {
+                  "capability": "inpatient",
+                  "state": "Retired"
+                }
+              ],
+              "reason": "Licensed as a clinic"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "revision": 0,
+                "profile": {
+                  "before": null,
+                  "after": {
+                    "code": "Clinic",
+                    "label": "Clinic (general practitioner, family physician or specialist)",
+                    "establishment": "Clinic",
+                    "beds": "no inpatient beds",
+                    "framework": "Clinic",
+                    "framework_edition": "MSDS Reference Manual for General Practitioners, Family Physicians and Specialist Clinics, 2017",
+                    "indicators": 47
+                  },
+                  "effective_from": "2026-10-14",
+                  "suggested": null,
+                  "beds": 0,
+                  "operational_beds": 0,
+                  "licensed_beds": null,
+                  "review": [],
+                  "reason_required": false,
+                  "framework_changes": true,
+                  "implications": [
+                    "The first profile: printouts carry Clinic (general practitioner, family physician or specialist) and the PHC number from its date.",
+                    "The inspection framework becomes Clinic (GP, family physician, specialist) (47 indicators)."
+                  ]
+                },
+                "moves": [
+                  {
+                    "capability": "surgery",
+                    "from_state": "Active",
+                    "to_state": "Retired",
+                    "label": "Operating theatre and anaesthesia",
+                    "prerequisites": [],
+                    "outstanding": [],
+                    "new_work": "theatre bookings"
+                  },
+                  {
+                    "capability": "inpatient",
+                    "from_state": "Active",
+                    "to_state": "Retired",
+                    "label": "Inpatient care",
+                    "prerequisites": [],
+                    "outstanding": [],
+                    "new_work": "admissions"
+                  },
+                  {
+                    "capability": "emergency_department",
+                    "from_state": "Active",
+                    "to_state": "Retired",
+                    "label": "Emergency department",
+                    "prerequisites": [],
+                    "outstanding": [],
+                    "new_work": "emergency visits"
+                  }
+                ],
+                "problems": [],
+                "acknowledgements": [],
+                "warnings": [],
+                "allowed": true
+              },
+              "meta": {
+                "server_time": "2026-10-14T10:29:13.751414+00:00"
+              },
+              "request_id": "4ffda45f1cb34e7c8e5d4b6bbeec39c4"
+            }
+          },
+          "errors_seen": [
+            "FORBIDDEN",
+            "VALIDATION_ERROR"
+          ],
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "FORBIDDEN",
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:POST /establishment/changes",
+      "call": "POST /api/v1/establishment/changes",
+      "summary": "Apply a change of profile or services",
+      "happy_path": {
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/establishment/changes",
+            "body": {
+              "profile": {
+                "category": "Clinic",
+                "registration_number": "PHC-Clinic-1",
+                "reason": "Our first licence",
+                "effective_from": "2026-10-14"
+              },
+              "capabilities": [
+                {
+                  "capability": "outsourced_diagnostics",
+                  "state": "Active"
+                }
+              ],
+              "reason": "Our first licence",
+              "expected_revision": 0,
+              "acknowledged": []
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "change_id": 1,
+                "revision": 1,
+                "reason": "Our first licence",
+                "profile_before": null,
+                "profile_after": "Clinic",
+                "confirmation_id": 1,
+                "moves": [
+                  {
+                    "to_state": "Active",
+                    "capability": "outsourced_diagnostics",
+                    "from_state": "Available"
+                  }
+                ],
+                "acknowledged": [],
+                "outstanding": {},
+                "changed_by": 1,
+                "changed_by_name": "ubc8174f938",
+                "changed_at": "2026-10-14T02:12:00.180117+00:00",
+                "effective_from": "2026-10-14",
+                "registration_number": "PHC-Clinic-1"
+              },
+              "meta": {
+                "server_time": "2026-10-14T02:12:00.205148+00:00"
+              },
+              "request_id": "e1b6e56bd23248ceb1ec92d3a8d3539e"
+            }
+          },
+          "errors_seen": [
+            "CONFIRMATION_REQUIRED",
+            "ESTABLISHMENT_CHANGE_REFUSED",
+            "VALIDATION_ERROR",
+            "VERSION_CONFLICT"
+          ],
+          "events_emitted": [
+            "establishment.changed"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "CAPABILITY_DEPENDENCY",
+        "CAPABILITY_NOT_IMPLEMENTED",
+        "CAPABILITY_NOT_PERMITTED",
+        "CAPABILITY_TRANSITION_NOT_ALLOWED",
+        "CAPABILITY_WORK_OUTSTANDING",
+        "CONFIRMATION_REQUIRED",
+        "ESTABLISHMENT_CHANGE_REFUSED",
+        "MSDS_CATEGORY_REASON_REQUIRED",
+        "VALIDATION_ERROR",
+        "VERSION_CONFLICT"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:GET /establishment/changes",
+      "call": "GET /api/v1/establishment/changes",
+      "summary": "The history of changes, newest first",
+      "happy_path": {
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/establishment/changes"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "change_id": 2,
+                  "revision": 2,
+                  "reason": "Contractor started",
+                  "profile_before": null,
+                  "profile_after": null,
+                  "confirmation_id": null,
+                  "moves": [
+                    {
+                      "to_state": "Retired",
+                      "capability": "cssd",
+                      "from_state": "Retiring"
+                    }
+                  ],
+                  "acknowledged": [],
+                  "outstanding": {},
+                  "changed_by": 1,
+                  "changed_by_name": "ub607ba38a1",
+                  "changed_at": "2026-10-14T02:13:15.028756+00:00",
+                  "effective_from": null,
+                  "registration_number": null
+                },
+                {
+                  "change_id": 1,
+                  "revision": 1,
+                  "reason": "The sterile supply moves to a contractor",
+                  "profile_before": null,
+                  "profile_after": null,
+                  "confirmation_id": null,
+                  "moves": [
+                    {
+                      "to_state": "Retiring",
+                      "capability": "cssd",
+                      "from_state": "Active"
+                    }
+                  ],
+                  "acknowledged": [
+                    "retire:cssd"
+                  ],
+                  "outstanding": {},
+                  "changed_by": 1,
+                  "changed_by_name": "ub607ba38a1",
+                  "changed_at": "2026-10-14T02:13:14.958922+00:00",
+                  "effective_from": null,
+                  "registration_number": null
+                }
+              ],
+              "meta": {
+                "server_time": "2026-10-14T02:13:15.148498+00:00"
+              },
+              "request_id": "74621239974548b087f0902a83cdd324"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /establishment/changes/{change_id}",
+      "call": "GET /api/v1/establishment/changes/{change_id}",
+      "summary": "One change",
+      "happy_path": {
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/establishment/changes/1"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "change_id": 1,
+                "revision": 1,
+                "reason": "The sterile supply moves to a contractor",
+                "profile_before": null,
+                "profile_after": null,
+                "confirmation_id": null,
+                "moves": [
+                  {
+                    "to_state": "Retiring",
+                    "capability": "cssd",
+                    "from_state": "Active"
+                  }
+                ],
+                "acknowledged": [
+                  "retire:cssd"
+                ],
+                "outstanding": {},
+                "changed_by": 1,
+                "changed_by_name": "ub607ba38a1",
+                "changed_at": "2026-10-14T02:13:14.958922+00:00",
+                "effective_from": null,
+                "registration_number": null
+              },
+              "meta": {
+                "server_time": "2026-10-14T02:13:15.157742+00:00"
+              },
+              "request_id": "cac9f111113e4f2fb90fb1c0f8f481c1"
+            }
+          },
+          "errors_seen": [
+            "NOT_FOUND"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "NOT_FOUND",
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /establishment/staffing",
+      "call": "GET /api/v1/establishment/staffing",
+      "summary": "Who can do each duty, and where a second person is missing",
+      "happy_path": {
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/establishment/staffing"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "duty": "registration",
+                  "label": "Register patients and issue visit tickets",
+                  "permissions": [
+                    "opd.ticket.create"
+                  ],
+                  "capability": null,
+                  "applies": true,
+                  "different_person_from": null,
+                  "enforced_by": null,
+                  "holders": 0,
+                  "holder_names": [],
+                  "status": "NobodyHolds",
+                  "message": "Nobody active holds opd.ticket.create",
+                  "solo_alternative": null
+                },
+                {
+                  "duty": "consultation",
+                  "label": "Consult and write the clinical note",
+                  "permissions": [
+                    "clinical.encounter.create"
+                  ],
+                  "capability": null,
+                  "applies": true,
+                  "different_person_from": null,
+                  "enforced_by": null,
+                  "holders": 0,
+                  "holder_names": [],
+                  "status": "NobodyHolds",
+                  "message": "Nobody active holds clinical.encounter.create",
+                  "solo_alternative": null
+                },
+                {
+                  "duty": "payment",
+                  "label": "Take payments",
+                  "permissions": [
+                    "finance.payment.collect"
+                  ],
+                  "capability": null,
+                  "applies": true,
+                  "different_person_from": null,
+                  "enforced_by": null,
+                  "holders": 0,
+                  "holder_names": [],
+                  "status": "NobodyHolds",
+                  "message": "Nobody active holds finance.payment.collect",
+                  "solo_alternative": null
+                }
+              ],
+              "meta": {
+                "server_time": "2026-10-14T11:33:46.187488+00:00"
+              },
+              "request_id": "3a39a8acd0b54cb0b20563aebcf1b60d"
+            }
+          },
+          "errors_seen": [
+            "FORBIDDEN"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "FORBIDDEN"
+      ]
+    },
+    {
+      "id": "case:GET /msds/profile",
+      "call": "GET /api/v1/msds/profile",
+      "summary": "The PHC category: as confirmed, and what the beds suggest",
+      "happy_path": {
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "phc_inspector",
+          "quality_officer"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/msds/profile"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "category": "IIA",
+                "category_label": "Category II A",
+                "registration_number": "PHC-IIA-2",
+                "licence_document": null,
+                "effective_from": "2026-10-14",
+                "confirmed_at": "2026-10-14T10:59:04.545469+00:00",
+                "confirmed_by_name": "u2f4fd5a42b",
+                "reason": "Step 1",
+                "bed_count": 3,
+                "licensed_beds": null,
+                "review": [],
+                "suggestion": {
+                  "category": "IIC",
+                  "category_label": "Category II C",
+                  "beds": 3,
+                  "operational": 3,
+                  "out_of_service": 0,
+                  "supported": true,
+                  "note": "3 inpatient beds: Category II C by the PHC's bands. The category on the licence decides.",
+                  "wards": [
+                    {
+                      "ward_id": 4,
+                      "code": "E63809e",
+                      "name": "E63809e",
+                      "ward_type": "Emergency",
+                      "beds": 1,
+                      "out_of_service": 0,
+                      "counted": false
+                    },
+                    {
+                      "ward_id": 2,
+                      "code": "GW",
+                      "name": "General Ward",
+                      "ward_type": "General",
+                      "beds": 1,
+                      "out_of_service": 0,
+                      "counted": true
+                    },
+                    {
+                      "ward_id": 3,
+                      "code": "W63809e",
+                      "name": "W63809e",
+                      "ward_type": "General",
+                      "beds": 1,
+                      "out_of_service": 0,
+                      "counted": true
+                    }
+                  ]
+                },
+                "needs_confirmation": false,
+                "standards": [
+                  {
+                    "category": "Clinic",
+                    "label": "Clinic (GP, family physician, specialist)",
+                    "edition": "MSDS Reference Manual for General Practitioners, Family Physicians and Specialist Clinics, 2017",
+                    "indicators": 47
+                  },
+                  {
+                    "category": "IIC",
+                    "label": "Category II C",
+                    "edition": "MSDS and Reference Manual for Category II C HCEs, 2017",
+                    "indicators": 118
+                  },
+                  {
+                    "category": "IIB",
+                    "label": "Category II B",
+                    "edition": "MSDS and Reference Manual for Category II B HCEs, 2017 (amended 2018)",
+                    "indicators": 122
+                  }
+                ]
+              },
+              "meta": {
+                "server_time": "2026-10-14T10:59:04.588364+00:00"
+              },
+              "request_id": "f3d5775cac044754882040d88090744f"
+            }
+          },
+          "errors_seen": [
+            "ACCOUNT_EXPIRED",
+            "FORBIDDEN"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "ACCOUNT_EXPIRED",
+        "FORBIDDEN"
+      ]
+    },
+    {
+      "id": "case:GET /msds/category-confirmations",
+      "call": "GET /api/v1/msds/category-confirmations",
+      "summary": "Every recorded PHC category, newest first",
+      "happy_path": {
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/msds/category-confirmations"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "confirmation_id": 3,
+                  "category": "IIB",
+                  "registration_number": "PHC-R-2",
+                  "licence_document_id": null,
+                  "bed_count": 2,
+                  "licensed_beds": null,
+                  "suggested_category": "IIC",
+                  "reason": "Licensed as II B again",
+                  "effective_from": "2026-10-14",
+                  "confirmed_by": 11,
+                  "confirmed_by_name": "u65bf1b82f9",
+                  "confirmed_at": "2026-10-14T10:44:00.352157+00:00"
+                },
+                {
+                  "confirmation_id": 2,
+                  "category": "Clinic",
+                  "registration_number": "PHC-C-77",
+                  "licence_document_id": null,
+                  "bed_count": 2,
+                  "licensed_beds": null,
+                  "suggested_category": "IIC",
+                  "reason": "The licence is a clinic's; the ward's beds close after the last patient",
+                  "effective_from": "2026-10-14",
+                  "confirmed_by": 11,
+                  "confirmed_by_name": "u65bf1b82f9",
+                  "confirmed_at": "2026-10-14T10:43:59.828967+00:00"
+                },
+                {
+                  "confirmation_id": 1,
+                  "category": "IIB",
+                  "registration_number": "PHC-R-1",
+                  "licence_document_id": null,
+                  "bed_count": 2,
+                  "licensed_beds": null,
+                  "suggested_category": "IIC",
+                  "reason": "Licensed as II B",
+                  "effective_from": "2026-10-14",
+                  "confirmed_by": 11,
+                  "confirmed_by_name": "u65bf1b82f9",
+                  "confirmed_at": "2026-10-14T10:43:59.544345+00:00"
+                }
+              ],
+              "meta": {
+                "server_time": "2026-10-14T10:44:00.474723+00:00"
+              },
+              "request_id": "33a055707245437d84f07c75f03eccd8"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": []
+    },
+    {
+      "id": "case:GET /facility/compliance-documents",
+      "call": "GET /api/v1/facility/compliance-documents",
+      "summary": "The compliance register",
+      "happy_path": {
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "lab_admin",
+          "maintenance_admin",
+          "ops_admin",
+          "owner",
+          "quality_officer"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/facility/compliance-documents",
+            "query": {
+              "kind": "Law"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "document_id": 12,
+                  "kind": "Law",
+                  "category": "Building",
+                  "title": "Building safety codes (Building Code of Pakistan, fire safety provisions)",
+                  "authority": "The local building control authority",
+                  "reference_no": null,
+                  "issued_on": null,
+                  "valid_until": null,
+                  "renewal_lead_days": 60,
+                  "responsible_user_id": null,
+                  "responsible_name": null,
+                  "asset_id": null,
+                  "asset_tag": null,
+                  "asset_name": null,
+                  "department_id": null,
+                  "department_name": null,
+                  "renewal_applied_on": null,
+                  "renewal_reference": null,
+                  "has_scan": false,
+                  "content_type": null,
+                  "size_bytes": null,
+                  "note": null,
+                  "status": "Current",
+                  "replaces_id": null,
+                  "renewed_by_id": null,
+                  "withdrawn_reason": null,
+                  "created_by_name": null,
+                  "created_at": "2026-10-01T07:06:25.784414+00:00",
+                  "row_version": 1,
+                  "days_left": null,
+                  "state": "NoExpiry"
+                },
+                {
+                  "document_id": 10,
+                  "kind": "Law",
+                  "category": "Pharmacy",
+                  "title": "Drugs Act 1976 and the Punjab Drug Rules",
+                  "authority": "Drug Regulatory Authority of Pakistan; Health Department, Punjab",
+                  "reference_no": null,
+                  "issued_on": null,
+                  "valid_until": null,
+                  "renewal_lead_days": 60,
+                  "responsible_user_id": null,
+                  "responsible_name": null,
+                  "asset_id": null,
+                  "asset_tag": null,
+                  "asset_name": null,
+                  "department_id": null,
+                  "department_name": null,
+                  "renewal_applied_on": null,
+                  "renewal_reference": null,
+                  "has_scan": false,
+                  "content_type": null,
+                  "size_bytes": null,
+                  "note": null,
+                  "status": "Current",
+                  "replaces_id": null,
+                  "renewed_by_id": null,
+                  "withdrawn_reason": null,
+                  "created_by_name": null,
+                  "created_at": "2026-10-01T07:06:25.784414+00:00",
+                  "row_version": 1,
+                  "days_left": null,
+                  "state": "NoExpiry"
+                },
+                {
+                  "document_id": 11,
+                  "kind": "Law",
+                  "category": "Fire",
+                  "title": "Fire and non-fire emergencies: the Punjab Emergency Service Act 2006 and the fire safety provisions",
+                  "authority": "Rescue 1122; Civil Defence",
+                  "reference_no": null,
+                  "issued_on": null,
+                  "valid_until": null,
+                  "renewal_lead_days": 60,
+                  "responsible_user_id": null,
+                  "responsible_name": null,
+                  "asset_id": null,
+                  "asset_tag": null,
+                  "asset_name": null,
+                  "department_id": null,
+                  "department_name": null,
+                  "renewal_applied_on": null,
+                  "renewal_reference": null,
+                  "has_scan": false,
+                  "content_type": null,
+                  "size_bytes": null,
+                  "note": null,
+                  "status": "Current",
+                  "replaces_id": null,
+                  "renewed_by_id": null,
+                  "withdrawn_reason": null,
+                  "created_by_name": null,
+                  "created_at": "2026-10-01T07:06:25.784414+00:00",
+                  "row_version": 1,
+                  "days_left": null,
+                  "state": "NoExpiry"
+                }
+              ],
+              "meta": {
+                "server_time": "2026-10-01T07:15:51.892960+00:00"
+              },
+              "request_id": "6e356393c6f042aa824a4c27af50c180"
+            }
+          },
+          "errors_seen": [
+            "FORBIDDEN"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "FORBIDDEN",
+        "VALIDATION_ERROR"
+      ]
+    }
+  ],
+  "service_cases": [],
+  "delivery_gate": {
+    "required": true,
+    "status": "required",
+    "progress_reporting": {
+      "required": true,
+      "submit": "propose_progress",
+      "verify": "progress_proposals",
+      "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+    },
+    "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+    "compulsory": [
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+        "points": 2
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+        "points": 3
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+        "points": 2
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+        "points": 4
+      }
+    ],
+    "zoom": {
+      "min_pct": 100,
+      "max_pct": 250,
+      "reset_pct": 100,
+      "keys": [
+        "Ctrl + or Ctrl = (zoom in)",
+        "Ctrl - (zoom out)",
+        "Ctrl 0 (reset to 100 %)",
+        "Command on macOS"
+      ],
+      "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+    },
+    "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+    "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+  },
+  "handbook_page": "screens/facility_profile",
+  "workspace_guide": "get_handbook_outline('owner_dashboard')",
+  "realtime": [
+    {
+      "event": "establishment.changed",
+      "check": "the screen refreshes without polling"
+    },
+    {
+      "event": "notification.created",
+      "check": "the screen refreshes without polling"
+    }
+  ],
+  "acceptance_rules": [
+    "Facility-wide, not a personal preference: open it from the admin's Settings entry (establishment.manage), never from the avatar's Settings modal.",
+    "A 'Staff and duties' tab: GET /establishment/staffing after every applied change (and on opening). Show NobodyHolds and NeedsSecondPerson in amber with the message and solo_alternative; never offer to weaken a rule. NotApplicable rows are greyed (the service is not running).",
+    "Top: the profile (label, PHC number, effective date, framework and its indicators) and, from GET /msds/profile, what the beds suggest (`note`) with the wards table (emergency wards are not counted). needs_confirmation true: a banner 'Record the category on your PHC licence'. Never change it by yourself: the licence decides, not the bed count.",
+    "Services: one row per capability with its state (Available / Preparing / Active / Retiring / Retired), what it needs (`requires`) and its open work (`outstanding`); a service with `implemented` false (none in this release) gets no button.",
+    "First setup and every later change are one form: the profile (category from GET /establishment/profiles, pre-tick its `preset`; the person decides each service), the number, the licence from the compliance register (GET /facility/compliance-documents?category=Hospital), the date it took effect, the reason.",
+    "Always preview first (POST /establishment/changes/preview) and show it in full: each move in order, its prerequisites (met or missing), the open work of each service being retired, the framework change, the warnings and every `problems` line. Apply is disabled while `allowed` is false.",
+    "Apply (POST /establishment/changes) sends the previewed `revision` as expected_revision and the codes of every acknowledgement the person ticked (each shown as a checkbox with its message). VERSION_CONFLICT: someone else changed it; preview again. CONFIRMATION_REQUIRED: tick what details.acknowledgements lists.",
+    "Retiring a service with open work: say it plainly ('No new admissions from now on; the 3 admitted patients continue to discharge; their records stay'). Retired only when nothing is open.",
+    "Becoming a clinic: inpatient care, the emergency department and the theatre cannot stay Active; the preview says so. Going back to a hospital rechecks every prerequisite (an earlier activation proves nothing).",
+    "History: GET /establishment/changes (who, when, why, before and after, the open work at that moment) and GET /msds/category-confirmations (each recorded category with its date). A reversal is a new change."
+  ],
+  "demo_accounts": "demo_accounts() lists a login per role; sandbox_call runs each case on the DEV server"
+}

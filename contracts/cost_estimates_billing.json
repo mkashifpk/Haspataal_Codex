@@ -1,7 +1,7 @@
 {
   "screen_id": "cost_estimates_billing",
-  "contract_fingerprint": "e90ba541e495d6487532",
-  "knowledge_revision": "e9e3dbb61b873e01",
+  "contract_fingerprint": "14824af5c60c05148994",
+  "knowledge_revision": "9250bafb1794ac12",
   "delivery_gate": {
     "required": true,
     "status": "required",
@@ -231,11 +231,15 @@
         "id": "rule:3b5c2c40ea",
         "text": "Show billed_so_far beside the total during the stay.",
         "cites": []
+      },
+      {
+        "id": "rule:a8073c529f",
+        "text": "The move of a ChangeOfWard estimate: the worklist item's transfer_id, or picked from GET /cost-estimates/admissions/{admission_id}/moves (from and to ward, both daily charges, rate_changed, estimate_explained); an estimate_status Draft opens that estimate instead of preparing another. Never a typed id, and never GET /admissions/{admission_id}/transfers: the chart's list with the clinical reason, which accounts cannot read.",
+        "cites": []
       }
     ],
     "related_workflows": [
-      "cost-estimates-and-tariff",
-      "inpatient-and-discharge"
+      "cost-estimates-and-tariff"
     ]
   },
   "rules_in_force": null,
@@ -245,7 +249,7 @@
     "workspace": "billing_admin",
     "phase": "P4",
     "position": 56,
-    "points": 69,
+    "points": 71,
     "capabilities": [
       "realtime",
       "patient_context",
@@ -256,14 +260,6 @@
       "zoom"
     ],
     "depends_on": [
-      {
-        "from": "cost_estimates_billing",
-        "to": "consultation",
-        "kind": "data_candidate",
-        "evidence": "it reads admissions, which POST /admissions on consultation creates",
-        "ordering": false,
-        "forward": false
-      },
       {
         "from": "cost_estimates_billing",
         "to": "ward_transfer",
@@ -286,7 +282,7 @@
     "note": "`forward`: a dependency on a later phase; use the demo data or a scenario (sandbox_scenario) until that screen exists. `ordering: false`: a hand-off or a hint, not a reason to wait."
   },
   "definition_of_done": {
-    "points": 69,
+    "points": 71,
     "items": [
       {
         "id": "ep:GET /cost-estimates/worklist",
@@ -343,8 +339,8 @@
         "claimed": false
       },
       {
-        "id": "ep:GET /admissions/{admission_id}/transfers",
-        "label": "GET /admissions/{admission_id}/transfers",
+        "id": "ep:GET /cost-estimates/admissions/{admission_id}/moves",
+        "label": "GET /cost-estimates/admissions/{admission_id}/moves",
         "points": 3,
         "claimed": false
       },
@@ -375,6 +371,12 @@
       {
         "id": "rule:3b5c2c40ea",
         "label": "Show billed_so_far beside the total during the stay.",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "rule:a8073c529f",
+        "label": "The move of a ChangeOfWard estimate: the worklist item's transfer_id, or picked from GET /cost-estimates/admissions/{admission_id}/moves (from and to ward, both daily charges, rate_changed, estimate_explained); an estimate_status Draft opens that estimate instead of preparing another. Never a typed id, and never GET /admissions/{admission_id}/transfers: the chart's list with the clinical reason, which accounts cannot read.",
         "points": 2,
         "claimed": false
       },
@@ -1602,29 +1604,66 @@
       }
     },
     {
-      "endpoint": "GET /admissions/{admission_id}/transfers",
-      "summary": "The moves of an admission",
+      "endpoint": "GET /cost-estimates/admissions/{admission_id}/moves",
+      "summary": "The moves of an admission, for a ChangeOfWard estimate",
       "access": {
         "authentication": "user",
         "permissions": [
-          "ipd.admission.view"
+          "estimate.view",
+          "estimate.prepare",
+          "estimate.explain"
         ],
-        "permissions_mode": "all",
-        "who": "holders of ipd.admission.view",
+        "permissions_mode": "any",
+        "who": "holders of estimate.view or estimate.prepare or estimate.explain",
         "roles_allowed": [
           "admissions_officer",
           "anaesthetist",
+          "billing_admin",
+          "cashier",
+          "clinic_director",
           "clinical_specialist",
           "doctor",
           "head_nurse",
-          "surgeon",
-          "triage_nurse",
-          "ward_nurse"
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer",
+          "surgeon"
         ]
       },
       "service_gates": [],
       "idempotency_key": false,
       "errors": [
+        {
+          "code": "FORBIDDEN",
+          "http_status": 403,
+          "message": "You do not have permission to do this.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "any_of",
+            "required"
+          ],
+          "details_from": "POST /api/v1/admin/departments"
+        },
+        {
+          "code": "NOT_FOUND",
+          "http_status": 404,
+          "message": "The requested resource was not found.",
+          "retryable": false,
+          "ui_action": "Say 'not found'; refresh the list.",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "resource"
+          ],
+          "details_from": "PUT /api/v1/admin/printers/{printer_id}"
+        },
         {
           "code": "VALIDATION_ERROR",
           "http_status": 422,
@@ -1657,7 +1696,7 @@
           "content": {
             "application/json; charset=utf-8": {
               "schema": {
-                "$ref": "#/components/schemas/Envelope_list_AdmissionTransferOut__"
+                "$ref": "#/components/schemas/Envelope_list_EstimateMoveOut__"
               }
             }
           }
@@ -1701,7 +1740,7 @@
           "GET /cost-estimates/worklist",
           "GET /cost-estimates",
           "GET /tariff",
-          "GET /admissions/{admission_id}/transfers"
+          "GET /cost-estimates/admissions/{admission_id}/moves"
         ]
       }
     ],
@@ -2073,6 +2112,7 @@
       "ADMISSION_STATE_INVALID": "The admission cannot move to that state.",
       "ESTIMATE_STATE_INVALID": "The estimate cannot change that way: what the family was told never changes; prepare a revision.",
       "FORBIDDEN": "You do not have permission to do this.",
+      "NOT_FOUND": "The requested resource was not found.",
       "REFERENCE_NOT_FOUND": "A referenced record does not exist.",
       "VALIDATION_ERROR": "The request is invalid."
     },
@@ -2086,6 +2126,7 @@
   ],
   "roles": {
     "full": [
+      "billing_admin",
       "admissions_officer"
     ],
     "partial": [
@@ -2093,14 +2134,11 @@
       "hospital_admin",
       "hospital_director",
       "clinic_director",
-      "billing_admin",
       "cashier",
-      "triage_nurse",
       "doctor",
       "clinical_specialist",
       "surgeon",
       "anaesthetist",
-      "ward_nurse",
       "head_nurse",
       "quality_officer"
     ],
@@ -2370,31 +2408,38 @@
         ]
       },
       {
-        "id": "case:GET /admissions/{admission_id}/transfers",
-        "call": "GET /api/v1/admissions/{admission_id}/transfers",
-        "summary": "The moves of an admission",
+        "id": "case:GET /cost-estimates/admissions/{admission_id}/moves",
+        "call": "GET /api/v1/cost-estimates/admissions/{admission_id}/moves",
+        "summary": "The moves of an admission, for a ChangeOfWard estimate",
         "denied": {
           "as_one_of": [
             "accountant",
-            "billing_admin",
-            "cashier",
-            "clinic_director",
-            "cssd_technician"
+            "cssd_technician",
+            "employee_self",
+            "hr_admin",
+            "ipc_nurse"
           ],
           "expect": "403 FORBIDDEN"
         },
         "errors_to_handle": [
+          "FORBIDDEN",
+          "NOT_FOUND",
           "VALIDATION_ERROR"
         ],
         "as_one_of": [
           "admissions_officer",
           "anaesthetist",
+          "billing_admin",
+          "cashier",
+          "clinic_director",
           "clinical_specialist",
           "doctor",
           "head_nurse",
-          "surgeon",
-          "triage_nurse",
-          "ward_nurse"
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer",
+          "surgeon"
         ]
       }
     ],
@@ -2462,7 +2507,8 @@
       "Worklist first: admissions without an explained estimate and moves to a ward with another daily charge (overdue in red after estimate_due_hours; admission.transferred with rate_changed arrives with priority high).",
       "Prepare: the ward and the expected days (the bed charge comes from the tariff), the services and procedures picked from GET /tariff (their price is the tariff's: never typed), the allowances for medicines and consumables, the deposit (prefilled). For a move: reason ChangeOfWard with the transfer_id.",
       "Print it (A4; Urdu from fields.urdu, right to left), explain it in the family's language, let them sign, then 'Mark explained' (who heard it, the relationship, the language, signed). Final; a new one supersedes it.",
-      "Show billed_so_far beside the total during the stay."
+      "Show billed_so_far beside the total during the stay.",
+      "The move of a ChangeOfWard estimate: the worklist item's transfer_id, or picked from GET /cost-estimates/admissions/{admission_id}/moves (from and to ward, both daily charges, rate_changed, estimate_explained); an estimate_status Draft opens that estimate instead of preparing another. Never a typed id, and never GET /admissions/{admission_id}/transfers: the chart's list with the clinical reason, which accounts cannot read."
     ],
     "demo_accounts": "demo_accounts() lists a login per role; sandbox_call runs each case on the DEV server"
   },
@@ -2580,14 +2626,16 @@
         "access": "any logged-in user"
       },
       {
-        "id": "cost_estimates_billing::GET /admissions/{admission_id}/transfers",
-        "task": "The moves of an admission",
-        "call": "GET /admissions/{admission_id}/transfers",
+        "id": "cost_estimates_billing::GET /cost-estimates/admissions/{admission_id}/moves",
+        "task": "The moves of an admission, for a ChangeOfWard estimate",
+        "call": "GET /cost-estimates/admissions/{admission_id}/moves",
         "is_action": false,
         "permissions": [
-          "ipd.admission.view"
+          "estimate.view",
+          "estimate.prepare",
+          "estimate.explain"
         ],
-        "permissions_mode": "all",
+        "permissions_mode": "any",
         "access": null
       }
     ],
@@ -2595,7 +2643,8 @@
       "Worklist first: admissions without an explained estimate and moves to a ward with another daily charge (overdue in red after estimate_due_hours; admission.transferred with rate_changed arrives with priority high).",
       "Prepare: the ward and the expected days (the bed charge comes from the tariff), the services and procedures picked from GET /tariff (their price is the tariff's: never typed), the allowances for medicines and consumables, the deposit (prefilled). For a move: reason ChangeOfWard with the transfer_id.",
       "Print it (A4; Urdu from fields.urdu, right to left), explain it in the family's language, let them sign, then 'Mark explained' (who heard it, the relationship, the language, signed). Final; a new one supersedes it.",
-      "Show billed_so_far beside the total during the stay."
+      "Show billed_so_far beside the total during the stay.",
+      "The move of a ChangeOfWard estimate: the worklist item's transfer_id, or picked from GET /cost-estimates/admissions/{admission_id}/moves (from and to ward, both daily charges, rate_changed, estimate_explained); an estimate_status Draft opens that estimate instead of preparing another. Never a typed id, and never GET /admissions/{admission_id}/transfers: the chart's list with the clinical reason, which accounts cannot read."
     ],
     "updates_by_itself_on": [
       "admission.transferred"
@@ -2615,6 +2664,11 @@
         "code": "FORBIDDEN",
         "message": "You do not have permission to do this.",
         "ui_action": "Explain and hide the action (check x-permissions)."
+      },
+      {
+        "code": "NOT_FOUND",
+        "message": "The requested resource was not found.",
+        "ui_action": "Say 'not found'; refresh the list."
       },
       {
         "code": "REFERENCE_NOT_FOUND",
@@ -2690,11 +2744,6 @@
       "slug": "cost-estimates-and-tariff",
       "title": "Cost estimates, the tariff and ward transfers (MSDS)",
       "recipe": "get_workflow_recipe('cost-estimates-and-tariff')"
-    },
-    {
-      "slug": "inpatient-and-discharge",
-      "title": "Admission, beds, nursing & discharge",
-      "recipe": "get_workflow_recipe('inpatient-and-discharge')"
     }
   ],
   "scenarios": [],
@@ -2845,9 +2894,154 @@
       "meanwhile": "The server's own settings (e.g. critical_result_communicate_minutes)."
     }
   ],
-  "unknowns": [],
+  "unknowns": [
+    {
+      "what": "decision H02",
+      "owner": [
+        "vendor"
+      ],
+      "question": "Digits in the Urdu UI and printouts: Latin 0-9 or Extended Arabic-Indic ۰-۹.",
+      "affects": [
+        "every screen in Urdu"
+      ],
+      "meanwhile": "Latin digits; identifiers, doses and money stay left to right."
+    },
+    {
+      "what": "decision H03",
+      "owner": [
+        "vendor",
+        "clinical_lead"
+      ],
+      "question": "How dates and times are shown on screen, and a 12- or 24-hour clock.",
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "The server's print format (e.g. 27-Sep-2026) and the hospital time zone."
+    },
+    {
+      "what": "decision H04",
+      "owner": [
+        "vendor"
+      ],
+      "question": "Money on screen: decimals shown, and digit grouping (1,234,567 or 12,34,567).",
+      "affects": [
+        "every screen with money"
+      ],
+      "meanwhile": "The amounts as the API sends them, with the currency setting."
+    },
+    {
+      "what": "decision H08",
+      "owner": [
+        "vendor",
+        "translator",
+        "clinical_lead"
+      ],
+      "question": "Who writes and signs off the Urdu text of the UI, above all clinical and consent wording.",
+      "affects": [
+        "every screen in Urdu"
+      ],
+      "meanwhile": "Urdu you add is a draft: mark it so (the interview bank's pattern: a draft until a native speaker reviews it)."
+    },
+    {
+      "what": "decision H09",
+      "owner": [
+        "vendor",
+        "frontend_lead"
+      ],
+      "question": "One design system shared by every frontend team (who authors and approves it), or each team's own.",
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "Each team designs within the backend's constraints: themes Light and DarkHighContrast, zoom 100-250 %, Noto Nastaliq Urdu, status shown as text and icon, never colour alone. Follow the vendor's design principles (frontend guide 18, get_design_principles)."
+    },
+    {
+      "what": "decision H10",
+      "owner": [
+        "clinical_lead",
+        "vendor"
+      ],
+      "question": "How each realtime event is shown (interrupt, attention, inform, silent), alert sounds and which terminals play them. Only Code Red (interrupt), the licence and maintenance banners and the logout on session.revoked are prescribed (the event catalogue's `presentation`).",
+      "affects": [
+        "every screen with realtime events"
+      ],
+      "meanwhile": "Code Red interrupts; every other event updates the screen and, at most, a dismissible notice. `priority` is the delivery urgency, not a presentation rule."
+    },
+    {
+      "what": "decision H12",
+      "owner": [
+        "vendor",
+        "backend"
+      ],
+      "question": "Which workspaces run on web, Android and iOS, which cannot read a MAC address, discover the server by UDP or print silently; or are cash and printing Windows-only.",
+      "affects": [
+        "my_cash_shift",
+        "registration",
+        "every screen that prints"
+      ],
+      "meanwhile": "The guides describe the Windows (Electron) terminal; tell your developer when a screen needs a capability your platform lacks."
+    },
+    {
+      "what": "decision H18",
+      "owner": [
+        "vendor",
+        "frontend_lead"
+      ],
+      "question": "Noto Nastaliq Urdu everywhere, or the more compact Naskh in dense tables.",
+      "affects": [
+        "every table in Urdu"
+      ],
+      "meanwhile": "Noto Nastaliq Urdu, as the guides require."
+    },
+    {
+      "what": "decision H19",
+      "owner": [
+        "clinical_lead",
+        "backend"
+      ],
+      "question": "Allergies: the patient record keeps free text, so it cannot tell \"no known allergies\" (asserted by a clinician) from \"not recorded\". Should it?",
+      "affects": [
+        "every screen with a patient banner"
+      ],
+      "meanwhile": "Show the recorded text as recorded; an empty value is \"not recorded\", never \"none\"."
+    },
+    {
+      "what": "decision H20",
+      "owner": [
+        "vendor",
+        "hospital"
+      ],
+      "question": "May unsaved form input be kept on the terminal (which fields, encrypted, for how long)?",
+      "affects": [
+        "every form"
+      ],
+      "meanwhile": "In memory only; never a second checker's password."
+    },
+    {
+      "what": "decision H22",
+      "owner": [
+        "hospital",
+        "vendor"
+      ],
+      "question": "Which documents may print on an unregistered terminal's default printer (sensitive A4 documents).",
+      "affects": [
+        "every screen that prints"
+      ],
+      "meanwhile": "As the printing guide says: the hint, then the default printer."
+    },
+    {
+      "what": "decision H24",
+      "owner": [
+        "vendor",
+        "clinical_lead"
+      ],
+      "question": "Who approves frontend performance targets, alert thresholds and escalation timers.",
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "The server's own settings (e.g. critical_result_communicate_minutes)."
+    }
+  ],
   "omitted_sections": [
-    "examples",
     "schemas"
   ],
   "next": "Request omitted sections separately with max_chars=200000; for an oversized endpoints/schemas section use get_endpoint / get_schema for each operation/type.",
@@ -3108,9 +3302,9 @@
         }
       }
     },
-    "GET /admissions/{admission_id}/transfers": {
+    "GET /cost-estimates/admissions/{admission_id}/moves": {
       "request": {
-        "path": "/api/v1/admissions/1/transfers"
+        "path": "/api/v1/cost-estimates/admissions/1/moves"
       },
       "response": {
         "status": 200,
@@ -3121,140 +3315,26 @@
               "admission_id": 1,
               "from_ward_id": 2,
               "from_ward_name": "General Ward",
-              "from_bed_id": 2,
-              "from_bed_label": "GW-1",
               "to_ward_id": 1,
               "to_ward_name": "ICU",
-              "to_bed_id": 1,
-              "to_bed_label": "ICU-1",
-              "reason": "Respiratory failure, needs ventilation",
               "from_daily_rate": 3000,
               "to_daily_rate": 12000,
               "rate_changed": true,
-              "transferred_at": "2026-10-01T07:15:43.271127+00:00",
-              "transferred_by_name": "u6a98fd085c",
-              "estimate_explained": false
+              "transferred_at": "2026-10-29T10:52:43.039573+00:00",
+              "estimate_explained": false,
+              "estimate_id": null,
+              "estimate_status": null
             }
           ],
           "meta": {
-            "server_time": "2026-10-01T07:15:43.321187+00:00"
+            "server_time": "2026-10-29T10:52:43.185638+00:00"
           },
-          "request_id": "e2e1540a4ce846749074a349c6a886ce"
+          "request_id": "63c77c1c8630464098f41acfe1eaec44"
         }
       }
     }
   },
   "schemas": {
-    "AdmissionTransferOut": {
-      "properties": {
-        "transfer_id": {
-          "type": "integer",
-          "title": "Transfer Id"
-        },
-        "admission_id": {
-          "type": "integer",
-          "title": "Admission Id"
-        },
-        "from_ward_id": {
-          "type": "integer",
-          "title": "From Ward Id"
-        },
-        "from_ward_name": {
-          "type": "string",
-          "title": "From Ward Name"
-        },
-        "from_bed_id": {
-          "type": "integer",
-          "title": "From Bed Id"
-        },
-        "from_bed_label": {
-          "type": "string",
-          "title": "From Bed Label"
-        },
-        "to_ward_id": {
-          "type": "integer",
-          "title": "To Ward Id"
-        },
-        "to_ward_name": {
-          "type": "string",
-          "title": "To Ward Name"
-        },
-        "to_bed_id": {
-          "type": "integer",
-          "title": "To Bed Id"
-        },
-        "to_bed_label": {
-          "type": "string",
-          "title": "To Bed Label"
-        },
-        "reason": {
-          "type": "string",
-          "title": "Reason"
-        },
-        "from_daily_rate": {
-          "anyOf": [
-            {
-              "type": "number"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "title": "From Daily Rate"
-        },
-        "to_daily_rate": {
-          "anyOf": [
-            {
-              "type": "number"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "title": "To Daily Rate"
-        },
-        "rate_changed": {
-          "type": "boolean",
-          "title": "Rate Changed"
-        },
-        "transferred_at": {
-          "type": "string",
-          "format": "date-time",
-          "title": "Transferred At"
-        },
-        "transferred_by_name": {
-          "type": "string",
-          "title": "Transferred By Name"
-        },
-        "estimate_explained": {
-          "type": "boolean",
-          "title": "Estimate Explained",
-          "description": "A ChangeOfWard estimate for this move was explained"
-        }
-      },
-      "type": "object",
-      "required": [
-        "transfer_id",
-        "admission_id",
-        "from_ward_id",
-        "from_ward_name",
-        "from_bed_id",
-        "from_bed_label",
-        "to_ward_id",
-        "to_ward_name",
-        "to_bed_id",
-        "to_bed_label",
-        "reason",
-        "from_daily_rate",
-        "to_daily_rate",
-        "rate_changed",
-        "transferred_at",
-        "transferred_by_name",
-        "estimate_explained"
-      ],
-      "title": "AdmissionTransferOut",
-      "description": "A move within the hospital; `rate_changed`: the family is told the new estimate (MSDS PRE 79)."
-    },
     "AuthorStampOut": {
       "properties": {
         "employee_id": {
@@ -3395,11 +3475,11 @@
       ],
       "title": "Envelope[TariffOut]"
     },
-    "Envelope_list_AdmissionTransferOut__": {
+    "Envelope_list_EstimateMoveOut__": {
       "properties": {
         "data": {
           "items": {
-            "$ref": "#/components/schemas/AdmissionTransferOut"
+            "$ref": "#/components/schemas/EstimateMoveOut"
           },
           "type": "array",
           "title": "Data"
@@ -3418,7 +3498,7 @@
         "meta",
         "request_id"
       ],
-      "title": "Envelope[list[AdmissionTransferOut]]"
+      "title": "Envelope[list[EstimateMoveOut]]"
     },
     "Envelope_list_EstimateOut__": {
       "properties": {
@@ -4096,6 +4176,118 @@
         "amount"
       ],
       "title": "EstimateLineOut"
+    },
+    "EstimateMoveOut": {
+      "properties": {
+        "transfer_id": {
+          "type": "integer",
+          "title": "Transfer Id"
+        },
+        "admission_id": {
+          "type": "integer",
+          "title": "Admission Id"
+        },
+        "from_ward_id": {
+          "type": "integer",
+          "title": "From Ward Id"
+        },
+        "from_ward_name": {
+          "type": "string",
+          "title": "From Ward Name"
+        },
+        "to_ward_id": {
+          "type": "integer",
+          "title": "To Ward Id"
+        },
+        "to_ward_name": {
+          "type": "string",
+          "title": "To Ward Name"
+        },
+        "from_daily_rate": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "From Daily Rate"
+        },
+        "to_daily_rate": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "To Daily Rate"
+        },
+        "rate_changed": {
+          "type": "boolean",
+          "title": "Rate Changed",
+          "description": "The daily bed charge changed: the family is told a new estimate (MSDS PRE 79)"
+        },
+        "transferred_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Transferred At"
+        },
+        "estimate_explained": {
+          "type": "boolean",
+          "title": "Estimate Explained",
+          "description": "A ChangeOfWard estimate for this move was explained"
+        },
+        "estimate_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Estimate Id",
+          "description": "The move's latest ChangeOfWard estimate that is not cancelled"
+        },
+        "estimate_status": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "Draft",
+                "Explained",
+                "Superseded",
+                "Cancelled"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Estimate Status"
+        }
+      },
+      "type": "object",
+      "required": [
+        "transfer_id",
+        "admission_id",
+        "from_ward_id",
+        "from_ward_name",
+        "to_ward_id",
+        "to_ward_name",
+        "from_daily_rate",
+        "to_daily_rate",
+        "rate_changed",
+        "transferred_at",
+        "estimate_explained",
+        "estimate_id",
+        "estimate_status"
+      ],
+      "title": "EstimateMoveOut",
+      "description": "A move of the admission as the estimate staff see it: the wards and their daily charges, never the clinical reason\nfor the move (backend issue #41)."
     },
     "EstimateOut": {
       "properties": {

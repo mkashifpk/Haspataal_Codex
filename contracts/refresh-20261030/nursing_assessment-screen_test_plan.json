@@ -1,0 +1,365 @@
+{
+  "screen": "nursing_assessment",
+  "title": "Nursing assessment: nutrition and the care plan",
+  "cases": [
+    {
+      "id": "case:GET /admissions/{admission_id}/nursing-assessment",
+      "call": "GET /api/v1/admissions/{admission_id}/nursing-assessment",
+      "summary": "The nursing assessment: nutrition screenings and the nursing care plan",
+      "happy_path": {
+        "as_one_of": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/admissions/1/nursing-assessment"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "admission_id": 1,
+                "admitted_at": "2026-10-01T07:32:22.158089+00:00",
+                "nutrition_screenings": [
+                  {
+                    "screening_id": 2,
+                    "screened_at": "2026-10-01T07:32:22.212036+00:00",
+                    "weight_kg": 41,
+                    "height_cm": 160,
+                    "bmi_score": 2,
+                    "weight_loss_score": 1,
+                    "acute_disease_score": 0,
+                    "total_score": 3,
+                    "risk": "High",
+                    "plan": "Dietitian referral today; food and fluid chart",
+                    "author_stamp": {
+                      "at": "2026-10-01T07:32:22.212036+00:00",
+                      "name": "Staff 28081",
+                      "text": "Staff 28081, Officer, PNC PNC-28081, 01-Oct-2026 12:32",
+                      "user_id": 7,
+                      "designation": "Officer",
+                      "employee_id": 7,
+                      "registration": "PNC PNC-28081"
+                    }
+                  }
+                ],
+                "latest_risk": "High",
+                "screening_overdue": false,
+                "care_plan": {
+                  "care_plan_id": 1,
+                  "problems": "Malnutrition risk; pressure area risk",
+                  "goals": "No weight loss this week; skin intact",
+                  "interventions": "Weigh twice a week, 2-hourly turning, high-protein supplements",
+                  "evaluation": "Eating half the meals",
+                  "written_at": "2026-10-01T07:32:22.229497+00:00",
+                  "updated_at": "2026-10-01T07:32:22.251763+00:00",
+                  "author_stamp": {
+                    "at": "2026-10-01T07:32:22.251763+00:00",
+                    "name": "Staff 28081",
+                    "text": "Staff 28081, Officer, PNC PNC-28081, 01-Oct-2026 12:32",
+                    "user_id": 7,
+                    "designation": "Officer",
+                    "employee_id": 7,
+                    "registration": "PNC PNC-28081"
+                  },
+                  "row_version": 2
+                },
+                "care_plan_overdue": false
+              },
+              "meta": {
+                "server_time": "2026-10-01T07:32:22.267208+00:00"
+              },
+              "request_id": "7cded0a273a246189c7916beecc4b8a9"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "billing_admin",
+          "cashier",
+          "clinic_director"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:POST /admissions/{admission_id}/nutrition-screenings",
+      "call": "POST /api/v1/admissions/{admission_id}/nutrition-screenings",
+      "summary": "Screen an inpatient for nutrition",
+      "happy_path": {
+        "as_one_of": [
+          "head_nurse",
+          "triage_nurse",
+          "ward_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/admissions/1/nutrition-screenings",
+            "body": {
+              "weight_kg": 64,
+              "height_cm": 170,
+              "bmi_score": 0,
+              "weight_loss_score": 0,
+              "acute_disease_score": 0
+            }
+          },
+          "response": {
+            "status": 201,
+            "body": {
+              "data": {
+                "admission_id": 1,
+                "admitted_at": "2026-10-01T07:31:22.570867+00:00",
+                "nutrition_screenings": [
+                  {
+                    "screening_id": 1,
+                    "screened_at": "2026-10-01T07:31:22.721255+00:00",
+                    "weight_kg": 64,
+                    "height_cm": 170,
+                    "bmi_score": 0,
+                    "weight_loss_score": 0,
+                    "acute_disease_score": 0,
+                    "total_score": 0,
+                    "risk": "Low",
+                    "plan": null,
+                    "author_stamp": {
+                      "at": "2026-10-01T07:31:22.721255+00:00",
+                      "name": "Staff 16359",
+                      "text": "Staff 16359, Officer, PNC PNC-16359, 01-Oct-2026 12:31",
+                      "user_id": 10,
+                      "designation": "Officer",
+                      "employee_id": 10,
+                      "registration": "PNC PNC-16359"
+                    }
+                  }
+                ],
+                "latest_risk": "Low",
+                "screening_overdue": false,
+                "care_plan": null,
+                "care_plan_overdue": false
+              },
+              "meta": {
+                "server_time": "2026-10-01T07:31:22.732657+00:00"
+              },
+              "request_id": "c74865862d894f8397208cb879508128"
+            }
+          },
+          "errors_seen": [
+            "FORBIDDEN",
+            "VALIDATION_ERROR"
+          ],
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "FORBIDDEN",
+        "VALIDATION_ERROR"
+      ],
+      "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)"
+    },
+    {
+      "id": "case:PUT /admissions/{admission_id}/nursing-care-plan",
+      "call": "PUT /api/v1/admissions/{admission_id}/nursing-care-plan",
+      "summary": "Write or update the nursing care plan",
+      "happy_path": {
+        "as_one_of": [
+          "head_nurse",
+          "triage_nurse",
+          "ward_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/admissions/1/nursing-care-plan",
+            "body": {
+              "problems": "Impaired gas exchange; fever",
+              "goals": "SpO2 above 94 % on room air within 48 hours",
+              "interventions": "Oxygen by nasal cannula, 4-hourly observations, tepid sponging"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "admission_id": 1,
+                "admitted_at": "2026-10-01T07:31:22.570867+00:00",
+                "nutrition_screenings": [
+                  {
+                    "screening_id": 1,
+                    "screened_at": "2026-10-01T07:31:22.721255+00:00",
+                    "weight_kg": 64,
+                    "height_cm": 170,
+                    "bmi_score": 0,
+                    "weight_loss_score": 0,
+                    "acute_disease_score": 0,
+                    "total_score": 0,
+                    "risk": "Low",
+                    "plan": null,
+                    "author_stamp": {
+                      "at": "2026-10-01T07:31:22.721255+00:00",
+                      "name": "Staff 16359",
+                      "text": "Staff 16359, Officer, PNC PNC-16359, 01-Oct-2026 12:31",
+                      "user_id": 10,
+                      "designation": "Officer",
+                      "employee_id": 10,
+                      "registration": "PNC PNC-16359"
+                    }
+                  }
+                ],
+                "latest_risk": "Low",
+                "screening_overdue": false,
+                "care_plan": {
+                  "care_plan_id": 1,
+                  "problems": "Impaired gas exchange; fever",
+                  "goals": "SpO2 above 94 % on room air within 48 hours",
+                  "interventions": "Oxygen by nasal cannula, 4-hourly observations, tepid sponging",
+                  "evaluation": null,
+                  "written_at": "2026-10-01T07:31:22.737330+00:00",
+                  "updated_at": "2026-10-01T07:31:22.737330+00:00",
+                  "author_stamp": {
+                    "at": "2026-10-01T07:31:22.73733+00:00",
+                    "name": "Staff 16359",
+                    "text": "Staff 16359, Officer, PNC PNC-16359, 01-Oct-2026 12:31",
+                    "user_id": 10,
+                    "designation": "Officer",
+                    "employee_id": 10,
+                    "registration": "PNC PNC-16359"
+                  },
+                  "row_version": 1
+                },
+                "care_plan_overdue": false
+              },
+              "meta": {
+                "server_time": "2026-10-01T07:31:22.741971+00:00"
+              },
+              "request_id": "42f896e94a64464e98beca6242af1b4d"
+            }
+          },
+          "errors_seen": [
+            "VERSION_CONFLICT"
+          ],
+          "events_emitted": []
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "ADMISSION_STATE_INVALID",
+        "VALIDATION_ERROR",
+        "VERSION_CONFLICT"
+      ],
+      "concurrent_edit": "send a stale expected_version: expect 409 VERSION_CONFLICT, reload and retry"
+    }
+  ],
+  "service_cases": [
+    {
+      "view": "full",
+      "set_up": "GET /establishment answers views.screens[screen_id=nursing_assessment].view = full (inpatient): stub that answer, or have the DEV server's admin move the service on Facility settings",
+      "expect": "Show it; every action the user's permissions allow."
+    },
+    {
+      "view": "open_work",
+      "set_up": "GET /establishment answers views.screens[screen_id=nursing_assessment].view = open_work (inpatient): stub that answer, or have the DEV server's admin move the service on Facility settings",
+      "expect": "The service is Retiring: show it with the banner 'No new <new_work> from now on' and its open work; hide the actions that start new work of it (x-capability-gates; continues_while_retiring ones stay); keep every other action (completing, transferring, settling, correcting)."
+    },
+    {
+      "view": "records",
+      "set_up": "GET /establishment answers views.screens[screen_id=nursing_assessment].view = records (inpatient): stub that answer, or have the DEV server's admin move the service on Facility settings",
+      "expect": "The service is Retired (or Preparing after it ran): show it as records only, under a 'Records' marker: lists, details, prints and the corrections the server still accepts; no action that starts new work."
+    },
+    {
+      "view": "hidden",
+      "set_up": "GET /establishment answers views.screens[screen_id=nursing_assessment].view = hidden (inpatient): stub that answer, or have the DEV server's admin move the service on Facility settings",
+      "expect": "Not in any menu: the service has never run here, so the screen has nothing to show."
+    }
+  ],
+  "delivery_gate": {
+    "required": true,
+    "status": "required",
+    "progress_reporting": {
+      "required": true,
+      "submit": "propose_progress",
+      "verify": "progress_proposals",
+      "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+    },
+    "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+    "compulsory": [
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+        "points": 2
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+        "points": 3
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+        "points": 2
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+        "points": 4
+      }
+    ],
+    "zoom": {
+      "min_pct": 100,
+      "max_pct": 250,
+      "reset_pct": 100,
+      "keys": [
+        "Ctrl + or Ctrl = (zoom in)",
+        "Ctrl - (zoom out)",
+        "Ctrl 0 (reset to 100 %)",
+        "Command on macOS"
+      ],
+      "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+    },
+    "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+    "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+  },
+  "handbook_page": "screens/nursing_assessment",
+  "workspace_guide": "get_handbook_outline('ward_nurse')",
+  "realtime": [],
+  "acceptance_rules": [
+    "On the bed card: screening_overdue and care_plan_overdue in red after the first day.",
+    "Screening: weight and height (the BMI score suggested), unplanned weight loss, acute illness with no intake; the risk Low / Medium / High; Medium and High need the plan (dietitian, food chart).",
+    "Care plan: problems, goals, interventions; add the evaluation at each review (send row_version as expected_version).",
+    "Exists for the service inpatient (work): show it as GET /establishment views.screens says for screen_id nursing_assessment (full; open_work: without its new work, with the banner \"No new ... from now on\"; records: history and corrections only; setup: only from Facility settings; hidden: in no menu), after login and again on establishment.changed. Never decide it from the profile's category."
+  ],
+  "demo_accounts": "demo_accounts() lists a login per role; sandbox_call runs each case on the DEV server"
+}

@@ -1,0 +1,976 @@
+{
+  "screen_id": "login",
+  "contract_fingerprint": "14824af5c60c05148994",
+  "knowledge_revision": "9250bafb1794ac12",
+  "delivery_gate": {
+    "required": true,
+    "status": "required",
+    "progress_reporting": {
+      "required": true,
+      "submit": "propose_progress",
+      "verify": "progress_proposals",
+      "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+    },
+    "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+    "compulsory": [
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+        "points": 2
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+        "points": 3
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+        "points": 2
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+        "points": 4
+      }
+    ],
+    "zoom": {
+      "min_pct": 100,
+      "max_pct": 250,
+      "reset_pct": 100,
+      "keys": [
+        "Ctrl + or Ctrl = (zoom in)",
+        "Ctrl - (zoom out)",
+        "Ctrl 0 (reset to 100 %)",
+        "Command on macOS"
+      ],
+      "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+    },
+    "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+    "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+  },
+  "screen": {
+    "id": "login",
+    "workspace": "*",
+    "title": "Login",
+    "purpose": "First screen on every terminal: username/password, LAN diagnostics, terminal identity overlay.",
+    "workflow": "§10",
+    "rule_objects": [
+      {
+        "id": "rule:0a37b50feb",
+        "text": "Before showing the form, ping GET /health/live every 5 s; if it fails show 'LAN / server unreachable' (cable, Wi-Fi, server) instead of hanging. When it answers, GET /health says whether the server is degraded (HTTP 503, its database down: 'The server is starting or has a problem: ask IT'), in maintenance, or licensed (license.state).",
+        "cites": []
+      },
+      {
+        "id": "rule:d975393728",
+        "text": "In maintenance (GET /health maintenance_mode) show maintenance_message word for word: it is the text IT wrote in the Control Center (e.g. 'Back at 02:30'), never replace it with one of your own; keep polling until maintenance_mode is false.",
+        "cites": []
+      },
+      {
+        "id": "rule:66a4630670",
+        "text": "License banner: GET /meta/license on this screen (and data.license after login, the system.license event, every 10 min). state grace = persistent banner with message, days_left and the vendor contact on EVERY screen, work continues; state locked = only the Super Admin can log in, others get LICENSE_INVALID at login and token refresh (show message + details.vendor).",
+        "cites": []
+      },
+      {
+        "id": "rule:f787ce1cd4",
+        "text": "Show the terminal MAC/IP overlay (Ctrl+Shift+I or an info icon) from GET /terminals/whoami for IT support.",
+        "cites": []
+      },
+      {
+        "id": "rule:f0462c4840",
+        "text": "A Settings button (and Ctrl+,) opens the Settings window before login: GET /settings/sections without a token answers signed_in false and the This terminal tier only (connection and LAN diagnostics, this terminal's location and printers, the login screen's language and zoom). It writes nothing on the server.",
+        "cites": []
+      },
+      {
+        "id": "rule:8b4678ddba",
+        "text": "If user.must_change_password is true, force the change-password form before anything else (other endpoints answer PASSWORD_CHANGE_REQUIRED).",
+        "cites": []
+      },
+      {
+        "id": "rule:d343d623a8",
+        "text": "ACCOUNT_LOCKED / RATE_LIMITED: show error.message and error.retry_after_seconds; never retry automatically.",
+        "cites": []
+      },
+      {
+        "id": "rule:343a338979",
+        "text": "Store the refresh token with Electron safeStorage; keep the access token in memory only.",
+        "cites": []
+      }
+    ],
+    "related_workflows": [
+      "clinical-and-prescriptions",
+      "finance-and-owner"
+    ]
+  },
+  "endpoints": [
+    {
+      "endpoint": "POST /auth/login",
+      "summary": "Log in (returns tokens, profile, roles, workspaces)",
+      "access": {
+        "authentication": "public",
+        "permissions": [],
+        "permissions_mode": "all",
+        "who": "public: no login (works before login)"
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "ACCOUNT_DISABLED",
+          "http_status": 403,
+          "message": "This account is disabled.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "POST /api/v1/auth/login"
+        },
+        {
+          "code": "ACCOUNT_EXPIRED",
+          "http_status": 403,
+          "message": "This guest account has expired (the PHC inspector's access ended).",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "GET /api/v1/msds/profile"
+        },
+        {
+          "code": "ACCOUNT_LOCKED",
+          "http_status": 423,
+          "message": "Too many failed attempts; the account is temporarily locked.",
+          "retryable": true,
+          "ui_action": "Show a countdown from retry_after_seconds.",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "retry_after_seconds"
+          ],
+          "details_from": "POST /api/v1/auth/login"
+        },
+        {
+          "code": "INVALID_CREDENTIALS",
+          "http_status": 401,
+          "message": "Username or password is incorrect.",
+          "retryable": false,
+          "ui_action": "Refresh the token once; if that fails return to login.",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "POST /api/v1/auth/login"
+        },
+        {
+          "code": "LICENSE_INVALID",
+          "http_status": 403,
+          "message": "This server's license grace period has ended; only the Super Admin can log in until the vendor's new license is installed.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "grace_until",
+            "reason",
+            "state",
+            "vendor"
+          ],
+          "details_from": "POST /api/v1/auth/login"
+        },
+        {
+          "code": "PASSWORD_CHANGE_REQUIRED",
+          "http_status": 403,
+          "message": "You must change your temporary password first.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "GET /api/v1/auth/workspaces"
+        },
+        {
+          "code": "RATE_LIMITED",
+          "http_status": 429,
+          "message": "Too many requests; slow down.",
+          "retryable": true,
+          "ui_action": "Back off per Retry-After.",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "retry_after_seconds"
+          ],
+          "details_from": "POST /api/v1/auth/login"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [],
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/LoginIn"
+            }
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_LoginOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "application/json",
+        "model": "LoginIn",
+        "fields": [
+          {
+            "pointer": "/username",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "min_length": 3,
+            "max_length": 64
+          },
+          {
+            "pointer": "/password",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "min_length": 1,
+            "max_length": 256,
+            "sensitive": "never log, store or keep it after the call"
+          },
+          {
+            "pointer": "/terminal_label",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "max_length": 100,
+            "description": "Optional terminal name shown in session lists"
+          }
+        ],
+        "cross_field_rules": {},
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "repeat_effect",
+        "on_lost_answer": "Repeating this call has another effect: opens another session; the unused one expires. Never retry automatically; reconcile the result and require a deliberate new action if still needed.",
+        "reconcile_with": null,
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "GET /terminals/whoami",
+      "summary": "Identify this terminal (location + mapped printers) — works before login",
+      "access": {
+        "authentication": "public",
+        "permissions": [],
+        "permissions_mode": "all",
+        "who": "public: no login (works before login)"
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_TerminalIdentityOut_"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "object",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "POST /auth/change-password",
+      "summary": "Change own password",
+      "access": {
+        "authentication": "user",
+        "permissions": [],
+        "permissions_mode": "all",
+        "who": "any logged-in user, for their own account (also before a forced password change where allowed)"
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "DEMO_ACCOUNT_PROTECTED",
+          "http_status": 403,
+          "message": "DEV servers only: a demo account is shared by every developer, so its password, roles and active state stay as seeded. Use a user of your own.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "change",
+            "username"
+          ],
+          "details_from": "POST /api/v1/auth/change-password"
+        },
+        {
+          "code": "INVALID_CREDENTIALS",
+          "http_status": 401,
+          "message": "Username or password is incorrect.",
+          "retryable": false,
+          "ui_action": "Refresh the token once; if that fails return to login.",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "POST /api/v1/auth/login"
+        },
+        {
+          "code": "PASSWORD_POLICY",
+          "http_status": 422,
+          "message": "The new password does not meet the password policy.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": null
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [],
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ChangePasswordIn"
+            }
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_TokenPair_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "application/json",
+        "model": "ChangePasswordIn",
+        "fields": [
+          {
+            "pointer": "/current_password",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "min_length": 1,
+            "max_length": 256,
+            "sensitive": "never log, store or keep it after the call"
+          },
+          {
+            "pointer": "/new_password",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "min_length": 8,
+            "max_length": 256,
+            "sensitive": "never log, store or keep it after the call"
+          }
+        ],
+        "cross_field_rules": {},
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "state_guard",
+        "on_lost_answer": "A repeat is refused with INVALID_CREDENTIALS: the password has changed already: log in with the new one. The first call may have succeeded; this error does not replay its result. Never retry automatically; re-read the record, then offer the action again only if it is still needed.",
+        "reconcile_with": null,
+        "refused_with": "INVALID_CREDENTIALS",
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "GET /meta/license",
+      "summary": "The server's license state: show a banner when it needs attention — works before login",
+      "access": {
+        "authentication": "public",
+        "permissions": [],
+        "permissions_mode": "all",
+        "who": "public: no login (works before login)"
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "LICENSE_INVALID",
+          "http_status": 403,
+          "message": "This server's license grace period has ended; only the Super Admin can log in until the vendor's new license is installed.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "grace_until",
+            "reason",
+            "state",
+            "vendor"
+          ],
+          "details_from": "POST /api/v1/auth/login"
+        }
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_LicenseStatusOut_"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "object",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "GET /health/live",
+      "summary": "Is the server there? (unauthenticated, no database)",
+      "access": {
+        "authentication": "public",
+        "permissions": [],
+        "permissions_mode": "all",
+        "who": "public: no login (works before login)"
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_LiveOut_"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "object",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "GET /health",
+      "summary": "Server health (unauthenticated; used by the login screen)",
+      "access": {
+        "authentication": "public",
+        "permissions": [],
+        "permissions_mode": "all",
+        "who": "public: no login (works before login)"
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_HealthOut_"
+              }
+            }
+          }
+        },
+        "503": {
+          "description": "degraded: the database is down",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_HealthOut_"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "object",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      }
+    }
+  ],
+  "realtime": {
+    "topics": [
+      "system.license",
+      "session.*",
+      "system.*",
+      "notification.created"
+    ],
+    "handlers": [
+      {
+        "event": "system.license",
+        "priority": "critical",
+        "presentation": "banner",
+        "emitted_by_operations": [],
+        "refresh": [
+          "GET /terminals/whoami",
+          "GET /meta/license",
+          "GET /health/live",
+          "GET /health"
+        ]
+      }
+    ],
+    "rule": "Refresh the listed reads when the event arrives (a list without a path id: every time; a detail read: when the payload names the same id). Never poll."
+  },
+  "rules_in_force": null,
+  "decisions": [
+    {
+      "id": "H02",
+      "question": "Digits in the Urdu UI and printouts: Latin 0-9 or Extended Arabic-Indic ۰-۹.",
+      "owner": [
+        "vendor"
+      ],
+      "affects": [
+        "every screen in Urdu"
+      ],
+      "meanwhile": "Latin digits; identifiers, doses and money stay left to right."
+    },
+    {
+      "id": "H03",
+      "question": "How dates and times are shown on screen, and a 12- or 24-hour clock.",
+      "owner": [
+        "vendor",
+        "clinical_lead"
+      ],
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "The server's print format (e.g. 27-Sep-2026) and the hospital time zone."
+    },
+    {
+      "id": "H04",
+      "question": "Money on screen: decimals shown, and digit grouping (1,234,567 or 12,34,567).",
+      "owner": [
+        "vendor"
+      ],
+      "affects": [
+        "every screen with money"
+      ],
+      "meanwhile": "The amounts as the API sends them, with the currency setting."
+    },
+    {
+      "id": "H05",
+      "question": "Idle lock on shared terminals: after how many minutes, what a locked screen hides, and fast user switching.",
+      "owner": [
+        "hospital",
+        "vendor"
+      ],
+      "affects": [
+        "app_shell",
+        "login"
+      ],
+      "meanwhile": "No automatic lock beyond the server's session expiry."
+    },
+    {
+      "id": "H08",
+      "question": "Who writes and signs off the Urdu text of the UI, above all clinical and consent wording.",
+      "owner": [
+        "vendor",
+        "translator",
+        "clinical_lead"
+      ],
+      "affects": [
+        "every screen in Urdu"
+      ],
+      "meanwhile": "Urdu you add is a draft: mark it so (the interview bank's pattern: a draft until a native speaker reviews it)."
+    },
+    {
+      "id": "H09",
+      "question": "One design system shared by every frontend team (who authors and approves it), or each team's own.",
+      "owner": [
+        "vendor",
+        "frontend_lead"
+      ],
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "Each team designs within the backend's constraints: themes Light and DarkHighContrast, zoom 100-250 %, Noto Nastaliq Urdu, status shown as text and icon, never colour alone. Follow the vendor's design principles (frontend guide 18, get_design_principles)."
+    },
+    {
+      "id": "H10",
+      "question": "How each realtime event is shown (interrupt, attention, inform, silent), alert sounds and which terminals play them. Only Code Red (interrupt), the licence and maintenance banners and the logout on session.revoked are prescribed (the event catalogue's `presentation`).",
+      "owner": [
+        "clinical_lead",
+        "vendor"
+      ],
+      "affects": [
+        "every screen with realtime events"
+      ],
+      "meanwhile": "Code Red interrupts; every other event updates the screen and, at most, a dismissible notice. `priority` is the delivery urgency, not a presentation rule."
+    },
+    {
+      "id": "H12",
+      "question": "Which workspaces run on web, Android and iOS, which cannot read a MAC address, discover the server by UDP or print silently; or are cash and printing Windows-only.",
+      "owner": [
+        "vendor",
+        "backend"
+      ],
+      "affects": [
+        "my_cash_shift",
+        "registration",
+        "every screen that prints"
+      ],
+      "meanwhile": "The guides describe the Windows (Electron) terminal; tell your developer when a screen needs a capability your platform lacks."
+    },
+    {
+      "id": "H15",
+      "question": "The terminal-information shortcut: Ctrl+Shift+I opens the developer tools in Electron development builds.",
+      "owner": [
+        "frontend_lead"
+      ],
+      "affects": [
+        "login"
+      ],
+      "meanwhile": "The information icon the login rule also offers."
+    },
+    {
+      "id": "H18",
+      "question": "Noto Nastaliq Urdu everywhere, or the more compact Naskh in dense tables.",
+      "owner": [
+        "vendor",
+        "frontend_lead"
+      ],
+      "affects": [
+        "every table in Urdu"
+      ],
+      "meanwhile": "Noto Nastaliq Urdu, as the guides require."
+    },
+    {
+      "id": "H19",
+      "question": "Allergies: the patient record keeps free text, so it cannot tell \"no known allergies\" (asserted by a clinician) from \"not recorded\". Should it?",
+      "owner": [
+        "clinical_lead",
+        "backend"
+      ],
+      "affects": [
+        "every screen with a patient banner"
+      ],
+      "meanwhile": "Show the recorded text as recorded; an empty value is \"not recorded\", never \"none\"."
+    },
+    {
+      "id": "H20",
+      "question": "May unsaved form input be kept on the terminal (which fields, encrypted, for how long)?",
+      "owner": [
+        "vendor",
+        "hospital"
+      ],
+      "affects": [
+        "every form"
+      ],
+      "meanwhile": "In memory only; never a second checker's password."
+    },
+    {
+      "id": "H22",
+      "question": "Which documents may print on an unregistered terminal's default printer (sensitive A4 documents).",
+      "owner": [
+        "hospital",
+        "vendor"
+      ],
+      "affects": [
+        "every screen that prints"
+      ],
+      "meanwhile": "As the printing guide says: the hint, then the default printer."
+    },
+    {
+      "id": "H24",
+      "question": "Who approves frontend performance targets, alert thresholds and escalation timers.",
+      "owner": [
+        "vendor",
+        "clinical_lead"
+      ],
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "The server's own settings (e.g. critical_result_communicate_minutes)."
+    }
+  ],
+  "unknowns": [
+    {
+      "what": "decision H02",
+      "owner": [
+        "vendor"
+      ],
+      "question": "Digits in the Urdu UI and printouts: Latin 0-9 or Extended Arabic-Indic ۰-۹.",
+      "affects": [
+        "every screen in Urdu"
+      ],
+      "meanwhile": "Latin digits; identifiers, doses and money stay left to right."
+    },
+    {
+      "what": "decision H03",
+      "owner": [
+        "vendor",
+        "clinical_lead"
+      ],
+      "question": "How dates and times are shown on screen, and a 12- or 24-hour clock.",
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "The server's print format (e.g. 27-Sep-2026) and the hospital time zone."
+    },
+    {
+      "what": "decision H04",
+      "owner": [
+        "vendor"
+      ],
+      "question": "Money on screen: decimals shown, and digit grouping (1,234,567 or 12,34,567).",
+      "affects": [
+        "every screen with money"
+      ],
+      "meanwhile": "The amounts as the API sends them, with the currency setting."
+    },
+    {
+      "what": "decision H05",
+      "owner": [
+        "hospital",
+        "vendor"
+      ],
+      "question": "Idle lock on shared terminals: after how many minutes, what a locked screen hides, and fast user switching.",
+      "affects": [
+        "app_shell",
+        "login"
+      ],
+      "meanwhile": "No automatic lock beyond the server's session expiry."
+    },
+    {
+      "what": "decision H08",
+      "owner": [
+        "vendor",
+        "translator",
+        "clinical_lead"
+      ],
+      "question": "Who writes and signs off the Urdu text of the UI, above all clinical and consent wording.",
+      "affects": [
+        "every screen in Urdu"
+      ],
+      "meanwhile": "Urdu you add is a draft: mark it so (the interview bank's pattern: a draft until a native speaker reviews it)."
+    },
+    {
+      "what": "decision H09",
+      "owner": [
+        "vendor",
+        "frontend_lead"
+      ],
+      "question": "One design system shared by every frontend team (who authors and approves it), or each team's own.",
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "Each team designs within the backend's constraints: themes Light and DarkHighContrast, zoom 100-250 %, Noto Nastaliq Urdu, status shown as text and icon, never colour alone. Follow the vendor's design principles (frontend guide 18, get_design_principles)."
+    },
+    {
+      "what": "decision H10",
+      "owner": [
+        "clinical_lead",
+        "vendor"
+      ],
+      "question": "How each realtime event is shown (interrupt, attention, inform, silent), alert sounds and which terminals play them. Only Code Red (interrupt), the licence and maintenance banners and the logout on session.revoked are prescribed (the event catalogue's `presentation`).",
+      "affects": [
+        "every screen with realtime events"
+      ],
+      "meanwhile": "Code Red interrupts; every other event updates the screen and, at most, a dismissible notice. `priority` is the delivery urgency, not a presentation rule."
+    },
+    {
+      "what": "decision H12",
+      "owner": [
+        "vendor",
+        "backend"
+      ],
+      "question": "Which workspaces run on web, Android and iOS, which cannot read a MAC address, discover the server by UDP or print silently; or are cash and printing Windows-only.",
+      "affects": [
+        "my_cash_shift",
+        "registration",
+        "every screen that prints"
+      ],
+      "meanwhile": "The guides describe the Windows (Electron) terminal; tell your developer when a screen needs a capability your platform lacks."
+    },
+    {
+      "what": "decision H15",
+      "owner": [
+        "frontend_lead"
+      ],
+      "question": "The terminal-information shortcut: Ctrl+Shift+I opens the developer tools in Electron development builds.",
+      "affects": [
+        "login"
+      ],
+      "meanwhile": "The information icon the login rule also offers."
+    },
+    {
+      "what": "decision H18",
+      "owner": [
+        "vendor",
+        "frontend_lead"
+      ],
+      "question": "Noto Nastaliq Urdu everywhere, or the more compact Naskh in dense tables.",
+      "affects": [
+        "every table in Urdu"
+      ],
+      "meanwhile": "Noto Nastaliq Urdu, as the guides require."
+    },
+    {
+      "what": "decision H19",
+      "owner": [
+        "clinical_lead",
+        "backend"
+      ],
+      "question": "Allergies: the patient record keeps free text, so it cannot tell \"no known allergies\" (asserted by a clinician) from \"not recorded\". Should it?",
+      "affects": [
+        "every screen with a patient banner"
+      ],
+      "meanwhile": "Show the recorded text as recorded; an empty value is \"not recorded\", never \"none\"."
+    },
+    {
+      "what": "decision H20",
+      "owner": [
+        "vendor",
+        "hospital"
+      ],
+      "question": "May unsaved form input be kept on the terminal (which fields, encrypted, for how long)?",
+      "affects": [
+        "every form"
+      ],
+      "meanwhile": "In memory only; never a second checker's password."
+    },
+    {
+      "what": "decision H22",
+      "owner": [
+        "hospital",
+        "vendor"
+      ],
+      "question": "Which documents may print on an unregistered terminal's default printer (sensitive A4 documents).",
+      "affects": [
+        "every screen that prints"
+      ],
+      "meanwhile": "As the printing guide says: the hint, then the default printer."
+    },
+    {
+      "what": "decision H24",
+      "owner": [
+        "vendor",
+        "clinical_lead"
+      ],
+      "question": "Who approves frontend performance targets, alert thresholds and escalation timers.",
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "The server's own settings (e.g. critical_result_communicate_minutes)."
+    }
+  ]
+}

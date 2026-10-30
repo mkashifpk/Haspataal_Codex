@@ -1,0 +1,2778 @@
+{
+  "screen_id": "duty_roster",
+  "contract_fingerprint": "14824af5c60c05148994",
+  "knowledge_revision": "9250bafb1794ac12",
+  "delivery_gate": {
+    "required": true,
+    "status": "required",
+    "progress_reporting": {
+      "required": true,
+      "submit": "propose_progress",
+      "verify": "progress_proposals",
+      "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+    },
+    "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+    "compulsory": [
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+        "points": 2
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+        "points": 3
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+        "points": 2
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+        "points": 4
+      }
+    ],
+    "zoom": {
+      "min_pct": 100,
+      "max_pct": 250,
+      "reset_pct": 100,
+      "keys": [
+        "Ctrl + or Ctrl = (zoom in)",
+        "Ctrl - (zoom out)",
+        "Ctrl 0 (reset to 100 %)",
+        "Command on macOS"
+      ],
+      "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+    },
+    "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+    "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+  },
+  "decisions": [
+    {
+      "id": "H02",
+      "question": "Digits in the Urdu UI and printouts: Latin 0-9 or Extended Arabic-Indic ۰-۹.",
+      "owner": [
+        "vendor"
+      ],
+      "affects": [
+        "every screen in Urdu"
+      ],
+      "meanwhile": "Latin digits; identifiers, doses and money stay left to right."
+    },
+    {
+      "id": "H03",
+      "question": "How dates and times are shown on screen, and a 12- or 24-hour clock.",
+      "owner": [
+        "vendor",
+        "clinical_lead"
+      ],
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "The server's print format (e.g. 27-Sep-2026) and the hospital time zone."
+    },
+    {
+      "id": "H04",
+      "question": "Money on screen: decimals shown, and digit grouping (1,234,567 or 12,34,567).",
+      "owner": [
+        "vendor"
+      ],
+      "affects": [
+        "every screen with money"
+      ],
+      "meanwhile": "The amounts as the API sends them, with the currency setting."
+    },
+    {
+      "id": "H08",
+      "question": "Who writes and signs off the Urdu text of the UI, above all clinical and consent wording.",
+      "owner": [
+        "vendor",
+        "translator",
+        "clinical_lead"
+      ],
+      "affects": [
+        "every screen in Urdu"
+      ],
+      "meanwhile": "Urdu you add is a draft: mark it so (the interview bank's pattern: a draft until a native speaker reviews it)."
+    },
+    {
+      "id": "H09",
+      "question": "One design system shared by every frontend team (who authors and approves it), or each team's own.",
+      "owner": [
+        "vendor",
+        "frontend_lead"
+      ],
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "Each team designs within the backend's constraints: themes Light and DarkHighContrast, zoom 100-250 %, Noto Nastaliq Urdu, status shown as text and icon, never colour alone. Follow the vendor's design principles (frontend guide 18, get_design_principles)."
+    },
+    {
+      "id": "H10",
+      "question": "How each realtime event is shown (interrupt, attention, inform, silent), alert sounds and which terminals play them. Only Code Red (interrupt), the licence and maintenance banners and the logout on session.revoked are prescribed (the event catalogue's `presentation`).",
+      "owner": [
+        "clinical_lead",
+        "vendor"
+      ],
+      "affects": [
+        "every screen with realtime events"
+      ],
+      "meanwhile": "Code Red interrupts; every other event updates the screen and, at most, a dismissible notice. `priority` is the delivery urgency, not a presentation rule."
+    },
+    {
+      "id": "H12",
+      "question": "Which workspaces run on web, Android and iOS, which cannot read a MAC address, discover the server by UDP or print silently; or are cash and printing Windows-only.",
+      "owner": [
+        "vendor",
+        "backend"
+      ],
+      "affects": [
+        "my_cash_shift",
+        "registration",
+        "every screen that prints"
+      ],
+      "meanwhile": "The guides describe the Windows (Electron) terminal; tell your developer when a screen needs a capability your platform lacks."
+    },
+    {
+      "id": "H18",
+      "question": "Noto Nastaliq Urdu everywhere, or the more compact Naskh in dense tables.",
+      "owner": [
+        "vendor",
+        "frontend_lead"
+      ],
+      "affects": [
+        "every table in Urdu"
+      ],
+      "meanwhile": "Noto Nastaliq Urdu, as the guides require."
+    },
+    {
+      "id": "H19",
+      "question": "Allergies: the patient record keeps free text, so it cannot tell \"no known allergies\" (asserted by a clinician) from \"not recorded\". Should it?",
+      "owner": [
+        "clinical_lead",
+        "backend"
+      ],
+      "affects": [
+        "every screen with a patient banner"
+      ],
+      "meanwhile": "Show the recorded text as recorded; an empty value is \"not recorded\", never \"none\"."
+    },
+    {
+      "id": "H20",
+      "question": "May unsaved form input be kept on the terminal (which fields, encrypted, for how long)?",
+      "owner": [
+        "vendor",
+        "hospital"
+      ],
+      "affects": [
+        "every form"
+      ],
+      "meanwhile": "In memory only; never a second checker's password."
+    },
+    {
+      "id": "H22",
+      "question": "Which documents may print on an unregistered terminal's default printer (sensitive A4 documents).",
+      "owner": [
+        "hospital",
+        "vendor"
+      ],
+      "affects": [
+        "every screen that prints"
+      ],
+      "meanwhile": "As the printing guide says: the hint, then the default printer."
+    },
+    {
+      "id": "H24",
+      "question": "Who approves frontend performance targets, alert thresholds and escalation timers.",
+      "owner": [
+        "vendor",
+        "clinical_lead"
+      ],
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "The server's own settings (e.g. critical_result_communicate_minutes)."
+    }
+  ],
+  "examples": {
+    "GET /rosters": {
+      "request": {
+        "path": "/api/v1/rosters",
+        "query": {
+          "date_from": "2026-09-29",
+          "include_cancelled": true
+        }
+      },
+      "response": {
+        "status": 200,
+        "body_preview": "{\"status\": 200, \"body\": {\"data\": {\"date_from\": \"2026-09-29\", \"date_to\": \"2026-10-05\", \"entries\": [{\"roster_id\": 1, \"employee_id\": 1, \"emp_number\": \"EMP-2026-0001\", \"full_name\": \"Nurse Amna\", \"designation\": \"Officer\", \"staff_category\": \"Nursing\", \"roster_date\": \"2026-10-01\", \"shift_pattern_id\": 1, \"shift_name\": \"Morning\", \"start_time\": \"08:00:00\", \"end_time\": \"14:00:00\", \"duty_area\": \"Ward\", \"ward_id\": 1, \"ward_name\": \"Roster Ward\", \"department_id\": null, \"department_name\": null, \"zone_label\": null, \"is_on_call\": false, \"notes\": null, \"status\": \"Cancelled\", \"cancel_reason\": \"Worked by Nurse Bushra (duty swap 1)\", \"swap_id\": null, \"row_version\": 2, \"bed_ids\": []}, {\"roster_id\": 4, \"employee_id\": 7, \"emp_number\": \"EMP-2026-0007\", \"full_name\": \"Nurse Bushra\", \"designation\": \"Officer\", \"staff_category\": \"Nursing\", \"roster_date\": \"2026-10-01\", \"shift_pattern_id\": 1, \"shift_name\": \"Morning\", \"start_time\": \"08:00:00\", \"end_time\": \"14:00:00\", \"duty_area\": \"Ward\", \"ward_id\": 1, \"ward_name\": \"Roster Ward\", \"department_id\": null, \"department_name\": null, \"zone_label\": null, \"is_on_call\": false, \"notes\": null, \"status\": \"Active\", \"cancel_reason\": null, \"swap_id\": 1, \"row_version\": 1, \"bed_ids\": []}, {\"roster_id\": 3, \"employee_id\": 8, \"emp_number\": \"EMP-2026-0008\", \"full_name\": \"Nurse Kiran\", \"designation\": \"Officer\", \"staff_category\": \"Nursing\", \"roster_date\": \"2026-10-01\", \"shift_pattern_id\": 1, \"shift_name\": \"Morning\", \"start_time\": \"08:00:00\", \"end_time\": \"14:00:00\", \"duty_area\": \"Ward…"
+      }
+    },
+    "GET /rosters/staff": {
+      "request": {
+        "path": "/api/v1/rosters/staff"
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": {
+            "date_from": "2026-09-29",
+            "date_to": "2026-10-05",
+            "shift_patterns": [
+              {
+                "shift_pattern_id": 1,
+                "name": "Morning",
+                "start_time": "08:00:00",
+                "end_time": "14:00:00",
+                "grace_minutes": 10,
+                "half_day_after_minutes": 120,
+                "is_active": true,
+                "row_version": 1
+              },
+              {
+                "shift_pattern_id": 2,
+                "name": "Evening",
+                "start_time": "14:00:00",
+                "end_time": "20:00:00",
+                "grace_minutes": 10,
+                "half_day_after_minutes": 120,
+                "is_active": true,
+                "row_version": 1
+              },
+              {
+                "shift_pattern_id": 3,
+                "name": "Night",
+                "start_time": "20:00:00",
+                "end_time": "08:00:00",
+                "grace_minutes": 10,
+                "half_day_after_minutes": 120,
+                "is_active": true,
+                "row_version": 1
+              }
+            ],
+            "holidays": [],
+            "staff": [
+              {
+                "employee_id": 2,
+                "emp_number": "EMP-2026-0002",
+                "full_name": "Sweeper Aslam",
+                "designation": "Officer",
+                "staff_category": "SupportZeroInterface",
+                "department_id": null,
+                "department_name": null,
+                "default_shift_pattern_id": null,
+                "default_weekly_off_days": [],
+                "leave": []
+              }
+            ]
+          },
+          "meta": {
+            "server_time": "2026-09-29T02:48:36.833443+00:00"
+          },
+          "request_id": "3741f41532ed481b8a8b99eae1532511"
+        }
+      }
+    },
+    "POST /rosters": {
+      "request": {
+        "path": "/api/v1/rosters",
+        "body": {
+          "entries": [
+            {
+              "employee_id": 1,
+              "roster_date": "2026-10-05",
+              "shift_pattern_id": 1,
+              "duty_area": "Ward",
+              "ward_id": 1
+            },
+            {
+              "employee_id": 1,
+              "roster_date": "2026-10-06",
+              "shift_pattern_id": 1,
+              "duty_area": "Ward",
+              "ward_id": 1
+            },
+            {
+              "employee_id": 1,
+              "roster_date": "2026-10-07",
+              "shift_pattern_id": 1,
+              "duty_area": "Ward",
+              "ward_id": 1
+            }
+          ]
+        }
+      },
+      "response": {
+        "status": 201,
+        "body_preview": "{\"status\": 201, \"body\": {\"data\": [{\"roster_id\": 1, \"employee_id\": 1, \"emp_number\": \"EMP-2026-0001\", \"full_name\": \"Nurse Amna\", \"designation\": \"Officer\", \"staff_category\": \"Nursing\", \"roster_date\": \"2026-10-05\", \"shift_pattern_id\": 1, \"shift_name\": \"Morning\", \"start_time\": \"08:00:00\", \"end_time\": \"14:00:00\", \"duty_area\": \"Ward\", \"ward_id\": 1, \"ward_name\": \"Roster Ward\", \"department_id\": null, \"department_name\": null, \"zone_label\": null, \"is_on_call\": false, \"notes\": null, \"status\": \"Active\", \"cancel_reason\": null, \"swap_id\": null, \"row_version\": 1, \"bed_ids\": []}, {\"roster_id\": 2, \"employee_id\": 1, \"emp_number\": \"EMP-2026-0001\", \"full_name\": \"Nurse Amna\", \"designation\": \"Officer\", \"staff_category\": \"Nursing\", \"roster_date\": \"2026-10-06\", \"shift_pattern_id\": 1, \"shift_name\": \"Morning\", \"start_time\": \"08:00:00\", \"end_time\": \"14:00:00\", \"duty_area\": \"Ward\", \"ward_id\": 1, \"ward_name\": \"Roster Ward\", \"department_id\": null, \"department_name\": null, \"zone_label\": null, \"is_on_call\": false, \"notes\": null, \"status\": \"Active\", \"cancel_reason\": null, \"swap_id\": null, \"row_version\": 1, \"bed_ids\": []}, {\"roster_id\": 3, \"employee_id\": 1, \"emp_number\": \"EMP-2026-0001\", \"full_name\": \"Nurse Amna\", \"designation\": \"Officer\", \"staff_category\": \"Nursing\", \"roster_date\": \"2026-10-07\", \"shift_pattern_id\": 1, \"shift_name\": \"Morning\", \"start_time\": \"08:00:00\", \"end_time\": \"14:00:00\", \"duty_area\": \"Ward\", \"ward_id\": 1, \"ward_name\": \"Roster Ward\", \"department_id\": null, \"department_name\": null, \"zone_la…"
+      }
+    },
+    "PATCH /rosters/{roster_id}": {
+      "request": {
+        "path": "/api/v1/rosters/1",
+        "body": {
+          "shift_pattern_id": 2,
+          "zone_label": "Bay C",
+          "expected_version": 1
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": {
+            "roster_id": 1,
+            "employee_id": 1,
+            "emp_number": "EMP-2026-0001",
+            "full_name": "Nurse Amna",
+            "designation": "Officer",
+            "staff_category": "Nursing",
+            "roster_date": "2026-09-30",
+            "shift_pattern_id": 2,
+            "shift_name": "Evening",
+            "start_time": "14:00:00",
+            "end_time": "20:00:00",
+            "duty_area": "Ward",
+            "ward_id": 1,
+            "ward_name": "Roster Ward",
+            "department_id": null,
+            "department_name": null,
+            "zone_label": "Bay C",
+            "is_on_call": false,
+            "notes": null,
+            "status": "Active",
+            "cancel_reason": null,
+            "swap_id": null,
+            "row_version": 2,
+            "bed_ids": []
+          },
+          "meta": {
+            "server_time": "2026-09-29T02:51:39.744265+00:00"
+          },
+          "request_id": "7c14df1b0b68482f8d5811ce70a86bae"
+        }
+      }
+    },
+    "POST /rosters/{roster_id}/cancel": {
+      "request": {
+        "path": "/api/v1/rosters/4/cancel",
+        "body": {
+          "reason": "Ward closed for repairs"
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": {
+            "roster_id": 4,
+            "employee_id": 1,
+            "emp_number": "EMP-2026-0001",
+            "full_name": "Nurse Amna",
+            "designation": "Officer",
+            "staff_category": "Nursing",
+            "roster_date": "2026-10-07",
+            "shift_pattern_id": 1,
+            "shift_name": "Morning",
+            "start_time": "08:00:00",
+            "end_time": "14:00:00",
+            "duty_area": "Department",
+            "ward_id": null,
+            "ward_name": null,
+            "department_id": null,
+            "department_name": null,
+            "zone_label": null,
+            "is_on_call": false,
+            "notes": null,
+            "status": "Cancelled",
+            "cancel_reason": "Ward closed for repairs",
+            "swap_id": null,
+            "row_version": 2,
+            "bed_ids": []
+          },
+          "meta": {
+            "server_time": "2026-09-29T02:40:47.429381+00:00"
+          },
+          "request_id": "43194a475d1e46259f84fd48508b297a"
+        }
+      }
+    },
+    "POST /rosters/copy": {
+      "request": {
+        "path": "/api/v1/rosters/copy",
+        "body": {
+          "source_from": "2026-10-05",
+          "source_to": "2026-10-11",
+          "target_from": "2026-10-12",
+          "rotate_days": 1
+        }
+      },
+      "response": {
+        "status": 201,
+        "body_preview": "{\"status\": 201, \"body\": {\"data\": {\"created\": [{\"roster_id\": 14, \"employee_id\": 1, \"emp_number\": \"EMP-2026-0001\", \"full_name\": \"Nurse Amna\", \"designation\": \"Officer\", \"staff_category\": \"Nursing\", \"roster_date\": \"2026-10-13\", \"shift_pattern_id\": 1, \"shift_name\": \"Morning\", \"start_time\": \"08:00:00\", \"end_time\": \"14:00:00\", \"duty_area\": \"Ward\", \"ward_id\": 1, \"ward_name\": \"Roster Ward\", \"department_id\": null, \"department_name\": null, \"zone_label\": null, \"is_on_call\": false, \"notes\": null, \"status\": \"Active\", \"cancel_reason\": null, \"swap_id\": null, \"row_version\": 1, \"bed_ids\": []}, {\"roster_id\": 15, \"employee_id\": 7, \"emp_number\": \"EMP-2026-0007\", \"full_name\": \"Nurse Bushra\", \"designation\": \"Officer\", \"staff_category\": \"Nursing\", \"roster_date\": \"2026-10-13\", \"shift_pattern_id\": 2, \"shift_name\": \"Evening\", \"start_time\": \"14:00:00\", \"end_time\": \"20:00:00\", \"duty_area\": \"Ward\", \"ward_id\": 1, \"ward_name\": \"Roster Ward\", \"department_id\": null, \"department_name\": null, \"zone_label\": null, \"is_on_call\": false, \"notes\": null, \"status\": \"Active\", \"cancel_reason\": null, \"swap_id\": null, \"row_version\": 1, \"bed_ids\": []}, {\"roster_id\": 16, \"employee_id\": 1, \"emp_number\": \"EMP-2026-0001\", \"full_name\": \"Nurse Amna\", \"designation\": \"Officer\", \"staff_category\": \"Nursing\", \"roster_date\": \"2026-10-14\", \"shift_pattern_id\": 1, \"shift_name\": \"Morning\", \"start_time\": \"08:00:00\", \"end_time\": \"14:00:00\", \"duty_area\": \"Ward\", \"ward_id\": 1, \"ward_name\": \"Roster Ward\", \"department_id\": null, \"department_name…"
+      }
+    },
+    "GET /rosters/week": {
+      "request": {
+        "path": "/api/v1/rosters/week",
+        "query": {
+          "week_of": "2026-10-08",
+          "ward_id": 1
+        }
+      },
+      "response": {
+        "status": 200,
+        "body_preview": "{\"status\": 200, \"body\": {\"data\": {\"week_start\": \"2026-10-05\", \"week_end\": \"2026-10-11\", \"rest_days_due\": 1, \"staff_without_rest_day\": 1, \"staff\": [{\"employee_id\": 1, \"emp_number\": \"EMP-2026-0001\", \"full_name\": \"Nurse Amna\", \"designation\": \"Officer\", \"staff_category\": \"Nursing\", \"department_name\": null, \"has_default_shift\": false, \"duty_dates\": [\"2026-10-05\", \"2026-10-06\", \"2026-10-07\"], \"rest_dates\": [\"2026-10-11\"], \"leave_dates\": [], \"working_days\": 6, \"extra_duty_days\": 0, \"status\": \"Ok\"}, {\"employee_id\": 7, \"emp_number\": \"EMP-2026-0007\", \"full_name\": \"Nurse Bushra\", \"designation\": \"Officer\", \"staff_category\": \"Nursing\", \"department_name\": null, \"has_default_shift\": false, \"duty_dates\": [\"2026-10-05\", \"2026-10-06\", \"2026-10-07\"], \"rest_dates\": [], \"leave_dates\": [], \"working_days\": 7, \"extra_duty_days\": 1, \"status\": \"NoRestDay\"}], \"days\": [{\"day\": \"2026-10-05\", \"weekday\": 1, \"holiday_name\": null, \"on_duty\": 2, \"on_leave\": 0, \"resting\": 0, \"shifts\": [{\"shift_pattern_id\": 1, \"shift_name\": \"Morning\", \"start_time\": \"08:00:00\", \"end_time\": \"14:00:00\", \"staff\": 1}, {\"shift_pattern_id\": 2, \"shift_name\": \"Evening\", \"start_time\": \"14:00:00\", \"end_time\": \"20:00:00\", \"staff\": 1}]}, {\"day\": \"2026-10-06\", \"weekday\": 2, \"holiday_name\": null, \"on_duty\": 2, \"on_leave\": 0, \"resting\": 0, \"shifts\": [{\"shift_pattern_id\": 1, \"shift_name\": \"Morning\", \"start_time\": \"08:00:00\", \"end_time\": \"14:00:00\", \"staff\": 1}, {\"shift_pattern_id\": 2, \"shift_name\": \"Evening\", \"start_time\": \"14:00:00\", \"end_time…"
+      }
+    },
+    "GET /rosters/swaps": {
+      "request": {
+        "path": "/api/v1/rosters/swaps"
+      },
+      "response": {
+        "status": 200,
+        "body_preview": "{\"status\": 200, \"body\": {\"data\": [{\"swap_id\": 1, \"status\": \"Accepted\", \"reason\": \"Family emergency\", \"roster_id\": 1, \"return_roster_id\": 2, \"requester_employee_id\": 1, \"requester_name\": \"Nurse Amna\", \"covering_employee_id\": 7, \"covering_name\": \"Nurse Bushra\", \"staff_category\": \"Nursing\", \"requested_at\": \"2026-09-29T02:40:41.486972+00:00\", \"responded_at\": \"2026-09-29T02:40:41.533158+00:00\", \"response_note\": \"Happy to help\", \"responded_by_name\": \"Nurse Bushra\", \"decided_at\": null, \"decision_note\": null, \"decided_by_name\": null, \"closed_at\": null, \"cover_roster_id\": null, \"return_cover_roster_id\": null, \"row_version\": 2, \"kind\": \"Swap\", \"duty\": {\"roster_id\": 1, \"employee_id\": 1, \"emp_number\": \"EMP-2026-0001\", \"full_name\": \"Nurse Amna\", \"designation\": \"Officer\", \"staff_category\": \"Nursing\", \"roster_date\": \"2026-10-01\", \"shift_pattern_id\": 1, \"shift_name\": \"Morning\", \"start_time\": \"08:00:00\", \"end_time\": \"14:00:00\", \"duty_area\": \"Ward\", \"ward_id\": 1, \"ward_name\": \"Roster Ward\", \"department_id\": null, \"department_name\": null, \"zone_label\": null, \"is_on_call\": false, \"notes\": null, \"status\": \"Active\", \"cancel_reason\": null, \"swap_id\": null, \"row_version\": 1, \"bed_ids\": []}, \"return_duty\": {\"roster_id\": 2, \"employee_id\": 7, \"emp_number\": \"EMP-2026-0007\", \"full_name\": \"Nurse Bushra\", \"designation\": \"Officer\", \"staff_category\": \"Nursing\", \"roster_date\": \"2026-10-02\", \"shift_pattern_id\": 2, \"shift_name\": \"Evening\", \"start_time\": \"14:00:00\", \"end_time\": \"20:00:00\", \"duty_area\": \"Ward\", \"…"
+      }
+    },
+    "POST /rosters/swaps": {
+      "request": {
+        "path": "/api/v1/rosters/swaps",
+        "body": {
+          "roster_id": 1,
+          "covering_employee_id": 7,
+          "return_roster_id": 2,
+          "reason": "Agreed at the gate"
+        }
+      },
+      "response": {
+        "status": 201,
+        "body_preview": "{\"status\": 201, \"body\": {\"data\": {\"swap_id\": 1, \"status\": \"Approved\", \"reason\": \"Agreed at the gate\", \"roster_id\": 1, \"return_roster_id\": 2, \"requester_employee_id\": 5, \"requester_name\": \"Sweeper Rafiq\", \"covering_employee_id\": 7, \"covering_name\": \"Guard Nadeem\", \"staff_category\": \"SupportZeroInterface\", \"requested_at\": \"2026-09-29T02:40:53.009971+00:00\", \"responded_at\": \"2026-09-29T02:40:53.009971+00:00\", \"response_note\": \"Agreed in person; recorded by the roster manager\", \"responded_by_name\": \"uc8e355f8a6\", \"decided_at\": \"2026-09-29T02:40:53.009971+00:00\", \"decision_note\": \"Recorded by the roster manager\", \"decided_by_name\": \"uc8e355f8a6\", \"closed_at\": \"2026-09-29T02:40:53.009971+00:00\", \"cover_roster_id\": 3, \"return_cover_roster_id\": 4, \"row_version\": 3, \"kind\": \"Swap\", \"duty\": {\"roster_id\": 1, \"employee_id\": 5, \"emp_number\": \"EMP-2026-0005\", \"full_name\": \"Sweeper Rafiq\", \"designation\": \"Officer\", \"staff_category\": \"SupportZeroInterface\", \"roster_date\": \"2026-10-01\", \"shift_pattern_id\": 1, \"shift_name\": \"Morning\", \"start_time\": \"08:00:00\", \"end_time\": \"14:00:00\", \"duty_area\": \"Facility\", \"ward_id\": null, \"ward_name\": null, \"department_id\": null, \"department_name\": null, \"zone_label\": null, \"is_on_call\": false, \"notes\": null, \"status\": \"Cancelled\", \"cancel_reason\": \"Worked by Guard Nadeem (duty swap 1)\", \"swap_id\": null, \"row_version\": 2, \"bed_ids\": []}, \"return_duty\": {\"roster_id\": 2, \"employee_id\": 7, \"emp_number\": \"EMP-2026-0007\", \"full_name\": \"Guard Nadeem\", \"designatio…"
+      }
+    },
+    "POST /rosters/swaps/{swap_id}/approve": {
+      "request": {
+        "path": "/api/v1/rosters/swaps/1/approve",
+        "body": {
+          "note": "Fine"
+        }
+      },
+      "response": {
+        "status": 200,
+        "body_preview": "{\"status\": 200, \"body\": {\"data\": {\"swap_id\": 1, \"status\": \"Approved\", \"reason\": \"Family emergency\", \"roster_id\": 1, \"return_roster_id\": 2, \"requester_employee_id\": 1, \"requester_name\": \"Nurse Amna\", \"covering_employee_id\": 7, \"covering_name\": \"Nurse Bushra\", \"staff_category\": \"Nursing\", \"requested_at\": \"2026-09-29T02:40:41.486972+00:00\", \"responded_at\": \"2026-09-29T02:40:41.533158+00:00\", \"response_note\": \"Happy to help\", \"responded_by_name\": \"Nurse Bushra\", \"decided_at\": \"2026-09-29T02:40:41.556790+00:00\", \"decision_note\": \"Fine\", \"decided_by_name\": \"ue4b4b9d8a3\", \"closed_at\": \"2026-09-29T02:40:41.556790+00:00\", \"cover_roster_id\": 4, \"return_cover_roster_id\": 5, \"row_version\": 3, \"kind\": \"Swap\", \"duty\": {\"roster_id\": 1, \"employee_id\": 1, \"emp_number\": \"EMP-2026-0001\", \"full_name\": \"Nurse Amna\", \"designation\": \"Officer\", \"staff_category\": \"Nursing\", \"roster_date\": \"2026-10-01\", \"shift_pattern_id\": 1, \"shift_name\": \"Morning\", \"start_time\": \"08:00:00\", \"end_time\": \"14:00:00\", \"duty_area\": \"Ward\", \"ward_id\": 1, \"ward_name\": \"Roster Ward\", \"department_id\": null, \"department_name\": null, \"zone_label\": null, \"is_on_call\": false, \"notes\": null, \"status\": \"Cancelled\", \"cancel_reason\": \"Worked by Nurse Bushra (duty swap 1)\", \"swap_id\": null, \"row_version\": 2, \"bed_ids\": []}, \"return_duty\": {\"roster_id\": 2, \"employee_id\": 7, \"emp_number\": \"EMP-2026-0007\", \"full_name\": \"Nurse Bushra\", \"designation\": \"Officer\", \"staff_category\": \"Nursing\", \"roster_date\": \"2026-10-02\", \"shift_pattern_id\":…"
+      }
+    },
+    "POST /rosters/swaps/{swap_id}/reject": {
+      "request": {
+        "path": "/api/v1/rosters/swaps/3/reject",
+        "body": {
+          "note": "Ward short that day"
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": {
+            "swap_id": 3,
+            "status": "Rejected",
+            "reason": "Child unwell",
+            "roster_id": 2,
+            "return_roster_id": null,
+            "requester_employee_id": 1,
+            "requester_name": "Nurse Amna",
+            "covering_employee_id": 7,
+            "covering_name": "Nurse Kiran",
+            "staff_category": "Nursing",
+            "requested_at": "2026-09-29T02:40:47.341398+00:00",
+            "responded_at": "2026-09-29T02:40:47.351808+00:00",
+            "response_note": null,
+            "responded_by_name": "Nurse Kiran",
+            "decided_at": "2026-09-29T02:40:47.365344+00:00",
+            "decision_note": "Ward short that day",
+            "decided_by_name": "u8dfb1e7acc",
+            "closed_at": "2026-09-29T02:40:47.365344+00:00",
+            "cover_roster_id": null,
+            "return_cover_roster_id": null,
+            "row_version": 3,
+            "kind": "Cover",
+            "duty": {
+              "roster_id": 2,
+              "employee_id": 1,
+              "emp_number": "EMP-2026-0001",
+              "full_name": "Nurse Amna",
+              "designation": "Officer",
+              "staff_category": "Nursing",
+              "roster_date": "2026-10-03",
+              "shift_pattern_id": 1,
+              "shift_name": "Morning",
+              "start_time": "08:00:00",
+              "end_time": "14:00:00",
+              "duty_area": "Department",
+              "ward_id": null,
+              "ward_name": null,
+              "department_id": null,
+              "department_name": null,
+              "zone_label": null,
+              "is_on_call": false,
+              "notes": null,
+              "status": "Active",
+              "cancel_reason": null,
+              "swap_id": null,
+              "row_version": 1,
+              "bed_ids": []
+            },
+            "return_duty": null
+          },
+          "meta": {
+            "server_time": "2026-09-29T02:40:47.371152+00:00"
+          },
+          "request_id": "c9cec1bdfe5041d4b0f8d15f933a0fe5"
+        }
+      }
+    },
+    "GET /beds/matrix": {
+      "request": {
+        "path": "/api/v1/beds/matrix"
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": {
+            "wards": [
+              {
+                "ward_id": 2,
+                "code": "GW",
+                "name": "General Ward",
+                "ward_type": "General",
+                "gender_restriction": "any",
+                "total_beds": 1,
+                "available": 0,
+                "reserved": 0,
+                "occupied": 1,
+                "turnover": 0,
+                "out_of_service": 0
+              },
+              {
+                "ward_id": 1,
+                "code": "ICU",
+                "name": "ICU",
+                "ward_type": "ICU",
+                "gender_restriction": "any",
+                "total_beds": 1,
+                "available": 1,
+                "reserved": 0,
+                "occupied": 0,
+                "turnover": 0,
+                "out_of_service": 0
+              }
+            ],
+            "summary": {
+              "General Ward": 0,
+              "ICU": 1
+            },
+            "beds": [
+              {
+                "bed_id": 1,
+                "ward_id": 1,
+                "label": "ICU-1",
+                "current_state": "Available",
+                "state_changed_at": "2026-09-27T17:38:22.548397+00:00",
+                "is_overflow_allowed": false,
+                "admission_id": null,
+                "patient_name": null,
+                "mrn": null,
+                "admission_status": null,
+                "is_overflow": null,
+                "discharge_blocked_on": null
+              },
+              {
+                "bed_id": 2,
+                "ward_id": 2,
+                "label": "GW-1",
+                "current_state": "Occupied",
+                "state_changed_at": "2026-09-27T17:38:22.903579+00:00",
+                "is_overflow_allowed": false,
+                "admission_id": 1,
+                "patient_name": null,
+                "mrn": null,
+                "admission_status": "Admitted",
+                "is_overflow": false,
+                "discharge_blocked_on": null
+              }
+            ]
+          },
+          "meta": {
+            "server_time": "2026-09-27T17:38:22.967241+00:00"
+          },
+          "request_id": "802131a929b14db0a0c8033474e8d271"
+        }
+      }
+    }
+  },
+  "schemas": {
+    "BedMatrixBedOut": {
+      "properties": {
+        "bed_id": {
+          "type": "integer",
+          "title": "Bed Id"
+        },
+        "ward_id": {
+          "type": "integer",
+          "title": "Ward Id"
+        },
+        "label": {
+          "type": "string",
+          "title": "Label"
+        },
+        "current_state": {
+          "type": "string",
+          "enum": [
+            "Available",
+            "Reserved",
+            "Occupied",
+            "Dirty",
+            "Cleaning",
+            "OutOfService"
+          ],
+          "title": "Current State"
+        },
+        "state_changed_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "State Changed At"
+        },
+        "is_overflow_allowed": {
+          "type": "boolean",
+          "title": "Is Overflow Allowed"
+        },
+        "admission_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Admission Id"
+        },
+        "patient_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Patient Name",
+          "description": "Only with with_patients=true"
+        },
+        "mrn": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Mrn",
+          "description": "Only with with_patients=true"
+        },
+        "admission_status": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "AdmissionPending",
+                "Waitlisted",
+                "BedReserved",
+                "CodeRedActive",
+                "Admitted",
+                "DischargeInProgress",
+                "Discharged",
+                "Cancelled"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Admission Status"
+        },
+        "is_overflow": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Is Overflow"
+        },
+        "discharge_blocked_on": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Discharge Blocked On",
+          "description": "The discharge stage the patient in this bed waits for"
+        }
+      },
+      "type": "object",
+      "required": [
+        "bed_id",
+        "ward_id",
+        "label",
+        "current_state",
+        "state_changed_at",
+        "is_overflow_allowed",
+        "admission_id",
+        "patient_name",
+        "mrn",
+        "admission_status",
+        "is_overflow",
+        "discharge_blocked_on"
+      ],
+      "title": "BedMatrixBedOut"
+    },
+    "BedMatrixOut": {
+      "properties": {
+        "wards": {
+          "items": {
+            "$ref": "#/components/schemas/WardOccupancyOut"
+          },
+          "type": "array",
+          "title": "Wards"
+        },
+        "summary": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "type": "object",
+          "title": "Summary",
+          "description": "Ward name -> available beds"
+        },
+        "beds": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/components/schemas/BedMatrixBedOut"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Beds",
+          "description": "Only with include_beds=true"
+        }
+      },
+      "type": "object",
+      "required": [
+        "wards",
+        "summary"
+      ],
+      "title": "BedMatrixOut"
+    },
+    "CopyIn": {
+      "properties": {
+        "source_from": {
+          "type": "string",
+          "format": "date",
+          "title": "Source From"
+        },
+        "source_to": {
+          "type": "string",
+          "format": "date",
+          "title": "Source To"
+        },
+        "target_from": {
+          "type": "string",
+          "format": "date",
+          "title": "Target From",
+          "description": "Where the copy starts, e.g. next Monday"
+        },
+        "ward_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ward Id"
+        },
+        "department_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Department Id"
+        },
+        "staff_category": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "Clinical",
+                "Nursing",
+                "Administrative",
+                "Technical",
+                "SupportZeroInterface",
+                "Visiting"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Staff Category"
+        },
+        "rotate_days": {
+          "type": "integer",
+          "maximum": 30,
+          "minimum": 0,
+          "title": "Rotate Days",
+          "description": "Move everyone's pattern on by this many days within the period, wrapping round: 1 on a week makes each rest day move to the next weekday, so rest days (and Sunday duty) rotate week by week",
+          "default": 0
+        }
+      },
+      "type": "object",
+      "required": [
+        "source_from",
+        "source_to",
+        "target_from"
+      ],
+      "title": "CopyIn"
+    },
+    "CopySkippedOut": {
+      "properties": {
+        "from_roster_id": {
+          "type": "integer",
+          "title": "From Roster Id"
+        },
+        "employee_id": {
+          "type": "integer",
+          "title": "Employee Id"
+        },
+        "full_name": {
+          "type": "string",
+          "title": "Full Name"
+        },
+        "roster_date": {
+          "type": "string",
+          "format": "date",
+          "title": "Roster Date"
+        },
+        "reason": {
+          "type": "string",
+          "title": "Reason",
+          "description": "The error code that stopped this entry (e.g. ROSTER_CONFLICT, LEAVE_CONFLICT)"
+        }
+      },
+      "type": "object",
+      "required": [
+        "from_roster_id",
+        "employee_id",
+        "full_name",
+        "roster_date",
+        "reason"
+      ],
+      "title": "CopySkippedOut"
+    },
+    "DutySwapOut": {
+      "properties": {
+        "swap_id": {
+          "type": "integer",
+          "title": "Swap Id"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "Cover",
+            "Swap"
+          ],
+          "title": "Kind"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "Requested",
+            "Accepted",
+            "Approved",
+            "Declined",
+            "Rejected",
+            "Cancelled",
+            "Expired"
+          ],
+          "title": "Status"
+        },
+        "reason": {
+          "type": "string",
+          "title": "Reason"
+        },
+        "roster_id": {
+          "type": "integer",
+          "title": "Roster Id"
+        },
+        "return_roster_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Return Roster Id"
+        },
+        "requester_employee_id": {
+          "type": "integer",
+          "title": "Requester Employee Id"
+        },
+        "requester_name": {
+          "type": "string",
+          "title": "Requester Name"
+        },
+        "covering_employee_id": {
+          "type": "integer",
+          "title": "Covering Employee Id"
+        },
+        "covering_name": {
+          "type": "string",
+          "title": "Covering Name"
+        },
+        "staff_category": {
+          "type": "string",
+          "enum": [
+            "Clinical",
+            "Nursing",
+            "Administrative",
+            "Technical",
+            "SupportZeroInterface",
+            "Visiting"
+          ],
+          "title": "Staff Category"
+        },
+        "duty": {
+          "$ref": "#/components/schemas/RosterEntryOut",
+          "description": "The requester's duty the colleague is asked to work (as it was asked)"
+        },
+        "return_duty": {
+          "anyOf": [
+            {
+              "$ref": "#/components/schemas/RosterEntryOut"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The colleague's duty the requester works in exchange"
+        },
+        "requested_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Requested At"
+        },
+        "responded_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Responded At"
+        },
+        "response_note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Response Note"
+        },
+        "responded_by_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Responded By Name"
+        },
+        "decided_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Decided At"
+        },
+        "decision_note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Decision Note"
+        },
+        "decided_by_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Decided By Name",
+          "description": "The roster manager (null when no approval was needed)"
+        },
+        "closed_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Closed At"
+        },
+        "cover_roster_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cover Roster Id",
+          "description": "The colleague's new duty, once approved"
+        },
+        "return_cover_roster_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Return Cover Roster Id",
+          "description": "The requester's new duty of a swap, once approved"
+        },
+        "row_version": {
+          "type": "integer",
+          "title": "Row Version"
+        }
+      },
+      "type": "object",
+      "required": [
+        "swap_id",
+        "kind",
+        "status",
+        "reason",
+        "roster_id",
+        "return_roster_id",
+        "requester_employee_id",
+        "requester_name",
+        "covering_employee_id",
+        "covering_name",
+        "staff_category",
+        "duty",
+        "return_duty",
+        "requested_at",
+        "responded_at",
+        "response_note",
+        "responded_by_name",
+        "decided_at",
+        "decision_note",
+        "decided_by_name",
+        "closed_at",
+        "cover_roster_id",
+        "return_cover_roster_id",
+        "row_version"
+      ],
+      "title": "DutySwapOut",
+      "description": "A duty swap: a cover (one duty) or a swap (the requester works `return_duty` in exchange)."
+    },
+    "EntriesIn": {
+      "properties": {
+        "entries": {
+          "items": {
+            "$ref": "#/components/schemas/EntryIn"
+          },
+          "type": "array",
+          "maxItems": 500,
+          "minItems": 1,
+          "title": "Entries"
+        }
+      },
+      "type": "object",
+      "required": [
+        "entries"
+      ],
+      "title": "EntriesIn"
+    },
+    "EntryIn": {
+      "properties": {
+        "employee_id": {
+          "type": "integer",
+          "title": "Employee Id"
+        },
+        "roster_date": {
+          "type": "string",
+          "format": "date",
+          "title": "Roster Date",
+          "description": "The date the shift STARTS (a night shift belongs to its start date)"
+        },
+        "shift_pattern_id": {
+          "type": "integer",
+          "title": "Shift Pattern Id",
+          "description": "GET /rosters/staff → shift_patterns (HR: GET /hr/shift-patterns)"
+        },
+        "duty_area": {
+          "type": "string",
+          "enum": [
+            "Ward",
+            "Department",
+            "Emergency",
+            "OT",
+            "Facility",
+            "Other"
+          ],
+          "title": "Duty Area",
+          "default": "Department"
+        },
+        "ward_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ward Id",
+          "description": "Required when duty_area is Ward"
+        },
+        "department_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Department Id"
+        },
+        "zone_label": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 100
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Zone Label",
+          "examples": [
+            "Bay A",
+            "Main gate",
+            "OPD corridor"
+          ]
+        },
+        "bed_ids": {
+          "items": {
+            "type": "integer"
+          },
+          "type": "array",
+          "maxItems": 60,
+          "title": "Bed Ids",
+          "description": "Ward duties: the beds this nurse looks after"
+        },
+        "is_on_call": {
+          "type": "boolean",
+          "title": "Is On Call",
+          "default": false
+        },
+        "notes": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 500
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Notes"
+        }
+      },
+      "type": "object",
+      "required": [
+        "employee_id",
+        "roster_date",
+        "shift_pattern_id"
+      ],
+      "title": "EntryIn"
+    },
+    "EntryPatch": {
+      "properties": {
+        "expected_version": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Expected Version",
+          "description": "row_version you loaded (optimistic concurrency)"
+        },
+        "roster_date": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Roster Date"
+        },
+        "shift_pattern_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Shift Pattern Id"
+        },
+        "duty_area": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "Ward",
+                "Department",
+                "Emergency",
+                "OT",
+                "Facility",
+                "Other"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Duty Area"
+        },
+        "ward_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ward Id"
+        },
+        "department_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Department Id"
+        },
+        "zone_label": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 100
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Zone Label"
+        },
+        "bed_ids": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "integer"
+              },
+              "type": "array",
+              "maxItems": 60
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Bed Ids"
+        },
+        "is_on_call": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Is On Call"
+        },
+        "notes": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 500
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Notes"
+        }
+      },
+      "type": "object",
+      "title": "EntryPatch"
+    },
+    "Envelope_BedMatrixOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/BedMatrixOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[BedMatrixOut]"
+    },
+    "Envelope_DutySwapOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/DutySwapOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[DutySwapOut]"
+    },
+    "Envelope_RosterCopyOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/RosterCopyOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[RosterCopyOut]"
+    },
+    "Envelope_RosterEntryOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/RosterEntryOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[RosterEntryOut]"
+    },
+    "Envelope_RosterPlannerOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/RosterPlannerOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[RosterPlannerOut]"
+    },
+    "Envelope_RosterRangeOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/RosterRangeOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[RosterRangeOut]"
+    },
+    "Envelope_RosterWeekOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/RosterWeekOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[RosterWeekOut]"
+    },
+    "Envelope_list_DutySwapOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/DutySwapOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[DutySwapOut]]"
+    },
+    "Envelope_list_RosterEntryOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/RosterEntryOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[RosterEntryOut]]"
+    },
+    "HTTPValidationError": {
+      "properties": {
+        "detail": {
+          "items": {
+            "$ref": "#/components/schemas/ValidationError"
+          },
+          "type": "array",
+          "title": "Detail"
+        }
+      },
+      "type": "object",
+      "title": "HTTPValidationError"
+    },
+    "HolidayBriefOut": {
+      "properties": {
+        "holiday_id": {
+          "type": "integer",
+          "title": "Holiday Id"
+        },
+        "holiday_date": {
+          "type": "string",
+          "format": "date",
+          "title": "Holiday Date"
+        },
+        "name": {
+          "type": "string",
+          "title": "Name"
+        }
+      },
+      "type": "object",
+      "required": [
+        "holiday_id",
+        "holiday_date",
+        "name"
+      ],
+      "title": "HolidayBriefOut"
+    },
+    "Meta": {
+      "properties": {
+        "server_time": {
+          "type": "string",
+          "title": "Server Time",
+          "description": "Server clock (UTC). Use it to detect terminal clock skew."
+        },
+        "page": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Page"
+        },
+        "page_size": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Page Size"
+        },
+        "total_count": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Total Count"
+        },
+        "next_cursor": {
+          "title": "Next Cursor"
+        }
+      },
+      "type": "object",
+      "required": [
+        "server_time"
+      ],
+      "title": "Meta"
+    },
+    "RosterCopyOut": {
+      "properties": {
+        "created": {
+          "items": {
+            "$ref": "#/components/schemas/RosterEntryOut"
+          },
+          "type": "array",
+          "title": "Created"
+        },
+        "skipped": {
+          "items": {
+            "$ref": "#/components/schemas/CopySkippedOut"
+          },
+          "type": "array",
+          "title": "Skipped"
+        }
+      },
+      "type": "object",
+      "required": [
+        "created",
+        "skipped"
+      ],
+      "title": "RosterCopyOut"
+    },
+    "RosterEntryOut": {
+      "properties": {
+        "roster_id": {
+          "type": "integer",
+          "title": "Roster Id"
+        },
+        "employee_id": {
+          "type": "integer",
+          "title": "Employee Id"
+        },
+        "emp_number": {
+          "type": "string",
+          "title": "Emp Number"
+        },
+        "full_name": {
+          "type": "string",
+          "title": "Full Name"
+        },
+        "designation": {
+          "type": "string",
+          "title": "Designation"
+        },
+        "staff_category": {
+          "type": "string",
+          "enum": [
+            "Clinical",
+            "Nursing",
+            "Administrative",
+            "Technical",
+            "SupportZeroInterface",
+            "Visiting"
+          ],
+          "title": "Staff Category"
+        },
+        "roster_date": {
+          "type": "string",
+          "format": "date",
+          "title": "Roster Date"
+        },
+        "shift_pattern_id": {
+          "type": "integer",
+          "title": "Shift Pattern Id"
+        },
+        "shift_name": {
+          "type": "string",
+          "title": "Shift Name"
+        },
+        "start_time": {
+          "type": "string",
+          "format": "time",
+          "title": "Start Time"
+        },
+        "end_time": {
+          "type": "string",
+          "format": "time",
+          "title": "End Time"
+        },
+        "duty_area": {
+          "type": "string",
+          "enum": [
+            "Ward",
+            "Department",
+            "Emergency",
+            "OT",
+            "Facility",
+            "Other"
+          ],
+          "title": "Duty Area"
+        },
+        "ward_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ward Id"
+        },
+        "ward_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ward Name"
+        },
+        "department_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Department Id"
+        },
+        "department_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Department Name"
+        },
+        "zone_label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Zone Label"
+        },
+        "is_on_call": {
+          "type": "boolean",
+          "title": "Is On Call"
+        },
+        "notes": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Notes"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "Active",
+            "Cancelled"
+          ],
+          "title": "Status"
+        },
+        "cancel_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cancel Reason"
+        },
+        "swap_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Swap Id",
+          "description": "Taken over from a colleague through this approved duty swap"
+        },
+        "row_version": {
+          "type": "integer",
+          "title": "Row Version"
+        },
+        "bed_ids": {
+          "items": {
+            "type": "integer"
+          },
+          "type": "array",
+          "title": "Bed Ids",
+          "description": "The beds of a ward duty (the nurse's \"my beds\")"
+        }
+      },
+      "type": "object",
+      "required": [
+        "roster_id",
+        "employee_id",
+        "emp_number",
+        "full_name",
+        "designation",
+        "staff_category",
+        "roster_date",
+        "shift_pattern_id",
+        "shift_name",
+        "start_time",
+        "end_time",
+        "duty_area",
+        "ward_id",
+        "ward_name",
+        "department_id",
+        "department_name",
+        "zone_label",
+        "is_on_call",
+        "notes",
+        "status",
+        "cancel_reason",
+        "swap_id",
+        "row_version",
+        "bed_ids"
+      ],
+      "title": "RosterEntryOut",
+      "description": "One rostered duty (service.ENTRY_COLS). A night shift belongs to the date it starts."
+    },
+    "RosterPlannerOut": {
+      "properties": {
+        "date_from": {
+          "type": "string",
+          "format": "date",
+          "title": "Date From"
+        },
+        "date_to": {
+          "type": "string",
+          "format": "date",
+          "title": "Date To"
+        },
+        "shift_patterns": {
+          "items": {
+            "$ref": "#/components/schemas/ShiftPatternOut"
+          },
+          "type": "array",
+          "title": "Shift Patterns"
+        },
+        "holidays": {
+          "items": {
+            "$ref": "#/components/schemas/HolidayBriefOut"
+          },
+          "type": "array",
+          "title": "Holidays"
+        },
+        "staff": {
+          "items": {
+            "$ref": "#/components/schemas/RosterableStaffOut"
+          },
+          "type": "array",
+          "title": "Staff"
+        }
+      },
+      "type": "object",
+      "required": [
+        "date_from",
+        "date_to",
+        "shift_patterns",
+        "holidays",
+        "staff"
+      ],
+      "title": "RosterPlannerOut",
+      "description": "Everything the planner grid needs for a range: shift patterns, public holidays and the staff I may roster."
+    },
+    "RosterRangeOut": {
+      "properties": {
+        "date_from": {
+          "type": "string",
+          "format": "date",
+          "title": "Date From"
+        },
+        "date_to": {
+          "type": "string",
+          "format": "date",
+          "title": "Date To"
+        },
+        "entries": {
+          "items": {
+            "$ref": "#/components/schemas/RosterEntryOut"
+          },
+          "type": "array",
+          "title": "Entries"
+        }
+      },
+      "type": "object",
+      "required": [
+        "date_from",
+        "date_to",
+        "entries"
+      ],
+      "title": "RosterRangeOut"
+    },
+    "RosterReasonIn": {
+      "properties": {
+        "reason": {
+          "type": "string",
+          "maxLength": 500,
+          "minLength": 3,
+          "title": "Reason"
+        }
+      },
+      "type": "object",
+      "required": [
+        "reason"
+      ],
+      "title": "RosterReasonIn"
+    },
+    "RosterWeekOut": {
+      "properties": {
+        "week_start": {
+          "type": "string",
+          "format": "date",
+          "title": "Week Start"
+        },
+        "week_end": {
+          "type": "string",
+          "format": "date",
+          "title": "Week End"
+        },
+        "rest_days_due": {
+          "type": "integer",
+          "title": "Rest Days Due",
+          "description": "Setting weekly_rest_days"
+        },
+        "staff_without_rest_day": {
+          "type": "integer",
+          "title": "Staff Without Rest Day"
+        },
+        "staff": {
+          "items": {
+            "$ref": "#/components/schemas/WeekStaffOut"
+          },
+          "type": "array",
+          "title": "Staff"
+        },
+        "days": {
+          "items": {
+            "$ref": "#/components/schemas/WeekDayOut"
+          },
+          "type": "array",
+          "title": "Days"
+        }
+      },
+      "type": "object",
+      "required": [
+        "week_start",
+        "week_end",
+        "rest_days_due",
+        "staff_without_rest_day",
+        "staff",
+        "days"
+      ],
+      "title": "RosterWeekOut"
+    },
+    "RosterableStaffOut": {
+      "properties": {
+        "employee_id": {
+          "type": "integer",
+          "title": "Employee Id"
+        },
+        "emp_number": {
+          "type": "string",
+          "title": "Emp Number"
+        },
+        "full_name": {
+          "type": "string",
+          "title": "Full Name"
+        },
+        "designation": {
+          "type": "string",
+          "title": "Designation"
+        },
+        "staff_category": {
+          "type": "string",
+          "enum": [
+            "Clinical",
+            "Nursing",
+            "Administrative",
+            "Technical",
+            "SupportZeroInterface",
+            "Visiting"
+          ],
+          "title": "Staff Category"
+        },
+        "department_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Department Id"
+        },
+        "department_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Department Name"
+        },
+        "default_shift_pattern_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Default Shift Pattern Id",
+          "description": "A fixed default shift (null: works to the roster only)"
+        },
+        "default_weekly_off_days": {
+          "items": {
+            "type": "integer"
+          },
+          "type": "array",
+          "title": "Default Weekly Off Days",
+          "description": "That default shift's weekly days off (ISO weekdays, 1 = Monday … 7 = Sunday); [] for roster-only staff"
+        },
+        "leave": {
+          "items": {
+            "$ref": "#/components/schemas/StaffLeaveOut"
+          },
+          "type": "array",
+          "title": "Leave",
+          "description": "Approved leave in the range (they cannot be rostered then)"
+        }
+      },
+      "type": "object",
+      "required": [
+        "employee_id",
+        "emp_number",
+        "full_name",
+        "designation",
+        "staff_category",
+        "department_id",
+        "department_name",
+        "default_shift_pattern_id",
+        "default_weekly_off_days",
+        "leave"
+      ],
+      "title": "RosterableStaffOut"
+    },
+    "ShiftPatternOut": {
+      "properties": {
+        "shift_pattern_id": {
+          "type": "integer",
+          "title": "Shift Pattern Id"
+        },
+        "name": {
+          "type": "string",
+          "title": "Name"
+        },
+        "start_time": {
+          "type": "string",
+          "format": "time",
+          "title": "Start Time"
+        },
+        "end_time": {
+          "type": "string",
+          "format": "time",
+          "title": "End Time",
+          "description": "Earlier than start_time for a night shift"
+        },
+        "grace_minutes": {
+          "type": "integer",
+          "title": "Grace Minutes"
+        },
+        "half_day_after_minutes": {
+          "type": "integer",
+          "title": "Half Day After Minutes"
+        },
+        "is_active": {
+          "type": "boolean",
+          "title": "Is Active"
+        },
+        "row_version": {
+          "type": "integer",
+          "title": "Row Version"
+        }
+      },
+      "type": "object",
+      "required": [
+        "shift_pattern_id",
+        "name",
+        "start_time",
+        "end_time",
+        "grace_minutes",
+        "half_day_after_minutes",
+        "is_active",
+        "row_version"
+      ],
+      "title": "ShiftPatternOut"
+    },
+    "StaffLeaveOut": {
+      "properties": {
+        "employee_id": {
+          "type": "integer",
+          "title": "Employee Id"
+        },
+        "from_date": {
+          "type": "string",
+          "format": "date",
+          "title": "From Date"
+        },
+        "to_date": {
+          "type": "string",
+          "format": "date",
+          "title": "To Date"
+        },
+        "leave_type": {
+          "type": "string",
+          "enum": [
+            "Annual",
+            "Casual",
+            "Sick",
+            "Maternity",
+            "Unpaid",
+            "Other"
+          ],
+          "title": "Leave Type"
+        }
+      },
+      "type": "object",
+      "required": [
+        "employee_id",
+        "from_date",
+        "to_date",
+        "leave_type"
+      ],
+      "title": "StaffLeaveOut"
+    },
+    "SwapIn": {
+      "properties": {
+        "roster_id": {
+          "type": "integer",
+          "title": "Roster Id",
+          "description": "The duty to be worked by the colleague"
+        },
+        "covering_employee_id": {
+          "type": "integer",
+          "title": "Covering Employee Id",
+          "description": "The colleague (same staff category): GET /self/roster/swap-options"
+        },
+        "return_roster_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Return Roster Id",
+          "description": "For a swap: the colleague's duty the requester works in return; omit for a cover"
+        },
+        "reason": {
+          "type": "string",
+          "maxLength": 500,
+          "minLength": 3,
+          "title": "Reason",
+          "examples": [
+            "Family emergency: my father is in hospital"
+          ]
+        }
+      },
+      "type": "object",
+      "required": [
+        "roster_id",
+        "covering_employee_id",
+        "reason"
+      ],
+      "title": "SwapIn"
+    },
+    "SwapNoteIn": {
+      "properties": {
+        "note": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 500
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Note"
+        }
+      },
+      "type": "object",
+      "title": "SwapNoteIn"
+    },
+    "SwapRejectIn": {
+      "properties": {
+        "note": {
+          "type": "string",
+          "maxLength": 500,
+          "minLength": 3,
+          "title": "Note",
+          "description": "Why (the two colleagues see it)"
+        }
+      },
+      "type": "object",
+      "required": [
+        "note"
+      ],
+      "title": "SwapRejectIn"
+    },
+    "ValidationError": {
+      "properties": {
+        "loc": {
+          "items": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ]
+          },
+          "type": "array",
+          "title": "Location"
+        },
+        "msg": {
+          "type": "string",
+          "title": "Message"
+        },
+        "type": {
+          "type": "string",
+          "title": "Error Type"
+        },
+        "input": {
+          "title": "Input"
+        },
+        "ctx": {
+          "type": "object",
+          "title": "Context"
+        }
+      },
+      "type": "object",
+      "required": [
+        "loc",
+        "msg",
+        "type"
+      ],
+      "title": "ValidationError"
+    },
+    "WardOccupancyOut": {
+      "properties": {
+        "ward_id": {
+          "type": "integer",
+          "title": "Ward Id"
+        },
+        "code": {
+          "type": "string",
+          "title": "Code"
+        },
+        "name": {
+          "type": "string",
+          "title": "Name"
+        },
+        "ward_type": {
+          "type": "string",
+          "enum": [
+            "General",
+            "Private",
+            "SemiPrivate",
+            "ICU",
+            "CCU",
+            "NICU",
+            "Surgical",
+            "Pediatric",
+            "Maternity",
+            "Emergency",
+            "Isolation",
+            "Other"
+          ],
+          "title": "Ward Type"
+        },
+        "gender_restriction": {
+          "type": "string",
+          "enum": [
+            "male",
+            "female",
+            "any"
+          ],
+          "title": "Gender Restriction"
+        },
+        "total_beds": {
+          "type": "integer",
+          "title": "Total Beds"
+        },
+        "available": {
+          "type": "integer",
+          "title": "Available"
+        },
+        "reserved": {
+          "type": "integer",
+          "title": "Reserved"
+        },
+        "occupied": {
+          "type": "integer",
+          "title": "Occupied"
+        },
+        "turnover": {
+          "type": "integer",
+          "title": "Turnover",
+          "description": "Beds being cleaned or waiting for discharge clearance"
+        },
+        "out_of_service": {
+          "type": "integer",
+          "title": "Out Of Service"
+        }
+      },
+      "type": "object",
+      "required": [
+        "ward_id",
+        "code",
+        "name",
+        "ward_type",
+        "gender_restriction",
+        "total_beds",
+        "available",
+        "reserved",
+        "occupied",
+        "turnover",
+        "out_of_service"
+      ],
+      "title": "WardOccupancyOut",
+      "description": "A ward's bed counts (view v_bed_matrix)."
+    },
+    "WeekDayOut": {
+      "properties": {
+        "day": {
+          "type": "string",
+          "format": "date",
+          "title": "Day"
+        },
+        "weekday": {
+          "type": "integer",
+          "title": "Weekday",
+          "description": "ISO weekday, 1 = Monday … 7 = Sunday"
+        },
+        "holiday_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Holiday Name"
+        },
+        "on_duty": {
+          "type": "integer",
+          "title": "On Duty"
+        },
+        "on_leave": {
+          "type": "integer",
+          "title": "On Leave"
+        },
+        "resting": {
+          "type": "integer",
+          "title": "Resting"
+        },
+        "shifts": {
+          "items": {
+            "$ref": "#/components/schemas/WeekShiftCountOut"
+          },
+          "type": "array",
+          "title": "Shifts"
+        }
+      },
+      "type": "object",
+      "required": [
+        "day",
+        "weekday",
+        "holiday_name",
+        "on_duty",
+        "on_leave",
+        "resting",
+        "shifts"
+      ],
+      "title": "WeekDayOut",
+      "description": "Staffing of one day of the week (with ward_id: that ward's duties)."
+    },
+    "WeekShiftCountOut": {
+      "properties": {
+        "shift_pattern_id": {
+          "type": "integer",
+          "title": "Shift Pattern Id"
+        },
+        "shift_name": {
+          "type": "string",
+          "title": "Shift Name"
+        },
+        "start_time": {
+          "type": "string",
+          "format": "time",
+          "title": "Start Time"
+        },
+        "end_time": {
+          "type": "string",
+          "format": "time",
+          "title": "End Time"
+        },
+        "staff": {
+          "type": "integer",
+          "title": "Staff"
+        }
+      },
+      "type": "object",
+      "required": [
+        "shift_pattern_id",
+        "shift_name",
+        "start_time",
+        "end_time",
+        "staff"
+      ],
+      "title": "WeekShiftCountOut"
+    },
+    "WeekStaffOut": {
+      "properties": {
+        "employee_id": {
+          "type": "integer",
+          "title": "Employee Id"
+        },
+        "emp_number": {
+          "type": "string",
+          "title": "Emp Number"
+        },
+        "full_name": {
+          "type": "string",
+          "title": "Full Name"
+        },
+        "designation": {
+          "type": "string",
+          "title": "Designation"
+        },
+        "staff_category": {
+          "type": "string",
+          "enum": [
+            "Clinical",
+            "Nursing",
+            "Administrative",
+            "Technical",
+            "SupportZeroInterface",
+            "Visiting"
+          ],
+          "title": "Staff Category"
+        },
+        "department_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Department Name"
+        },
+        "has_default_shift": {
+          "type": "boolean",
+          "title": "Has Default Shift",
+          "description": "On a fixed schedule (a default shift) during the week"
+        },
+        "duty_dates": {
+          "items": {
+            "type": "string",
+            "format": "date"
+          },
+          "type": "array",
+          "title": "Duty Dates"
+        },
+        "rest_dates": {
+          "items": {
+            "type": "string",
+            "format": "date"
+          },
+          "type": "array",
+          "title": "Rest Dates",
+          "description": "Days without a duty and without leave"
+        },
+        "leave_dates": {
+          "items": {
+            "type": "string",
+            "format": "date"
+          },
+          "type": "array",
+          "title": "Leave Dates"
+        },
+        "working_days": {
+          "type": "integer",
+          "title": "Working Days"
+        },
+        "extra_duty_days": {
+          "type": "integer",
+          "title": "Extra Duty Days",
+          "description": "Duty days beyond the week's allowance (7 - rest_days_due), paid as extra duty"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "Ok",
+            "NoRestDay",
+            "NotRostered"
+          ],
+          "title": "Status",
+          "description": "NoRestDay: fewer rest days than due; NotRostered: roster-only staff with no duty this week yet"
+        }
+      },
+      "type": "object",
+      "required": [
+        "employee_id",
+        "emp_number",
+        "full_name",
+        "designation",
+        "staff_category",
+        "department_name",
+        "has_default_shift",
+        "duty_dates",
+        "rest_dates",
+        "leave_dates",
+        "working_days",
+        "extra_duty_days",
+        "status"
+      ],
+      "title": "WeekStaffOut",
+      "description": "One person's roster week."
+    }
+  },
+  "unknowns": [
+    {
+      "what": "decision H02",
+      "owner": [
+        "vendor"
+      ],
+      "question": "Digits in the Urdu UI and printouts: Latin 0-9 or Extended Arabic-Indic ۰-۹.",
+      "affects": [
+        "every screen in Urdu"
+      ],
+      "meanwhile": "Latin digits; identifiers, doses and money stay left to right."
+    },
+    {
+      "what": "decision H03",
+      "owner": [
+        "vendor",
+        "clinical_lead"
+      ],
+      "question": "How dates and times are shown on screen, and a 12- or 24-hour clock.",
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "The server's print format (e.g. 27-Sep-2026) and the hospital time zone."
+    },
+    {
+      "what": "decision H04",
+      "owner": [
+        "vendor"
+      ],
+      "question": "Money on screen: decimals shown, and digit grouping (1,234,567 or 12,34,567).",
+      "affects": [
+        "every screen with money"
+      ],
+      "meanwhile": "The amounts as the API sends them, with the currency setting."
+    },
+    {
+      "what": "decision H08",
+      "owner": [
+        "vendor",
+        "translator",
+        "clinical_lead"
+      ],
+      "question": "Who writes and signs off the Urdu text of the UI, above all clinical and consent wording.",
+      "affects": [
+        "every screen in Urdu"
+      ],
+      "meanwhile": "Urdu you add is a draft: mark it so (the interview bank's pattern: a draft until a native speaker reviews it)."
+    },
+    {
+      "what": "decision H09",
+      "owner": [
+        "vendor",
+        "frontend_lead"
+      ],
+      "question": "One design system shared by every frontend team (who authors and approves it), or each team's own.",
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "Each team designs within the backend's constraints: themes Light and DarkHighContrast, zoom 100-250 %, Noto Nastaliq Urdu, status shown as text and icon, never colour alone. Follow the vendor's design principles (frontend guide 18, get_design_principles)."
+    },
+    {
+      "what": "decision H10",
+      "owner": [
+        "clinical_lead",
+        "vendor"
+      ],
+      "question": "How each realtime event is shown (interrupt, attention, inform, silent), alert sounds and which terminals play them. Only Code Red (interrupt), the licence and maintenance banners and the logout on session.revoked are prescribed (the event catalogue's `presentation`).",
+      "affects": [
+        "every screen with realtime events"
+      ],
+      "meanwhile": "Code Red interrupts; every other event updates the screen and, at most, a dismissible notice. `priority` is the delivery urgency, not a presentation rule."
+    },
+    {
+      "what": "decision H12",
+      "owner": [
+        "vendor",
+        "backend"
+      ],
+      "question": "Which workspaces run on web, Android and iOS, which cannot read a MAC address, discover the server by UDP or print silently; or are cash and printing Windows-only.",
+      "affects": [
+        "my_cash_shift",
+        "registration",
+        "every screen that prints"
+      ],
+      "meanwhile": "The guides describe the Windows (Electron) terminal; tell your developer when a screen needs a capability your platform lacks."
+    },
+    {
+      "what": "decision H18",
+      "owner": [
+        "vendor",
+        "frontend_lead"
+      ],
+      "question": "Noto Nastaliq Urdu everywhere, or the more compact Naskh in dense tables.",
+      "affects": [
+        "every table in Urdu"
+      ],
+      "meanwhile": "Noto Nastaliq Urdu, as the guides require."
+    },
+    {
+      "what": "decision H19",
+      "owner": [
+        "clinical_lead",
+        "backend"
+      ],
+      "question": "Allergies: the patient record keeps free text, so it cannot tell \"no known allergies\" (asserted by a clinician) from \"not recorded\". Should it?",
+      "affects": [
+        "every screen with a patient banner"
+      ],
+      "meanwhile": "Show the recorded text as recorded; an empty value is \"not recorded\", never \"none\"."
+    },
+    {
+      "what": "decision H20",
+      "owner": [
+        "vendor",
+        "hospital"
+      ],
+      "question": "May unsaved form input be kept on the terminal (which fields, encrypted, for how long)?",
+      "affects": [
+        "every form"
+      ],
+      "meanwhile": "In memory only; never a second checker's password."
+    },
+    {
+      "what": "decision H22",
+      "owner": [
+        "hospital",
+        "vendor"
+      ],
+      "question": "Which documents may print on an unregistered terminal's default printer (sensitive A4 documents).",
+      "affects": [
+        "every screen that prints"
+      ],
+      "meanwhile": "As the printing guide says: the hint, then the default printer."
+    },
+    {
+      "what": "decision H24",
+      "owner": [
+        "vendor",
+        "clinical_lead"
+      ],
+      "question": "Who approves frontend performance targets, alert thresholds and escalation timers.",
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "The server's own settings (e.g. critical_result_communicate_minutes)."
+    }
+  ]
+}

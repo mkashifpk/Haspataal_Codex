@@ -11,7 +11,7 @@ import {
 import { tr } from "../i18n";
 import { formatHospitalTime } from "../hospital-time";
 import * as queue from "../generated/doctor_queue";
-import { serviceCatalog } from "../generated/registration";
+
 import { definiteWriteRefusal } from "../write-attempt";
 
 type Review = { kind: "call" | "reroute"; row: queue.DoctorQueueEntryOut };
@@ -52,7 +52,7 @@ export function DoctorQueue({
   const catalog = useLoad(
     () =>
       permitted && permissions.includes("opd.queue.reroute")
-        ? serviceCatalog({ category: "OPD" })
+        ? queue.opdDoctors()
         : Promise.resolve([]),
     [permitted, revision, permissions.includes("opd.queue.reroute")],
   );
@@ -75,13 +75,13 @@ export function DoctorQueue({
     ["Waiting", "InConsultation"].includes(r.ticket_status);
   const choices = new Map<string, string>();
   for (const s of catalog.data || [])
-    if (s.is_active) {
+    {
       if (
-        s.doctor_id &&
-        s.doctor_name &&
-        `doctor:${s.doctor_id}` !== review?.row.queue_group
+        s.employee_id &&
+        s.full_name &&
+        `doctor:${s.employee_id}` !== review?.row.queue_group
       )
-        choices.set(`doctor:${s.doctor_id}`, s.doctor_name);
+        choices.set(`doctor:${s.employee_id}`, `${s.full_name} · ${s.department_name || ""} · ${s.waiting} ${tr('Waiting')}`);
       if (s.department_id && s.department_name)
         choices.set(`department:${s.department_id}`, s.department_name);
     }
@@ -151,14 +151,13 @@ export function DoctorQueue({
         throw new Error(tr("Permission required"));
       let body: queue.RerouteIn | undefined;
       if (review.kind === "reroute") {
-        const latest = await serviceCatalog({ category: "OPD" });
+        const latest = await queue.opdDoctors();
         const [kind, id] = target.split(":");
         if (
           !latest.some(
             (s) =>
-              s.is_active &&
               (kind === "doctor"
-                ? s.doctor_id === Number(id)
+                ? s.employee_id === Number(id)
                 : s.department_id === Number(id)),
           )
         )
@@ -393,6 +392,7 @@ export function DoctorQueue({
               <Field label={tr("Destination")}>
                 <select
                   data-help="doctorqueue.reroute"
+                  data-field="target_doctor_id target_department_id"
                   value={target}
                   disabled={busy || unknown}
                   onChange={(e) => setTarget(e.target.value)}

@@ -737,8 +737,8 @@ export function Wristbands({
           {!access.worklist && (
             <p className="muted">
               {t(
-                "The missing-band worklist needs medication-safety permission. Choose an admission here.",
-                "گم پٹی فہرست کے لیے دوا حفاظت کی اجازت لازم۔ یہاں داخلہ منتخب کریں۔",
+                "The missing-band worklist needs wristband or medication-safety permission. Choose an admission here.",
+                "گم پٹی فہرست کے لیے پٹی یا دوا حفاظت کی اجازت لازم۔ یہاں داخلہ منتخب کریں۔",
               )}
             </p>
           )}

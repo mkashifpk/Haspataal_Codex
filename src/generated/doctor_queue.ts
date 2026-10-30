@@ -2,6 +2,12 @@
 // api(): the helper from get_guide("envelope-and-errors"). Types come from the declared request and response models.
 import { api } from "../bridge";
 
+const withQuery = (path: string, q?: Record<string, unknown>) => {
+  const s = new URLSearchParams(Object.entries(q ?? {}).filter(([, v]) => v !== undefined && v !== null)
+    .map(([k, v]) => [k, String(v)])).toString();
+  return s ? `${path}?${s}` : path;
+};
+
 /** A patient in a doctor's live queue, in calling order (the patient in consultation first). */
 export interface DoctorQueueEntryOut {
   queue_id: number;
@@ -16,34 +22,9 @@ export interface DoctorQueueEntryOut {
   token_no: number;
   token_date: string;
   priority: number;
-  queue_status:
-    | "Active"
-    | "Suspended"
-    | "Deferred"
-    | "Rerouted"
-    | "Completed"
-    | "Cancelled"
-    | "Expired";
-  ticket_status:
-    | "Issued"
-    | "Waiting"
-    | "InConsultation"
-    | "Examined"
-    | "Completed"
-    | "Deferred"
-    | "Expired"
-    | "Forfeited"
-    | "Refunded"
-    | "Void"
-    | "Cancelled";
-  payment_status:
-    | "Unpaid"
-    | "PartiallyPaid"
-    | "Paid"
-    | "CreditAuthorized"
-    | "Waivered"
-    | "Refunded"
-    | "PanelBilled";
+  queue_status: "Active" | "Suspended" | "Deferred" | "Rerouted" | "Completed" | "Cancelled" | "Expired";
+  ticket_status: "Issued" | "Waiting" | "InConsultation" | "Examined" | "Completed" | "Deferred" | "Expired" | "Forfeited" | "Refunded" | "Void" | "Cancelled";
+  payment_status: "Unpaid" | "PartiallyPaid" | "Paid" | "CreditAuthorized" | "Waivered" | "Refunded" | "PanelBilled";
   approval_lock: "None" | "RefundPending" | "WaiverPending" | "CreditPending";
   queued_at: string;
   called_at: string | null;
@@ -71,26 +52,8 @@ export interface OpdTicketDetailOut {
   department_name: string | null;
   service_id: number | null;
   source: "WalkIn" | "Emergency" | "CodeRed" | "Referred" | "ReturnVisit";
-  status:
-    | "Issued"
-    | "Waiting"
-    | "InConsultation"
-    | "Examined"
-    | "Completed"
-    | "Deferred"
-    | "Expired"
-    | "Forfeited"
-    | "Refunded"
-    | "Void"
-    | "Cancelled";
-  payment_status:
-    | "Unpaid"
-    | "PartiallyPaid"
-    | "Paid"
-    | "CreditAuthorized"
-    | "Waivered"
-    | "Refunded"
-    | "PanelBilled";
+  status: "Issued" | "Waiting" | "InConsultation" | "Examined" | "Completed" | "Deferred" | "Expired" | "Forfeited" | "Refunded" | "Void" | "Cancelled";
+  payment_status: "Unpaid" | "PartiallyPaid" | "Paid" | "CreditAuthorized" | "Waivered" | "Refunded" | "PanelBilled";
   approval_lock: "None" | "RefundPending" | "WaiverPending" | "CreditPending";
   gross_amount: number;
   discount_amount: number;
@@ -129,14 +92,7 @@ export interface OpdQueueEntryOut {
   token_no: number;
   token_date: string;
   priority: number;
-  status:
-    | "Active"
-    | "Suspended"
-    | "Deferred"
-    | "Rerouted"
-    | "Completed"
-    | "Cancelled"
-    | "Expired";
+  status: "Active" | "Suspended" | "Deferred" | "Rerouted" | "Completed" | "Cancelled" | "Expired";
   queued_at: string;
   called_at: string | null;
   rerouted_from_queue_id: number | null;
@@ -146,8 +102,7 @@ export interface OpdQueueEntryOut {
 export interface InvoiceDetailOut {
   invoice_id: number;
   invoice_no: string;
-  invoice_type:
-    "OPD" | "IPD" | "Pharmacy" | "Lab" | "Imaging" | "OT" | "OTC" | "Other";
+  invoice_type: "OPD" | "IPD" | "Pharmacy" | "Lab" | "Imaging" | "OT" | "OTC" | "Other";
   patient_id: number | null;
   admission_id: number | null;
   ticket_id: number | null;
@@ -164,15 +119,7 @@ export interface InvoiceDetailOut {
   waiver_amount: number;
   waiver_dispensed_amount: number;
   credit_amount: number;
-  status:
-    | "Draft"
-    | "Open"
-    | "PartiallyPaid"
-    | "Paid"
-    | "CreditAuthorized"
-    | "Waivered"
-    | "Refunded"
-    | "Cancelled";
+  status: "Draft" | "Open" | "PartiallyPaid" | "Paid" | "CreditAuthorized" | "Waivered" | "Refunded" | "Cancelled";
   /** Locked while an approval (waiver, credit, refund) is pending */
   is_locked: boolean;
   locked_reason: string | null;
@@ -186,16 +133,7 @@ export interface InvoiceDetailOut {
 
 export interface InvoiceLineOut {
   invoice_item_id: number;
-  line_type:
-    | "Consultation"
-    | "Service"
-    | "Drug"
-    | "LabTest"
-    | "Imaging"
-    | "OTProcedure"
-    | "OTConsumable"
-    | "RoomCharge"
-    | "Reversal";
+  line_type: "Consultation" | "Service" | "Drug" | "LabTest" | "Imaging" | "OTProcedure" | "OTConsumable" | "RoomCharge" | "Reversal";
   description: string;
   qty: number;
   unit_price: number;
@@ -210,17 +148,7 @@ export interface InvoiceLineOut {
 /** The pending approval that currently locks a subject (e.g. an OPD ticket). */
 export interface ApprovalSummaryOut {
   request_id: number;
-  approval_type:
-    | "Refund"
-    | "VIPWaiverPreConsult"
-    | "VIPWaiverPostConsult"
-    | "PatientCredit"
-    | "PharmacyCharityOverride"
-    | "LargeCashDrop"
-    | "WardIndent"
-    | "APPayment"
-    | "PolicyChange"
-    | "PrivilegedAccess";
+  approval_type: "Refund" | "VIPWaiverPreConsult" | "VIPWaiverPostConsult" | "PatientCredit" | "PharmacyCharityOverride" | "LargeCashDrop" | "WardIndent" | "APPayment" | "PolicyChange" | "PrivilegedAccess";
   status: "Pending" | "Approved" | "Rejected" | "Cancelled";
   requested_at: string;
   summary: string;
@@ -241,6 +169,19 @@ export interface RerouteIn {
   reason: string;
 }
 
+/** A doctor who sees an OPD queue: a re-route's target, a slip's doctor (workflow §1.4). */
+export interface OpdDoctorOut {
+  employee_id: number;
+  full_name: string;
+  designation: string | null;
+  department_id: number | null;
+  department_name: string | null;
+  /** The council registration as the author stamp prints it, e.g. 'PMDC 12345-P' */
+  registration: string;
+  /** Patients waiting for this doctor now, their department's unassigned ones included */
+  waiting: number;
+}
+
 /** Doctor: my live queue — GET /api/v1/opd-queues/me (who may call: holders of opd.queue.doctor). */
 export function myQueue(): Promise<DoctorQueueEntryOut[]> {
   return api<DoctorQueueEntryOut[]>("GET", `/opd-queues/me`, undefined);
@@ -248,21 +189,15 @@ export function myQueue(): Promise<DoctorQueueEntryOut[]> {
 
 /** Doctor calls the patient in (InConsultation) — POST /api/v1/opd-queues/{queue_id}/call (who may call: holders of opd.queue.doctor). */
 export function callIn(queue_id: number): Promise<OpdTicketDetailOut> {
-  return api<OpdTicketDetailOut>(
-    "POST",
-    `/opd-queues/${queue_id}/call`,
-    undefined,
-  );
+  return api<OpdTicketDetailOut>("POST", `/opd-queues/${queue_id}/call`, undefined);
 }
 
 /** Re-route / Refer to another doctor (top of their queue) — POST /api/v1/opd-queues/{queue_id}/reroute (who may call: holders of opd.queue.reroute). */
-export function reroute(
-  queue_id: number,
-  body: RerouteIn,
-): Promise<OpdTicketDetailOut> {
-  return api<OpdTicketDetailOut>(
-    "POST",
-    `/opd-queues/${queue_id}/reroute`,
-    body,
-  );
+export function reroute(queue_id: number, body: RerouteIn): Promise<OpdTicketDetailOut> {
+  return api<OpdTicketDetailOut>("POST", `/opd-queues/${queue_id}/reroute`, body);
+}
+
+/** The doctors who see an OPD queue (the re-route and slip picker) — GET /api/v1/opd-queues/doctors (who may call: holders of opd.queue.doctor or opd.queue.view). */
+export function opdDoctors(query?: { department_id?: number | null }): Promise<OpdDoctorOut[]> {
+  return api<OpdDoctorOut[]>("GET", withQuery(`/opd-queues/doctors`, query), undefined);
 }

@@ -46,7 +46,7 @@ export interface RxItemIn {
   end_at?: string | null;
   is_prn?: boolean;
   is_stat?: boolean;
-  /** Inpatients: the patient may take it themselves (MSDS 70): an oral, inhaled or topical medicine that is not high-alert */
+  /** Inpatients: the patient may take it themselves (MSDS 70): an oral, inhaled or topical medicine that is not high-alert, from the hospital pharmacy or bought outside (an outside line with a drug_id of the hospital's list, never a typed name; decisions 59) */
   self_administration?: boolean;
 }
 
@@ -280,4 +280,3 @@ export function listVerbalOrders(query?: { mine?: boolean; pending?: boolean; ad
 export function searchDrugs(query?: { q?: string; limit?: number }): Promise<DrugStockOut[]> {
   return api<DrugStockOut[]>("GET", withQuery(`/drugs/search`, query), undefined);
 }
-

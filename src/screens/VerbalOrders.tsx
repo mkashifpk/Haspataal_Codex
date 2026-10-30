@@ -294,8 +294,8 @@ function VerbalForm({
           );
         if (
           l.self &&
-          (l.drug?.high_alert_category ||
-            !["Oral", "Inhaled", "Topical"].includes(l.route))
+          (l.drug?.high_alert_category || (destination === "ExternalMarket" && !l.drug) ||
+            !["Oral", "SL", "Inhaled", "Topical", "Ophthalmic", "Otic", "Nasal"].includes(l.route))
         )
           throw Error(
             t(
@@ -843,8 +843,8 @@ function VerbalForm({
                   data-help="verbal.self"
                   type="checkbox"
                   disabled={
-                    !!l.drug?.high_alert_category ||
-                    !["Oral", "Inhaled", "Topical"].includes(l.route)
+                    !!l.drug?.high_alert_category || (destination === "ExternalMarket" && !l.drug) ||
+                    !["Oral", "SL", "Inhaled", "Topical", "Ophthalmic", "Otic", "Nasal"].includes(l.route)
                   }
                   checked={l.self}
                   onChange={(e) => update(l.key, { self: e.target.checked })}

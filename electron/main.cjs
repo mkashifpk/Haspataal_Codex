@@ -67,7 +67,7 @@ let connected = false,
 const windows = new Map(),
   streams = new Map();
 const clinicalViewers = new Set();
-const doseLabels = require('./dose-label-cache.cjs').createDoseLabelCache();
+
 function closeClinicalViewers() {
   for (const viewer of clinicalViewers) if(!viewer.isDestroyed()) viewer.destroy();
   clinicalViewers.clear();
@@ -75,7 +75,8 @@ function closeClinicalViewers() {
 const root = path.join(__dirname, "..");
 const bundles = fs
   .readdirSync(path.join(root, "contracts"))
-  .filter((n) => !n.startsWith("meta-") && !n.startsWith("handbook-"))
+  .filter((n) => n.endsWith('.json') && !n.startsWith("meta-") && !n.startsWith("handbook-"))
+  .sort()
   .map((n) =>
     JSON.parse(fs.readFileSync(path.join(root, "contracts", n), "utf8")),
   );
@@ -885,15 +886,16 @@ ipcMain.handle("terminal", async (event, action, args = {}) => {
         windows.get(win.id),
         args.key,
       );
-      if (response.ok && args.method === 'POST' && /^\/mar\/\d+\/prepare$/.test(args.path) && requestActor && requestActor === auth?.user.user_id) doseLabels.remember(win,requestActor,args.path,response.data);
       return response;
     }
     if (action === 'print-dose-label') {
       const actor=auth?.user.user_id;
       if(!actor || !Number.isSafeInteger(args.marId) || args.marId<=0)throw Error('Sign in and select a recorded preparation label');
       const current=await api('GET','/auth/me');if(!current.ok)return current;
-      if(current.data.user_id!==actor||!current.data.permissions.some(p=>['ipd.mar.view','ipd.mar.administer'].includes(p)))throw Error('Dose-label viewing permission changed. Ask the responsible team.');
-      const payload=doseLabels.read(win,actor,args.marId);
+      if(current.data.user_id!==actor||!current.data.permissions.includes('ipd.mar.administer'))throw Error('Dose-label viewing permission changed. Ask the responsible team.');
+      const label = await require('./dose-label.cjs').readPreparedDoseLabel(api,args.marId,windows.get(win.id));
+      if(!label.ok)return label;
+      const payload=label.data;
       const terminal=await api('GET','/terminals/whoami');if(!terminal.ok)return terminal;
       if(actor!==auth?.user.user_id)throw Error('The session changed before label printing');
       return {ok:true,data:await require('./opd-print.cjs').printSlip(payload,terminal.data,{owner:win,pdf:false})};
@@ -1332,7 +1334,6 @@ ipcMain.handle("terminal", async (event, action, args = {}) => {
       return { ok: true };
     }
     if (action === "logout") {
-      doseLabels.clear(win);
       if (logoutPending)
         throw new Error("Sign-out is already pending. Wait for the result.");
       if (credentialFlight)

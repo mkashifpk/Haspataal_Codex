@@ -9,12 +9,16 @@ export function StaffPicker({
   onSelect,
   required = false,
   invalid = false,
+  licenseType,
+  field,
 }: {
   label: string;
   value?: number | null;
   onSelect: (id: number | null) => void;
   required?: boolean;
   invalid?: boolean;
+  licenseType?: 'PMDC' | 'PNC';
+  field?: string;
 }) {
   const [query, setQuery] = useState("");
   const [rows, setRows] = useState<StaffLookupOut[]>();
@@ -28,7 +32,7 @@ export function StaffPicker({
     setRows(undefined);
     onSelect(null);
     try {
-      const result = await lookupStaff({ q: query.trim(), limit: 20 });
+      const result = await lookupStaff({ q: query.trim(), limit: 20, license_type:licenseType });
       if (n === generation.current) setRows(result);
     } catch (cause) {
       if (n === generation.current) setError(cause);
@@ -43,7 +47,7 @@ export function StaffPicker({
         hint={tr("Search active staff by name or employee number.")}
       >
         <input
-          data-help="incident.staff"
+          data-help={licenseType==='PMDC'?'consultation.admit':'incident.staff'}
           aria-label={label}
           aria-invalid={invalid}
           maxLength={80}
@@ -65,7 +69,7 @@ export function StaffPicker({
         />
       </Field>
       <button
-        data-help="incident.staff"
+        data-help={licenseType==='PMDC'?'consultation.admit':'incident.staff'}
         type="button"
         disabled={busy || query.trim().length < 2}
         onClick={() => void search()}
@@ -77,7 +81,8 @@ export function StaffPicker({
         <>
           <Field label={tr("Select staff member")}>
             <select
-              data-help="incident.staff"
+              data-help={licenseType==='PMDC'?'consultation.admit':'incident.staff'}
+              data-field={field}
               aria-label={tr("Select staff member")}
               aria-invalid={invalid}
               required={required}

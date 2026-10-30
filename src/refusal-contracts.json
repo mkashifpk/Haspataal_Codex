@@ -109,6 +109,7 @@
     "codes": [
       "CAPABILITY_INACTIVE",
       "FINALIZED_RECORD_IMMUTABLE",
+      "ICD_CODE_UNKNOWN",
       "VALIDATION_ERROR",
       "VERSION_CONFLICT"
     ],
@@ -214,6 +215,7 @@
       "HIGH_ALERT_CHECK_REQUIRED",
       "INSUFFICIENT_STOCK",
       "OPD_PHARMACY_CREDIT_NOT_ALLOWED",
+      "OVERPAYMENT",
       "PRESCRIPTION_NOT_DISPENSABLE",
       "PRESCRIPTION_QUERY_OPEN",
       "REFERENCE_NOT_FOUND",
@@ -245,7 +247,9 @@
     "method": "POST",
     "path": "/opd-queues/{queue_id}/reroute",
     "codes": [
+      "FORBIDDEN",
       "QUEUE_ENTRY_CLOSED",
+      "REFERENCE_NOT_FOUND",
       "TICKET_TRANSITION_INVALID",
       "VALIDATION_ERROR"
     ],
@@ -270,8 +274,12 @@
     "path": "/rosters/{roster_id}",
     "codes": [
       "REFERENCE_NOT_FOUND",
+      "ROSTER_CONFLICT",
       "ROSTER_DATE_CLOSED",
+      "ROSTER_EMPLOYEE_INACTIVE",
       "ROSTER_ENTRY_CANCELLED",
+      "ROSTER_ON_LEAVE",
+      "ROSTER_OUT_OF_SCOPE",
       "VALIDATION_ERROR",
       "VERSION_CONFLICT"
     ],
@@ -283,6 +291,7 @@
     "codes": [
       "ROSTER_DATE_CLOSED",
       "ROSTER_ENTRY_CANCELLED",
+      "ROSTER_OUT_OF_SCOPE",
       "VALIDATION_ERROR"
     ],
     "read": "GET /rosters"
@@ -291,7 +300,11 @@
     "method": "POST",
     "path": "/rosters/copy",
     "codes": [
+      "ROSTER_CONFLICT",
       "ROSTER_DATE_CLOSED",
+      "ROSTER_EMPLOYEE_INACTIVE",
+      "ROSTER_ON_LEAVE",
+      "ROSTER_OUT_OF_SCOPE",
       "VALIDATION_ERROR"
     ],
     "read": "GET /rosters"
@@ -301,6 +314,7 @@
     "path": "/rosters/swaps",
     "codes": [
       "ROSTER_CONFLICT",
+      "ROSTER_EMPLOYEE_INACTIVE",
       "ROSTER_ON_LEAVE",
       "ROSTER_OUT_OF_SCOPE",
       "SWAP_COLLEAGUE_INELIGIBLE",
@@ -315,6 +329,8 @@
     "method": "POST",
     "path": "/rosters/swaps/{swap_id}/approve",
     "codes": [
+      "ROSTER_CONFLICT",
+      "ROSTER_ON_LEAVE",
       "ROSTER_OUT_OF_SCOPE",
       "SWAP_DUTY_STARTED",
       "SWAP_SELF_APPROVAL",
@@ -666,7 +682,7 @@
     "codes": [
       "VALIDATION_ERROR"
     ],
-    "read": null
+    "read": "GET /admin/wards"
   },
   {
     "method": "POST",
@@ -675,7 +691,7 @@
       "NOT_FOUND",
       "VALIDATION_ERROR"
     ],
-    "read": null
+    "read": "GET /admin/wards"
   },
   {
     "method": "POST",
@@ -720,6 +736,7 @@
     "codes": [
       "DEMO_ACCOUNT_PROTECTED",
       "FORBIDDEN",
+      "ICD_SYSTEM_NOT_LOADED",
       "LAST_OWNER",
       "REFERENCE_NOT_FOUND",
       "SELF_ROLE_CHANGE_FORBIDDEN",
@@ -745,6 +762,7 @@
     "codes": [
       "LAB_PAYMENT_REQUIRED",
       "LAB_SAMPLE_STATE_INVALID",
+      "PATIENT_IDENTITY_MISMATCH",
       "PATIENT_IDENTITY_REQUIRED",
       "VALIDATION_ERROR"
     ],
@@ -754,6 +772,7 @@
     "method": "POST",
     "path": "/lab/items/{item_id}/results",
     "codes": [
+      "INSUFFICIENT_STOCK",
       "LAB_ITEM_STATE_INVALID",
       "LAB_METRICS_INVALID",
       "LAB_REAGENT_BOM_MISSING",
@@ -774,6 +793,9 @@
     "method": "POST",
     "path": "/lab/items/{item_id}/corrections",
     "codes": [
+      "INSUFFICIENT_STOCK",
+      "LAB_METRICS_INVALID",
+      "LAB_REAGENT_BOM_MISSING",
       "VALIDATION_ERROR"
     ],
     "read": null
@@ -800,6 +822,8 @@
     "method": "POST",
     "path": "/finance/invoices/{invoice_id}/payments",
     "codes": [
+      "INVOICE_LOCKED",
+      "OVERPAYMENT",
       "SHIFT_NOT_OPEN",
       "VALIDATION_ERROR"
     ],
@@ -810,6 +834,7 @@
     "path": "/lab/requisitions/{requisition_id}/cancel",
     "codes": [
       "FORBIDDEN",
+      "INVOICE_HAS_PAYMENTS",
       "LAB_ITEM_STATE_INVALID",
       "NOT_FOUND",
       "VALIDATION_ERROR"
@@ -941,7 +966,9 @@
     "path": "/otc-sales",
     "codes": [
       "CAPABILITY_INACTIVE",
+      "INSUFFICIENT_STOCK",
       "OTC_PRESCRIPTION_REQUIRED",
+      "OVERPAYMENT",
       "REFERENCE_NOT_FOUND",
       "SHIFT_NOT_OPEN",
       "VALIDATION_ERROR"
@@ -1050,6 +1077,7 @@
       "FORBIDDEN",
       "IMAGING_ORDER_STATE_INVALID",
       "IMAGING_SAFETY_CHECK_REQUIRED",
+      "INVOICE_HAS_PAYMENTS",
       "PATIENT_IDENTITY_MISMATCH",
       "PATIENT_IDENTITY_REQUIRED",
       "VALIDATION_ERROR"
@@ -1135,6 +1163,9 @@
     "codes": [
       "APPROVAL_PENDING",
       "CREDIT_NOT_ALLOWED",
+      "INVOICE_LOCKED",
+      "OVERPAYMENT",
+      "SHIFT_NOT_OPEN",
       "VALIDATION_ERROR"
     ],
     "read": "GET /opd-tickets/{ticket_id}"
@@ -1155,6 +1186,8 @@
     "method": "POST",
     "path": "/opd-tickets/{ticket_id}/pay",
     "codes": [
+      "INVOICE_LOCKED",
+      "OVERPAYMENT",
       "SHIFT_NOT_OPEN",
       "TICKET_NOT_ACTIVE",
       "VALIDATION_ERROR"
@@ -1170,6 +1203,7 @@
       "DISCOUNT_CEILING_EXCEEDED",
       "IDEMPOTENCY_CONFLICT",
       "LAB_ONLY_QUEUE_FORBIDDEN",
+      "OVERPAYMENT",
       "PATIENT_MERGED_CANNOT_TRANSACT",
       "REFERENCE_NOT_FOUND",
       "SHIFT_NOT_OPEN",
@@ -1195,6 +1229,7 @@
     "codes": [
       "ROLL_CALL_NOT_ROSTERED",
       "ROSTER_DATE_CLOSED",
+      "ROSTER_EMPLOYEE_INACTIVE",
       "ROSTER_OUT_OF_SCOPE",
       "VALIDATION_ERROR"
     ],
@@ -1312,8 +1347,8 @@
     "path": "/consents/{consent_id}",
     "codes": [
       "CONSENT_STATE_INVALID",
-      "VALIDATION_ERROR",
-      "VERSION_CONFLICT"
+      "CONSENT_TEXT_MISSING",
+      "VALIDATION_ERROR"
     ],
     "read": "GET /consents/{consent_id}"
   },
@@ -1326,8 +1361,7 @@
       "CONSENT_STATE_INVALID",
       "CONSENT_TAKER_NOT_AUTHORIZED",
       "FORBIDDEN",
-      "VALIDATION_ERROR",
-      "VERSION_CONFLICT"
+      "VALIDATION_ERROR"
     ],
     "read": "GET /consents/{consent_id}"
   },
@@ -1339,8 +1373,7 @@
       "CONSENT_SIGNER_INVALID",
       "CONSENT_STATE_INVALID",
       "CONSENT_TAKER_NOT_AUTHORIZED",
-      "VALIDATION_ERROR",
-      "VERSION_CONFLICT"
+      "VALIDATION_ERROR"
     ],
     "read": "GET /consents/{consent_id}"
   },
@@ -1350,8 +1383,7 @@
     "codes": [
       "BLOOD_CONSENT_REQUIRED",
       "CONSENT_STATE_INVALID",
-      "VALIDATION_ERROR",
-      "VERSION_CONFLICT"
+      "VALIDATION_ERROR"
     ],
     "read": "GET /consents/{consent_id}"
   },
@@ -1360,8 +1392,7 @@
     "path": "/consents/{consent_id}/cancel",
     "codes": [
       "CONSENT_STATE_INVALID",
-      "VALIDATION_ERROR",
-      "VERSION_CONFLICT"
+      "VALIDATION_ERROR"
     ],
     "read": "GET /consents/{consent_id}"
   },
@@ -1371,8 +1402,7 @@
     "codes": [
       "CONSENT_STATE_INVALID",
       "REFERENCE_NOT_FOUND",
-      "VALIDATION_ERROR",
-      "VERSION_CONFLICT"
+      "VALIDATION_ERROR"
     ],
     "read": "GET /consents/{consent_id}"
   },
@@ -1385,7 +1415,7 @@
       "REFERENCE_NOT_FOUND",
       "VALIDATION_ERROR"
     ],
-    "read": "GET /admissions/{admission_id}"
+    "read": "GET /cost-estimates"
   },
   {
     "method": "POST",
@@ -1404,5 +1434,1756 @@
       "VALIDATION_ERROR"
     ],
     "read": "GET /cost-estimates/{estimate_id}"
+  },
+  {
+    "method": "POST",
+    "path": "/prescriptions/verbal",
+    "codes": [
+      "CAPABILITY_INACTIVE",
+      "FORBIDDEN",
+      "PRESCRIBER_NOT_AUTHORIZED",
+      "PRESCRIPTION_INCOMPLETE",
+      "REFERENCE_NOT_FOUND",
+      "VALIDATION_ERROR",
+      "VERBAL_ORDER_INVALID"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/verbal-orders",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/drugs/search",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/admissions/{admission_id}/mar",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "POST",
+    "path": "/mar/{mar_id}/chart",
+    "codes": [
+      "ACCOUNT_LOCKED",
+      "ADMINISTRATION_NOT_AUTHORIZED",
+      "ADMINISTRATION_VARIANCE_REASON_REQUIRED",
+      "BATCH_EXPIRED",
+      "BATCH_RECALLED",
+      "DRUG_MISMATCH",
+      "DUAL_CONTROL_SAME_PERSON",
+      "HIGH_ALERT_CHECK_REQUIRED",
+      "INSUFFICIENT_STOCK",
+      "MAR_STATE_INVALID",
+      "PATIENT_IDENTITY_MISMATCH",
+      "PATIENT_IDENTITY_REQUIRED",
+      "SELF_ADMINISTRATION_INVALID",
+      "STEP_UP_REQUIRED",
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "POST",
+    "path": "/admissions/{admission_id}/mar/prn",
+    "codes": [
+      "ACCOUNT_LOCKED",
+      "ADMINISTRATION_NOT_AUTHORIZED",
+      "ADMINISTRATION_VARIANCE_REASON_REQUIRED",
+      "DRUG_MISMATCH",
+      "DUAL_CONTROL_SAME_PERSON",
+      "HIGH_ALERT_CHECK_REQUIRED",
+      "MEDICATION_ORDER_INVALID",
+      "MEDICATION_ORDER_STOPPED",
+      "PATIENT_IDENTITY_MISMATCH",
+      "PATIENT_IDENTITY_REQUIRED",
+      "REFERENCE_NOT_FOUND",
+      "SELF_ADMINISTRATION_INVALID",
+      "STEP_UP_REQUIRED",
+      "VALIDATION_ERROR"
+    ],
+    "read": "GET /admissions/{admission_id}/mar"
+  },
+  {
+    "method": "POST",
+    "path": "/mar/{mar_id}/correction",
+    "codes": [
+      "NOT_FOUND",
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "POST",
+    "path": "/admissions/{admission_id}/mar/generate",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": "GET /admissions/{admission_id}/mar"
+  },
+  {
+    "method": "GET",
+    "path": "/wards/{ward_id}/inventory",
+    "codes": [
+      "BATCH_EXPIRED",
+      "BATCH_RECALLED",
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "POST",
+    "path": "/mar/{mar_id}/prepare",
+    "codes": [
+      "MAR_STATE_INVALID",
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/admissions/{admission_id}/mar/prn-orders",
+    "codes": [
+      "NOT_FOUND",
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/mar/{mar_id}/dose-label",
+    "codes": [
+      "DOSE_NOT_PREPARED",
+      "NOT_FOUND",
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/admissions/{admission_id}/flowsheet",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "POST",
+    "path": "/admissions/{admission_id}/flowsheet/vitals",
+    "codes": [
+      "ADMISSION_STATE_INVALID",
+      "VALIDATION_ERROR"
+    ],
+    "read": "GET /admissions/{admission_id}/flowsheet"
+  },
+  {
+    "method": "POST",
+    "path": "/admissions/{admission_id}/flowsheet/vitals/{entry_id}/correction",
+    "codes": [
+      "FLOWSHEET_CORRECTION_INVALID",
+      "VALIDATION_ERROR"
+    ],
+    "read": "GET /admissions/{admission_id}/flowsheet"
+  },
+  {
+    "method": "POST",
+    "path": "/admissions/{admission_id}/flowsheet/nursing-notes",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": "GET /admissions/{admission_id}/flowsheet"
+  },
+  {
+    "method": "POST",
+    "path": "/admissions/{admission_id}/flowsheet/nursing-notes/{note_id}/correction",
+    "codes": [
+      "FLOWSHEET_CORRECTION_INVALID",
+      "VALIDATION_ERROR"
+    ],
+    "read": "GET /admissions/{admission_id}/flowsheet"
+  },
+  {
+    "method": "PUT",
+    "path": "/admissions/{admission_id}/flowsheet/vitals-schedule",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": "GET /admissions/{admission_id}/flowsheet"
+  },
+  {
+    "method": "GET",
+    "path": "/ot/clinical-worklist",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/ot/bookings/{booking_id}/surgical-record",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/patients/{patient_id}/education",
+    "codes": [
+      "NOT_FOUND",
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/education/materials",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/admissions/{admission_id}/nursing-assessment",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "POST",
+    "path": "/admissions/{admission_id}/nutrition-screenings",
+    "codes": [
+      "FORBIDDEN",
+      "VALIDATION_ERROR"
+    ],
+    "read": "GET /admissions/{admission_id}"
+  },
+  {
+    "method": "PUT",
+    "path": "/admissions/{admission_id}/nursing-care-plan",
+    "codes": [
+      "ADMISSION_STATE_INVALID",
+      "VALIDATION_ERROR",
+      "VERSION_CONFLICT"
+    ],
+    "read": "GET /admissions/{admission_id}"
+  },
+  {
+    "method": "GET",
+    "path": "/ipd/my-beds",
+    "codes": [
+      "PASSWORD_CHANGE_REQUIRED"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/self/roster",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "POST",
+    "path": "/beds/{bed_id}/mark-cleaned",
+    "codes": [
+      "REFERENCE_NOT_FOUND",
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/admissions/{admission_id}/discharge-summary/print-payload",
+    "codes": [
+      "DISCHARGE_SUMMARY_NOT_FINAL",
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/admissions/{admission_id}/discharge-summary/pdf",
+    "codes": [
+      "DISCHARGE_SUMMARY_NOT_FINAL",
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/staff/lookup",
+    "codes": [
+      "UNAUTHENTICATED",
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/admissions",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/admissions/{admission_id}",
+    "codes": [
+      "FORBIDDEN",
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "POST",
+    "path": "/admissions/{admission_id}/discharge",
+    "codes": [
+      "ADMISSION_DETAILS_REQUIRED",
+      "CONSENT_REQUIRED",
+      "DISCHARGE_NOT_ALLOWED",
+      "DISCHARGE_SUMMARY_REQUIRED",
+      "VALIDATION_ERROR"
+    ],
+    "read": "GET /admissions/{admission_id}"
+  },
+  {
+    "method": "GET",
+    "path": "/admissions/{admission_id}/discharge-status",
+    "codes": [
+      "FORBIDDEN",
+      "NOT_FOUND",
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "POST",
+    "path": "/admissions/{admission_id}/admission-details",
+    "codes": [
+      "ADMISSION_DETAILS_RECORDED",
+      "ADMISSION_DETAILS_REQUIRED",
+      "ADMISSION_STATE_INVALID",
+      "FORBIDDEN",
+      "VALIDATION_ERROR"
+    ],
+    "read": "GET /admissions/{admission_id}"
+  },
+  {
+    "method": "GET",
+    "path": "/patients/{patient_id}/documents",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/patient-documents/{document_id}/download",
+    "codes": [
+      "FORBIDDEN",
+      "NOT_FOUND",
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/ipd/treating-doctors",
+    "codes": [
+      "FORBIDDEN",
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/admissions/{admission_id}/treating-doctor",
+    "codes": [
+      "NOT_FOUND",
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "POST",
+    "path": "/admissions/{admission_id}/treating-doctor",
+    "codes": [
+      "ADMISSION_STATE_INVALID",
+      "FORBIDDEN",
+      "NOT_FOUND",
+      "REFERENCE_NOT_FOUND",
+      "TREATING_DOCTOR_ONLY",
+      "VALIDATION_ERROR"
+    ],
+    "read": "GET /admissions/{admission_id}/treating-doctor"
+  },
+  {
+    "method": "GET",
+    "path": "/cost-estimates/worklist",
+    "codes": [],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/cost-estimates",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/cost-estimates/{estimate_id}",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/cost-estimates/{estimate_id}/print-payload",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/cost-estimates/{estimate_id}/pdf",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/tariff",
+    "codes": [],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/cost-estimates/admissions/{admission_id}/moves",
+    "codes": [
+      "FORBIDDEN",
+      "NOT_FOUND",
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/opd-tickets/{ticket_id}/clinical-encounters",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/clinical-encounters/{encounter_id}",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/patients/{patient_id}/clinical-encounters",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/patients/{patient_id}/master-summary",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/beds/matrix",
+    "codes": [
+      "BED_NO_LONGER_AVAILABLE",
+      "FORBIDDEN",
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/clinical-encounters/{encounter_id}/print-payload",
+    "codes": [
+      "ENCOUNTER_NOT_FINAL",
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/clinical-encounters/{encounter_id}/pdf",
+    "codes": [
+      "ENCOUNTER_NOT_FINAL",
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/icd/codes",
+    "codes": [
+      "ICD_SYSTEM_NOT_LOADED",
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/icd/browse",
+    "codes": [
+      "ICD_SYSTEM_NOT_LOADED",
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/icd/codes/{code}",
+    "codes": [
+      "ICD_SYSTEM_NOT_LOADED",
+      "NOT_FOUND",
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/icd/releases",
+    "codes": [],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/opd-queues/doctors",
+    "codes": [
+      "FORBIDDEN",
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/wards/{ward_id}/waitlist",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/admin/users/{user_id}",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/admin/login-events",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/admin/departments",
+    "codes": [],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/meta/roles",
+    "codes": [],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/meta/permissions",
+    "codes": [],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/admin/provisioning-queue",
+    "codes": [],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/admin/users",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/admin/role-matrix",
+    "codes": [],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/admin/terminals",
+    "codes": [],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/admin/printers",
+    "codes": [],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/admin/badge-stations",
+    "codes": [],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/admin/wards/{ward_id}/bed-labels",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/admin/server-health",
+    "codes": [],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/admin/settings",
+    "codes": [],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/admin/wards",
+    "codes": [],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/admin/first-owner",
+    "codes": [],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/admin/change-requests",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/admin/change-requests/{change_request_id}",
+    "codes": [
+      "NOT_FOUND",
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/consent-worklist",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/consents",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/consent-forms",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/consent-decision-makers",
+    "codes": [
+      "CONSENT_SIGNER_INVALID"
+    ],
+    "read": null
+  },
+  {
+    "method": "POST",
+    "path": "/consents",
+    "codes": [
+      "CONSENT_TEXT_MISSING",
+      "OT_BOOKING_STATE_INVALID",
+      "REFERENCE_NOT_FOUND",
+      "VALIDATION_ERROR"
+    ],
+    "read": "GET /consents"
+  },
+  {
+    "method": "GET",
+    "path": "/consents/{consent_id}",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/consents/{consent_id}/print-payload",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/consents/{consent_id}/pdf",
+    "codes": [
+      "CONSENT_PDF_UNAVAILABLE",
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/rosters",
+    "codes": [
+      "FORBIDDEN",
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/rosters/staff",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/rosters/week",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/rosters/swaps",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/diagnostics/services/pdf",
+    "codes": [],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/settings/sections",
+    "codes": [
+      "TOKEN_EXPIRED",
+      "TOKEN_REVOKED",
+      "UNAUTHENTICATED"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/settings/me",
+    "codes": [],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/finance/cash-shifts/mine",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/finance/cash-shifts/{shift_id}/transactions",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "POST",
+    "path": "/wristbands",
+    "codes": [
+      "REFERENCE_NOT_FOUND",
+      "VALIDATION_ERROR"
+    ],
+    "read": "GET /wristbands"
+  },
+  {
+    "method": "GET",
+    "path": "/wristbands",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/wristbands/{wristband_id}/print-payload",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/wristbands/verify",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/medication-safety/worklist",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/dispensations/{dispensation_id}/receipt-payload",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/dispensations/{dispensation_id}/labels",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/diagnostic-partners",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/imaging/worklist",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/imaging/repeats",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/imaging/orders/{order_id}",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/critical-imaging-findings",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/imaging/orders/{order_id}/report/print-payload",
+    "codes": [
+      "IMAGING_REPORT_NOT_READY",
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/imaging/orders/{order_id}/report/pdf",
+    "codes": [
+      "IMAGING_REPORT_NOT_READY",
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/rosters/roll-call",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/critical-results",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/critical-results/{critical_result_id}",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/diagnostics/worklist",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/lab/verification-queue",
+    "codes": [
+      "LAB_VERIFIER_MUST_DIFFER"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/lab/requisitions/{requisition_id}",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/lab/requisitions/{requisition_id}/report/print-payload",
+    "codes": [
+      "LAB_REPORT_NOT_READY",
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/lab/requisitions/{requisition_id}/report/pdf",
+    "codes": [
+      "LAB_REPORT_NOT_READY",
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/lab/tests",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/lab/requisitions",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/lab/worklist",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/lab/samples/{sample_id}/label",
+    "codes": [
+      "NOT_FOUND",
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/lab/scan/{barcode}",
+    "codes": [
+      "LAB_SAMPLE_NOT_FOUND",
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/establishment",
+    "codes": [],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/establishment/profiles",
+    "codes": [],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/establishment/changes",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/establishment/changes/{change_id}",
+    "codes": [
+      "NOT_FOUND",
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/establishment/staffing",
+    "codes": [
+      "FORBIDDEN"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/msds/profile",
+    "codes": [
+      "ACCOUNT_EXPIRED",
+      "FORBIDDEN"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/msds/category-confirmations",
+    "codes": [],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/facility/compliance-documents",
+    "codes": [
+      "FORBIDDEN",
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/imaging/turnaround-targets",
+    "codes": [],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/diagnostics/imaging-policy/pdf",
+    "codes": [],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/lab/send-outs/pending",
+    "codes": [],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/lab/send-outs",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/lab/send-outs/{send_out_id}",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/lab/send-outs/{send_out_id}/print-payload",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/approvals",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/prescription-queries",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/prescriptions/{prescription_id}",
+    "codes": [
+      "FORBIDDEN",
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/prescriptions/pending",
+    "codes": [],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/finance/service-catalog",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/opd-tickets/{ticket_id}/print-payload",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/opd-queues/reception-dashboard",
+    "codes": [],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/meta/enums",
+    "codes": [],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/meta/settings",
+    "codes": [],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/meta/workspaces",
+    "codes": [],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/meta/error-codes",
+    "codes": [],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/meta/events",
+    "codes": [],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/home-visits/policy",
+    "codes": [],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/patients/search",
+    "codes": [
+      "FORBIDDEN",
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/patients/{patient_id}/programmes",
+    "codes": [
+      "NOT_FOUND",
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/preventive-programmes",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/preventive-programmes/due",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/referrals",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/referrals/{referral_id}",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/referrals/{referral_id}/pdf",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/terminals/whoami",
+    "codes": [],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/meta/license",
+    "codes": [
+      "LICENSE_INVALID"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/health/live",
+    "codes": [],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/health",
+    "codes": [],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/finance/ar/outstanding",
+    "codes": [],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/finance/ar/aging",
+    "codes": [],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/finance/invoices",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/finance/invoices/{invoice_id}",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/opd-tickets/{ticket_id}",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/tariff/pdf",
+    "codes": [],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/drugs/{drug_id}/stock-status",
+    "codes": [
+      "NOT_FOUND",
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/prescriptions/{prescription_id}/print-payload",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/opd-queues/me",
+    "codes": [],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/lab/patients/{patient_id}/results",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/imaging/orders",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/mlc/contacts",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/patients/{patient_id}",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/patients/{patient_id}/financial-summary",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/auth/workspaces",
+    "codes": [
+      "PASSWORD_CHANGE_REQUIRED",
+      "TOKEN_REVOKED"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/auth/me",
+    "codes": [
+      "TOKEN_REVOKED",
+      "WORKSPACE_NOT_ALLOWED"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/opd-tickets/{ticket_id}/status-history",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/opd-queues/by-doctor/{doctor_id}",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/opd-tickets/by-number/{ticket_number}",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/notifications",
+    "codes": [
+      "LICENSE_INVALID",
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/notifications/unread-count",
+    "codes": [],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/incident-types",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/incidents",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/incidents/{incident_id}",
+    "codes": [
+      "FORBIDDEN",
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/incidents/sentinel-list/pdf",
+    "codes": [],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/approvals/{request_id}",
+    "codes": [
+      "FORBIDDEN",
+      "NOT_FOUND",
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/meta/handbook",
+    "codes": [
+      "FORBIDDEN",
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/meta/server-info",
+    "codes": [],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/finance/cash-shifts/{shift_id}",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/er/visits",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/ot/bookings",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/deaths",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/admissions/{admission_id}/own-medicines",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/home-visits/{home_visit_id}",
+    "codes": [
+      "NOT_FOUND",
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/home-visits",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/home-visits/notice/pdf",
+    "codes": [
+      "FORBIDDEN"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/hr/employees",
+    "codes": [
+      "FORBIDDEN",
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/preventive-programmes/list/pdf",
+    "codes": [],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/hr/shift-patterns",
+    "codes": [],
+    "read": null
+  },
+  {
+    "method": "POST",
+    "path": "/hr/shift-patterns",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": "GET /hr/shift-patterns"
+  },
+  {
+    "method": "GET",
+    "path": "/ops/work-orders/{wo_id}",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "POST",
+    "path": "/ops/work-orders/{wo_id}/cancel",
+    "codes": [
+      "VALIDATION_ERROR",
+      "WORK_ORDER_STATE_INVALID"
+    ],
+    "read": "GET /ops/work-orders/{wo_id}"
+  },
+  {
+    "method": "PUT",
+    "path": "/ops/assets/{asset_id}",
+    "codes": [
+      "ASSET_DISPOSED",
+      "NOT_FOUND",
+      "VALIDATION_ERROR"
+    ],
+    "read": "GET /ops/assets"
+  },
+  {
+    "method": "GET",
+    "path": "/ops/work-orders",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "POST",
+    "path": "/ops/work-orders/{wo_id}/assign",
+    "codes": [
+      "VALIDATION_ERROR",
+      "WORK_ORDER_STATE_INVALID"
+    ],
+    "read": "GET /ops/work-orders/{wo_id}"
+  },
+  {
+    "method": "POST",
+    "path": "/ops/work-orders/{wo_id}/start",
+    "codes": [
+      "VALIDATION_ERROR",
+      "WORK_ORDER_STATE_INVALID"
+    ],
+    "read": "GET /ops/work-orders/{wo_id}"
+  },
+  {
+    "method": "POST",
+    "path": "/ops/work-orders/{wo_id}/complete",
+    "codes": [
+      "VALIDATION_ERROR",
+      "WORK_ORDER_STATE_INVALID"
+    ],
+    "read": "GET /ops/work-orders/{wo_id}"
+  },
+  {
+    "method": "GET",
+    "path": "/ops/utility-categories",
+    "codes": [],
+    "read": null
+  },
+  {
+    "method": "POST",
+    "path": "/ops/utility-logs",
+    "codes": [
+      "REFERENCE_NOT_FOUND",
+      "VALIDATION_ERROR"
+    ],
+    "read": "GET /ops/utility-logs"
+  },
+  {
+    "method": "GET",
+    "path": "/ops/utility-logs",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/ops/assets",
+    "codes": [
+      "FORBIDDEN",
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "POST",
+    "path": "/ops/assets",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": "GET /ops/assets"
+  },
+  {
+    "method": "GET",
+    "path": "/ops/facility-feed",
+    "codes": [
+      "VALIDATION_ERROR"
+    ],
+    "read": null
+  },
+  {
+    "method": "GET",
+    "path": "/finance/panels",
+    "codes": [],
+    "read": null
   }
 ]

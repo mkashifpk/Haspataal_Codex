@@ -77,4 +77,3 @@ export function forPatientPatientsEducation(patient_id: number, query?: { limit?
 export function listMaterials(query?: { include_inactive?: boolean }): Promise<MaterialOut[]> {
   return api<MaterialOut[]>("GET", withQuery(`/education/materials`, query), undefined);
 }
-

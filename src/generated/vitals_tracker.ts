@@ -580,4 +580,3 @@ export function worklistOtClinical(query?: { mine?: boolean; days?: number; admi
 export function getRecord(booking_id: number): Promise<SurgicalRecordOut> {
   return api<SurgicalRecordOut>("GET", `/ot/bookings/${booking_id}/surgical-record`, undefined);
 }
-

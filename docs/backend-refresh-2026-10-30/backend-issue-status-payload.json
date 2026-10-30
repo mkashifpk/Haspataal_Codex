@@ -1,0 +1,15 @@
+{
+  "implementation_id": 1,
+  "request_id": "SCN-Codex-1030-mvu9bpk9-hr-status-unlisted-v1",
+  "kind": "ContractMismatch",
+  "severity": "Medium",
+  "title": "Employment status activation omits its EMPLOYEE_DOCUMENT_REQUIRED refusal",
+  "endpoint": "POST /hr/employees/{employee_id}/status",
+  "screen_id": "onboarding_wizard",
+  "build": "758bd34 + backend refresh index-Bc1t60yf.js",
+  "agent": "Codex",
+  "actual": "On this reinstalled DEV server, POST /hr/employees/36/status as demo.hr with status Active and a synthetic reason returns 409 EMPLOYEE_DOCUMENT_REQUIRED. get_endpoint lists only VALIDATION_ERROR; no activation occurs. The fixture is our new synthetic Nursing employee36, still Draft, without CNIC document.",
+  "expected": "Preserve the document requirement and name EMPLOYEE_DOCUMENT_REQUIRED (and other reachable activation refusals) in this status route's error contract. The #48 fix and connecting workflow require clients to handle every actual refusal by code.",
+  "steps": "Create an own synthetic Nursing profile via POST /hr/employees (201), without any document; POST its /status {status:'Active',reason:'synthetic test'} as demo.hr. Compare the returned refusal with get_endpoint errors. No employee/user belonging to another developer was changed.",
+  "evidence": "Server_build2026-10-29T22:15:35.506405+00:00. Creation request12d505ccf83340f0abc672127720efe8. Activation refusal requestba6dbada59f94d2d9731fadfcac6eb3b, codeEMPLOYEE_DOCUMENT_REQUIRED, status409, retryablefalse, details{}. Exact synthetic intents/results docs/backend-refresh-2026-10-30/dev/roster-new-employee* and roster-employee-active*. get_endpoint POST /hr/employees/{employee_id}/status errors=[VALIDATION_ERROR]. Discovered while setting up the departed-duty cancellation regression; no roster was written and activation was not retried."
+}

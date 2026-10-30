@@ -214,6 +214,8 @@ export function checkHelp({
       "ConsentsAdmissions",
       "CostEstimates",
       "DoctorInpatients",
+      "TreatingDoctor",
+      "ConsultationReroute",
       "MyBeds",
       "WardEducation",
       "NursingAssessment",

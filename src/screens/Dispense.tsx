@@ -34,7 +34,6 @@ import { approvedCharityHandoff, type CharityHandoff } from "../charity-policy";
 import type { ApprovalOut } from "../generated/charity_override";
 type Review =
   | { kind: "dispense"; body: d.DispenseIn; snapshot: string; high: boolean }
-  | { kind: "stop"; item: number; reason: string; snapshot: string }
   | { kind: "clear"; admission: number; note: string };
 type OwnMedicine = {
   own_medicine_id: number;
@@ -223,7 +222,7 @@ export function Dispense({
     if (
       review &&
       review.kind !== "dispense" &&
-      (review.kind === "stop" ? review.reason : review.note) &&
+      review.note &&
       !window.confirm(
         t(
           "Discard the unsent reason or note?",
@@ -437,20 +436,7 @@ export function Dispense({
           }
         },
       );
-    } else if (review.kind === "stop")
-      write.start(
-        {
-          method: "POST",
-          path: `/prescriptions/${selected}/items/${review.item}/stop`,
-          body: { reason: review.reason },
-          permission: "prescription.cancel",
-          protection: "reconcile",
-          reconcilePath: `/prescriptions/${selected}`,
-          label: t("Stop medication line", "دوا کی سطر بند کریں"),
-        },
-        () => preflight("prescription.cancel", review.snapshot).then(() => {}),
-      );
-    else
+    } else
       write.start(
         {
           method: "POST",
@@ -780,24 +766,7 @@ export function Dispense({
                       {t("Query line", "سطر پر سوال")} #{i.prescription_item_id}
                     </button>
                   )}
-                  {can("prescription.cancel") &&
-                    i.item_status === "Active" &&
-                    view !== "records" && (
-                      <button
-                        data-help="dispense.stop"
-                        onClick={() => {
-                          setReason("");
-                          setReview({
-                            kind: "stop",
-                            item: i.prescription_item_id,
-                            reason: "",
-                            snapshot: dispenseSnapshot(p, patient!.row_version),
-                          });
-                        }}
-                      >
-                        {t("Stop this line", "یہ سطر بند کریں")}
-                      </button>
-                    )}
+
                 </article>
               ))}
               {!p.admission_id && (
@@ -1166,14 +1135,12 @@ export function Dispense({
             <Field label={t("Reason / clearance note", "وجہ / کلیئرنس نوٹ")}>
               <textarea data-field="reason note"
                 data-help="dispense.confirm"
-                value={review.kind === "stop" ? review.reason : review.note}
-                maxLength={review.kind === "stop" ? 500 : 1000}
+                value={review.note}
+                maxLength={1000}
                 disabled={write.blocked}
                 onChange={(e) =>
                   setReview(
-                    review.kind === "stop"
-                      ? { ...review, reason: e.target.value }
-                      : { ...review, note: e.target.value },
+                    { ...review, note: e.target.value },
                   )
                 }
               />
@@ -1185,7 +1152,7 @@ export function Dispense({
               write.blocked ||
               (review.kind === "dispense"
                 ? !ack || (review.high && (!checker.trim() || !password))
-                : review.kind === "stop" && review.reason.trim().length < 3)
+                : false)
             }
             onClick={confirm}
           >

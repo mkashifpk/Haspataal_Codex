@@ -113,7 +113,7 @@ export function Approvals({
         await r.reload();
         return;
       }
-      const d = await approvals[confirm](selected.request_id, {
+      const d = await approvals[confirm === "cancel" ? "cancelApprovals" : confirm](selected.request_id, {
         note: note.trim() || null,
       });
       setEffect(d.effect);

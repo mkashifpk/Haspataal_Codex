@@ -144,6 +144,8 @@ export type ApiErrorCode =
   | "DISPENSATION_LINE_INVALID"
   | "DISPENSATION_TOTAL_MISMATCH"
   | "DISPENSE_EXCEEDS_PRESCRIBED"
+  | "DOCTOR_CHANGE_UNRECORDED"
+  | "DOSE_NOT_PREPARED"
   | "DRILL_FINAL"
   | "DRILL_REPORT_INCOMPLETE"
   | "DRUG_MISMATCH"
@@ -251,6 +253,7 @@ export type ApiErrorCode =
   | "MAR_STATE_INVALID"
   | "MATERNAL_NUTRITION_REQUIRED"
   | "MEDICATION_ORDER_INVALID"
+  | "MEDICATION_ORDER_STOPPED"
   | "MEETING_FINAL"
   | "MEETING_MINUTES_INCOMPLETE"
   | "MERGE_COSIGNER_REQUIRED"
@@ -428,6 +431,7 @@ export type ApiErrorCode =
   | "TIMEOUT"
   | "TOKEN_EXPIRED"
   | "TOKEN_REVOKED"
+  | "TREATING_DOCTOR_ONLY"
   | "UNAUTHENTICATED"
   | "UNSUPPORTED_MEDIA_TYPE"
   | "USERNAME_TAKEN"
@@ -516,6 +520,7 @@ export interface ApiErrorDetails {
   LEAVE_ALREADY_DECIDED: { status?: string };
   LEAVE_INSUFFICIENT_BALANCE: { available?: number; pending?: number; requested?: number };
   LICENSE_INVALID: { state?: string; reason?: string; grace_until?: unknown; vendor?: Record<string, unknown> };
+  MEDICATION_ORDER_STOPPED: { field?: string };
   MEETING_MINUTES_INCOMPLETE: { missing?: unknown[] };
   MERGE_COSIGNER_REQUIRED: { source_type?: string; permission?: string };
   MERGE_IDENTITY_CONFLICT: { conflicts?: unknown[] };

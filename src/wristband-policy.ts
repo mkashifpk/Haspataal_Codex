@@ -51,7 +51,7 @@ export function bandAccess(view: string | undefined, permissions: string[]) {
       view !== "records" &&
       permissions.includes("patient.wristband.print"),
     print: visible && permissions.includes("patient.wristband.print"),
-    worklist: visible && permissions.includes("medication.safety.view"),
+    worklist: visible && permissions.some(p=>['medication.safety.view','patient.wristband.print'].includes(p)),
   };
 }
 export function bandBody(

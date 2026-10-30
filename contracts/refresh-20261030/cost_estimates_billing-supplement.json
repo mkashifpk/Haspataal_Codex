@@ -1,0 +1,1942 @@
+{
+  "screen_id": "cost_estimates_billing",
+  "contract_fingerprint": "14824af5c60c05148994",
+  "knowledge_revision": "9250bafb1794ac12",
+  "delivery_gate": {
+    "required": true,
+    "status": "required",
+    "progress_reporting": {
+      "required": true,
+      "submit": "propose_progress",
+      "verify": "progress_proposals",
+      "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+    },
+    "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+    "compulsory": [
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+        "points": 2
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+        "points": 3
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+        "points": 2
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+        "points": 4
+      }
+    ],
+    "zoom": {
+      "min_pct": 100,
+      "max_pct": 250,
+      "reset_pct": 100,
+      "keys": [
+        "Ctrl + or Ctrl = (zoom in)",
+        "Ctrl - (zoom out)",
+        "Ctrl 0 (reset to 100 %)",
+        "Command on macOS"
+      ],
+      "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+    },
+    "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+    "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+  },
+  "schemas": {
+    "AuthorStampOut": {
+      "properties": {
+        "employee_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Employee Id"
+        },
+        "user_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "User Id"
+        },
+        "name": {
+          "type": "string",
+          "title": "Name"
+        },
+        "designation": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Designation",
+          "description": "Designation and specialty, e.g. \"Medical Officer, General Medicine\""
+        },
+        "registration": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Registration",
+          "description": "Council registration, e.g. \"PMDC 12345-P\" or \"PNC 67890\""
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "At",
+          "description": "When the entry was signed, reported or verified"
+        },
+        "text": {
+          "type": "string",
+          "title": "Text",
+          "description": "The printed line: name, designation, registration, date and time"
+        }
+      },
+      "type": "object",
+      "required": [
+        "employee_id",
+        "user_id",
+        "name",
+        "designation",
+        "registration",
+        "at",
+        "text"
+      ],
+      "title": "AuthorStampOut",
+      "description": "The author stamp of a clinical entry (MSDS IMS 147), as the author's staff record stood when they signed it\n(SQL hms_author_stamp / hms_employee_stamp, migration 0013 [STP]). Show it under the entry on screen and print\n`text` under it on paper."
+    },
+    "Envelope_EstimateDetailOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/EstimateDetailOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[EstimateDetailOut]"
+    },
+    "Envelope_PrintOut_EstimatePrintFieldsOut__": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/PrintOut_EstimatePrintFieldsOut_"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[PrintOut[EstimatePrintFieldsOut]]"
+    },
+    "Envelope_TariffOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/TariffOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[TariffOut]"
+    },
+    "Envelope_list_EstimateMoveOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/EstimateMoveOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[EstimateMoveOut]]"
+    },
+    "Envelope_list_EstimateOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/EstimateOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[EstimateOut]]"
+    },
+    "Envelope_list_EstimateWorkItemOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/EstimateWorkItemOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[EstimateWorkItemOut]]"
+    },
+    "EstimateAllowanceIn": {
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "Medicines",
+            "Consumables",
+            "Investigations",
+            "Consultant",
+            "Other"
+          ],
+          "title": "Kind"
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 300,
+          "minLength": 3,
+          "title": "Description",
+          "examples": [
+            "Medicines and IV fluids for 5 days"
+          ]
+        },
+        "amount": {
+          "type": "number",
+          "maximum": 100000000,
+          "exclusiveMinimum": 0,
+          "title": "Amount",
+          "description": "The preparer's estimate of this part"
+        }
+      },
+      "type": "object",
+      "required": [
+        "kind",
+        "description",
+        "amount"
+      ],
+      "title": "EstimateAllowanceIn"
+    },
+    "EstimateCancelIn": {
+      "properties": {
+        "reason": {
+          "type": "string",
+          "maxLength": 1000,
+          "minLength": 5,
+          "title": "Reason"
+        }
+      },
+      "type": "object",
+      "required": [
+        "reason"
+      ],
+      "title": "EstimateCancelIn"
+    },
+    "EstimateDetailOut": {
+      "properties": {
+        "estimate_id": {
+          "type": "integer",
+          "title": "Estimate Id"
+        },
+        "estimate_number": {
+          "type": "string",
+          "title": "Estimate Number"
+        },
+        "patient_id": {
+          "type": "integer",
+          "title": "Patient Id"
+        },
+        "mrn": {
+          "type": "string",
+          "title": "Mrn"
+        },
+        "patient_name": {
+          "type": "string",
+          "title": "Patient Name"
+        },
+        "admission_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Admission Id"
+        },
+        "admission_number": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Admission Number"
+        },
+        "transfer_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Transfer Id"
+        },
+        "reason": {
+          "type": "string",
+          "enum": [
+            "Admission",
+            "ChangeOfWard",
+            "ChangeOfCondition",
+            "Procedure",
+            "OnRequest"
+          ],
+          "title": "Reason"
+        },
+        "ward_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ward Id"
+        },
+        "ward_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ward Name"
+        },
+        "expected_days": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Expected Days"
+        },
+        "total": {
+          "type": "number",
+          "title": "Total"
+        },
+        "deposit": {
+          "type": "number",
+          "title": "Deposit"
+        },
+        "payment_terms": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Payment Terms"
+        },
+        "note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Note"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "Draft",
+            "Explained",
+            "Superseded",
+            "Cancelled"
+          ],
+          "title": "Status"
+        },
+        "prepared_by_name": {
+          "type": "string",
+          "title": "Prepared By Name"
+        },
+        "prepared_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Prepared At"
+        },
+        "explained_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Explained At"
+        },
+        "explained_by_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Explained By Name"
+        },
+        "explained_to": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Explained To"
+        },
+        "explained_relation": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "Patient",
+                "Relative",
+                "Attendant",
+                "Guardian",
+                "Other"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Explained Relation"
+        },
+        "language": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "Urdu",
+                "English",
+                "Punjabi",
+                "Sindhi",
+                "Pashto",
+                "Other"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Language"
+        },
+        "acknowledged": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Acknowledged"
+        },
+        "explain_stamp": {
+          "anyOf": [
+            {
+              "$ref": "#/components/schemas/AuthorStampOut"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "superseded_by": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Superseded By"
+        },
+        "cancel_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cancel Reason"
+        },
+        "row_version": {
+          "type": "integer",
+          "title": "Row Version"
+        },
+        "billed_so_far": {
+          "type": "number",
+          "title": "Billed So Far",
+          "description": "The admission's bills so far (to compare with the estimate)"
+        },
+        "lines": {
+          "items": {
+            "$ref": "#/components/schemas/EstimateLineOut"
+          },
+          "type": "array",
+          "title": "Lines"
+        }
+      },
+      "type": "object",
+      "required": [
+        "estimate_id",
+        "estimate_number",
+        "patient_id",
+        "mrn",
+        "patient_name",
+        "admission_id",
+        "admission_number",
+        "transfer_id",
+        "reason",
+        "ward_id",
+        "ward_name",
+        "expected_days",
+        "total",
+        "deposit",
+        "payment_terms",
+        "note",
+        "status",
+        "prepared_by_name",
+        "prepared_at",
+        "explained_at",
+        "explained_by_name",
+        "explained_to",
+        "explained_relation",
+        "language",
+        "acknowledged",
+        "explain_stamp",
+        "superseded_by",
+        "cancel_reason",
+        "row_version",
+        "billed_so_far",
+        "lines"
+      ],
+      "title": "EstimateDetailOut"
+    },
+    "EstimateExplainIn": {
+      "properties": {
+        "explained_to": {
+          "type": "string",
+          "maxLength": 200,
+          "minLength": 2,
+          "title": "Explained To",
+          "description": "Who heard it"
+        },
+        "explained_relation": {
+          "type": "string",
+          "enum": [
+            "Patient",
+            "Relative",
+            "Attendant",
+            "Guardian",
+            "Other"
+          ],
+          "title": "Explained Relation"
+        },
+        "language": {
+          "type": "string",
+          "enum": [
+            "Urdu",
+            "English",
+            "Punjabi",
+            "Sindhi",
+            "Pashto",
+            "Other"
+          ],
+          "title": "Language"
+        },
+        "acknowledged": {
+          "type": "boolean",
+          "title": "Acknowledged",
+          "description": "They signed or thumb-printed the printed estimate"
+        },
+        "note": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 2000
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Note",
+          "description": "Their questions, what was agreed about the deposit"
+        }
+      },
+      "type": "object",
+      "required": [
+        "explained_to",
+        "explained_relation",
+        "language",
+        "acknowledged"
+      ],
+      "title": "EstimateExplainIn"
+    },
+    "EstimateIn": {
+      "properties": {
+        "patient_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Patient Id",
+          "description": "Before admission: the patient; otherwise give admission_id"
+        },
+        "admission_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Admission Id"
+        },
+        "reason": {
+          "type": "string",
+          "enum": [
+            "Admission",
+            "ChangeOfWard",
+            "ChangeOfCondition",
+            "Procedure",
+            "OnRequest"
+          ],
+          "title": "Reason"
+        },
+        "transfer_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Transfer Id",
+          "description": "ChangeOfWard: the move it answers (GET /admissions/{id}/transfers)"
+        },
+        "ward_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ward Id",
+          "description": "The ward priced (default: the admission's ward)"
+        },
+        "expected_days": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "maximum": 365,
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Expected Days",
+          "description": "The bed-days priced at the ward's daily charge"
+        },
+        "services": {
+          "items": {
+            "$ref": "#/components/schemas/EstimateServiceIn"
+          },
+          "type": "array",
+          "maxItems": 50,
+          "title": "Services"
+        },
+        "allowances": {
+          "items": {
+            "$ref": "#/components/schemas/EstimateAllowanceIn"
+          },
+          "type": "array",
+          "maxItems": 20,
+          "title": "Allowances"
+        },
+        "deposit": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Deposit",
+          "description": "Default: estimate_deposit_pct of the total"
+        },
+        "payment_terms": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 1000
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Payment Terms",
+          "description": "Default: the hospital's (pricing_payment_terms)"
+        },
+        "note": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 2000
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Note",
+          "examples": [
+            "Panel patient: the panel covers the ward and the operation"
+          ]
+        }
+      },
+      "type": "object",
+      "required": [
+        "reason"
+      ],
+      "title": "EstimateIn"
+    },
+    "EstimateLineOut": {
+      "properties": {
+        "line_id": {
+          "type": "integer",
+          "title": "Line Id"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "BedDays",
+            "Service",
+            "Procedure",
+            "Investigations",
+            "Medicines",
+            "Consumables",
+            "Consultant",
+            "Other"
+          ],
+          "title": "Kind"
+        },
+        "service_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Service Id",
+          "description": "A tariff line (priced by the tariff); null for an allowance"
+        },
+        "description": {
+          "type": "string",
+          "title": "Description"
+        },
+        "quantity": {
+          "type": "number",
+          "title": "Quantity"
+        },
+        "unit_price": {
+          "type": "number",
+          "title": "Unit Price"
+        },
+        "amount": {
+          "type": "number",
+          "title": "Amount"
+        }
+      },
+      "type": "object",
+      "required": [
+        "line_id",
+        "kind",
+        "service_id",
+        "description",
+        "quantity",
+        "unit_price",
+        "amount"
+      ],
+      "title": "EstimateLineOut"
+    },
+    "EstimateMoveOut": {
+      "properties": {
+        "transfer_id": {
+          "type": "integer",
+          "title": "Transfer Id"
+        },
+        "admission_id": {
+          "type": "integer",
+          "title": "Admission Id"
+        },
+        "from_ward_id": {
+          "type": "integer",
+          "title": "From Ward Id"
+        },
+        "from_ward_name": {
+          "type": "string",
+          "title": "From Ward Name"
+        },
+        "to_ward_id": {
+          "type": "integer",
+          "title": "To Ward Id"
+        },
+        "to_ward_name": {
+          "type": "string",
+          "title": "To Ward Name"
+        },
+        "from_daily_rate": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "From Daily Rate"
+        },
+        "to_daily_rate": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "To Daily Rate"
+        },
+        "rate_changed": {
+          "type": "boolean",
+          "title": "Rate Changed",
+          "description": "The daily bed charge changed: the family is told a new estimate (MSDS PRE 79)"
+        },
+        "transferred_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Transferred At"
+        },
+        "estimate_explained": {
+          "type": "boolean",
+          "title": "Estimate Explained",
+          "description": "A ChangeOfWard estimate for this move was explained"
+        },
+        "estimate_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Estimate Id",
+          "description": "The move's latest ChangeOfWard estimate that is not cancelled"
+        },
+        "estimate_status": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "Draft",
+                "Explained",
+                "Superseded",
+                "Cancelled"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Estimate Status"
+        }
+      },
+      "type": "object",
+      "required": [
+        "transfer_id",
+        "admission_id",
+        "from_ward_id",
+        "from_ward_name",
+        "to_ward_id",
+        "to_ward_name",
+        "from_daily_rate",
+        "to_daily_rate",
+        "rate_changed",
+        "transferred_at",
+        "estimate_explained",
+        "estimate_id",
+        "estimate_status"
+      ],
+      "title": "EstimateMoveOut",
+      "description": "A move of the admission as the estimate staff see it: the wards and their daily charges, never the clinical reason\nfor the move (backend issue #41)."
+    },
+    "EstimateOut": {
+      "properties": {
+        "estimate_id": {
+          "type": "integer",
+          "title": "Estimate Id"
+        },
+        "estimate_number": {
+          "type": "string",
+          "title": "Estimate Number"
+        },
+        "patient_id": {
+          "type": "integer",
+          "title": "Patient Id"
+        },
+        "mrn": {
+          "type": "string",
+          "title": "Mrn"
+        },
+        "patient_name": {
+          "type": "string",
+          "title": "Patient Name"
+        },
+        "admission_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Admission Id"
+        },
+        "admission_number": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Admission Number"
+        },
+        "transfer_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Transfer Id"
+        },
+        "reason": {
+          "type": "string",
+          "enum": [
+            "Admission",
+            "ChangeOfWard",
+            "ChangeOfCondition",
+            "Procedure",
+            "OnRequest"
+          ],
+          "title": "Reason"
+        },
+        "ward_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ward Id"
+        },
+        "ward_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ward Name"
+        },
+        "expected_days": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Expected Days"
+        },
+        "total": {
+          "type": "number",
+          "title": "Total"
+        },
+        "deposit": {
+          "type": "number",
+          "title": "Deposit"
+        },
+        "payment_terms": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Payment Terms"
+        },
+        "note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Note"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "Draft",
+            "Explained",
+            "Superseded",
+            "Cancelled"
+          ],
+          "title": "Status"
+        },
+        "prepared_by_name": {
+          "type": "string",
+          "title": "Prepared By Name"
+        },
+        "prepared_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Prepared At"
+        },
+        "explained_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Explained At"
+        },
+        "explained_by_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Explained By Name"
+        },
+        "explained_to": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Explained To"
+        },
+        "explained_relation": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "Patient",
+                "Relative",
+                "Attendant",
+                "Guardian",
+                "Other"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Explained Relation"
+        },
+        "language": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "Urdu",
+                "English",
+                "Punjabi",
+                "Sindhi",
+                "Pashto",
+                "Other"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Language"
+        },
+        "acknowledged": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Acknowledged"
+        },
+        "explain_stamp": {
+          "anyOf": [
+            {
+              "$ref": "#/components/schemas/AuthorStampOut"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "superseded_by": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Superseded By"
+        },
+        "cancel_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cancel Reason"
+        },
+        "row_version": {
+          "type": "integer",
+          "title": "Row Version"
+        },
+        "billed_so_far": {
+          "type": "number",
+          "title": "Billed So Far",
+          "description": "The admission's bills so far (to compare with the estimate)"
+        }
+      },
+      "type": "object",
+      "required": [
+        "estimate_id",
+        "estimate_number",
+        "patient_id",
+        "mrn",
+        "patient_name",
+        "admission_id",
+        "admission_number",
+        "transfer_id",
+        "reason",
+        "ward_id",
+        "ward_name",
+        "expected_days",
+        "total",
+        "deposit",
+        "payment_terms",
+        "note",
+        "status",
+        "prepared_by_name",
+        "prepared_at",
+        "explained_at",
+        "explained_by_name",
+        "explained_to",
+        "explained_relation",
+        "language",
+        "acknowledged",
+        "explain_stamp",
+        "superseded_by",
+        "cancel_reason",
+        "row_version",
+        "billed_so_far"
+      ],
+      "title": "EstimateOut"
+    },
+    "EstimatePrintFieldsOut": {
+      "properties": {
+        "hospital": {
+          "$ref": "#/components/schemas/HospitalHeaderOut"
+        },
+        "estimate": {
+          "$ref": "#/components/schemas/EstimateDetailOut"
+        },
+        "english": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "English"
+        },
+        "urdu": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Urdu",
+          "description": "The notes in Urdu: render right to left on the terminal"
+        },
+        "signature_lines": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Signature Lines"
+        }
+      },
+      "type": "object",
+      "required": [
+        "hospital",
+        "estimate",
+        "english",
+        "urdu",
+        "signature_lines"
+      ],
+      "title": "EstimatePrintFieldsOut"
+    },
+    "EstimateServiceIn": {
+      "properties": {
+        "service_id": {
+          "type": "integer",
+          "title": "Service Id",
+          "description": "A service of the tariff (GET /tariff): priced by the tariff, never typed"
+        },
+        "quantity": {
+          "type": "number",
+          "maximum": 1000,
+          "exclusiveMinimum": 0,
+          "title": "Quantity",
+          "default": 1
+        }
+      },
+      "type": "object",
+      "required": [
+        "service_id"
+      ],
+      "title": "EstimateServiceIn"
+    },
+    "EstimateWorkItemOut": {
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "Admission",
+            "ChangeOfWard"
+          ],
+          "title": "Kind"
+        },
+        "admission_id": {
+          "type": "integer",
+          "title": "Admission Id"
+        },
+        "admission_number": {
+          "type": "string",
+          "title": "Admission Number"
+        },
+        "patient_id": {
+          "type": "integer",
+          "title": "Patient Id"
+        },
+        "mrn": {
+          "type": "string",
+          "title": "Mrn"
+        },
+        "patient_name": {
+          "type": "string",
+          "title": "Patient Name"
+        },
+        "ward_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ward Name"
+        },
+        "transfer_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Transfer Id"
+        },
+        "since": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Since"
+        },
+        "overdue": {
+          "type": "boolean",
+          "title": "Overdue",
+          "description": "Past estimate_due_hours"
+        },
+        "detail": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Detail"
+        }
+      },
+      "type": "object",
+      "required": [
+        "kind",
+        "admission_id",
+        "admission_number",
+        "patient_id",
+        "mrn",
+        "patient_name",
+        "ward_name",
+        "transfer_id",
+        "since",
+        "overdue",
+        "detail"
+      ],
+      "title": "EstimateWorkItemOut"
+    },
+    "HTTPValidationError": {
+      "properties": {
+        "detail": {
+          "items": {
+            "$ref": "#/components/schemas/ValidationError"
+          },
+          "type": "array",
+          "title": "Detail"
+        }
+      },
+      "type": "object",
+      "title": "HTTPValidationError"
+    },
+    "HospitalHeaderOut": {
+      "properties": {
+        "name": {
+          "type": "string",
+          "title": "Name"
+        },
+        "address": {
+          "type": "string",
+          "title": "Address"
+        },
+        "phone": {
+          "type": "string",
+          "title": "Phone"
+        },
+        "phc_number": {
+          "type": "string",
+          "title": "Phc Number",
+          "description": "The Punjab Healthcare Commission registration / licence number (GET /msds/profile); empty until an admin confirms it"
+        },
+        "issue_line": {
+          "type": "string",
+          "title": "Issue Line",
+          "description": "An issued document: 'Issued <when>; this copy printed <when>', with '(reprint)' an hour or more later; print it under the PHC number. Empty for a report of now"
+        }
+      },
+      "type": "object",
+      "required": [
+        "name",
+        "address",
+        "phone",
+        "phc_number",
+        "issue_line"
+      ],
+      "title": "HospitalHeaderOut"
+    },
+    "Meta": {
+      "properties": {
+        "server_time": {
+          "type": "string",
+          "title": "Server Time",
+          "description": "Server clock (UTC). Use it to detect terminal clock skew."
+        },
+        "page": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Page"
+        },
+        "page_size": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Page Size"
+        },
+        "total_count": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Total Count"
+        },
+        "next_cursor": {
+          "title": "Next Cursor"
+        }
+      },
+      "type": "object",
+      "required": [
+        "server_time"
+      ],
+      "title": "Meta"
+    },
+    "PrintOut_EstimatePrintFieldsOut_": {
+      "properties": {
+        "document_type": {
+          "type": "string",
+          "enum": [
+            "autopsy_order",
+            "bed_labels",
+            "blood_component_label",
+            "blood_donation_labels",
+            "clinical_note",
+            "complaint_letter",
+            "complaints_notice",
+            "consent_form",
+            "cost_estimate",
+            "cssd_labels",
+            "death_certificate",
+            "discharge_summary",
+            "dispensing_label",
+            "dose_label",
+            "id_card",
+            "imaging_report",
+            "lab_label",
+            "lab_report",
+            "mlc_intimation",
+            "opd_slip",
+            "pharmacy_receipt",
+            "prescription",
+            "referral_slip",
+            "send_out_manifest",
+            "surgical_record",
+            "triage_algorithm",
+            "wristband"
+          ],
+          "title": "Document Type"
+        },
+        "printer_role": {
+          "type": "string",
+          "enum": [
+            "receipt",
+            "label",
+            "document",
+            "card"
+          ],
+          "title": "Printer Role",
+          "description": "Which printer of the terminal to use (GET /api/v1/terminals/whoami)"
+        },
+        "paper_width_mm": {
+          "type": "integer",
+          "title": "Paper Width Mm"
+        },
+        "fields": {
+          "$ref": "#/components/schemas/EstimatePrintFieldsOut",
+          "description": "The document's data, for frontends that render their own layout"
+        },
+        "text": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Text",
+          "description": "Pre-formatted monospace text (48 columns) for ESC/POS printers, as is"
+        },
+        "barcode_svg": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Barcode Svg"
+        },
+        "qr_svg": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Qr Svg"
+        },
+        "pdf_url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Pdf Url"
+        }
+      },
+      "type": "object",
+      "required": [
+        "document_type",
+        "printer_role",
+        "paper_width_mm",
+        "fields",
+        "text",
+        "barcode_svg",
+        "qr_svg",
+        "pdf_url"
+      ],
+      "title": "PrintOut[EstimatePrintFieldsOut]"
+    },
+    "TariffCategoryOut": {
+      "properties": {
+        "category": {
+          "type": "string",
+          "enum": [
+            "OPD",
+            "IPD",
+            "OT",
+            "Imaging",
+            "RoomCharge",
+            "Procedure",
+            "Other"
+          ],
+          "title": "Category"
+        },
+        "label": {
+          "type": "string",
+          "title": "Label"
+        },
+        "items": {
+          "items": {
+            "$ref": "#/components/schemas/TariffItemOut"
+          },
+          "type": "array",
+          "title": "Items"
+        }
+      },
+      "type": "object",
+      "required": [
+        "category",
+        "label",
+        "items"
+      ],
+      "title": "TariffCategoryOut"
+    },
+    "TariffItemOut": {
+      "properties": {
+        "service_id": {
+          "type": "integer",
+          "title": "Service Id"
+        },
+        "code": {
+          "type": "string",
+          "title": "Code"
+        },
+        "name": {
+          "type": "string",
+          "title": "Name"
+        },
+        "category": {
+          "type": "string",
+          "enum": [
+            "OPD",
+            "IPD",
+            "OT",
+            "Imaging",
+            "RoomCharge",
+            "Procedure",
+            "Other"
+          ],
+          "title": "Category"
+        },
+        "price": {
+          "type": "number",
+          "title": "Price"
+        },
+        "department_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Department Name"
+        }
+      },
+      "type": "object",
+      "required": [
+        "service_id",
+        "code",
+        "name",
+        "category",
+        "price",
+        "department_name"
+      ],
+      "title": "TariffItemOut"
+    },
+    "TariffLabTestOut": {
+      "properties": {
+        "test_id": {
+          "type": "integer",
+          "title": "Test Id"
+        },
+        "code": {
+          "type": "string",
+          "title": "Code"
+        },
+        "name": {
+          "type": "string",
+          "title": "Name"
+        },
+        "section": {
+          "type": "string",
+          "title": "Section"
+        },
+        "price": {
+          "type": "number",
+          "title": "Price"
+        }
+      },
+      "type": "object",
+      "required": [
+        "test_id",
+        "code",
+        "name",
+        "section",
+        "price"
+      ],
+      "title": "TariffLabTestOut"
+    },
+    "TariffOut": {
+      "properties": {
+        "hospital_name": {
+          "type": "string",
+          "title": "Hospital Name"
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date",
+          "title": "As Of"
+        },
+        "currency": {
+          "type": "string",
+          "title": "Currency"
+        },
+        "categories": {
+          "items": {
+            "$ref": "#/components/schemas/TariffCategoryOut"
+          },
+          "type": "array",
+          "title": "Categories"
+        },
+        "wards": {
+          "items": {
+            "$ref": "#/components/schemas/TariffWardOut"
+          },
+          "type": "array",
+          "title": "Wards"
+        },
+        "lab_tests": {
+          "items": {
+            "$ref": "#/components/schemas/TariffLabTestOut"
+          },
+          "type": "array",
+          "title": "Lab Tests"
+        }
+      },
+      "type": "object",
+      "required": [
+        "hospital_name",
+        "as_of",
+        "currency",
+        "categories",
+        "wards",
+        "lab_tests"
+      ],
+      "title": "TariffOut"
+    },
+    "TariffWardOut": {
+      "properties": {
+        "ward_id": {
+          "type": "integer",
+          "title": "Ward Id"
+        },
+        "name": {
+          "type": "string",
+          "title": "Name"
+        },
+        "ward_type": {
+          "type": "string",
+          "enum": [
+            "General",
+            "Private",
+            "SemiPrivate",
+            "ICU",
+            "CCU",
+            "NICU",
+            "Surgical",
+            "Pediatric",
+            "Maternity",
+            "Emergency",
+            "Isolation",
+            "Other"
+          ],
+          "title": "Ward Type"
+        },
+        "bed_day_price": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Bed Day Price"
+        }
+      },
+      "type": "object",
+      "required": [
+        "ward_id",
+        "name",
+        "ward_type",
+        "bed_day_price"
+      ],
+      "title": "TariffWardOut"
+    },
+    "ValidationError": {
+      "properties": {
+        "loc": {
+          "items": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ]
+          },
+          "type": "array",
+          "title": "Location"
+        },
+        "msg": {
+          "type": "string",
+          "title": "Message"
+        },
+        "type": {
+          "type": "string",
+          "title": "Error Type"
+        },
+        "input": {
+          "title": "Input"
+        },
+        "ctx": {
+          "type": "object",
+          "title": "Context"
+        }
+      },
+      "type": "object",
+      "required": [
+        "loc",
+        "msg",
+        "type"
+      ],
+      "title": "ValidationError"
+    }
+  },
+  "unknowns": []
+}

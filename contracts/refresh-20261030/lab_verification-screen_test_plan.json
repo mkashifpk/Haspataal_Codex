@@ -1,0 +1,574 @@
+{
+  "screen": "lab_verification",
+  "title": "Verification queue",
+  "cases": [
+    {
+      "id": "case:GET /lab/verification-queue",
+      "call": "GET /api/v1/lab/verification-queue",
+      "summary": "Results awaiting verification (critical & STAT first)",
+      "happy_path": {
+        "as_one_of": [
+          "lab_verifier"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/lab/verification-queue"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": [
+                {
+                  "result_id": 1,
+                  "lab_requisition_item_id": 1,
+                  "code": "CBC",
+                  "test_name": "Complete Blood Count",
+                  "metrics_jsonb": {
+                    "hb": 6.5,
+                    "wbc": 12.2
+                  },
+                  "flags_jsonb": {
+                    "hb": "CL",
+                    "wbc": "H"
+                  },
+                  "has_critical_value": true,
+                  "interpretation": "Severe anemia",
+                  "entered_at": "2026-10-26T15:20:13.948146+00:00",
+                  "entered_by": 7,
+                  "entered_by_name": "uc1d45b0c0f",
+                  "is_correction": false,
+                  "requisition_id": 1,
+                  "requisition_number": "LR-2026-000001",
+                  "patient_id": 1,
+                  "patient_name": "Ali Khan",
+                  "mrn": "MRN-2026-000001",
+                  "priority": "STAT",
+                  "barcode": "LB-2026-0000001",
+                  "due_at": "2026-10-26T16:20:13.841004+00:00",
+                  "is_overdue": false
+                }
+              ],
+              "meta": {
+                "server_time": "2026-10-26T15:20:14.035581+00:00"
+              },
+              "request_id": "b1f82cfeaa60455f92ab7e870a422bf2"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "LAB_VERIFIER_MUST_DIFFER"
+      ]
+    },
+    {
+      "id": "case:POST /lab/results/{result_id}/verify",
+      "call": "POST /api/v1/lab/results/{result_id}/verify",
+      "summary": "Verify (publish + notify doctor) or reject back to the bench",
+      "happy_path": {
+        "as_one_of": [
+          "lab_verifier"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/lab/results/1/verify",
+            "body": {
+              "decision": "Verified"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "result_id": 1,
+                "lab_requisition_item_id": 1,
+                "sample_id": 1,
+                "metrics_jsonb": {
+                  "hb": 11.2,
+                  "wbc": 7.4,
+                  "comment": "Mild anaemia"
+                },
+                "flags_jsonb": {
+                  "hb": "L",
+                  "wbc": "N"
+                },
+                "has_critical_value": false,
+                "interpretation": null,
+                "status": "Published",
+                "entered_by": 7,
+                "entered_at": "2026-10-16T09:29:48.110932+00:00",
+                "published_at": "2026-10-16T09:29:48.133822+00:00",
+                "provisionally_released_at": null,
+                "is_correction": false,
+                "corrects_result_id": null,
+                "correction_reason": null,
+                "partner_id": null,
+                "partner_report_ref": null,
+                "partner_reported_at": null,
+                "row_version": 2
+              },
+              "meta": {
+                "server_time": "2026-10-16T09:29:48.149800+00:00"
+              },
+              "request_id": "57bdfc6b731047ecb47c3992b4a0fda0"
+            }
+          },
+          "errors_seen": [
+            "FORBIDDEN",
+            "LAB_RESULT_STATE_INVALID",
+            "LAB_VERIFIER_MUST_DIFFER",
+            "VALIDATION_ERROR"
+          ],
+          "events_emitted": [
+            "critical_result.updated",
+            "lab.result.provisional_withdrawn",
+            "lab.result.published",
+            "notification.created"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "FORBIDDEN",
+        "LAB_RESULT_STATE_INVALID",
+        "LAB_VERIFIER_MUST_DIFFER",
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /lab/requisitions/{requisition_id}",
+      "call": "GET /api/v1/lab/requisitions/{requisition_id}",
+      "summary": "Requisition with items, samples, results and bill status",
+      "happy_path": {
+        "as_one_of": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "lab_admin",
+          "lab_technician",
+          "lab_verifier",
+          "radiologist",
+          "receptionist",
+          "surgeon",
+          "ward_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/lab/requisitions/1"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "requisition_id": 1,
+                "requisition_number": "LR-2026-000001",
+                "patient_id": 1,
+                "ticket_id": 1,
+                "admission_id": null,
+                "requester_type": "Doctor",
+                "requester_user_id": 1,
+                "requester_doctor_id": 1,
+                "is_lab_only_walkin": false,
+                "priority": "Routine",
+                "clinical_notes": null,
+                "status": "Completed",
+                "cancel_reason": null,
+                "ordered_at": "2026-10-16T09:29:48.014835+00:00",
+                "row_version": 3,
+                "patient_name": "Ali Khan",
+                "mrn": "MRN-2026-000001",
+                "gender": "male",
+                "age_years": 40,
+                "dob": null,
+                "doctor_name": "Dr Ahmed",
+                "items": [
+                  {
+                    "lab_requisition_item_id": 1,
+                    "test_id": 1,
+                    "code": "CBC",
+                    "test_name": "Complete Blood Count",
+                    "section": "Hematology",
+                    "price_at_order": 800,
+                    "status": "Published",
+                    "rerun_of_item_id": null,
+                    "is_billable": true,
+                    "sample_id": 1,
+                    "barcode": "LB-2026-0000001",
+                    "sample_status": "Consumed",
+                    "collected_at": "2026-10-16T09:29:48.091781+00:00",
+                    "received_at": null,
+                    "identity_check": "TwoIdentifiers",
+                    "is_send_out": false,
+                    "partner_name": null,
+                    "due_at": "2026-10-16T13:29:48.091781+00:00"
+                  }
+                ],
+                "results": [
+                  {
+                    "result_id": 1,
+                    "lab_requisition_item_id": 1,
+                    "metrics_jsonb": {
+                      "hb": 11.2,
+                      "wbc": 7.4,
+                      "comment": "Mild anaemia"
+                    },
+                    "flags_jsonb": {
+                      "hb": "L",
+                      "wbc": "N"
+                    },
+                    "has_critical_value": false,
+                    "interpretation": null,
+                    "status": "Published",
+                    "entered_at": "2026-10-16T09:29:48.110932+00:00",
+                    "published_at": "2026-10-16T09:29:48.133822+00:00",
+                    "provisionally_released_at": null,
+                    "is_correction": false,
+                    "corrects_result_id": null,
+                    "correction_reason": null,
+                    "partner_name": null,
+                    "partner_report_ref": null,
+                    "performed_stamp": {
+                      "at": "2026-10-16T09:29:48.110932+00:00",
+                      "name": "Staff 21985",
+                      "text": "Staff 21985, Officer, 16-Oct-2026 14:29",
+                      "user_id": 7,
+                      "designation": "Officer",
+                      "employee_id": 7,
+                      "registration": null
+                    },
+                    "verified_stamp": {
+                      "at": "2026-10-16T09:29:48.133822+00:00",
+                      "name": "Staff 15248",
+                      "text": "Staff 15248, Officer, 16-Oct-2026 14:29",
+                      "user_id": 8,
+                      "designation": "Officer",
+                      "employee_id": 8,
+                      "registration": null
+                    }
+                  }
+                ],
+                "invoice": {
+                  "invoice_id": 2,
+                  "invoice_no": "INV-2026-0000002",
+                  "invoice_type": "Lab",
+                  "status": "Paid",
+                  "balance_due": 0
+                }
+              },
+              "meta": {
+                "server_time": "2026-10-16T09:29:48.162620+00:00"
+              },
+              "request_id": "14d720746a604b44a7dc97e0284e3d3c"
+            }
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "billing_admin",
+          "cashier",
+          "clinic_director"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /lab/requisitions/{requisition_id}/report/print-payload",
+      "call": "GET /api/v1/lab/requisitions/{requisition_id}/report/print-payload",
+      "summary": "Printable lab report with who performed and who verified each test",
+      "happy_path": {
+        "as_one_of": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "lab_admin",
+          "lab_technician",
+          "lab_verifier",
+          "radiologist",
+          "receptionist",
+          "surgeon",
+          "ward_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/lab/requisitions/1/report/print-payload"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "data": {
+                "document_type": "lab_report",
+                "printer_role": "document",
+                "paper_width_mm": 210,
+                "fields": {
+                  "hospital": {
+                    "name": "Haspataal Hospital",
+                    "address": "",
+                    "phone": ""
+                  },
+                  "requisition_number": "LR-2026-000001",
+                  "patient_name": "Ali Khan",
+                  "mrn": "MRN-2026-000001",
+                  "gender": "male",
+                  "age_years": 40,
+                  "doctor_name": "Dr Ahmed",
+                  "ordered_at": "2026-09-30T19:59:44.971373+00:00",
+                  "complete": true,
+                  "results": [
+                    {
+                      "result_id": 1,
+                      "code": "CBC",
+                      "test_name": "Complete Blood Count",
+                      "section": "Hematology",
+                      "interpretation": null,
+                      "has_critical_value": false,
+                      "is_correction": false,
+                      "correction_reason": null,
+                      "published_at": "2026-09-30T19:59:45.090086+00:00",
+                      "performed_by_partner": null,
+                      "performed_stamp": {
+                        "at": "2026-09-30T19:59:45.067016+00:00",
+                        "name": "Staff 4343",
+                        "text": "Staff 4343, Officer, 01-Oct-2026 00:59",
+                        "user_id": 7,
+                        "designation": "Officer",
+                        "employee_id": 7,
+                        "registration": null
+                      },
+                      "verified_stamp": {
+                        "at": "2026-09-30T19:59:45.090086+00:00",
+                        "name": "Staff 58278",
+                        "text": "Staff 58278, Officer, 01-Oct-2026 00:59",
+                        "user_id": 8,
+                        "designation": "Officer",
+                        "employee_id": 8,
+                        "registration": null
+                      },
+                      "rows": [
+                        {
+                          "key": "hb",
+                          "label": "Hemoglobin",
+                          "value": 11.2,
+                          "unit": "g/dL",
+                          "reference": "13.5 - 17.5",
+                          "flag": "L"
+                        },
+                        {
+                          "key": "wbc",
+                          "label": "WBC",
+                          "value": 7.4,
+                          "unit": "10^9/L",
+                          "reference": "4 - 11",
+                          "flag": "N"
+                        },
+                        {
+                          "key": "comment",
+                          "label": "Comment",
+                          "value": "Mild anaemia",
+                          "unit": null,
+                          "reference": null,
+                          "flag": null
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "text": "                                    Haspataal Hospital\n                                    LABORATORY REPORT\n------------------------------------------------------------------------------------------\nPatient                                                     Ali Khan (MRN MRN-2026-000001)\nAge / sex                                                                        40 / male\nRequisition       …",
+                "barcode_svg": "<svg version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" width=\"50.760mm\" height=\"18.411mm\">\r\n    <!--Autogenerated with python-barcode 0.16.1-->\r\n    <g id=\"barcode_group\">\r\n        <rect width=\"100%\" height=\"100%\" style=\"fill:white\"/>\r\n        <rect x=\"2.000mm\" y=\"1.000mm\" width=\"0.560mm\" height=\"12.000mm\" style=\"fill:black;\"/>\r\n        <rect x=\"2.840mm\" y=\"1.000mm\" width=\"0.280mm\" height=\"12.000mm…",
+                "qr_svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"116\" height=\"116\" class=\"segno\"><path transform=\"scale(4)\" class=\"qrline\" stroke=\"#000\" d=\"M2 2.5h7m1 0h1m1 0h2m2 0h3m1 0h7m-25 1h1m5 0h1m1 0h1m1 0h1m2 0h1m1 0h1m2 0h1m5 0h1m-25 1h1m1 0h3m1 0h1m2 0h2m1 0h1m5 0h1m1 0h3m1 0h1m-25 1h1m1 0h3m1 0h1m1 0h1m2 0h6m1 0h1m1 0h3m1 0h1m-25 1h1m1 0h3m1 0h1m2 0h2m1 0h1m1 0h1m3 0h1m1 0h3m1 0h1m-25 1h1m5 0h1m2 0h1m4 0…",
+                "pdf_url": "/api/v1/lab/requisitions/1/report/pdf"
+              },
+              "meta": {
+                "server_time": "2026-09-30T19:59:45.137533+00:00"
+              },
+              "request_id": "7a458503e11b47b6ad7595893a1ddbbf"
+            }
+          },
+          "errors_seen": [
+            "LAB_REPORT_NOT_READY"
+          ]
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "billing_admin",
+          "cashier",
+          "clinic_director"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "LAB_REPORT_NOT_READY",
+        "VALIDATION_ERROR"
+      ]
+    },
+    {
+      "id": "case:GET /lab/requisitions/{requisition_id}/report/pdf",
+      "call": "GET /api/v1/lab/requisitions/{requisition_id}/report/pdf",
+      "summary": "The lab report as a PDF",
+      "happy_path": {
+        "as_one_of": [
+          "anaesthetist",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "lab_admin",
+          "lab_technician",
+          "lab_verifier",
+          "radiologist",
+          "receptionist",
+          "surgeon",
+          "ward_nurse"
+        ],
+        "example": {
+          "request": {
+            "path": "/api/v1/lab/requisitions/1/report/pdf"
+          },
+          "response": {
+            "status": 200,
+            "content_type": "application/pdf",
+            "bytes": 2522
+          }
+        }
+      },
+      "denied": {
+        "as_one_of": [
+          "accountant",
+          "admissions_officer",
+          "billing_admin",
+          "cashier",
+          "clinic_director"
+        ],
+        "expect": "403 FORBIDDEN"
+      },
+      "errors_to_handle": [
+        "LAB_REPORT_NOT_READY",
+        "VALIDATION_ERROR"
+      ]
+    }
+  ],
+  "service_cases": [
+    {
+      "view": "full",
+      "set_up": "GET /establishment answers views.screens[screen_id=lab_verification].view = full (laboratory or blood_center): stub that answer, or have the DEV server's admin move the service on Facility settings",
+      "expect": "Show it; every action the user's permissions allow."
+    },
+    {
+      "view": "open_work",
+      "set_up": "GET /establishment answers views.screens[screen_id=lab_verification].view = open_work (laboratory or blood_center): stub that answer, or have the DEV server's admin move the service on Facility settings",
+      "expect": "The service is Retiring: show it with the banner 'No new <new_work> from now on' and its open work; hide the actions that start new work of it (x-capability-gates; continues_while_retiring ones stay); keep every other action (completing, transferring, settling, correcting)."
+    },
+    {
+      "view": "records",
+      "set_up": "GET /establishment answers views.screens[screen_id=lab_verification].view = records (laboratory or blood_center): stub that answer, or have the DEV server's admin move the service on Facility settings",
+      "expect": "The service is Retired (or Preparing after it ran): show it as records only, under a 'Records' marker: lists, details, prints and the corrections the server still accepts; no action that starts new work."
+    },
+    {
+      "view": "hidden",
+      "set_up": "GET /establishment answers views.screens[screen_id=lab_verification].view = hidden (laboratory or blood_center): stub that answer, or have the DEV server's admin move the service on Facility settings",
+      "expect": "Not in any menu: the service has never run here, so the screen has nothing to show."
+    }
+  ],
+  "delivery_gate": {
+    "required": true,
+    "status": "required",
+    "progress_reporting": {
+      "required": true,
+      "submit": "propose_progress",
+      "verify": "progress_proposals",
+      "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+    },
+    "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+    "compulsory": [
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+        "points": 2
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+        "points": 3
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+        "points": 2
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+        "points": 4
+      }
+    ],
+    "zoom": {
+      "min_pct": 100,
+      "max_pct": 250,
+      "reset_pct": 100,
+      "keys": [
+        "Ctrl + or Ctrl = (zoom in)",
+        "Ctrl - (zoom out)",
+        "Ctrl 0 (reset to 100 %)",
+        "Command on macOS"
+      ],
+      "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+    },
+    "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+    "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+  },
+  "handbook_page": "screens/lab_verification",
+  "workspace_guide": "get_handbook_outline('lab_verifier')",
+  "realtime": [
+    {
+      "event": "lab.result.pending_verification",
+      "check": "the screen refreshes without polling"
+    },
+    {
+      "event": "lab.result.critical_pending",
+      "check": "the screen refreshes without polling"
+    }
+  ],
+  "acceptance_rules": [
+    "You cannot verify results you entered (LAB_VERIFIER_MUST_DIFFER).",
+    "Rejection requires a note.",
+    "Verify critical values first: after lab_critical_release_minutes the ordering doctor sees them marked Pending verification.",
+    "Verifying a critical result opens it in the critical results log: tell the doctor NOW and record it (screen critical_results_verifier).",
+    "A result past its due time: ask for delay_reason (optional) before verifying (MSDS AAC 4).",
+    "Verifying signs the result with your stamp (verified_stamp), printed on the lab report under the technician's (performed_stamp).",
+    "Each queue row carries its context: open its order with requisition_id (never by the patient's name), compare entered_by with the signed-in user's user_id to warn before LAB_VERIFIER_MUST_DIFFER, and ask for the delay reason when is_overdue (due_at, the server's clock); never derive a deadline from entered_at.",
+    "After a lost verify answer, never repeat it by itself: read GET /lab/requisitions/{requisition_id} and find the result_id. Published or Rejected: decided; PendingVerification: offer it again. A row gone from the queue says neither.",
+    "Exists for the service laboratory or blood_center (work): show it as GET /establishment views.screens says for screen_id lab_verification (full; open_work: without its new work, with the banner \"No new ... from now on\"; records: history and corrections only; setup: only from Facility settings; hidden: in no menu), after login and again on establishment.changed. Never decide it from the profile's category."
+  ],
+  "demo_accounts": "demo_accounts() lists a login per role; sandbox_call runs each case on the DEV server"
+}
