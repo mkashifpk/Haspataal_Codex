@@ -2,11 +2,40 @@
 Last updated: 30 October 2026, Antigravity (Codex pair), Asia/Karachi.
 
 ## Active new screen request
-Completed Screen 75 `blood_bank` ("Blood bank stock, testing, issue & discard" for Lab workspace `lab_tech` / `lab_admin`, Phase 4 Inpatient Journey).
-Next screen: Position 76 `blood_donors` ("Blood donors", Points: 58).
+Completed Screen 76 `blood_donors` ("Blood donors" for Lab & Blood Center workspace `lab_tech` / `blood_bank`, Phase 4 Inpatient Journey).
+Previous screen: Position 75 `blood_bank` (Proposal #227 pending).
+Next screen: Position 77 in Phase 4 Roadmap.
 
-- Current status: Screen 75 completed and verified (live DEV reads 200 OK, 271/271 tests passing, check:help passing, build passing). Committing and proposing progress.
+- Current status: Screen 76 completed, verified live (200 OK), 274/274 tests passing, check:help passing (75 screens), build passing (`index-CH-J_ACq.js`). Committing and proposing progress.
 - Completed checkpoints:
+  1. Saved contract bundle in `contracts/blood_donors.json` (5 endpoints, realtime events, 58 points).
+  2. Generated typed API contracts in `src/generated/blood_donors.ts`.
+  3. Implemented domain policy in `src/blood-donors-policy.ts`:
+     - Access gating by screen view (`full`, `open_work`, `records`, `setup`, `hidden`), capability (`establishment.active.includes('blood_center')`), and permissions (`blood_center.view`, `blood_center.donor.register`) (`rule:6a58b93e99`, `rule:5850958062`).
+     - Search validation rule (`rule:71bc3f69b3`): search first (`q`, min 2 chars: donor number, CNIC, mobile, or name).
+     - Registration validation rule (`rule:40349aea7e`): legal full name, sex (Male/Female), date of birth (17-70 years), identity document (CNIC, Passport, Proof of Registration, Other), and at least one contact (phone, email, or address).
+     - Lifetime donor rules (`rule:71bc3f69b3`, `rule:40349aea7e`): donor is registered once for life. Duplicate registration intercepted by `BLOOD_DONOR_EXISTS` and automatically opens existing record.
+     - Eligibility and deferral evaluation (`rule:d7bf9e8097`): permanently deferred donors must never be bled (never offer 'Donate' action); temporary deferrals display active banner with earliest permitted date (`may_donate_from`). Opening record is logged for audit under PBTA Act s.10.
+     - Correction validation rule (`rule:73b2977f2f`): requires mandatory reason (5-500 chars), expected_version concurrency control; immutable donor number cannot be changed.
+  4. Implemented full screen in `src/screens/BloodDonors.tsx`:
+     - Real-time `establishment.changed` listener.
+     - Retiring banner for `open_work` ("No new donor registrations from now on"); records mode for `records`.
+     - Search-first interface with min 2 chars validation and audit notice.
+     - Search results table with donor number, demographics, identification, blood group, donation count, and eligibility badges.
+     - Detailed inspection card with audit logging banner, eligibility alert, deferral history table with author stamps, and donation history table.
+     - Register donor modal with client validation and idempotency protection (`useClinicalWrite`).
+     - Correct particulars modal with mandatory reason and concurrency versioning.
+  5. Wired routing, screen labels, view filters, and navigation in `src/App.tsx`.
+  6. Registered 5 tasks in `src/foundation-catalogue.json` (75 screens) and mapped in `src/foundation-task-map.json`.
+  7. Added 29 `blood_donors.*` control guides and added `"blood_donors"` to `deliveredHelpScreens` in `src/foundation-help.ts`.
+  8. Authored bilingual English/Urdu screen help, 8 steps, and 7 role FAQs in `src/help.ts`.
+  9. Bundled reference screenshots `public/handbook/blood_donors-en.png` and `public/handbook/blood_donors-ur.png`.
+  10. Authored unit tests in `tests/blood-donors.test.mjs` (3 test suites) and updated `tests/help-coverage.test.mjs` (75 screens).
+  11. Verified live DEV endpoints with real auth (`POST /auth/login` as `demo.labtech`, `GET /blood-center/donors?q=Ali` -> 200 OK, `GET /establishment` -> 200 OK with `blood_center` view `full` and active capability).
+  12. Full verification suite:
+      - `npm run check:help`: PASS (75 screens, 1553 controls, 693 groups, 69 FAQ seeds, 30 workspace guides).
+      - `npm run build`: PASS (`index-CH-J_ACq.js`, tsc + Vite production bundle).
+      - `npm test`: PASS (274/274 tests passing).
   1. Saved contract bundle in `contracts/blood_bank.json` with 15 endpoints, 5 realtime events, and definitions.
   2. Generated typed API contracts in `src/generated/blood_bank.ts` (15 typed methods).
   3. Implemented domain policy in `src/blood-bank-policy.ts`:
@@ -54,9 +83,9 @@ Next screen: Position 76 `blood_donors` ("Blood donors", Points: 58).
 - Next concrete step: Fetch bundle for Position 75 `blood_bank` (`get_screen_bundle('blood_bank')`) and begin implementation.
 
 ## Prior task and Git
-- Clean working tree on branch `main` at commit `b6cf9a40b7bc766452c4bf78316ea8212360d789` (19 commits ahead of `origin/main`).
-- Proposal #226 (`blood_request`) awaiting human review on /docs -> My progress.
-- Proposals awaiting human review on /docs -> My progress: #208–#226.
+- Clean working tree on branch `main` at commit `b7781fe11508309a2e4428c481239e1db55ccefe` (21 commits ahead of `origin/main`).
+- Proposal #227 (`blood_bank`) awaiting human review on /docs -> My progress.
+- Proposals awaiting human review on /docs -> My progress: #208–#227.
 
 ## Backend gaps
 #50 New: employment status activation omits its EMPLOYEE_DOCUMENT_REQUIRED refusal.

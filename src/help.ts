@@ -4326,6 +4326,92 @@ consents_doctor: {
   },
 
 
+  blood_donors: {
+    title: "Blood donors registry",
+    titleUr: "خون کے عطیہ دہندگان کا رجسٹر",
+    purpose: "Find a donor, or register one once for life with an immutable donor number; evaluate deferral status and correct particulars under PBTA Standards.",
+    purposeUr: "خون کے عطیہ دہندگان تلاش کریں، مستقل ڈونر نمبر کے ساتھ زندگی میں ایک بار رجسٹر کریں اور پی بی ٹی اے معیار کے تحت معلومات درست کریں۔",
+    steps: [
+      "Open Laboratory → Blood donors to access donor search, lifetime registration, and deferral audit history.",
+      "Enter at least 2 characters in the search bar (donor number, CNIC, mobile phone, or name) following the regulatory search-first rule.",
+      "Review search results displaying donor number, identification, blood group, donation count, and current eligibility status.",
+      "Click on any donor in the results list to view their complete audit record, past donations, and historical deferrals.",
+      "Click '+ Register New Donor' to enroll a donor once for life; mandatory fields include legal full name, biological sex, date of birth, identity document, and contact information.",
+      "If the donor was registered previously, the system intercepts duplicate submission (BLOOD_DONOR_EXISTS) and opens the existing record instead.",
+      "Review deferral alerts: permanently deferred donors must never be bled; temporary deferrals show earliest permitted donation date.",
+      "Click 'Correct Particulars' to update contact details or fix typos; every correction requires an explicit clinical reason and preserves the immutable donor number.",
+    ],
+    stepsUr: [
+      "ڈونر تلاش، تاحیات رجسٹریشن اور التواء کی تاریخ دیکھنے کے لیے لیبارٹری سے 'خون کے عطیہ دہندگان' کھولیں۔",
+      "قانونی ضابطے کے تحت تلاش کے خانے میں کم از کم 2 حروف درج کریں (ڈونر نمبر، شناختی کارڈ، فون یا نام)۔",
+      "تلاش کے نتائج میں ڈونر کا تاحیات نمبر، شناختی کارڈ، بلڈ گروپ، عطیات کی تعداد اور اہلیت کا جائزہ لیں۔",
+      "مکمل ریکارڈ، ماضی کے عطیات اور التواء کی تاریخ دیکھنے کے لیے بائیں جانب سے ڈونر منتخب کریں۔",
+      "زندگی میں ایک بار ڈونر کے اندراج کے لیے 'نیا عطیہ دہندہ رجسٹر کریں' پر کلک کریں اور نام، جنس، تاریخ پیدائش اور رابطہ درج کریں۔",
+      "اگر ڈونر پہلے سے رجسٹرڈ ہو تو نظام رجسٹریشن روک کر خودکار طور پر پرانا ریکارڈ سامنے لے آتا ہے۔",
+      "التواء کا جائزہ لیں: مستقل مسترد شدہ ڈونر سے کبھی خون نہیں لیا جا سکتا؛ عارضی التواء اگلی ممکنہ تاریخ ظاہر کرتا ہے۔",
+      "معلومات یا رابطہ نمبر میں تبدیلی کے لیے 'معلومات درست کریں' پر کلک کریں؛ ہر تصحیح کی ٹھوس وجہ درج کرنا لازمی ہے۔",
+    ],
+    faq: [
+      [
+        "Why is there no unauthenticated full list of all blood donors?",
+        "Per rule 71bc3f69b3 and PBTA regulatory standards, staff must search first using specific credentials. Browsing every donor is prohibited and each record opened is logged for compliance.",
+      ],
+      [
+        "Why is a donor registered once for life with an immutable donor number?",
+        "Per rule 40349aea7e and PBTA Standard S.1.1.1, lifetime registration ensures permanent deferrals and past adverse reactions remain irreversibly linked to the donor across all encounters.",
+      ],
+      [
+        "What happens if staff attempt to register an already-registered donor?",
+        "The server returns 409 BLOOD_DONOR_EXISTS. The application intercepts this refusal and automatically searches and opens the existing lifetime donor file.",
+      ],
+      [
+        "Can a permanently deferred donor ever donate blood?",
+        "Never. Per rule d7bf9e8097, a donor with a permanent deferral must never be offered a 'Donate' action, protecting recipient safety from chronic transmissible hazards.",
+      ],
+      [
+        "How are temporary donation deferrals displayed?",
+        "Donors with active temporary deferrals display an amber 'Deferred Today' badge and specify the earliest permitted donation date calculated from recovery intervals.",
+      ],
+      [
+        "Can the donor number ever be altered during a record correction?",
+        "No. Per rule 73b2977f2f, the donor number is immutable for life. Corrections only alter contact or demographic particulars and require a documented reason and row version.",
+      ],
+      [
+        "What happens when the blood center service is retiring?",
+        "In retiring mode (open_work), new donor registrations are hidden with a banner, but existing donor records remain fully accessible for consultation and corrections.",
+      ],
+    ],
+    faqUr: [
+      [
+        "خون کے تمام عطیہ دہندگان کی عمومی فہرست کیوں نہیں دکھائی جاتی؟",
+        "پی بی ٹی اے کے رازداری قوانین کے تحت پہلے تلاش کرنا لازمی ہے۔ تمام ڈونرز کی کھلی فہرست ممنوع ہے اور ہر فائل کھولنے کا اندراج لاگ میں ہوتا ہے۔",
+      ],
+      [
+        "عطیہ دہندہ کو زندگی میں صرف ایک بار کیوں رجسٹر کیا جاتا ہے؟",
+        "ایک ہی مستقل نمبر اس بات کی ضمانت دیتا ہے کہ ماضی کی بیماریاں یا مستقل التواء ہمیشہ محفوظ رہیں اور شناخت تبدیل کر کے خون نہ دیا جا سکے۔",
+      ],
+      [
+        "اگر پہلے سے رجسٹرڈ ڈونر کو دوبارہ رجسٹر کرنے کی کوشش کی جائے تو کیا ہوتا ہے؟",
+        "سرور رجسٹریشن مسترد کر کے پرانا ریکارڈ ظاہر کرتا ہے تاکہ ڈونر کا تاریخی ریکارڈ برقرار رہے اور دوہرا اندراج نہ ہو۔",
+      ],
+      [
+        "کیا مستقل مسترد شدہ ڈونر کبھی خون دے سکتا ہے؟",
+        "ہرگز نہیں۔ قوانین کے مطابق مستقل مسترد ڈونر سے کبھی بھی خون نہیں لیا جا سکتا تاکہ مریضوں کو خطرناک بیماریوں سے بچایا جا سکے۔",
+      ],
+      [
+        "عارضی طور پر روکے گئے ڈونر کی اہلیت کیسے ظاہر ہوتی ہے؟",
+        "سسٹم پیلے رنگ کا بیج ظاہر کرتا ہے جس میں التواء کی وجہ اور اگلی ممکنہ تاریخ واضح درج ہوتی ہے جس دن وہ دوبارہ خون دے سکتے ہیں۔",
+      ],
+      [
+        "کیا تصحیح کے دوران ڈونر نمبر بدلا جا سکتا ہے؟",
+        "نہیں۔ ڈونر نمبر تاحیات ناقابل تبدیل ہوتا ہے۔ صرف نام کے ہجے، پتہ یا فون نمبر میں درستگی ٹھوس وجہ کے ساتھ کی جا سکتی ہے۔",
+      ],
+      [
+        "جب بلڈ سنٹر کی سروس بند ہو رہی ہو تو کیا ہوتا ہے؟",
+        "ریٹائرنگ موڈ میں نئی رجسٹریشن کا بٹن چھپ جاتا ہے مگر پرانے ڈونرز کا ریکارڈ تصدیق اور علاج کے لیے دستیاب رہتا ہے۔",
+      ],
+    ],
+  },
   blood_bank: {
     title: "Blood bank management",
     titleUr: "بلڈ بینک اور خون کا انتظام",

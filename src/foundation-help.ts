@@ -20,6 +20,7 @@ export const phase1Screens = [
 const approvalScreens = ["approval_queue", "charity_approvals"];
 // Coverage grows screen by screen; Phase 1 acceptance remains separate.
 export const deliveredHelpScreens = [
+  "blood_donors",
   "blood_bank",
   "blood_request",
   "blood_sources",
@@ -85,6 +86,35 @@ const g = (
 // IDs are also attached to the actual controls. The build rejects missing
 // mappings and empty translations instead of treating a page as coverage.
 export const controlGuides: Record<string, ControlGuide> = {
+"blood_donors.refresh": g(["blood_donors"],["Refresh donors","تازہ کریں"],["Rereads establishment profile and search results.","ڈونرز اور اسٹیبلشمنٹ کی تفصیلات تازہ کرتا ہے۔"]),
+"blood_donors.register_button": g(["blood_donors"],["Register new donor","نیا ڈونر رجسٹر کریں"],["Opens the registration modal to register a blood donor once for life.","خون کا نیا عطیہ دہندہ رجسٹر کرنے کا فارم کھولتا ہے۔"]),
+"blood_donors.search_input": g(["blood_donors"],["Search query input","تلاش ان پٹ"],["Enter donor number, CNIC, mobile, or name (at least 2 characters).","ڈونر نمبر، شناختی کارڈ، موبائل یا نام درج کریں (کم از کم 2 حروف)۔"]),
+"blood_donors.search_clear": g(["blood_donors"],["Clear search query","تلاش صاف کریں"],["Clears the active search query text.","تلاش کا متن صاف کرتا ہے۔"]),
+"blood_donors.search_button": g(["blood_donors"],["Search donors button","ڈونر تلاش بٹن"],["Queries GET /blood-center/donors to look up donors matching the query.","عطیہ دہندگان تلاش کرنے کے لیے استفسار بھیجتا ہے۔"]),
+"blood_donors.empty_register_prompt": g(["blood_donors"],["Register with searched ID","تلاش کردہ شناختی نمبر سے رجسٹر کریں"],["Convenience button to open registration prefilled with searched ID.","تلاش کردہ نمبر کے ساتھ فوری رجسٹریشن فارم کھولتا ہے۔"]),
+"blood_donors.select_donor": g(["blood_donors"],["Select donor record","ڈونر منتخب کریں"],["Opens the full donor file and deferral audit record via GET /blood-center/donors/{id}.","ڈونر کا مکمل ریکارڈ اور التواء کی تاریخ کھولتا ہے۔"]),
+"blood_donors.edit_button": g(["blood_donors"],["Correct particulars button","معلومات درست کریں بٹن"],["Opens correction modal to update donor record particulars.","ڈونر کی تفصیلات درست کرنے کا فارم کھولتا ہے۔"]),
+"blood_donors.form_name": g(["blood_donors"],["Donor full name input","ڈونر کا پورا نام"],["Legal full name of the blood donor.","خون کے عطیہ دہندہ کا قانونی پورا نام۔"]),
+"blood_donors.form_sex": g(["blood_donors"],["Donor sex selector","جنس کا انتخاب"],["Donor biological sex (Male or Female) used for donation interval criteria.","ڈونر کی جنس (وقفہ کے تعین کے لیے)۔"]),
+"blood_donors.form_dob": g(["blood_donors"],["Donor date of birth","تاریخ پیدائش"],["Donor date of birth in YYYY-MM-DD format (must be 17-70 years old).","ڈونر کی تاریخ پیدائش (عمر 17 سے 70 سال)۔"]),
+"blood_donors.form_id_kind": g(["blood_donors"],["Identification kind","شناخت کی قسم"],["Type of identity document (CNIC, Passport, Proof of Registration, Other).","شناختی دستاویز کی قسم۔"]),
+"blood_donors.form_id_number": g(["blood_donors"],["Identification number","شناختی نمبر"],["Official ID document number.","سرکاری شناختی دستاویز کا نمبر۔"]),
+"blood_donors.form_phone": g(["blood_donors"],["Mobile phone number","موبائل نمبر"],["Contact mobile or landline phone number.","رابطہ کا فون یا موبائل نمبر۔"]),
+"blood_donors.form_email": g(["blood_donors"],["Email address","ای میل پتہ"],["Electronic mail address of donor.","عطیہ دہندہ کا ای میل پتہ۔"]),
+"blood_donors.form_address": g(["blood_donors"],["Postal address","ڈاک کا پتہ"],["Residential address of the blood donor.","عطیہ دہندہ کی رہائش گاہ کا پتہ۔"]),
+"blood_donors.modal_register_cancel": g(["blood_donors"],["Cancel registration","رجسٹریشن منسوخ"],["Dismisses registration modal without saving.","رجسٹریشن فارم بند کرتا ہے۔"]),
+"blood_donors.modal_register_submit": g(["blood_donors"],["Submit registration","رجسٹریشن جمع کریں"],["Sends POST /blood-center/donors with idempotency protection.","ڈونر رجسٹریشن محفوظ کرتا ہے۔"]),
+"blood_donors.form_correct_reason": g(["blood_donors"],["Correction reason input","درستگی کی وجہ"],["Mandatory explanation for correcting the donor record (at least 5 characters).","معلومات درست کرنے کی لازمی وجہ۔"]),
+"blood_donors.form_correct_name": g(["blood_donors"],["Corrected full name","درست شدہ نام"],["Updated full legal name.","درست شدہ پورا قانونی نام۔"]),
+"blood_donors.form_correct_sex": g(["blood_donors"],["Corrected sex","درست شدہ جنس"],["Updated sex selection.","درست شدہ جنس کا انتخاب۔"]),
+"blood_donors.form_correct_dob": g(["blood_donors"],["Corrected date of birth","درست شدہ تاریخ پیدائش"],["Updated birth date.","درست شدہ تاریخ پیدائش۔"]),
+"blood_donors.form_correct_id_kind": g(["blood_donors"],["Corrected ID kind","درست شدہ شناخت قسم"],["Updated identification document kind.","درست شدہ شناختی دستاویز کی قسم۔"]),
+"blood_donors.form_correct_id_number": g(["blood_donors"],["Corrected ID number","درست شدہ شناختی نمبر"],["Updated identification number.","درست شدہ شناختی کارڈ نمبر۔"]),
+"blood_donors.form_correct_phone": g(["blood_donors"],["Corrected phone number","درست شدہ فون نمبر"],["Updated telephone contact.","درست شدہ رابطہ نمبر۔"]),
+"blood_donors.form_correct_email": g(["blood_donors"],["Corrected email address","درست شدہ ای میل"],["Updated email address.","درست شدہ ای میل پتہ۔"]),
+"blood_donors.form_correct_address": g(["blood_donors"],["Corrected residential address","درست شدہ پتہ"],["Updated postal address.","درست شدہ ڈاک کا پتہ۔"]),
+"blood_donors.modal_correct_cancel": g(["blood_donors"],["Cancel correction","ترمیم منسوخ"],["Dismisses correction modal without changes.","ترمیم کا فارم بند کرتا ہے۔"]),
+"blood_donors.modal_correct_submit": g(["blood_donors"],["Save correction submit","ترمیم محفوظ کریں"],["Sends PATCH /blood-center/donors/{id} with expected_version.","ترمیم شدہ معلومات کو محفوظ کرتا ہے۔"]),
 "blood_bank.refresh": g(["blood_bank"],["Refresh blood bank","بلڈ بینک تازہ کریں"],["Rereads blood units in stock, requests worklist, and daily storage checks. Realtime events automatically update state.","بلڈ بینک کا اسٹاک، درخواستیں اور درجہ حرارت کا لاگ دوبارہ پڑھتا ہے۔ ریئل ٹائم ایونٹس سے خودکار اپ ڈیٹ ہوتا ہے۔"]),
 "blood_bank.dialog_close": g(["blood_bank"],["Dismiss dialog","ڈائیلاگ بند کریں"],["Closes the open dialog or modal without saving changes.","کھلا ہوا ڈائیلاگ غیر محفوظ شدہ تبدیلیوں کو مسترد کر کے بند کرتا ہے۔"]),
 "blood_bank.tab_stock": g(["blood_bank"],["Blood stock tab","اسٹاک ٹیب"],["Displays inventory units sorted with soonest expiry first. Expired bags are marked in red for discard.","ختم ہونے والی میعاد کے لحاظ سے ترتیب شدہ خون کے بیگز کی فہرست ظاہر کرتا ہے۔"]),
