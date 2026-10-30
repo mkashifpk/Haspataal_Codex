@@ -226,6 +226,7 @@ export function checkHelp({
       "LabVerification",
       "CriticalResultsBench",
       "CriticalResultsDoctor",
+      "CriticalResultsWard",
       "MedicationOrdersDoctor",
       "OwnMedicinesWard",
       "OwnMedicinesPharmacy",

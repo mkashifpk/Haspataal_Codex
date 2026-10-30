@@ -1466,6 +1466,92 @@ own_medicines_pharmacy: {
     ]
   ]
 },
+critical_results_ward: {
+  title: "Critical results of my patients",
+  titleUr: "میرے مریضوں کے ہنگامی نتائج",
+  purpose: "On the inpatient ward, nurses track critical laboratory and imaging results for admitted patients, verify telephone read-backs when alerted by diagnostic benches, and ensure the treating doctor is immediately notified for emergency medical intervention. Urdu remains a draft until a native speaker reviews it.",
+  purposeUr: "ان ڈور وارڈ میں، نرسیں داخل مریضوں کے ہنگامی لیبارٹری اور ریڈیالوجی نتائج پر نظر رکھتی ہیں، تشخیصی بنچ سے فون پر اطلاع ملنے پر نتائج واپس پڑھ کر سناتی ہیں اور ہنگامی طبی کارروائی کے لیے فوری معالج کو مطلع کرتی ہیں۔ اردو انسانی جائزے تک مسودہ ہے۔",
+  steps: [
+    "Open Ward Nursing → Critical results of my patients. The screen displays the inpatient critical results log showing all critical diagnostic alerts for admitted patients.",
+    "Filter by Open / Communicating only to concentrate on urgent active findings requiring clinical action, or uncheck the toggle to inspect the full audit history including finalized results.",
+    "Filter by diagnostic source (Laboratory vs Imaging / Radiology) or enter a known Admission ID to isolate critical results for an individual patient chart.",
+    "Watch for the red OVERDUE badge and prominent alert banner indicating results where clinician communication or doctor action has exceeded hospital turnaround limits.",
+    "Adhere strictly to the inpatient hand-off policy (rule:abc8a2c23d): when the laboratory or radiology department phones the ward, verify the patient identity and read the critical values back word-for-word.",
+    "Immediately notify the treating or on-call doctor in person or by phone; never delay emergency escalation or assume another clinician has already seen the result.",
+    "Click Details & Log on any row to open the complete critical result modal (GET /critical-results/{id}), reviewing the exact finding, priority notifiable disease flags, and full communication history.",
+    "Confirm doctor acknowledgement: once the physician enters their clinical action note, the alert updates to Acknowledged status. Keyboard zoom (100–250%, reset 100%) and contextual F1 help are supported across all views."
+  ],
+  stepsUr: [
+    "وارڈ نرسنگ سے میرے مریضوں کے ہنگامی نتائج کھولیں۔ اسکرین پر داخل مریضوں کے تمام ہنگامی تشخیصی نتائج کا لاگ ظاہر ہوتا ہے۔",
+    "صرف کھلے اور زیر اطلاع نتائج چنیں تاکہ ان نتائج پر توجہ رہے جن پر فوری کارروائی لازم ہے، یا تمام پرانے حتمی نتائج دیکھنے کے لیے نشان ہٹا دیں۔",
+    "تشخیصی ذریعہ (لیبارٹری بمقابلہ ریڈیالوجی) سے فلٹر کریں یا کسی ایک مریض کے چارٹ کے نتائج دیکھنے کے لیے داخلہ نمبر درج کریں۔",
+    "سرخ تاخیر شدہ (OVERDUE) بیج اور انتباہی بینر پر نظر رکھیں جو انتباہ کرتے ہیں کہ ڈاکٹر کو اطلاع کا وقت ہسپتال کے مقررہ وقت سے تجاوز کر گیا ہے۔",
+    "وارڈ ہینڈ آف پالیسی (اصول abc8a2c23d) پر سختی سے عمل کریں: جب لیب یا ریڈیالوجی وارڈ کو فون کرے، مریض کی شناخت کی تصدیق کریں اور ہنگامی قدریں لفظ بہ لفظ واپس پڑھ کر سنائیں۔",
+    "علاج کرنے والے یا ڈیوٹی ڈاکٹر کو فوری روبرو یا فون پر مطلع کریں؛ ہنگامی اطلاع میں تاخیر نہ کریں اور یہ فرض نہ کریں کہ کسی دوسرے نے دیکھ لیا ہوگا۔",
+    "کسی بھی سطر پر تفصیل و ریکارڈ پر کلک کر کے مکمل مکالمہ کھولیں (GET /critical-results/{id})، جہاں اصل نتیجہ، وبائی بیماری اور رابطے کی مکمل تاریخ دیکھی جا سکتی ہے۔",
+    "ڈاکٹر کی تصدیق چیک کریں: معالج کے کارروائی درج کرنے پر نتیجہ تسلیم شدہ (Acknowledged) ہو جاتا ہے۔ کی بورڈ زوم (100 تا 250 فیصد) اور ایف ون مدد ہر جگہ دستیاب ہے۔"
+  ],
+  faq: [
+    [
+      "What constitutes a critical diagnostic result?",
+      "A critical (or panic) result is a laboratory measurement or imaging finding that indicates an immediate, life-threatening condition requiring rapid clinical evaluation and emergency medical intervention."
+    ],
+    [
+      "Why is read-back mandatory when receiving a critical result by telephone?",
+      "Under rule:abc8a2c23d and international patient safety standards, verbal transmission of clinical values carries high risk of transcription error. Reading back the patient identity, test, and exact values ensures zero miscommunication before emergency treatment begins."
+    ],
+    [
+      "What is the difference between Open, Communicated, and Acknowledged status?",
+      "Open means the critical finding has been released by the bench and is awaiting nurse/clinician notification. Communicated means someone responsible (e.g. ward nurse or doctor) has been told. Acknowledged means the responsible doctor has formally reviewed the result and documented the clinical action taken."
+    ],
+    [
+      "What does the red OVERDUE badge mean and what action must the nurse take?",
+      "OVERDUE indicates that the result has remained in Open or Communicated state past the hospital turnaround threshold (typically 30 minutes from reporting). The nurse must immediately escalate to the treating doctor or nursing supervisor."
+    ],
+    [
+      "What should the ward nurse do if the primary doctor is unavailable?",
+      "If the primary treating doctor cannot be reached immediately, escalate to the ward's on-call physician, medical registrar, or the medical superintendent according to the hospital emergency critical results policy."
+    ],
+    [
+      "How are priority notifiable diseases handled on critical results?",
+      "Findings matching mandatory reporting conditions (such as Dengue, Cholera, or Tuberculosis) display a Priority Disease flag, indicating that infection prevention and the public health authority must be notified in parallel."
+    ],
+    [
+      "How does real-time event communication keep this board updated?",
+      "The screen subscribes to the critical_result.updated WebSocket event stream. Whenever a lab tech logs a phone call or a doctor acknowledges a finding, the ward display updates instantly without requiring manual browser refreshes."
+    ]
+  ],
+  faqUr: [
+    [
+      "ہنگامی تشخیصی نتیجہ (Critical Result) کیا ہوتا ہے؟",
+      "ہنگامی یا پینک رزلٹ وہ لیبارٹری یا ایکسرے فائنڈنگ ہے جو مریض کی جان کے فوری خطرے کی نشاندہی کرتی ہے اور جس پر فوری طبی مداخلت لازمی ہوتی ہے۔"
+    ],
+    [
+      "فون پر ہنگامی نتیجہ وصول کرتے وقت واپس پڑھ کر سنانا (Read-back) کیوں لازمی ہے؟",
+      "اصول abc8a2c23d اور مریضوں کے عالمی حفاظتی معیار کے تحت زبانی گفتگو میں غلط فہمی کا خطرہ ہوتا ہے۔ مریض کا نام اور قدریں واپس دہرانے سے فوری علاج سے قبل مکمل درستی یقینی بنتی ہے۔"
+    ],
+    [
+      "کھلا (Open)، مطلع شدہ (Communicated) اور تسلیم شدہ (Acknowledged) میں کیا فرق ہے؟",
+      "کھلا کا مطلب ہے کہ بنچ نے رزلٹ جاری کر دیا ہے اور عملے کو اطلاع کا منتظر ہے۔ مطلع شدہ کا مطلب ہے کہ نرس یا ڈاکٹر کو فون پر بتا دیا گیا ہے۔ تسلیم شدہ کا مطلب ہے کہ ڈاکٹر نے دیکھ کر اپنی کارروائی ریکارڈ کر دی ہے۔"
+    ],
+    [
+      "سرخ تاخیر شدہ (OVERDUE) بیج کا کیا مطلب ہے اور نرس کو کیا کرنا چاہیے؟",
+      "تاخیر شدہ کا مطلب ہے کہ نتیجہ ہسپتال کے مقررہ حفاظتی وقت (عموماً 30 منٹ) کے بعد بھی زیر التواء ہے۔ نرس کو فوری طور پر معالج یا نرسنگ سپروائزر کو الرٹ کرنا چاہیے۔"
+    ],
+    [
+      "اگر بنیادی معالج دستیاب نہ ہو تو نرس کیا کرے؟",
+      "اگر بنیادی ڈاکٹر فوری دستیاب نہ ہو تو ہسپتال کی پالیسی کے تحت وارڈ کے ڈیوٹی ڈاکٹر، آن کال رجسٹرار یا میڈیکل سپرنٹنڈنٹ سے فوری رابطہ کریں۔"
+    ],
+    [
+      "ہنگامی نتائج میں وبائی یا قابل اطلاع بیماریوں کو کیسے سنبھالا جاتا ہے؟",
+      "حکومتی قواعد کے تحت قابل اطلاع امراض (جیسے ڈینگی، ہیضہ یا ٹی بی) پر ترجیحی بیماری کا نشان ظاہر ہوتا ہے تاکہ انفیکشن کنٹرول اور محکمہ صحت کو بھی بروقت اطلاع دی جا سکے۔"
+    ],
+    [
+      "لائیو ایونٹس سے یہ بورڈ کیسے تازہ رہتا ہے؟",
+      "یہ اسکرین critical_result.updated ایونٹس کو سنتی ہے۔ جب بھی لیب عملہ فون کا اندراج کرے یا ڈاکٹر رزلٹ تسلیم کرے، وارڈ کا بورڈ بغیر ریفریش کیے خودکار تازہ ہو جاتا ہے۔"
+    ]
+  ]
+},
  bed_matrix: {
   title: "Live bed matrix",
   titleUr: "بستروں کی تازہ صورت حال",

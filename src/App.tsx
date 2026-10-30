@@ -56,6 +56,7 @@ import { RadiologyWorklist } from './screens/RadiologyWorklist';
 import { LabVerification } from './screens/LabVerification';
 import { CriticalResultsDoctor, DoctorCriticalAlert } from './screens/CriticalResultsDoctor';
 import { CriticalResultsBench } from './screens/CriticalResultsBench';
+import { CriticalResultsWard } from './screens/CriticalResultsWard';
 import { ExternalReferral } from "./screens/ExternalReferral";
 import { ReferralRegister } from "./screens/ReferralRegister";
 import { PatientEducation } from "./screens/PatientEducation";
@@ -127,6 +128,7 @@ const labels: Record<string, [string, string, string]> = {
   critical_results_radiology: ["Critical results to tell","فوری بتانے والے اہم نتائج","!"],
   critical_results_verifier: ['Critical results to tell','فوری بتانے والے اہم نتائج','!'],
   critical_results_bench: ['Critical results to tell','فوری بتانے والے اہم نتائج','!'],
+  critical_results_ward: ["Critical results of my patients","میرے مریضوں کے ہنگامی نتائج","!"],
   queue_management: ["Queue management", "قطاروں کا انتظام", "≡"],
   refund_waiver_credit: [
     "Refund / waiver / credit",
@@ -168,6 +170,7 @@ const frontDeskScreens = new Set([
   'wristbands_ward',
   'own_medicines_ward',
   'own_medicines_pharmacy',
+  'critical_results_ward',
   'bed_matrix',
   'pending_admissions',
   'duty_roster',
@@ -674,6 +677,7 @@ export function App() {
       rx_queue: ["pharmacy.queue.view", "prescription.view"],
       dispense: ["pharmacy.dispense", "prescription.view", "ipd.discharge.clear_pharmacy"],
       own_medicines_pharmacy: ["patient.own_medicine.identify", "patient.own_medicine.record", "medication.safety.view", "prescription.view"],
+      critical_results_ward: ["diagnostics.critical.view", "patient.view"],
       order_queries: ["prescription.view", "prescription.query.raise"],
       otc: ["pharmacy.otc.sell", "pharmacy.formulary.view"],
       facility_profile: ["establishment.manage"],
@@ -838,6 +842,7 @@ export function App() {
   'wristbands_ward',
   'own_medicines_ward',
   'own_medicines_pharmacy',
+  'critical_results_ward',
   'bed_matrix',
   'pending_admissions',
   'duty_roster',
@@ -845,7 +850,7 @@ export function App() {
     'imaging_outsourced',
     'radiology_worklist',
     ...(user?.permissions.some(p => ['diagnostics.quality.view','lab.requisition.create','imaging.order.create','lab.requisition.view'].includes(p)) ? ['diagnostic_services_list'] : []),
-    ...(user?.permissions.includes('diagnostics.critical.view') ? ['critical_results_bench','critical_results_verifier','critical_results_doctor','critical_results_radiology'] : []),
+    ...(user?.permissions.includes('diagnostics.critical.view') ? ['critical_results_bench','critical_results_verifier','critical_results_doctor','critical_results_radiology','critical_results_ward'] : []),
     ...(user?.permissions.some(p => ['lab.result.verify', 'lab.result.view'].includes(p)) ? ['lab_verification'] : []),
     ...(user?.permissions.includes("clinical.encounter.view") || user?.permissions.includes("clinical.encounter.create") ? ["consultation"] : []),
     ...(user?.permissions.includes("prescription.view") || user?.permissions.includes("prescription.create") ? ["eprescription"] : []),
@@ -888,7 +893,7 @@ export function App() {
         )))) &&
       est?.views.screens.find((v) => v.screen_id === id)?.view !== "hidden" &&
       (id !== "imaging_quality_setup" || ["full","open_work","records"].includes(est?.views.screens.find(v=>v.screen_id===id)?.view || "")) &&
-      (!["mar","verbal_orders_ward","vitals_tracker","patient_education_ward","nursing_assessment","my_beds","doctor_inpatients","cost_estimates_admissions","consents_admissions","wristbands_admissions","wristbands_ward","own_medicines_ward","own_medicines_pharmacy","bed_matrix","pending_admissions","imaging_repeats","imaging_outsourced","critical_results_radiology","radiology_worklist","rx_queue","dispense","order_queries","otc","charity_override","lab_only_walkin","lab_bench","lab_send_outs","lab_verification","critical_results_bench","critical_results_verifier","critical_results_doctor"].includes(id) || ["full", "open_work", "records"].includes(est?.views.screens.find(v => v.screen_id === id)?.view || "")),
+      (!["mar","verbal_orders_ward","vitals_tracker","patient_education_ward","nursing_assessment","my_beds","doctor_inpatients","cost_estimates_admissions","consents_admissions","wristbands_admissions","wristbands_ward","own_medicines_ward","own_medicines_pharmacy","bed_matrix","pending_admissions","imaging_repeats","imaging_outsourced","critical_results_radiology","radiology_worklist","rx_queue","dispense","order_queries","otc","charity_override","lab_only_walkin","lab_bench","lab_send_outs","lab_verification","critical_results_bench","critical_results_verifier","critical_results_doctor","critical_results_ward"].includes(id) || ["full", "open_work", "records"].includes(est?.views.screens.find(v => v.screen_id === id)?.view || "")),
   );
   const view = est?.views.workspaces.find(
     (v) => v.workspace === workspace,
@@ -1278,6 +1283,7 @@ export function App() {
               {screen === 'critical_results_radiology' && est && <CriticalResultsBench screenId="critical_results_radiology" key={user.user_id} user={user} connected={connected} stream={stream} establishment={est} timeZone={meta?.hospital_timezone}/>}
               {screen === 'critical_results_verifier' && est && <CriticalResultsBench screenId="critical_results_verifier" key={user.user_id} user={user} connected={connected} stream={stream} establishment={est} timeZone={meta?.hospital_timezone}/>}
               {screen === 'critical_results_bench' && est && <CriticalResultsBench key={user.user_id} user={user} connected={connected} stream={stream} establishment={est} timeZone={meta?.hospital_timezone}/>}
+              {screen === 'critical_results_ward' && est && <CriticalResultsWard key={user.user_id} user={user} connected={connected} stream={stream} establishment={est} timeZone={meta?.hospital_timezone}/>}
               {screen === "patient_documents" && <PatientDocuments user={user} revision={revision} />}
               {screen === "rx_queue" && <PrescriptionQueue key={user.user_id} permissions={user.permissions} connected={connected} stream={stream} timeZone={meta?.hospital_timezone} view={est?.views.screens.find(v => v.screen_id === "rx_queue")?.view || "hidden"} onDispense={nav.includes("dispense")?id=>{if(navigate("dispense"))setPharmacySelection({userId:user.user_id,prescriptionId:id})}:undefined} />}
               {screen === "dispense" && est && <Dispense onCashShift={nav.includes("my_cash_shift")?()=>{navigate("my_cash_shift")}:undefined} initialAssistance={pharmacySelection?.userId===user.user_id?pharmacySelection.assistance:undefined} onCharity={nav.includes("charity_override")?id=>{if(navigate("charity_override"))setCharitySelection({userId:user.user_id,prescriptionId:id})}:undefined} key={user.user_id} user={user} connected={connected} stream={stream} establishment={est} initialId={pharmacySelection?.userId===user.user_id?pharmacySelection.prescriptionId:undefined} onQueue={nav.includes("rx_queue")?()=>{navigate("rx_queue")}:undefined} onQuery={nav.includes("order_queries")?(id,itemId)=>{if(navigate("order_queries"))setQuerySelection({userId:user.user_id,prescriptionId:id,itemId})}:undefined} />}
