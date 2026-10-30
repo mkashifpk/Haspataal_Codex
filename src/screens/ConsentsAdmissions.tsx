@@ -70,21 +70,25 @@ export function ConsentsAdmissions({
   connected,
   stream,
   timeZone,
+  screenId = "consents_admissions",
 }: {
   user: ClinicalUser;
   establishment: EstablishmentOut;
   connected: boolean;
   stream: string;
   timeZone?: string;
+  screenId?: "consents_admissions" | "consents_ward";
 }) {
-  const can = (p: string) => user.permissions.includes(p),
+  const isWard = screenId === "consents_ward",
+    can = (p: string) => user.permissions.includes(p),
     view = establishment.views.screens.find(
-      (s) => s.screen_id === "consents_admissions",
+      (s) => s.screen_id === (screenId || "consents_admissions"),
     )?.view,
     access = consentAccess(view, user.permissions),
     live = connected && stream === "Live";
   const [revision, setRevision] = useState(0),
     [mine, setMine] = useState(false),
+    [category, setCategory] = useState<string>(""),
     [find, setFind] = useState(""),
     [status, setStatus] = useState(""),
     [known, setKnown] = useState(""),
@@ -117,14 +121,16 @@ export function ConsentsAdmissions({
     () =>
       access.read
         ? c.listConsents({
-            category: "General",
+            category: isWard
+              ? (category ? (category as c.ConsentBriefOut["category"]) : undefined)
+              : "General",
             limit: 1000,
             status: status
               ? (status as c.ConsentBriefOut["status"])
               : undefined,
           })
         : Promise.resolve([]),
-    [revision, status, access.read],
+    [revision, status, category, isWard, access.read],
   );
   const forms = useLoad(
     () => (access.read ? c.listForms() : Promise.resolve([])),
@@ -749,12 +755,21 @@ export function ConsentsAdmissions({
     >
       <div className="bed-board-heading">
         <div>
-          <h1>{t("General consent at admission", "داخلے پر عمومی رضامندی")}</h1>
+          <h1>
+            {isWard
+              ? t("Consents of my patients", "میرے مریضوں کی رضامندی")
+              : t("General consent at admission", "داخلے پر عمومی رضامندی")}
+          </h1>
           <p>
-            {t(
-              "Prepare in the patient’s language, explain, record the decision, then scan the signed paper.",
-              "مریض کی زبان میں تیار، سمجھائیں، فیصلہ درج، پھر دستخط شدہ کاغذ اسکین۔",
-            )}
+            {isWard
+              ? t(
+                  "The general consent still missing on the ward, and the signed forms to scan.",
+                  "وارڈ میں ابھی تک غیر موجود عمومی رضامندی اور دستخط شدہ فارموں کو اسکین کرنا۔",
+                )
+              : t(
+                  "Prepare in the patient’s language, explain, record the decision, then scan the signed paper.",
+                  "مریض کی زبان میں تیار، سمجھائیں، فیصلہ درج، پھر دستخط شدہ کاغذ اسکین۔",
+                )}
           </p>
         </div>
         <button
@@ -792,10 +807,15 @@ export function ConsentsAdmissions({
       )}
       {view === "open_work" && (
         <p className="notice">
-          {t(
-            "No new inpatient admissions from now on. Consent for existing stays continues.",
-            "اب نئے داخلے نہیں؛ موجودہ داخلوں کی رضامندی جاری۔",
-          )}
+          {isWard
+            ? t(
+                "No new consents from now on. Existing consents and scanning continue.",
+                "اب نئی رضامندی نہیں؛ موجودہ دستاویزات اور اسکین جاری۔",
+              )
+            : t(
+                "No new inpatient admissions from now on. Consent for existing stays continues.",
+                "اب نئے داخلے نہیں؛ موجودہ داخلوں کی رضامندی جاری۔",
+              )}
         </p>
       )}
       <div className="consent-layout">
@@ -916,7 +936,37 @@ export function ConsentsAdmissions({
             </select>
           </Field>
           <LoadState {...stays} retry={stays.reload} />
-          <h3>{t("General consent register", "عمومی رضامندی رجسٹر")}</h3>
+          <h3>
+            {isWard
+              ? t("Consent register", "رضامندی رجسٹر")
+              : t("General consent register", "عمومی رضامندی رجسٹر")}
+          </h3>
+          {isWard && (
+            <Field label={t("Consent category", "رضامندی کی قسم")}>
+              <select
+                data-field="category"
+                data-help="consents.filters"
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                disabled={locked}
+              >
+                <option value="">{t("All categories", "تمام اقسام")}</option>
+                {[
+                  "General",
+                  "Procedure",
+                  "Anaesthesia",
+                  "Transfusion",
+                  "HighRiskTreatment",
+                  "AgainstMedicalAdvice",
+                  "Other",
+                ].map((cat) => (
+                  <option key={cat} value={cat}>
+                    {tr(cat)}
+                  </option>
+                ))}
+              </select>
+            </Field>
+          )}
           <Field label={t("Find a consent or patient", "رضامندی یا مریض تلاش")}>
             <input
               data-help="consents.filters"

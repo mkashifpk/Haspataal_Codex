@@ -2740,6 +2740,92 @@ critical_results_ward: {
     faq: [["How do I find the next patient?", "Use the server-ordered queue, verify name/MRN/slip and Review prescription. Local search narrows it without reprioritizing."], ["Why is a prescription absent?", "This list contains pending hospital-pharmacy work only. Clear local search, Refresh prescriptions and verify the doctor's destination/status. An external-market, cancelled or completed order is not pending. Ask the prescriber for its actual numeric ID to read the permitted record; never re-prescribe to repair a failed read."], ["What do the safety badges mean?", "High-alert needs a second counter checker. Verbal/Telephone requires read-back/countersignature review. Open queries block the affected lines until the doctor's answer; opening the detail does not clear them."], ["What can a partial role do?", "Queue permission permits list/badges; prescription.view separately permits details. The active workspace handbook and service gate must also permit this screen. Records mode offers known-ID review. No dispensing is offered by this read-only screen."], ["What if connection or a read fails?", "Loading/errors hide stale data. Reconnect, then Refresh prescriptions or Try again. Confirm the selected identity after recovery. No order/payment is repeated. F1 works from the lookup field; keyboard/Settings zoom share100–250%."]],
     faqUr: [["اگلا مریض کیسے تلاش کروں؟", "سرور ترتیب قطار میں نام، ایم آر این اور پرچی چیک، پھر نسخہ دیکھیں۔ مقامی تلاش چھانٹتی، ترجیح نہیں بدلتی۔"], ["نسخہ غائب کیوں ہے؟", "صرف باقی ہسپتال فارمیسی کام۔ تلاش صاف، تازہ کریں اور معالج کی منزل/حالت چیک۔ بیرونی، منسوخ یا مکمل نسخہ باقی نہیں۔ اصل مثبت عددی نمبر معالج سے لیں؛ خرابی پر نیا نسخہ نہ بنائیں۔"], ["حفاظتی نشان کیا ہیں؟", "زیادہ خطرے میں دوسرا جانچنے والا؛ زبانی/ٹیلی فون میں دہرانا و دستخط۔ سوال متعلقہ سطریں معالج کے جواب تک روکتا؛ تفصیل کھولنا جواب نہیں۔"], ["جزوی کردار کیا کر سکتا ہے؟", "قطار اجازت فہرست/نشان، نسخہ دیکھنے کی الگ اجازت تفصیل۔ مجاز کام کی رہنمائی و خدمت بھی لازم۔ صرف ریکارڈ میں اصل نمبر۔ یہاں دوا فراہم نہیں ہوتی۔"], ["رابطہ یا پڑھنے میں خرابی ہو تو؟", "پرانی معلومات چھپتی۔ رابطہ بحال کرکے تازہ یا دوبارہ کوشش کریں، اصل شناخت چیک۔ حکم/رقم نہیں دہرتی۔ شناخت خانے سے ایف۱؛ مشترک زوم100تا250۔"]],
   },
+consents_ward: {
+  title: "Consents of my patients",
+  titleUr: "میرے مریضوں کی رضامندی",
+  purpose: "On the inpatient ward, nurses ensure general admission consents are completed, track missing surgical or anaesthesia consents before transfer to the operating theatre, and scan signed paper consent documents into the patient record. Urdu remains a draft until a native speaker reviews it.",
+  purposeUr: "ان ڈور وارڈ میں، نرسیں داخلے کی عمومی رضامندی مکمل کراتی ہیں، آپریشن تھیٹر منتقلی سے قبل جراحی اور بے ہوشی کی رضامندیوں کا تعاقب کرتی ہیں، اور دستخط شدہ کاغذات مریض کے ریکارڈ میں اسکین کرتی ہیں۔ اردو انسانی جائزے تک مسودہ ہے۔",
+  steps: [
+    "Open Ward Nursing → Consents of my patients. The screen displays the inpatient consent worklist showing pending general admission consents, missing procedure/anaesthesia consents, and signed paper forms awaiting scanning.",
+    "Toggle 'My patients and forms' to isolate admissions assigned to your current ward shift, or view all ward inpatients to coordinate team handovers.",
+    "Inspect the waiting work items: overdue items are highlighted with a prominent red OVERDUE badge indicating that surgery or admission stay is proceeding without mandatory signed consent.",
+    "Open prepared consent for any inpatient with an existing draft (rule:e9d9f576df), or click 'Prepare for this admission' to generate the required general or procedure consent form.",
+    "Select the hospital consent form and patient's preferred language (English, Urdu, or regional language with RTL Nastaliq layout). Enter the clinical need for admission, estimated length of stay, and estimated financial charges.",
+    "Print the consent document (GET /consents/{id}/print-payload): verify hospital branding, patient identity flags, and Nastaliq Urdu formatting. Read aloud to illiterate patients and answer all questions.",
+    "Record the decision: verify eligible signers from who_decides (adult patient, or ordered priority decision makers for minors/incapacitated patients). Record signature or thumb impression, witness details, or emergency clinical note.",
+    "Scan and attach physical paper: upload the signed/thumb-printed paper document via patient documents (POST /patients/{id}/documents) and link it using 'Attach the signed scan' (POST /consents/{id}/scan). Realtime updates refresh on consent.updated."
+  ],
+  stepsUr: [
+    "وارڈ نرسنگ سے میرے مریضوں کی رضامندی کھولیں۔ اسکرین پر وارڈ کا منتظر کام نظر آتا ہے جس میں داخلے کی عمومی رضامندی، جراحی و بے ہوشی کی مطلوبہ رضامندیاں اور اسکین کے منتظر دستخط شدہ کاغذات شامل ہیں۔",
+    "'میرے مریض اور فارم' کا انتخاب کر کے اپنی شفٹ کے مریض الگ کریں یا ٹیم کے باہمی تعاون کے لیے وارڈ کے تمام داخل مریضوں کا کام دیکھیں۔",
+    "منتظر کام کی فہرست دیکھیں: سرخ تاخیر شدہ (OVERDUE) بیج ان مریضوں کو نمایاں کرتا ہے جن کی جراحی یا وارڈ قیام بغیر دستخط شدہ رضامندی کے آگے بڑھ رہا ہے۔",
+    "کسی بھی مریض کے لیے پہلے سے تیار مسودہ کھولیں (اصول e9d9f576df)، یا نئے داخلے کے لیے مطلوبہ عمومی یا طریقہ کار رضامندی تیار کرنے کے لیے 'اس داخلے کی رضامندی تیار' پر کلک کریں۔",
+    "ہسپتال کا تصدیق شدہ فارم اور مریض کی مادری زبان (انگریزی یا نستعلیق اردو) منتخب کریں۔ داخلے کی ضرورت، متوقع قیام کے دن اور متوقع اخراجات درج کریں۔",
+    "رضامندی فارم پرنٹ کریں (GET /consents/{id}/print-payload): ہسپتال کا عنوان، مریض کی شناخت اور اردو متن کی تصدیق کریں۔ ناخواندہ مریضوں کو پڑھ کر سنائیں اور تمام سوالات کے جواب دیں۔",
+    "فیصلہ درج کریں: who_decides سے مجاز فیصلہ کنندہ منتخب کریں (بالغ مریض خود، یا نابالغ/معذور مریض کے لیے ترجیحی سرپرست)۔ دستخط، انگوٹھا، گواہ یا ہنگامی ڈاکٹر نوٹ ریکارڈ کریں۔",
+    "کاغذی دستاویز اسکین اور منسلک کریں: دستخط شدہ یا انگوٹھے والا اصل کاغذ اپ لوڈ کریں (POST /patients/{id}/documents) اور 'دستخط شدہ اسکین کا ربط' سے منسلک کریں۔ consent.updated سے بورڈ ازخود تازہ ہوتا ہے۔"
+  ],
+  faq: [
+    [
+      "What is the ward nurse's responsibility regarding patient consents?",
+      "Ward nurses verify that every admitted inpatient has a valid signed General Consent on file, ensure pre-operative surgical and anaesthesia consents are signed before transferring a patient to the Operating Theatre, and upload scanned paper copies to the electronic chart."
+    ],
+    [
+      "Can a ward nurse explain and take informed surgical or anaesthesia consent?",
+      "No. Under rule:f811c03843, informed consent for surgeries, anaesthesia, or high-risk procedures must be explained and taken by a registered doctor (or anaesthesia team doctor). The nurse coordinates verification, checks the file, and assists with paper scanning."
+    ],
+    [
+      "How is language support handled for patients who speak only Urdu?",
+      "The system formats consent forms with bilingual Nastaliq Urdu typography in right-to-left (RTL) reading direction (rule:fea5622fc5). If the patient cannot read, the nurse or doctor must read the entire text aloud in the presence of a witness before obtaining signature or thumb impression."
+    ],
+    [
+      "Who is legally eligible to sign consent for a minor or unconscious patient?",
+      "Eligibility is strictly governed by the server's who_decides policy (rule:cb2f327ee7). For minors, patient signing is disabled and only authorized guardians in defined priority (Parent, Guardian, Next of Kin) may sign. Staff must never guess or alter legal age limits."
+    ],
+    [
+      "What is the procedure when a patient verbally refuses consent?",
+      "Select 'Record informed refusal'. Document the patient's exact words in the refusal reason and ensure a staff witness is recorded (rule:b7bacc1ffb). Notify the primary treating consultant immediately."
+    ],
+    [
+      "How does the emergency consent procedure operate when family is unreachable?",
+      "In life-threatening emergencies where the patient lacks capacity and no decision maker is present, a registered doctor records an EmergencyNote documenting the clinical emergency. If required by hospital policy, a second registered PMDC physician must concur."
+    ],
+    [
+      "Can a signed consent be modified after it has been finalized?",
+      "No. A decided consent (Given, Refused) is permanent (rule:8b7301ca0f). If circumstances change or the patient changes their mind, withdraw the existing consent with an explicit clinical justification and prepare a new consent form."
+    ]
+  ],
+  faqUr: [
+    [
+      "مریضوں کی رضامندی میں وارڈ نرس کی بنیادی ذمہ داری کیا ہے؟",
+      "وارڈ نرس کی ذمہ داری ہے کہ وہ ہر داخل مریض کے پاس عمومی داخلہ رضامندی کی تصدیق کرے، آپریشن تھیٹر منتقلی سے قبل جراحی اور بے ہوشی کی رضامندی مکمل ہونے کی جانچ کرے، اور دستخط شدہ کاغذات اسکین کر کے ریکارڈ میں منسلک کرے۔"
+    ],
+    [
+      "کیا وارڈ نرس جراحی یا بے ہوشی کی باخبر رضامندی لے سکتی ہے؟",
+      "نہیں۔ اصول f811c03843 کے تحت جراحی، بے ہوشی یا پرخطر طریقۂ علاج کی رضامندی صرف بااختیار رجسٹرڈ ڈاکٹر یا بے ہوشی ٹیم لے سکتی ہے۔ نرس فارم کی موجودگی کی جانچ اور اسکیننگ میں مدد کرتی ہے۔"
+    ],
+    [
+      "صرف اردو بولنے اور سمجھنے والے مریضوں کے لیے کیا انتظام ہے؟",
+      "نظام رضامندی فارم دائیں سے بائیں (RTL) خطِ نستعلیق میں پرنٹ کرتا ہے (اصول fea5622fc5)۔ اگر مریض ناخواندہ ہو تو عملہ گواہ کی موجودگی میں پورا متن پڑھ کر سناتا ہے اور سوالات کے بعد دستخط یا انگوٹھا لیتا ہے۔"
+    ],
+    [
+      "نابالغ یا بے ہوش مریض کی رضامندی پر کون دستخط کر سکتا ہے؟",
+      "اہلیت کا فیصلہ سرور کی who_decides پالیسی کرتی ہے (اصول cb2f327ee7)۔ نابالغ مریض کے لیے خود دستخط کرنا بند ہوتا ہے اور صرف ترتیب وار مجاز سرپرست (والدین، ولی وغیرہ) ہی دستخط کر سکتے ہیں۔"
+    ],
+    [
+      "اگر مریض زبانی طور پر علاج سے انکار کر دے تو کیا طریقہ کار ہے؟",
+      "'باخبر انکار کا اندراج' منتخب کریں۔ مریض کے اصل الفاظ میں وجہ درج کریں اور گواہ کے کوائف لازمی شامل کریں (اصول b7bacc1ffb)۔ معالج کو فوری آگاہ کریں۔"
+    ],
+    [
+      "جب لواحقین نہ ملیں تو ہنگامی رضامندی (Emergency Note) کیسے کام کرتی ہے؟",
+      "جان لیوا صورتحال میں جب مریض ہوش میں نہ ہو اور سرپرست نہ ملے تو رجسٹرڈ ڈاکٹر ہنگامی نوٹ درج کرتا ہے۔ ہسپتال پالیسی کے تحت دوسرے تصدیق کنندہ پی ایم ڈی سی ڈاکٹر کی توثیق درکار ہوتی ہے۔"
+    ],
+    [
+      "کیا حتمی ہونے کے بعد رضامندی میں کوئی ترمیم ہو سکتی ہے؟",
+      "نہیں۔ حتمی رضامندی (Given یا Refused) مستقل ہوتی ہے (اصول 8b7301ca0f)۔ اگر مریض رائے بدلے تو پرانی رضامندی تحریری وجہ کے ساتھ واپس (Withdraw) کی جاتی ہے اور بالکل نیا فارم تیار کیا جاتا ہے۔"
+    ]
+  ]
+},
  home_visit_record:{
   title: "Record a home visit",
   titleUr: "گھر کے دورے کا اندراج",

@@ -20,14 +20,18 @@ export const consentAccess = (view: string | undefined, p: string[]) => ({
     p.includes("consent.record"),
 });
 export const consentSnapshot = (c: ConsentOut) => JSON.stringify(c);
-export function consentActionAllowed(c: ConsentOut, action: ConsentAction) {
+export function consentActionAllowed(
+  c: ConsentOut,
+  action: ConsentAction,
+  screenCategory?: string,
+) {
+  if (screenCategory && c.category !== screenCategory) return false;
   return (
-    c.category === "General" &&
-    ((["edit", "sign", "refuse", "cancel"].includes(action) &&
+    (["edit", "sign", "refuse", "cancel"].includes(action) &&
       c.status === "Draft") ||
-      (action === "withdraw" && c.status === "Given") ||
-      (action === "scan" &&
-        ["Given", "Refused", "Withdrawn"].includes(c.status)))
+    (action === "withdraw" && c.status === "Given") ||
+    (action === "scan" &&
+      ["Given", "Refused", "Withdrawn"].includes(c.status))
   );
 }
 export type Explanation = {
