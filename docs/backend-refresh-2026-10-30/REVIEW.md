@@ -64,3 +64,11 @@ New backend reports: **#51 New (High)**: bedded CodeRedActive patient waiting fo
 ## Manual review / checkpoint continuation
 
 On DEV only: check Doctor rounds waiting patient admission4 (MRN-2026-000008), takeover/handover and history with two doctors; due-vitals marker without doctor entry controls. Check Billing moves for admission1 and no clinical reason. Refer a **new** app-created synthetic visit and verify same slip at receiving queue; do not re-use completed calls/keys. Check MAR admission1 active PRN facts and prepared MAR1 REPRINT; no physical dose. Check bilingual F1/FAQs, keyboard/Settings zoom and Urdu wording. Human starts/completes/signs reviews on the portal; agent never enters a Review code. Existing checkpoint's named human/service-gate/scanner/printing acceptance remains the next work; screen65 medication_orders_doctor was not begun in this refresh.
+
+## Committed progress reporting
+
+Source commit `d81d4c180d3aebace49509b27b21e3d1ff769f20`; proposals **208–217** submitted and independently verified pending: Billing208, Admissions estimates209, Doctor rounds210, Consultation211, Doctor queue212, Registration213, MAR214, wristbands215, verbal-order event216, Duty Roster217. Every exact payload/receipt and final verification saved here. Duty217 explicitly replaces changed staff-response consumer/cancellation confirmation evidence from older pending177; unchanged roster items not repeated. No progress points or human acceptance asserted. Awaiting human review on /docs -> My progress.
+
+No empty proposals for removed desk waiver/dispense controls or generic error refresh: no new separately tested rubric item. EPrescription external-self gate has real API201/422 plus compile coverage, but no new positive app-created prescription UI test in this refresh; its broader self-administration rubric remains unclaimed. Vitals postoperative gate is existing code; waiting due acceptance is blocked51.
+
+Existing synthetic fixtures are orientation only. A signed human workspace review must use records created fresh through the app by that human. Keep admission4 waiting/null for the backend51 retest, or use a separate newly created human test patient. No agent-entered portal review code/signature.
