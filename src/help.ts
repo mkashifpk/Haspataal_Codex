@@ -1380,6 +1380,92 @@ nursing_assessment: {
     ]
   ]
 },
+own_medicines_pharmacy: {
+  title: "Identify patients' own medicines",
+  titleUr: "مریض کی ادویات کی شناخت",
+  purpose: "In the hospital pharmacy, the pharmacist inspects personal medicines brought in by admitted inpatients, matches them against the hospital formulary, confirms or updates storage custody, and records identification decisions before medicines are locked in storage. Urdu remains a draft until a native speaker reviews it.",
+  purposeUr: "ہسپتال فارمیسی میں، فارماسسٹ داخل مریضوں کے لائے ہوئے ادویاتی پیک کا معائنہ کرتا ہے، ہسپتال فارمولری سے ملاپ کرتا ہے، تحویل کے مقام کی تصدیق کرتا ہے اور محفوظ کرنے سے قبل شناخت کا فیصلہ ریکارڈ کرتا ہے۔ اردو انسانی جائزے تک مسودہ ہے۔",
+  steps: [
+    "Open Hospital Pharmacy → Identify patients' own medicines. The screen displays the Medication Safety worklist on the left showing admissions with personal medicines awaiting identification (kind: OwnMedicineToIdentify).",
+    "Filter the worklist between facility-wide waiting items and Mine only. Select an admission from the queue or enter an Admission ID directly to view that patient's personal medicines inventory.",
+    "Review the inventory table loaded via GET /admissions/{admission_id}/own-medicines. Note each pack's reported name, strength, form, quantity, batch number, expiry date, custodian, and current storage location.",
+    "Inspect the pack's physical condition and expiry date. If the expiry date has passed, the row displays a prominent red EXPIRED badge. Expired packs cannot be matched to active formulary drugs for therapeutic use.",
+    "Click Identify on any pack in Received status (items with identification pending). Packs already Retained, Returned, or Destroyed are read-only and cannot be re-identified.",
+    "Select the identification outcome: Identified (matches hospital formulary), NotIdentifiable (unlabelled, generic mixture, or unknown), Expired, or Damaged (crushed, broken seal, or contaminated).",
+    "When Identified is selected, search the hospital formulary via GET /drugs/search. Review the live stock availability, high-alert classification, and Look-Alike / Sound-Alike (LASA) safety warnings, then pick the matching formulary drug.",
+    "Confirm or update the storage custody (Hospital Pharmacy locked custody or Ward Cupboard bedside nursing), add pharmacist observations (up to 500 characters), review the frozen confirmation summary, and Confirm to execute the write."
+  ],
+  stepsUr: [
+    "ہسپتال فارمیسی سے مریض کی ادویات کی شناخت کھولیں۔ بائیں جانب ادویاتی حفاظتی ورک لسٹ ظاہر ہوتی ہے جس میں شناخت کے منتظر داخلے (OwnMedicineToIdentify) نظر آتے ہیں۔",
+    "پورے ہسپتال یا صرف اپنی ڈیوٹی کے منتظر مریضوں کے درمیان فلٹر کریں۔ ورک لسٹ سے داخلہ چنیں یا براہ راست داخلہ نمبر درج کر کے ذاتی ادویات کی فہرست دیکھیں۔",
+    "سرور سے لوڈ شدہ لائی گئی ادویات کی فہرست دیکھیں۔ ہر پیک کا نام، طاقت، شکل، مقدار، بیچ نمبر، تاریخ تنسیخ، لانے والا اور موجودہ تحویل کا مقام نوٹ کریں۔",
+    "دوا کے پیک کی ظاہری حالت اور میعاد چیک کریں۔ میعاد ختم ہونے کی صورت میں سرخ ختم شدہ نشان ظاہر ہوتا ہے۔ میعاد ختم دوا ہسپتال فارمولری سے منسلک نہیں کی جا سکتی۔",
+    "موصول حالت کے کسی بھی پیک پر شناخت کریں کا بٹن دبائیں۔ پہلے سے محفوظ، واپس یا تلف شدہ ادویات صرف مطالعہ کے لیے ہیں اور دوبارہ تبدیل نہیں ہو سکتیں۔",
+    "شناخت کا نتیجہ منتخب کریں: شناخت شدہ (فارمولری سے مماثل)، ناقابل شناخت (بغیر لیبل یا نامعلوم)، میعاد ختم، یا خراب (ٹوٹی یا آلودہ)۔",
+    "شناخت شدہ چننے پر فارمولری میں تلاش کریں۔ لائیو اسٹاک کی حالت، انتہائی محتاط درجہ بندی اور مشابہ ادویات (LASA) کے انتباہات کا جائزہ لیں اور درست فارمولری دوا منتخب کریں۔",
+    "محفوظ رکھنے کی جگہ (ہسپتال فارمیسی یا وارڈ الماری) کی تصدیق کریں، اپنے نوٹس درج کریں، جائزے کے خلاصے کی تصدیق کریں اور حتمی ارسال مکمل کریں۔"
+  ],
+  faq: [
+    [
+      "What is the pharmacist's role in verifying patients' own medicines?",
+      "The pharmacist acts as the safety gatekeeper. Before brought-in medicines are locked in ward cupboards or pharmacy vaults, the pharmacist verifies that the contents physically match the label, checks expiry and seal integrity, matches identified medications to the official hospital formulary, and flags any high-alert or LASA risks."
+    ],
+    [
+      "Why must an identified medicine match a formulary drug?",
+      "Matching a brought-in medicine to an active hospital formulary item establishes its exact clinical classification, strength, active ingredient, and systemic safety checks (such as drug-drug interactions and allergy warnings) across the electronic medical record."
+    ],
+    [
+      "How are look-alike / sound-alike (LASA) or high-alert warnings handled?",
+      "When searching the formulary, drugs flagged with lasa_with display prominent warning banners listing confusing names. High-alert medicines (e.g. Concentrated Electrolytes, Insulin, Opioids) display a bold red warning requiring dual-signature protocols before dispensing or handling."
+    ],
+    [
+      "What should be done when a pack is marked NotIdentifiable, Expired, or Damaged?",
+      "If the pack label is missing, illegible, past expiry, or physically compromised, select the corresponding status without linking a formulary drug. These packs cannot be approved for use and should be scheduled for witness-verified destruction or retained strictly for return at discharge."
+    ],
+    [
+      "Where should patient's own medicines be stored after identification?",
+      "The pharmacist confirms or reassigns storage custody to either Hospital Pharmacy (for high-cost, controlled, or restricted medicines requiring central vault security) or Ward Cupboard (for non-controlled medicines kept under nursing lock at the bedside)."
+    ],
+    [
+      "Can an identification decision be edited or repeated?",
+      "No. Under rule:dfd5ef5981, once an own medicine pack is identified, it transitions to Retained status and the server enforces OWN_MEDICINE_STATE_INVALID on repeat identification attempts. If an administrative correction is needed, consult the pharmacy supervisor."
+    ],
+    [
+      "How does identification affect the inpatient safety worklist?",
+      "Submitting a valid identification automatically resolves the OwnMedicineToIdentify task for that pack on the safety worklist. When all packs for an admission have been identified, the admission clears from the pharmacy queue."
+    ]
+  ],
+  faqUr: [
+    [
+      "مریض کی ادویات کی تصدیق میں فارماسسٹ کا کیا کردار ہے؟",
+      "فارماسسٹ حفاظتی محافظ کے طور پر کام کرتا ہے۔ ادویات مقفل کرنے سے پہلے فارماسسٹ لیبل، میعاد اور سیل کی تصدیق کرتا ہے، ہسپتال فارمولری سے ملاپ کرتا ہے اور انتہائی محتاط یا مشابہ دوا کے خطرات کی نشاندہی کرتا ہے۔"
+    ],
+    [
+      "شناخت شدہ دوا کا فارمولری سے مماثل ہونا کیوں ضروری ہے؟",
+      "ہسپتال فارمولری سے ملاپ مریض کے طبی ریکارڈ میں دوا کی درست طاقت، اجزاء اور دیگر ادویات یا الرجی سے ممکنہ تضاد کی خودکار جانچ ممکن بناتا ہے۔"
+    ],
+    [
+      "مشابہ ادویات (LASA) یا انتہائی محتاط ادویات سے کیسے نمٹا جائے؟",
+      "فارمولری تلاش میں مشابہ ادویات کے ساتھ انتباہی بینر ظاہر ہوتا ہے۔ انتہائی محتاط ادویات (مثلاً انسولین، اوپیئائڈز) سرخ نشان کے ساتھ ظاہر ہوتی ہیں جن کی فراہمی پر دو افراد کی تصدیق لازمی ہے۔"
+    ],
+    [
+      "اگر دوا ناقابل شناخت، میعاد ختم یا خراب ہو تو کیا کیا جائے؟",
+      "اگر لیبل غائب، ناقابل مطالعہ، میعاد ختم یا پیک ٹوٹا ہو تو متعلقہ درجہ چنیں بغیر فارمولری دوا ملائے۔ ایسی ادویات مریض کے علاج میں استعمال نہیں ہو سکتیں اور ڈسچارج پر واپسی یا گواہ کے سامنے تلفی کے لیے رکھی جاتی ہیں۔"
+    ],
+    [
+      "شناخت کے بعد ادویات کہاں رکھی جانی چاہئیں؟",
+      "فارماسسٹ محفوظ مقام کی تصدیق کرتا ہے: ہسپتال فارمیسی (قیمتی یا خصوصی حفاظت والی ادویات کے لیے) یا وارڈ الماری (عام ادویات کے لیے جو نرس کی تحویل میں مقفل رہتی ہیں)۔"
+    ],
+    [
+      "کیا شناخت کا فیصلہ بدلا یا دہرایا جا سکتا ہے؟",
+      "نہیں۔ اصول rule:dfd5ef5981 کے تحت ایک بار شناخت کے بعد دوا ریٹینڈ حالت میں چلی جاتی ہے اور دوبارہ شناخت پر سرور انکار (OWN_MEDICINE_STATE_INVALID) کرتا ہے۔ کسی ناگزیر درستی کے لیے فارمیسی نگراں سے رابطہ کریں۔"
+    ],
+    [
+      "شناخت سے حفاظتی ورک لسٹ پر کیا اثر پڑتا ہے؟",
+      "درست شناخت جمع کروانے پر اس پیک کا کام ورک لسٹ سے خودکار طور پر خارج ہو جاتا ہے۔ داخلے کے تمام پیک کی شناخت مکمل ہونے پر وہ داخلہ فارمیسی کی قطار سے صاف ہو جاتا ہے۔"
+    ]
+  ]
+},
  bed_matrix: {
   title: "Live bed matrix",
   titleUr: "بستروں کی تازہ صورت حال",
