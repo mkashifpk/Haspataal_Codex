@@ -1294,6 +1294,92 @@ nursing_assessment: {
     ]
   ]
 },
+ own_medicines_ward: {
+  title: "Patient's own medicines",
+  titleUr: "مریض کی اپنی ادویات",
+  purpose: "On the inpatient ward upon arrival, the nurse records every medicine pack brought in by the patient or attendant, locks them in ward or pharmacy storage, tracks pharmacy verification, and ensures they are safely handed back or destroyed before discharge. Urdu remains a draft until a native speaker reviews it.",
+  purposeUr: "وارڈ میں داخلے پر نرس مریض یا تیماردار کی لائی ہوئی ہر دوا کا اندراج کرتی ہے، وارڈ یا فارمیسی الماری میں محفوظ رکھتی ہے، فارمیسی شناخت کی جانچ کرتی ہے اور ڈسچارج سے پہلے بحفاظت واپسی یا گواہ کے سامنے تلفی یقینی بناتی ہے۔ اردو مقامی زبان کے انسانی جائزے تک مسودہ ہے۔",
+  steps: [
+    "Open Ward Nursing → Patient's own medicines. Choose an admitted patient or select their stay from My beds this shift. The screen shows the patient's verified identity, ward, bed, and admission reference.",
+    "Review the Brought-in medicines inventory table. Each pack row displays the brand/generic name, strength, form, quantity, batch number, expiry date, storage location (Ward or Pharmacy), and lifecycle status (Received, Retained, Returned, or Destroyed).",
+    "Any pack whose expiry date has passed is clearly flagged with a red EXPIRED badge. Expired or unidentifiable packs must never be administered to patients.",
+    "Check the safety worklist banners at the top: OwnMedicineToIdentify alerts when packs are waiting for hospital pharmacist formulary matching; OwnMedicineToHandBack alerts when held packs must be resolved before discharge clearance.",
+    "To record newly brought packs, enter who brought them (patient or attendant name & relation) and select the storage location (Ward Cupboard or Hospital Pharmacy). Add one line per pack with name, quantity, and optional strength, form, batch, and expiry. Click Review medicines entry, verify the frozen preview, and Confirm to save.",
+    "Before discharge clearance (OWN_MEDICINES_HELD), click Hand back held medicines. Verify the packs, enter who receives them (patient or authorized attendant), and confirm the hand-back. Handed-back medicines transition to Returned status.",
+    "If a medicine is expired, damaged, or the patient specifically requests disposal, click Destroy. Enter a factual reason verifying the patient's agreement (3–300 characters) and the name and role of a witnessing staff member (2–120 characters), then confirm destruction.",
+    "F1 or visible Help opens this guidance preserving current input and focus. Light and DarkHighContrast themes share keyboard zoom 100–250% (reset 100%). Service view open_work shows the banner No new own medicines from now on while continuing hand-backs and destruction."
+  ],
+  stepsUr: [
+    "وارڈ نرسنگ سے مریض کی اپنی ادویات کھولیں۔ داخل مریض چنیں یا اس شفٹ میں میرے بستر سے ان کا قیام منتخب کریں۔ اسکرین پر مریض کی تصدیق شدہ شناخت، وارڈ، بستر اور داخلہ حوالہ دکھتا ہے۔",
+    "لائی گئی ادویات کی فہرست دیکھیں۔ ہر پیک کی سطر میں دوا کا نام، طاقت، شکل، مقدار، بیچ نمبر، تاریخ تنسیخ، جگہ (وارڈ یا فارمیسی) اور حالت (موصول، زیر تحویل، واپس یا تلف) ظاہر ہوتی ہے۔",
+    "جس پیک کی تاریخ میعاد گزر چکی ہو اسے واضح سرخ ختم شدہ نشان ملتا ہے۔ میعاد ختم یا نامعلوم ادویات مریض کو ہرگز نہیں دی جا سکتیں۔",
+    "اوپر حفاظتی ورک لسٹ کے انتباہات دیکھیں: فارماسسٹ کی شناخت کی منتظر ادویات یا ڈسچارج سے پہلے واپسی کی ضرورت کی نشاندہی ہوتی ہے۔",
+    "نئی لائی گئی ادویات کے اندراج کے لیے لانے والے کا نام و رشتہ درج کریں اور محفوظ جگہ چنیں۔ ہر پیک کی الگ سطر درج کریں، جائزہ لیں اور تصدیق کر کے محفوظ کریں۔",
+    "ڈسچارج کلیئرنس سے پہلے زیر تحویل ادویات واپس کریں پر کلک کریں۔ پیک منتخب کریں، وصول کنندہ کا نام درج کریں اور واپسی کی تصدیق کریں۔",
+    "اگر دوا میعاد ختم، خراب ہو یا مریض ضائع کرنے کی رضامندی دے تو تلف کریں پر کلک کریں۔ مریض کی رضامندی کی وجہ اور گواہ عملے کا نام و عہدہ درج کر کے تلفی کی تصدیق کریں۔",
+    "ایف ون یا مدد خانے و جائزے سے یہی صفحہ، مسودہ و فوکس محفوظ۔ دونوں تھیم میں کی بورڈ زوم 100 تا 250 فیصد، ری سیٹ 100 فیصد۔ ختم ہوتی خدمت میں نیا اندراج بند مگر واپسی و تلفی جاری رہتی ہے۔"
+  ],
+  faq: [
+    [
+      "Why must patient's own medicines be recorded and held?",
+      "Hospital policy and patient safety require that all medications administered to inpatients are doctor-ordered and pharmacy-verified. Patient-brought medicines are inventoried and held in locked storage to prevent unverified self-administration or adverse interactions during admission."
+    ],
+    [
+      "Can patient's own medicines be used on the ward?",
+      "No. Medications brought in by the patient are never directly administered from personal packs during the inpatient stay. The doctor orders required medications and the hospital pharmacy supplies them."
+    ],
+    [
+      "What is the difference between Received and Retained status?",
+      "Received means the medicine has been logged by ward nursing and is waiting for the hospital pharmacist to inspect it (worklist OwnMedicineToIdentify). Once the pharmacist matches it to a formulary drug, it transitions to Retained status."
+    ],
+    [
+      "What happens if a medicine is expired?",
+      "Any expired pack is flagged in red with an EXPIRED badge. Expired medicines should not be retained for continued use; they can be safely destroyed with the patient's agreement before a witness."
+    ],
+    [
+      "Why does discharge clearance block on held medicines?",
+      "The system enforces OWN_MEDICINES_HELD to ensure that no patient is discharged with personal medications still locked in ward cupboards or pharmacy vaults. All held items must be returned or destroyed before discharge."
+    ],
+    [
+      "Who can receive medicines during hand-back?",
+      "Medicines can only be handed back to the patient herself or an authorized attendant (e.g. spouse, adult child) whose identity and relationship are explicitly recorded."
+    ],
+    [
+      "What are the requirements for destroying a pack?",
+      "Destruction requires the patient's agreement (a factual reason of 3–300 characters) and must be witnessed by another clinical staff member whose name and role are recorded (2–120 characters)."
+    ]
+  ],
+  faqUr: [
+    [
+      "مریض کی اپنی ادویات کا اندراج اور تحویل کیوں ضروری ہے؟",
+      "ہسپتال کی پالیسی اور مریض کی حفاظت کے لیے ضروری ہے کہ داخل مریضوں کو دی جانے والی تمام ادویات ڈاکٹر کے نسخے اور فارمیسی کی تصدیق سے ہوں۔ لائی گئی ادویات کو مقفل تحویل میں رکھا جاتا ہے تاکہ غلط خوراک یا تضاد سے بچا جا سکے۔"
+    ],
+    [
+      "کیا مریض کی ادویات وارڈ میں استعمال ہو سکتی ہیں؟",
+      "نہیں۔ مریض کے لائے ہوئے پیک سے قیام کے دوران خوراک نہیں دی جاتی۔ ڈاکٹر نسخہ لکھتا ہے اور ہسپتال فارمیسی معیاری ادویات فراہم کرتی ہے۔"
+    ],
+    [
+      "موصول اور زیر تحویل حالت میں کیا فرق ہے؟",
+      "موصول کا مطلب نرس نے درج کر لی ہے اور فارماسسٹ کی جانچ باقی ہے (ورک لسٹ OwnMedicineToIdentify)۔ فارماسسٹ کی تصدیق کے بعد یہ زیر تحویل حالت میں آ جاتی ہے۔"
+    ],
+    [
+      "اگر دوا کی میعاد ختم ہو تو کیا کریں؟",
+      "میعاد ختم دوا پر سرخ ختم شدہ نشان ظاہر ہوتا ہے۔ ایسی دوا مریض کو واپس دینے کے بجائے مریض کی رضامندی اور گواہ کے سامنے تلف کی جا سکتی ہے۔"
+    ],
+    [
+      "ڈسچارج کے وقت ادویات کی تحویل کیوں رکاوٹ بنتی ہے؟",
+      "نظام OWN_MEDICINES_HELD لاگو کرتا ہے تاکہ کوئی مریض اپنی ادویات ہسپتال الماری میں چھوڑ کر نہ جائے۔ ڈسچارج سے پہلے تمام ادویات واپس یا تلف کرنا لازمی ہے۔"
+    ],
+    [
+      "واپسی پر ادویات کس کو دی جا سکتی ہیں؟",
+      "ادویات صرف مریض خود یا اس کے مجاز تیماردار (مثلاً شریک حیات، بالغ بچہ) کے حوالے کی جاتی ہیں جن کا نام اور رشتہ درج کیا جاتا ہے۔"
+    ],
+    [
+      "دوا تلف کرنے کے کیا اصول ہیں؟",
+      "تلفی کے لیے مریض کی رضامندی (3 تا 300 حروف کی ٹھوس وجہ) اور عملے کے دوسرے فرد کی گواہی (2 تا 120 حروف پر نام و عہدہ) لازمی ہے۔"
+    ]
+  ]
+},
  bed_matrix: {
   title: "Live bed matrix",
   titleUr: "بستروں کی تازہ صورت حال",

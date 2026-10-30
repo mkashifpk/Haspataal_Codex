@@ -2,18 +2,34 @@
 Last updated: 30 October 2026, Antigravity (Codex pair), Asia/Karachi.
 
 ## Active new screen request
-Screen 67 `wristbands_ward` (Ward Nursing workspace, Phase P4 Inpatient journey) implementation, verification, and progress proposal COMPLETED.
-- Implementation: `src/screens/Wristbands.tsx` parameterizing `screenId="wristbands_ward"` to evaluate establishment screen view and permissions per `rule:a49f25831b`, pure policies `src/wristband-policy.ts`, and generated contracts `src/generated/wristbands_ward.ts`.
-- App integration: `src/App.tsx` navigation, workspace routing, and establishment screen view filters.
-- Handbook & Coverage: `src/help.ts` (bilingual tasks, 8 steps, 7 role FAQs for ward nursing), `src/foundation-help.ts` (10 `bands.*` control guides updated with `wristbands_ward`, `deliveredHelpScreens` updated to 66 screens), `src/foundation-catalogue.json` (66 screens), `src/foundation-task-map.json`, and reference screenshots `public/handbook/wristbands_ward-*.png`.
-- Tests: `tests/wristband-policy.test.mjs` (ward nurse role access and view policy tests) and `tests/help-coverage.test.mjs` (66 screens).
-- Verifications:
-  - `npm run check:help`: PASS (66 screens, 1369 controls, 541 groups, 69 FAQ seeds, 30 workspace guides).
-  - `npm test`: 244/244 PASS.
-  - `npm run build`: PASS (tsc + vite client bundle `index-DLH8OIIi.js`).
-  - Live DEV reads: Verified `/medication-safety/worklist` (200 OK, 7 NoWristband items), `/wristbands` (200 OK), `/wristbands/verify` (200 OK, match: true).
-- Progress Reporting: Proposal ID #219 (`codex-wristbands_ward-c60fcc5-20261030-v1`) successfully submitted and verified via `progress_proposals` with 17 rubric items claimed. Awaiting human review on /docs -> My progress.
-- Work in progress: None. No running commands or uncertain writes.
+Implementing Screen 68 `own_medicines_ward` (Ward Nursing workspace, Phase P4 Inpatient journey).
+- Purpose: Record patient's own medicines brought in on arrival, track storage (Ward / Pharmacy), hand back at discharge, destroy with patient agreement before a witness, and link with medication safety worklist.
+- Scope:
+  - Policy logic in `src/own-medicines-policy.ts` (record validation, hand-back rules, destroy guards, permission/view access).
+  - Screen component in `src/screens/OwnMedicinesWard.tsx` supporting all 5 endpoints, realtime events (`session.*`, `system.*`, `notification.created`), and establishment views (`rule:88b0c22780`).
+  - Wire navigation and route in `src/App.tsx` under ward_nurse workspace.
+  - Register in `src/foundation-catalogue.json` (67 screens) and `src/foundation-task-map.json`.
+  - Author English/Urdu bilingual help and role FAQs in `src/help.ts`.
+  - Control guides in `src/foundation-help.ts` and add `own_medicines_ward` to `deliveredHelpScreens` (67 screens).
+  - Reference screenshots `public/handbook/own_medicines_ward-en.png` and `public/handbook/own_medicines_ward-ur.png`.
+  - Unit tests in `tests/own-medicines.test.mjs` and update assertion in `tests/help-coverage.test.mjs` (67 screens).
+  - Run checks (check:help, build, test), live DEV verification, propose progress via MCP `propose_progress`, and verify with `progress_proposals`.
+- Files involved:
+  - contracts/own_medicines_ward.json
+  - src/generated/own_medicines_ward.ts
+  - src/own-medicines-policy.ts
+  - src/screens/OwnMedicinesWard.tsx
+  - src/App.tsx
+  - src/foundation-catalogue.json
+  - src/foundation-task-map.json
+  - src/foundation-help.ts
+  - src/help.ts
+  - public/handbook/own_medicines_ward-en.png
+  - public/handbook/own_medicines_ward-ur.png
+  - tests/help-coverage.test.mjs
+  - tests/own-medicines.test.mjs
+  - handoff.md
+- Next concrete step: Author `src/own-medicines-policy.ts` and `src/screens/OwnMedicinesWard.tsx`.
 
 ## Prior task and Git
 User requested fa151db backend refresh (#41–49), all built-screen contracts/errors/events/help, fresh synthetic DEV tests, commit and changed/tested-only progress proposals, then checkpoint next steps. Baseline verified CLEAN 758bd34a8152086f8f8f42434167694620a72f36 on main. Source/evidence committed d81d4c180d3aebace49509b27b21e3d1ff769f20; tree verified clean. Source complete, 10 proposals confirmed/verified pending; reporting docs/final handoff included in this reporting commit. No running commands, unknown writes or agents. Never reuse pre-reinstall IDs/keys/cursors from archived ward6364/earlier evidence.
