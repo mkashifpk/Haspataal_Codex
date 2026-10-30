@@ -4237,4 +4237,92 @@ consents_doctor: {
     ],
   },
 
+
+  blood_request: {
+    title: "Clinical blood requests",
+    titleUr: "خون کی طبی درخواستیں",
+    purpose: "The doctor's request for blood for a patient admitted now or in the emergency department, with the patient's transfusion consent of the stay, and its progress.",
+    purposeUr: "زیر علاج یا ایمرجنسی مریض کے لیے خون کی فراہمی کی درخواست، متعلقہ باخبر رضامندی اور ترسیل کی پیشرفت۔",
+    steps: [
+      "Open Clinical OPD / IPD → Request blood to review active blood requests and issue status.",
+      "Click 'Request blood' to prepare a requisition for an admitted inpatient or emergency department visit.",
+      "Enter Patient ID and Admission ID / ER Visit ID to fetch the patient's active transfusion consents.",
+      "Select the patient's Given transfusion consent of this stay; never pre-selected by the system.",
+      "If no consent exists, follow the prompt to open Doctor Consents and record an informed consent or emergency clinical note.",
+      "Select the required blood component (PRBC, Whole Blood, FFP, Platelets, Cryoprecipitate) and units count (1–20).",
+      "Choose urgency: Routine, Urgent, or Emergency. For Emergency, provide an uncrossmatched blood authorization note.",
+      "Document the clinical indication and click 'Submit blood request' with idempotent safety protection.",
+    ],
+    stepsUr: [
+      "مریضوں کے لیے خون کی موجودہ درخواستیں دیکھنے کے لیے ڈاکٹر ورک اسپیس سے 'خون کی طبی درخواستیں' کھولیں۔",
+      "داخل یا ایمرجنسی مریض کے لیے خون طلب کرنے کے لیے 'خون کی نئی درخواست' پر کلک کریں۔",
+      "مریض کی دی گئی باضابطہ رضامندی معلوم کرنے کے لیے مریض آئی ڈی اور داخلہ یا ایمرجنسی وزٹ نمبر درج کریں۔",
+      "اس داخلے کی منظور شدہ رضامندی منتخب کریں؛ سسٹم کی جانب سے پہلے سے کوئی انتخاب نہیں کیا جاتا۔",
+      "اگر رضامندی موجود نہ ہو تو فوری رضامندی تیار کرنے کے لیے لنک کے ذریعے ڈاکٹر رضامندی اسکرین پر جائیں۔",
+      "مطلوبہ خون کا جزو (ریڈ سیلز، مکمل خون، پلازما، پلیٹلیٹس) اور بیگز کی تعداد (1 سے 20) منتخب کریں۔",
+      "فوری ضرورت کی قسم چنیں؛ ہنگامی حالت میں بغیر مطابقت ٹیسٹ خون جاری کرنے کا تحریری جواز درج کریں۔",
+      "طبی ضرورت و تشخیص کی تفصیل لکھیں اور محفوظ کنکرنسی کے ساتھ 'درخواست ارسال کریں' پر کلک کریں۔",
+    ],
+    faq: [
+      [
+        "Why is a Given transfusion consent required before requesting blood?",
+        "Punjab Blood Transfusion regulations mandate informed patient or guardian consent for all transfusions. The server strictly enforces BLOOD_CONSENT_REQUIRED.",
+      ],
+      [
+        "Why does the system never pre-select a transfusion consent?",
+        "Per rule c5f6768a50, the attending clinician must actively review and verify the specific valid transfusion consent for this hospitalization stay.",
+      ],
+      [
+        "When can an uncrossmatched blood note be provided?",
+        "Only for Emergency requests in life-threatening scenarios where immediate transfusion is vital before laboratory compatibility testing completes.",
+      ],
+      [
+        "What is the difference between closing and cancelling a blood request?",
+        "A request can be Cancelled only before any units are issued. Once blood has been issued or transfused, the request must be Closed when no further units are required.",
+      ],
+      [
+        "What happens if blood_transfusion is not active in facility settings?",
+        "POST /blood/requests starts new work and is strictly gated by rule 90effa2802; it is offered only while the blood_transfusion service is Active.",
+      ],
+      [
+        "How are units issued against units requested tracked in realtime?",
+        "The screen listens for the blood.unit.issued realtime event, instantly updating the issued ratio and crossmatch compatibility table without manual polling.",
+      ],
+      [
+        "How does the system prevent duplicate blood requests on retries?",
+        "Every submission carries an Idempotency-Key. If the request is repeated after a network retry, the server reuses the initial order rather than ordering duplicate blood.",
+      ],
+    ],
+    faqUr: [
+      [
+        "خون طلب کرنے سے قبل باخبر رضامندی کیوں لازمی ہے؟",
+        "پنجاب بلڈ ٹرانسفیوژن قوانین کے تحت انتقال خون سے قبل مریض یا سرپرست کی باضابطہ رضامندی قانونی تقاضا ہے جس کی خلاف ورزی پر سرور درخواست مسترد کرتا ہے۔",
+      ],
+      [
+        "سسٹم پہلے سے رضامندی کا خودکار انتخاب کیوں نہیں کرتا؟",
+        "قانون کے مطابق معالج کے لیے ضروری ہے کہ وہ اس داخلے کی درست اور فعال رضامندی کا خود جائزہ لے کر دستی انتخاب کرے۔",
+      ],
+      [
+        "بغیر کراس میچ خون کا نوٹ کن حالات میں لکھا جا سکتا ہے؟",
+        "صرف شدید ہنگامی صورتحال میں جب مریض کی جان بچانے کے لیے لیبارٹری کراس میچ کا انتظار ممکن نہ ہو۔",
+      ],
+      [
+        "درخواست بند کرنے اور منسوخ کرنے میں کیا فرق ہے؟",
+        "منسوخی صرف خون جاری ہونے سے پہلے ممکن ہے۔ اگر بلڈ بینک سے خون جاری ہو چکا ہو تو کام مکمل ہونے پر درخواست بند کی جاتی ہے۔",
+      ],
+      [
+        "اگر ہسپتال میں بلڈ ٹرانسفیوژن سروس فعال نہ ہو تو کیا ہوگا؟",
+        "سرور کے قانون کے مطابق نئی درخواستیں صرف اسی وقت شروع ہو سکتی ہیں جب ہسپتال کی ترتیبات میں یہ خدمت فعال ہو۔",
+      ],
+      [
+        "جاری شدہ خون کے بیگز کی پیشرفت کیسے اپ ڈیٹ ہوتی ہے؟",
+        "اسکرین سرور کے ریئل ٹائم ایونٹ کو مانیٹر کرتی ہے، جیسے ہی بلڈ بینک سے خون جاری ہو فوری طور پر معلومات اپ ڈیٹ ہو جاتی ہیں۔",
+      ],
+      [
+        "دوبارہ کوشش پر خون کی دہری درخواست بننے سے کیسے روکا جاتا ہے؟",
+        "ہر درخواست کے ساتھ منفرد آئیڈمپوٹینسی کی بھیجی جاتی ہے، جس سے نیٹ ورک تعطل کے بعد بھی خون کا اضافی آرڈر نہیں بنتا۔",
+      ],
+    ],
+  },
+
 };
