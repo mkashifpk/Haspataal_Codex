@@ -6,7 +6,7 @@ Completed Screen 76 `blood_donors` ("Blood donors" for Lab & Blood Center worksp
 Previous screen: Position 75 `blood_bank` (Proposal #227 pending).
 Next screen: Position 77 in Phase 4 Roadmap.
 
-- Current status: Screen 76 completed, verified live (200 OK), 274/274 tests passing, check:help passing (75 screens), build passing (`index-CH-J_ACq.js`). Committing and proposing progress.
+- Current status: Screen 76 completed, verified live (200 OK), committed (3230dc2), and submitted for review (Proposal #228).
 - Completed checkpoints:
   1. Saved contract bundle in `contracts/blood_donors.json` (5 endpoints, realtime events, 58 points).
   2. Generated typed API contracts in `src/generated/blood_donors.ts`.
@@ -82,10 +82,12 @@ Next screen: Position 77 in Phase 4 Roadmap.
 
 - Next concrete step: Fetch bundle for Position 75 `blood_bank` (`get_screen_bundle('blood_bank')`) and begin implementation.
 
+- Next concrete step: Fetch bundle for Position 77 `donor_assessment` (`get_screen_bundle('donor_assessment')`) and begin implementation.
+
 ## Prior task and Git
-- Clean working tree on branch `main` at commit `b7781fe11508309a2e4428c481239e1db55ccefe` (21 commits ahead of `origin/main`).
-- Proposal #227 (`blood_bank`) awaiting human review on /docs -> My progress.
-- Proposals awaiting human review on /docs -> My progress: #208–#227.
+- Clean working tree on branch `main` at commit `3230dc257520fb7411763c3196aa05d48e5e48eb` (22 commits ahead of `origin/main`).
+- Proposal #227 (`blood_bank`) and Proposal #228 (`blood_donors`) awaiting human review on /docs -> My progress.
+- Proposals awaiting human review on /docs -> My progress: #208–#228.
 
 ## Backend gaps
 #50 New: employment status activation omits its EMPLOYEE_DOCUMENT_REQUIRED refusal.
