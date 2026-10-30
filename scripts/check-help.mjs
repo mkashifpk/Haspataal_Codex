@@ -230,6 +230,7 @@ export function checkHelp({
       "MedicationOrdersDoctor",
       "OwnMedicinesWard",
       "OwnMedicinesPharmacy",
+      "BloodSources",
     ].map((n) => `src/screens/${n}.tsx`),
   ];
   const used = new Set(),

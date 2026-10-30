@@ -4149,4 +4149,92 @@ consents_doctor: {
       ],
     ],
   },
+
+  blood_sources: {
+    title: "Licensed blood sources",
+    titleUr: "مجاز بلڈ سنٹرز و ذرائع",
+    purpose: "The blood centers and hospital blood banks the hospital receives blood from, with their PBTA licence and the MOU or contract kept in the compliance register.",
+    purposeUr: "وہ بلڈ سنٹرز اور ہسپتال بلڈ بینکس جن سے ہسپتال خون حاصل کرتا ہے، پی بی ٹی اے لائسنس اور کمپلائنس رجسٹر کے معاہدوں سمیت۔",
+    steps: [
+      "Open Lab Admin → Licensed blood sources to view the hospital's approved blood suppliers and current transfusion readiness.",
+      "Review existing blood sources, their PBTA licence numbers, status (Active or Stopped), and linked compliance MOUs.",
+      "Click 'Add blood source' to register a new external Regional Blood Center or partner hospital blood bank.",
+      "Select category: Regional Blood Center (BloodCenter), Partner Hospital Blood Bank (HospitalBloodBank), or Hospital's Own Blood Center (OwnBloodCenter).",
+      "Enter PBTA licence number and link the active MOU agreement from the compliance register for Category II B/C hospitals.",
+      "If the hospital operates its own blood center, add it once as OwnBloodCenter; duplicate registrations are rejected by the server.",
+      "To suspend incoming blood from a source, click 'Stop receiving'; existing units already in stock remain fully safe and usable.",
+      "Verify the transfusion service readiness indicator to confirm at least one active source is available before activating facility services.",
+    ],
+    stepsUr: [
+      "ہسپتال کے منظور شدہ بلڈ سنٹرز اور بلڈ ٹرانسفیوژن سروس کی تیاری دیکھنے کے لیے لیب ایڈمن سے 'مجاز بلڈ سنٹرز و ذرائع' کھولیں۔",
+      "موجودہ بلڈ سنٹرز، ان کے پی بی ٹی اے لائسنس نمبر، فعال یا بند حالت، اور منسلک قانونی معاہدات کا جائزہ لیں۔",
+      "نیا بیرونی ریجنل بلڈ سنٹر یا پارٹنر ہسپتال بلڈ بینک رجسٹر کرنے کے لیے 'نیا بلڈ سنٹر شامل کریں' پر کلک کریں۔",
+      "درست زمرہ منتخب کریں: ریجنل بلڈ سنٹر، پارٹنر ہسپتال بلڈ بینک، یا ہسپتال کا اپنا بلڈ سنٹر۔",
+      "پی بی ٹی اے لائسنس نمبر درج کریں اور کیٹیگری دوئم کے ہسپتالوں کے لیے کمپلائنس رجسٹر سے فعال تحریری معاہدہ منتخب کریں۔",
+      "اگر ہسپتال کا اپنا بلڈ سنٹر ہے تو اسے صرف ایک بار درج کریں؛ دوبارہ اندراج سرور کی طرف سے مسترد کر دیا جاتا ہے۔",
+      "کسی سنٹر سے خون کی وصولی روکنے کے لیے 'وصولی بند کریں' پر کلک کریں؛ پہلے سے موجود خون کا اسٹاک بدستور استعمال کے قابل رہے گا۔",
+      "ہسپتال کی ترتیبات میں سروس آن کرنے سے پہلے بلڈ ٹرانسفیوژن تیاری کے اشارے سے تصدیق کریں کہ کم از کم ایک فعال ذریعہ موجود ہے۔",
+    ],
+    faq: [
+      [
+        "Which blood source categories are permitted under PBTA regulations?",
+        "Three categories are supported: Regional Blood Centers (BloodCenter), partner hospital blood banks (HospitalBloodBank), and the hospital's own blood center (OwnBloodCenter). Every source must have an official PBTA licence.",
+      ],
+      [
+        "Can a hospital register more than one OwnBloodCenter?",
+        "No. A facility may operate at most one OwnBloodCenter. Attempting to add a second returns the BLOOD_SOURCE_EXISTS conflict error.",
+      ],
+      [
+        "Why is an MOU agreement required for Category II B and II C hospitals?",
+        "Hospitals without their own licensed blood center must receive transfusion units under a formal memorandum of understanding (MOU) linked from the compliance register.",
+      ],
+      [
+        "What happens to blood units in stock when we stop receiving from a source?",
+        "Units already received and stored in the blood bank remain completely valid and usable for crossmatch and transfusion until their expiry date.",
+      ],
+      [
+        "What prerequisites are required before activating the blood transfusion service?",
+        "The hospital must have at least one active licensed blood source, qualified personnel authorized to test and issue blood, and clinical staff authorized to administer transfusions.",
+      ],
+      [
+        "How does the screen behave when the blood transfusion service is retiring (open_work)?",
+        "It displays a banner stating 'No new blood sources from now on'. Creating new sources is disabled, but existing sources and stock continue functioning.",
+      ],
+      [
+        "How does the system handle concurrent updates to a blood source?",
+        "Every update sends the record's expected_version. If another user modified the source concurrently, VERSION_CONFLICT is returned and the latest data is reloaded safely.",
+      ],
+    ],
+    faqUr: [
+      [
+        "پی بی ٹی اے قوانین کے تحت کن اقسام کے بلڈ سنٹرز کی اجازت ہے؟",
+        "تین زمرے شامل ہیں: ریجنل بلڈ سنٹر، پارٹنر ہسپتال بلڈ بینک، اور ہسپتال کا اپنا بلڈ سنٹر۔ ہر ذریعہ کے پاس پی بی ٹی اے کا مستند لائسنس ہونا لازمی ہے۔",
+      ],
+      [
+        "کیا ہسپتال ایک سے زیادہ اپنے بلڈ سنٹرز درج کر سکتا ہے؟",
+        "نہیں۔ ایک ہسپتال زیادہ سے زیادہ ایک اپنا بلڈ سنٹر چلا سکتا ہے۔ دوسرے سنٹر کے اندراج پر سرور خرابی ظاہر کرتا ہے۔",
+      ],
+      [
+        "کیٹیگری دوئم کے ہسپتالوں کے لیے قانونی معاہدہ کیوں ضروری ہے؟",
+        "جن ہسپتالوں کا اپنا بلڈ سنٹر نہیں ہوتا، ان کے لیے مستند بلڈ سنٹر کے ساتھ باقاعدہ تحریری معاہدہ منسلک کرنا قانونی تقاضا ہے۔",
+      ],
+      [
+        "جب کسی سنٹر سے وصولی بند کی جائے تو موجودہ اسٹاک پر کیا اثر پڑتا ہے؟",
+        "پہلے سے موصول شدہ خون کی تھیلیاں میعاد ختم ہونے تک کراس میچ اور مریضوں کو لگانے کے لیے مکمل طور پر کارآمد اور محفوظ رہتی ہیں۔",
+      ],
+      [
+        "بلڈ ٹرانسفیوژن سروس فعال کرنے کے لیے کیا شرائط لازمی ہیں؟",
+        "ہسپتال میں کم از کم ایک فعال لائسنس یافتہ بلڈ سنٹر، خون ٹیسٹ اور جاری کرنے کا مجاز عملہ، اور خون لگانے والا عملہ ہونا ضروری ہے۔",
+      ],
+      [
+        "جب سروس ریٹائرنگ ہو تو اسکرین کیا رویہ اختیار کرتی ہے؟",
+        "اسکرین پر بینر ظاہر ہوتا ہے کہ نئے ذرائع شامل نہیں ہو سکتے، جبکہ موجودہ سنٹرز اور خون کے ذخائر سے معمول کے مطابق کام جاری رہتا ہے۔",
+      ],
+      [
+        "بلڈ سنٹر کی تفصیلات میں باہم متصادم ترامیم کو کیسے روکا جاتا ہے؟",
+        "ہر ترمیم کے ساتھ متوقع ورژن بھیجا جاتا ہے۔ اگر کسی دوسرے ٹرمینل سے تبدیلی ہو چکی ہو تو ورژن تنازعہ کے ذریعے ڈیٹا ضائع ہونے سے بچایا جاتا ہے۔",
+      ],
+    ],
+  },
+
 };
