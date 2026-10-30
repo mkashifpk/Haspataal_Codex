@@ -232,6 +232,7 @@ export function checkHelp({
       "OwnMedicinesPharmacy",
       "BloodSources",
       "BloodRequest",
+      "BloodBank",
     ].map((n) => `src/screens/${n}.tsx`),
   ];
   const used = new Set(),

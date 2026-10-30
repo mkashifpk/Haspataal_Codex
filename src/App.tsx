@@ -43,6 +43,7 @@ import { ImagingRepeats } from './screens/ImagingRepeats';
 import { ConsentsAdmissions } from './screens/ConsentsAdmissions';
 import { BloodSources } from './screens/BloodSources';
 import { BloodRequest } from './screens/BloodRequest';
+import { BloodBank } from './screens/BloodBank';
 import { Wristbands } from './screens/Wristbands';
 import { OwnMedicinesWard } from './screens/OwnMedicinesWard';
 import { OwnMedicinesPharmacy } from './screens/OwnMedicinesPharmacy';
@@ -92,6 +93,7 @@ const labels: Record<string, [string, string, string]> = {
  consents_doctor: ["Consents: informed consent and refusal","رضامندی: باخبر رضامندی اور انکار","▤"],
  blood_sources: ["Licensed blood sources","مجاز بلڈ سنٹرز و ذرائع","🩸"],
  blood_request: ["Request blood","خون کی درخواست","🩸"],
+ blood_bank: ["Blood bank","بلڈ بینک","🩸"],
  wristbands_admissions: ["Identity wristbands","شناختی پٹیاں","▤"],
  wristbands_ward: ["Identity wristbands","شناختی پٹیاں","▤"],
  own_medicines_ward: ["Patient's own medicines","مریض کی اپنی ادویات","▤"],
@@ -181,6 +183,7 @@ const frontDeskScreens = new Set([
   'consents_doctor',
   'blood_sources',
   'blood_request',
+  'blood_bank',
   'bed_matrix',
   'pending_admissions',
   'duty_roster',
@@ -908,6 +911,7 @@ export function App() {
       (id !== "imaging_quality_setup" || ["full","open_work","records"].includes(est?.views.screens.find(v=>v.screen_id===id)?.view || "")) &&
       (id !== "blood_sources" || ["full","open_work","records","setup"].includes(est?.views.screens.find(v=>v.screen_id===id)?.view || "")) &&
       (id !== "blood_request" || ["full","open_work","records","setup"].includes(est?.views.screens.find(v=>v.screen_id===id)?.view || "")) &&
+      (id !== "blood_bank" || ["full","open_work","records","setup"].includes(est?.views.screens.find(v=>v.screen_id===id)?.view || "")) &&
       (!["mar","verbal_orders_ward","vitals_tracker","patient_education_ward","nursing_assessment","my_beds","doctor_inpatients","cost_estimates_admissions","consents_admissions","wristbands_admissions","wristbands_ward","own_medicines_ward","own_medicines_pharmacy","bed_matrix","pending_admissions","imaging_repeats","imaging_outsourced","critical_results_radiology","radiology_worklist","rx_queue","dispense","order_queries","otc","charity_override","lab_only_walkin","lab_bench","lab_send_outs","lab_verification","critical_results_bench","critical_results_verifier","critical_results_doctor","critical_results_ward","consents_ward"].includes(id) || ["full", "open_work", "records"].includes(est?.views.screens.find(v => v.screen_id === id)?.view || "")),
   );
   const view = est?.views.workspaces.find(
@@ -1286,6 +1290,7 @@ export function App() {
               {screen === 'consents_doctor' && est && <ConsentsAdmissions key={user.user_id+'doctor'} screenId="consents_doctor" user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone}/>}
               {screen === 'blood_sources' && est && <BloodSources key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} />}
               {screen === 'blood_request' && est && <BloodRequest key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} onNavigateToConsent={() => navigate('consents_doctor')} />}
+              {screen === 'blood_bank' && est && <BloodBank key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} />}
               {screen === 'wristbands_admissions' && est && <Wristbands key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone}/>}
               {screen === 'wristbands_ward' && est && <Wristbands screenId="wristbands_ward" key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone}/>}
               {screen === 'own_medicines_ward' && est && <OwnMedicinesWard key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone} initialAdmissionId={wardAdmissionEntry?.userId===user.user_id?wardAdmissionEntry.admissionId:undefined} onBack={id=>{if(navigate('my_beds'))setWardAdmissionEntry({userId:user.user_id,admissionId:id});}}/>}

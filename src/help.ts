@@ -4325,4 +4325,92 @@ consents_doctor: {
     ],
   },
 
+
+  blood_bank: {
+    title: "Blood bank management",
+    titleUr: "بلڈ بینک اور خون کا انتظام",
+    purpose: "Receive units, the stock with its expiries, the worklist of requests, compatibility tests, issue to the bedside, units signed back, discards and returns to the source, the storage temperature log.",
+    purposeUr: "خون کے بیگز کی وصولی، اسٹاک کی میعاد، مطابقت ٹیسٹ، ترسیل، واپسی، تلفی اور کولڈ چین درجہ حرارت کا لاگ۔",
+    steps: [
+      "Open Laboratory → Blood bank to access inventory shelves, open clinical requests, and cold-chain temperature logs.",
+      "Review blood units in stock sorted with soonest expiry first; expired bags are highlighted in red for prompt discard.",
+      "Click 'Receive New Units' to log incoming bags from licensed Regional Blood Centers or partner hospital blood banks.",
+      "Enter unit bag barcode, component, ABO/Rh, expiry date, and verify the mandatory TTI screening check before saving.",
+      "Open 'Clinical Requests & Issue' tab to review doctor requests sorted with life-threatening Emergency cases first.",
+      "Click '+ Record crossmatch' to test patient compatibility with an in-stock unit; Compatible test automatically reserves the bag.",
+      "Click 'Issue unit to bedside' and require the collecting nurse or doctor to sign with their own staff credentials.",
+      "Log twice-daily refrigerator and freezer temperatures in the Storage tab; enter corrective actions if readings drift out of range.",
+    ],
+    stepsUr: [
+      "بلڈ بینک اسٹاک، طبی درخواستیں اور کولڈ چین درجہ حرارت دیکھنے کے لیے لیبارٹری سے 'بلڈ بینک' کھولیں۔",
+      "جلد ختم ہونے والی میعاد کے مطابق ترتیب شدہ خون کے بیگز کا جائزہ لیں؛ زائد المیعاد بیگز تلفی کے لیے سرخ رنگ میں نمایاں ہوتے ہیں۔",
+      "مجاز ریجنل بلڈ سنٹرز یا پارٹنر بلڈ بینکس سے موصول ہونے والے بیگز کے اندراج کے لیے 'نئے یونٹس وصول کریں' پر کلک کریں۔",
+      "بیگ کا بارکوڈ، جزو، بلڈ گروپ اور میعاد درج کریں اور محفوظ کرنے سے پہلے متعدی امراض کی اسکریننگ کی لازمی تصدیق کریں۔",
+      "ڈاکٹر کی درخواستوں کا جائزہ لینے کے لیے 'طبی درخواستیں اور ترسیل' ٹیب کھولیں جہاں ایمرجنسی کیسز پہلے ظاہر ہوتے ہیں۔",
+      "مریض کے نمونے کے ساتھ مطابقت جانچنے کے لیے 'کراس میچ درج کریں' پر کلک کریں؛ درست نتیجہ بیگ کو خودکار مخصوص کر دیتا ہے۔",
+      "وارڈ کے لیے خون جاری کرنے پر کلک کریں اور وصول کنندہ نرس یا ڈاکٹر سے اپنے پاس ورڈ کے ذریعے باضابطہ تصدیق کروائیں۔",
+      "اسٹوریج ٹیب میں دن میں دو بار درجہ حرارت درج کریں؛ اگر درجہ حرارت حد سے باہر ہو تو فوری اصلاحی کارروائی درج کریں۔",
+    ],
+    faq: [
+      [
+        "Why is the screened checkbox never pre-ticked when receiving blood units?",
+        "Per rule 82db038331, transfusion safety mandates explicit physical verification of TTI screening labels on every blood bag before accepting it into stock.",
+      ],
+      [
+        "How are blood units prioritized in the inventory list?",
+        "Units are strictly sorted with the earliest expiring bags first to enforce first-expiry-first-out (FEFO) transfusion practice and minimize wastage.",
+      ],
+      [
+        "Why must bedside staff sign with their own credentials when collecting blood?",
+        "Per rule 7378206488, blood issue requires step-up dual verification to guarantee only registered medical or nursing personnel take blood to the bedside.",
+      ],
+      [
+        "Can blood be issued without a compatibility crossmatch test?",
+        "Only for life-threatening Emergency requests carrying the attending doctor's documented uncrossmatched authorization note. Routine requests require full crossmatch.",
+      ],
+      [
+        "What is the policy for blood units returned from the ward?",
+        "A unit signed back within 30 minutes of issue with intact cold chain can be returned to stock. Units outside 30 minutes are marked Not given and discarded.",
+      ],
+      [
+        "What temperature thresholds are enforced for cold-chain storage equipment?",
+        "Blood Refrigerators must stay between +2°C and +6°C; Plasma Freezers at -25°C or colder; Platelet Incubators between +20°C and +24°C.",
+      ],
+      [
+        "What happens when storage temperature drifts out of the safe range?",
+        "The system triggers a real-time blood.storage.out_of_range alert and refuses log submission until corrective action is documented (STORAGE_CHECK_ACTION_REQUIRED).",
+      ],
+    ],
+    faqUr: [
+      [
+        "خون وصول کرتے وقت اسکریننگ کا نشان خودکار کیوں نہیں لگا ہوتا؟",
+        "حفاظتی قوانین کے تحت لیب ٹیکنیشن کے لیے ضروری ہے کہ وہ ہر بیگ پر اسکریننگ کے لیبل کی تصدیق کر کے خود نشان لگائے۔",
+      ],
+      [
+        "اسٹاک لسٹ میں خون کے بیگز کس ترتیب سے ظاہر ہوتے ہیں؟",
+        "سب سے پہلے ختم ہونے والی میعاد کے بیگز اوپر ظاہر ہوتے ہیں تاکہ ضیاع سے بچا جا سکے اور پرانا خون پہلے استعمال ہو۔",
+      ],
+      [
+        "خون وصول کرتے وقت عملے کا ذاتی لاگ ان سے تصدیق کرنا کیوں ضروری ہے؟",
+        "قانون کے مطابق دوہری تصدیق لازمی ہے تاکہ صرف مستند اور رجسٹرڈ نرس یا ڈاکٹر ہی خون کا بیگ وارڈ لے کر جا سکیں۔",
+      ],
+      [
+        "کیا کراس میچ ٹیسٹ کے بغیر خون جاری کیا جا سکتا ہے؟",
+        "صرف شدید ہنگامی صورتحال میں جب ڈاکٹر کا تحریری اجازت نامہ موجود ہو۔ عام حالات میں کراس میچ کے بغیر خون دینا ممنوع ہے۔",
+      ],
+      [
+        "وارڈ سے واپس آنے والے خون کے بیگز کے لیے کیا پالیسی ہے؟",
+        "اگر خون 30 منٹ کے اندر اور محفوظ درجہ حرارت میں واپس آ جائے تو اسٹاک میں شامل ہو سکتا ہے، ورنہ ضائع کیا جاتا ہے۔",
+      ],
+      [
+        "بلڈ بینک کے آلات کے لیے درجہ حرارت کی کیا حدود ہیں؟",
+        "ریفریجریٹر +2 سے +6 سینٹی گریڈ، پلازما فریزر -25 یا اس سے کم، اور پلیٹلیٹ انکیوبیٹر +20 سے +24 سینٹی گریڈ پر ہونا لازمی ہے۔",
+      ],
+      [
+        "اگر درجہ حرارت محفوظ حد سے باہر ہو جائے تو کیا ہوتا ہے؟",
+        "سسٹم فوری انتباہ جاری کرتا ہے اور جب تک کی گئی اصلاحی کارروائی درج نہ ہو، لاگ کا اندراج قبول نہیں کرتا۔",
+      ],
+    ],
+  },
+
 };
