@@ -156,15 +156,11 @@ export function Wristbands({
       patients.getPatient(stay.patient_id),
       w.listWristbands({ patient_id: stay.patient_id }),
     ]);
-    if (
-      person.patient_id !== stay.patient_id ||
-      person.mrn !== stay.mrn ||
-      person.registration_type === "Merged"
-    )
+    if (person.is_deceased)
       throw Error(
         t(
-          "Patient identity changed. Return to the corrected stay before issuing a band.",
-          "مریض کی شناخت بدلی۔ درست داخلہ منتخب کریں۔",
+          "Patient is deceased. Wristbands cannot be issued for deceased patients.",
+          "مریض کا انتقال ہو چکا ہے۔ متوفی مریضوں کو کلائی بینڈ جاری نہیں ہو سکتے۔",
         ),
       );
     return { stay, person, bands };
@@ -274,6 +270,7 @@ export function Wristbands({
     () =>
       window.terminal.subscribe((e) => {
         if (e.type === "stream" && e.status === "Live" && e.resync) refresh();
+        if (e.type === "event" && e.event_type === "patient.merged") refresh();
       }),
     [refresh],
   );

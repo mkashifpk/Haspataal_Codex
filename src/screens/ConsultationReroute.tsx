@@ -42,10 +42,7 @@ export function ConsultationReroute({
     user,
     "consultation-reroute:" + ticket.ticket_id,
     async (value) => {
-      if (
-        value.patient_id !== ticket.patient_id ||
-        value.ticket_id !== ticket.ticket_id
-      )
+      if (value.ticket_id !== ticket.ticket_id)
         throw Error("Re-route response identity differs. Read current slip.");
       setOpen(false);
       setReview(undefined);
@@ -92,7 +89,7 @@ export function ConsultationReroute({
               (d) => d.department_id === review.target_department_id,
             );
         if (
-          fresh.patient_id !== ticket.patient_id ||
+          fresh.ticket_id !== ticket.ticket_id ||
           fresh.queue?.queue_id !== queueId ||
           fresh.queue.status !== "Active" ||
           !fresh.queue.called_at ||

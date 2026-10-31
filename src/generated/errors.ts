@@ -159,6 +159,7 @@ export type ApiErrorCode =
   | "EMPLOYEE_DOCUMENT_REQUIRED"
   | "EMPLOYEE_IMMUTABLE_FIELD"
   | "EMPLOYEE_NOT_READY_FOR_PROVISIONING"
+  | "EMPLOYEE_STATUS_INVALID"
   | "ENCOUNTER_IMMUTABLE_FIELD"
   | "ENCOUNTER_NOT_FINAL"
   | "EQUIPMENT_EVALUATION_EXISTS"
@@ -491,6 +492,7 @@ export interface ApiErrorDetails {
   DRILL_REPORT_INCOMPLETE: { missing?: unknown[] };
   DRUG_MISMATCH: { ordered?: string; scanned?: string };
   EDUCATION_MATERIAL_EXISTS: { constraint?: string };
+  EMPLOYEE_STATUS_INVALID: { status?: string; next_step?: string };
   EQUIPMENT_EVALUATION_EXISTS: { constraint?: string };
   EQUIPMENT_EVALUATION_REQUIRED: { chosen_option_id?: number };
   EQUIPMENT_REQUISITION_STATE_INVALID: { status?: string };

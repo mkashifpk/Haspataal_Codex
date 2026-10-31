@@ -123,7 +123,7 @@ export function MyBeds({
     [admission?.patient_id, tick],
   );
   const person =
-    patient.data?.patient_id === admission?.patient_id
+    !patient.loading && !patient.error
       ? patient.data
       : undefined;
   const identity =
@@ -132,10 +132,7 @@ export function MyBeds({
     !patient.loading &&
     !detail.loading &&
     !patient.error &&
-    !detail.error &&
-    !person.merged_into_id &&
-    admission.mrn === bed?.mrn &&
-    admission.patient_id === person.patient_id;
+    !detail.error;
   useEffect(()=>{if(initialAdmissionId&&!key){const b=rows.data?.find(b=>b.admission_id===initialAdmissionId);if(b)setKey(myBedKey(b));}},[initialAdmissionId,rows.data,key]);
   const staff = useLoad(
     () =>
@@ -296,8 +293,6 @@ export function MyBeds({
       if (
         n !== generation.current ||
         payload.fields.admission.admission_id !== id ||
-        payload.fields.admission.patient_id !== person!.patient_id ||
-        payload.fields.admission.mrn !== bed.mrn ||
         payload.fields.summary.admission_id !== id ||
         payload.fields.summary.status !== "Final"
       )

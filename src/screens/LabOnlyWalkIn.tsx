@@ -620,7 +620,7 @@ export function LabOnlyWalkIn({
                 }}
               >
                 <bdi>
-                  {h.full_name} · {h.mrn} · {h.mobile}
+                  {h.full_name} · {h.mrn}{h.mobile ? ` · ${h.mobile}` : ""}
                 </bdi>
               </button>
             ))}
@@ -1154,7 +1154,7 @@ export function LabOnlyWalkIn({
             <>
               <p>
                 <bdi>
-                  {review.body.full_name} · {review.body.mobile}
+                  {review.body.full_name}{review.body.mobile ? ` · ${review.body.mobile}` : ""}
                 </bdi>
               </p>
               <p>

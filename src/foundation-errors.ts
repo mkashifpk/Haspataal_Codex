@@ -1,7 +1,15 @@
 import type { Bilingual } from "./foundation-help";
 // Recovery guidance, not a substitute for server validation or authorization.
-export const foundationErrors: Record<string, Bilingual> = {
- TREATING_DOCTOR_ONLY:["This patient belongs to another treating doctor. Read the latest doctor history. Only that doctor can hand over; a Hospital Admin or Director reassigns while they are away.","یہ مریض دوسرے معالج کا ہے۔ تازہ تاریخ پڑھیں۔ وہی ڈاکٹر حوالہ دے سکتا ہے؛ غیر موجودگی میں ایڈمن یا ڈائریکٹر معالج بدلتے ہیں۔"],
+ export const foundationErrors: Record<string, Bilingual> = {
+  CLINICAL_LICENSE_REQUIRED: [
+    "Clinical staff need a PMDC/PNC licence number and document. HR completes the profile first; keep the chosen roles.",
+    "طبی عملے کو پی ایم ڈی سی/پی این سی لائسنس نمبر اور دستاویز درکار ہے۔ پہلے ایچ آر پروفائل مکمل کرے؛ منتخب کردار محفوظ رکھیں۔",
+  ],
+  EMPLOYEE_STATUS_INVALID: [
+    "This employee status transition is not allowed. Read the current status and follow the required step.",
+    "ملازم کی اس حالت میں یہ تبدیلی ممکن نہیں۔ موجودہ حالت پڑھیں اور مطلوبہ مرحلے پر عمل کریں۔",
+  ],
+  TREATING_DOCTOR_ONLY:["This patient belongs to another treating doctor. Read the latest doctor history. Only that doctor can hand over; a Hospital Admin or Director reassigns while they are away.","یہ مریض دوسرے معالج کا ہے۔ تازہ تاریخ پڑھیں۔ وہی ڈاکٹر حوالہ دے سکتا ہے؛ غیر موجودگی میں ایڈمن یا ڈائریکٹر معالج بدلتے ہیں۔"],
  DOCTOR_CHANGE_UNRECORDED:["The doctor change has no matching history record. Keep the draft and report this response to the backend team; do not retry or change the doctor locally.","معالج کی تبدیلی کا تاریخی اندراج نہیں۔ مسودہ رکھ کر سرور ٹیم کو اطلاع دیں؛ دوبارہ ارسال یا مقامی تبدیلی نہ کریں۔"],
  MEDICATION_ORDER_STOPPED:["This order has stopped or ended. Refresh the PRN orders and select a current order; do not give another dose from this line.","یہ حکم بند یا ختم ہے۔ حسب ضرورت احکام تازہ کرکے فعال حکم چنیں؛ اس سطر سے مزید خوراک نہ دیں۔"],
  DOSE_NOT_PREPARED:["Prepare this dose first. Reprinting only reads a recorded preparation and never prepares or gives a dose.","پہلے یہ خوراک تیار کریں۔ دوبارہ لیبل صرف درج تیاری پڑھتا ہے؛ تیاری یا خوراک نہیں دیتا۔"],

@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { api, call } from "../bridge";
 import {
   Details,
@@ -154,6 +154,19 @@ export function ITConsole({
     detailGeneration = useRef(0);
   const roles = data("/meta/roles") || [],
     permissionsList = data("/meta/permissions") || [];
+  useEffect(() => {
+    const handleEvent = (event: Event) => {
+      const custom = event as CustomEvent;
+      const d = custom.detail;
+      if (!d) return;
+      const evType = d.event_type || d.type;
+      if (evType === "hr.provisioning.requested") {
+        void r.reload();
+      }
+    };
+    window.addEventListener("haspataal:event", handleEvent);
+    return () => window.removeEventListener("haspataal:event", handleEvent);
+  }, [r]);
   const open = (a: Action) => {
     if (
       action &&
@@ -640,12 +653,14 @@ export function ITConsole({
           permissionsList={permissionsList}
           departments={data("/admin/departments") || []}
           printers={data("/admin/printers") || []}
+          error={error}
           onCancel={() => setAction(undefined)}
           onSubmit={(body) => {
             const path = action.path.replace(
               "{station_id}",
               encodeURIComponent(body.station_id),
             );
+            setAction((prev) => (prev ? { ...prev, body } : undefined));
             setConfirming(writeAttempt({ ...action, path, body:adminRequestBody(action.endpoint,body) }));
           }}
         />
@@ -777,6 +792,7 @@ export function AdminForm({
   permissionsList,
   departments,
   printers,
+  error,
   onSubmit,
   onCancel,
 }: {
@@ -785,6 +801,7 @@ export function AdminForm({
   permissionsList: any[];
   departments: any[];
   printers: any[];
+  error?: unknown;
   onSubmit: (body: Record<string, any>) => void;
   onCancel: () => void;
 }) {
@@ -820,6 +837,7 @@ export function AdminForm({
       }}
     >
       <h3>{tr(action.label)}</h3>
+      <ErrorBox error={error} />
       <p className="muted">
         {tr(
           "Only the server can confirm this change. Privileged access may wait for Owner approval.",

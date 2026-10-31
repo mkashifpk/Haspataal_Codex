@@ -107,18 +107,16 @@ export function DoctorInpatients({
     [record?.patient_id, revision],
   );
   const person =
-      profile.data?.patient_id === record?.patient_id
+      !profile.loading && !profile.error
         ? profile.data
         : undefined,
     identity =
       !!record &&
       !!person &&
-      record.patient_id === person.patient_id &&
       !row.loading &&
       !row.error &&
       !profile.loading &&
-      !profile.error &&
-      !person.merged_into_id;
+      !profile.error;
   const flow = useLoad(
     () =>
       record && can("ipd.flowsheet.view")
@@ -445,8 +443,6 @@ export function DoctorInpatients({
         )?.view;
         if (
           actor.user_id !== user.user_id ||
-          patient.patient_id !== source.patient_id ||
-          patient.merged_into_id ||
           inpatientSnapshot(fresh) !== inpatientSnapshot(source) ||
           !inpatientActionAllowed(
             d.action,

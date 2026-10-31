@@ -1,94 +1,43 @@
 # Haspataal checkpoint
-Last updated: 30 October 2026, Antigravity (Codex pair), Asia/Karachi.
+Last updated: 31 October 2026, Antigravity (Codex pair), Asia/Karachi.
 
-## Active new screen request
-Completed Screen 76 `blood_donors` ("Blood donors" for Lab & Blood Center workspace `lab_tech` / `blood_bank`, Phase 4 Inpatient Journey).
-Previous screen: Position 75 `blood_bank` (Proposal #227 pending).
-Next screen: Position 77 in Phase 4 Roadmap.
+## Active request: Server update (30 Oct 2026 commit e6df884), #50, #51, Decision 61 refactoring
+Resumed from baseline commit `a9af820`. Checking and refactoring screens against backend issue fixes #50 and #51, decision 61 merged-patient rules, DEV synthetic tests 9.a-9.h, help/FAQ updates, and MCP progress proposals.
 
-- Current status: Screen 76 completed, verified live (200 OK), committed (3230dc2), and submitted for review (Proposal #228).
-- Completed checkpoints:
-  1. Saved contract bundle in `contracts/blood_donors.json` (5 endpoints, realtime events, 58 points).
-  2. Generated typed API contracts in `src/generated/blood_donors.ts`.
-  3. Implemented domain policy in `src/blood-donors-policy.ts`:
-     - Access gating by screen view (`full`, `open_work`, `records`, `setup`, `hidden`), capability (`establishment.active.includes('blood_center')`), and permissions (`blood_center.view`, `blood_center.donor.register`) (`rule:6a58b93e99`, `rule:5850958062`).
-     - Search validation rule (`rule:71bc3f69b3`): search first (`q`, min 2 chars: donor number, CNIC, mobile, or name).
-     - Registration validation rule (`rule:40349aea7e`): legal full name, sex (Male/Female), date of birth (17-70 years), identity document (CNIC, Passport, Proof of Registration, Other), and at least one contact (phone, email, or address).
-     - Lifetime donor rules (`rule:71bc3f69b3`, `rule:40349aea7e`): donor is registered once for life. Duplicate registration intercepted by `BLOOD_DONOR_EXISTS` and automatically opens existing record.
-     - Eligibility and deferral evaluation (`rule:d7bf9e8097`): permanently deferred donors must never be bled (never offer 'Donate' action); temporary deferrals display active banner with earliest permitted date (`may_donate_from`). Opening record is logged for audit under PBTA Act s.10.
-     - Correction validation rule (`rule:73b2977f2f`): requires mandatory reason (5-500 chars), expected_version concurrency control; immutable donor number cannot be changed.
-  4. Implemented full screen in `src/screens/BloodDonors.tsx`:
-     - Real-time `establishment.changed` listener.
-     - Retiring banner for `open_work` ("No new donor registrations from now on"); records mode for `records`.
-     - Search-first interface with min 2 chars validation and audit notice.
-     - Search results table with donor number, demographics, identification, blood group, donation count, and eligibility badges.
-     - Detailed inspection card with audit logging banner, eligibility alert, deferral history table with author stamps, and donation history table.
-     - Register donor modal with client validation and idempotency protection (`useClinicalWrite`).
-     - Correct particulars modal with mandatory reason and concurrency versioning.
-  5. Wired routing, screen labels, view filters, and navigation in `src/App.tsx`.
-  6. Registered 5 tasks in `src/foundation-catalogue.json` (75 screens) and mapped in `src/foundation-task-map.json`.
-  7. Added 29 `blood_donors.*` control guides and added `"blood_donors"` to `deliveredHelpScreens` in `src/foundation-help.ts`.
-  8. Authored bilingual English/Urdu screen help, 8 steps, and 7 role FAQs in `src/help.ts`.
-  9. Bundled reference screenshots `public/handbook/blood_donors-en.png` and `public/handbook/blood_donors-ur.png`.
-  10. Authored unit tests in `tests/blood-donors.test.mjs` (3 test suites) and updated `tests/help-coverage.test.mjs` (75 screens).
-  11. Verified live DEV endpoints with real auth (`POST /auth/login` as `demo.labtech`, `GET /blood-center/donors?q=Ali` -> 200 OK, `GET /establishment` -> 200 OK with `blood_center` view `full` and active capability).
-  12. Full verification suite:
-      - `npm run check:help`: PASS (75 screens, 1553 controls, 693 groups, 69 FAQ seeds, 30 workspace guides).
-      - `npm run build`: PASS (`index-CH-J_ACq.js`, tsc + Vite production bundle).
-      - `npm test`: PASS (274/274 tests passing).
-  1. Saved contract bundle in `contracts/blood_bank.json` with 15 endpoints, 5 realtime events, and definitions.
-  2. Generated typed API contracts in `src/generated/blood_bank.ts` (15 typed methods).
-  3. Implemented domain policy in `src/blood-bank-policy.ts`:
-     - Access gating by screen view (`full`, `open_work`, `records`, `setup`, `hidden`), capability (`establishment.active.includes('blood_transfusion')`), and permissions (`blood.view`, `blood.bank.operate`, `blood.bank.manage`).
-     - Safe temperature range validation for storage checks (`rule:970c05860c`): Blood Refrigerator (+2°C to +6°C), Plasma Freezer (<= -25°C), Platelet Agitator/Incubator (+20°C to +24°C). Mandates documented `action_taken` when out of range (`STORAGE_CHECK_ACTION_REQUIRED`).
-     - TTI screening verification (`rule:82db038331`): `screened` checkbox cannot be pre-ticked; unscreened units are refused.
-     - FEFO sorting and expiry flagging (`rule:cdfdb93c8e`): soonest expiry first; expired bags highlighted in red with Discard action. Emergency requests prioritized at the top of worklist.
-     - Dual sign-off for issue (`rule:7378206488`): bedside issue requires collecting nurse/doctor credentials (`collector_username`, `collector_password`), enforcing `STEP_UP_REQUIRED` and `ADMINISTRATION_NOT_AUTHORIZED`.
-     - 30-minute return window (`rule:0e8d0a52ed`): units returned within 30 minutes with cold chain intact return to stock (`fit_for_use: true`); otherwise marked `NotGiven` with reason and discarded.
-     - Input validators for unit intake, crossmatch test, discard, return-to-source, issue, returned unit sign-in, and storage check.
-  4. Implemented full screen in `src/screens/BloodBank.tsx`:
-     - 4 tabs: `stock` (inventory with FEFO sorting, expiry badges, discard/return actions, filter by ABO/Rh and component), `receive` (intake from licensed source with un-ticked screened checkbox, bag barcode, component, volume, expiry, batch), `worklist` (clinical blood requests with priority emergency sorting, crossmatch modal, issue modal with collector step-up credentialing, close request), `storage` (temperature log table, chart/out-of-range alerts, new check modal with auto-flagging and action taken, A4 PDF download button).
-     - Modals: Discard Modal (`POST /blood/units/{id}/discard`), Return to Source Modal (`POST /blood/units/{id}/return-to-source`), Crossmatch Test Modal (`POST /blood/requests/{id}/crossmatches`), Issue Modal (`POST /blood/requests/{id}/issue` with collector co-sign credentials), Return Signing Modal (`POST /blood/transfusions/{id}/return` within 30 min window), Storage Check Modal (`POST /blood/storage-checks`).
-     - Real-time reactive listeners for `blood.request.created`, `blood.consent.withdrawn`, `blood.storage.out_of_range`, `blood.reaction.reported`, `blood_center.component.released`, and `establishment.changed`.
-     - Retiring mode banner for `open_work` view; read-only mode for `records`.
-     - Idempotent safe writes via `useClinicalWrite`.
-  5. Wired routing, screen labels, view filters, and navigation in `src/App.tsx`.
-  6. Registered 7 tasks in `src/foundation-catalogue.json` (74 screens) and mapped in `src/foundation-task-map.json`.
-  7. Added 50 `blood_bank.*` control guides and added `"blood_bank"` to `deliveredHelpScreens` in `src/foundation-help.ts`.
-  8. Authored bilingual English/Urdu screen help, 8 steps, and 7 role FAQs in `src/help.ts`.
-  9. Bundled reference screenshots `public/handbook/blood_bank-en.png` and `public/handbook/blood_bank-ur.png`.
-  10. Authored unit tests in `tests/blood-bank.test.mjs` (3 test suites) and updated `tests/help-coverage.test.mjs` (74 screens).
-  11. Verified live DEV endpoints with real auth (`POST /auth/login` as `demo.labtech`, `GET /blood/units` -> 200 OK, `GET /blood/requests` -> 200 OK, `GET /blood/storage-checks` -> 200 OK, `GET /blood/sources` -> 200 OK, `GET /establishment` -> 200 OK).
-  12. Full verification suite:
-      - `npm run check:help`: PASS (74 screens, 1524 controls, 664 groups, 69 FAQ seeds, 30 workspace guides).
-      - `npm run build`: PASS (`index-efr3Zcfn.js`, tsc + Vite production bundle).
-      - `npm test`: PASS (271/271 tests passing).
+- Current status:
+  - Step 1: Confirmed baseline git commit `a9af820`.
+  - Step 2: Called `overview`, `what_changed`, `my_progress`, `my_backend_issues`. Verified `server_build: 2026-10-31T00:19:38.433994+00:00` matches `fixed_in` for #50 and #51.
+  - Step 3: Regenerated errors via `generate_typescript(kind: "errors")`; confirmed only `EMPLOYEE_STATUS_INVALID` added. Re-read all designated contracts, endpoints, state machine, and workflows.
+  - Step 4 & 5: Verified `staff_directory` and `onboarding_wizard` not yet built.
+  - Step 6: `ITConsole.tsx` refactored: added real-time listener for `hr.provisioning.requested` to reload queue, preserved form body and role selections on submission failure, and integrated `CLINICAL_LICENSE_REQUIRED` error guidance.
+  - Step 7: Verified `DoctorInpatients.tsx`, `MyBeds.tsx`, `VitalsFlowsheet.tsx` rely strictly on server `is_overdue` and show `vitals.due` only for own/unassigned patients.
+  - Step 8: Merged patients (decision 61): refactored `ConsentsAdmissions.tsx`, `Wristbands.tsx`, `Dispense.tsx`, `DoctorInpatients.tsx`, `MyBeds.tsx`, `PendingAdmissions.tsx`, `ConsultationReroute.tsx`, `LabOnlyWalkIn.tsx` to eliminate cross-identity assertions, retain original `patient_id` on clinical records, display master demographics, reload wristbands on `patient.merged`, and format empty contact for unlinked newborns.
+  - Step 9 synthetic tests on DEV:
+    - 9.a: PASS (demo.hr employee 36 /status Active -> 409 EMPLOYEE_STATUS_INVALID; CNIC upload; repeat -> 409).
+    - 9.b: PASS (POST .../submit -> 200 Awaiting_IT_Provisioning; status Active -> 409 with details.next_step 'POST /admin/users').
+    - 9.c: PASS (Status Suspended -> 200; status Active -> 200 Awaiting_IT_Provisioning; verified in GET /admin/provisioning-queue).
+    - 9.d: PASS (demo.it provisioned user 34 synth.user36 -> Active; demo.hr left_on before join date -> 422 left_on; left_on today -> 200 with user null; Suspended -> 409; Active -> 200; demo.it re-enabled user 34 -> restored).
+    - 9.e: In Progress (admission 1 CodeRedActive, no doctor, vitals recorded 25 min past, schedule 15 min set; awaiting vitals.due delivery & flowsheet verification).
+    - 9.f: Pending (prescribe PRN/routine dose, verify medication.due for demo.nurse).
+    - 9.g: Pending (trauma profile, unpaid registration ticket, merge into male permanent patient, pay ticket, verify patient_name/mrn).
+    - 9.h: Pending (Code Red female admission, arrival, newborn delivery, mother merge, verify newborn name and mobile).
+  - Step 10: Pending (Update F1 help and role FAQs in `src/help.ts`).
+  - Step 11: Pending (Replace outdated fixtures/snapshots).
+  - Step 12: Pending (Commit changes, submit propose_progress, update handoff).
 
 - Files involved:
-  - `contracts/blood_request.json`
-  - `src/generated/blood_request.ts`
-  - `src/blood-request-policy.ts`
-  - `src/screens/BloodRequest.tsx`
-  - `src/App.tsx`
-  - `scripts/check-help.mjs`
-  - `src/foundation-catalogue.json`
-  - `src/foundation-help.ts`
-  - `src/foundation-task-map.json`
+  - `src/foundation-errors.ts`
+  - `src/generated/errors.ts`
+  - `src/screens/ConsentsAdmissions.tsx`
+  - `src/screens/ConsultationReroute.tsx`
+  - `src/screens/Dispense.tsx`
+  - `src/screens/DoctorInpatients.tsx`
+  - `src/screens/ITConsole.tsx`
+  - `src/screens/LabOnlyWalkIn.tsx`
+  - `src/screens/MyBeds.tsx`
+  - `src/screens/PendingAdmissions.tsx`
+  - `src/screens/Wristbands.tsx`
   - `src/help.ts`
-  - `public/handbook/blood_request-*.png`
-  - `tests/blood-request.test.mjs`
-  - `tests/help-coverage.test.mjs`
   - `handoff.md`
 
-- Next concrete step: Fetch bundle for Position 75 `blood_bank` (`get_screen_bundle('blood_bank')`) and begin implementation.
-
-- Next concrete step: Fetch bundle for Position 77 `donor_assessment` (`get_screen_bundle('donor_assessment')`) and begin implementation.
-
-## Prior task and Git
-- Clean working tree on branch `main` at commit `3230dc257520fb7411763c3196aa05d48e5e48eb` (22 commits ahead of `origin/main`).
-- Proposal #227 (`blood_bank`) and Proposal #228 (`blood_donors`) awaiting human review on /docs -> My progress.
-- Proposals awaiting human review on /docs -> My progress: #208–#228.
-
-## Backend gaps
-#50 New: employment status activation omits its EMPLOYEE_DOCUMENT_REQUIRED refusal.
-#51 New High: own waiting CodeRed admission 4 never emits vitals.due.
+- Next concrete step: Check `sandbox_events` for `demo.nurse` and `demo.doctor` to verify `vitals.due` delivery for Code Red admission 1, and check `GET /admissions/1/flowsheet` for `is_overdue: true` and `last_alerted_at`.

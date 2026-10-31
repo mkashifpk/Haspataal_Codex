@@ -125,9 +125,8 @@ export function PendingAdmissions({
   const identity =
     !!record &&
     !!person &&
-    record.patient_id === person.patient_id &&
-    record.mrn === person.mrn &&
-    !person.merged_into_id;
+    !profile.loading &&
+    !profile.error;
   useEffect(() => {
     if (record && person && identity)
       setDocContext({ admissionId: record.admission_id, person });
@@ -351,11 +350,7 @@ export function PendingAdmissions({
     try {
       const fresh = await detailApi.getAdmission(editor.record.admission_id),
         p = await resolvePatientMaster(fresh.patient_id, patients.getPatient);
-      if (
-        !p ||
-        p.patient_id !== editor.person.patient_id ||
-        p.mrn !== editor.person.mrn
-      )
+      if (!p)
         throw Error(
           t(
             "The patient identity changed. Keep the draft for reference and reopen the verified admission.",

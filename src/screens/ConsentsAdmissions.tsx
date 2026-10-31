@@ -378,7 +378,7 @@ export function ConsentsAdmissions({
             "ہسپتال کا فعال عمومی فارم نہیں۔ پالیسی نگران سے کہیں۔",
           ),
         );
-      if (p.patient_id !== a.patient_id || p.is_deceased)
+      if (p.is_deceased)
         throw Error(
           t(
             "Patient identity or status changed. Reconcile the admission first.",
@@ -421,7 +421,6 @@ export function ConsentsAdmissions({
       syncing ||
       !live ||
       person.is_deceased ||
-      person.patient_id !== record.patient_id ||
       !consentActionAllowed(record, action) ||
       !(action === "withdraw" || action === "cancel" || action === "scan"
         ? access.correct
@@ -512,11 +511,7 @@ export function ConsentsAdmissions({
           );
           protection = "reconcile";
         } else if (d.action === "scan") {
-          if (
-            !d.document ||
-            d.document.patient_id !== r.patient_id ||
-            d.document.doc_type !== "Consent"
-          )
+          if (!d.document || d.document.doc_type !== "Consent")
             throw Error(
               t(
                 "Select this patient’s actual Consent document.",
@@ -605,10 +600,7 @@ export function ConsentsAdmissions({
           }
         } else {
           const fresh = await getAdmission(v.draft.admission!.admission_id);
-          if (
-            fresh.patient_id !== v.draft.person.patient_id ||
-            fresh.row_version !== v.draft.admission!.row_version
-          )
+          if (fresh.row_version !== v.draft.admission!.row_version)
             throw Error(
               t(
                 "The admission changed. Read it before preparing a consent.",
@@ -1137,14 +1129,6 @@ export function ConsentsAdmissions({
               {person.outstanding.banner_text && (
                 <p className="notice">{person.outstanding.banner_text}</p>
               )}
-              {record && record.patient_id !== person.patient_id && (
-                <p className="error">
-                  {t(
-                    "Merged identity: reconcile this consent with the master patient before writing.",
-                    "ضم شدہ شناخت: ارسال سے پہلے اصل مریض سے ریکارڈ درست کرائیں۔",
-                  )}
-                </p>
-              )}
             </section>
           )}
           {record && (
@@ -1229,8 +1213,7 @@ export function ConsentsAdmissions({
                         syncing ||
                         !live ||
                         !!draft ||
-                        !!person?.is_deceased ||
-                        person?.patient_id !== record.patient_id
+                        !!person?.is_deceased
                       }
                       onClick={() => start(a)}
                     >

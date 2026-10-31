@@ -126,8 +126,7 @@ export function Dispense({
   );
   const patient =
     !identity.loading &&
-    !identity.error &&
-    identity.data?.patient_id === p?.patient_id
+    !identity.error
       ? identity.data
       : undefined;
   const admissionId = p?.admission_id;
@@ -267,8 +266,7 @@ export function Dispense({
     if (
       me.user_id !== user.user_id ||
       !me.permissions.includes(permission) ||
-      identity.is_deceased ||
-      identity.merged_into_id
+      identity.is_deceased
     )
       throw new Error(
         t(
