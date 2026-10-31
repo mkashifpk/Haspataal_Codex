@@ -4514,6 +4514,92 @@ consents_doctor: {
       ],
     ],
   },
+  blood_collection: {
+    title: "Blood collection and donor adverse reactions",
+    titleUr: "خون کا حصول اور عطیہ دہندہ کے ردعمل",
+    purpose: "The accepted donors waiting, the donation number labels for the bags and tubes, the collection or why it failed, and the donor's reaction.",
+    purposeUr: "خون کے حصول کے منتظر منظور شدہ عطیہ دہندگان، بیگز اور ٹیوبز کے لیے بارکوڈ لیبلز، خون کا حصول یا نامکمل رہنے کی وجوہات اور عطیہ دہندہ کے منفی ردعمل کا اندراج۔",
+    steps: [
+      "Open Laboratory → Blood collection to view the waiting worklist of accepted donors awaiting phlebotomy.",
+      "Verify the worklist ordered by waiting time (oldest medical assessment first per PBTA standards).",
+      "Prior to venepuncture, click 'Print Labels' at the donor's side to generate barcoded labels for all pack bags and the two sample tubes (red-top and EDTA).",
+      "Confirm that labels do NOT display the donor's name, maintaining strict donor confidentiality and laboratory blinding.",
+      "Click 'Record Bleed' to open the collection record modal; verify donor demographics, weight, and maximum allowable volume limit.",
+      "If collection is successful, select the bag pack type (Single, Double, Triple, Quadruple), enter the bag lot barcode, select anticoagulant (CPDA-1), and enter start/end times and volume in mL (max 495 mL or weight-adjusted limit).",
+      "If venepuncture fails or is interrupted, choose 'Unsuccessful Bleed' and document the clinical reason (e.g. vein collapse, hematoma, donor distress).",
+      "If an adverse event occurs, select the donor reaction; if Severe, specify harm severity to immediately generate a Section 13 regulatory incident report.",
+    ],
+    stepsUr: [
+      "خون کے حصول کے منتظر منظور شدہ عطیہ دہندگان کی ورک لسٹ دیکھنے کے لیے لیبارٹری سے 'خون کا حصول' کھولیں۔",
+      "پی بی ٹی اے معیار کے تحت وقت کے مطابق ترتیب شدہ لسٹ کا جائزہ لیں (سب سے پرانا معائنہ سب سے اوپر)۔",
+      "سوئی لگانے سے پہلے عطیہ دہندہ کے پاس 'لیبلز پرنٹ کریں' پر کلک کریں تاکہ پیک کے تمام بیگز اور دونوں نمونہ ٹیوبز کے لیے بارکوڈ لیبل تیار ہو سکیں۔",
+      "تصدیق کریں کہ رازداری اور لیب کے غیر جانبدارانہ ٹیسٹ کے لیے بیگ پر عطیہ دہندہ کا نام پرنٹ نہ ہو۔",
+      "خون کے اندراج کے لیے 'خون کا اندراج' پر کلک کریں؛ ڈونر کا وزن اور خون کی زیادہ سے زیادہ جائز حد چیک کریں۔",
+      "کامیاب حصول کی صورت میں بیگ کی قسم (سنگل، ڈبل، ٹرپل، کواڈرپل)، لاٹ بارکوڈ، اینٹی کوگولنٹ، اوقات اور حاصل شدہ مقدار (زیادہ سے زیادہ 495 ملی لیٹر) درج کریں۔",
+      "اگر حصول رک جائے یا ناکام ہو تو 'نامکمل حصول' منتخب کر کے ٹھوس طبی وجہ (مثلاً رگ کا بیٹھنا، نیل پڑنا یا ڈونر کی گھبراہٹ) تحریر کریں۔",
+      "اگر کوئی منفی ردعمل ہو تو اس کا انتخاب کریں؛ شدید ردعمل کی صورت میں نقصان کی شدت منتخب کریں تاکہ سیکشن 13 کے تحت خودکار واقعہ رپورٹ درج ہو۔",
+    ],
+    faq: [
+      [
+        "Why must donation number labels be printed at the donor's side before venepuncture?",
+        "Per rule 653f9e21c7 and PBTA Standard S.5.2.1, printing labels bedside before needle insertion prevents sample mix-ups, labeling wrong tubes, or misidentifying blood packs.",
+      ],
+      [
+        "Why do blood bag labels never display the donor's name?",
+        "Per rule 653f9e21c7 and PBTA Act s.18(b)(x), donor anonymity protects donor confidentiality and ensures laboratory testing remains blinded and unbiased.",
+      ],
+      [
+        "What is the maximum volume of blood that can be drawn from a donor?",
+        "Per rule 368f4aace1, the maximum collection is 495 mL for donors weighing >= 50 kg; for donors under 50 kg, the limit is at most weight in kg * 9 mL + 10%.",
+      ],
+      [
+        "What happens if a collection is started more than 24 hours after medical assessment?",
+        "Per rule 834ffec14a, the server refuses with 409 BLOOD_ASSESSMENT_EXPIRED. The UI offers a 1-click option to record the donation Unsuccessful and directs the donor for a fresh doctor assessment.",
+      ],
+      [
+        "How does the application handle a donor who was deferred after assessment?",
+        "Per rule 834ffec14a, if a deferral was recorded since assessment, the server returns 409 BLOOD_DONOR_DEFERRED, preventing phlebotomy while the deferral remains active.",
+      ],
+      [
+        "What actions are triggered when a Severe adverse reaction is recorded?",
+        "Per rule 8c56f5bd5c and PBTA Act s.13, logging a Severe reaction mandates recording harm severity and immediately generates an official incident report (reaction_incident_number) for regulatory review.",
+      ],
+      [
+        "How is the screen affected when the Blood Center service is retiring?",
+        "Per rule 28291a1e73, in retiring mode (open_work), starting new collections is locked behind a notice banner, but existing open accepted work can be completed and label printing remains accessible.",
+      ],
+    ],
+    faqUr: [
+      [
+        "خون نکالنے سے پہلے عطیہ دہندہ کے پاس لیبل پرنٹ کرنا کیوں ضروری ہے؟",
+        "قوانین کے مطابق سوئی لگانے سے قبل بیڈ سائیڈ پر لیبل پرنٹ کرنے سے نمونوں کے تبادلے یا غلط ٹیوب اور بیگ پر لیبل لگنے کا خطرہ ختم ہو جاتا ہے۔",
+      ],
+      [
+        "بلڈ بیگ کے لیبل پر عطیہ دہندہ کا نام کیوں نہیں لکھا جاتا؟",
+        "پی بی ٹی اے ایکٹ کے تحت ڈونر کی رازداری کا تحفظ اور لیب ٹیسٹنگ کے عمل کو بغیر کسی جانبداری کے چلانے کے لیے بیگ پر نام نہیں لکھا جاتا۔",
+      ],
+      [
+        "عطیہ دہندہ سے زیادہ سے زیادہ کتنا خون حاصل کیا جا سکتا ہے؟",
+        "50 کلو یا زیادہ وزن والے ڈونر سے زیادہ سے زیادہ 495 ملی لیٹر، اور 50 کلو سے کم وزن کے لیے وزن ضرب 9 ملی لیٹر جمع 10 فیصد کی حد مقرر ہے۔",
+      ],
+      [
+        "اگر معائنے کے 24 گھنٹے بعد خون نکالا جائے تو کیا ہوتا ہے؟",
+        "سرور اسیسمنٹ کی معیاد ختم ہونے (BLOOD_ASSESSMENT_EXPIRED) کا ایرر دیتا ہے۔ سسٹم اسے نامکمل درج کرنے اور دوبارہ ڈاکٹر سے معائنہ کروانے کا راستہ فراہم کرتا ہے۔",
+      ],
+      [
+        "اگر معائنے کے بعد ڈونر کا التواء درج ہو جائے تو سسٹم کیا کرتا ہے؟",
+        "سرور 409 BLOOD_DONOR_DEFERRED دیتا ہے جس سے التواء کے دوران خون کا حصول فوری طور پر رک جاتا ہے۔",
+      ],
+      [
+        "شدید منفی ردعمل پر کیا کارروائی خودکار شروع ہوتی ہے؟",
+        "شدید ردعمل پر نقصان کی شدت درج کرنے سے سرور پر خودکار واقعہ رپورٹ درج ہوتی ہے جو پنجاب بلڈ ٹرانسفیوژن اتھارٹی کو بھیجی جاتی ہے۔",
+      ],
+      [
+        "جب بلڈ سنٹر کی سروس ریٹائر ہو رہی ہو تو اسکرین پر کیا اثر ہوتا ہے؟",
+        "ریٹائرنگ موڈ میں نیا خون نکالنا بند ہو جاتا ہے اور بینر ظاہر ہوتا ہے، مگر پہلے سے منظور شدہ خون مکمل کیا جا سکتا ہے اور لیبلز پرنٹ ہو سکتے ہیں۔",
+      ],
+    ],
+  },
   blood_bank: {
     title: "Blood bank management",
     titleUr: "بلڈ بینک اور خون کا انتظام",

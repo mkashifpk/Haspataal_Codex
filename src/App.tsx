@@ -46,6 +46,7 @@ import { BloodRequest } from './screens/BloodRequest';
 import { BloodBank } from './screens/BloodBank';
 import { BloodDonors } from './screens/BloodDonors';
 import { DonorAssessment } from './screens/DonorAssessment';
+import { BloodCollection } from './screens/BloodCollection';
 import { Wristbands } from './screens/Wristbands';
 import { OwnMedicinesWard } from './screens/OwnMedicinesWard';
 import { OwnMedicinesPharmacy } from './screens/OwnMedicinesPharmacy';
@@ -98,6 +99,7 @@ const labels: Record<string, [string, string, string]> = {
  blood_bank: ["Blood bank","بلڈ بینک","🩸"],
  blood_donors: ["Blood donors","خون کے عطیہ دہندگان","🩸"],
  donor_assessment: ["Donor assessment","عطیہ دہندہ کا معائنہ","🩸"],
+ blood_collection: ["Blood collection","خون کا حصول","💉"],
  wristbands_admissions: ["Identity wristbands","شناختی پٹیاں","▤"],
  wristbands_ward: ["Identity wristbands","شناختی پٹیاں","▤"],
  own_medicines_ward: ["Patient's own medicines","مریض کی اپنی ادویات","▤"],
@@ -190,6 +192,7 @@ const frontDeskScreens = new Set([
   'blood_bank',
   'blood_donors',
   'donor_assessment',
+  'blood_collection',
   'bed_matrix',
   'pending_admissions',
   'duty_roster',
@@ -920,6 +923,7 @@ export function App() {
       (id !== "blood_bank" || ["full","open_work","records","setup"].includes(est?.views.screens.find(v=>v.screen_id===id)?.view || "")) &&
       (id !== "blood_donors" || ["full","open_work","records","setup"].includes(est?.views.screens.find(v=>v.screen_id===id)?.view || "")) &&
       (id !== "donor_assessment" || ["full","open_work","records","setup"].includes(est?.views.screens.find(v=>v.screen_id===id)?.view || "")) &&
+      (id !== "blood_collection" || ["full","open_work","records","setup"].includes(est?.views.screens.find(v=>v.screen_id===id)?.view || "")) &&
       (!["mar","verbal_orders_ward","vitals_tracker","patient_education_ward","nursing_assessment","my_beds","doctor_inpatients","cost_estimates_admissions","consents_admissions","wristbands_admissions","wristbands_ward","own_medicines_ward","own_medicines_pharmacy","bed_matrix","pending_admissions","imaging_repeats","imaging_outsourced","critical_results_radiology","radiology_worklist","rx_queue","dispense","order_queries","otc","charity_override","lab_only_walkin","lab_bench","lab_send_outs","lab_verification","critical_results_bench","critical_results_verifier","critical_results_doctor","critical_results_ward","consents_ward"].includes(id) || ["full", "open_work", "records"].includes(est?.views.screens.find(v => v.screen_id === id)?.view || "")),
   );
   const view = est?.views.workspaces.find(
@@ -1301,6 +1305,7 @@ export function App() {
               {screen === 'blood_bank' && est && <BloodBank key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} />}
               {screen === 'blood_donors' && est && <BloodDonors key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} />}
               {screen === 'donor_assessment' && est && <DonorAssessment key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} />}
+              {screen === 'blood_collection' && est && <BloodCollection key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} />}
               {screen === 'wristbands_admissions' && est && <Wristbands key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone}/>}
               {screen === 'wristbands_ward' && est && <Wristbands screenId="wristbands_ward" key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone}/>}
               {screen === 'own_medicines_ward' && est && <OwnMedicinesWard key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone} initialAdmissionId={wardAdmissionEntry?.userId===user.user_id?wardAdmissionEntry.admissionId:undefined} onBack={id=>{if(navigate('my_beds'))setWardAdmissionEntry({userId:user.user_id,admissionId:id});}}/>}

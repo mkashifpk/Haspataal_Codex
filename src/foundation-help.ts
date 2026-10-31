@@ -20,6 +20,7 @@ export const phase1Screens = [
 const approvalScreens = ["approval_queue", "charity_approvals"];
 // Coverage grows screen by screen; Phase 1 acceptance remains separate.
 export const deliveredHelpScreens = [
+  "blood_collection",
   "donor_assessment",
   "blood_donors",
   "blood_bank",
@@ -87,6 +88,34 @@ const g = (
 // IDs are also attached to the actual controls. The build rejects missing
 // mappings and empty translations instead of treating a page as coverage.
 export const controlGuides: Record<string, ControlGuide> = {
+"blood_collection.refresh": g(["blood_collection"],["Refresh collection worklist","ورک لسٹ تازہ کریں"],["Rereads accepted donations waiting for phlebotomy and history log.","خون کے حصول کے منتظر عطیات اور ہسٹری لاگ دوبارہ لوڈ کرتا ہے۔"]),
+"blood_collection.tab_waiting": g(["blood_collection"],["Waiting for phlebotomy tab","منتظر عطیہ دہندگان ٹیب"],["Displays accepted donors awaiting venepuncture ordered by waiting time.","خون دینے کے منتظر منظور شدہ عطیہ دہندگان کی فہرست دکھاتا ہے۔"]),
+"blood_collection.tab_history": g(["blood_collection"],["Collection history tab","حصول کی تاریخ ٹیب"],["Audits completed and unsuccessful bleed records, phlebotomist stamps, and reaction incidents.","مکمل اور نامکمل خون کے حصول کے ریکارڈز اور ری ایکشن رپورٹس دکھاتا ہے۔"]),
+"blood_collection.btn_empty_refresh": g(["blood_collection"],["Refresh empty waiting list","خالی لسٹ تازہ کریں"],["Refreshes waiting donors queue when no accepted donors are currently present.","جب کوئی ڈونر منتظر نہ ہو تو لسٹ تازہ کرتا ہے۔"]),
+"blood_collection.btn_print_labels": g(["blood_collection"],["Print bedside labels button","بیڈ سائیڈ لیبلز پرنٹ کریں"],["Fetches and displays barcoded donation labels for the pack bags and sample tubes at donor side.","بیگ اور ٹیوبز کے لیے بارکوڈ لیبلز حاصل کر کے پرنٹ کے لیے کھولتا ہے۔"]),
+"blood_collection.btn_record_collection": g(["blood_collection"],["Record bleed button","خون کا اندراج بٹن"],["Opens phlebotomy collection form to record bag pack, lot, volume, times, or adverse reaction.","خون نکالنے کا فارم کھولتا ہے تاکہ بیگ لاٹ، مقدار، اوقات یا ری ایکشن درج کیا جا سکے۔"]),
+"blood_collection.filter_history_status": g(["blood_collection"],["History status filter","ہسٹری اسٹیٹس فلٹر"],["Filters collection records by Collected, Unsuccessful, or All outcomes.","کامیاب، ناکام یا تمام نتائج کے لحاظ سے فلٹر کرتا ہے۔"]),
+"blood_collection.btn_history_refresh": g(["blood_collection"],["Refresh history log","ہسٹری لاگ تازہ کریں"],["Refreshes historical donation bleeds list.","ماضی کے عطیات کی لسٹ تازہ کرتا ہے۔"]),
+"blood_collection.btn_history_labels": g(["blood_collection"],["View historical labels","ماضی کے لیبلز دیکھیں"],["Inspects donation number labels and barcodes of past collected donations.","سابقہ عطیات کے لیبلز اور بارکوڈز دیکھنے کا بٹن۔"]),
+"blood_collection.btn_send_printer": g(["blood_collection"],["Send to label printer","لیبل پرنٹر پر بھیجیں"],["Dispatches label payload to terminal receipt/label printer.","لیبلز کو ٹرمینل کے لیبل پرنٹر پر بھیجتا ہے۔"]),
+"blood_collection.btn_close_labels": g(["blood_collection"],["Close labels dialog","لیبلز ڈائیلاگ بند کریں"],["Closes bedside label printing preview modal.","لیبل پرنٹنگ کا پریویو بند کرتا ہے۔"]),
+"blood_collection.btn_switch_unsuccessful_expired": g(["blood_collection"],["Switch to unsuccessful for expired assessment","معیاد ختم پر نامکمل منتخب کریں"],["Automatically sets outcome to Unsuccessful when donor medical assessment has exceeded 24 hours.","جب میڈیکل اسیسمنٹ کو 24 گھنٹے سے زیادہ ہو جائیں تو خودکار طور پر نامکمل منتخب کرتا ہے۔"]),
+"blood_collection.radio_outcome_collected": g(["blood_collection"],["Successful collection radio","کامیاب حصول ریڈیو"],["Selects successful phlebotomy outcome to log bag pack lot and collected volume.","کامیاب خون کے حصول کا انتخاب کرتا ہے۔"]),
+"blood_collection.radio_outcome_unsuccessful": g(["blood_collection"],["Unsuccessful bleed radio","نامکمل حصول ریڈیو"],["Selects unsuccessful bleed outcome to document clinical reason for cessation.","خون کا حصول نامکمل رہنے کی وجہ درج کرنے کا انتخاب کرتا ہے۔"]),
+"blood_collection.select_bag_type": g(["blood_collection"],["Blood bag type selector","بلڈ بیگ قسم کا انتخاب"],["Selects blood bag configuration: Single, Double, Triple, or Quadruple pack.","بلڈ بیگ کی قسم کا انتخاب: سنگل، ڈبل، ٹرپل یا کواڈرپل۔"]),
+"blood_collection.input_bag_lot": g(["blood_collection"],["Bag lot barcode input","بیگ لاٹ بارکوڈ ان پٹ"],["Scans or enters manufacturer lot barcode of blood bag pack (max 60 characters).","بلڈ بیگ کا لاٹ نمبر یا بارکوڈ درج کرتا ہے۔"]),
+"blood_collection.select_anticoagulant": g(["blood_collection"],["Anticoagulant selector","اینٹی کوگولنٹ کا انتخاب"],["Selects preservative and anticoagulant solution (e.g. CPDA-1, SAGM).","حفاظتی کیمیکل و محلول کا انتخاب کرتا ہے۔"]),
+"blood_collection.input_volume_ml": g(["blood_collection"],["Volume collected in mL","حاصل کردہ مقدار ملی لیٹر"],["Records collected blood volume (max 495 mL or donor weight-adjusted limit).","حاصل شدہ خون کی مقدار ملی لیٹر میں درج کرتا ہے۔"]),
+"blood_collection.input_started_at": g(["blood_collection"],["Venepuncture start time","خون لینے کے آغاز کا وقت"],["Records date and time venepuncture commenced.","خون نکالنے کا عمل شروع ہونے کا وقت۔"]),
+"blood_collection.input_ended_at": g(["blood_collection"],["Venepuncture end time","خون لینے کے اختتام کا وقت"],["Records date and time needle was withdrawn.","سوئی نکالنے اور عمل ختم ہونے کا وقت۔"]),
+"blood_collection.select_common_unsuccessful": g(["blood_collection"],["Common unsuccessful reasons selector","نامکمل ہونے کی عام وجوہات"],["Quickly populates standard clinical reasons for unsuccessful collection.","خون ادھورا رہنے کی عام وجوہات میں سے فوری انتخاب۔"]),
+"blood_collection.textarea_unsuccessful_reason": g(["blood_collection"],["Unsuccessful bleed reason textarea","نامکمل ہونے کی وجہ کی تفصیل"],["Documents detailed clinical explanation why collection could not be completed.","خون مکمل نہ ہونے کی تفصیلی طبی وجہ درج کرنے کا خانہ۔"]),
+"blood_collection.select_donor_reaction": g(["blood_collection"],["Donor adverse reaction selector","منفی ردعمل کا انتخاب"],["Selects observed adverse event (Vasovagal, Haematoma, Convulsions, Severe, etc.).","عطیہ دہندہ پر منفی اثر یا ردعمل کا انتخاب کرتا ہے۔"]),
+"blood_collection.select_reaction_harm": g(["blood_collection"],["Reaction harm severity selector","نقصان کی شدت کا انتخاب"],["Specifies harm severity (NoHarm, Mild, Moderate, Severe, Death) for Section 13 incident dispatch.","سیکشن 13 واقعہ رپورٹ کے لیے نقصان کی شدت کا تعین کرتا ہے۔"]),
+"blood_collection.textarea_reaction_action": g(["blood_collection"],["Reaction action taken textarea","طبی امداد کی تفصیل"],["Documents immediate first aid and medical management rendered to donor.","عطیہ دہندہ کو دی جانے والی فوری طبی امداد اور نگہداشت۔"]),
+"blood_collection.btn_cancel_collect": g(["blood_collection"],["Cancel collection modal","حصول منسوخ کریں"],["Closes collection form without saving changes.","تبدیلیاں محفوظ کیے بغیر فارم بند کرتا ہے۔"]),
+"blood_collection.btn_submit_collect": g(["blood_collection"],["Submit collection record","خون کا ریکارڈ جمع کریں"],["Executes POST /blood-center/donations/{id}/collection to finalize bleed record.","خون کے حصول یا نامکمل رہنے کا ریکارڈ سرور پر محفوظ کرتا ہے۔"]),
+
 "donor_assessment.refresh": g(["donor_assessment"],["Refresh donor assessment","ڈونر معائنہ تازہ کریں"],["Rereads donor assessment state, establishment capability, and reactive worklist.","ڈونر معائنہ کی حالت اور ری ایکٹیو لسٹ تازہ کرتا ہے۔"]),
 "donor_assessment.dismiss_alert": g(["donor_assessment"],["Dismiss alert","انتباہ ہٹائیں"],["Closes real-time reactive screening notification banner.","رئیل ٹائم ری ایکٹیو اسکریننگ کا انتباہی بینر بند کرتا ہے۔"]),
 "donor_assessment.switch_deferral_btn": g(["donor_assessment"],["Switch to deferral button","التواء کی طرف منتقل کریں"],["Convenience action to switch outcome to Deferred and prefill eligibility failure reason.","طبی عدم اہلیت کی بنیاد پر خودکار التواء کے فارم پر منتقل کرتا ہے۔"]),
