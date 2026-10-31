@@ -48,6 +48,7 @@ export interface ERBoardProps {
   timeZone?: string;
   onNavigateScreen?: (screen: string, contextId?: number) => void;
   onBack?: () => void;
+  screenId?: string;
 }
 
 export function ERBoard({
@@ -58,6 +59,7 @@ export function ERBoard({
   timeZone = "Asia/Karachi",
   onNavigateScreen,
   onBack,
+  screenId = "er_board",
 }: ERBoardProps) {
   // Action notifications & alerts
   const [actionNotice, setActionNotice] = useState<string | null>(null);
@@ -94,7 +96,7 @@ export function ERBoard({
   const [traumaErrors, setTraumaErrors] = useState<Record<string, string>>({});
 
   // View Evaluation under rule:9501947a0e & capability gating under rule:141986b356
-  const viewEval = evaluateErBoardView(establishment);
+  const viewEval = evaluateErBoardView(establishment, screenId);
   const canView = canViewErBoard(user) && viewEval.canShow;
   const canRegister = canRegisterErArrival(user) && viewEval.canStartNewWork;
   const canTrauma = canCreateTrauma(user) && viewEval.canStartNewWork;
@@ -121,7 +123,7 @@ export function ERBoard({
   );
 
   // Write controller
-  const write = useClinicalWrite(user, "er_board", () => {
+  const write = useClinicalWrite(user, screenId, () => {
     boardLoad.reload();
   });
 
@@ -299,7 +301,9 @@ export function ERBoard({
           )}
           <div>
             <h3 className="h4 mb-0 fw-bold text-danger d-flex align-items-center gap-2">
-              🚨 {t("Emergency Room Tracking Board", "ایمرجنسی روم ٹریکنگ بورڈ")}
+              🚨 {screenId === "er_board_doctor"
+                ? t("Emergency Room Board (Doctor)", "ایمرجنسی روم ٹریکنگ بورڈ (ڈاکٹر)")
+                : t("Emergency Room Tracking Board", "ایمرجنسی روم ٹریکنگ بورڈ")}
             </h3>
             <span className="badge bg-danger text-white me-2">MSDS AAC 15-20</span>
             <small className="text-muted">

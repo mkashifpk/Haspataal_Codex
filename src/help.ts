@@ -5382,6 +5382,101 @@ consents_doctor: {
       ],
     ],
   },
+  er_board_doctor: {
+    title: "ER board",
+    titleUr: "ایمرجنسی بورڈ",
+    purpose: "Every patient in the emergency department by triage level, with the waits against the hospital's targets, the medico-legal status, and the staff on duty and on call under MSDS AAC 15-20 and MSDS 18 (never first-come, first-served). The emergency doctor prioritizes clinical assessments, identifies overdue targets (DoctorOverdue, TriageOverdue, ObservationTooLong, AdmissionWaitTooLong, ReferralWaitTooLong), handles urgent medico-legal flags (MlcNotOpened, MedicoLegalUndecided), responds to real-time Level 1 Code Red chimes via er.visit.updated, registers emergency arrivals, generates temporary trauma profiles for unknown casualties, and accesses on-duty staff and on-call specialist rosters under MSDS 17 iii (rules 2422ef9b12, 618704df95, bdb901deb2, 74958f2576, 21a063e488, 44901aa670, 141986b356).",
+    purposeUr: "ایم ایس ڈی ایس اے اے سی 15-20 اور 18 کے مطابق ایمرجنسی ڈیپارٹمنٹ کے تمام زیرِ علاج مریضوں کی ترجیحی ترتیب (پہلے غیر ٹرائیج شدہ، پھر لیول 1 سے 5 اور آمد کے لحاظ سے، کبھی بھی پہلے آئیے پہلے پائیے نہیں) سے معائنہ کریں۔ ایمرجنسی ڈاکٹر ترجیحی بنیاد پر معائنے کرے، تاخیر کے الرٹس (ڈاکٹر تاخیر، ٹرائیج تاخیر، طویل مشاہدہ، داخلے کا انتظار) اور میڈیکو لیگل بیجز دیکھے، لیول 1 کوڈ ریڈ سائرن پر فوری توجہ دے، نئی آمد کا اندراج کرے، نامعلوم مریضوں کا فوری ٹراما پروفائل بنائے، اور ڈیوٹی و آن کال کنسلٹنٹس کے فون نمبرز ملاحظہ کرے۔",
+    steps: [
+      "Open Doctor workspace -> ER board to access the real-time emergency department tracking board for attending physicians and surgeons.",
+      "Review the top KPI summary tiles displaying total active patient load broken down by triage priority levels (Level 1 to 5), departmental care stages, and overdue service target counts (rule 618704df95).",
+      "Follow strict acuity-based care: untriaged arrivals are pinned to the top for immediate initial nursing triage, followed strictly by priority severity level (1 Resuscitation to 5 Non-urgent) and arrival duration, never first-come first-served (rule 2422ef9b12, MSDS 18).",
+      "Monitor clinical warning flags on patient rows: DoctorOverdue (target doctor assessment window passed), TriageOverdue, ObservationTooLong (>6h in observation), AdmissionWaitTooLong, ReferralWaitTooLong, and prominent red MlcNotOpened / MedicoLegalUndecided alerts (rule 618704df95).",
+      "Listen for real-time audible chimes and visual Code Red notification banners delivered via er.visit.updated whenever an incoming patient is designated or upgraded to Level 1 (Resuscitation) (rule bdb901deb2).",
+      "Click '+ Register Arrival' to record a new emergency intake before formal ticketing when patients arrive directly at the resuscitation bay via ambulance, Rescue 1122, or police escort (rules 74958f2576, 141986b356).",
+      "For unidentified, unconscious, or unknown trauma casualties, click '+ Quick Trauma' to generate an immediate temporary identity (e.g. 'Unknown Male 1') to initiate clinical charting and diagnostic orders without administrative delay (rule 74958f2576).",
+      "Click 'On-Duty Staff' side panel to view on-duty medical officers, triage nurses, and ward staff, as well as on-call specialist consultants (general surgery, orthopaedics, cardiology) with direct contact extensions under MSDS 17 iii (rule 21a063e488).",
+    ],
+    stepsUr: [
+      "ڈاکٹر ورک اسپیس -> 'ایمرجنسی بورڈ' کھولیں اور تمام زیر علاج ہنگامی مریضوں کا ریئل ٹائم ٹریکنگ بورڈ دیکھیں۔",
+      "سب سے اوپر کے سمری ٹائلز دیکھیں جہاں ٹرائیج لیول (1 سے 5)، علاج کے مراحل اور ہدف سے زیادہ تاخیر کے شکار مریضوں کی کل تعداد دکھائی گئی ہے (قاعدہ 618704df95)۔",
+      "طبی نزاکت کی بنیاد پر علاج ترجیح دیں: غیر ٹرائیج شدہ مریض سب سے اوپر نظر آئیں گے، اس کے بعد سختی سے ٹرائیج لیول (1 سے 5) اور آمد کے وقت کی بنیاد پر ترتیب ہوگی، کبھی بھی پہلے آئیے پہلے پائیے نہیں (قاعدہ 2422ef9b12، ایم ایس ڈی ایس 18)۔",
+      "مریض کی قطار پر وارننگ بیجز چیک کریں: ڈاکٹر معائنہ تاخیر، ٹرائیج تاخیر، طویل مشاہدہ، اور لال رنگ کا ایم ایل سی غیر مکمل الرٹ (قاعدہ 618704df95)۔",
+      "سرور سے er.visit.updated موصول ہونے پر لیول 1 کوڈ ریڈ مریض کے لیے خودکار آڈیو گھنٹی اور سرخ الرٹ بینر پر فوری توجہ دیں (قاعدہ bdb901deb2)۔",
+      "ایمبولینس یا براہ راست پہنچنے والے مریضوں کے لیے کاؤنٹر پرچی سے پہلے '+ Register Arrival' پر کلک کر کے آمد کا طریقہ اور بنیادی علامات درج کریں (قاعدہ 74958f2576، 141986b356)۔",
+      "نامعلوم یا بے ہوش ایمرجنسی مریضوں کے لیے پہلے '+ Quick Trauma' پر کلک کر کے فوری عارضی پروفائل تیار کریں اور فوری طبی علاج شروع کریں (قاعدہ 74958f2576)۔",
+      "ڈیوٹی پر موجود ڈاکٹرز، نرسز اور آن کال کنسلٹنٹس (سرجن، آرتھوپیڈک، کارڈیالوجی) کے براہ راست رابطہ نمبرز دیکھنے کے لیے 'On-Duty Staff' پینل کھولیں (قاعدہ 21a063e488، ایم ایس ڈی ایس 17 iii)۔",
+    ],
+    faq: [
+      [
+        "How does the emergency doctor prioritize patients waiting on the ER board?",
+        "Under MSDS 18 and rule 2422ef9b12, the emergency department strictly prioritizes clinical acuity rather than arrival sequence. Untriaged patients appear first to prompt immediate nursing triage, followed by Level 1 (Resuscitation: immediate zero-wait attention) and Level 2 (Emergency: target assessment within 10-15 minutes). The physician must always attend to higher acuity tiers first regardless of who arrived at the facility earlier.",
+      ],
+      [
+        "What clinical obligation is indicated when the 'DoctorOverdue' badge appears?",
+        "Under rule 618704df95, the DoctorOverdue badge indicates that a triaged patient has exceeded the hospital's target maximum wait time for physician assessment for their assigned triage level. The attending doctor must immediately review the patient's vitals, initiate emergency bedside evaluation, or call on-call specialist backup if multiple high-acuity patients arrive simultaneously.",
+      ],
+      [
+        "Why does 'MlcNotOpened' appear in prominent red and what is the doctor's responsibility?",
+        "Under rule 618704df95, a bold red MlcNotOpened hazard flag indicates an acute trauma, road accident, assault, poisoning, or firearm case where the mandatory medico-legal record has not yet been opened. Under Punjab Healthcare Commission guidelines, the doctor must ensure the MLC checklist is recorded, evidence is sealed, and police intimation is generated without delaying critical care.",
+      ],
+      [
+        "How should the clinical team respond to real-time Level 1 / Code Red alerts?",
+        "Under rule bdb901deb2, when an er.visit.updated event upgrades any patient to Level 1, the terminal sounds an audible chime and renders an urgent red alert banner. The ER doctor and resuscitation team must immediately report to Resuscitation Bay 1, prepare airway equipment and emergency drug trays, and assume direct airway, breathing, and circulation management.",
+      ],
+      [
+        "How does a physician initiate emergency care for unidentified unconscious trauma casualties?",
+        "Under rule 74958f2576, the doctor or nurse clicks '+ Quick Trauma' to issue a temporary identity (POST /patients/trauma) such as 'Unknown Male 1'. This immediately establishes a temporary MRN and ER visit, permitting instant verbal orders, emergency blood cross-matching, and portable imaging before demographic identification occurs.",
+      ],
+      [
+        "What does the 409 'ER_VISIT_OPEN' error indicate and how is it resolved?",
+        "Under rule 74958f2576, an individual patient can only have one active open ER visit at a time. If an arrival is submitted for a patient already in the emergency department, the server returns 409 ER_VISIT_OPEN with details.er_visit_id. Clicking the error prompt opens the existing visit chart to resume clinical notes and orders.",
+      ],
+      [
+        "How does the attending doctor summon on-call specialist consultants under MSDS 17 iii?",
+        "Under rule 21a063e488 and MSDS 17 iii, clicking 'On-Duty Staff' opens a side drawer listing all duty doctors and senior on-call specialist consultants (e.g. neurosurgery, thoracic, pediatric surgery) with their active direct telephone contact numbers, ensuring rapid summoning during critical resuscitations.",
+      ],
+      [
+        "How does facility service state affect physician workflows on the ER board?",
+        "Under rules 44901aa670 and 141986b356, when emergency_department transitions to 'open_work' (retiring), active patient tracking, clinical consultations, investigations, and discharge/handover workflows continue uninterrupted, but new arrival registration is blocked with a banner stating 'No new emergency arrivals from now on'.",
+      ],
+    ],
+    faqUr: [
+      [
+        "ایمرجنسی ڈاکٹر بورڈ پر موجود مریضوں کے معائنے میں کس طرح ترجیح دیتا ہے؟",
+        "ایم ایس ڈی ایس 18 اور قاعدہ 2422ef9b12 کے تحت ایمرجنسی میں مریضوں کی ترتیب کلینیکل نزاکت کے مطابق ہوتی ہے، کبھی بھی پہلے آئیے پہلے پائیے کی بنیاد پر نہیں۔ غیر ٹرائیج شدہ مریض سب سے اوپر آتے ہیں، پھر لیول 1 (فوری بحالی) اور لیول 2 (ہنگامی)۔ معالج کو پہلے زیادہ نازک مریضوں کا علاج شروع کرنا ہوتا ہے۔",
+      ],
+      [
+        "جب 'DoctorOverdue' بیج ظاہر ہو تو ڈاکٹر پر کیا کلینیکل ذمہ داری عائد ہوتی ہے؟",
+        "قاعدہ 618704df95 کے مطابق ڈاکٹر اوور ڈیو بیج اس بات کی علامت ہے کہ مریض کے معائنے کا ہدف وقت گزر چکا ہے۔ ڈاکٹر کو فوری طور پر وائٹلز کا جائزہ لے کر بیڈ سائیڈ معائنہ شروع کرنا چاہیے یا ضرورت پڑنے پر آن کال سپیشلسٹ کو طلب کرنا چاہیے۔",
+      ],
+      [
+        "سرخ رنگ میں 'MlcNotOpened' کیوں نظر آتا ہے اور ڈاکٹر کی قانونی ذمہ داری کیا ہے؟",
+        "قاعدہ 618704df95 کے تحت یہ خطرے کا سرخ بیج ظاہر کرتا ہے کہ مریض حادثے، تشدد یا زہر خوری کا ہے مگر قانونی اندراج ابھی تک شروع نہیں ہوا۔ ڈاکٹر پر لازم ہے کہ وہ طبی امداد کے ساتھ ساتھ فوری ایم ایل سی چیک لسٹ مکمل کرے اور پولیس اطلاع کروائے۔",
+      ],
+      [
+        "لیول 1 کوڈ ریڈ الرٹ ملنے پر طبی ٹیم کو کیا فوری اقدامات کرنے چاہئیں؟",
+        "قاعدہ bdb901deb2 کے تحت er.visit.updated پر جیسے ہی کوئی مریض لیول 1 بنتا ہے تو آڈیو گھنٹی بجتی ہے۔ ڈاکٹر اور ٹیم کو فوری طور پر ریسیسیٹیشن بے میں پہنچ کر ایئروے اور ادویات کی ٹرے تیار کر کے جان بچانے کی کارروائی کرنی چاہیے۔",
+      ],
+      [
+        "نامعلوم اور لاوارث ٹراما مریضوں کے لیے فوری علاج کیسے شروع کیا جاتا ہے؟",
+        "قاعدہ 74958f2576 کے تحت معالج یا عملہ '+ Quick Trauma' کے ذریعے فوری عارضی شناختی پروفائل (جیسے 'Unknown Male 1') بناتا ہے جس سے ایم آر این اور وزٹ فوری بن جاتا ہے اور بغیر تاخیر ادویات و ٹیسٹ کے احکامات دیے جا سکتے ہیں۔",
+      ],
+      [
+        "سرور کے 409 'ER_VISIT_OPEN' ایرر کا کیا مطلب ہے اور اسے کیسے نمٹایا جائے؟",
+        "قاعدہ 74958f2576 کے مطابق کسی بھی مریض کا ایک وقت میں صرف ایک اوپن ایمرجنسی وزٹ ہو سکتا ہے۔ اگر پرانا وزٹ فعال ہو تو سرور 409 جاری کرتا ہے؛ ڈاکٹر ایرر پر کلک کر کے موجودہ اوپن وزٹ کھول سکتا ہے۔",
+      ],
+      [
+        "ایم ایس ڈی ایس 17 iii کے تحت معالج آن کال کنسلٹنٹس سے کیسے فوری رابطہ کر سکتا ہے؟",
+        "قاعدہ 21a063e488 اور ایم ایس ڈی ایس 17 iii کے تحت 'On-Duty Staff' پینل تمام ڈیوٹی پر موجود ڈاکٹرز اور آن کال کنسلٹنٹس (جنرل سرجن، آرتھوپیڈک، امراض قلب) کے فون نمبرز دکھاتا ہے تاکہ ہنگامی رابطہ فوراً ممکن ہو۔",
+      ],
+      [
+        "سروس کا اسٹیٹس 'open_work' ہونے پر ڈاکٹر کے طریقہ کار پر کیا فرق پڑتا ہے؟",
+        "قواعد 44901aa670 اور 141986b356 کے تحت سروس کے ریٹائر ہونے پر جاری مریضوں کا علاج، ادویات اور ڈسچارج معمول کے مطابق جاری رہتا ہے لیکن نئی آمد کا اندراج 'No new emergency arrivals from now on' کے بینر کے ساتھ روک دیا جاتا ہے۔",
+      ],
+    ],
+  },
+
   er_board: {
     title: "Emergency room tracking board",
     titleUr: "ایمرجنسی روم ٹریکنگ بورڈ",

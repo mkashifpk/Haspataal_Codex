@@ -74,20 +74,21 @@ export const TRIAGE_COLOUR_MAP: Record<
 };
 
 /**
- * Screen view policy for er_board under rule:9501947a0e.
+ * Screen view policy for er_board and er_board_doctor under rule:9501947a0e / rule:44901aa670.
  * Screen belongs to emergency_department service (work role).
  */
 export function evaluateErBoardView(
   establishmentOrScreens?: any,
+  screenId: string = "er_board"
 ): { mode: ScreenViewMode; canShow: boolean; canStartNewWork: boolean; bannerText?: string } {
   let mode: ScreenViewMode = "full";
   const screens = establishmentOrScreens?.views?.screens || establishmentOrScreens?.screens || establishmentOrScreens;
   if (Array.isArray(screens)) {
-    const item = screens.find((s: any) => s.screen_id === "er_board");
+    const item = screens.find((s: any) => s.screen_id === screenId);
     if (item?.view) mode = item.view;
   } else if (screens && typeof screens === "object") {
-    if (screens["er_board"]?.view) mode = screens["er_board"].view;
-    else if (typeof screens["er_board"] === "string") mode = screens["er_board"] as ScreenViewMode;
+    if (screens[screenId]?.view) mode = screens[screenId].view;
+    else if (typeof screens[screenId] === "string") mode = screens[screenId] as ScreenViewMode;
   }
 
   // Capability active check (rule:141986b356)
@@ -156,7 +157,7 @@ export function canViewErBoard(user: { permissions: string[]; roles?: string[] }
 export function canRegisterErArrival(user: { permissions: string[]; roles?: string[] }): boolean {
   return (
     user.permissions.includes("er.visit.register") ||
-    Boolean(user.roles?.some((r) => ["receptionist", "triage_nurse", "doctor"].includes(r)))
+    Boolean(user.roles?.some((r) => ["receptionist", "triage_nurse", "doctor", "clinical_specialist", "surgeon"].includes(r)))
   );
 }
 
@@ -165,7 +166,7 @@ export function canCreateTrauma(user: { permissions: string[]; roles?: string[] 
   return (
     user.permissions.includes("ipd.admission.code_red") ||
     user.permissions.includes("patient.create") ||
-    Boolean(user.roles?.some((r) => ["doctor", "triage_nurse", "receptionist"].includes(r)))
+    Boolean(user.roles?.some((r) => ["doctor", "clinical_specialist", "surgeon", "triage_nurse", "receptionist"].includes(r)))
   );
 }
 
