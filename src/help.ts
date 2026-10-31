@@ -4428,6 +4428,92 @@ consents_doctor: {
       ],
     ],
   },
+  donor_assessment: {
+    title: "Donor medical assessment and deferrals",
+    titleUr: "عطیہ دہندہ کا طبی معائنہ و التواء",
+    purpose: "Perform doctor medical assessment, verify PBTA donor eligibility standards, record independent written consent and unpaid declarations, enforce temporary and permanent deferrals, and manage repeat-reactive donors in confidence.",
+    purposeUr: "پی بی ٹی اے کے معیار کے مطابق ڈونر کا طبی معائنہ، تحریری باخبر رضامندی اور بلا معاوضہ اقرار نامے کا اندراج، عارضی و مستقل التواء اور ری ایکٹیو عطیات کا رازداری سے فیصلہ۔",
+    steps: [
+      "Open Doctor / Blood Center → Donor assessment to evaluate donor fitness, physical parameters, and blood safety eligibility.",
+      "Search for the donor using their lifetime donor number, CNIC, mobile, or name (minimum 2 characters per regulatory search-first policy).",
+      "Review the selected donor's lifetime audit summary, prior donations count, ABO/Rh group, and existing temporary or permanent deferral status.",
+      "Review the completed Donor Health History Questionnaire (PBTA Standard ch.2 S.2.3) and record any clinical observations.",
+      "Measure and record physical examination parameters: weight in kg (≥ 50 kg), haemoglobin in g/dL (≥ 13.0 for men, ≥ 12.5 for women), pulse, blood pressure, and temperature.",
+      "Decide the assessment outcome: choose 'Accepted' if all PBTA eligibility criteria are met, or 'Deferred' with temporary/permanent clinical reason.",
+      "If Accepted, verify and separately check both the written informed consent and voluntary non-remuneration declaration (neither is pre-ticked).",
+      "Submit the assessment with safe idempotency protection; if deferred or repeat-reactive, record confidential disclosure to the donor and confirmatory lab referral.",
+    ],
+    stepsUr: [
+      "ڈونر کی جسمانی صحت، لیبارٹری معیار اور خون کی حفاظت کی جانچ کے لیے 'عطیہ دہندہ کا طبی معائنہ' کھولیں۔",
+      "ڈونر کے تاحیات نمبر، شناختی کارڈ، موبائل یا نام سے تلاش کریں (کم از کم 2 حروف درج کرنا لازمی ہے)۔",
+      "ڈونر کا سابقہ ریکارڈ، ماضی کے عطیات کی تعداد، بلڈ گروپ اور عارضی یا مستقل التواء کی حالت کا جائزہ لیں۔",
+      "ڈونر کی صحت سے متعلق سوالنامے کا جائزہ لیں اور ڈاکٹر کے مشاہدات اور نوٹس درج کریں۔",
+      "جسمانی علامات درج کریں: وزن (کم از کم 50 کلوگرام)، ہیموگلوبن (مرد 13.0، خواتین 12.5 گرام/ڈی ایل)، نبض، بلڈ پریشر اور درجہ حرارت۔",
+      "طبی فیصلہ کریں: اگر تمام معیار پورے ہوں تو 'قبول' منتخب کریں ورنہ ٹھوس وجہ کے ساتھ 'التواء' کا انتخاب کریں۔",
+      "قبولیت کی صورت میں تحریری باخبر رضامندی اور بلا معاوضہ خون دینے کے اقرار نامے کے دونوں الگ خانوں کو خود ٹک کریں۔",
+      "معائنہ کو محفوظ کریں؛ التواء یا ری ایکٹیو ہونے کی صورت میں ڈونر کو رازداری میں آگاہی اور ریفرنس لیب کا اندراج کریں۔",
+    ],
+    faq: [
+      [
+        "Who is legally authorized to assess donors and record deferrals?",
+        "Per rule 2f34c9a08a and PBTA Standard S.1.9, only a registered medical doctor with a valid PMDC/PMC credential on their staff profile is authorized to perform donor medical assessments, record deferrals, or inform donors (BLOOD_DONOR_DOCTOR_REQUIRED).",
+      ],
+      [
+        "Why are informed consent and the unpaid declaration separate, un-ticked boxes?",
+        "Per rule 91e1708abe and Punjab Blood Transfusion Safety Act 2016 s.2(k), pre-ticking consents is strictly prohibited. The doctor must independently confirm both informed consent and the voluntary, non-remunerated declaration for every accepted collection.",
+      ],
+      [
+        "What physical and laboratory criteria are enforced by PBTA standards?",
+        "Per rule eee718a5dc, donors must be 18 or older (first-time at most 60), weigh at least 50 kg, have Hb >= 13.0 g/dL for men or >= 12.5 g/dL for women, safe resting vitals, and observe minimum intervals (90 days for men, 120 days for women).",
+      ],
+      [
+        "How are temporary and permanent deferrals recorded and counselled?",
+        "Per rule a8bf19300f and Act s.10(2)(e), temporary deferrals require a future end date, while permanent deferrals prohibit future donation. The doctor records confidential disclosure (In Person, Phone, Letter), counselling, and reference laboratory referral.",
+      ],
+      [
+        "What must a doctor do when a donor has an unresolved repeat-reactive donation?",
+        "Per rule 7abf8e8e44 (BLOOD_DONOR_REACTIVE_UNRESOLVED), if an earlier donation was repeat-reactive on screening, the system blocks new acceptance until the doctor inspects the reactive file and formalizes the permanent deferral decision.",
+      ],
+      [
+        "How does the Reactive Worklist handle real-time screening notifications?",
+        "Per rule d8cd988a65, the Reactive Worklist queries donations with status Reactive and subscribes to realtime blood_center.donation.reactive events, allowing doctors to promptly inform donors in private and refer them for diagnostic confirmation.",
+      ],
+      [
+        "Under what circumstances can a donor deferral be revoked?",
+        "Per rule d8cd988a65, a deferral is permanent medical audit data and may ONLY be revoked if it was entered in error (e.g. misattributed laboratory reading or transcription mistake), requiring a documented explanatory justification.",
+      ],
+    ],
+    faqUr: [
+      [
+        "ڈونر کا معائنہ کرنے اور التواء درج کرنے کا قانونی مجاز کون ہے؟",
+        "پی بی ٹی اے کے معیار اور قانون کے تحت صرف پی ایم ڈی سی سے رجسٹرڈ میڈیکل ڈاکٹر ہی ڈونر کا معائنہ، التواء اور رازداری سے آگاہ کرنے کے مجاز ہیں (BLOOD_DONOR_DOCTOR_REQUIRED)۔",
+      ],
+      [
+        "باخبر رضامندی اور بلا معاوضہ اقرار نامے کے الگ خانوں کو پہلے سے ٹک کیوں نہیں کیا جاتا؟",
+        "قانون کے مطابق رضامندی خود بخود ٹک کرنا ممنوع ہے۔ ڈاکٹر کے لیے لازم ہے کہ وہ ہر ڈونر سے تحریری باخبر رضامندی اور بلا معاوضہ ہونے کے اقرار نامے کی الگ الگ تصدیق کرے۔",
+      ],
+      [
+        "پی بی ٹی اے معیار کے تحت ڈونر کے لیے کون سے جسمانی معیار لازمی ہیں؟",
+        "عمر کم از کم 18 سال (پہلی بار زیادہ سے زیادہ 60)، وزن کم از کم 50 کلوگرام، ہیموگلوبن مردوں میں 13.0 اور خواتین میں 12.5 گرام، اور محفوظ نبض اور بلڈ پریشر لازمی ہے۔",
+      ],
+      [
+        "عارضی اور مستقل التواء کا اندراج اور کونسلنگ کیسے کی جاتی ہے؟",
+        "عارضی التواء میں اگلی ممکنہ تاریخ درج کی جاتی ہے جبکہ مستقل التواء میں تاحیات ممانعت ہوتی ہے۔ ڈاکٹر رازداری میں آگاہی، کونسلنگ اور ریفرنس لیب کا اندراج کرتا ہے۔",
+      ],
+      [
+        "سابقہ ری ایکٹیو عطیہ رکھنے والے ڈونر کے لیے ڈاکٹر پر کیا لازم ہے؟",
+        "اگر پچھلا عطیہ ری ایکٹیو ہو تو نیا عطیہ روک دیا جاتا ہے۔ ڈاکٹر کے لیے لازم ہے کہ وہ ری ایکٹیو فائل کھول کر باقاعدہ مستقل التواء کا فیصلہ درج کرے۔",
+      ],
+      [
+        "ری ایکٹیو لسٹ کو نئے نتائج کے لیے کیسے تازہ رکھا جاتا ہے؟",
+        "سسٹم ری ایکٹیو لسٹ خودکار رئیل ٹائم ایونٹس سے تازہ رکھتا ہے تاکہ ڈاکٹر بروقت ڈونر سے رابطہ کر کے رازداری سے کونسلنگ کر سکے اور تصدیقی ٹیسٹ کے لیے بھیج سکے۔",
+      ],
+      [
+        "کس صورتحال میں ڈونر کا التواء منسوخ کیا جا سکتا ہے؟",
+        "التواء صرف اور صرف اسی صورت میں منسوخ ہو سکتا ہے جب وہ غلطی سے درج ہوا ہو (جیسے کسی اور کے ٹیسٹ کا غلط اندراج) اور اس کی ٹھوس اور تفصیلی وجہ لکھنا لازمی ہے۔",
+      ],
+    ],
+  },
   blood_bank: {
     title: "Blood bank management",
     titleUr: "بلڈ بینک اور خون کا انتظام",

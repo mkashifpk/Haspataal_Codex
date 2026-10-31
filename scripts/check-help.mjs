@@ -234,6 +234,7 @@ export function checkHelp({
       "BloodRequest",
       "BloodBank",
       "BloodDonors",
+      "DonorAssessment",
     ].map((n) => `src/screens/${n}.tsx`),
   ];
   const used = new Set(),
