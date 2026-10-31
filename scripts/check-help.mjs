@@ -245,6 +245,7 @@ export function checkHelp({
       "LabourRegister",
       "MedicationSafetyWard",
       "WardTransfer",
+      "WardTransferHeadNurse",
     ].map((n) => `src/screens/${n}.tsx`),
   ];
   const used = new Set(),

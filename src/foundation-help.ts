@@ -20,6 +20,7 @@ export const phase1Screens = [
 const approvalScreens = ["approval_queue", "charity_approvals"];
 // Coverage grows screen by screen; Phase 1 acceptance remains separate.
 export const deliveredHelpScreens = [
+  "ward_transfer_head_nurse",
   "ward_transfer",
   "medication_safety_ward",
   "labour_register",
@@ -97,6 +98,25 @@ const g = (
 // IDs are also attached to the actual controls. The build rejects missing
 // mappings and empty translations instead of treating a page as coverage.
 export const controlGuides: Record<string, ControlGuide> = {
+"ward_transfer_head_nurse.btn_back": g(["ward_transfer_head_nurse"],["Back button","واپس جائیں بٹن"],["Navigates back to the previous screen or ward view.","پچھلی سکرین یا وارڈ ویو پر واپس جاتا ہے۔"]),
+"ward_transfer_head_nurse.btn_dismiss_realtime": g(["ward_transfer_head_nurse"],["Dismiss realtime alert","ریئل ٹائم الرٹ ہٹائیں"],["Dismisses the real-time event notification banner.","ریئل ٹائم اطلاع کا بینر بند کرتا ہے۔"]),
+"ward_transfer_head_nurse.search_admission": g(["ward_transfer_head_nurse"],["Inpatient Admission ID input","مریض کا داخلہ نمبر فیلڈ"],["Specifies the admission ID or MRN of the admitted patient to transfer.","منتقلی کے لیے زیر علاج مریض کا داخلہ نمبر یا ایم آر این درج کرتا ہے۔"]),
+"ward_transfer_head_nurse.search_btn": g(["ward_transfer_head_nurse"],["Load Inpatient Chart button","مریض کا چارٹ کھولیں بٹن"],["Fetches patient demographics, current ward, bed, and transfer history.","مریض کی تفصیلات، موجودہ وارڈ، بستر اور منتقلی کی تاریخ حاصل کرتا ہے۔"]),
+"ward_transfer_head_nurse.tab_transfer": g(["ward_transfer_head_nurse"],["Transfer to New Bed tab","نئے بستر پر منتقلی ٹیب"],["Opens the active bed transfer work form and destination bed picker.","مریض کی منتقلی کا فارم اور نئے بستر کا انتخاب دکھاتا ہے۔"]),
+"ward_transfer_head_nurse.tab_history": g(["ward_transfer_head_nurse"],["Transfer History tab","منتقلی کی تاریخ ٹیب"],["Displays the log of all previous bed and ward moves for this admission.","اس داخلے کے دوران کی گئی تمام پچھلی منتقلیوں کا ریکارڈ دکھاتا ہے۔"]),
+"ward_transfer_head_nurse.tab_matrix": g(["ward_transfer_head_nurse"],["Bed Matrix Overview tab","بیڈ میٹرکس جائزہ ٹیب"],["Displays the live hospital-wide bed occupancy matrix across all wards.","ہسپتال کے تمام وارڈز میں بستروں کی موجودہ صورتحال کا میٹرکس دکھاتا ہے۔"]),
+"ward_transfer_head_nurse.refresh_matrix": g(["ward_transfer_head_nurse"],["Refresh beds button","بستر ریفریش کریں بٹن"],["Rereads live bed matrix occupancy and available bed states from server.","سرور سے بیڈ میٹرکس اور دستیاب بستروں کی تازہ ترین معلومات حاصل کرتا ہے۔"]),
+"ward_transfer_head_nurse.ward_filter": g(["ward_transfer_head_nurse"],["Filter by Ward select","وارڈ فلٹر سلیکٹ"],["Filters available destination beds by specific hospital ward.","دستیاب بستروں کو مخصوص وارڈ کے لحاظ سے فلٹر کرتا ہے۔"]),
+"ward_transfer_head_nurse.bed_select": g(["ward_transfer_head_nurse"],["Select Destination Bed button","منزل کا بستر منتخب کریں بٹن"],["Selects an available bed on the matrix as the destination bed for transfer.","بیڈ میٹرکس پر موجود دستیاب بستر کو منتقلی کے لیے منتخب کرتا ہے۔"]),
+"ward_transfer_head_nurse.quick_reason": g(["ward_transfer_head_nurse"],["Quick reason preset button","فوری طبی وجہ کا بٹن"],["Pre-fills the transfer reason with standard clinical indication (ICU escalation, step-down, isolation, etc.).","معیاری طبی وجوہات (آئی سی یو وینٹیلیشن، بہتری، آئسولیشن) سے وجہ خودکار طریقے سے درج کرتا ہے۔"]),
+"ward_transfer_head_nurse.reason_input": g(["ward_transfer_head_nurse"],["Clinical reason textarea","منتقلی کی طبی وجہ کا فیلڈ"],["Captures documented medical or administrative reason for the ward move (min 5 chars).","وارڈ کی تبدیلی کی تفصیلی طبی یا انتظامی وجہ درج کرتا ہے (کم از کم 5 حروف)۔"]),
+"ward_transfer_head_nurse.check_wristband": g(["ward_transfer_head_nurse"],["Verify wristband checkbox","رسٹ بینڈ تصدیق کا چیک باکس"],["Confirms patient identity was verified using bedside wristband barcode.","بیڈ سائیڈ پر مریض کے رسٹ بینڈ بارکوڈ سے شناخت کی تصدیق کی توثیق کرتا ہے۔"]),
+"ward_transfer_head_nurse.check_handover": g(["ward_transfer_head_nurse"],["Verify clinical handover checkbox","کلینیکل ہینڈ اوور کا چیک باکس"],["Confirms receiving ward nurse was notified and structured SBAR clinical handover completed.","وصول کرنے والے وارڈ کی نرس کو مطلع کرنے اور ایس بی اے آر ہینڈ اوور کی تکمیل کی توثیق کرتا ہے۔"]),
+"ward_transfer_head_nurse.check_chart": g(["ward_transfer_head_nurse"],["Verify chart transfer checkbox","چارٹ منتقلی کا چیک باکس"],["Confirms physical medical record, MAR chart, and verified medicines accompany patient.","طبعی میڈیکل ریکارڈ، ادویات کا چارٹ اور مریض کی ادویات ہمراہ ہونے کی توثیق کرتا ہے۔"]),
+"ward_transfer_head_nurse.submit_transfer": g(["ward_transfer_head_nurse"],["Confirm Ward Transfer button","وارڈ منتقلی کی تصدیق کا بٹن"],["Submits the transfer request to the server, releasing old bed to cleaning and occupying new bed.","سرور پر منتقلی درج کرتا ہے، پرانے بستر کو صفائی کے لیے بھیجتا ہے اور نیا بستر الاٹ کرتا ہے۔"]),
+"ward_transfer_head_nurse.open_cost_estimates": g(["ward_transfer_head_nurse"],["Open Cost Estimates button","لاگت کا تخمینہ کھولیں بٹن"],["Navigates to Cost Estimates to explain revised daily tariff to family (MSDS PRE 79).","ٹیرف تبدیلی پر فیملی کو نیا تخمینہ لاگت سمجھانے کے لیے متعلقہ اسکرین کھولتا ہے (معیار 79)۔"]),
+"ward_transfer_head_nurse.btn_refresh_history": g(["ward_transfer_head_nurse"],["Refresh moves history button","منتقلیوں کا ریکارڈ تازہ کریں بٹن"],["Rereads the list of admission transfers from the server.","سرور سے اس داخلے کی تمام منتقلیوں کی تازہ ترین فہرست حاصل کرتا ہے۔"]),
+"ward_transfer_head_nurse.btn_explain_history": g(["ward_transfer_head_nurse"],["Explain Cost Estimate button","لاگت کا تخمینہ سمجھائیں بٹن"],["Navigates to Cost Estimates to document explanation of rate change to family.","فیملی کو ٹیرف تبدیلی کی وضاحت درج کرنے کے لیے لاگت کا تخمینہ سکرین کھولتا ہے۔"]),
 "ward_transfer.btn_back": g(["ward_transfer"],["Back button","واپس جائیں بٹن"],["Navigates back to the previous screen or ward view.","پچھلی سکرین یا وارڈ ویو پر واپس جاتا ہے۔"]),
 "ward_transfer.btn_dismiss_realtime": g(["ward_transfer"],["Dismiss realtime alert","ریئل ٹائم الرٹ ہٹائیں"],["Dismisses the real-time event notification banner.","ریئل ٹائم اطلاع کا بینر بند کرتا ہے۔"]),
 "ward_transfer.tab_transfer": g(["ward_transfer"],["Transfer to New Bed tab","نئے بستر پر منتقلی ٹیب"],["Opens the active bed transfer work form and destination bed picker.","مریض کی منتقلی کا فارم اور نئے بستر کا انتخاب دکھاتا ہے۔"]),

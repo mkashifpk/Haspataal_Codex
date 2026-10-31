@@ -4686,6 +4686,92 @@ consents_doctor: {
       ],
     ],
   },
+  ward_transfer_head_nurse: {
+    title: "Head Nurse: ward patient transfer",
+    titleUr: "ہیڈ نرس: مریض کی وارڈ منتقلی",
+    purpose: "Move an inpatient between beds and wards with documented clinical reason (to and from ICU). When daily tariff changes (rate_changed), admissions desk is notified to explain the new estimate (MSDS PRE 79, rule cbaa60994a).",
+    purposeUr: "طبی وجوہات کی بنا پر مریض کو دوسرے بستر یا وارڈ (بشمول آئی سی یو) منتقل کریں۔ ٹیرف کی تبدیلی پر داخلہ ڈیسک کو فیملی کو نیا تخمینہ سمجھانے کی ہدایت جاری کی جاتی ہے (ایم ایس ڈی ایس پی آر ای 79، قاعدہ cbaa60994a)۔",
+    steps: [
+      "Open Head Nurse workspace -> Move a patient to another bed or ward.",
+      "Enter the inpatient Admission ID or MRN and click 'Load Inpatient Chart' to verify current ward, bed, and status.",
+      "Inspect the live Bed Matrix overview to evaluate hospital bed availability and cleaning turnaround across wards.",
+      "Filter available beds by destination ward (e.g. ICU, General Ward, Isolation, Maternity) and select an Available destination bed.",
+      "Review the daily bed rate comparison; when tariff changes, confirm that the admissions desk will be alerted for cost counseling.",
+      "Choose a head nurse clinical reason template or document a factual clinical transfer reason (min 5 characters).",
+      "Perform supervisory clinical handover checks: bedside wristband verification, SBAR handover to receiving nurse, and chart transit.",
+      "Click 'Confirm Ward Transfer'; on rate change, notify admissions/billing counselor to explain revised estimate to the family.",
+    ],
+    stepsUr: [
+      "ہیڈ نرس ورک اسپیس کھولیں -> 'مریض کو دوسرے بستر یا وارڈ میں منتقل کریں' پر جائیں۔",
+      "مریض کا داخلہ نمبر یا ایم آر این درج کریں اور 'مریض کا چارٹ کھولیں' پر کلک کرکے موجودہ وارڈ و بستر کی تصدیق کریں۔",
+      "ہسپتال کے وارڈز میں دستیاب بستر اور صفائی کی صورتحال دیکھنے کے لیے لائیو بیڈ میٹرکس کا جائزہ لیں۔",
+      "مطلوبہ وارڈ (جیسے آئی سی یو، جنرل، آئسولیشن یا میٹرنٹی) کے لحاظ سے فلٹر کریں اور دستیاب بستر کا انتخاب کریں۔",
+      "یومیہ بیڈ فیس کا موازنہ چیک کریں؛ اگر ریٹ تبدیل ہو رہا ہو تو داخلہ ڈیسک کو مالی کونسلنگ الرٹ کی تصدیق کریں۔",
+      "ہیڈ نرس کلینیکل ٹیمپلیٹ منتخب کریں یا منتقلی کی مستند طبی وجہ کم از کم 5 حروف میں درج کریں۔",
+      "نگران کلینیکل ہینڈ اوور چیک لسٹ مکمل کریں: رسٹ بینڈ بارکوڈ تصدیق، ایس بی اے آر ہینڈ اوور اور چارٹ منتقلی۔",
+      "'وارڈ منتقلی کی تصدیق کریں' پر کلک کریں؛ ٹیرف کی تبدیلی پر داخلہ ڈیسک کو نیا تخمینہ فیملی کو سمجھانے کی ہدایت دیں۔",
+    ],
+    faq: [
+      [
+        "What supervisory role does the head nurse have in patient transfers?",
+        "The head nurse manages clinical bed allocation across wards, ensuring patients are placed in clinically appropriate beds (e.g. ICU escalation, step-down, or isolation) under rule cbaa60994a and MSDS PRE 79.",
+      ],
+      [
+        "How is the admissions desk notified when the head nurse transfers a patient with a tariff change?",
+        "Under rule cbaa60994a and MSDS PRE 79, when rate_changed is true, the server emits admission.transferred and generates a ChangeOfWard notification alerting admissions financial counseling staff to explain the new estimate to the family.",
+      ],
+      [
+        "What should the head nurse do if the chosen bed becomes unavailable concurrently?",
+        "If another desk allocates the bed, the server answers 409 BED_NO_LONGER_AVAILABLE. The screen preserves what the head nurse entered in the clinical reason field and prompts to refresh and pick another available bed.",
+      ],
+      [
+        "What happens to the vacated bed once the transfer is confirmed?",
+        "The previous bed immediately transitions to 'Dirty' or 'Cleaning' state on the bed matrix. The head nurse can dispatch ward sweepers or mark the bed cleaned once turnaround is complete.",
+      ],
+      [
+        "Can a head nurse transfer an inpatient whose admission is in pending or discharged state?",
+        "No. Under rule 7defdd4e70, the server enforces 409 ADMISSION_STATE_INVALID. Only patients actively admitted to a bed can be transferred.",
+      ],
+      [
+        "How does the head nurse verify that the transfer succeeded without duplicate writes?",
+        "The screen uses safe write protection (state_guard/reconcile) via useClinicalWrite, verifying that network retry never duplicates a transfer or corrupts bed state.",
+      ],
+      [
+        "What SBAR clinical handover is required when transferring a patient to another ward?",
+        "Head nurse standards mandate confirming patient identity at bedside with wristband barcode, delivering a structured SBAR (Situation, Background, Assessment, Recommendation) handover, and verifying chart and medication transport.",
+      ],
+    ],
+    faqUr: [
+      [
+        "مریضوں کی منتقلی میں ہیڈ نرس کا نگران کردار کیا ہے؟",
+        "ہیڈ نرس وارڈز میں کلینیکل بیڈ مینجمنٹ کی ذمہ دار ہے تاکہ مریضوں کو ان کی طبی حالت کے عین مطابق بستر (آئی سی یو وینٹیلیشن، بہتری، یا آئسولیشن) پر منتقل کیا جا سکے (قاعدہ cbaa60994a اور ایم ایس ڈی ایس پی آر ای 79)۔",
+      ],
+      [
+        "ٹیرف تبدیلی کی صورت میں داخلہ ڈیسک کو کیسے مطلع کیا جاتا ہے؟",
+        "قاعدہ cbaa60994a اور معیار 79 کے تحت، جب ریٹ تبدیل ہو تو سرور admission.transferred ایونٹ جاری کرتا ہے جس سے داخلہ اور بلنگ ڈیسک کو فیملی کو نیا تخمینہ سمجھانے کا الرٹ چلا جاتا ہے۔",
+      ],
+      [
+        "اگر منتخب کردہ بستر اس دوران کسی اور ٹرمینل نے بک کر لیا تو کیا کرنا چاہیے؟",
+        "سرور 409 BED_NO_LONGER_AVAILABLE کا جواب دیتا ہے۔ سکرین ہیڈ نرس کی درج کردہ وجہ کو برقرار رکھتی ہے اور بیڈ میٹرکس تازہ کرکے دوسرا دستیاب بستر چننے کی ہدایت دیتی ہے۔",
+      ],
+      [
+        "منتقلی کے بعد خالی ہونے والا پرانا بستر کس حالت میں جاتا ہے؟",
+        "پرانا بستر فوراً میٹرکس پر 'ڈرٹی' (صفائی کا طلبگار) ہو جاتا ہے۔ ہیڈ نرس صفائی عملے کو بھیج کر بستر کی فوری تیاری کی نگرانی کر سکتی ہے۔",
+      ],
+      [
+        "کیا ہیڈ نرس غیر داخل شدہ یا خارج شدہ مریض کو منتقل کر سکتی ہے؟",
+        "نہیں، سرور 409 ADMISSION_STATE_INVALID نافذ کرتا ہے۔ صرف وہی مریض منتقل ہو سکتا ہے جو باقاعدہ داخل شدہ ہو اور ہسپتال کے بستر پر موجود ہو۔",
+      ],
+      [
+        "ہیڈ نرس کیسے تصدیق کرے کہ منتقلی بغیر کسی ڈپلیکیٹ اندراج کے محفوظ ہو گئی؟",
+        "سکرین محفوظ رائٹ کنٹرولر (useClinicalWrite) استعمال کرتی ہے جس سے نیٹ ورک تعطل پر بھی اندراج ڈپلیکیٹ نہیں ہوتا اور بیڈ کی حالت محفوظ رہتی ہے۔",
+      ],
+      [
+        "وارڈ منتقلی کے وقت ایس بی اے آر کلینیکل ہینڈ اوور میں کیا شامل ہے؟",
+        "ہیڈ نرس قوانین کے تحت بیڈ سائیڈ پر رسٹ بینڈ بارکوڈ سے مریض کی شناخت کی تصدیق، وصول کرنے والے وارڈ کو ایس بی اے آر ہینڈ اوور کی فراہمی، اور میڈیکل چارٹ و ذاتی ادویات کی منتقلی لازمی ہے۔",
+      ],
+    ],
+  },
   ward_transfer: {
     title: "Move a patient to another bed or ward",
     titleUr: "مریض کو دوسرے بستر یا وارڈ میں منتقل کریں",
