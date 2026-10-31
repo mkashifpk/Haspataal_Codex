@@ -1,10 +1,10 @@
 # Haspataal checkpoint
 Last updated: 31 October 2026, Antigravity (Codex pair), Asia/Karachi.
 
-## Active request: Phase 5 Screen 91 `triage_scale` ("Emergency triage scale and assessment", Position 91, 55 points)
+## Active request: Phase 5 Screen 91 `triage_scale` Complete -> Starting Screen 92 `er_board`
 Building screens in Phase 5 Roadmap (Emergency, deaths and medico-legal cases) along with all tests, reporting backend issues if found:
 - Screen 90: **`discharge_summary`** ("Doctor: discharge summary & take-home prescription", Position 90, 73 points) — **COMPLETED (Phase 4 Final Screen)** (commit `0a4d651`, Proposal **243** awaiting human review on `/docs -> My progress`).
-- Screen 91: **`triage_scale`** ("Emergency triage scale and assessment", Position 91, 55 points) — **COMPLETED** (commit pending, Proposal ID awaiting submission).
+- Screen 91: **`triage_scale`** ("Emergency triage scale and assessment", Position 91, 55 points) — **COMPLETED** (commit `fb479e0`, Proposal **244** awaiting human review on `/docs -> My progress`).
 - Screen 92: **`er_board`** ("Emergency room tracking board", Position 92, 62 points) — **NEXT UP**.
 
 ### Completed Screens Checkpoint
@@ -15,9 +15,9 @@ Building screens in Phase 5 Roadmap (Emergency, deaths and medico-legal cases) a
 - Screen 88: **`ward_transfer_head_nurse`** (commit `79efd60`, Proposal **241** awaiting human review on `/docs -> My progress`).
 - Screen 89: **`ward_indent`** (commit `0749c48`, Proposal **242** awaiting human review on `/docs -> My progress`).
 - Screen 90: **`discharge_summary`** (commit `0a4d651`, Proposal **243** awaiting human review on `/docs -> My progress`).
-- Screen 91: **`triage_scale`** (commit pending, Proposal awaiting submission).
+- Screen 91: **`triage_scale`** (commit `fb479e0`, Proposal **244** awaiting human review on `/docs -> My progress`).
 - Proposals **231**, **232**, **233**, **234**, **235**, and **236** are accepted.
-- Proposals **237**, **238**, **239**, **240**, **241**, **242**, and **243** are awaiting human review on `/docs -> My progress`.
+- Proposals **237**, **238**, **239**, **240**, **241**, **242**, **243**, and **244** are awaiting human review on `/docs -> My progress`.
 
 ### Verification for Screen 91 (`triage_scale`)
 - `contracts/triage_scale.json`: Screen bundle with 6 endpoints and 4 domain rules.
@@ -30,6 +30,7 @@ Building screens in Phase 5 Roadmap (Emergency, deaths and medico-legal cases) a
 - `npx tsc --noEmit`: Passed with 0 errors.
 - `npm test`: Passed (359/359 tests passing).
 - `npm run build`: Passed (`dist/assets/index-DidY0HVM.js`).
+- Proposal ID **244** submitted and confirmed pending review on `/docs -> My progress`.
 
 ### Next Concrete Actions for Screen 92 (`er_board`)
 1. Call `get_screen_bundle("er_board", max_chars: 180000)` and inspect endpoints, rules, and rubric items.
