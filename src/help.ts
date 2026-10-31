@@ -4686,6 +4686,92 @@ consents_doctor: {
       ],
     ],
   },
+  medication_safety_ward: {
+    title: "Medication safety board",
+    titleUr: "وارڈ میڈیکیشن سیفٹی بورڈ",
+    purpose: "The ward's medication safety worklist across 7 categories and the high-alert and LASA medication lists displayed at the nursing station under PHC MSDS MOM 51-71 standards.",
+    purposeUr: "پی ایچ سی معیارات کے تحت 7 زمروں پر مشتمل حفاظتی فہرست اور نرسنگ اسٹیشن پر آویزاں ہائی الرٹ اور ملتی جلتی ادویات (LASA) کا معلوماتی بورڈ۔",
+    steps: [
+      "Open Inpatient Ward workspace → Medication safety board to review pending safety actions and reference lists.",
+      "Check the top summary KPI tiles for overdue safety items, missing wristbands, and open pharmacy queries.",
+      "Filter the safety worklist by specific ward or emergency department, or toggle 'Show Overdue Actions Only'.",
+      "Review the 7 risk categories: missing wristbands, unsigned verbal orders, open queries, own medicines, and recalls.",
+      "Click 'Take Action →' on any safety card to navigate directly to the relevant screen and resolve the alert.",
+      "Switch to the 'High-Alert & LASA Reference Board' tab to review high-risk categories and look-alike sound-alike pairs.",
+      "Click 'Print High-Alert List PDF' to generate the official document to pin up at the nursing station (MSDS 56 ii).",
+      "Click 'Medication Policy PDF' to view and review the hospital's written clinical medication safety policy.",
+    ],
+    stepsUr: [
+      "وارڈ نرس یا ان پیشنٹ ورک اسپیس سے 'وارڈ میڈیکیشن سیفٹی بورڈ' کھول کر حفاظتی امور اور رہنما فہرستیں دیکھیں۔",
+      "اوپر موجود سمری ٹائلز میں میعاد ختم امور، غائب کلائی بینڈ، اور فارمیسی سوالات کی فوری تعداد چیک کریں۔",
+      "حفاظتی فہرست کو مخصوص وارڈ کے مطابق فلٹر کریں یا صرف میعاد ختم امور دیکھنے کے لیے چیک باکس منتخب کریں۔",
+      "سات حفاظتی زمروں کا جائزہ لیں: کلائی بینڈ، غیر دستخط شدہ زبانی آرڈر، فارمیسی سوالات، ذاتی دوائی، اور ری کالز۔",
+      "کسی بھی الرٹ کو فوری حل کرنے کے لیے کارڈ پر موجود 'اقدام کریں →' بٹن پر کلک کر کے متعلقہ سکرین پر جائیں۔",
+      "ہائی الرٹ ادویات اور ملتی جلتی ادویات (LASA) کی فہرست دیکھنے کے لیے 'ہائی الرٹ و LASA بورڈ' ٹیب پر جائیں۔",
+      "نرسنگ اسٹیشن پر آویزاں کرنے کے لیے 'ہائی الرٹ لسٹ پی ڈی ایف پرنٹ' پر کلک کریں (معیار 56 ii)۔",
+      "ہسپتال کی تحریری طبی میڈیکیشن سیفٹی پالیسی کا جائزہ لینے کے لیے 'میڈیکیشن پالیسی پی ڈی ایف' پر کلک کریں۔",
+    ],
+    faq: [
+      [
+        "What are the 7 safety categories monitored on the medication safety board?",
+        "Under rule b9e1768945 and PHC MSDS MOM standards, the board monitors: 1) Patients without an active wristband, 2) Patient's own medicines needing verification, 3) Own medicines to hand back upon discharge, 4) Expired ward cabinet stock, 5) Open drug recalls, 6) Unsigned verbal medication orders, and 7) Open pharmacy queries.",
+      ],
+      [
+        "Why is there a dedicated button to print the High-Alert list as a PDF?",
+        "Under MSDS Standard 56 ii, hospitals are required to display the approved list of high-alert medications prominently at every nursing station and dispensing area. The print action produces the exact A4 document formatted for physical pin-up.",
+      ],
+      [
+        "How are Look-Alike Sound-Alike (LASA) medicines handled on the board?",
+        "Under rule a810f77980, LASA pairs (such as regular insulin versus NPH insulin) are highlighted with specific clinical distinction instructions and warnings that they must never be stored adjacent to each other in ward cabinets.",
+      ],
+      [
+        "How does the safety worklist stay synchronized in real time?",
+        "The board subscribes to realtime server events: 'medication.order.updated' refreshes pending verbal orders and order states, 'pharmacy.recall.updated' reflects new batch recalls immediately, and 'establishment.changed' updates service views without polling.",
+      ],
+      [
+        "Can a nurse navigate directly to resolve an alert from this board?",
+        "Yes. Each alert card displays an action shortcut linking directly to the resolution workflow: Missing Wristband links to Wristbands Ward, Unsigned Verbal Order links to Verbal Orders Ward, and Own Medicine links to Own Medicines Ward.",
+      ],
+      [
+        "What makes a safety action 'Overdue'?",
+        "An item is marked overdue when the server-calculated is_overdue flag is true. This occurs when verbal orders exceed the mandatory countersignature window, wristbands are missing beyond arrival limits, or discharge hand-backs are pending.",
+      ],
+      [
+        "What clinical roles can access the medication safety board?",
+        "The board is available to ward nurses, head nurses, doctors, clinical specialists, surgeons, anaesthetists, and pharmacists who hold the 'medication.safety.view' or 'patient.wristband.print' permissions.",
+      ],
+    ],
+    faqUr: [
+      [
+        "میڈیکیشن سیفٹی بورڈ پر کن سات حفاظتی زمروں کی نگرانی کی جاتی ہے؟",
+        "قاعدہ b9e1768945 اور پی ایچ سی معیارات کے تحت بورڈ ان 7 امور کی نگرانی کرتا ہے: 1) کلائی بینڈ کے بغیر مریض، 2) تصدیق طلب ذاتی ادویات، 3) ڈسچارج پر واپسی کے لیے ادویات، 4) ایکسپائر شدہ وارڈ سٹاک، 5) اوپن ڈرگ ری کالز، 6) غیر تصدیق شدہ زبانی آرڈرز، اور 7) فارمیسی کے سوالات۔",
+      ],
+      [
+        "ہائی الرٹ لسٹ کو پی ڈی ایف پرنٹ کرنے کا مخصوص بٹن کیوں دیا گیا ہے؟",
+        "پی ایچ سی معیار 56 ii کے تحت ہسپتال کے ہر نرسنگ اسٹیشن اور فارمیسی کاؤنٹر پر ہائی الرٹ ادویات کی سرکاری فہرست نمایاں طور پر آویزاں ہونی چاہیے۔ یہ بٹن براہ راست اے 4 سائز کا پرنٹ تیار کرتا ہے۔",
+      ],
+      [
+        "ملتی جلتی ادویات (LASA) کے حوالے سے بورڈ پر کیا ہدایات دی گئی ہیں؟",
+        "قاعدہ a810f77980 کے تحت ملتی جلتی ادویات کی جوڑیوں (جیسے ریگولر انسولین اور این پی ایچ انسولین) کو واضح فرق اور اس وارننگ کے ساتھ دکھایا گیا ہے کہ انہیں کیبنٹ میں ساتھ ساتھ ہرگز نہ رکھا جائے۔",
+      ],
+      [
+        "سیفٹی لسٹ ریئل ٹائم میں کیسے اپ ڈیٹ ہوتی ہے؟",
+        "سکرین خودکار طور پر سرور ایونٹس سنتی ہے: 'medication.order.updated' زبانی آرڈرز کو فوراً اپ ڈیٹ کرتا ہے، 'pharmacy.recall.updated' نئی واپسیوں کو لاگ کرتا ہے، اور 'establishment.changed' سیٹنگز تازہ کرتا ہے۔",
+      ],
+      [
+        "کیا نرس اس بورڈ سے براہ راست الرٹ حل کرنے جا سکتی ہے؟",
+        "جی ہاں۔ ہر کارڈ پر اقدام کا شارٹ کٹ بٹن موجود ہے جو متعلقہ سکرین (کلائی بینڈ سکرین، زبانی آرڈر سکرین یا ذاتی دوائی سکرین) پر لے جاتا ہے۔",
+      ],
+      [
+        "کوئی حفاظتی کام 'میعاد ختم' کب کہلاتا ہے؟",
+        "جب سرور کا is_overdue فلیگ درست ہو جائے، مثلاً جب زبانی آرڈر پر دستخط کا قانونی وقت گزر جائے یا ڈسچارج شدہ مریض کی دوائی واپس نہ ہوئی ہو، تو وہ سرخ رنگ میں میعاد ختم ظاہر ہوتا ہے۔",
+      ],
+      [
+        "میڈیکیشن سیفٹی بورڈ کن طبی ماہرین کے لیے دستیاب ہے؟",
+        "یہ بورڈ وارڈ نرسز، ہیڈ نرسز، ڈاکٹرز، سرجنز، اینستھیٹسٹ اور فارماسسٹ کے لیے دستیاب ہے جن کے پاس 'medication.safety.view' یا 'patient.wristband.print' اجازت موجود ہو۔",
+      ],
+    ],
+  },
   labour_register: {
     title: "Labour register: record a delivery",
     titleUr: "لیبر رجسٹر: زچگی کا اندراج",

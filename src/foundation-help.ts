@@ -20,6 +20,7 @@ export const phase1Screens = [
 const approvalScreens = ["approval_queue", "charity_approvals"];
 // Coverage grows screen by screen; Phase 1 acceptance remains separate.
 export const deliveredHelpScreens = [
+  "medication_safety_ward",
   "labour_register",
   "newborn_registration",
   "obstetric_assessment",
@@ -95,6 +96,18 @@ const g = (
 // IDs are also attached to the actual controls. The build rejects missing
 // mappings and empty translations instead of treating a page as coverage.
 export const controlGuides: Record<string, ControlGuide> = {
+"medication_safety_ward.btn_print_high_alert": g(["medication_safety_ward"],["Print High-Alert List PDF button","ہائی الرٹ لسٹ پی ڈی ایف پرنٹ"],["Generates official High-Alert and LASA medication list PDF for nursing station display (MSDS 56 ii).","نرسنگ اسٹیشن پر آویزاں کرنے کے لیے ہائی الرٹ اور ملتی جلتی ادویات کی پی ڈی ایف تیار کرتا ہے (معیار 56 ii)۔"]),
+"medication_safety_ward.btn_download_policy": g(["medication_safety_ward"],["Download Medication Policy PDF button","میڈیکیشن پالیسی پی ڈی ایف بٹن"],["Generates the written hospital medication policy document for clinical staff review.","طبی عملے کے جائزے کے لیے ہسپتال میڈیکیشن پالیسی کی سرکاری دستاویز فراہم کرتا ہے۔"]),
+"medication_safety_ward.btn_refresh": g(["medication_safety_ward"],["Refresh safety board button","سیفٹی بورڈ تازہ کریں بٹن"],["Rereads safety worklist items and high-alert drug formulary from server.","سرور سے حفاظتی امور کی فہرست اور ہائی الرٹ ادویات کا ریکارڈ دوبارہ حاصل کرتا ہے۔"]),
+"medication_safety_ward.btn_dismiss_download": g(["medication_safety_ward"],["Dismiss download notice","ڈاؤنلوڈ نوٹس ہٹائیں"],["Closes the PDF generation status notice.","پی ڈی ایف دستاویز تیار ہونے کا نوٹس بند کرتا ہے۔"]),
+"medication_safety_ward.btn_dismiss_realtime": g(["medication_safety_ward"],["Dismiss realtime alert","ریئل ٹائم الرٹ ہٹائیں"],["Dismisses the order or recall update banner.","آرڈر یا ری کال کی تبدیلی کا نوٹس بند کرتا ہے۔"]),
+"medication_safety_ward.tab_worklist": g(["medication_safety_ward"],["Safety worklist tab","حفاظتی امور ٹیب"],["Displays the active medication safety worklist across 7 clinical risk categories.","سات کلینیکل رسک کیٹیگریز پر مشتمل ایکٹیو حفاظتی کاموں کی فہرست دکھاتا ہے۔"]),
+"medication_safety_ward.tab_high_alert": g(["medication_safety_ward"],["High-Alert & LASA board tab","ہائی الرٹ و ملتی جلتی ادویات ٹیب"],["Displays categorized high-alert drugs, look-alike sound-alike pairs, and clinical precautions.","ہائی الرٹ ادویات، ملتی جلتی ادویات، اور طبی احتیاطی تدابیر کی مکمل تفصیل دکھاتا ہے۔"]),
+"medication_safety_ward.select_ward": g(["medication_safety_ward"],["Filter by ward select","وارڈ فلٹر ڈراپ ڈاؤن"],["Filters safety items by specific inpatient ward or emergency department.","حفاظتی امور کو مخصوص وارڈ یا شعبہ حادثات کے مطابق فلٹر کرتا ہے۔"]),
+"medication_safety_ward.select_kind": g(["medication_safety_ward"],["Safety category filter select","کیٹیگری فلٹر ڈراپ ڈاؤن"],["Filters safety items by category: missing wristband, unsigned verbal order, query, or recall.","حفاظتی امور کو کلائی بینڈ، زبانی آرڈر، فارمیسی سوال، یا ری کال کے مطابق فلٹر کرتا ہے۔"]),
+"medication_safety_ward.input_search": g(["medication_safety_ward"],["Search patient or bed input","مریض یا بستر تلاش ان پٹ"],["Filters safety items by patient name, MRN, bed label, or item title.","مریض کے نام، ایم آر این، بستر یا عنوان کے ذریعے حفاظتی امور تلاش کرتا ہے۔"]),
+"medication_safety_ward.checkbox_overdue_only": g(["medication_safety_ward"],["Show overdue only checkbox","صرف میعاد ختم امور چیک باکس"],["Restricts safety list to display only overdue clinical safety actions.","فہرست کو صرف ان کاموں تک محدود کرتا ہے جن کا مقررہ وقت گزر چکا ہے۔"]),
+"medication_safety_ward.btn_action_shortcut": g(["medication_safety_ward"],["Take action shortcut button","اقدام کریں شارٹ کٹ بٹن"],["Navigates directly to the appropriate screen (wristbands, verbal orders, or own medicines) to resolve the safety alert.","سیفٹی الرٹ حل کرنے کے لیے متعلقہ سکرین (کلائی بینڈ، زبانی آرڈر، یا ذاتی دوائی) پر لے جاتا ہے۔"]),
 "labour_register.btn_back_worklist": g(["labour_register"],["Back to labour register worklist","لیبر رجسٹر لسٹ پر واپس"],["Returns to delivery register list view from delivery entry detail.","زچگی اندراج سے دوبارہ لیبر رجسٹر لسٹ پر واپس جاتا ہے۔"]),
 "labour_register.btn_new_delivery": g(["labour_register"],["Record new delivery button","نئی زچگی درج کریں بٹن"],["Opens modal to record a new delivery in the labour register (rule e108ec7978).","لیبر رجسٹر میں نئی زچگی درج کرنے کا ڈائیلاگ کھولتا ہے (قاعدہ e108ec7978)۔"]),
 "labour_register.btn_refresh": g(["labour_register"],["Refresh labour register","لیبر رجسٹر تازہ کریں"],["Rereads hospital register columns and delivery records from server.","سرور سے کالم کنفیگریشن اور زچگی اندراجات دوبارہ پڑھتا ہے۔"]),
