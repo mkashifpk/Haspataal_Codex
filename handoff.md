@@ -9,7 +9,7 @@ Completed all screens in Phase 4 (Screens 73–90):
 - Screen 87: **`ward_transfer`** ("Ward patient transfer", Position 87, 48 points) — **COMPLETED** (commit `07a2db0`, Proposal **240** awaiting human review on `/docs -> My progress`).
 - Screen 88: **`ward_transfer_head_nurse`** ("Accept or dispute a ward transfer", Position 88, 44 points) — **COMPLETED** (commit `79efd60`, Proposal **241** awaiting human review on `/docs -> My progress`).
 - Screen 89: **`ward_indent`** ("Ward supply indent & inventory", Position 89, 52 points) — **COMPLETED** (commit `0749c48`, Proposal **242** awaiting human review on `/docs -> My progress`).
-- Screen 90: **`discharge_summary`** ("Doctor: discharge summary & take-home prescription", Position 90, 73 points) — **COMPLETED (Phase 4 Final Screen)** (commit `c562e84`, Proposal ID awaiting submission).
+- Screen 90: **`discharge_summary`** ("Doctor: discharge summary & take-home prescription", Position 90, 73 points) — **COMPLETED (Phase 4 Final Screen)** (commit `0a4d651`, Proposal **243** awaiting human review on `/docs -> My progress`).
 
 ### Completed Screens Checkpoint
 - Screen 82: **`maternity_policy`** (commit `adb0c9a`, Proposal **235** accepted).
@@ -20,9 +20,9 @@ Completed all screens in Phase 4 (Screens 73–90):
 - Screen 87: **`ward_transfer`** (commit `07a2db0`, Proposal **240** awaiting human review on `/docs -> My progress`).
 - Screen 88: **`ward_transfer_head_nurse`** (commit `79efd60`, Proposal **241** awaiting human review on `/docs -> My progress`).
 - Screen 89: **`ward_indent`** (commit `0749c48`, Proposal **242** awaiting human review on `/docs -> My progress`).
-- Screen 90: **`discharge_summary`** (commit pending, Proposal awaiting human review on `/docs -> My progress`).
+- Screen 90: **`discharge_summary`** (commit `0a4d651`, Proposal **243** awaiting human review on `/docs -> My progress`).
 - Proposals **231**, **232**, **233**, **234**, **235**, and **236** are accepted.
-- Proposals **237**, **238**, **239**, **240**, **241**, and **242** are awaiting human review on `/docs -> My progress`.
+- Proposals **237**, **238**, **239**, **240**, **241**, **242**, and **243** are awaiting human review on `/docs -> My progress`.
 
 ### Verification for Screen 90 (`discharge_summary`)
 - `contracts/discharge_summary.json`: Screen bundle with 10 endpoints and 7 domain rules.
@@ -35,6 +35,7 @@ Completed all screens in Phase 4 (Screens 73–90):
 - `npx tsc --noEmit`: Passed with 0 errors.
 - `npm test`: Passed (353/353 tests passing).
 - `npm run build`: Passed (`dist/assets/index-3aGoTHNv.js`).
+- Proposal ID **243** submitted and confirmed pending review on `/docs -> My progress`.
 
 ### Next Concrete Actions for Screen 91 (`triage_scale`)
 1. Call `get_screen_bundle("triage_scale", max_chars: 180000)` and inspect endpoints, rules, and rubric items.
