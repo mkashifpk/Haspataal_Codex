@@ -20,6 +20,7 @@ export const phase1Screens = [
 const approvalScreens = ["approval_queue", "charity_approvals"];
 // Coverage grows screen by screen; Phase 1 acceptance remains separate.
 export const deliveredHelpScreens = [
+  "blood_center_release",
   "blood_center_lab",
   "blood_collection",
   "donor_assessment",
@@ -89,6 +90,31 @@ const g = (
 // IDs are also attached to the actual controls. The build rejects missing
 // mappings and empty translations instead of treating a page as coverage.
 export const controlGuides: Record<string, ControlGuide> = {
+"blood_center_release.refresh": g(["blood_center_release"],["Refresh release worklists","ورک لسٹ تازہ کریں"],["Rereads collected donations, quarantine components, and inventory status.","جمع شدہ عطیات اور قرنطینہ اجزاء کی لسٹ دوبارہ لوڈ کرتا ہے۔"]),
+"blood_center_release.tab_clearance": g(["blood_center_release"],["Donation clearance tab","عطیہ منظوری ٹیب"],["Displays collected donations awaiting infectious clearance and ABO/Rh grouping verification.","عطیات جن کی انفیکشن اور گروپ کی تصدیق باقی ہے دکھاتا ہے۔"]),
+"blood_center_release.tab_quarantine": g(["blood_center_release"],["Quarantine release tab","قرنطینہ اخراج ٹیب"],["Displays cleared components in quarantine ready for dual-control release to blood bank.","قرنطینہ میں موجود منظور شدہ اجزاء بلڈ بینک میں جاری کرنے کے لیے دکھاتا ہے۔"]),
+"blood_center_release.tab_trace": g(["blood_center_release"],["Blood bank unit trace tab","یونٹ ٹریس ایبلٹی ٹیب"],["Allows searching and auditing full provenance and transfusion history of blood units.","بلڈ یونٹ کی مکمل تاریخ، کراس میچ اور ٹرانسفیوژن ریکارڈ دکھاتا ہے۔"]),
+"blood_center_release.filter_status": g(["blood_center_release"],["Clearance status filter","منظوری اسٹیٹس فلٹر"],["Filters donations by Collected, Cleared, Reactive, Rejected, or All.","عطیات کو ان کی حالت کے مطابق فلٹر کرتا ہے۔"]),
+"blood_center_release.donations_search_input": g(["blood_center_release"],["Search donations input","عطیات تلاش کریں"],["Filters donations by donation number, donor number, sex, or blood group.","عطیہ نمبر، ڈونر نمبر یا بلڈ گروپ سے تلاش کرتا ہے۔"]),
+"blood_center_release.inspect_donation_btn": g(["blood_center_release"],["Inspect donation lifetime file","عطیہ کا معائنہ کریں"],["Opens full inspection modal with donor details, vitals, lab tests, and components.","ڈونر کی مکمل تفصیلات، وائٹلز اور لیب ٹیسٹ دیکھنے کی ونڈو کھولتا ہے۔"]),
+"blood_center_release.clearance_action_btn": g(["blood_center_release"],["Medical clearance action","طبی منظوری کا بٹن"],["Opens medical clearance modal to evaluate tests and record Cleared, Reactive, or Rejected.","ٹیسٹ کی جانچ کر کے منظوری یا مسترد کرنے کا فارم کھولتا ہے۔"]),
+"blood_center_release.radio_clearance_outcome": g(["blood_center_release"],["Clearance outcome selector","منظوری کا فیصلہ"],["Selects clearance decision: Cleared, Reactive, or Rejected.","منظور شدہ، ری ایکٹیو یا مسترد شدہ کا انتخاب کرتا ہے۔"]),
+"blood_center_release.clearance_note_textarea": g(["blood_center_release"],["Clearance explanation note","منظوری کا نوٹ"],["Documents clinical reasoning (mandatory when rejecting a donation).","طبی نوٹ درج کرتا ہے (عطیہ مسترد کرنے پر لازمی ہے)۔"]),
+"blood_center_release.submit_clearance_btn": g(["blood_center_release"],["Submit medical clearance","طبی فیصلہ محفوظ کریں"],["Executes POST /blood-center/donations/{id}/clearance to finalize donation status.","عطیہ کی منظوری یا مسترد کرنے کا فیصلہ سرور پر بھیجتا ہے۔"]),
+"blood_center_release.filter_quarantine": g(["blood_center_release"],["Quarantine status filter","قرنطینہ فلٹر"],["Filters components by Quarantine, Released, Discarded, or All.","اجزاء کو قرنطینہ یا جاری شدہ حالت کے لحاظ سے فلٹر کرتا ہے۔"]),
+"blood_center_release.release_component_btn": g(["blood_center_release"],["Release component to inventory","انوینٹری میں اخراج"],["Opens dual-control verification modal to release component into blood bank.","بلڈ بینک میں جز شامل کرنے کے لیے دوہرے دستخط کا فارم کھولتا ہے۔"]),
+"blood_center_release.print_component_label_btn": g(["blood_center_release"],["Print component release label","ریلیز لیبل پرنٹ کریں"],["Fetches component label data and sends to terminal label printer.","لیبل پرنٹر پر تصدیق شدہ بارکوڈ لیبل پرنٹ کرتا ہے۔"]),
+"blood_center_release.checker_username_input": g(["blood_center_release"],["Second approver username","دوسرے تصدیق کنندہ کا یوزرنیم"],["Username of independent second verifier (cannot be current user).","دوسرے آزاد تصدیق کنندہ کا یوزرنیم (موجودہ صارف سے الگ ہونا لازمی ہے)۔"]),
+"blood_center_release.checker_password_input": g(["blood_center_release"],["Second approver password","دوسرے تصدیق کنندہ کا پاس ورڈ"],["Password of independent second verifier for step-up authentication.","دوہرے تصدیقی کنٹرول کے لیے دوسرے شخص کا خفیہ پاس ورڈ۔"]),
+"blood_center_release.confirm_release_btn": g(["blood_center_release"],["Co-sign and release component","تصدیق و اخراج"],["Executes POST /blood-center/components/{id}/release with dual-control credentials.","دوہرے دستخط کے ساتھ جز کو بلڈ بینک اسٹاک میں شامل کرتا ہے۔"]),
+"blood_center_release.view_traced_unit_btn": g(["blood_center_release"],["View created unit in trace","نیا یونٹ ٹریس میں دیکھیں"],["Navigates to unit trace tab to inspect newly created blood bank unit.","نئے بننے والے بلڈ یونٹ کی مکمل ٹریس ایبلٹی دیکھنے کے لیے لے جاتا ہے۔"]),
+"blood_center_release.view_trace_unit_link": g(["blood_center_release"],["View trace unit shortcut","یونٹ لنک"],["Links directly to blood bank unit trace record from component row.","کمپوننٹ کی قطار سے براہ راست یونٹ کے مکمل ریکارڈ پر لے جاتا ہے۔"]),
+"blood_center_release.trace_unit_id_input": g(["blood_center_release"],["Blood bank unit ID input","بلڈ یونٹ آئی ڈی ان پٹ"],["Numeric ID of blood bank unit to audit and inspect.","آڈٹ کے لیے بلڈ بینک یونٹ کا شناختی نمبر درج کرتا ہے۔"]),
+"blood_center_release.trace_lookup_btn": g(["blood_center_release"],["Trace unit lookup button","یونٹ تلاش کریں"],["Fetches GET /blood/units/{id} for full provenance and issue history.","بلڈ یونٹ کی مکمل معلومات اور مریض کو لگانے کا ریکارڈ لوڈ کرتا ہے۔"]),
+"blood_center_release.btn_dismiss_alert": g(["blood_center_release"],["Dismiss reactive notification","الرٹ ہٹائیں"],["Dismisses real-time reactive screening alert banner.","رئیل ٹائم ری ایکٹیو اسکریننگ کا انتباہی بینر بند کرتا ہے۔"]),
+"blood_center_release.btn_cancel_clearance": g(["blood_center_release"],["Cancel clearance modal","منظوری منسوخ کریں"],["Closes donation medical clearance modal without saving decision.","طبی منظوری کا فارم بغیر فیصلہ محفوظ کیے بند کرتا ہے۔"]),
+"blood_center_release.btn_close_release_success": g(["blood_center_release"],["Close release success dialog","کامیابی ڈائیلاگ بند کریں"],["Closes the quarantine release success notification dialog.","انوینٹری اخراج کے بعد کامیابی کا پیغام بند کرتا ہے۔"]),
+"blood_center_release.btn_cancel_release": g(["blood_center_release"],["Cancel release modal","اخراج منسوخ کریں"],["Closes dual-control quarantine release modal without co-signing.","دوہرے دستخط کا فارم منسوخ کرتا ہے۔"]),
 "blood_center_lab.refresh": g(["blood_center_lab"],["Refresh lab worklists","ورک لسٹ تازہ کریں"],["Rereads collected donations awaiting testing and quarantine components inventory.","ٹیسٹنگ کے منتظر یونٹس اور قرنطینہ اجزاء کی لسٹ دوبارہ لوڈ کرتا ہے۔"]),
 "blood_center_lab.tab_donations": g(["blood_center_lab"],["Collected donations tab","جمع شدہ یونٹس ٹیب"],["Displays collected blood donations awaiting TTI screening and ABO/Rh determinations.","خون کے عطیات جن کے متعدی امراض اور بلڈ گروپ کے ٹیسٹ باقی ہیں۔"]),
 "blood_center_lab.tab_quarantine": g(["blood_center_lab"],["Quarantine inventory tab","قرنطینہ اسٹاک ٹیب"],["Displays blood components held in quarantine pending laboratory clearance or discard.","قرنطینہ میں موجود بلڈ کمپوننٹس کی فہرست دکھاتا ہے۔"]),

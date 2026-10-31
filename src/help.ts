@@ -4686,6 +4686,92 @@ consents_doctor: {
       ],
     ],
   },
+  blood_center_release: {
+    title: "Blood center release to inventory",
+    titleUr: "بلڈ سنٹر انوینٹری ریلیز",
+    purpose: "Donation medical clearance, dual independent release verification to blood bank inventory, and complete vein-to-vein unit traceability.",
+    purposeUr: "عطیات کی طبی منظوری، بلڈ بینک انوینٹری کے لیے دوہرے تصدیقی کنٹرول کے ذریعے اخراج، اور مکمل رگ تا رگ ٹریس ایبلٹی۔",
+    steps: [
+      "Open Laboratory → Blood center release to inspect collected donations awaiting medical clearance and quarantine components ready for inventory release.",
+      "In the Clearance tab, review pending donations; click 'Inspect' to examine donor vitals, adverse reaction history, and complete laboratory tests.",
+      "Verify that all 5 mandatory TTI screens (HBsAg, Anti-HCV, Anti-HIV, Syphilis, Malaria) and dual determinations for ABO forward/reverse and duplicate RhD are recorded.",
+      "Click 'Medical Clearance' to evaluate donation results; confirm Cleared outcome or record Reactive/Rejected (which triggers immediate quarantine component discards).",
+      "In the Quarantine Release tab, locate components prepared from Cleared donations; check volume, component type, and verify shelf life has not expired.",
+      "Click 'Release to Bank' to open the dual-control verification modal; click 'Print Label' to review barcode, caution warnings, and dispatch label to the terminal label printer.",
+      "Have a second independent authorized staff member enter their own username and password (rule 1e77b26ed6); fields are never prefilled and cannot match the current user.",
+      "Click 'Co-Sign & Release to Inventory' to execute the idempotent release; view the newly assigned blood bank unit number or inspect provenance in the Trace tab.",
+    ],
+    stepsUr: [
+      "طبی منظوری کے منتظر عطیات اور بلڈ بینک میں اخراج کے لیے تیار قرنطینہ اجزاء دیکھنے کے لیے لیبارٹری سے 'بلڈ سنٹر ریلیز' کھولیں۔",
+      "منظوری ٹیب میں منتظر عطیات کا جائزہ لیں؛ ڈونر وائٹلز، ری ایکشن ہسٹری اور مکمل لیب ٹیسٹ دیکھنے کے لیے 'معائنہ' پر کلک کریں۔",
+      "تصدیق کریں کہ تمام 5 متعدی امراض کے ٹیسٹ (HBsAg، Anti-HCV، Anti-HIV، آتشک، ملیریا) اور اے بی او فارورڈ و ریورس اور آر ایچ کے دوہرے ٹیسٹ مکمل ہیں۔",
+      "نتائج کی جانچ کے لیے 'طبی منظوری' پر کلک کریں؛ کلیئرڈ فیصلے کی تصدیق کریں یا ری ایکٹیو/مسترد درج کریں (جس سے قرنطینہ اجزاء فوری تلف ہو جاتے ہیں)۔",
+      "قرنطینہ اخراج ٹیب میں منظور شدہ عطیات سے تیار اجزاء تلاش کریں؛ حجم، جزو کی قسم اور میعاد کی تاریخ کی تصدیق کریں۔",
+      "دوہرے کنٹرول کا فارم کھولنے کے لیے 'بینک میں اخراج' پر کلک کریں؛ بارکوڈ، انتباہی ہدایات دیکھنے اور لیبل پرنٹ کرنے کے لیے 'لیبل پرنٹ کریں' پر کلک کریں۔",
+      "دوسرے آزاد مجاز اہلکار سے اپنا یوزرنیم اور پاس ورڈ درج کروائیں؛ یہ خانے پہلے سے پر نہیں ہوتے اور موجودہ صارف سے الگ ہونا لازمی ہیں۔",
+      "جز کو بلڈ بینک میں محفوظ کرنے کے لیے 'تصدیق و انوینٹری اخراج' پر کلک کریں؛ جاری شدہ یونٹ نمبر دیکھیں یا ٹریس ٹیب میں مکمل تاریخ کا جائزہ لیں۔",
+    ],
+    faq: [
+      [
+        "What are the mandatory requirements for medical clearance of a blood donation?",
+        "Under rule d1b6b7c78b and PBTA standards, medical clearance requires all 5 mandatory TTI screens (HBsAg, Anti-HCV, Anti-HIV, Syphilis, Malaria) to be non-reactive, and dual determinations for ABO (forward and reverse) and RhD to agree completely without discrepancy.",
+      ],
+      [
+        "Why does release to blood bank inventory require dual-control co-signature?",
+        "Under rule 1e77b26ed6 and the PBTA SOP on labelling and release, the second person who checked the component number and label must sign with their own credentials (STEP_UP_REQUIRED, DUAL_CONTROL_SAME_PERSON) to eliminate single-operator mislabeling errors.",
+      ],
+      [
+        "Can the currently logged-in user co-sign their own release?",
+        "No. The system strictly refuses co-signatures where the checker is the same person (DUAL_CONTROL_SAME_PERSON, 403 Forbidden). A different authorized verifier or laboratory administrator must provide their credentials.",
+      ],
+      [
+        "What happens if a donation is recorded as Reactive or Rejected during clearance?",
+        "Per rule d1b6b7c78b, recording a donation as Reactive or Rejected automatically discards all components of that donation still held in quarantine; nothing from that donation can ever be released to inventory.",
+      ],
+      [
+        "What is the BLOOD_CENTER_SOURCE_REQUIRED error?",
+        "Under rule bd509b7d5a, the facility must have its own blood center source configured with its PBTA license number in Facility Blood Sources (POST /blood/sources, kind OwnBloodCenter) before units can be received into inventory.",
+      ],
+      [
+        "How is duplicate inventory release prevented on network retries?",
+        "Per rule adbb482acd, every release request transmits a client-generated Idempotency-Key. If a network interruption occurs, re-transmitting the same key safely returns the existing unit without duplicating stock.",
+      ],
+      [
+        "Can quarantine units continue to be released while the blood center service is retiring?",
+        "Yes. Per rule e4772411e5, POST /blood-center/components/{id}/release continues work started earlier and remains accessible while blood_center is Active or Retiring (open_work).",
+      ],
+    ],
+    faqUr: [
+      [
+        "خون کے عطیہ کی طبی منظوری کے لیے کیا شرائط لازمی ہیں؟",
+        "پی بی ٹی اے کے معیار کے تحت تمام 5 متعدی امراض کے اسکریننگ ٹیسٹ نان ری ایکٹیو ہونا اور اے بی او و آر ایچ کے دوہرے ٹیسٹ کا مکمل طور پر متفق ہونا لازمی ہے۔",
+      ],
+      [
+        "بلڈ بینک انوینٹری میں اخراج کے لیے دوہرے دستخط کیوں ضروری ہیں؟",
+        "قانون اور پی بی ٹی اے ایس او پی کے مطابق جس دوسرے شخص نے جزو کا نمبر اور لیبل چیک کیا ہو اس کا اپنے پاس ورڈ سے تصدیق کرنا لازمی ہے تاکہ غلطی نہ ہو۔",
+      ],
+      [
+        "کیا لاگ ان شدہ صارف خود ہی دوسرے تصدیق کنندہ کے طور پر دستخط کر سکتا ہے؟",
+        "ہرگز نہیں۔ سسٹم DUAL_CONTROL_SAME_PERSON کے تحت اسے سختی سے مسترد کرتا ہے۔ دوسرے مجاز ویریفائر یا لیب ایڈمن کا دستخط کرنا لازمی ہے۔",
+      ],
+      [
+        "اگر منظوری کے دوران عطیہ کو ری ایکٹیو یا مسترد کیا جائے تو کیا ہوتا ہے؟",
+        "عطیہ کے ری ایکٹیو یا مسترد ہونے پر قرنطینہ میں موجود اس کے تمام اجزاء خود بخود فوری طور پر تلف کر دیے جاتے ہیں اور کوئی بھی جزو جاری نہیں ہو سکتا۔",
+      ],
+      [
+        "BLOOD_CENTER_SOURCE_REQUIRED کی غلطی کیوں آتی ہے؟",
+        "اسپتال کے اپنے بلڈ سنٹر کا پی بی ٹی اے لائسنس یافتہ ماخذ (OwnBloodCenter) پہلے سے بلڈ سورسز میں درج ہونا لازمی ہے، ورنہ یونٹ انوینٹری میں داخل نہیں ہو سکتا۔",
+      ],
+      [
+        "نیٹ ورک کی خرابی پر دوبارہ کوشش کے دوران ڈپلیکیٹ اخراج سے کیسے بچا جاتا ہے؟",
+        "ہر ریلیز کے ساتھ کلائنٹ کی طرف سے Idempotency-Key بھیجی جاتی ہے جس سے سسٹم ڈپلیکیٹ انٹری بنانے کے بجائے پہلے سے موجود یونٹ ہی واپس کرتا ہے۔",
+      ],
+      [
+        "جب بلڈ سنٹر سروس ریٹائر ہو رہی ہو تو کیا قرنطینہ اجزاء جاری کیے جا سکتے ہیں؟",
+        "جی ہاں، ریٹائرنگ موڈ (open_work) میں بھی پہلے سے قرنطینہ میں موجود اجزاء کی منظوری اور انوینٹری میں اخراج جاری رکھا جا سکتا ہے۔",
+      ],
+    ],
+  },
   blood_bank: {
     title: "Blood bank management",
     titleUr: "بلڈ بینک اور خون کا انتظام",
