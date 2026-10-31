@@ -4772,6 +4772,92 @@ consents_doctor: {
       ],
     ],
   },
+  er_visit: {
+    title: "Emergency visit: triage, stages & departure",
+    titleUr: "ایمرجنسی وزٹ: ٹرائیج، مراحل اور روانگی",
+    purpose: "Manage the complete clinical life-cycle of an emergency visit under MSDS AAC 15-20, MSDS 18, and MSDS 20. Document real-time vital signs and qualitative clinical danger signs to calculate priority triage levels automatically, record physician and nurse override rationale, enforce mandatory medico-legal checklist questions with direct case registration, progress patients through care stages (With Doctor, Observation, Waiting for Referral), attach verified outside medical reports and referral letters brought by patients, and complete formal departure dispositions (Discharged, Referred, LAMA, Discharged on Request, LWBS) with immutable visit closure (rules b985ad38dc, bd91e95b22, 50175606cd, 436225bf5c, 1c52f88e02, 231e22e6bd, 7571033b1d, 794ff452da, abab0015cb, cbd04d6c73).",
+    purposeUr: "ایم ایس ڈی ایس 18 اور 20 کے تحت ایمرجنسی مریض کے مکمل علاج، ٹرائیج اور روانگی کا انتظام کریں۔ وائٹل سائنز اور خطرے کی علامات درج کر کے خودکار ترجیحی لیول حاصل کریں، کلینیکل اوور رائیڈ کی وجوہات لکھیں، لازمی میڈیکو لیگل چیک لسٹ پر کیس درج کریں، علاج کے مراحل (ڈاکٹر کے ساتھ، آبزرویشن، ریفرل) کو اپ ڈیٹ کریں، مریض کی لائی گئی بیرونی ٹیسٹ رپورٹس منسلک کریں، اور باضابطہ روانگی درج کر کے وزٹ مکمل کریں۔",
+    steps: [
+      "Open Triage -> ER Visit Chart and lookup an active visit by entering the ER visit ID or selecting from the tracking board.",
+      "Inspect patient details, arrival modality, current stage duration, and top warning badges (e.g. TriageOverdue, DoctorOverdue, MlcNotOpened).",
+      "Click 'Triage Assessment' to open the clinical intake modal; record presenting complaint and enter vital signs (HR, RR, BP, SpO2, Temp, GCS, Pain score).",
+      "Tick qualitative clinical danger signs from Level 1 (Resuscitation) to Level 5; observe live algorithm priority recommendation (rule b985ad38dc).",
+      "If clinical judgment differs from the suggested level, select assigned level and document mandatory override rationale (rule bd91e95b22).",
+      "Answer the mandatory Medico-Legal checklist (Yes/No); if confirmed, choose the case type from the catalogue and click 'Open MLC Case' (rule 50175606cd).",
+      "Click 'Attach Outside Report' to upload previous laboratory, radiology, or referral letters brought by the patient with source facility and test date (rule 794ff452da).",
+      "Click 'Update Stage' to advance care to InTreatment or Observation; when care finishes, click 'Record Departure' to register final disposition and discharge advice (rule 1c52f88e02, 231e22e6bd).",
+    ],
+    stepsUr: [
+      "ٹرائیج ورک اسپیس -> 'ایمرجنسی وزٹ چارٹ' کھولیں اور وزٹ آئی ڈی درج کر کے یا بورڈ سے منتخب کر کے چارٹ کھولیں۔",
+      "مریض کی تفصیلات، آمد کا ذریعہ، موجودہ مرحلے کا دورانیہ اور وارننگ بیجز (جیسے ٹرائیج تاخیر، ڈاکٹر تاخیر، ایم ایل سی نامکمل) ملاحظہ کریں۔",
+      "کلینیکل معائنے کے لیے 'Triage Assessment' پر کلک کریں؛ علامات اور وائٹل سائنز (نبض، بلڈ پریشر، آکسیجن، بخار، جی سی ایس) درج کریں۔",
+      "لیول 1 سے لیول 5 تک کی علامات ٹک کریں؛ سسٹم الگورتھم کے تحت فوری حساب شدہ ترجیحی لیول دکھائے گا (قاعدہ b985ad38dc)۔",
+      "اگر طبی رائے حساب شدہ لیول سے مختلف ہو تو تفویض کردہ لیول منتخب کریں اور اوور رائیڈ کی لازمی کلینیکل وجہ درج کریں (قاعدہ bd91e95b22)۔",
+      "لازمی میڈیکو لیگل چیک لسٹ کا جواب (ہاں/نہیں) دیں؛ اگر واقعہ حادثاتی یا قانونی نوعیت کا ہو تو 'Open MLC Case' پر کلک کر کے فوری کیس کھولیں (قاعدہ 50175606cd)۔",
+      "مریض کی لائی گئی بیرونی رپورٹس، پرانے ٹیسٹ یا ریفرل خطوط منسلک کرنے کے لیے 'Attach Outside Report' پر کلک کریں (قاعدہ 794ff452da)۔",
+      "مرحلہ آگے بڑھانے کے لیے 'Update Stage' اور علاج مکمل ہونے پر حتمی روانگی اور ڈسچارج ہدایات درج کرنے کے لیے 'Record Departure' پر کلک کریں (قاعدہ 1c52f88e02، 231e22e6bd)۔",
+    ],
+    faq: [
+      [
+        "How does the live triage algorithm determine the suggested priority level?",
+        "Under rule b985ad38dc, the system checks qualitative danger signs from Level 1 downwards, alongside quantitative vital sign limits (comparing values against age-appropriate pediatric or adult thresholds). The most critical met tier becomes the suggested level.",
+      ],
+      [
+        "When is a clinical override reason required during triage?",
+        "Under rule bd91e95b22, whenever a nurse or physician assigns a priority level different from the algorithm's calculated recommendation, an explicit clinical justification (at least 5 characters) must be documented for transparency and audit compliance.",
+      ],
+      [
+        "Why is the Medico-Legal checklist mandatory on every triage?",
+        "Under rule 50175606cd and MSDS 15 ii, clinical staff must explicitly declare whether the emergency is an MLC (road traffic accident, assault, poisoning, burn, firearm). If affirmative, the case type is linked and staff are prompted to immediately trigger police intimation.",
+      ],
+      [
+        "What information is required when referring an ER patient to another hospital?",
+        "Under MSDS 20 and rule 1c52f88e02, selecting 'Referred' disposition requires condition at departure, the receiving hospital name (referred_to), and a clinical transfer rationale (referral_reason).",
+      ],
+      [
+        "Can a patient be marked 'Left Without Being Seen' (LWBS) after a doctor has examined them?",
+        "Under rule 1c52f88e02, LWBS is strictly reserved for patients who leave before medical consultation begins. Once seen_at or seen_by is recorded, LWBS is rejected and departure must be recorded as LAMA, Discharged on Request, or regular discharge.",
+      ],
+      [
+        "How are outside reports kept separate from this hospital's diagnostic results?",
+        "Under rules 794ff452da and abab0015cb, uploaded documents brought by patients are explicitly flagged with is_outside=true, displaying 'Outside: <facility>, <date>' tags so they are never confused with internal accredited laboratory results.",
+      ],
+      [
+        "Can an ER visit chart be edited after departure is recorded?",
+        "Under rule 231e22e6bd, departure represents final discharge. Once departed, the visit becomes permanently read-only (ER_VISIT_DEPARTED), and any further clinical actions must be recorded on a newly registered visit or inpatient admission.",
+      ],
+    ],
+    faqUr: [
+      [
+        "لائیو ٹرائیج الگورتھم خودکار ترجیحی لیول کا تعین کیسے کرتا ہے؟",
+        "قاعدہ b985ad38dc کے تحت سسٹم لیول 1 سے نیچے کی طرف خطرے کی علامات اور وائٹل سائنز (عمر کے مطابق بالغ یا بچوں کی حدود) کو پرکھتا ہے۔ سب سے نازک تسلیم شدہ درجہ خودکار طور پر تجویز کیا جاتا ہے۔",
+      ],
+      [
+        "ٹرائیج کے دوران اوور رائیڈ کی وجہ لکھنا کب لازمی ہوتا ہے؟",
+        "قاعدہ bd91e95b22 کے مطابق جب بھی عملہ الگورتھم کے تجویز کردہ لیول سے مختلف ترجیح تفویض کرے تو کم از کم 5 حروف پر مشتمل کلینیکل جواز لکھنا لازمی ہوتا ہے۔",
+      ],
+      [
+        "ہر ٹرائیج پر میڈیکو لیگل چیک لسٹ کیوں لازمی ہے؟",
+        "قاعدہ 50175606cd اور ایم ایس ڈی ایس 15 ii کے تحت عملے کو واضح طور پر تصدیق کرنی ہوتی ہے کہ آیا مریض حادثے، تشدد، زہر یا جھلسنے کا ہے، تاکہ پولیس اطلاع اور قانونی کارروائی بلا تاخیر شروع ہو سکے۔",
+      ],
+      [
+        "ایمرجنسی مریض کو دوسرے ہسپتال ریفر کرتے وقت کن باتوں کا اندراج لازمی ہے؟",
+        "ایم ایس ڈی ایس 20 اور قاعدہ 1c52f88e02 کے تحت روانگی کے وقت مریض کی حالت، وصول کنندہ ہسپتال کا نام اور ریفرل کا طبی سبب درج کرنا لازمی ہے۔",
+      ],
+      [
+        "کیا ڈاکٹر کے معائنے کے بعد مریض کو 'Left Without Being Seen' کیا جا سکتا ہے؟",
+        "قاعدہ 1c52f88e02 کے مطابق LWBS صرف ان مریضوں کے لیے ہے جو ڈاکٹر کے دیکھنے سے پہلے چلے جائیں۔ اگر ڈاکٹر معائنہ کر چکا ہو تو روانگی کو ایل اے ایم اے، درخواست پر چھٹی یا باضابطہ ڈسچارج کے طور پر درج کرنا ہوگا۔",
+      ],
+      [
+        "مریض کی لائی گئی بیرونی رپورٹس کو ہسپتال کے اپنے ٹیسٹ سے کیسے الگ رکھا جاتا ہے؟",
+        "قواعد 794ff452da اور abab0015cb کے تحت بیرونی رپورٹس پر is_outside=true کا ٹیگ ہوتا ہے اور 'Outside: <facility>, <date>' کے لیبل سے الگ دکھائی جاتی ہیں تاکہ وہ ہسپتال کے اپنے نتائج نہ سمجھے جائیں۔",
+      ],
+      [
+        "کیا روانگی کے اندراج کے بعد وزٹ میں تبدیلی ممکن ہے؟",
+        "قاعدہ 231e22e6bd کے تحت روانگی کے بعد وزٹ مکمل طور پر بند ہو جاتا ہے اور ریڈ اونلی (ER_VISIT_DEPARTED) ہو جاتا ہے۔ مزید علاج کے لیے نیا وزٹ یا داخلہ کرنا پڑتا ہے۔",
+      ],
+    ],
+  },
   er_board: {
     title: "Emergency room tracking board",
     titleUr: "ایمرجنسی روم ٹریکنگ بورڈ",
