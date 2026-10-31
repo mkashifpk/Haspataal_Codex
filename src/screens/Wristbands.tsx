@@ -58,7 +58,7 @@ export function Wristbands({
     access = bandAccess(view, user.permissions),
     live = connected && stream === "Live";
   const [revision, setRevision] = useState(0),
-    [mode, setMode] = useState<"admission" | "er">("admission"),
+    [mode, setMode] = useState<"admission" | "er">(screenId === "wristbands_er" ? "er" : "admission"),
     [find, setFind] = useState(""),
     [known, setKnown] = useState(""),
     [ctx, setCtx] = useState<Context>(),

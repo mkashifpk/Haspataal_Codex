@@ -28,3 +28,37 @@ test('ward nurse role access and view policy for wristbands_ward', () => {
   assert.equal(bandAccess('records', wardNursePerms).print, true);
   assert.equal(bandAccess('hidden', wardNursePerms).read, false);
 });
+
+test('triage nurse role access, ER stay formatting and view policy for wristbands_er', () => {
+  const triageNursePerms = ['patient.view', 'patient.wristband.print', 'er.visit.view'];
+  assert.equal(bandAccess('full', triageNursePerms).issue, true);
+  assert.equal(bandAccess('full', triageNursePerms).print, true);
+  assert.equal(bandAccess('full', triageNursePerms).worklist, true);
+  assert.equal(bandAccess('open_work', triageNursePerms).issue, true);
+  assert.equal(bandAccess('records', triageNursePerms).issue, false);
+  assert.equal(bandAccess('records', triageNursePerms).print, true);
+  assert.equal(bandAccess('hidden', triageNursePerms).read, false);
+
+  const erStay = {
+    kind: 'er',
+    id: 505,
+    patient_id: 202,
+    name: 'ER Trauma Patient',
+    mrn: 'MRN-ER-505',
+    number: 'ER-2026-001',
+    status: 'TriageLevel1',
+  };
+  assert.deepEqual(bandBody(erStay, [], '', true), { er_visit_id: 505 });
+  const existingBand = {
+    patient_id: erStay.patient_id,
+    is_current: true,
+    wristband_id: 888,
+    er_visit_id: 505,
+    row_version: 1,
+  };
+  assert.throws(() => bandBody(erStay, [existingBand], '', true), /current band/);
+  assert.deepEqual(
+    bandBody(erStay, [existingBand], 'band removed for trauma resuscitation', true),
+    { er_visit_id: 505, replacement_reason: 'band removed for trauma resuscitation' }
+  );
+});

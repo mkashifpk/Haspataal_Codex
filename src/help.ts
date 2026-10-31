@@ -1294,6 +1294,92 @@ nursing_assessment: {
     ]
   ]
 },
+ wristbands_er: {
+  title: "Identity wristbands: Emergency department patient bands",
+  titleUr: "شناختی پٹیاں: ایمرجنسی مریضوں کے شناختی کلائی بینڈ",
+  purpose: "In the Emergency Department during resuscitation and intake, the triage nurse verifies the emergency patient and visit, issues or replaces an identity wristband under MSDS AAC 30, MOM 64, and COP 37, prints and fits the band, and scans to verify identity before emergency interventions, medication administration, or transfers. Supports NoWristband emergency safety queues, printer jam reprinting (GET /wristbands/{wristband_id}/print-payload), and replacement justifications for damaged or removed bands (rules c5c48e21ec, db1f94e899, 70f62daec7, df7060a63b, 0176961416).",
+  purposeUr: "ایمرجنسی شعبے میں ٹرائیج اور ابتدائی طبی امداد کے دوران، ٹرائیج نرس ایمرجنسی مریض اور وزٹ کی تصدیق کرتی ہے، ایم ایس ڈی ایس اے اے سی 30، ایم او ایم 64، اور سی او پی 37 کے تحت شناختی کلائی بینڈ جاری یا تبدیل کرتی ہے، پٹی پرنٹ کر کے مریض کو باندھتی ہے، اور کسی بھی ہنگامی علاج، دوا یا منتقلی سے پہلے اسکین کر کے شناخت کی تصدیق کرتی ہے۔",
+  steps: [
+    "Open Triage -> Identity Wristbands. The screen defaults to Emergency Visits mode (can switch to Inpatient Admissions if permitted). Use Find a stay to filter emergency patients by name, MRN, or ER visit number.",
+    "Select the actual emergency visit row, or enter Known ER visit number from the record and click Read this visit. Never guess an ID. Refresh wristbands rereads visits and context while preserving any typed replacement reason.",
+    "Inspect the Patient and Band panel. Verify full name, MRN, age, sex, ER number, status, and allergies. Prominently check allergy alerts before proceeding to issue (rule db1f94e899).",
+    "Inspect the Red 'Patients Without a Wristband' (NoWristband) Worklist banner. The list highlights all arriving emergency patients currently lacking a band. Clicking a missing-band patient immediately loads their visit context (rule c5c48e21ec).",
+    "To issue a new band, tick 'I checked this patient and stay using two identifiers', then click 'Review wristband issue'. If the patient already wears a band, enter a factual Replacement Reason (damaged, removed for emergency procedure, demographics corrected) up to 300 characters (rule 70f62daec7).",
+    "Review freezes the verified ER visit context, existing band history, and replacement reason. Click 'Confirm band issue' to save to POST /wristbands under state-guard idempotency protection.",
+    "Once issued, the Band Ready to Print section displays the label preview with MRN barcode, QR code, and prominent allergies. Click 'Print this same wristband' to dispatch to the mapped thermal label printer, or 'Save wristband PDF'. For paper jams, click Reprint to re-fetch the existing payload without issuing duplicate bands.",
+    "Before administering resuscitation medications or blood, place cursor in 'Scan patient wristband' and scan the patient's band barcode. If verified, the system confirms match; if mismatch, a prominent STOP warning reveals whose band was scanned and halts unsafe administration (rule df7060a63b)."
+  ],
+  stepsUr: [
+    "ٹرائیج سے شناختی کلائی بینڈ اسکرین کھولیں۔ اسکرین پر پہلے سے ایمرجنسی وزٹس کا موڈ فعال ہوتا ہے۔ مریضوں کو نام، ایم آر این یا ایمرجنسی وزٹ نمبر سے تلاش کریں۔",
+    "متعلقہ ایمرجنسی وزٹ کی سطر منتخب کریں یا معلوم ایمرجنسی وزٹ نمبر درج کر کے ریکارڈ پڑھیں؛ اندازے سے نمبر نہ درج کریں۔ ری فریش کا بٹن وزٹس اور تفصیلات کو دوبارہ پڑھتا ہے۔",
+    "مریض اور بینڈ پینل کا معائنہ کریں۔ نام، ایم آر این، عمر، جنس، ایمرجنسی نمبر اور الرجی چیک کریں۔ کلائی بینڈ جاری کرنے سے پہلے الرجی کی تصدیق لازمی ہے۔",
+    "سرخ رنگ کی 'بغیر کلائی بینڈ مریض' ورک لسٹ دیکھیں۔ یہ فہرست ان تمام ہنگامی مریضوں کو نمایاں کرتی ہے جن کے پاس تاحال بینڈ نہیں ہے۔ کسی بھی مریض پر کلک کر کے فوری بینڈ جاری کیا جا سکتا ہے۔",
+    "نیا بینڈ جاری کرنے کے لیے 'دو شناختوں سے مریض کی تصدیق کی گئی' چیک باکس لگائیں اور 'جائزہ لیں' پر کلک کریں۔ اگر مریض کے پاس پہلے سے بینڈ ہے تو تبدیلی کی ٹھوس وجہ درج کریں۔",
+    "جائزہ اسکرین تصدیق شدہ وزٹ، پرانی تاریخ اور تبدیلی کی وجہ کو منجمد کر دیتی ہے۔ سرور پر محفوظ کرنے کے لیے 'بینڈ اجرا کی تصدیق کریں' پر کلک کریں۔",
+    "اجرا کے بعد بینڈ پرنٹ کا پیش نظارہ بارکوڈ، کیو آر اور الرجی کے ساتھ ظاہر ہوتا ہے۔ پرنٹر پر بھیجنے کے لیے 'پرنٹ کریں' یا پی ڈی ایف محفوظ کرنے کا بٹن دبائیں۔ کاغذ پھنسنے پر صرف دوبارہ پرنٹ کریں۔",
+    "ہنگامی ادویات یا خون لگانے سے پہلے 'مریض کا بینڈ اسکین کریں' میں بارکوڈ اسکین کریں۔ اگر بارکوڈ میچ نہ کرے تو سرخ انتباہ جاری ہوتا ہے اور غلط مریض کو دوا دینے سے روکتا ہے۔"
+  ],
+  faq: [
+    [
+      "Why must every emergency patient receive an identity wristband immediately upon arrival?",
+      "Under MSDS AAC 30 and rule db1f94e899, positive patient identification is mandatory before any clinical intervention, medication administration, or blood draw. The band provides an indelible physical barcode and QR code linked to the ER visit number."
+    ],
+    [
+      "How does the triage nurse track emergency patients who arrive without a band?",
+      "Under rule c5c48e21ec, the screen connects to GET /medication-safety/worklist, displaying a prominent red banner of 'Patients without a wristband'. Clicking any entry immediately opens their visit file for rapid band issuance."
+    ],
+    [
+      "When is a replacement reason required for an emergency patient's band?",
+      "Under rule 70f62daec7, if an active current band already exists in the patient's history, the server refuses issuance with a blank reason. The nurse must record a factual clinical justification (e.g. damaged during trauma resuscitation, cut for venous cutdown, or demographics corrected)."
+    ],
+    [
+      "What should staff do if the label printer jams or runs out of thermal paper?",
+      "Under rule 70f62daec7, staff must never issue a replacement band for a printer problem. Simply resolve the paper jam or reload the roll, and click 'Reprint this same band' (GET /wristbands/{wristband_id}/print-payload). This re-fetches the identical token without altering the patient's audit trail."
+    ],
+    [
+      "How does barcode/QR scanning protect patient safety at bedside or bay?",
+      "Under rule df7060a63b, scanning the band via GET /wristbands/verify compares the physical code against the selected emergency visit. If another patient's band is scanned, the system flashes a red STOP warning, identifies the mismatched patient, and immediately halts unsafe administration."
+    ],
+    [
+      "Can a temporary trauma patient ('Unknown Male 1') receive an emergency wristband?",
+      "Yes. Temporary trauma profiles generated during Code Red or emergency intake receive full ER wristbands displaying their temporary identifier and trauma MRN. When the profile is merged, a replacement band is printed under the permanent MRN."
+    ],
+    [
+      "How does emergency department service view affect wristband operations?",
+      "Under rule 0176961416, wristband capabilities respect the emergency_department service gate: 'full' allows issuance and printing; 'open_work' continues open emergency visits under a retiring banner; 'records' restricts the screen to historical verification and reprints only."
+    ]
+  ],
+  faqUr: [
+    [
+      "ایمرجنسی میں ہر مریض کو فوری شناختی کلائی بینڈ کیوں دیا جاتا ہے؟",
+      "قاعدہ db1f94e899 اور ایم ایس ڈی ایس اے اے سی 30 کے تحت کسی بھی دوا یا علاج سے پہلے مصدقہ شناخت لازمی ہے۔ بینڈ پر بارکوڈ اور کیو آر کوڈ موجود ہوتا ہے جو ایمرجنسی نمبر سے منسلک ہوتا ہے۔"
+    ],
+    [
+      "ٹرائیج نرس بغیر بینڈ والے ہنگامی مریضوں کو کیسے تلاش کرتی ہے؟",
+      "قاعدہ c5c48e21ec کے تحت اسکرین خودکار طور پر 'بغیر کلائی بینڈ مریض' کی سرخ ورک لسٹ دکھاتی ہے۔ کسی بھی نام پر کلک کر کے فوری طور پر اس مریض کا بینڈ بنایا جا سکتا ہے۔"
+    ],
+    [
+      "ہنگامی مریض کے بینڈ کی تبدیلی کی وجہ کب درج کرنا لازمی ہوتی ہے؟",
+      "قاعدہ 70f62daec7 کے مطابق اگر مریض کے پاس پہلے سے فعال بینڈ ہو تو سرور بغیر وجہ نیا بینڈ جاری نہیں کرتا۔ نرس کو طبی جواز (جیسے علاج کے دوران کٹ گیا، یا معلومات درست کی گئیں) درج کرنا پڑتا ہے۔"
+    ],
+    [
+      "اگر پرنٹر میں کاغذ پھنس جائے یا ختم ہو جائے تو کیا کیا جائے؟",
+      "قاعدہ 70f62daec7 کے تحت پرنٹر کی خرابی پر نیا بینڈ جاری نہیں کرنا چاہیے۔ پرنٹر ٹھیک کر کے 'اسی بینڈ کو دوبارہ پرنٹ کریں' پر کلک کریں، تاکہ پچھلا ہی بارکوڈ دوبارہ نکل آئے اور نیا ریکارڈ نہ بنے۔"
+    ],
+    [
+      "بارکوڈ اسکیننگ ہنگامی بیڈ پر مریض کو کیسے محفوظ رکھتی ہے؟",
+      "قاعدہ df7060a63b کے تحت اسکین کیا گیا کوڈ منتخب مریض سے میچ کیا جاتا ہے۔ اگر غلط مریض کا بینڈ اسکین ہو تو اسکرین سرخ ہو کر فوری رکنے کا کہتی ہے تاکہ غلط مریض کو دوا نہ دی جا سکے۔"
+    ],
+    [
+      "کیا نامعلوم ٹراما مریض کو بھی ایمرجنسی بینڈ دیا جاتا ہے؟",
+      "جی ہاں۔ نامعلوم ٹراما مریض (جیسے Unknown Male 1) کو ان کے عارضی نام اور ٹراما نمبر کے ساتھ فوری کلائی بینڈ ملتا ہے۔ جب پروفائل مستقل ریکارڈ میں ضم ہوتا ہے تو نیا بینڈ پرنٹ کیا جاتا ہے۔"
+    ],
+    [
+      "ایمرجنسی سروس اسٹیٹس کا کلائی بینڈ کے نظام پر کیا اثر ہوتا ہے؟",
+      "قاعدہ 0176961416 کے مطابق اگر ایمرجنسی سروس فل ہو تو نیا بینڈ بنتا ہے؛ اگر اوپن ورک ہو تو پرانے وزٹس مکمل ہوتے ہیں؛ اور اگر ریکارڈز موڈ ہو تو صرف سابقہ بینڈز دیکھے اور پرنٹ کیے جا سکتے ہیں۔"
+    ]
+  ]
+},
  own_medicines_ward: {
   title: "Patient's own medicines",
   titleUr: "مریض کی اپنی ادویات",
