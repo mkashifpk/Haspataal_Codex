@@ -29,6 +29,7 @@ export interface CriticalResultsWardProps {
   establishment: EstablishmentOut;
   timeZone?: string;
   initialAdmissionId?: number;
+  screenId?: "critical_results_ward" | "critical_results_er" | string;
 }
 
 export function CriticalResultsWard({
@@ -38,10 +39,12 @@ export function CriticalResultsWard({
   establishment,
   timeZone,
   initialAdmissionId,
+  screenId = "critical_results_ward",
 }: CriticalResultsWardProps) {
+  const isEr = screenId === "critical_results_er";
   const screenView =
     establishment.views.screens.find(
-      (s) => s.screen_id === "critical_results_ward",
+      (s) => s.screen_id === screenId,
     )?.view || "full";
 
   const access = criticalResultsWardAccess(user.permissions, screenView);
@@ -152,10 +155,15 @@ export function CriticalResultsWard({
               )}
             </strong>{" "}
             —{" "}
-            {t(
-              "Inpatient service is retiring; finalize open communications only.",
-              "ان ڈور سروس ریٹائر ہو رہی ہے؛ صرف کھلی ہوئی اطلاعات مکمل کریں۔",
-            )}
+            {isEr
+              ? t(
+                  "Emergency department service is retiring; finalize open communications only.",
+                  "ایمرجنسی سروس ریٹائر ہو رہی ہے؛ صرف کھلی ہوئی اطلاعات مکمل کریں۔",
+                )
+              : t(
+                  "Inpatient service is retiring; finalize open communications only.",
+                  "ان ڈور سروس ریٹائر ہو رہی ہے؛ صرف کھلی ہوئی اطلاعات مکمل کریں۔",
+                )}
           </div>
         )}
 
@@ -165,10 +173,15 @@ export function CriticalResultsWard({
               {t("Records Only Mode", "صرف ریکارڈز موڈ")}
             </strong>{" "}
             —{" "}
-            {t(
-              "Inpatient service is retired. Critical results are displayed in read-only mode.",
-              "ان ڈور سروس ریٹائر ہو چکی ہے۔ ہنگامی نتائج صرف مطالعہ کے لیے ہیں۔",
-            )}
+            {isEr
+              ? t(
+                  "Emergency department service is retired. Critical results are displayed in read-only mode.",
+                  "ایمرجنسی سروس ریٹائر ہو چکی ہے۔ ہنگامی نتائج صرف مطالعہ کے لیے ہیں۔",
+                )
+              : t(
+                  "Inpatient service is retired. Critical results are displayed in read-only mode.",
+                  "ان ڈور سروس ریٹائر ہو چکی ہے۔ ہنگامی نتائج صرف مطالعہ کے لیے ہیں۔",
+                )}
           </div>
         )}
 
@@ -186,10 +199,15 @@ export function CriticalResultsWard({
           }}
         >
           <strong>⚠️ {t("Clinical Nursing Hand-off Policy (rule:abc8a2c23d)", "طبی نرسنگ پروٹوکول (اصول abc8a2c23d)")}:</strong>{" "}
-          {t(
-            "When the lab or radiology phones the ward with a critical result, the nurse must read the values back and immediately notify the treating doctor.",
-            "جب لیب یا ریڈیالوجی وارڈ کو ہنگامی نتیجہ فون کرے، نرس کو نتائج واپس پڑھ کر سنانے ہوں گے اور فوری معالج کو بتانا ہوگا۔",
-          )}
+          {isEr
+            ? t(
+                "When the lab or radiology phones the emergency department with a critical result, the triage nurse must read the values back and immediately notify the emergency physician.",
+                "جب لیب یا ریڈیالوجی ایمرجنسی کو ہنگامی نتیجہ فون کرے، نرس کو نتائج واپس پڑھ کر سنانے ہوں گے اور فوری ایمرجنسی معالج کو بتانا ہوگا۔",
+              )
+            : t(
+                "When the lab or radiology phones the ward with a critical result, the nurse must read the values back and immediately notify the treating doctor.",
+                "جب لیب یا ریڈیالوجی وارڈ کو ہنگامی نتیجہ فون کرے، نرس کو نتائج واپس پڑھ کر سنانے ہوں گے اور فوری معالج کو بتانا ہوگا۔",
+              )}
         </div>
 
         {overdueCount > 0 && (

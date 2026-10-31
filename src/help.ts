@@ -1466,6 +1466,92 @@ nursing_assessment: {
     ]
   ]
 },
+ critical_results_er: {
+  title: "Critical results of my patients: Emergency department critical results communication",
+  titleUr: "میرے مریضوں کے ہنگامی نتائج: ایمرجنسی شعبے میں تشویشناک نتائج کی اطلاع",
+  purpose: "In the Emergency Department, triage and emergency nurses track life-threatening laboratory and imaging results under MSDS AAC 5 and 12, filter by open active communication or patient admission/ticket reference (rule abc8a2c23d), observe the red OVERDUE alert badge when communication or clinician action exceeds target minutes, perform mandatory read-back verification when receiving panic alerts from diagnostic benches, immediately alert the emergency physician, and evaluate emergency department service view states (rule 9ef18690f5).",
+  purposeUr: "ایمرجنسی شعبے میں، ٹرائیج اور ایمرجنسی نرسیں ایم ایس ڈی ایس اے اے سی 5 اور 12 کے تحت جان لیوا لیبارٹری اور ریڈیالوجی نتائج پر نظر رکھتی ہیں، فعال اطلاعات یا مریض کے داخلے/ٹکٹ سے فلٹر کرتی ہیں (اصول abc8a2c23d)، وقت گزرنے پر سرخ تاخیر (OVERDUE) بیج دیکھتی ہیں، تشخیصی بنچ سے ہنگامی اطلاع ملنے پر نتائج واپس پڑھ کر سناتی ہیں (ریڈ بیک)، فوری ایمرجنسی معالج کو مطلع کرتی ہیں، اور سروس موڈز کا جائزہ لیتی ہیں (اصول 9ef18690f5)۔",
+  steps: [
+    "Open ER / Triage -> Critical results of my patients. The screen displays all life-threatening diagnostic alerts for emergency department patients under rule 9ef18690f5.",
+    "Inspect the top notification alert banner. Review any active OVERDUE indicators in bold red signaling results where laboratory communication or clinician action has exceeded target minutes.",
+    "Toggle 'Open and communicating only' to focus on urgent active findings requiring immediate nurse hand-off or physician action, or uncheck to review finalized Acknowledged results.",
+    "Filter by diagnostic source: select All Sources, Laboratory Only (e.g. panic potassium, critical troponin, positive blood cultures), or Imaging Only (e.g. acute intracranial haemorrhage, tension pneumothorax).",
+    "Filter by patient: enter a specific Admission ID or emergency reference in the admission filter box to isolate critical results for an individual patient chart, or click Clear to view the unit-wide board.",
+    "Adhere strictly to the emergency hand-off policy (rule abc8a2c23d): when the laboratory or radiology department phones the ER, verify patient identity and read the critical values back word-for-word.",
+    "Immediately alert the emergency medical officer or treating consultant in person or via urgent internal communication; never delay resuscitation or assume another clinician saw the result.",
+    "Click 'Details & Log' on any result row to open the complete critical result modal via GET /critical-results/{critical_result_id}. Review numeric findings, notifiable disease alerts, doctor acknowledgement notes, and timestamped communication audit trail."
+  ],
+  stepsUr: [
+    "ٹرائیج سے میرے مریضوں کے ہنگامی نتائج کھولیں۔ اسکرین پر ایمرجنسی شعبے کے تمام ہنگامی اور جان لیوا تشخیصی نتائج کا لاگ ظاہر ہوتا ہے۔",
+    "سب سے اوپر دیا گیا انتباہی بینر دیکھیں۔ اگر کسی نتیجے کے آگے سرخ رنگ میں OVERDUE لکھا ہو تو اس کا مطلب ہے کہ ڈاکٹر کو اطلاع کا وقت گزر چکا ہے اور فوری توجہ درکار ہے۔",
+    "صرف کھلے نتائج (Open and communicating only) منتخب کریں تاکہ ان ہنگامی ٹیسٹوں پر توجہ رہے جن پر فوری طبی کارروائی باقی ہے، یا مکمل تاریخ دیکھنے کے لیے نشان ہٹا دیں۔",
+    "تشخیصی شعبے کے مطابق فلٹر کریں: تمام ذرائع، صرف لیبارٹری (جیسے تشویشناک پوٹاشیم یا ٹروپونن)، یا صرف ریڈیالوجی (جیسے دماغی شریان کا پھٹنا یا نیوموتھوریکس)۔",
+    "کسی مخصوص مریض کے چارٹ کے نتائج دیکھنے کے لیے داخلہ نمبر درج کریں، یا پورے ایمرجنسی وارڈ کے نتائج دیکھنے کے لیے صاف (Clear) کا بٹن دبائیں۔",
+    "ایمرجنسی ہینڈ آف پالیسی (قاعدہ abc8a2c23d) پر عمل کریں: جب لیب یا ریڈیالوجی ایمرجنسی کو فون کرے، مریض کی شناخت چیک کریں اور قدریں لفظ بہ لفظ واپس پڑھ کر سنائیں۔",
+    "ایمرجنسی میڈیکل آفیسر یا کنسلٹنٹ کو فوری طور پر روبرو یا فون پر بتائیں؛ ہنگامی اطلاع میں تاخیر نہ کریں اور یہ فرض نہ کریں کہ کسی اور نے دیکھ لیا ہوگا۔",
+    "کسی بھی سطر پر تفصیل و ریکارڈ (Details & Log) پر کلک کر کے مکمل ونڈو کھولیں (GET /critical-results/{id})، جہاں اصل اقدار، وبائی امراض اور رابطے کا مکمل ریکارڈ دیکھا جا سکتا ہے۔"
+  ],
+  faq: [
+    [
+      "What constitutes a critical diagnostic result in the emergency department?",
+      "Under MSDS AAC 5 and 12, a critical (or panic) result is a laboratory measurement or imaging finding that indicates an imminent life-threatening emergency (such as severe hyperkalaemia, critical cardiac enzymes, acute intracranial haemorrhage, or tension pneumothorax) requiring immediate clinical intervention within target minutes."
+    ],
+    [
+      "What is the mandatory nursing hand-off and read-back protocol under rule abc8a2c23d?",
+      "When the laboratory or imaging department phones the emergency department with a critical alert, the triage or emergency nurse must verify two patient identifiers (name and MRN), write down the exact finding, and read it back word-for-word to the caller. The nurse must then notify the responsible emergency physician immediately without delay."
+    ],
+    [
+      "What does the red OVERDUE badge signify on emergency critical results?",
+      "Under rule abc8a2c23d, each critical result carries a communicate_due_at target calculated from hospital safety settings. If communication or physician action is not documented before this deadline, the system highlights the row with a bold red OVERDUE badge and advances the hospital-wide overdue alert counter."
+    ],
+    [
+      "How does the triage nurse filter critical results for a specific emergency patient?",
+      "Enter the patient's Admission ID (or admission reference linked to their emergency stay) in the admission filter box. The table immediately filters to show only critical laboratory and radiology findings for that patient's chart. Click Clear to return to all active department alerts."
+    ],
+    [
+      "What information is recorded in the critical results communication log?",
+      "GET /critical-results/{critical_result_id} displays every communication event: who delivered the alert, who received it, the recipient's clinical role (e.g. TreatingDoctor, WardNurse), the communication method (Telephone, InPerson, Electronic), whether read-back was performed, and clinical notes."
+    ],
+    [
+      "How does the emergency department service view affect critical communication under rule 9ef18690f5?",
+      "Under rule 9ef18690f5, the screen checks establishment views for emergency_department: 'full' enables all viewing and filtering; 'open_work' displays the banner 'No new critical results from now on' while allowing nurses to finalize open communication hand-offs; 'records' restricts the screen to historical audit review."
+    ],
+    [
+      "What happens when a priority notifiable disease is identified in an emergency critical result?",
+      "Under MSDS surveillance protocols, results matching priority notifiable pathogens (such as cholera, polio, dengue with haemorrhagic fever, or COVID-19) display an amber 'Notifiable Disease' banner with authority_pending status until institutional notification is completed."
+    ]
+  ],
+  faqUr: [
+    [
+      "ایمرجنسی شعبے میں ہنگامی یا تشویشناک تشخیصی نتیجہ کیا ہوتا ہے؟",
+      "ایم ایس ڈی ایس اے اے سی 5 اور 12 کے تحت ہنگامی نتیجہ لیب یا ایکسرے کا وہ نتیجہ ہے جو فوری جان لیوا خطرے کی نشاندہی کرتا ہے (جیسے پوٹاشیم کا خطرناک حد تک بڑھنا، دل کا دورہ، یا دماغ کی رگ پھٹنا) جس پر چند منٹوں میں ہنگامی علاج لازم ہوتا ہے۔"
+    ],
+    [
+      "قاعدہ abc8a2c23d کے تحت نرسنگ ہینڈ آف اور ریڈ بیک پروٹوکول کیا ہے؟",
+      "جب لیب یا ریڈیالوجی ایمرجنسی میں فون پر ہنگامی نتیجہ بتائے، نرس کو مریض کے نام اور ایم آر این کی تصدیق کرنی ہوتی ہے، نتیجہ لکھنا ہوتا ہے اور لفظ بہ لفظ کال کرنے والے کو دہرا کر سنانا ہوتا ہے، پھر فوری طور پر ڈیوٹی ڈاکٹر کو مطلع کرنا ہوتا ہے۔"
+    ],
+    [
+      "ہنگامی نتائج پر سرخ تاخیر شدہ (OVERDUE) بیج کا کیا مطلب ہے؟",
+      "قاعدہ abc8a2c23d کے مطابق ہر ہنگامی نتیجے کا معالج کو بتانے کا ایک مقررہ ہسپتال وقت ہوتا ہے۔ اگر اس وقت کے اندر اطلاع اور کارروائی درج نہ ہو تو اسکرین پر سرخ رنگ میں OVERDUE لکھا آتا ہے تاکہ فوری توجہ مل سکے۔"
+    ],
+    [
+      "ٹرائیج نرس کسی مخصوص ہنگامی مریض کے نتائج کیسے دیکھتی ہے؟",
+      "داخلہ فلٹر کے خانے میں مریض کا داخلہ نمبر درج کریں۔ اسکرین فوری طور پر صرف اس مریض کے چارٹ کے ہنگامی ٹیسٹ دکھاتی ہے۔ تمام مریضوں کے نتائج واپس لانے کے لیے فلٹر صاف (Clear) کریں۔"
+    ],
+    [
+      "ہنگامی نتیجے کے کمیونیکیشن لاگ میں کیا تفصیلات درج ہوتی ہیں؟",
+      "لاگ میں ہر رابطے کی تاریخ اور وقت، اطلاع دینے والے اور وصول کرنے والے کا نام اور کردار، رابطے کا ذریعہ (فون، روبرو یا کمپیوٹر)، اور کیا رزلٹ دہرا کر سنایا گیا (ریڈ بیک) کی مکمل معلومات محفوظ ہوتی ہیں۔"
+    ],
+    [
+      "ایمرجنسی ڈیپارٹمنٹ کی سروس حالت کا اس اسکرین پر کیا اثر ہوتا ہے؟",
+      "قاعدہ 9ef18690f5 کے تحت اگر سروس فل ہو تو مکمل اسکرین چلتی ہے؛ اوپن ورک موڈ میں 'اب سے نئے نتائج موصول نہیں ہوں گے' کا بینر آتا ہے لیکن زیر التوا کام مکمل کیے جا سکتے ہیں؛ اور ریکارڈز موڈ میں صرف پرانی تاریخ دیکھی جا سکتی ہے۔"
+    ],
+    [
+      "اگر ہنگامی نتیجے میں کوئی وبائی بیماری سامنے آئے تو کیا ہوتا ہے؟",
+      "قومی اور صوبائی ایم ایس ڈی ایس اصولوں کے تحت وبائی امراض (جیسے ہیضہ، پولیو یا ڈینگی) پر نمایاں انتباہی نشان آتا ہے اور متعلقہ حکام کو بروقت اطلاع دینے تک پینڈنگ کا نشان رہتا ہے۔"
+    ]
+  ]
+},
  own_medicines_ward: {
   title: "Patient's own medicines",
   titleUr: "مریض کی اپنی ادویات",
