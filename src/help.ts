@@ -4772,6 +4772,92 @@ consents_doctor: {
       ],
     ],
   },
+  triage_scale: {
+    title: "Emergency triage scale & SOP algorithm",
+    titleUr: "ایمرجنسی ٹرائیج اسکیل اور تحریری الگورتھم",
+    purpose: "Configure and adapt the hospital's emergency triage levels, target response times, clinical danger signs, and vital-sign limits under MSDS AAC 15 v, 18. Emergency consultant reviews and signs the printed algorithm; retired items are preserved for historic triage audit (rules 156f8bf375, 023ae1126f, 7e8f4c97ea, 813c874c56).",
+    purposeUr: "ایم ایس ڈی ایس اے اے سی 15 وی اور 18 کے تحت ہسپتال کے ایمرجنسی ٹرائیج درجات، ہدف کے اوقات، خطرے کی علامات اور وائٹل سائن کی حدود مقرر کریں۔ کنسلٹنٹ تحریری الگورتھم کی سالانہ توثیق اور دستخط کرتا ہے؛ سابقہ ٹرائیج کے آڈٹ کے لیے غیر فعال علامات محفوظ رہتی ہیں۔",
+    steps: [
+      "Open Quality or Emergency Setup workspace -> Triage scale and review active 5-level emergency priority tiers.",
+      "Inspect Level 1 (Resuscitation) to Level 5 (Non-urgent), verifying names, standard colour codes, and target doctor assessment times (0 to 1440 min).",
+      "Click 'Edit Level' on any triage tier to adapt target response minutes, level description, or colour code to institutional SOP.",
+      "Click '+ Add Danger Sign' to configure high-risk qualitative clinical red flags (e.g. stridor, severe burns, active seizures) that nurses tick on intake.",
+      "Click '+ Add Vital Limit' to configure quantitative thresholds (e.g. SpO2 < 90%, Systolic BP < 90 mmHg, GCS < 9) that auto-trigger priority levels (rule 023ae1126f).",
+      "Specify age-group applicability: 'All', 'Adult' (>= child age), or 'Child' (< child threshold age) for age-specific pediatric vs adult limits.",
+      "To deprecate an obsolete sign or limit, click 'Retire' (✕) to set is_active false, preserving historic triage consistency (rule 023ae1126f).",
+      "Click 'Print A4 Algorithm' or 'Download PDF' for formal annual review, emergency consultant approval, and departmental pin-up display (rule 156f8bf375).",
+    ],
+    stepsUr: [
+      "کوالٹی یا ایمرجنسی سیٹ اپ ورک اسپیس کھولیں -> 'ٹرائیج اسکیل' پر جائیں اور 5 ترجیحی درجات کا جائزہ لیں۔",
+      "لیول 1 (فوری بحالی) سے لیول 5 (غیر ہنگامی) تک نام، معیاری رنگ اور معائنے کے ہدف کے اوقات (0 سے 1440 منٹ) چیک کریں۔",
+      "ہسپتال کے ایس او پی کے مطابق وقت، تفصیل یا رنگ تبدیل کرنے کے لیے کسی بھی لیول پر 'لیول ایڈٹ کریں' پر کلک کریں۔",
+      "نرسنگ کے معائنے کے لیے خطرے کی نمایاں طبی علامات (جیسے جھٹکے، شدید سانس کی رکاوٹ) شامل کرنے کے لیے '+ Add Danger Sign' پر کلک کریں۔",
+      "خودکار جانچ کے لیے وائٹل سائن کی عددی حدود (جیسے آکسیجن 90 سے کم، بلڈ پریشر 90 سے کم) شامل کرنے کے لیے '+ Add Vital Limit' پر کلک کریں (قاعدہ 023ae1126f)۔",
+      "عمر کا گروپ منتخب کریں: تمام مریض، بالغ یا بچپن کی عمر کی حد سے کم بچے تاکہ درست حدود لاگو ہوں۔",
+      "کسی پرانی علامت کو ختم کرنے کے لیے 'Retire' (✕) پر کلک کریں تاکہ وہ غیر فعال ہو جائے لیکن سابقہ ٹرائیج کا ریکارڈ محفوظ رہے (قاعدہ 023ae1126f)۔",
+      "کنسلٹنٹ ایمرجنسی کے دستخط، سالانہ جائزے اور نوٹس بورڈ پر لگانے کے لیے 'Print A4 Algorithm' یا 'Download PDF' پر کلک کریں (قاعدہ 156f8bf375)۔",
+    ],
+    faq: [
+      [
+        "Why are danger signs and vital-sign limits retired instead of deleted?",
+        "Under rule 023ae1126f, triage discriminators must be retired (is_active: false) rather than physically deleted. Emergency visits already triaged under those rules preserve the exact signs and vital limits that triggered their priority assignment for medical-legal and PHC compliance audits.",
+      ],
+      [
+        "What parameters are required for a VitalSign discriminator vs a Danger Sign?",
+        "Under rule 023ae1126f, a VitalSign row requires vital (heart rate, SpO2, systolic BP, GCS, etc.), comparison operator (<, <=, >, >=), and a numerical threshold. A qualitative danger Sign row requires none of them and is ticked based on clinical observation.",
+      ],
+      [
+        "Who is required to review and sign the printed triage algorithm?",
+        "Under rule 156f8bf375 and MSDS AAC 15 v & 18, the scale ships as an institutional starting algorithm that must be reviewed, adapted, and signed on official printout by the designated Emergency Consultant, with documented annual SOP review cycles.",
+      ],
+      [
+        "How can staff inspect retired or inactive discriminators?",
+        "Under rule 7e8f4c97ea, switching on 'Show Retired Items' sends include_inactive=true to the server, displaying obsolete signs and limits greyed out with strikethrough styling and offering a 'Re-activate' option.",
+      ],
+      [
+        "How are pediatric limits separated from adult vital sign limits?",
+        "Each vital-sign limit specifies age_group: 'All', 'Adult', or 'Child'. The server's child_age_years (default 12 years) establishes the cutoff below which pediatric vital sign thresholds apply automatically.",
+      ],
+      [
+        "What happens if the emergency department service is in 'setup' or 'open_work' mode?",
+        "Under rule 813c874c56, in setup mode the screen is accessed via Facility Settings to configure algorithms before launching. In open_work (retiring), scale adjustments are locked while viewing and printing active algorithms remains available.",
+      ],
+      [
+        "Who has authorization to modify triage levels and discriminators?",
+        "Configuring levels and discriminators is restricted to er.triage.configure permission holders (hospital admin, directors, quality officer). Clinical staff (triage nurses, doctors) have er.visit.view permissions for viewing and printing.",
+      ],
+    ],
+    faqUr: [
+      [
+        "خطرے کی علامات یا وائٹل سائن کی حدود کو ڈیلیٹ کرنے کے بجائے ریٹائر کیوں کیا جاتا ہے؟",
+        "قاعدہ 023ae1126f کے تحت ٹرائیج علامات کو مستقل حذف کرنے کے بجائے غیر فعال (is_active: false) کیا جاتا ہے۔ ماضی میں اس بنیاد پر کیے گئے ٹرائیج کا قانونی اور آڈٹ ریکارڈ بالکل محفوظ رہتا ہے۔",
+      ],
+      [
+        "وائٹل سائن کی حد اور خطرے کی علامت میں کن پیرامیٹرز کا فرق ہے؟",
+        "قاعدہ 023ae1126f کے تحت وائٹل سائن کے لیے پیرامیٹر (نبض، آکسیجن، بلڈ پریشر)، موازنہ (<، <=، >، >=) اور عددی حد لازمی ہے۔ عام خطرے کی علامت کے لیے صرف عنوان درکار ہوتا ہے جسے نرس دیکھ کر ٹک کرتی ہے۔",
+      ],
+      [
+        "تحریری ٹرائیج الگورتھم کی باضابطہ منظوری اور دستخط کون کرتا ہے؟",
+        "قاعدہ 156f8bf375 اور MSDS AAC 15 v و 18 کے تحت ہسپتال کے کنسلٹنٹ ایمرجنسی کا پرنٹ شدہ سرکاری دستاویز پر دستخط اور سالانہ جائزہ لینا لازمی ہے تاکہ ایس او پی نافذ العمل رہے۔",
+      ],
+      [
+        "غیر فعال یا ریٹائرڈ علامات کا معائنہ کیسے کیا جا سکتا ہے؟",
+        "قاعدہ 7e8f4c97ea کے تحت 'Show Retired Items' آن کرنے سے غیر فعال علامات سرمئی رنگ میں خط کشیدہ دکھائی دیتی ہیں، اور ضرورت پڑنے پر انہیں دوبارہ فعال بھی کیا جا سکتا ہے۔",
+      ],
+      [
+        "بچوں اور بڑوں کے وائٹل سائن کی حدود میں کیسے فرق کیا جاتا ہے؟",
+        "ہر وائٹل سائن میں عمر کا گروپ (تمام، بالغ، بچے) منتخب کیا جاتا ہے۔ سسٹم میں مقررہ بچپن کی عمر (جیسے 12 سال) سے کم مریضوں پر خودکار طور پر بچوں کی حدود لاگو ہوتی ہیں۔",
+      ],
+      [
+        "اگر ایمرجنسی سروس 'setup' یا 'open_work' موڈ میں ہو تو سکرین کا رویہ کیا ہوگا؟",
+        "قاعدہ 813c874c56 کے تحت سیٹ اپ موڈ میں فیسلٹی سیٹنگز سے الگورتھم تیار کیا جاتا ہے۔ ریٹائرنگ موڈ میں نئی ترامیم بند ہو جاتی ہیں جبکہ پرنٹ اور مطالعہ جاری رہتا ہے۔",
+      ],
+      [
+        "ٹرائیج اسکیل اور علامات میں ترمیم کی اجازت کن عہدیداروں کو ہے؟",
+        "اسکیل میں تبدیلی er.triage.configure کی اجازت کے حامل افراد (ہسپتال ڈائریکٹر، ایڈمن، کوالٹی آفیسر) کر سکتے ہیں۔ نرس اور ڈاکٹر کے پاس دیکھنے اور پرنٹ کرنے کی اجازت ہوتی ہے۔",
+      ],
+    ],
+  },
   ward_indent: {
     title: "Ward supply indent & inventory",
     titleUr: "وارڈ سپلائی انڈینٹ اور کیبنٹ اسٹاک",

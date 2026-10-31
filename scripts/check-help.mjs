@@ -248,6 +248,7 @@ export function checkHelp({
       "WardTransferHeadNurse",
       "WardIndent",
       "DischargeSummary",
+      "TriageScale",
     ].map((n) => `src/screens/${n}.tsx`),
   ];
   const used = new Set(),
