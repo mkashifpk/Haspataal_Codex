@@ -20,6 +20,7 @@ export const phase1Screens = [
 const approvalScreens = ["approval_queue", "charity_approvals"];
 // Coverage grows screen by screen; Phase 1 acceptance remains separate.
 export const deliveredHelpScreens = [
+  "code_red",
   "er_visit",
   "er_board",
   "triage_scale",
@@ -103,6 +104,32 @@ const g = (
 // IDs are also attached to the actual controls. The build rejects missing
 // mappings and empty translations instead of treating a page as coverage.
 export const controlGuides: Record<string, ControlGuide> = {
+"code_red.back": g(["code_red"], ["Back to tracking board button", "ایمرجنسی بورڈ پر واپس بٹن"], ["Navigates back to the emergency room tracking board.", "ایمرجنسی روم ٹریکنگ بورڈ پر واپس جاتا ہے۔"]),
+"code_red.btn_acknowledge_alert": g(["code_red"], ["Acknowledge alert button", "الرٹ وصول کیا بٹن"], ["Acknowledges and dismisses the full-screen Code Red broadcast alert (rule 77b021933d).", "کوڈ ریڈ ہنگامی الرٹ نوٹیفکیشن کو وصول کر کے ہٹاتا ہے۔"]),
+"code_red.btn_confirm_arrived": g(["code_red"], ["Confirm patient arrived button", "مریض کی آمد تصدیق بٹن"], ["Confirms resuscitation patient reached the bay, advancing status to Admitted (POST /admissions/{admission_id}/arrived).", "مریض کی بیڈ یا وارڈ میں آمد کی تصدیق کرتا ہے اور اسٹیٹس Admitted کرتا ہے۔"]),
+"code_red.btn_dismiss_notice": g(["code_red"], ["Dismiss banner button", "اطلاع بینر بند کریں بٹن"], ["Dismisses action feedback banner.", "فیڈ بیک اطلاع کا بینر بند کرتا ہے۔"]),
+"code_red.btn_open_trauma_modal": g(["code_red"], ["New trauma identity button", "نیا ٹراما ریکارڈ بٹن"], ["Opens dialog to create a temporary trauma identity (e.g. Unknown Male 1) (POST /patients/trauma).", "نامعلوم ایمرجنسی مریض کا نیا عارضی شناختی ریکارڈ بنانے کا ڈائیلاگ کھولتا ہے۔"]),
+"code_red.btn_trigger_code_red": g(["code_red"], ["Activate Code Red button", "کوڈ ریڈ فعال کریں بٹن"], ["Triggers one-click Code Red admission and alerts destination teams (POST /admissions/code-red).", "ایک کلک سے کوڈ ریڈ ہنگامی داخلہ فعال کرتا ہے اور تمام وارڈز کو الرٹ بھیجتا ہے۔"]),
+"code_red.check_is_mlc": g(["code_red"], ["Medico-legal checkbox", "میڈیکو لیگل چیک باکس"], ["Flags patient as suspected trauma or medico-legal incident (rule 2d008ab65a).", "مریض کو میڈیکو لیگل نوعیت کا قرار دیتا ہے۔"]),
+"code_red.input_approx_age": g(["code_red"], ["Approximate age input", "تخمینہ عمر فیلڈ"], ["Captures estimated age in years for clinical resuscitation baseline.", "مریض کی متوقع عمر درج کرتا ہے۔"]),
+"code_red.input_eta": g(["code_red"], ["Arrival ETA input", "آمد کا تخمینہ وقت فیلڈ"], ["Captures estimated arrival time in minutes for the receiving team.", "وصول کنندہ عملے کے لیے متوقع آمد کے منٹ درج کرتا ہے۔"]),
+"code_red.input_mlc_type": g(["code_red"], ["MLC case type ID input", "کیس کی قسم فیلڈ"], ["Captures classification ID of suspected medico-legal incident.", "میڈیکو لیگل کیس کی قانونی قسم درج کرتا ہے۔"]),
+"code_red.input_ot_id": g(["code_red"], ["Operating theatre ID input", "تھیٹر نمبر فیلڈ"], ["Specifies optional operating theatre suite ID to reserve.", "ریزرو کرنے کے لیے مخصوص آپریشن تھیٹر نمبر درج کرتا ہے۔"]),
+"code_red.input_patient_id": g(["code_red"], ["Known patient ID input", "مریض کا آئی ڈی فیلڈ"], ["Captures registered patient MRN or database ID.", "پہلے سے رجسٹرڈ مریض کا ایم آر این یا آئی ڈی درج کرتا ہے۔"]),
+"code_red.input_procedure": g(["code_red"], ["Emergency procedure name input", "ہنگامی پروسیجر فیلڈ"], ["Captures planned emergency surgical procedure (e.g. Laparotomy).", "ہنگامی سرجری کا نام درج کرتا ہے۔"]),
+"code_red.input_temp_id": g(["code_red"], ["Temporary identifier input", "عارضی شناختی نام فیلڈ"], ["Captures temporary trauma label (e.g. Unknown Male 1).", "نامعلوم مریض کا عارضی شناختی نام درج کرتا ہے۔"]),
+"code_red.radio_known": g(["code_red"], ["Known patient radio button", "شناخت شدہ مریض ریڈیو بٹن"], ["Selects known registered patient mode.", "شناخت شدہ مریض کا آپشن منتخب کرتا ہے۔"]),
+"code_red.radio_trauma": g(["code_red"], ["Unidentified trauma radio button", "نامعلوم ٹراما ریڈیو بٹن"], ["Selects unidentified emergency trauma patient mode.", "نامعلوم ایمرجنسی مریض کا آپشن منتخب کرتا ہے۔"]),
+"code_red.select_gender": g(["code_red"], ["Gender selector", "جنس سلیکٹر"], ["Selects perceived gender for trauma intake: Male, Female, Other, Unknown.", "ظاہری جنس منتخب کرتا ہے۔"]),
+"code_red.select_ward_type": g(["code_red"], ["Destination ward type selector", "منزل وارڈ سلیکٹر"], ["Selects receiving resuscitation bay: Emergency, ICU, CCU, Surgical, General.", "منزل کا ہنگامی وارڈ منتخب کرتا ہے۔"]),
+"code_red.switch_needs_ot": g(["code_red"], ["Emergency surgery hold switch", "تھیٹر ہولڈ سوئچ"], ["Toggles operating theatre hold for immediate surgical intervention (rule 45f4e0ca60).", "ہنگامی سرجری کے لیے آپریشن تھیٹر ریزرو کرنے کا سوئچ۔"]),
+"code_red.textarea_notes": g(["code_red"], ["Handover notes textarea", "ہدایات نوٹس فیلڈ"], ["Captures clinical handover message for receiving resuscitation team.", "وصول کنندہ عملے کے لیے کلینیکل نوٹس درج کرتا ہے۔"]),
+"code_red.trauma_age_input": g(["code_red"], ["Modal estimated age input", "موڈل تخمینہ عمر فیلڈ"], ["Captures estimated age in modal trauma creation.", "ٹراما موڈل میں متوقع عمر درج کرتا ہے۔"]),
+"code_red.trauma_cancel_btn": g(["code_red"], ["Cancel trauma creation button", "ٹراما منسوخ بٹن"], ["Closes trauma creation modal.", "ٹراما موڈل منسوخ کرتا ہے۔"]),
+"code_red.trauma_close_btn": g(["code_red"], ["Close trauma modal button", "ٹراما ڈائیلاگ بند کریں بٹن"], ["Closes trauma dialog without saving.", "ٹراما ڈائیلاگ بند کرتا ہے۔"]),
+"code_red.trauma_gender_select": g(["code_red"], ["Modal gender selector", "موڈل جنس سلیکٹر"], ["Selects perceived gender in trauma modal.", "ٹراما موڈل میں جنس منتخب کرتا ہے۔"]),
+"code_red.trauma_submit_btn": g(["code_red"], ["Save trauma profile button", "پروفائل محفوظ کریں بٹن"], ["Submits temporary trauma profile to POST /patients/trauma.", "عارضی ٹراما پروفائل سرور پر محفوظ کرتا ہے۔"]),
+"code_red.trauma_temp_id_input": g(["code_red"], ["Modal temporary identifier input", "موڈل عارضی نام فیلڈ"], ["Captures temporary identity in trauma dialog.", "ٹراما موڈل میں عارضی نام درج کرتا ہے۔"]),
 "er_visit.back": g(["er_visit"], ["Back to tracking board button", "ایمرجنسی بورڈ پر واپس بٹن"], ["Navigates back to emergency tracking board.", "ایمرجنسی روم ٹریکنگ بورڈ پر واپس منتقل کرتا ہے۔"]),
 "er_visit.btn_dismiss_alert": g(["er_visit"], ["Dismiss alert banner button", "الرٹ بینر بند کریں بٹن"], ["Dismisses high-urgency Code Red alert notification.", "کوڈ ریڈ ایمرجنسی الرٹ بینر کو ہٹاتا ہے۔"]),
 "er_visit.btn_dismiss_notice": g(["er_visit"], ["Dismiss action notice button", "نوٹس ہٹائیں بٹن"], ["Dismisses status feedback message banner.", "فیڈ بیک اطلاع کا بینر بند کرتا ہے۔"]),

@@ -4772,6 +4772,92 @@ consents_doctor: {
       ],
     ],
   },
+  code_red: {
+    title: "Code Red: Emergency resuscitation admission",
+    titleUr: "کوڈ ریڈ: ہنگامی بحالی کا داخلہ",
+    purpose: "Activate instant, zero-block emergency resuscitation admissions and clinical alerts under MSDS AAC 15-20, MSDS 18, and MSDS 20. Provides one-click priority level 1 admission without delaying for billing or demographics (deferred, never waived), issues temporary trauma profiles for unknown patients ('Unknown Male 1'), broadcasts full-screen audio-visual Code Red alert chimes to destination resuscitation bays, operating theatres, and pharmacy, reserves emergency surgical suites when surgery capability is active, and records arrival handovers (rules 79df75a537, ddc33f8c02, 2d008ab65a, 77b021933d, 3eafe672a6, 0bf43fe61a, 97aab11043, e67eb016d9, 8cd8387cf2, 45f4e0ca60).",
+    purposeUr: "ایم ایس ڈی ایس 18 کے تحت انتہائی نازک مریضوں کے لیے بلنگ یا شناختی تصدیق کے بغیر فوری ون کلک کوڈ ریڈ داخلہ فعال کریں۔ نامعلوم مریضوں کا خودکار عارضی ٹراما پروفائل بنائیں، وارڈز، آپریشن تھیٹر اور فارمیسی کو سرخ روشنی اور سائرن کا الرٹ بھیجیں، ہنگامی سرجری کے لیے تھیٹر ہولڈ کریں اور مریض کی آمد کی تصدیق کریں۔",
+    steps: [
+      "Open Triage -> Code Red / Emergency Admit to access the rapid resuscitation intake console.",
+      "Choose whether the patient has a known MRN/ID or is an unidentified emergency trauma victim (rule 79df75a537).",
+      "If unidentified, specify perceived gender, approximate age, and accept or customize the auto-generated temporary trauma identity (e.g. 'Unknown Male 1').",
+      "Select destination resuscitation unit: Emergency Resuscitation Bay, ICU, CCU, or Surgical Emergency Ward.",
+      "If immediate emergency surgery is required and surgical capability is active, toggle 'Emergency Operating Theatre Hold' (needs_ot) to hold an operating suite (rule 45f4e0ca60).",
+      "Document estimated arrival time (ETA in minutes) and optional clinical handover notes for the receiving resuscitation team.",
+      "Click the prominent 'ACTIVATE CODE RED NOW' button to invoke POST /admissions/code-red with idempotency protection.",
+      "Destination resuscitation units, pharmacy, and OT receive full-screen red warning strobes and audio chimes; upon patient arrival in the bay, click 'Confirm Patient Arrived' to transition status to Admitted (rule 77b021933d).",
+    ],
+    stepsUr: [
+      "ٹرائیج ورک اسپیس -> 'کوڈ ریڈ / ایمرجنسی داخلہ' کھولیں اور ہنگامی بحالی کا کنسول دیکھیں۔",
+      "منتخب کریں کہ آیا مریض کا پہلے سے شناختی نمبر موجود ہے یا وہ نامعلوم ٹراما مریض ہے (قاعدہ 79df75a537)۔",
+      "نامعلوم مریض کی صورت میں ظاہری جنس اور متوقع عمر درج کریں اور خودکار شناختی نام (جیسے 'Unknown Male 1') کی تصدیق کریں۔",
+      "منزل کا ہنگامی یونٹ منتخب کریں: ایمرجنسی بحالی وارڈ، آئی سی یو، سی سی یو یا سرجیکل ایمرجنسی۔",
+      "اگر ہنگامی آپریشن کی ضرورت ہو اور سرجری فعال ہو تو 'Emergency Operating Theatre Hold' سوئچ آن کر کے تھیٹر ریزرو کریں (قاعدہ 45f4e0ca60)۔",
+      "متوقع آمد کے منٹ (ETA) اور وصول کنندہ عملے کے لیے ہنگامی کلینیکل نوٹس درج کریں۔",
+      "سرخ بٹن 'ACTIVATE CODE RED NOW' پر کلک کر کے فوری کوڈ ریڈ داخلہ سرور پر فعال کریں (قاعدہ 79df75a537)۔",
+      "منزل وارڈ، فارمیسی اور آپریشن تھیٹر میں فوری ریڈ الرٹ سائرن بجتا ہے؛ مریض کے پہنچنے پر 'Confirm Patient Arrived' پر کلک کر کے داخلہ مکمل کریں (قاعدہ 77b021933d)۔",
+    ],
+    faq: [
+      [
+        "Why are billing and CNIC/demographic checks bypassed during Code Red?",
+        "Under rule 79df75a537 and MSDS 18, clinical resuscitation takes absolute priority over administration. Billing is deferred (never waived), and patient identity, CNIC, and billing verification are handled later at the admissions desk once the patient is clinically stable.",
+      ],
+      [
+        "How are unknown or unconscious Code Red trauma patients identified?",
+        "Under rule 79df75a537, staff create an instant temporary trauma identity (such as 'Unknown Male 1') through POST /patients/trauma. This temporary MRN tracks all emergency medications, blood transfusions, and clinical notes until merged with the permanent record.",
+      ],
+      [
+        "Which hospital terminals receive the full-screen audio-visual Code Red broadcast?",
+        "Under rules 77b021933d and 3eafe672a6, the destination resuscitation ward/ICU terminal flashes full-screen red with an urgent audio chime and arrival ETA. The hospital pharmacy and main operating theatre suites simultaneously receive the identical alert.",
+      ],
+      [
+        "Who is recorded as the primary doctor when a nurse activates Code Red?",
+        "Under rule 0bf43fe61a and decision 57, if a doctor triggers Code Red, they are recorded as primary_doctor. If activated by a triage nurse, primary_doctor is left null ('Doctor: waiting') until the attending emergency physician examines the patient and confirms the clinical diagnosis.",
+      ],
+      [
+        "When can an emergency operating theatre hold (needs_ot) be requested?",
+        "Under rule 45f4e0ca60, theatre holds are available only when the surgical service is active in facility configuration. Requesting needs_ot locks an emergency theatre slot and alerts the on-duty surgical and anaesthesia teams.",
+      ],
+      [
+        "Are patient photos required during Code Red activation?",
+        "Under rule ddc33f8c02, patient photos are strictly optional and must never delay resuscitation. A photograph can be captured later from the admissions desk or document vault once the patient is stable and consents.",
+      ],
+      [
+        "How does the destination ward confirm patient arrival?",
+        "Once the patient reaches the resuscitation bay, authorized staff click 'Confirm Patient Arrived in Bay' (POST /admissions/{admission_id}/arrived), transitioning admission status from CodeRedActive to Admitted.",
+      ],
+    ],
+    faqUr: [
+      [
+        "کوڈ ریڈ کے دوران بلنگ اور شناختی کوائف کیوں موخر کیے جاتے ہیں؟",
+        "قاعدہ 79df75a537 اور ایم ایس ڈی ایس 18 کے تحت جان بچانا کاغذی کارروائی سے زیادہ اہم ہے۔ بلنگ موخر کی جاتی ہے (معاف نہیں)، اور مریض کے مستحکم ہونے کے بعد شناختی کوائف اور فیس کی توثیق ایڈمیشن ڈیسک سے کی جاتی ہے۔",
+      ],
+      [
+        "نامعلوم یا بے ہوش کوڈ ریڈ مریضوں کی شناخت کیسے کی جاتی ہے؟",
+        "قاعدہ 79df75a537 کے تحت عملہ فوری طور پر عارضی شناختی ریکارڈ (جیسے 'Unknown Male 1') بناتا ہے۔ یہ عارضی نمبر تمام ادویات، خون کی بوتلوں اور نوٹس کو سنبھالتا ہے جب تک کہ وہ مستقل فائل کے ساتھ ضم نہ ہو جائے۔",
+      ],
+      [
+        "ہسپتال کے کون سے ٹرمینلز پر کوڈ ریڈ کا سائرن اور فل سکرین الرٹ بجتا ہے؟",
+        "قواعد 77b021933d اور 3eafe672a6 کے تحت منزل کے وارڈ یا آئی سی یو کے ٹرمینل پر سرخ سکرین اور الارم بجتا ہے۔ اس کے ساتھ ساتھ ہسپتال کی فارمیسی اور آپریشن تھیٹر کو بھی وہی الرٹ بیک وقت موصول ہوتا ہے۔",
+      ],
+      [
+        "اگر نرس کوڈ ریڈ لگائے تو پرائمری ڈاکٹر کون درج ہوتا ہے؟",
+        "قاعدہ 0bf43fe61a کے تحت اگر ڈاکٹر کوڈ ریڈ کرے تو وہ درج ہوتا ہے، لیکن اگر نرس لگائے تو ڈاکٹر کا خانہ 'Doctor: waiting' رہتا ہے جب تک کہ کوئی معالج معائنہ کر کے کیس کی ذمہ داری نہ لے لے۔",
+      ],
+      [
+        "ایمرجنسی آپریشن تھیٹر ہولڈ (needs_ot) کب طلب کیا جا سکتا ہے؟",
+        "قاعدہ 45f4e0ca60 کے مطابق تھیٹر ہولڈ صرف اس وقت ممکن ہے جب ہسپتال میں سرجری سروس فعال ہو۔ اس کی بدولت ہنگامی آپریشن تھیٹر اور اینستھیزیا ٹیم الرٹ ہو جاتی ہے۔",
+      ],
+      [
+        "کیا کوڈ ریڈ کے وقت مریض کی تصویر لینا لازمی ہے؟",
+        "قاعدہ ddc33f8c02 کے تحت مریض کی تصویر اختیاری ہے اور جان بچانے کے عمل میں تاخیر کا سبب نہیں بننی چاہیے۔ مریض کے سنبھلنے کے بعد ایڈمیشن ڈیسک سے تصویر لی جا سکتی ہے۔",
+      ],
+      [
+        "منزل وارڈ مریض کی آمد کی تصدیق کیسے کرتا ہے؟",
+        "مریض کے وارڈ میں پہنچتے ہی مجاز عملہ 'Confirm Patient Arrived in Bay' پر کلک کرتا ہے جس سے اسٹیٹس CodeRedActive سے تبدیل ہو کر باقاعدہ Admitted ہو جاتا ہے۔",
+      ],
+    ],
+  },
   er_visit: {
     title: "Emergency visit: triage, stages & departure",
     titleUr: "ایمرجنسی وزٹ: ٹرائیج، مراحل اور روانگی",

@@ -251,6 +251,7 @@ export function checkHelp({
       "TriageScale",
       "ERBoard",
       "ERVisit",
+      "CodeRed",
     ].map((n) => `src/screens/${n}.tsx`),
   ];
   const used = new Set(),
