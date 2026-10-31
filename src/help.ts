@@ -4600,6 +4600,92 @@ consents_doctor: {
       ],
     ],
   },
+  blood_center_lab: {
+    title: "Blood center laboratory and screening",
+    titleUr: "بلڈ سنٹر لیبارٹری اور اسکریننگ",
+    purpose: "Each collected donation's screens and groups, its components into quarantine, discards, and the labels.",
+    purposeUr: "جمع شدہ عطیات کی 5 متعدی امراض کی اسکریننگ، اے بی او و آر ایچ ٹیسٹ، قرنطینہ میں اجزاء کی تیاری، تلفی اور لیبلز۔",
+    steps: [
+      "Open Laboratory → Blood center laboratory to view collected blood donations waiting for infectious disease testing and component preparation.",
+      "Review the worklist of collected units; check collection volume, pack type (Single, Double, Triple, Quadruple), and elapsed processing time.",
+      "Click 'Record Tests' to open the laboratory entry grid for mandatory 5-marker TTI screening (HBsAg, Anti-HCV, Anti-HIV, Syphilis, Malaria) and dual ABO/Rh determinations.",
+      "Fill in reagent kit lot numbers and testing methodologies (ELISA, CLIA, Rapid, Tube, Gel); result fields start blank per PBTA rules.",
+      "If an initial TTI screening returns reactive, click 'Repeat from Bag' to test a second independent sample taken directly from the collection bag before final interpretation.",
+      "Click 'Separate Components' to prepare Whole Blood or split units into Packed Red Blood Cells (PRBC), Fresh Frozen Plasma (FFP), and Platelet Concentrate (PC) into quarantine.",
+      "Verify the 8-hour processing window: platelets and fresh plasma must be separated within 8 hours of venepuncture (BLOOD_PROCESSING_TIME_EXCEEDED).",
+      "In the Quarantine tab, isolate reactive units; click 'Discard' to document clinical reasons (ReactiveScreening, Expired, BagDamaged, Other with mandatory explanation note).",
+    ],
+    stepsUr: [
+      "متعدی امراض کی ٹیسٹنگ اور بلڈ کمپوننٹس کی تیاری کے لیے لیبارٹری سے 'بلڈ سنٹر لیبارٹری' کھولیں۔",
+      "جمع شدہ خون کے یونٹس کی لسٹ کا جائزہ لیں؛ خون کی مقدار، بیگ کی قسم اور گزرے ہوئے گھنٹوں کی جانچ کریں۔",
+      "متعدی امراض (HBsAg، Anti-HCV، Anti-HIV، آتشک، ملیریا) اور اے بی او و آر ایچ کے دوہرے ٹیسٹ درج کرنے کے لیے 'ٹیسٹ درج کریں' پر کلک کریں۔",
+      "کٹ لاٹ نمبر اور ٹیسٹنگ طریقہ کار (الائزا، کلیا، ریپڈ یا ٹیوب) منتخب کریں؛ قانونی تقاضے کے مطابق نتائج کا خانہ خالی شروع ہوتا ہے۔",
+      "اگر کوئی اسکریننگ ٹیسٹ ری ایکٹیو آئے تو بیگ سے دوسرا آزاد نمونہ لے کر ٹیسٹ کرنے کے لیے 'بیگ سے دوبارہ نمونہ لیں' پر کلک کریں۔",
+      "خون کے بیگز کو ہول بلڈ یا ریڈ سیلز، تازہ منجمد پلازما اور پلیٹ لیٹس میں تقسیم کر کے قرنطینہ میں بھیجنے کے لیے 'اجزاء تیار کریں' پر کلک کریں۔",
+      "8 گھنٹے کی پروسیسنگ حد کی تصدیق کریں: پلیٹ لیٹس اور پلازما کو سوئی نکالنے کے 8 گھنٹے کے اندر اندر تیار کرنا لازمی ہے۔",
+      "قرنطینہ ٹیب میں ری ایکٹیو یونٹس کو فوری الگ کریں؛ تلفی کے لیے 'تلف کریں' پر کلک کر کے ٹھوس طبی وجہ اور وضاحتی نوٹ درج کریں۔",
+    ],
+    faq: [
+      [
+        "What are the mandatory 5 Transfusion-Transmissible Infections (TTI) screened for every donation?",
+        "Under Punjab Blood Transfusion Safety Act 2016 s.10(2)(f) and PBTA standards, every single donated blood unit must be tested for HBsAg, Anti-HCV, Anti-HIV 1 & 2, Syphilis, and Malaria before release.",
+      ],
+      [
+        "Why must ABO and Rh determinations be performed at least twice?",
+        "Per rule ac0462c02a and PBTA Standard ch.3, blood grouping mandates dual independent determinations—such as forward grouping and reverse grouping, or testing by two independent methods—to prevent fatal ABO mismatch transfusion errors.",
+      ],
+      [
+        "What is the required protocol when a TTI screening returns reactive?",
+        "Per rule 7e769d8e04, any initial reactive result triggers 'Repeat on another sample from the bag' (sample Repeat) in red; the donation and its components must be immediately quarantined apart from untested units.",
+      ],
+      [
+        "What is the strict time limit for preparing platelets and fresh frozen plasma?",
+        "Per rule 22b4758a41, platelets and plasma must be separated from whole blood within 8 hours of venepuncture (BLOOD_PROCESSING_TIME_EXCEEDED) to maintain coagulation factor potency and platelet viability.",
+      ],
+      [
+        "How are component expiration dates determined?",
+        "Per rule 22b4758a41, Whole Blood and Red Cells in CPDA-1 expire in 35 days; Platelets expire in 5 days at 20-24°C under continuous agitation; Fresh Frozen Plasma and Cryoprecipitate expire in 12 months at -25°C or colder.",
+      ],
+      [
+        "How does quarantine discard auditing work?",
+        "Per rule 87598ad7aa, components in quarantine can be permanently discarded with an audited reason (ReactiveScreening, BagDamaged, ProcessingTimeExceeded, etc.); selecting 'Other' mandates a documented clinical note.",
+      ],
+      [
+        "Can laboratory testing and component preparation continue while the blood center service is retiring?",
+        "Yes. Per rules 9f918de113 and 6dab3d3a8e, POST /blood-center/donations/{id}/tests and POST /blood-center/donations/{id}/components continue work started earlier and remain fully operational in retiring mode (open_work).",
+      ],
+    ],
+    faqUr: [
+      [
+        "ہر عطیہ کے لیے کن 5 متعدی امراض کی اسکریننگ قانونی طور پر لازمی ہے؟",
+        "پنجاب بلڈ ٹرانسفیوژن سیفٹی ایکٹ کے تحت ہر بیگ کا ہیپاٹائٹس بی، ہیپاٹائٹس سی، ایچ آئی وی ایڈز، آتشک اور ملیریا کے لیے ٹیسٹ ہونا لازمی ہے۔",
+      ],
+      [
+        "بلڈ گروپ اور آر ایچ کے ٹیسٹ کم از کم دو بار کیوں کیے جاتے ہیں؟",
+        "پی بی ٹی اے کے معیار کے مطابق فارورڈ اور ریورس گروپنگ کے دوہرے ٹیسٹ لازمی ہیں تاکہ گروپ کی غلط شناخت اور جان لیوا تضاد سے بچا جا سکے۔",
+      ],
+      [
+        "اگر اسکریننگ کا ٹیسٹ ری ایکٹیو آ جائے تو کیا طریقہ کار ہے؟",
+        "ابتدائی مثبت نتیجہ آنے پر سسٹم 'بیگ سے دوبارہ نمونہ لیں' تجویز کرتا ہے؛ اس عطیہ اور اس کے تمام بیگز کو قرنطینہ میں غیر ٹیسٹ شدہ یونٹس سے الگ رکھا جاتا ہے۔",
+      ],
+      [
+        "پلیٹ لیٹس اور تازہ منجمد پلازما کی تیاری کے لیے کیا وقت مقرر ہے؟",
+        "خون نکالنے کے 8 گھنٹے کے اندر اندر پلازما اور پلیٹ لیٹس کو الگ کرنا لازمی ہے، ورنہ تاخیر کی صورت میں سرور BLOOD_PROCESSING_TIME_EXCEEDED دیتا ہے۔",
+      ],
+      [
+        "خون کے مختلف اجزاء کی میعاد کیسے مقرر ہوتی ہے؟",
+        "ہول بلڈ اور ریڈ سیلز کی میعاد 35 دن، پلیٹ لیٹس کی 5 دن (مسلسل ہلانے کے ساتھ)، اور منجمد پلازما و کرائیو کی 12 ماہ (-25 ڈگری پر) ہوتی ہے۔",
+      ],
+      [
+        "قرنطینہ میں اجزاء کی تلفی کا آڈٹ کیسے ہوتا ہے؟",
+        "قرنطینہ کا کوئی بھی جزو باضابطہ وجہ (ری ایکٹیو ٹیسٹ، بیگ خراب، وقت ختم) کے تحت تلف کیا جاتا ہے؛ دیگر وجہ پر ڈاکٹر کا تفصیلی وضاحتی نوٹ لازمی ہے۔",
+      ],
+      [
+        "جب سروس ریٹائر ہو رہی ہو تو کیا ٹیسٹ اور اجزاء کی تیاری جاری رہ سکتی ہے؟",
+        "جی ہاں، قوانین کے تحت جمع شدہ خون کے ٹیسٹ اور قرنطینہ میں اجزاء کی تیاری ریٹائرنگ موڈ میں بھی مکمل کی جا سکتی ہے۔",
+      ],
+    ],
+  },
   blood_bank: {
     title: "Blood bank management",
     titleUr: "بلڈ بینک اور خون کا انتظام",
