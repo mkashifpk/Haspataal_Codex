@@ -20,6 +20,7 @@ export const phase1Screens = [
 const approvalScreens = ["approval_queue", "charity_approvals"];
 // Coverage grows screen by screen; Phase 1 acceptance remains separate.
 export const deliveredHelpScreens = [
+  "ward_transfer",
   "medication_safety_ward",
   "labour_register",
   "newborn_registration",
@@ -96,6 +97,25 @@ const g = (
 // IDs are also attached to the actual controls. The build rejects missing
 // mappings and empty translations instead of treating a page as coverage.
 export const controlGuides: Record<string, ControlGuide> = {
+"ward_transfer.btn_back": g(["ward_transfer"],["Back button","واپس جائیں بٹن"],["Navigates back to the previous screen or ward view.","پچھلی سکرین یا وارڈ ویو پر واپس جاتا ہے۔"]),
+"ward_transfer.btn_dismiss_realtime": g(["ward_transfer"],["Dismiss realtime alert","ریئل ٹائم الرٹ ہٹائیں"],["Dismisses the real-time event notification banner.","ریئل ٹائم اطلاع کا بینر بند کرتا ہے۔"]),
+"ward_transfer.tab_transfer": g(["ward_transfer"],["Transfer to New Bed tab","نئے بستر پر منتقلی ٹیب"],["Opens the active bed transfer work form and destination bed picker.","مریض کی منتقلی کا فارم اور نئے بستر کا انتخاب دکھاتا ہے۔"]),
+"ward_transfer.tab_history": g(["ward_transfer"],["Transfer History tab","منتقلی کی تاریخ ٹیب"],["Displays the log of all previous bed and ward moves for this admission.","اس داخلے کے دوران کی گئی تمام پچھلی منتقلیوں کا ریکارڈ دکھاتا ہے۔"]),
+"ward_transfer.tab_matrix": g(["ward_transfer"],["Bed Matrix Overview tab","بیڈ میٹرکس جائزہ ٹیب"],["Displays the live hospital-wide bed occupancy matrix across all wards.","ہسپتال کے تمام وارڈز میں بستروں کی موجودہ صورتحال کا میٹرکس دکھاتا ہے۔"]),
+"ward_transfer.btn_refresh_history": g(["ward_transfer"],["Refresh moves history button","منتقلیوں کا ریکارڈ تازہ کریں بٹن"],["Rereads the list of admission transfers from the server.","سرور سے اس داخلے کی تمام منتقلیوں کی تازہ ترین فہرست حاصل کرتا ہے۔"]),
+"ward_transfer.btn_explain_history": g(["ward_transfer"],["Explain Cost Estimate button","لاگت کا تخمینہ سمجھائیں بٹن"],["Navigates to Cost Estimates to document explanation of rate change to family.","فیملی کو ٹیرف تبدیلی کی وضاحت درج کرنے کے لیے لاگت کا تخمینہ سکرین کھولتا ہے۔"]),
+"ward_transfer.search_admission": g(["ward_transfer"],["Inpatient Admission ID input","مریض کا داخلہ نمبر فیلڈ"],["Specifies the admission ID or MRN of the admitted patient to transfer.","منتقلی کے لیے زیر علاج مریض کا داخلہ نمبر یا ایم آر این درج کرتا ہے۔"]),
+"ward_transfer.search_btn": g(["ward_transfer"],["Load Inpatient Chart button","مریض کا چارٹ کھولیں بٹن"],["Fetches patient demographics, current ward, bed, and transfer history.","مریض کی تفصیلات، موجودہ وارڈ، بستر اور منتقلی کی تاریخ حاصل کرتا ہے۔"]),
+"ward_transfer.refresh_matrix": g(["ward_transfer"],["Refresh beds button","بستر ریفریش کریں بٹن"],["Rereads live bed matrix occupancy and available bed states from server.","سرور سے بیڈ میٹرکس اور دستیاب بستروں کی تازہ ترین معلومات حاصل کرتا ہے۔"]),
+"ward_transfer.ward_filter": g(["ward_transfer"],["Filter by Ward select","وارڈ فلٹر سلیکٹ"],["Filters available destination beds by specific hospital ward.","دستیاب بستروں کو مخصوص وارڈ کے لحاظ سے فلٹر کرتا ہے۔"]),
+"ward_transfer.bed_select": g(["ward_transfer"],["Select Destination Bed button","منزل کا بستر منتخب کریں بٹن"],["Selects an available bed on the matrix as the destination bed for transfer.","بیڈ میٹرکس پر موجود دستیاب بستر کو منتقلی کے لیے منتخب کرتا ہے۔"]),
+"ward_transfer.quick_reason": g(["ward_transfer"],["Quick reason preset button","فوری طبی وجہ کا بٹن"],["Pre-fills the transfer reason with standard clinical indication (ICU escalation, step-down, isolation, etc.).","معیاری طبی وجوہات (آئی سی یو وینٹیلیشن، بہتری، آئسولیشن) سے وجہ خودکار طریقے سے درج کرتا ہے۔"]),
+"ward_transfer.reason_input": g(["ward_transfer"],["Clinical reason textarea","منتقلی کی طبی وجہ کا فیلڈ"],["Captures documented medical or administrative reason for the ward move (min 5 chars).","وارڈ کی تبدیلی کی تفصیلی طبی یا انتظامی وجہ درج کرتا ہے (کم از کم 5 حروف)۔"]),
+"ward_transfer.check_wristband": g(["ward_transfer"],["Verify wristband checkbox","رسٹ بینڈ تصدیق کا چیک باکس"],["Confirms patient identity was verified using bedside wristband barcode.","بیڈ سائیڈ پر مریض کے رسٹ بینڈ بارکوڈ سے شناخت کی تصدیق کی توثیق کرتا ہے۔"]),
+"ward_transfer.check_handover": g(["ward_transfer"],["Verify clinical handover checkbox","کلینیکل ہینڈ اوور کا چیک باکس"],["Confirms receiving ward nurse was notified and structured SBAR clinical handover completed.","وصول کرنے والے وارڈ کی نرس کو مطلع کرنے اور ایس بی اے آر ہینڈ اوور کی تکمیل کی توثیق کرتا ہے۔"]),
+"ward_transfer.check_chart": g(["ward_transfer"],["Verify chart transfer checkbox","چارٹ منتقلی کا چیک باکس"],["Confirms physical medical record, MAR chart, and verified medicines accompany patient.","طبعی میڈیکل ریکارڈ، ادویات کا چارٹ اور مریض کی ادویات ہمراہ ہونے کی توثیق کرتا ہے۔"]),
+"ward_transfer.submit_transfer": g(["ward_transfer"],["Confirm Ward Transfer button","وارڈ منتقلی کی تصدیق کا بٹن"],["Submits the transfer request to the server, releasing old bed to cleaning and occupying new bed.","سرور پر منتقلی درج کرتا ہے، پرانے بستر کو صفائی کے لیے بھیجتا ہے اور نیا بستر الاٹ کرتا ہے۔"]),
+"ward_transfer.open_cost_estimates": g(["ward_transfer"],["Open Cost Estimates button","لاگت کا تخمینہ کھولیں بٹن"],["Navigates to Cost Estimates to explain revised daily tariff to family (MSDS PRE 79).","ٹیرف تبدیلی پر فیملی کو نیا تخمینہ لاگت سمجھانے کے لیے متعلقہ اسکرین کھولتا ہے (معیار 79)۔"]),
 "medication_safety_ward.btn_print_high_alert": g(["medication_safety_ward"],["Print High-Alert List PDF button","ہائی الرٹ لسٹ پی ڈی ایف پرنٹ"],["Generates official High-Alert and LASA medication list PDF for nursing station display (MSDS 56 ii).","نرسنگ اسٹیشن پر آویزاں کرنے کے لیے ہائی الرٹ اور ملتی جلتی ادویات کی پی ڈی ایف تیار کرتا ہے (معیار 56 ii)۔"]),
 "medication_safety_ward.btn_download_policy": g(["medication_safety_ward"],["Download Medication Policy PDF button","میڈیکیشن پالیسی پی ڈی ایف بٹن"],["Generates the written hospital medication policy document for clinical staff review.","طبی عملے کے جائزے کے لیے ہسپتال میڈیکیشن پالیسی کی سرکاری دستاویز فراہم کرتا ہے۔"]),
 "medication_safety_ward.btn_refresh": g(["medication_safety_ward"],["Refresh safety board button","سیفٹی بورڈ تازہ کریں بٹن"],["Rereads safety worklist items and high-alert drug formulary from server.","سرور سے حفاظتی امور کی فہرست اور ہائی الرٹ ادویات کا ریکارڈ دوبارہ حاصل کرتا ہے۔"]),

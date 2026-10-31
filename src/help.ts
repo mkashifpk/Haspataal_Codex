@@ -4686,6 +4686,92 @@ consents_doctor: {
       ],
     ],
   },
+  ward_transfer: {
+    title: "Move a patient to another bed or ward",
+    titleUr: "مریض کو دوسرے بستر یا وارڈ میں منتقل کریں",
+    purpose: "Move an inpatient to another bed or ward (to and from the ICU) with the clinical reason under MSDS PRE 79. When tariff changes (rate_changed), inform the family of the new estimate.",
+    purposeUr: "ایم ایس ڈی ایس پی آر ای 79 کے تحت طبی وجہ کی بنا پر مریض کو دوسرے بستر یا وارڈ (بشمول آئی سی یو) منتقل کریں۔ ٹیرف کی تبدیلی پر فیملی کو نیا تخمینہ لاگت فراہم کیا جاتا ہے۔",
+    steps: [
+      "Open Admissions or Inpatient Ward workspace -> Move a patient to another bed or ward.",
+      "Enter the inpatient Admission ID or MRN and click 'Load Inpatient Chart' to confirm current location and billing category.",
+      "Inspect the live Bed Matrix overview to see available, occupied, and cleaning beds across hospital wards.",
+      "Filter available beds by destination ward (e.g. ICU, General Ward, Private, Isolation) and select an Available destination bed.",
+      "Review the daily bed charge comparison; if tariff changes, verify that the ChangeOfWard estimate notification will fire.",
+      "Select a quick clinical reason template or type a factual clinical transfer reason of at least 5 characters.",
+      "Complete the bedside safety checklist: verify wristband barcode, SBAR clinical handover to receiving nurse, and physical chart transfer.",
+      "Click 'Confirm Ward Transfer'; on rate change, click 'Open Cost Estimates' to explain the revised estimate to the family.",
+    ],
+    stepsUr: [
+      "ایڈمیشنز یا وارڈ نرسنگ ورک اسپیس کھولیں -> 'مریض کو دوسرے بستر یا وارڈ میں منتقل کریں' پر جائیں۔",
+      "مریض کا داخلہ نمبر یا ایم آر این درج کریں اور 'مریض کا چارٹ کھولیں' پر کلک کرکے موجودہ وارڈ و بستر کی تصدیق کریں۔",
+      "ہسپتال بھر کے وارڈز میں دستیاب، زیر استعمال اور صفائی والے بستر دیکھنے کے لیے لائیو بیڈ میٹرکس کا جائزہ لیں۔",
+      "وارڈ کے لحاظ سے فلٹر کریں (جیسے آئی سی یو، جنرل وارڈ، پرائیویٹ یا آئسولیشن) اور مطلوبہ دستیاب بستر منتخب کریں۔",
+      "یومیہ بیڈ چارج کا موازنہ چیک کریں؛ اگر ٹیرف تبدیل ہو رہا ہو تو نیا تخمینہ لاگت سمجھانے کے الرٹ کا جائزہ لیں۔",
+      "فوری طبی وجہ کا انتخاب کریں یا منتقلی کی مستند کلینیکل وجہ کم از کم 5 حروف میں درج کریں۔",
+      "بیڈ سائیڈ حفاظتی چیک لسٹ مکمل کریں: رسٹ بینڈ بارکوڈ تصدیق، ایس بی اے آر نرسنگ ہینڈ اوور اور چارٹ منتقلی۔",
+      "'وارڈ منتقلی کی تصدیق کریں' پر کلک کریں؛ ٹیرف کی تبدیلی پر فیملی کو نیا تخمینہ سمجھانے کے لیے لاگت تخمینہ کھولیں۔",
+    ],
+    faq: [
+      [
+        "Who is authorized to transfer an inpatient between beds or wards?",
+        "Under hospital clinical policy and rule d136cb7db9, admissions officers and head nurses holding the 'ipd.admission.transfer' permission are authorized to submit patient transfers. Other clinical staff (ward nurses, doctors, anaesthetists) can view the live bed matrix and transfer history.",
+      ],
+      [
+        "What happens if another terminal reserves the bed while I am preparing the transfer?",
+        "Under rule e867f67863, the server returns 409 BED_NO_LONGER_AVAILABLE. The screen preserves what you typed in the clinical reason field, alerts you that the bed was taken, and prompts you to refresh the bed matrix and pick another available bed.",
+      ],
+      [
+        "Why does the system flag 'Rate Changed' and what action is required?",
+        "Under MSDS PRE 79 and rule dfe411b7e9, when a patient is moved to a ward with a different daily tariff (such as from General Ward to ICU or Private room), rate_changed is set to true. The system emits admission.transferred and alerts financial counseling staff to explain the new Cost Estimate (ChangeOfWard) to the patient's family.",
+      ],
+      [
+        "What state does the patient's previous bed transition to upon transfer?",
+        "When the patient moves to the new bed, the old bed immediately transitions to 'Dirty' or 'Cleaning' state on the bed matrix. It cannot be allocated to another patient until cleaning staff badge at the station or a nurse marks it cleaned.",
+      ],
+      [
+        "Can a patient who is not yet admitted or already discharged be transferred?",
+        "No. The server enforces 409 ADMISSION_STATE_INVALID. Only an inpatient who is actively admitted (status 'Admitted' or 'CodeRedActive') and currently assigned to a hospital bed can be transferred.",
+      ],
+      [
+        "How does the bed matrix update when transfers occur across multiple terminals?",
+        "The screen listens in real time for 'admission.transferred' and 'bed.state_changed' server events. When any bed is reserved, occupied, or transferred anywhere in the hospital, the live bed grid updates immediately without requiring manual browser reload.",
+      ],
+      [
+        "What clinical handover is mandated by Punjab Healthcare Commission standards during ward transfers?",
+        "Under MSDS PRE 79, patient identity must be re-verified at bedside using the wristband barcode, structured clinical SBAR handover must be given to the receiving ward nurse, and all open medication charts (MAR) and personal medicines must accompany the patient.",
+      ],
+    ],
+    faqUr: [
+      [
+        "وارڈز اور بستروں کے درمیان مریض منتقل کرنے کا مجاز کون ہے؟",
+        "ہسپتال کی کلینیکل پالیسی اور قاعدہ d136cb7db9 کے تحت ایڈمیشن افسران اور ہیڈ نرسز جن کے پاس 'ipd.admission.transfer' کی اجازت ہو، منتقلی درج کر سکتے ہیں۔ دیگر طبی عملہ (وارڈ نرسز، ڈاکٹرز) بیڈ میٹرکس اور منتقلی کی تاریخ دیکھ سکتے ہیں۔",
+      ],
+      [
+        "اگر منتقلی کی تیاری کے دوران کوئی اور ٹرمینل وہ بستر محفوظ کر لے تو کیا ہوگا؟",
+        "قاعدہ e867f67863 کے تحت سرور 409 BED_NO_LONGER_AVAILABLE جواب دیتا ہے۔ سکرین آپ کی لکھی ہوئی وجہ کو محفوظ رکھتی ہے، آپ کو مطلع کرتی ہے کہ بستر کسی اور نے لے لیا ہے، اور نیا دستیاب بستر منتخب کرنے کی ہدایت دیتی ہے۔",
+      ],
+      [
+        "سسٹم 'ریٹ تبدیل ہوا' کیوں ظاہر کرتا ہے اور کیا کارروائی ضروری ہے؟",
+        "ایم ایس ڈی ایس پی آر ای 79 اور قاعدہ dfe411b7e9 کے تحت، جب مریض کسی مختلف یومیہ فیس والے وارڈ (جیسے جنرل وارڈ سے آئی سی یو یا پرائیویٹ روم) منتقل ہوتا ہے تو rate_changed نشان زد ہو جاتا ہے۔ سسٹم فنانشل کونسلر کو فیملی کو نیا تخمینہ لاگت سمجھانے کی ہدایت دیتا ہے۔",
+      ],
+      [
+        "منتقلی کے بعد مریض کا پرانا بستر کس حالت میں چلا جاتا ہے؟",
+        "جیسے ہی مریض نئے بستر پر منتقل ہوتا ہے، پرانا بستر بیڈ میٹرکس پر فوری طور پر 'ڈرٹی' (صفائی کا طلبگار) ہو جاتا ہے۔ جب تک صفائی عملہ بیج نہ لگائے یا نرس صفائی کی تصدیق نہ کرے، وہ کسی اور مریض کو نہیں مل سکتا۔",
+      ],
+      [
+        "کیا غیر داخل شدہ یا خارج شدہ مریض کو منتقل کیا جا سکتا ہے؟",
+        "نہیں، سرور 409 ADMISSION_STATE_INVALID کی پابندی لگاتا ہے۔ صرف وہی مریض منتقل ہو سکتا ہے جو باقاعدہ داخل شدہ (ایڈمٹڈ یا کوڈ ریڈ ایکٹیو) ہو اور ہسپتال کے بستر پر موجود ہو۔",
+      ],
+      [
+        "مختلف ٹرمینلز پر منتقلیوں کی صورت میں بیڈ میٹرکس کیسے تازہ ہوتا ہے؟",
+        "سکرین 'admission.transferred' اور 'bed.state_changed' کے ریئل ٹائم ایونٹس سنتی ہے۔ ہسپتال میں کہیں بھی بستر بک، خالی یا تبدیل ہونے پر لائیو بیڈ میٹرکس بغیر پیج ریفریش کیے فوراً اپ ڈیٹ ہو جاتا ہے۔",
+      ],
+      [
+        "پنجاب ہیلتھ کیئر کمیشن کے تحت وارڈ منتقلی کے دوران کن حفاظتی اقدامات کا حکم ہے؟",
+        "معیار PRE 79 کے تحت بیڈ سائیڈ پر رسٹ بینڈ بارکوڈ سے مریض کی شناخت کی تصدیق لازمی ہے، وصول کرنے والی نرس کو ایس بی اے آر کے تحت باضابطہ ہینڈ اوور دیا جائے اور ادویات کا چارٹ اور مریض کی ادویات ہمراہ بھیجی جائیں۔",
+      ],
+    ],
+  },
   medication_safety_ward: {
     title: "Medication safety board",
     titleUr: "وارڈ میڈیکیشن سیفٹی بورڈ",
