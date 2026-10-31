@@ -49,6 +49,7 @@ import { DonorAssessment } from './screens/DonorAssessment';
 import { BloodCollection } from './screens/BloodCollection';
 import { BloodCenterLab } from './screens/BloodCenterLab';
 import { BloodCenterRelease } from './screens/BloodCenterRelease';
+import { TransfusionBedside } from './screens/TransfusionBedside';
 import { Wristbands } from './screens/Wristbands';
 import { OwnMedicinesWard } from './screens/OwnMedicinesWard';
 import { OwnMedicinesPharmacy } from './screens/OwnMedicinesPharmacy';
@@ -1313,6 +1314,7 @@ export function App() {
               {screen === 'blood_collection' && est && <BloodCollection key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} />}
               {screen === 'blood_center_lab' && est && <BloodCenterLab key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} />}
               {screen === 'blood_center_release' && est && <BloodCenterRelease key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} />}
+              {screen === 'transfusion_bedside' && est && <TransfusionBedside key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} />}
               {screen === 'wristbands_admissions' && est && <Wristbands key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone}/>}
               {screen === 'wristbands_ward' && est && <Wristbands screenId="wristbands_ward" key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone}/>}
               {screen === 'own_medicines_ward' && est && <OwnMedicinesWard key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone} initialAdmissionId={wardAdmissionEntry?.userId===user.user_id?wardAdmissionEntry.admissionId:undefined} onBack={id=>{if(navigate('my_beds'))setWardAdmissionEntry({userId:user.user_id,admissionId:id});}}/>}

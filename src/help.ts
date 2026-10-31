@@ -4686,6 +4686,92 @@ consents_doctor: {
       ],
     ],
   },
+  transfusion_bedside: {
+    title: "Transfusion bedside verification and administration",
+    titleUr: "ٹرانسفیوژن بیڈ سائیڈ تصدیق اور منتقلی",
+    purpose: "Bedside 5-point safety verification, dual independent co-signature, vital signs monitoring, late completion tracking, Section 13 adverse reaction incident dispatch, and 30-minute cold-chain return management.",
+    purposeUr: "بیڈ سائیڈ 5 نکاتی حفاظتی تصدیق، آزادانہ دوہرے دستخط، علامات کی نگرانی، تاخیری تکمیل کا اندراج، دفعہ 13 منفی ردعمل حادثات، اور 30 منٹ کولڈ چین واپسی کا انتظام۔",
+    steps: [
+      "Open Inpatient Ward or Emergency → Transfusion bedside to review blood units issued by the blood bank ready for administration.",
+      "Verify the 30-minute start countdown timer; blood transfusion must begin within 30 minutes of blood bank issue to maintain cold chain (rule 8e16f20b4a).",
+      "Click 'Start Transfusion' at the bedside; scan the patient's wristband barcode or record clinical identity verification if unscannable.",
+      "Complete all 5 mandatory bedside safety checkboxes: patient identity concordance, unit number match, expiry date, prescribed product/special requirements, and bag integrity inspection (rule 0a07d57ff8).",
+      "Have a second independent qualified clinician (nurse or doctor) enter their credentials to co-sign the bedside check; current user self-approval is strictly forbidden.",
+      "Click 'Record Vital Signs' to document baseline observations (temperature, pulse, blood pressure, respiratory rate) and log observations at 15 minutes and hourly thereafter.",
+      "If signs of adverse reaction appear, click 'Report Reaction' to document symptoms and immediate actions; Section 13 hospital incident and sentinel event alerts are dispatched automatically (rule a2f80c80d7).",
+      "Click 'End Transfusion' upon finishing or if stopping early; if administration exceeded 4 hours, the record is flagged as ended late (rule efcdf1e299).",
+    ],
+    stepsUr: [
+      "بلڈ بینک سے جاری شدہ خون کے بیگز اور زیرِ عمل ٹرانسفیوژن کا جائزہ لینے کے لیے ان پیشنٹ وارڈ یا ایمرجنسی سے 'ٹرانسفیوژن بیڈ سائیڈ' کھولیں۔",
+      "30 منٹ کے الٹی گنتی ٹائمر پر نظر رکھیں؛ کولڈ چین برقرار رکھنے کے لیے بلڈ بینک سے اخراج کے 30 منٹ کے اندر خون شروع کرنا لازمی ہے (قاعدہ 8e16f20b4a)۔",
+      "بیڈ سائیڈ پر 'ٹرانسفیوژن شروع کریں' پر کلک کریں؛ مریض کی کلائی پٹی کا بارکوڈ اسکین کریں یا اسکین نہ ہونے پر متبادل تصدیق درج کریں۔",
+      "تمام 5 لازمی بیڈ سائیڈ حفاظتی چیک باکسز کی تصدیق کریں: مریض کی شناخت، یونٹ نمبر کا ملاپ، میعاد، تجویز کردہ پروڈکٹ اور بیگ کی درستگی و سالمیت (قاعدہ 0a07d57ff8)۔",
+      "دوسرے آزاد مستند معالج (نرس یا ڈاکٹر) سے اپنے یوزرنیم اور پاس ورڈ کے ذریعے تصدیق کروائیں؛ موجودہ صارف کا خود ہی دستخط کرنا سختی سے منع ہے۔",
+      "شروع سے پہلے بنیادی علامات (درجہ حرارت، نبض، بی پی، سانس) اور 15 منٹ بعد و فی گھنٹہ علامات کے اندراج کے لیے 'علامات درج کریں' پر کلک کریں۔",
+      "اگر منفی ردعمل کی علامات ظاہر ہوں تو فوری 'منفی ردعمل رپورٹ کریں' پر کلک کریں؛ سسٹم دفعہ 13 کے تحت خودکار ہسپتال حادثہ اور سینٹینل الرٹ بناتا ہے (قاعدہ a2f80c80d7)۔",
+      "مکمل ہونے یا درمیان میں روکنے پر 'ٹرانسفیوژن ختم کریں' پر کلک کریں؛ اگر عمل 4 گھنٹے سے زیادہ جاری رہا تو سرور اسے تاخیری اختتام نشان زد کرتا ہے (قاعدہ efcdf1e299)۔",
+    ],
+    faq: [
+      [
+        "Why must blood transfusion start within 30 minutes of issue?",
+        "Under rule 8e16f20b4a and PBTA clinical guidelines, blood packs removed from monitored refrigeration warm up. If administration does not begin within 30 minutes, the server refuses start with BLOOD_UNIT_OUT_TOO_LONG (409) and the unit can only be signed back or discarded.",
+      ],
+      [
+        "What are the 5 mandatory bedside safety checks before transfusion?",
+        "Under rule 0a07d57ff8, clinicians must independently verify: (1) identity concordance across patient notes, wristband, and compatibility label, (2) unit number and blood group matching the crossmatch label, (3) expiry date not exceeded, (4) correct prescribed product and special requirements, and (5) bag integrity without clots, leaks, or discoloration.",
+      ],
+      [
+        "Why can the logged-in clinician not co-sign their own bedside verification?",
+        "Under rule 0a07d57ff8, bedside administration requires two independent qualified healthcare professionals. The server rejects self-approval with DUAL_CONTROL_SAME_PERSON (403) to ensure a true four-eyes safety check.",
+      ],
+      [
+        "What is the 4-hour administration limit for blood transfusion?",
+        "Under rule efcdf1e299 and PBTA transfusion standards, a red cell unit must complete infusion within 4 hours of issue to prevent bacterial proliferation and loss of cellular function. The server marks any transfusion taking longer than 4 hours as ended_late: true.",
+      ],
+      [
+        "What must happen if a patient withdraws consent during transfusion?",
+        "Under rule e1211e09ae and event blood.consent.withdrawn, any running transfusion must be immediately stopped and documented, and unstarted units cannot be administered (BLOOD_CONSENT_REQUIRED).",
+      ],
+      [
+        "How does the system handle acute adverse transfusion reactions?",
+        "Under rule a2f80c80d7, reporting an adverse reaction documents clinical symptoms and immediate treatment, and automatically dispatches a Section 13 hospital incident. If wrong blood was transfused, a TRANSFUSION_WRONG_BLOOD sentinel incident is created.",
+      ],
+      [
+        "Can an unused blood unit be returned to the blood bank?",
+        "Yes, provided it is returned within 30 minutes of issue with cold chain intact and the seal unpunctured (POST /blood/units/{id}/sign-back). After 30 minutes or if compromised, it must be recorded as Not Given with an appropriate discard reason.",
+      ],
+    ],
+    faqUr: [
+      [
+        "بلڈ بینک سے ملنے کے 30 منٹ کے اندر ٹرانسفیوژن شروع کرنا کیوں ضروری ہے؟",
+        "کولڈ چین کے معیار کے مطابق فریج سے نکلنے کے بعد بیگ گرم ہونا شروع ہو جاتا ہے۔ 30 منٹ گزرنے کے بعد سرور BLOOD_UNIT_OUT_TOO_LONG کے تحت عمل شروع کرنے سے روک دیتا ہے اور یونٹ کو صرف واپس یا ضائع کیا جا سکتا ہے۔",
+      ],
+      [
+        "ٹرانسفیوژن شروع کرنے سے پہلے 5 لازمی بیڈ سائیڈ حفاظتی اقدامات کیا ہیں؟",
+        "طبی عملے کو بیڈ سائیڈ پر جانچنا لازمی ہے: (1) کلائی پٹی، فائل اور لیبل پر مریض کی یکساں شناخت، (2) بیگ اور کراس میچ لیبل پر یونٹ نمبر و گروپ کا ملاپ، (3) میعاد کی تاریخ، (4) تجویز کردہ پراڈکٹ اور خصوصی تقاضے، اور (5) بیگ کی سالمیت و رساؤ یا لوتھڑوں کی عدم موجودگی۔",
+      ],
+      [
+        "لاگ ان شدہ معالج خود ہی دوسرے تصدیق کنندہ کے طور پر دستخط کیوں نہیں کر سکتا؟",
+        "قاعدہ 0a07d57ff8 کے تحت غلط خون لگنے کے جان لیوا خطرے سے بچاؤ کے لیے دو الگ مستند افراد کی آزادانہ تصدیق لازمی ہے۔ سرور خود منظوری کو DUAL_CONTROL_SAME_PERSON کے تحت مسترد کرتا ہے۔",
+      ],
+      [
+        "خون کی منتقلی کے لیے 4 گھنٹے کی حد کی کیا اہمیت ہے؟",
+        "کمرے کے درجہ حرارت پر بیکٹیریا کی افزائش روکنے کے لیے ایک یونٹ کا اخراج کے 4 گھنٹے کے اندر اندر مکمل ہونا لازمی ہے۔ 4 گھنٹے سے زائد وقت لینے والی ٹرانسفیوژن کو سرور خود بخود تاخیری اختتام (ended_late) قرار دیتا ہے۔",
+      ],
+      [
+        "اگر مریض دورانِ ٹرانسفیوژن رضامندی واپس لے لے تو کیا کرنا ہوگا؟",
+        "قاعدہ e1211e09ae کے مطابق جاری خون کو فوری طور پر روکنا اور درج کرنا لازمی ہے، اور بقیہ بیگز کو مریض کی نئی رضامندی کے بغیر نہیں لگایا جا سکتا۔",
+      ],
+      [
+        "منفی ردعمل رپورٹ کرنے پر سسٹم کیا کارروائی کرتا ہے؟",
+        "قاعدہ a2f80c80d7 کے تحت منفی ردعمل درج ہونے پر علامات و فوری علاج محفوظ ہوتا ہے اور پنجاب بلڈ ٹرانسفیوژن سیفٹی ایکٹ کی دفعہ 13 کے تحت خودکار ہسپتال حادثاتی رپورٹ بن جاتی ہے، جبکہ غلط خون پر سینٹینل واقعہ درج ہوتا ہے۔",
+      ],
+      [
+        "کیا غیر استعمال شدہ بلڈ یونٹ بلڈ بینک واپس کیا جا سکتا ہے؟",
+        "جی ہاں، بشرطیکہ 30 منٹ کے اندر کولڈ چین برقرار ہو اور سیل نہ کھولی گئی ہو۔ 30 منٹ کے بعد یا حالت خراب ہونے پر اسے واپس نہیں کیا جا سکتا بلکہ تلفی کا سبب لکھ کر Not Given ریکارڈ کیا جاتا ہے۔",
+      ],
+    ],
+  },
   blood_center_release: {
     title: "Blood center release to inventory",
     titleUr: "بلڈ سنٹر انوینٹری ریلیز",
