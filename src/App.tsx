@@ -63,6 +63,7 @@ import { TriageScale } from './screens/TriageScale';
 import { ERBoard } from './screens/ERBoard';
 import { ERVisit } from './screens/ERVisit';
 import { CodeRed } from './screens/CodeRed';
+import { TraumaMerge } from './screens/TraumaMerge';
 import { Wristbands } from './screens/Wristbands';
 import { OwnMedicinesWard } from './screens/OwnMedicinesWard';
 import { OwnMedicinesPharmacy } from './screens/OwnMedicinesPharmacy';
@@ -1341,6 +1342,7 @@ export function App() {
               {screen === 'er_board' && est && <ERBoard key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone} onNavigateScreen={(s) => navigate(s)} />}
               {screen === 'er_visit' && est && <ERVisit key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone} onNavigateScreen={(s) => navigate(s)} onBack={() => navigate('er_board')} />}
               {screen === 'code_red' && est && <CodeRed key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone} onNavigateScreen={(s) => navigate(s)} onBack={() => navigate('er_board')} />}
+              {screen === 'trauma_merge' && est && <TraumaMerge key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone} onNavigateScreen={(s) => navigate(s)} onBack={() => navigate('er_board')} />}
               {screen === 'wristbands_admissions' && est && <Wristbands key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone}/>}
               {screen === 'wristbands_ward' && est && <Wristbands screenId="wristbands_ward" key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone}/>}
               {screen === 'own_medicines_ward' && est && <OwnMedicinesWard key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone} initialAdmissionId={wardAdmissionEntry?.userId===user.user_id?wardAdmissionEntry.admissionId:undefined} onBack={id=>{if(navigate('my_beds'))setWardAdmissionEntry({userId:user.user_id,admissionId:id});}}/>}

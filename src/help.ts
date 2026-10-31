@@ -4772,6 +4772,92 @@ consents_doctor: {
       ],
     ],
   },
+  trauma_merge: {
+    title: "Trauma profile merge: Consolidate temporary into permanent records",
+    titleUr: "ٹراما پروفائل انضمام: عارضی ریکارڈز کو مستقل فائل میں ضم کرنا",
+    purpose: "Consolidate temporary emergency trauma profiles ('Unknown Male 1', 'LabOnly') into a patient's verified permanent master record under MSDS AAC 15-20. Preserves the full indelible audit trail of the trauma registration while unifying all clinical activity, historical admissions, prescriptions, laboratory results, and outstanding accounts receivable under the surviving master file (rules 1734acddbd, ba9b5a51e2, a0a7f261f7, de91bfcdbd). Enforces mandatory side-by-side reconciliation, dual-control supervisor co-signatures when consolidating permanent records, and strict refusal of merges when hard demographic identity conflicts exist.",
+    purposeUr: "ایم ایس ڈی ایس اے اے سی 15-20 کے تحت عارضی ٹراما پروفائلز (جیسے نامعلوم مریض) یا ڈپلیکیٹ فائلوں کو مریض کے مستقل تصدیق شدہ ماسٹر ریکارڈ میں ضم کریں۔ یہ نظام ٹراما ریکارڈ کو قانونی آڈٹ کے لیے مستقل محفوظ رکھتے ہوئے تمام طبی سرگرمیوں، داخلوں، نسخوں اور بلوں کو ماسٹر فائل میں یکجا کرتا ہے۔ یہ طریقہ کار لازمی پہلو بہ پہلو موازنہ، سپروائزر کے دوہرے دستخط اور شناختی تضاد کی صورت میں سخت ممانعت کو یقینی بناتا ہے۔",
+    steps: [
+      "Open Reception / Admissions -> Trauma Profile Merge to access the profile consolidation console.",
+      "Under '1. Source Profile (Absorbed)', enter the temporary trauma MRN, patient name, phone, or label (e.g. 'Unknown Male 1') and click Search.",
+      "Select the source trauma profile from the search results to inspect its current demographic and financial status.",
+      "Under '2. Target Master Profile (Surviving)', search for the patient's verified permanent master record by MRN, CNIC, or verified mobile number.",
+      "Select the destination master record and verify that both patient cards reflect the expected merge direction (use 'Swap Direction' if reversed).",
+      "Examine the Side-by-Side Demographic Verification Table (rule ba9b5a51e2) to ensure names, gender, age, and identity numbers match without contradiction.",
+      "If merging a permanent 'Regular' profile, have a supervisor holding 'patient.merge.approve' enter their co-signer credentials for dual control (rule a0a7f261f7).",
+      "Enter a clear audit justification reason (min 3 chars), check the mandatory irrevocable consolidation acknowledgment, and click 'Confirm & Merge Profiles' (POST /patients/{patient_id}/merge).",
+    ],
+    stepsUr: [
+      "پروفائل یکجا کرنے کے لیے ریسپشن / ایڈمیشنز -> ٹراما پروفائل انضمام اسکرین کھولیں۔",
+      "'1. ماخذ پروفائل' کے تحت عارضی ٹراما ایم آر این، مریض کا نام، فون یا شناختی لیبل درج کریں اور تلاش پر کلک کریں۔",
+      "سرچ نتائج میں سے عارضی ٹراما پروفائل کا انتخاب کریں تاکہ اس کے موجودہ کوائف ظاہر ہو سکیں۔",
+      "'2. ہدف ماسٹر پروفائل' کے تحت مریض کا تصدیق شدہ مستقل ریکارڈ شناختی کارڈ، ایم آر این یا فون سے تلاش کریں۔",
+      "مستقل ماسٹر ریکارڈ کو منتخب کریں اور تصدیق کریں کہ انضمام کی سمت درست ہے (ضرورت پڑنے پر سمت تبدیل کرنے کا بٹن دبائیں)۔",
+      "پہلو بہ پہلو آبادیاتی تصدیقی جدول (قاعدہ ba9b5a51e2) کا بغور جائزہ لیں تاکہ جنس، عمر اور شناختی نمبرز میں کوئی تضاد نہ ہو۔",
+      "اگر مستقل پروفائل ضم کی جا رہی ہو تو سپروائزر سے ان کے کو سائنر یوزر نیم اور پاس ورڈ درج کرائیں (قاعدہ a0a7f261f7)۔",
+      "انضمام کا واضح طبی جواز درج کریں، حتمی تصدیقی چیک باکس پر نشان لگائیں، اور 'پروفائلز ضم کریں' پر کلک کریں۔",
+    ],
+    faq: [
+      [
+        "What happens to the temporary trauma record and its clinical history after a merge?",
+        "Under rule 1734acddbd, the trauma record is permanently preserved for medico-legal and clinical audit trails. It is never deleted. All past and ongoing encounters, visits, admissions, medication administrations, surgical notes, diagnostic imaging, lab results, and financial invoices automatically re-associate and display under the surviving permanent master MRN.",
+      ],
+      [
+        "Why is a side-by-side demographic comparison mandatory before submitting a merge?",
+        "Under rule ba9b5a51e2, merging medical files is permanent and irrevocable. To prevent accidental consolidation of two different human beings, the system mandates a side-by-side reconciliation of Name, Father/Husband, Gender, Age/DOB, CNIC, Mobile, and MRN with explicit affirmative confirmation before dispatch.",
+      ],
+      [
+        "When is supervisor co-signature (dual control) required during a profile merge?",
+        "Under rule a0a7f261f7, when the source profile being merged has registration_type 'Regular' (a permanent record), the backend enforces dual control (MERGE_COSIGNER_REQUIRED). A second authorized staff member holding 'patient.merge.approve' must enter their username and password on screen. Temporary trauma profiles ('TraumaTemp') do not strictly require co-signature.",
+      ],
+      [
+        "What should staff do if the screen flags a 'CRITICAL IDENTITY CONFLICT' (MERGE_IDENTITY_CONFLICT)?",
+        "Under rule de91bfcdbd, if profiles exhibit conflicting CNICs, UPMRNs, biological genders, or dates of birth, the system classifies them as two distinct individuals. Hospital policy and the backend strictly prohibit overrides. If a clerical error occurred on one record, staff must first correct the demographics via PATCH /patients/{patient_id} before attempting merge.",
+      ],
+      [
+        "How are outstanding financial dues or balances handled during a profile merge?",
+        "All outstanding accounts receivable, deposits, and billing liabilities of the source profile are unified into the surviving master account. If either record had an active reception block due to unpaid dues, the consolidated master profile reflects the total combined balance.",
+      ],
+      [
+        "Can a merged profile be searched again by reception staff using its old trauma MRN?",
+        "Yes. When searching by an old trauma slip MRN or temporary label (e.g. 'Unknown Male 1'), the system returns the master surviving record with a clear annotation: 'Found by MRN-..., merged into this record', ensuring past slips remain fully traceable at the counter.",
+      ],
+      [
+        "Can an agent or automated script forge supervisor co-signatures or bypass merge permissions?",
+        "Never. Co-signer passwords are treated as sensitive ephemeral credentials, never stored in state, and verified directly by the server. Staff attempting unauthorized merges without patient.merge receive an immediate 403 Forbidden refusal.",
+      ],
+    ],
+    faqUr: [
+      [
+        "انضمام کے بعد عارضی ٹراما فائل اور اس کے طبی ریکارڈ کا کیا بنتا ہے؟",
+        "قاعدہ 1734acddbd کے تحت ٹراما ریکارڈ کو قانونی اور طبی آڈٹ کے لیے مستقل محفوظ رکھا جاتا ہے۔ تمام سابقہ ملاقاتیں، داخلے، دوائیں، سرجری نوٹس، ٹیسٹ اور بل خودکار طور پر باقی رہنے والے ماسٹر ایم آر این کے ساتھ منسلک ہو جاتے ہیں۔",
+      ],
+      [
+        "انضمام بھیجنے سے پہلے پہلو بہ پہلو موازنہ کیوں لازمی ہے؟",
+        "قاعدہ ba9b5a51e2 کے مطابق فائلوں کا انضمام مستقل اور ناقابل تنسیخ ہوتا ہے۔ دو الگ انسانوں کے ریکارڈز کو غلطی سے جوڑنے سے بچانے کے لیے نام، والد کا نام، جنس، عمر، شناختی کارڈ اور فون کا موازنہ اور حتمی تصدیق لازمی ہے۔",
+      ],
+      [
+        "پروفائل انضمام میں سپروائزر کے تصدیقی دستخط (ڈوئل کنٹرول) کب درکار ہوتے ہیں؟",
+        "قاعدہ a0a7f261f7 کے تحت جب ماخذ پروفائل باقاعدہ مستقل ریکارڈ ہو تو سرور دوہرے کنٹرول کا تقاضا کرتا ہے۔ ایسی صورت میں 'patient.merge.approve' کا اختیار رکھنے والے دوسرے افسر کا یوزر نیم اور پاس ورڈ دینا لازمی ہوتا ہے۔",
+      ],
+      [
+        "اگر اسکرین پر 'شدید شناختی تضاد' کا الرٹ آئے تو عملہ کیا کرے؟",
+        "قاعدہ de91bfcdbd کے مطابق اگر شناختی کارڈ یا جنس میں تضاد ہو تو وہ دو الگ افراد ہیں۔ پالیسی کسی اوور رائیڈ کی اجازت نہیں دیتی۔ اگر غلطی ہوئی ہے تو پہلے ڈیموگرافکس درست کریں پھر انضمام کی کوشش کریں۔",
+      ],
+      [
+        "انضمام کے دوران واجب الادا بلوں اور بیلنس کا کیا بنتا ہے؟",
+        "ماخذ ریکارڈ کے تمام واجب الادا بل، ڈپازٹس اور مالی ذمہ داریاں خودکار طور پر ماسٹر کھاتے میں جمع ہو جاتی ہیں۔ اگر کسی ایک پر بھی بقایا جات کا بلاک تھا تو وہ ماسٹر فائل پر نافذ العمل رہتا ہے۔",
+      ],
+      [
+        "کیا ضم شدہ پروفائل کو اس کے پرانے عارضی نمبر سے دوبارہ تلاش کیا جا سکتا ہے؟",
+        "جی ہاں۔ پرانے عارضی نمبر یا شناختی لیبل سے تلاش کرنے پر سرور اصل ماسٹر فائل ظاہر کرتا ہے اور ساتھ واضح نشاندہی کرتا ہے کہ یہ ریکارڈ پرانے نمبر سے ملا ہے جو اس میں ضم ہو چکا ہے۔",
+      ],
+      [
+        "کیا کوئی ایجنٹ یا اسکرپٹ سپروائزر کے دستخط خود ساختہ بنا سکتا ہے؟",
+        "ہرگز نہیں۔ سپروائزر کا پاس ورڈ ایک حساس اور وقتی تصدیق ہے جسے سرور براہ راست چیک کرتا ہے۔ اجازت نامے کے بغیر کی گئی کوئی بھی کوشش فوری طور پر مسترد کر دی جاتی ہے۔",
+      ],
+    ],
+  },
   code_red: {
     title: "Code Red: Emergency resuscitation admission",
     titleUr: "کوڈ ریڈ: ہنگامی بحالی کا داخلہ",

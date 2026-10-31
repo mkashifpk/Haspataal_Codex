@@ -20,6 +20,7 @@ export const phase1Screens = [
 const approvalScreens = ["approval_queue", "charity_approvals"];
 // Coverage grows screen by screen; Phase 1 acceptance remains separate.
 export const deliveredHelpScreens = [
+  "trauma_merge",
   "code_red",
   "er_visit",
   "er_board",
@@ -104,6 +105,25 @@ const g = (
 // IDs are also attached to the actual controls. The build rejects missing
 // mappings and empty translations instead of treating a page as coverage.
 export const controlGuides: Record<string, ControlGuide> = {
+"trauma_merge.back_button": g(["trauma_merge"], ["Back button", "واپس بٹن"], ["Navigates back to the previous screen or tracking board.", "پچھلی اسکرین یا ٹریکنگ بورڈ پر واپس جاتا ہے۔"]),
+"trauma_merge.cancel_merge": g(["trauma_merge"], ["Cancel merge button", "انضمام منسوخ بٹن"], ["Cancels the pending merge action and resets form state.", "زیر التواء انضمام کے عمل کو منسوخ کرتا ہے اور فارم کو ری سیٹ کرتا ہے۔"]),
+"trauma_merge.change_source": g(["trauma_merge"], ["Change source profile button", "ماخذ پروفائل تبدیل کریں بٹن"], ["Deselects the current source profile to choose a different record.", "موجودہ ماخذ پروفائل کا انتخاب ختم کر کے دوسرے ریکارڈ کو منتخب کرنے کی اجازت دیتا ہے۔"]),
+"trauma_merge.change_target": g(["trauma_merge"], ["Change target profile button", "ماسٹر پروفائل تبدیل کریں بٹن"], ["Deselects the surviving master record to search or select an alternate record.", "مستقل ماسٹر پروفائل کا انتخاب منسوخ کر کے دوسرا ریکارڈ چننے کی اجازت دیتا ہے۔"]),
+"trauma_merge.confirm_checkbox": g(["trauma_merge"], ["Irrevocable merge confirmation checkbox", "ناقابل تنسیخ انضمام تصدیق چیک باکس"], ["Enforces explicit user confirmation of side-by-side verification before dispatch (rule ba9b5a51e2).", "پہلو بہ پہلو موازنے کے بعد حتمی انضمام کی لازمی انسانی تصدیق فراہم کرتا ہے۔"]),
+"trauma_merge.cosigner_password": g(["trauma_merge"], ["Supervisor co-signer password input", "شریک تصدیق کنندہ کا پاس ورڈ فیلڈ"], ["Captures password of second authorizer; sensitive credential never persisted (rule a0a7f261f7).", "دوسرے مجاز افسر کا پاس ورڈ؛ حساس معلومات جو کبھی محفوظ نہیں کی جاتیں۔"]),
+"trauma_merge.cosigner_username": g(["trauma_merge"], ["Supervisor co-signer username input", "شریک تصدیق کنندہ کا یوزر نیم فیلڈ"], ["Captures username of second authorized staff holding patient.merge.approve (rule a0a7f261f7).", "مستقل پروفائل ضم کرنے کے لیے دوسرے مجاز افسر کا یوزر نیم درج کرتا ہے۔"]),
+"trauma_merge.go_to_er_board": g(["trauma_merge"], ["Return to ER tracking board button", "ایمرجنسی بورڈ پر واپس بٹن"], ["Navigates directly to the emergency room tracking board.", "براہ راست ایمرجنسی روم ٹریکنگ بورڈ پر واپس لے جاتا ہے۔"]),
+"trauma_merge.merge_another": g(["trauma_merge"], ["Merge another profile button", "ایک اور پروفائل ضم کریں بٹن"], ["Resets the screen after a successful merge to consolidate another profile.", "کامیاب انضمام کے بعد اسکرین کو ری سیٹ کر کے دوسرے مریض کی فائل کھولنے کی اجازت دیتا ہے۔"]),
+"trauma_merge.reason_input": g(["trauma_merge"], ["Merge justification reason textarea", "انضمام کی طبی وجہ فیلڈ"], ["Captures clinical or administrative rationale for profile unification into the audit trail (rule 1734acddbd).", "پروفائل یکجا کرنے کا طبی یا انتظامی جواز درج کرتا ہے جو مستقل آڈٹ میں محفوظ ہوتا ہے۔"]),
+"trauma_merge.reset_button": g(["trauma_merge"], ["Reset or clear button", "نیا تلاش اور ری سیٹ بٹن"], ["Clears current patient selections, search queries, and form inputs to start a fresh search.", "موجودہ مریض کے انتخاب، تلاش کے سوالات اور فارم ان پٹ کو صاف کر کے نئی تلاش شروع کرتا ہے۔"]),
+"trauma_merge.source_patient_select": g(["trauma_merge"], ["Select source profile button", "ماخذ پروفائل منتخب کریں بٹن"], ["Selects the designated temporary or duplicate patient profile to be absorbed.", "منسلک کیے جانے والے عارضی یا ڈپلیکیٹ مریض کے پروفائل کا انتخاب کرتا ہے۔"]),
+"trauma_merge.source_search_button": g(["trauma_merge"], ["Source search button", "ماخذ تلاش بٹن"], ["Dispatches patient search lookup to locate source profiles.", "ماخذ مریض کو تلاش کرنے کے لیے تلاش کا عمل شروع کرتا ہے۔"]),
+"trauma_merge.source_search_query": g(["trauma_merge"], ["Source patient search input", "ماخذ مریض تلاش فیلڈ"], ["Captures MRN, name, phone, or temporary trauma identifier (e.g. Unknown Male 1) to locate the profile to be absorbed.", "ضم ہونے والے عارضی پروفائل کو تلاش کرنے کے لیے ایم آر این، نام، فون یا شناختی لیبل درج کرتا ہے۔"]),
+"trauma_merge.submit_merge": g(["trauma_merge"], ["Confirm and merge profiles button", "پروفائلز ضم کریں بٹن"], ["Executes permanent profile merge under state-guard protection (POST /patients/{patient_id}/merge).", "عارضی پروفائل کو مستقل ماسٹر ریکارڈ میں مستقل طور پر ضم کرنے کی درخواست بھیجتا ہے۔"]),
+"trauma_merge.swap_profiles": g(["trauma_merge"], ["Swap merge direction button", "انضمام کی سمت تبدیل کریں بٹن"], ["Swaps the roles of source and target profiles if entered in reverse order.", "اگر ریکارڈز الٹ منتخب ہو گئے ہوں تو ماخذ اور ماسٹر کی سمت کو تبدیل کرتا ہے۔"]),
+"trauma_merge.target_patient_select": g(["trauma_merge"], ["Select target profile button", "ماسٹر پروفائل منتخب کریں بٹن"], ["Selects the permanent master record that will survive and retain all unified clinical data.", "اس مستقل ماسٹر ریکارڈ کا انتخاب کرتا ہے جس میں تمام طبی ڈیٹا یکجا رکھا جائے گا۔"]),
+"trauma_merge.target_search_button": g(["trauma_merge"], ["Target search button", "ماسٹر تلاش بٹن"], ["Dispatches patient search query to locate master profile candidates.", "مستقل ماسٹر پروفائل تلاش کرنے کے لیے تلاش کا عمل چلاتا ہے۔"]),
+"trauma_merge.target_search_query": g(["trauma_merge"], ["Target master search input", "ماسٹر ریکارڈ تلاش فیلڈ"], ["Captures MRN, CNIC, phone, or full name to find the surviving permanent master profile.", "باقی رہنے والے مستقل ماسٹر ریکارڈ کو تلاش کرنے کے لیے شناختی کارڈ، ایم آر این یا نام درج کرتا ہے۔"]),
 "code_red.back": g(["code_red"], ["Back to tracking board button", "ایمرجنسی بورڈ پر واپس بٹن"], ["Navigates back to the emergency room tracking board.", "ایمرجنسی روم ٹریکنگ بورڈ پر واپس جاتا ہے۔"]),
 "code_red.btn_acknowledge_alert": g(["code_red"], ["Acknowledge alert button", "الرٹ وصول کیا بٹن"], ["Acknowledges and dismisses the full-screen Code Red broadcast alert (rule 77b021933d).", "کوڈ ریڈ ہنگامی الرٹ نوٹیفکیشن کو وصول کر کے ہٹاتا ہے۔"]),
 "code_red.btn_confirm_arrived": g(["code_red"], ["Confirm patient arrived button", "مریض کی آمد تصدیق بٹن"], ["Confirms resuscitation patient reached the bay, advancing status to Admitted (POST /admissions/{admission_id}/arrived).", "مریض کی بیڈ یا وارڈ میں آمد کی تصدیق کرتا ہے اور اسٹیٹس Admitted کرتا ہے۔"]),
