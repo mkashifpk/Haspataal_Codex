@@ -4686,6 +4686,92 @@ consents_doctor: {
       ],
     ],
   },
+  labour_register: {
+    title: "Labour register: record a delivery",
+    titleUr: "لیبر رجسٹر: زچگی کا اندراج",
+    purpose: "Record each delivery into the hospital's Punjab HMIS labour register: mother's admission, attending staff, dynamic clinical columns, alive/stillborn babies with bedside newborn linkage, draft autosaving, signing and freezing with author stamp, and Union Council birth notification.",
+    purposeUr: "ہسپتال کے پنجاب ایچ ایم آئی ایس لیبر رجسٹر میں ہر زچگی کا اندراج: والدہ کا داخلہ، نگران عملہ، متحرک کالمز، زندہ و مردہ نوزائیدہ کا تعلق، ڈرافٹ محفوظ کرنا، مہر کے ساتھ حتمی دستخط، اور یونین کونسل کے لیے سرکاری پیدائش کی اطلاعی رپورٹ۔",
+    steps: [
+      "Open Inpatient Ward or Maternity workspace → Labour Register to view deliveries and record births.",
+      "Click '+ Record New Delivery' to create a new delivery entry in the labour register.",
+      "Search for the admitted mother by MRN or patient name, or enter her active inpatient admission ID.",
+      "Confirm the delivery date and time (not in the future) and select the attending healthcare staff member.",
+      "Complete the dynamic register columns across Admission, Delivery (Partograph), Mother, and Discharge sections.",
+      "Under Babies, link each liveborn baby to their registered newborn patient record; leave unlinked for stillbirths (rule 632b575029).",
+      "Click 'Save Draft' (PATCH with expected_version) as labour progresses; click 'Sign & Freeze Entry' once delivery is fully documented (rule fe685a82bd).",
+      "Print the official Union Council birth notification for each baby born alive and hand it to the family for birth registration (rule b4fd64b49f).",
+    ],
+    stepsUr: [
+      "وارڈ نرس یا زچگی ورک اسپیس سے زچگی کا اندراج اور جائزہ لینے کے لیے 'لیبر رجسٹر' کھولیں۔",
+      "لیبر رجسٹر میں نیا کیس شروع کرنے کے لیے '+ نئی زچگی درج کریں' بٹن پر کلک کریں۔",
+      "داخل شدہ والدہ کو ایم آر این یا نام سے تلاش کریں یا براہ راست ان کا داخلہ نمبر درج کریں۔",
+      "پیدائش کا درست وقت منتخب کریں اور زچگی کی نگرانی کرنے والے عملے (ڈاکٹر/نرس/مڈوائف) کا انتخاب کریں۔",
+      "پنجاب ایچ ایم آئی ایس کے کالمز کو داخلہ، ڈلیوری (پارٹوگراف)، والدہ، اور ڈسچارج کے حصوں میں پر کریں۔",
+      "بچوں کے سیکشن میں ہر زندہ پیدا ہونے والے بچے کو اس کے رجسٹرڈ نوزائیدہ ریکارڈ سے جوڑیں؛ مردہ پیدائش کو بغیر آئی ڈی رکھیں۔",
+      "ڈلیوری کے دوران 'ڈرافٹ محفوظ کریں' پر کلک کرتے رہیں؛ مکمل ہونے پر 'دستخط و حتمی اندراج' پر کلک کریں (قاعدہ fe685a82bd)۔",
+      "زندہ پیدا ہونے والے بچے کے لیے یونین کونسل کی سرکاری پیدائش کی اطلاعی رپورٹ پرنٹ کر کے والدین کے حوالے کریں (قاعدہ b4fd64b49f)۔",
+    ],
+    faq: [
+      [
+        "Why is the labour register form dynamic rather than a fixed static form?",
+        "Under rule 1146a499b0, the hospital configures its own clinical register columns via GET /maternity/labour-register/columns according to Punjab HMIS/HISDU guidelines. The UI dynamically builds fields by kind (Number, YesNo, Choice, MultiChoice, Date, Text) and evaluates conditional requirements (when_code matches when_value).",
+      ],
+      [
+        "How should stillbirths and babies born alive be documented in the babies section?",
+        "Under rule 632b575029, each baby born alive must first be registered via Newborn Registration (POST /maternity/newborns) and named in the babies array. A stillbirth has no separate patient record of its own and is recorded with newborn_patient_id null.",
+      ],
+      [
+        "What happens when I click 'Save Draft' versus 'Sign & Freeze Entry'?",
+        "Under rule fe685a82bd, 'Save Draft' issues a PATCH request with expected_version, allowing nurses to document labour progress in real time. 'Sign' permanently freezes the entry with the clinician's author stamp (MSDS IMS 147); once signed, the entry is read-only and cannot be altered.",
+      ],
+      [
+        "What does the error LABOUR_ENTRY_INCOMPLETE mean when attempting to sign?",
+        "Under rule fe685a82bd, the server checks that all mandatory columns are filled before allowing an entry to be signed. If any are missing, the server returns 422 LABOUR_ENTRY_INCOMPLETE with details.missing listing the missing column codes, which are highlighted on screen.",
+      ],
+      [
+        "Why is the printed document called a 'Birth Notification' and not a 'Birth Certificate'?",
+        "Under rule b4fd64b49f and the Punjab Local Government Act, the hospital generates a clinical Birth Notification certifying that a live birth occurred in the facility. Only the Union Council or municipal authority has the legal mandate to issue an official Birth Certificate.",
+      ],
+      [
+        "How are multiple births such as twins or triplets recorded in the labour register?",
+        "Under rule 1146a499b0, Admission, Delivery, Mother, and Discharge sections are completed once per delivery, while the Baby columns are duplicated per baby. Staff click '+ Add Twin / Triplet Baby' to record individual baby numbers, birth weights, conditions, and separate newborn links.",
+      ],
+      [
+        "What happens to the labour register when the maternity service enters 'open_work' retiring mode?",
+        "Under rule 119a276f5a and rule e108ec7978, when maternity is Retiring, a banner states 'No new delivery registrations from now on'. Staff cannot create new delivery entries, but can continue editing, signing, and printing existing open delivery records.",
+      ],
+    ],
+    faqUr: [
+      [
+        "لیبر رجسٹر کا فارم جامد ہونے کے بجائے متحرک کیوں ہے؟",
+        "قاعدہ 1146a499b0 کے تحت ہسپتال پنجاب ایچ ایم آئی ایس کے رہنما اصولوں کے مطابق کالمز سرور سے خودکار حاصل کرتا ہے۔ سکرین ان کالمز کو ان کی نوعیت (نمبر، ہاں/نہیں، انتخاب، تاریخ) اور شرائط کے مطابق بناتی ہے۔",
+      ],
+      [
+        "زندہ پیدا ہونے والے اور مردہ پیدا ہونے والے بچوں کا اندراج کیسے ہوتا ہے؟",
+        "قاعدہ 632b575029 کے تحت زندہ پیدا ہونے والے بچے کا پہلے نوزائیدہ رجسٹریشن میں اندراج ضروری ہے اور اس کا شناختی نمبر درج کیا جاتا ہے۔ مردہ بچے کا کوئی الگ مریض ریکارڈ نہیں بنتا اور اسے خالی چھوڑا جاتا ہے۔",
+      ],
+      [
+        "ڈرافٹ محفوظ کرنے اور دستخط کر کے حتمی بنانے میں کیا فرق ہے؟",
+        "قاعدہ fe685a82bd کے تحت ڈرافٹ محفوظ کرنے سے درد زہ کی پیشرفت ساتھ ساتھ محفوظ ہوتی رہتی ہے۔ دستخط کرنے کے بعد ریکارڈ ہمیشہ کے لیے محفوظ اور ناقابل ترمیم ہو جاتا ہے اور اس پر ڈاکٹر کی مہر لگ جاتی ہے۔",
+      ],
+      [
+        "دستخط کرتے وقت LABOUR_ENTRY_INCOMPLETE کا کیا مطلب ہوتا ہے؟",
+        "قاعدہ fe685a82bd کے تحت اگر کوئی لازمی کالم خالی رہ جائے تو سرور 422 غلطی واپس کرتا ہے اور نامکمل کالمز کی فہرست بتاتا ہے، جس پر سکرین ان کالمز کو سرخ رنگ میں نمایاں کر دیتی ہے۔",
+      ],
+      [
+        "پرنٹ شدہ دستاویز کو برتھ سرٹیفکیٹ کے بجائے 'پیدائش کی اطلاعی رپورٹ' کیوں کہا جاتا ہے؟",
+        "قاعدہ b4fd64b49f کے مطابق ہسپتال صرف پیدائش کی تصدیقی اطلاعی رپورٹ جاری کرتا ہے۔ برتھ سرٹیفکیٹ جاری کرنے کا قانونی اختیار صرف یونین کونسل اور نادرا کے پاس ہے۔",
+      ],
+      [
+        "جڑواں یا زائد بچوں کی پیدائش کا اندراج کیسے کیا جاتا ہے؟",
+        "قاعدہ 1146a499b0 کے تحت داخلہ اور زچگی کے کالم ایک ہی بار بھرے جاتے ہیں جبکہ بچوں کے کالم ہر بچے کے لیے الگ بھرے جاتے ہیں۔ عملہ 'جڑواں بچہ شامل کریں' پر کلک کر کے ہر بچے کا الگ ریکارڈ درج کرتا ہے۔",
+      ],
+      [
+        "جب زچگی سروس ختم کی جا رہی ہو تو لیبر رجسٹر پر کیا اثر پڑتا ہے؟",
+        "قاعدہ 119a276f5a کے تحت ریٹائرنگ موڈ میں سکرین پر بینر آتا ہے کہ نئی زچگی درج نہیں ہوگی، لیکن پہلے سے کھلے ہوئے کیسز کو مکمل، دستخط اور پرنٹ کیا جا سکتا ہے۔",
+      ],
+    ],
+  },
   newborn_registration: {
     title: "Newborn registration and identification",
     titleUr: "نوزائیدہ کا اندراج اور شناختی کلائی بینڈ",

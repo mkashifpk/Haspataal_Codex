@@ -242,6 +242,7 @@ export function checkHelp({
       "MaternityPolicy",
       "ObstetricAssessment",
       "NewbornRegistration",
+      "LabourRegister",
     ].map((n) => `src/screens/${n}.tsx`),
   ];
   const used = new Set(),

@@ -53,6 +53,7 @@ import { TransfusionBedside } from './screens/TransfusionBedside';
 import { MaternityPolicy } from './screens/MaternityPolicy';
 import { ObstetricAssessment } from './screens/ObstetricAssessment';
 import { NewbornRegistration } from './screens/NewbornRegistration';
+import { LabourRegister } from './screens/LabourRegister';
 import { Wristbands } from './screens/Wristbands';
 import { OwnMedicinesWard } from './screens/OwnMedicinesWard';
 import { OwnMedicinesPharmacy } from './screens/OwnMedicinesPharmacy';
@@ -1321,6 +1322,7 @@ export function App() {
               {screen === 'maternity_policy' && est && <MaternityPolicy key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} />}
               {screen === 'obstetric_assessment' && est && <ObstetricAssessment key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} />}
               {screen === 'newborn_registration' && est && <NewbornRegistration key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} onNavigateScreen={navigate} />}
+              {screen === 'labour_register' && est && <LabourRegister key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} onNavigateScreen={navigate} />}
               {screen === 'wristbands_admissions' && est && <Wristbands key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone}/>}
               {screen === 'wristbands_ward' && est && <Wristbands screenId="wristbands_ward" key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone}/>}
               {screen === 'own_medicines_ward' && est && <OwnMedicinesWard key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone} initialAdmissionId={wardAdmissionEntry?.userId===user.user_id?wardAdmissionEntry.admissionId:undefined} onBack={id=>{if(navigate('my_beds'))setWardAdmissionEntry({userId:user.user_id,admissionId:id});}}/>}

@@ -1,0 +1,4759 @@
+{
+  "screen_id": "labour_register",
+  "contract_fingerprint": "f253171154eef6044fa2",
+  "knowledge_revision": "bbf3ad4e2e48dc00",
+  "delivery_gate": {
+    "required": true,
+    "status": "required",
+    "progress_reporting": {
+      "required": true,
+      "submit": "propose_progress",
+      "verify": "progress_proposals",
+      "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+    },
+    "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+    "compulsory": [
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+        "points": 2
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+        "points": 3
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+        "points": 2
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+        "points": 4
+      }
+    ],
+    "zoom": {
+      "min_pct": 100.0,
+      "max_pct": 250.0,
+      "reset_pct": 100,
+      "keys": [
+        "Ctrl + or Ctrl = (zoom in)",
+        "Ctrl - (zoom out)",
+        "Ctrl 0 (reset to 100 %)",
+        "Command on macOS"
+      ],
+      "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+    },
+    "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+    "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+  },
+  "ui_quality": {
+    "source": "frontend-docs/guides/16-ui-quality.md",
+    "standard_revision": "7795bdfe5246755d",
+    "context": {
+      "workspace": "ward_nurse",
+      "purpose": "Each delivery into the hospital's own labour register: the mother's admission, when, who attended, the register's columns and each baby; signed, then frozen; the birth notification of a baby born alive.",
+      "roles": [
+        "ward_nurse"
+      ],
+      "screens": [
+        {
+          "id": "labour_register",
+          "title": "Labour register: record a delivery"
+        }
+      ],
+      "also_uses": [],
+      "handbook": "get_handbook_outline('ward_nurse')",
+      "screen_id": "labour_register",
+      "workflow": "Owner decision M1 (decisions 47); Punjab HMIS delivery and newborn forms",
+      "contract": "get_screen_bundle('labour_register')",
+      "service": {
+        "services": [
+          "maternity"
+        ],
+        "role": "work"
+      }
+    },
+    "requirements": [
+      {
+        "id": "Q1",
+        "title": "Establish the purpose and staff context",
+        "instruction": "Before choosing a layout, state who is doing what, what starts the task, what success looks like and what could\nconfuse them. Use the screen's purpose, workspace, playbook and demo role. Distinguish a busy reception counter,\nbedside nursing, a laboratory scanner and an office review. Record the relevant input devices, interruptions,\nlanguage and display conditions. Keep the patient, visit, money or stock context clear throughout the task.\n\nWrite down why the proposed interaction fits this work. Use actual staff-task evidence and references approved by\nthe frontend lead; do not substitute an attractive generic dashboard for the job. Do not invent software screens\nfor staff whose specified interaction is a physical badge tap."
+      },
+      {
+        "id": "Q2",
+        "title": "Reuse intent through complete patterns",
+        "instruction": "Use the frontend team's approved design system and record its version and owner. Where no shared system has been\napproved, use the team's established components within the backend constraints and record the outstanding decision.\nReuse complete patterns: patient selection and identity, search and selection, a validated write and its result,\npending approval and handover, printing and recovery, corrections to finalized records. Follow the relevant\nplaybook; a template must preserve the permissions and transitions of this particular task.\n\nDocument the reason for a variation. Explore alternatives where they make a task clearer or reduce effort, then\nreview them in the whole journey. Do not introduce arbitrary colours, motion, alerts or different meanings for the\nsame control. Read the relevant standards when building or reviewing the flow; do not rely on an old chat summary."
+      },
+      {
+        "id": "Q3",
+        "title": "Complete the interaction and its recovery",
+        "instruction": "For every task show prerequisites, editable and read-only information, validation, the pending state, the confirmed\nresult and the next step. Distinguish loading, empty, unavailable, denied, stale and failed states. Explain disabled\nactions when the user needs to know how to proceed. Include keyboard and scanner interactions, focus after actions,\nconfirmation, cancellation and navigation with unsaved work.\n\nUse each endpoint's repeat rules, version checks and reconciliation instructions after an uncertain result. Never\nshow success merely because a button was pressed, queue clinical or money writes offline, or offer an unsupported\nundo. Follow the existing guides for printing, reconnects, sessions, realtime refreshes and in-memory form recovery.\nNever persist a co-signer's credentials. Distinguish server-owned rules from frontend presentation choices."
+      },
+      {
+        "id": "Q4",
+        "title": "Make the details work in the actual environment",
+        "instruction": "Review both Light and DarkHighContrast, 100-250 percent zoom, English and Urdu, right-to-left layout, mixed-direction\nidentifiers, long names and dense tables. Bundle the required Urdu font. Keep meaning available through text and\nicons, not colour alone. Verify labels, focus order, keyboard operation and readable status messages using the\nfrontend's accessibility tests and a person using the app.\n\nKeyboard zoom shortcuts are compulsory: Ctrl++ (including Ctrl+=) increases, Ctrl+- decreases, and Ctrl+0 resets\nto 100%; use Command on macOS. Clamp the application's zoom to **100% through 250%, inclusive**. Settings, keyboard,\nmenu and any enabled wheel/pinch zoom must share that bound and one zoom state. Persist `ui_scale_pct` through\n`PUT /settings/me` and restore it on login; do not layer CSS scaling over an independent browser zoom. Touch clients\nmust expose equivalent visible controls and handle shortcuts when a hardware keyboard is attached. Test both bounds,\nreset, intermediate values, reopened windows and dense forms/tables without clipped controls or lost data.\n\nUse the actual terminal workflow and supported devices: a scanner must not type into the wrong field, a printer\nproblem must leave the task understandable, and a realtime update must not silently change the selected patient.\nReview consistency across screens and helpful details such as an explicit selected date, shift or patient. Give\nthe product character through clarity, wording and care for staff, within the approved visual system. Any new\nperformance target or clinical presentation rule needs its designated owner's decision."
+      },
+      {
+        "id": "Q5",
+        "title": "Teach the delivered UI as part of building it",
+        "instruction": "Create or revise the screen handbook and the workspace guide with its role-specific FAQ in the same change as\nthe UI. Follow `get_end_user_handbook_brief` and `get_handbook_outline(workspace)` and the\n[end-user handbook contract](12-end-user-handbook.md). Explain every user-facing control and meaningful outcome,\nincluding frontend-only filters, navigation and dialogs that have no API call. Use actual labels and demo-data\nscreenshots in English and Urdu; flag translations awaiting human review.\n\nCover every supported job task in the role's workspace FAQ, including shared screens and handovers. A help page's\nexistence does not establish completeness. Kiosks also need an operator job aid available through the authorized\nstaff help or training material; do not add a login to the kiosk to deliver it."
+      },
+      {
+        "id": "Q6",
+        "title": "Require evidence before reporting completion",
+        "instruction": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.\n\nThe frontend repository must make these checks part of its build or CI:\n\n- Maintain an inventory of implemented screens, workspaces, supported role tasks and interactive controls. Map each\n  to handbook pages and sections in both languages. Include frontend-only behaviour; catalogue tasks are a minimum.\n- Fail on missing or empty pages/sections, uncovered tasks or controls, broken help links or missing referenced\n  screenshots. Test F1, screen Help, workspace Help, offline help, deep links, search and permission filtering; changing\n  user or roles must not retain another user's navigation or search results.\n- Run the relevant API scenario and frontend interaction tests, including repeat submissions, concurrent edits,\n  uncertain outcomes and hardware failures. A non-applicable case needs a reason, not a silent omission.\n- Apply every section of the [human workspace acceptance checklist](17-workspace-review-checklist.md) to each role\n  and supported task. Create fresh synthetic records through the UI, then read, update and cancel/deactivate/delete\n  only as the API permits. Test refusal where deletion or editing is forbidden. Read-only roles inspect new records\n  created by an authorized upstream role. Record the actual new IDs and outcomes; never treat seeded records alone\n  or an agent's API calls as a human journey pass.\n- Record the standards revision, implemented scope, test results, guide paths, demo screenshots and outstanding\n  decisions in the change's review evidence. A named human reviewer must walk through a complete role journey using\n  only the handbook, check that it matches the UI and review translations. Revise misleading or incomplete details.\n\nThe frontend lead owns the component and flow patterns, the delivery checks and their maintenance. The designated\nclinical/language owners approve their wording and decisions. The backend supplies the contract and examples.\nMCP supplies requirements, not proof that a frontend file exists, that a build passed or that staff can use it.\nAn agent may critique the work and collect evidence; it cannot approve its own human review or award progress."
+      }
+    ],
+    "human_review": {
+      "source": "frontend-docs/guides/17-workspace-review-checklist.md",
+      "required": true,
+      "checklist": [
+        {
+          "id": "R1",
+          "title": "Identify the implementation and complete scope",
+          "instruction": "- [ ] Record implementation ID/name, repository, commit/build, backend/standards revision, workspace, roles,\n  reviewer, date, device/OS, languages and peripherals tested (the review's *Start* step: the portal fills in what it\n  knows).\n- [ ] Inventory each role's screens, tasks, controls, permissions and required handovers. Every task needs a test\n  result and matching FAQ answer. A read-only role or non-applicable operation needs a specific contract-based reason."
+        },
+        {
+          "id": "R2",
+          "title": "Create fresh data through the frontend",
+          "instruction": "- [ ] With the review code in your app's DEV settings, create new records through each applicable create form:\n  patient/visit, request/order, master record, transaction or register entry. The review lists them with their IDs as\n  the server sees them; where a free-text field permits it, you may type the code there too, to find them again.\n- [ ] Try required fields missing, invalid values, duplicate identifiers and cancellation before saving. Verify\n  the visible validation, server refusal and that no partial or duplicate business record is reported as saved.\n- [ ] Complete the valid path and check the generated number, defaults, ownership, patient/visit context and next step.\n  A seeded master may be a prerequisite; the transaction being accepted must be new. Do not create destructive test\n  masters on a shared server without coordinating with its backend team."
+        },
+        {
+          "id": "R3",
+          "title": "Read and retrieve those new records",
+          "instruction": "- [ ] Find each new record by its actual ID/number and relevant search/filter/sort controls. Open list and detail\n  views, refresh, navigate away/back and sign in again. Confirm persistence and exact values, units, dates and status.\n- [ ] Check empty/no-match results and pagination where applicable. A read-only role must read a fresh record created\n  by an authorized upstream role and demonstrate that write actions are unavailable/refused."
+        },
+        {
+          "id": "R4",
+          "title": "Update, correct and exercise permitted deletion",
+          "instruction": "- [ ] Edit each supported field on the new record, save and re-read it. Check cancellation, unsaved-work navigation,\n  stale versions and simultaneous edits from a second session; one user's changes must not silently replace another's.\n- [ ] Test the actual permitted lifecycle: delete a draft where supported, or cancel, deactivate, stop, reverse or\n  append a correction with the required reason/approval. Verify list/detail/history and downstream effects afterwards.\n- [ ] Where deletion or editing is forbidden (for example finalized clinical or financial records), verify the\n  frontend offers the permitted correction and the server refuses the forbidden action. Never invent hard deletion\n  to tick a CRUD box. Record an explicit not-applicable/refused result with the supporting contract."
+        },
+        {
+          "id": "R5",
+          "title": "Permissions, handovers and end-to-end outcomes",
+          "instruction": "- [ ] Test allowed and denied actions with the appropriate accounts, including separation of requester/approver,\n  sign-off, counter-signature and multi-role switching. Check patient and workspace context after every switch.\n- [ ] Follow the new record into the next role's queue and complete the supported journey. Verify live refresh,\n  balances/stock/bed state where relevant, notifications and printable output against the new record's values.\n- [ ] Shared task coverage belongs to every role that uses it; do not mark a workspace done with an unfinished handover."
+        },
+        {
+          "id": "R6",
+          "title": "F1 help and detailed role FAQs",
+          "instruction": "- [ ] Press **F1** on each screen and with a field/dialog focused. Correct contextual help must open without losing\n  input; closing it restores focus. Test visible Help, workspace help, offline reading, search and deep links.\n- [ ] Follow each role task's FAQ using only its instructions. Check prerequisites, actual labels, steps, outcomes,\n  errors, recovery and handovers in English and Urdu. Missing/generic answers fail acceptance.\n- [ ] Change user/permissions and verify restricted pages/search results disappear. Login/locked/kiosk help must\n  reveal only permitted public/operator guidance. Hardware keyboard shortcuts and touch Help must both work where supported."
+        },
+        {
+          "id": "R7",
+          "title": "Zoom, language and usable layouts",
+          "instruction": "- [ ] Test Ctrl++/Ctrl+=, Ctrl+-, Ctrl+0 (Command equivalents on macOS), Settings and any enabled wheel/pinch/menu\n  routes. Verify **100% minimum, 250% maximum**, reset to 100%, persistence and a single shared application zoom state.\n- [ ] Repeatedly try beyond both bounds. Test at 100%, 150%, 200% and 250%, in both themes and languages, including\n  Urdu reading direction, long labels, tables, dialogs, validation messages and Help. All actions remain reachable.\n- [ ] Check tab order, focus, scanner input and visible controls on touch clients. Do not confuse OS magnification\n  with the application's saved zoom preference."
+        },
+        {
+          "id": "R8",
+          "title": "Failures, retries and devices",
+          "instruction": "- [ ] Test double submit, lost reply, disconnect/reconnect, session expiry, stale data and refused operations on\n  the new records. Confirm honest pending/error messages, correct reconciliation and no duplicate writes.\n- [ ] Test required printers/scanners/cameras, denied device permission and unavailable hardware. Verify recovery\n  preserves appropriate form context and does not display success before the server confirms it.\n- [ ] Patient workflows: register and admit a new patient **without** a photo (the form must let you skip it with no\n  reason), then take one and see it on the patient and the admission; a PDF as the photo must be refused. Upload a\n  synthetic outside report with its facility and date, re-open it under the correct patient and check it is labelled\n  as an outside report, never shown as this hospital's result."
+        },
+        {
+          "id": "R9",
+          "title": "Keep reproducible evidence",
+          "instruction": "- [ ] The review on the portal is the evidence, kept on the DEV server: what the server saw your app do (records new\n  and existing, refusals, each operation by lifecycle step and screen), your answers and a note for every Fail and N/A\n  (what failed and how to reproduce it, or why it does not apply). Keep screenshots and longer test output with your\n  app; mention where in the note.\n- [ ] *Test in the app* is a to-do list that ticks itself: an operation turns **Done on a new record** when the server\n  sees your app do it with the code, **Done on existing records only** when it changed demo data alone (the inspectors\n  see that), **Refused** when you tested a refusal. Mark only what is not seen: *Not applicable* or *Fail*, with the note.\n- [ ] *Screens*: for each screen, F1 help, the role FAQs and zoom (one click passes a whole column; then mark the\n  exceptions). The **fresh-data** column is the server's: it passes where your app made new records with that screen's\n  own write operations (any new record, for a screen that only reads); you can only reject it.\n- [ ] *Export* gives the review as one Markdown file for your repository or review system, whenever you want it.\n- [ ] Accepting or reporting **F1 help, the role FAQs, zoom or the fresh-data review** (on a proposal, on *Save this\n  screen* or in the transfer of legacy work) needs **your signed review** of that screen's workspace. The portal\n  preselects the review that passes them and refuses, saying why (`details.field` = `review_id`), an item without a\n  signed review, on a review that does not cover the screen or one that does not pass it there. The backend team's\n  inspectors see the review beside your agent's proposals.\n- [ ] **Approve all reported progress** is one human declaration for the displayed selection; untick any untested items\n  first. Each proposal retains its build, the review it was accepted with and your decision."
+        },
+        {
+          "id": "R10",
+          "title": "Decide and report honestly",
+          "instruction": "- [ ] Every applicable task and mandatory quality check must pass. A blocker, missing FAQ, broken F1, out-of-bounds\n  zoom or untested fresh-data lifecycle keeps the screen/workspace pending. Partial item acceptance remains possible.\n- [ ] The named human signs the review for this build (its *Sign* step: every question answered or decided by the\n  server, the declaration that the writes with the code are theirs, not their agent's), clears the code from the app,\n  accepts only tested proposal items or reports them manually, and returns failures: the agent reads the signed\n  review's failures and notes (`progress_proposals` → `human_reviews`). Agents cannot start, fill or sign a review, nor\n  approve their own claims. Backend inspection can confirm or withdraw accepted claims; verified points are a subset of\n  completion, never an additional award.\n- [ ] Retest affected tasks after fixes or backend changes; stale evidence does not establish the new build's behavior."
+        }
+      ],
+      "workspace_checklist": "- [ ] **Create:** for a patient admitted in this review: vitals, a nursing note, a PRN dose, the charting of a\n  scheduled dose, a verbal order, the patient's own medicines, a nutrition screening and care plan, a wristband check,\n  a suspected infection, a wound check; for a delivery in this review: the newborn, the labour register entry (a draft,\n  completed and signed) and the baby's birth notification.\n- [ ] **Read:** my beds this shift, the vitals grid and the MAR show the new entries; due alerts arrive.\n- [ ] **Update / correct:** a correction entry on a vitals row, a nursing note and a charted dose (never an edit);\n  change the vitals interval; update the care plan.\n- [ ] **Cancel / delete:** cancel a prepared consent; hand back or destroy own medicines with the reason.\n- [ ] **Refused:** a dose charted Administered with another patient's wristband (`PATIENT_IDENTITY_MISMATCH`), or with\n  neither a wristband scan nor an accepted alternative (two identifiers; the emergency override with its note:\n  `PATIENT_IDENTITY_REQUIRED`); no committed entry offers an edit. Chart one dose with two identifiers instead of a scan.\n- [ ] **Hand over:** the nursing discharge clearance reaches the next stage; the verbal order reaches its prescriber.",
+      "operations": {
+        "create": [
+          {
+            "call": "POST /maternity/labour-register",
+            "summary": "Record a delivery in the labour register (a draft)",
+            "screen": "labour_register"
+          },
+          {
+            "call": "POST /maternity/newborns",
+            "summary": "Register a newborn and print its band",
+            "screen": "labour_register"
+          }
+        ],
+        "update_or_correct": [
+          {
+            "call": "PATCH /maternity/labour-register/{entry_id}",
+            "summary": "Complete or correct a draft entry",
+            "screen": "labour_register"
+          }
+        ],
+        "cancel_or_delete": [],
+        "other_actions": [
+          {
+            "call": "POST /maternity/labour-register/{entry_id}/sign",
+            "summary": "Sign an entry of the labour register",
+            "screen": "labour_register"
+          }
+        ]
+      },
+      "operations_rule": "Exercise each operation on records you create new in this review, through the app: create, then read them back, update or correct them, and cancel, withdraw or delete them where the contract allows (and see the refusal where it does not). The other_actions are the steps of the record's life (sign, approve, dispense ...).",
+      "portal_review": "The human tester records this review on the portal (My progress → the workspace → Start the review), with its code in the app's DEV settings: the server sees the operations the app did on new records, the tester answers the rest and signs. The four compulsory items need that signed review; fresh data needs the server's evidence. You build the Review code setting (dev_build_headers), never start, fill or sign a review; progress_proposals → human_reviews lists the failures to fix.",
+      "dev_build_headers": {
+        "send": [
+          "X-Haspataal-Developer: <portal username>",
+          "X-Haspataal-Implementation: <implementation id>",
+          "X-Haspataal-Review: <the DEV settings' Review code, while the tester has one set>"
+        ],
+        "review_code_setting": "One app-wide field, Review code, in Settings → This terminal (open before login too), empty by default; the shared API client adds the header. Not on any screen or the login form.",
+        "release_build": "The field and all three headers behind the DEV build flag (compiled out, never a runtime switch): the hospital's release build has neither (guide 19, I6 and I9).",
+        "never": "Never set a review code yourself, in tests or scripts: only the tester's writes with it count."
+      }
+    },
+    "verification": {
+      "frontend_files_inspected": false,
+      "progress_recorded": false,
+      "rule": "Requirements only. Frontend CI checks coverage; a named human reviews the working journey."
+    }
+  },
+  "screen": {
+    "id": "labour_register",
+    "workspace": "ward_nurse",
+    "title": "Labour register: record a delivery",
+    "purpose": "Each delivery into the hospital's own labour register: the mother's admission, when, who attended, the register's columns and each baby; signed, then frozen; the birth notification of a baby born alive.",
+    "workflow": "Owner decision M1 (decisions 47); Punjab HMIS delivery and newborn forms",
+    "rule_objects": [
+      {
+        "id": "rule:1146a499b0",
+        "text": "Build the form from GET /maternity/labour-register/columns (never a fixed form: the hospital changes its columns): the sections Admission, Delivery, Mother and Discharge once per delivery, the Baby columns once per baby, in sort_order; the input by kind (Number with unit and min/max, YesNo, Choice, MultiChoice, Date, Text); show a column marked required, or required when its when_code has when_value, as required.",
+        "cites": []
+      },
+      {
+        "id": "rule:632b575029",
+        "text": "Register each baby born alive first (POST /maternity/newborns) and name it in babies; a stillbirth has no record of its own. Send an Idempotency-Key with the entry.",
+        "cites": []
+      },
+      {
+        "id": "rule:fe685a82bd",
+        "text": "Save as a draft as the labour goes on (PATCH with expected_version); Sign at the end: LABOUR_ENTRY_INCOMPLETE lists details.missing (mark those columns). A signed entry never changes: show it read-only with the signer's stamp and the labels it was signed with.",
+        "cites": []
+      },
+      {
+        "id": "rule:b4fd64b49f",
+        "text": "Print the birth notification of each baby born alive of a signed entry and give it to the family for the union council; never call it a birth certificate (the union council issues that).",
+        "cites": []
+      },
+      {
+        "id": "rule:119a276f5a",
+        "text": "Exists for the service maternity (work): show it as GET /establishment views.screens says for screen_id labour_register (full; open_work: without its new work, with the banner \"No new ... from now on\"; records: history and corrections only; setup: only from Facility settings; hidden: in no menu), after login and again on establishment.changed. Never decide it from the profile's category.",
+        "cites": []
+      },
+      {
+        "id": "rule:e108ec7978",
+        "text": "POST /maternity/labour-register starts new maternity work: offer it only while maternity is Active (GET /establishment active).",
+        "cites": []
+      },
+      {
+        "id": "rule:e261e1b4d0",
+        "text": "POST /maternity/newborns starts new maternity work: offer it only while maternity is Active (GET /establishment active).",
+        "cites": []
+      }
+    ],
+    "related_workflows": [
+      "maternity-and-newborns"
+    ],
+    "service": {
+      "services": [
+        "maternity"
+      ],
+      "role": "work",
+      "views": {
+        "full": "Show it; every action the user's permissions allow.",
+        "open_work": "The service is Retiring: show it with the banner 'No new <new_work> from now on' and its open work; hide the actions that start new work of it (x-capability-gates; continues_while_retiring ones stay); keep every other action (completing, transferring, settling, correcting).",
+        "records": "The service is Retired (or Preparing after it ran): show it as records only, under a 'Records' marker: lists, details, prints and the corrections the server still accepts; no action that starts new work.",
+        "setup": "Not in the daily menus: reach it from Facility settings (a preview's prerequisites link to it) to set the service up before switching it on.",
+        "hidden": "Not in any menu: the service has never run here, so the screen has nothing to show."
+      },
+      "how": "GET /establishment after login and on establishment.changed: views.screens gives this screen's view (one frontend build for every profile; never decide it from the profile's category)"
+    }
+  },
+  "rules_in_force": null,
+  "build_order": {
+    "screen": "labour_register",
+    "title": "Labour register: record a delivery",
+    "workspace": "ward_nurse",
+    "phase": "P4",
+    "position": 85,
+    "points": 70,
+    "capabilities": [
+      "idempotent_writes",
+      "versioned_edits",
+      "file_downloads",
+      "f1_help",
+      "zoom"
+    ],
+    "depends_on": [
+      {
+        "from": "labour_register",
+        "to": "facility_profile",
+        "kind": "error_prerequisite",
+        "evidence": "POST /maternity/labour-register answers CAPABILITY_INACTIVE (documented); resolved on facility_profile",
+        "ordering": true,
+        "forward": false
+      },
+      {
+        "from": "labour_register",
+        "to": "labour_register_columns",
+        "kind": "data_candidate",
+        "evidence": "it reads maternity/labour-register/columns, which POST /maternity/labour-register/columns on labour_register_columns creates",
+        "ordering": false,
+        "forward": true
+      }
+    ],
+    "needed_by": [
+      {
+        "from": "newborn_registration",
+        "to": "labour_register",
+        "kind": "rule_reference",
+        "evidence": "its rule names screen labour_register: \"Then the delivery goes into the labour register with this baby named (screen labour_register); the birth notification fo\"",
+        "ordering": false
+      },
+      {
+        "from": "obstetric_register",
+        "to": "labour_register",
+        "kind": "data_candidate",
+        "evidence": "it reads maternity/newborns, which POST /maternity/newborns on labour_register creates",
+        "ordering": false
+      }
+    ],
+    "go_live_setup": false,
+    "note": "`forward`: a dependency on a later phase; use the demo data or a scenario (sandbox_scenario) until that screen exists. `ordering: false`: a hand-off or a hint, not a reason to wait."
+  },
+  "definition_of_done": {
+    "points": 70,
+    "items": [
+      {
+        "id": "ep:GET /maternity/labour-register/columns",
+        "label": "GET /maternity/labour-register/columns",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:POST /maternity/labour-register",
+        "label": "POST /maternity/labour-register",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:GET /maternity/labour-register",
+        "label": "GET /maternity/labour-register",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:GET /maternity/labour-register/{entry_id}",
+        "label": "GET /maternity/labour-register/{entry_id}",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:PATCH /maternity/labour-register/{entry_id}",
+        "label": "PATCH /maternity/labour-register/{entry_id}",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:POST /maternity/labour-register/{entry_id}/sign",
+        "label": "POST /maternity/labour-register/{entry_id}/sign",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:GET /maternity/labour-register/{entry_id}/babies/{baby_no}/birth-notification/pdf",
+        "label": "GET /maternity/labour-register/{entry_id}/babies/{baby_no}/birth-notification/pdf",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:POST /maternity/newborns",
+        "label": "POST /maternity/newborns",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:GET /maternity/newborns",
+        "label": "GET /maternity/newborns",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "rule:1146a499b0",
+        "label": "Build the form from GET /maternity/labour-register/columns (never a fixed form: the hospital changes its columns): the sections Admission, Delivery, Mother and Discharge once per delivery, the Baby columns once per baby, in sort_order; the input by kind (Number with unit and min/max, YesNo, Choice, MultiChoice, Date, Text); show a column marked required, or required when its when_code has when_value, as required.",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "rule:632b575029",
+        "label": "Register each baby born alive first (POST /maternity/newborns) and name it in babies; a stillbirth has no record of its own. Send an Idempotency-Key with the entry.",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "rule:fe685a82bd",
+        "label": "Save as a draft as the labour goes on (PATCH with expected_version); Sign at the end: LABOUR_ENTRY_INCOMPLETE lists details.missing (mark those columns). A signed entry never changes: show it read-only with the signer's stamp and the labels it was signed with.",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "rule:b4fd64b49f",
+        "label": "Print the birth notification of each baby born alive of a signed entry and give it to the family for the union council; never call it a birth certificate (the union council issues that).",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "rule:119a276f5a",
+        "label": "Exists for the service maternity (work): show it as GET /establishment views.screens says for screen_id labour_register (full; open_work: without its new work, with the banner \"No new ... from now on\"; records: history and corrections only; setup: only from Facility settings; hidden: in no menu), after login and again on establishment.changed. Never decide it from the profile's category.",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "rule:e108ec7978",
+        "label": "POST /maternity/labour-register starts new maternity work: offer it only while maternity is Active (GET /establishment active).",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "rule:e261e1b4d0",
+        "label": "POST /maternity/newborns starts new maternity work: offer it only while maternity is Active (GET /establishment active).",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:states",
+        "label": "Loading, empty and error states",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:permissions",
+        "label": "Actions by permission",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:writes",
+        "label": "Safe writes",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:tested",
+        "label": "Test plan passed",
+        "points": 4,
+        "claimed": false
+      },
+      {
+        "id": "q:handbook",
+        "label": "Handbook page",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "points": 4,
+        "claimed": false
+      },
+      {
+        "id": "q:character",
+        "label": "Design principles applied",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "q:editor",
+        "label": "Editor's pass",
+        "points": 2,
+        "claimed": false
+      }
+    ],
+    "rule": "Agents MUST submit propose_progress after implementing this screen and verify it with progress_proposals. Only the developer accepts items on My progress for what this implementation does on the DEV server. No tool awards progress."
+  },
+  "endpoints": [
+    {
+      "endpoint": "GET /maternity/labour-register/columns",
+      "summary": "The labour register's columns, in order",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "maternity.view",
+          "maternity.record",
+          "maternity.policy.manage"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of maternity.view or maternity.record or maternity.policy.manage",
+        "roles_allowed": [
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "include_inactive",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "type": "boolean",
+            "default": false,
+            "title": "Include Inactive"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_LabourFieldOut__"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [],
+        "search": [],
+        "filters": [
+          {
+            "name": "include_inactive",
+            "required": false,
+            "type": "boolean",
+            "default": false
+          }
+        ],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "POST /maternity/labour-register",
+      "summary": "Record a delivery in the labour register (a draft)",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "maternity.record"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of maternity.record",
+        "roles_allowed": [
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "surgeon",
+          "ward_nurse"
+        ]
+      },
+      "service_gates": [
+        {
+          "capability": "maternity",
+          "continues_while_retiring": false
+        }
+      ],
+      "idempotency_key": true,
+      "errors": [
+        {
+          "code": "CAPABILITY_INACTIVE",
+          "http_status": 409,
+          "message": "This service is not active here, so no new work of it can start (Settings, facility; GET /establishment).",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "POST /api/v1/er/visits"
+        },
+        {
+          "code": "FORBIDDEN",
+          "http_status": 403,
+          "message": "You do not have permission to do this.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "any_of",
+            "required"
+          ],
+          "details_from": "POST /api/v1/admin/departments"
+        },
+        {
+          "code": "NOT_FOUND",
+          "http_status": 404,
+          "message": "The requested resource was not found.",
+          "retryable": false,
+          "ui_action": "Say 'not found'; refresh the list.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "resource"
+          ],
+          "details_from": "PUT /api/v1/admin/printers/{printer_id}"
+        },
+        {
+          "code": "REFERENCE_NOT_FOUND",
+          "http_status": 422,
+          "message": "A referenced record does not exist.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "ward_id"
+          ],
+          "details_from": "POST /api/v1/pharmacy/storage-checks"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "Idempotency-Key",
+          "in": "header",
+          "required": false,
+          "description": "Unique per logical action; retries return the first result",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Unique per logical action; retries return the first result",
+            "title": "Idempotency-Key"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/LabourEntryIn"
+            }
+          }
+        }
+      },
+      "responses": {
+        "201": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_LabourEntryOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "application/json",
+        "model": "LabourEntryIn",
+        "fields": [
+          {
+            "pointer": "/admission_id",
+            "type": "integer",
+            "required": true,
+            "nullable": false,
+            "description": "The mother's admission (the mother is its patient)"
+          },
+          {
+            "pointer": "/delivered_at",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "format": "date-time"
+          },
+          {
+            "pointer": "/attended_by",
+            "type": "integer",
+            "required": true,
+            "nullable": false,
+            "description": "The employee who attended the delivery"
+          },
+          {
+            "pointer": "/field_values",
+            "type": "object",
+            "required": false,
+            "nullable": false,
+            "description": "Column code -> value: Number a number, YesNo \"Yes\"/\"No\", Choice one of its choices, MultiChoice a list of them, Date YYYY-MM-DD"
+          },
+          {
+            "pointer": "/babies",
+            "type": "array",
+            "required": true,
+            "nullable": false,
+            "items": "LabourBabyIn"
+          }
+        ],
+        "cross_field_rules": {},
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "idempotency_key",
+        "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+        "reconcile_with": "GET /maternity/labour-register",
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "GET /maternity/labour-register",
+      "summary": "Deliveries of a period, newest first",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "maternity.view"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of maternity.view",
+        "roles_allowed": [
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "date_from",
+          "in": "query",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "string",
+            "format": "date",
+            "title": "Date From"
+          }
+        },
+        {
+          "name": "date_to",
+          "in": "query",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "string",
+            "format": "date",
+            "title": "Date To"
+          }
+        },
+        {
+          "name": "status",
+          "in": "query",
+          "required": false,
+          "description": "Draft: still to sign",
+          "schema": {
+            "anyOf": [
+              {
+                "enum": [
+                  "Draft",
+                  "Signed"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Draft: still to sign",
+            "title": "Status"
+          }
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "maximum": 1000,
+            "minimum": 1,
+            "default": 200,
+            "title": "Limit"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_LabourEntryOut__"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [
+          {
+            "name": "limit",
+            "required": false,
+            "type": "integer",
+            "default": 200,
+            "minimum": 1,
+            "maximum": 1000
+          }
+        ],
+        "search": [],
+        "filters": [
+          {
+            "name": "date_from",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "date_to",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "status",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "Draft",
+              "Signed"
+            ],
+            "description": "Draft: still to sign"
+          }
+        ],
+        "note": "Lists are bounded by `limit` (no cursor paging): ask for what the screen shows, filter on the server."
+      }
+    },
+    {
+      "endpoint": "GET /maternity/labour-register/{entry_id}",
+      "summary": "One delivery of the labour register",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "maternity.view",
+          "maternity.record"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of maternity.view or maternity.record",
+        "roles_allowed": [
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "NOT_FOUND",
+          "http_status": 404,
+          "message": "The requested resource was not found.",
+          "retryable": false,
+          "ui_action": "Say 'not found'; refresh the list.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "resource"
+          ],
+          "details_from": "PUT /api/v1/admin/printers/{printer_id}"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "entry_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Entry Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_LabourEntryOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "object",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "PATCH /maternity/labour-register/{entry_id}",
+      "summary": "Complete or correct a draft entry",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "maternity.record"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of maternity.record",
+        "roles_allowed": [
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "surgeon",
+          "ward_nurse"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "LABOUR_ENTRY_SIGNED",
+          "http_status": 409,
+          "message": "This entry of the labour register is signed: it does not change.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "POST /api/v1/maternity/labour-register/{entry_id}/sign"
+        },
+        {
+          "code": "NOT_FOUND",
+          "http_status": 404,
+          "message": "The requested resource was not found.",
+          "retryable": false,
+          "ui_action": "Say 'not found'; refresh the list.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "resource"
+          ],
+          "details_from": "PUT /api/v1/admin/printers/{printer_id}"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        },
+        {
+          "code": "VERSION_CONFLICT",
+          "http_status": 409,
+          "message": "The record was changed by someone else; reload and try again.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "current_version",
+            "expected_version"
+          ],
+          "details_from": "PATCH /api/v1/finance/service-catalog/{service_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "entry_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Entry Id"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/LabourEntryPatch"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_LabourEntryOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "application/json",
+        "model": "LabourEntryPatch",
+        "fields": [
+          {
+            "pointer": "/delivered_at",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "format": "date-time"
+          },
+          {
+            "pointer": "/attended_by",
+            "type": "integer",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "pointer": "/field_values",
+            "type": "object",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "pointer": "/babies",
+            "type": "array",
+            "required": false,
+            "nullable": true,
+            "items": "LabourBabyIn"
+          },
+          {
+            "pointer": "/expected_version",
+            "type": "integer",
+            "required": true,
+            "nullable": false,
+            "description": "row_version as read"
+          }
+        ],
+        "cross_field_rules": {},
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "version_check",
+        "on_lost_answer": "Send expected_version from the record you edited. If the first call advances that version, a repeat with the old version is refused (VERSION_CONFLICT or a final-state error). Omitting this optional field gives no version protection. Re-read the record and let the user decide; never retry automatically.",
+        "reconcile_with": "GET /maternity/labour-register/{entry_id}",
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "POST /maternity/labour-register/{entry_id}/sign",
+      "summary": "Sign an entry of the labour register",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "maternity.record"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of maternity.record",
+        "roles_allowed": [
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "surgeon",
+          "ward_nurse"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "LABOUR_ENTRY_INCOMPLETE",
+          "http_status": 422,
+          "message": "Fill the labour register's required columns before signing the entry (details.missing lists them).",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "missing"
+          ],
+          "details_from": "POST /api/v1/maternity/labour-register/{entry_id}/sign"
+        },
+        {
+          "code": "LABOUR_ENTRY_SIGNED",
+          "http_status": 409,
+          "message": "This entry of the labour register is signed: it does not change.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "POST /api/v1/maternity/labour-register/{entry_id}/sign"
+        },
+        {
+          "code": "NOT_FOUND",
+          "http_status": 404,
+          "message": "The requested resource was not found.",
+          "retryable": false,
+          "ui_action": "Say 'not found'; refresh the list.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "resource"
+          ],
+          "details_from": "PUT /api/v1/admin/printers/{printer_id}"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "entry_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Entry Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_LabourEntryOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": null,
+      "write": {
+        "protection": "state_guard",
+        "on_lost_answer": "A repeat is refused with LABOUR_ENTRY_SIGNED: the entry is signed already. The first call may have succeeded; this error does not replay its result. Never retry automatically; re-read the record, then offer the action again only if it is still needed.",
+        "reconcile_with": "GET /maternity/labour-register/{entry_id}",
+        "refused_with": "LABOUR_ENTRY_SIGNED",
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "GET /maternity/labour-register/{entry_id}/babies/{baby_no}/birth-notification/pdf",
+      "summary": "A baby's birth notification for the union council (PDF)",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "maternity.record",
+          "maternity.view"
+        ],
+        "permissions_mode": "any",
+        "who": "holders of maternity.record or maternity.view",
+        "roles_allowed": [
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "NOT_FOUND",
+          "http_status": 404,
+          "message": "The requested resource was not found.",
+          "retryable": false,
+          "ui_action": "Say 'not found'; refresh the list.",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "resource"
+          ],
+          "details_from": "PUT /api/v1/admin/printers/{printer_id}"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "entry_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Entry Id"
+          }
+        },
+        {
+          "name": "baby_no",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Baby No"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "The stored file, with its own Content-Type (e.g. application/pdf) and its file name in Content-Disposition.",
+          "content": {
+            "application/octet-stream": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "file",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      },
+      "prints": {
+        "kind": "file",
+        "media": [
+          "application/octet-stream"
+        ]
+      }
+    },
+    {
+      "endpoint": "POST /maternity/newborns",
+      "summary": "Register a newborn and print its band",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "maternity.record",
+          "patient.wristband.print"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of maternity.record and patient.wristband.print",
+        "roles_allowed": [
+          "head_nurse",
+          "ward_nurse"
+        ]
+      },
+      "service_gates": [
+        {
+          "capability": "maternity",
+          "continues_while_retiring": false
+        }
+      ],
+      "idempotency_key": true,
+      "errors": [
+        {
+          "code": "CAPABILITY_INACTIVE",
+          "http_status": 409,
+          "message": "This service is not active here, so no new work of it can start (Settings, facility; GET /establishment).",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "POST /api/v1/er/visits"
+        },
+        {
+          "code": "NOT_FOUND",
+          "http_status": 404,
+          "message": "The requested resource was not found.",
+          "retryable": false,
+          "ui_action": "Say 'not found'; refresh the list.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "resource"
+          ],
+          "details_from": "PUT /api/v1/admin/printers/{printer_id}"
+        },
+        {
+          "code": "REFERENCE_NOT_FOUND",
+          "http_status": 422,
+          "message": "A referenced record does not exist.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "ward_id"
+          ],
+          "details_from": "POST /api/v1/pharmacy/storage-checks"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "Idempotency-Key",
+          "in": "header",
+          "required": false,
+          "description": "Unique per logical action; retries return the first result",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Unique per logical action; retries return the first result",
+            "title": "Idempotency-Key"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/NewbornIn"
+            }
+          }
+        }
+      },
+      "responses": {
+        "201": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_NewbornRegisteredOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "application/json",
+        "model": "NewbornIn",
+        "fields": [
+          {
+            "pointer": "/admission_id",
+            "type": "integer",
+            "required": true,
+            "nullable": false,
+            "description": "The mother's current admission"
+          },
+          {
+            "pointer": "/born_at",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "format": "date-time"
+          },
+          {
+            "pointer": "/gender",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "enum": [
+              "male",
+              "female",
+              "other",
+              "unknown"
+            ]
+          }
+        ],
+        "cross_field_rules": {},
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "idempotency_key",
+        "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+        "reconcile_with": "GET /maternity/newborns",
+        "emits_events": [],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "GET /maternity/newborns",
+      "summary": "Newborns of a mother or a period",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "maternity.view"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of maternity.view",
+        "roles_allowed": [
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "mother_patient_id",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mother Patient Id"
+          }
+        },
+        {
+          "name": "date_from",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Date From"
+          }
+        },
+        {
+          "name": "date_to",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Date To"
+          }
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "maximum": 1000,
+            "minimum": 1,
+            "default": 200,
+            "title": "Limit"
+          }
+        },
+        {
+          "name": "before_id",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Before Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_NewbornOut__"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [
+          {
+            "name": "limit",
+            "required": false,
+            "type": "integer",
+            "default": 200,
+            "minimum": 1,
+            "maximum": 1000
+          }
+        ],
+        "search": [],
+        "filters": [
+          {
+            "name": "mother_patient_id",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "date_from",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "date_to",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "before_id",
+            "required": false,
+            "type": "integer",
+            "minimum": 1
+          }
+        ],
+        "note": "Lists are bounded by `limit` (no cursor paging): ask for what the screen shows, filter on the server."
+      }
+    }
+  ],
+  "realtime": {
+    "topics": [
+      "session.*",
+      "system.*",
+      "notification.created"
+    ],
+    "handlers": [],
+    "rule": "Refresh the listed reads when the event arrives (a list without a path id: every time; a detail read: when the payload names the same id). Never poll."
+  },
+  "handoffs": [],
+  "patient_context": null,
+  "value_lists": [
+    {
+      "values": [
+        "Draft",
+        "Signed"
+      ],
+      "column": "labour_register_entries.status",
+      "used_at": "POST /maternity/labour-register.status",
+      "labels": {
+        "Draft": "Draft",
+        "Signed": "Signed"
+      }
+    },
+    {
+      "values": [
+        "Text",
+        "Number",
+        "Choice",
+        "MultiChoice",
+        "YesNo",
+        "Date"
+      ],
+      "column": "labour_register_fields.kind",
+      "used_at": "GET /maternity/labour-register/columns[].kind",
+      "labels": {
+        "Text": "Text",
+        "Number": "Number",
+        "Choice": "Choice",
+        "MultiChoice": "Multi choice",
+        "YesNo": "Yes no",
+        "Date": "Date"
+      }
+    },
+    {
+      "values": [
+        "Admission",
+        "Delivery",
+        "Mother",
+        "Baby",
+        "Discharge"
+      ],
+      "column": "labour_register_fields.section",
+      "used_at": "GET /maternity/labour-register/columns[].section",
+      "labels": {
+        "Admission": "Admission",
+        "Delivery": "Delivery",
+        "Mother": "Mother",
+        "Baby": "Baby",
+        "Discharge": "Discharge"
+      }
+    },
+    {
+      "values": [
+        "Admission",
+        "Emergency",
+        "Newborn",
+        "Replacement"
+      ],
+      "column": "patient_wristbands.reason",
+      "used_at": "POST /maternity/newborns.wristband.wristband.reason",
+      "labels": {
+        "Admission": "Admission",
+        "Emergency": "Emergency",
+        "Newborn": "Newborn",
+        "Replacement": "Replacement"
+      }
+    },
+    {
+      "values": [
+        "male",
+        "female",
+        "other",
+        "unknown"
+      ],
+      "column": "patients.gender",
+      "used_at": "POST /maternity/newborns.gender",
+      "labels": {
+        "male": "Male",
+        "female": "Female",
+        "other": "Other",
+        "unknown": "Unknown"
+      }
+    },
+    {
+      "values": [
+        "autopsy_order",
+        "bed_labels",
+        "blood_component_label",
+        "blood_donation_labels",
+        "clinical_note",
+        "complaint_letter",
+        "complaints_notice",
+        "consent_form",
+        "cost_estimate",
+        "cssd_labels",
+        "death_certificate",
+        "discharge_summary",
+        "dispensing_label",
+        "dose_label",
+        "id_card",
+        "imaging_report",
+        "lab_label",
+        "lab_report",
+        "mlc_intimation",
+        "opd_slip",
+        "pharmacy_receipt",
+        "prescription",
+        "referral_slip",
+        "send_out_manifest",
+        "surgical_record",
+        "triage_algorithm",
+        "wristband"
+      ],
+      "column": null,
+      "used_at": "POST /maternity/newborns.wristband.print.document_type",
+      "labels": {
+        "autopsy_order": "Autopsy order",
+        "bed_labels": "Bed labels",
+        "blood_component_label": "Blood component label",
+        "blood_donation_labels": "Blood donation labels",
+        "clinical_note": "Clinical note",
+        "complaint_letter": "Complaint letter",
+        "complaints_notice": "Complaints notice",
+        "consent_form": "Consent form",
+        "cost_estimate": "Cost estimate",
+        "cssd_labels": "Cssd labels",
+        "death_certificate": "Death certificate",
+        "discharge_summary": "Discharge summary",
+        "dispensing_label": "Dispensing label",
+        "dose_label": "Dose label",
+        "id_card": "Id card",
+        "imaging_report": "Imaging report",
+        "lab_label": "Lab label",
+        "lab_report": "Lab report",
+        "mlc_intimation": "Mlc intimation",
+        "opd_slip": "Opd slip",
+        "pharmacy_receipt": "Pharmacy receipt",
+        "prescription": "Prescription",
+        "referral_slip": "Referral slip",
+        "send_out_manifest": "Send out manifest",
+        "surgical_record": "Surgical record",
+        "triage_algorithm": "Triage algorithm",
+        "wristband": "Wristband"
+      }
+    },
+    {
+      "values": [
+        "receipt",
+        "label",
+        "document",
+        "card"
+      ],
+      "column": null,
+      "used_at": "POST /maternity/newborns.wristband.print.printer_role",
+      "labels": {
+        "receipt": "Receipt",
+        "label": "Label",
+        "document": "Document",
+        "card": "Card"
+      }
+    }
+  ],
+  "states": [
+    {
+      "state": "loading",
+      "why": "every read"
+    },
+    {
+      "state": "error",
+      "why": "every call (show error.code's message)"
+    },
+    {
+      "state": "empty",
+      "why": "a list can be empty: say why and what to do next"
+    },
+    {
+      "state": "forbidden",
+      "why": "actions hidden or disabled by permission (GET /auth/me)"
+    },
+    {
+      "state": "submitting / outcome unknown",
+      "why": "a write in flight, or its answer lost: see each write's on_lost_answer"
+    },
+    {
+      "state": "version conflict",
+      "why": "VERSION_CONFLICT: reload, show the change, re-apply"
+    },
+    {
+      "state": "print failed",
+      "why": "printing is separate from the write: reprint, never redo it"
+    }
+  ],
+  "scanner": [],
+  "copy": {
+    "workspace": {
+      "en": "Ward Nursing",
+      "ur": "وارڈ نرسنگ"
+    },
+    "error_messages": {
+      "CAPABILITY_INACTIVE": "This service is not active here, so no new work of it can start (Settings, facility; GET /establishment).",
+      "FORBIDDEN": "You do not have permission to do this.",
+      "LABOUR_ENTRY_INCOMPLETE": "Fill the labour register's required columns before signing the entry (details.missing lists them).",
+      "LABOUR_ENTRY_SIGNED": "This entry of the labour register is signed: it does not change.",
+      "NOT_FOUND": "The requested resource was not found.",
+      "REFERENCE_NOT_FOUND": "A referenced record does not exist.",
+      "VALIDATION_ERROR": "The request is invalid.",
+      "VERSION_CONFLICT": "The record was changed by someone else; reload and try again."
+    },
+    "wording_quoted_in_rules": [
+      "No new ... from now on"
+    ],
+    "note": "Server-owned strings only: the error messages (English), the workspace labels (English and Urdu) and the wording the rules quote. The UI's own copy and its Urdu are yours (decision H08)."
+  },
+  "same_component_as": [],
+  "roles": {
+    "full": [
+      "ward_nurse",
+      "head_nurse"
+    ],
+    "partial": [
+      "owner",
+      "hospital_admin",
+      "hospital_director",
+      "clinic_director",
+      "triage_nurse",
+      "doctor",
+      "clinical_specialist",
+      "surgeon",
+      "quality_officer"
+    ],
+    "page_for": [
+      "ward_nurse",
+      "head_nurse"
+    ],
+    "note": "page_for: the roles whose GET /meta/handbook lists this screen (its menu entry and F1 page; for a user with that one role, every service Active). A partial role outside page_for only makes some of these calls from screens of its own: never offer it this screen. Build the menu from the logged-in user's GET /meta/handbook."
+  },
+  "test_plan": {
+    "screen": "labour_register",
+    "title": "Labour register: record a delivery",
+    "cases": [
+      {
+        "id": "case:GET /maternity/labour-register/columns",
+        "call": "GET /api/v1/maternity/labour-register/columns",
+        "summary": "The labour register's columns, in order",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "VALIDATION_ERROR"
+        ],
+        "as_one_of": [
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ]
+      },
+      {
+        "id": "case:POST /maternity/labour-register",
+        "call": "POST /api/v1/maternity/labour-register",
+        "summary": "Record a delivery in the labour register (a draft)",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "CAPABILITY_INACTIVE",
+          "FORBIDDEN",
+          "NOT_FOUND",
+          "REFERENCE_NOT_FOUND",
+          "VALIDATION_ERROR"
+        ],
+        "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)",
+        "as_one_of": [
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "surgeon",
+          "ward_nurse"
+        ]
+      },
+      {
+        "id": "case:GET /maternity/labour-register",
+        "call": "GET /api/v1/maternity/labour-register",
+        "summary": "Deliveries of a period, newest first",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "VALIDATION_ERROR"
+        ],
+        "as_one_of": [
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ]
+      },
+      {
+        "id": "case:GET /maternity/labour-register/{entry_id}",
+        "call": "GET /api/v1/maternity/labour-register/{entry_id}",
+        "summary": "One delivery of the labour register",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "NOT_FOUND",
+          "VALIDATION_ERROR"
+        ],
+        "as_one_of": [
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ]
+      },
+      {
+        "id": "case:PATCH /maternity/labour-register/{entry_id}",
+        "call": "PATCH /api/v1/maternity/labour-register/{entry_id}",
+        "summary": "Complete or correct a draft entry",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "LABOUR_ENTRY_SIGNED",
+          "NOT_FOUND",
+          "VALIDATION_ERROR",
+          "VERSION_CONFLICT"
+        ],
+        "concurrent_edit": "send a stale expected_version: expect 409 VERSION_CONFLICT, reload and retry",
+        "as_one_of": [
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "surgeon",
+          "ward_nurse"
+        ]
+      },
+      {
+        "id": "case:POST /maternity/labour-register/{entry_id}/sign",
+        "call": "POST /api/v1/maternity/labour-register/{entry_id}/sign",
+        "summary": "Sign an entry of the labour register",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "LABOUR_ENTRY_INCOMPLETE",
+          "LABOUR_ENTRY_SIGNED",
+          "NOT_FOUND",
+          "VALIDATION_ERROR"
+        ],
+        "as_one_of": [
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "surgeon",
+          "ward_nurse"
+        ]
+      },
+      {
+        "id": "case:GET /maternity/labour-register/{entry_id}/babies/{baby_no}/birth-notification/pdf",
+        "call": "GET /api/v1/maternity/labour-register/{entry_id}/babies/{baby_no}/birth-notification/pdf",
+        "summary": "A baby's birth notification for the union council (PDF)",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "NOT_FOUND",
+          "VALIDATION_ERROR"
+        ],
+        "as_one_of": [
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ]
+      },
+      {
+        "id": "case:POST /maternity/newborns",
+        "call": "POST /api/v1/maternity/newborns",
+        "summary": "Register a newborn and print its band",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "CAPABILITY_INACTIVE",
+          "NOT_FOUND",
+          "REFERENCE_NOT_FOUND",
+          "VALIDATION_ERROR"
+        ],
+        "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)",
+        "as_one_of": [
+          "head_nurse",
+          "ward_nurse"
+        ]
+      },
+      {
+        "id": "case:GET /maternity/newborns",
+        "call": "GET /api/v1/maternity/newborns",
+        "summary": "Newborns of a mother or a period",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "VALIDATION_ERROR"
+        ],
+        "as_one_of": [
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "quality_officer",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ]
+      }
+    ],
+    "service_cases": [
+      {
+        "view": "full",
+        "set_up": "GET /establishment answers views.screens[screen_id=labour_register].view = full (maternity): stub that answer, or have the DEV server's admin move the service on Facility settings",
+        "expect": "Show it; every action the user's permissions allow."
+      },
+      {
+        "view": "open_work",
+        "set_up": "GET /establishment answers views.screens[screen_id=labour_register].view = open_work (maternity): stub that answer, or have the DEV server's admin move the service on Facility settings",
+        "expect": "The service is Retiring: show it with the banner 'No new <new_work> from now on' and its open work; hide the actions that start new work of it (x-capability-gates; continues_while_retiring ones stay); keep every other action (completing, transferring, settling, correcting)."
+      },
+      {
+        "view": "records",
+        "set_up": "GET /establishment answers views.screens[screen_id=labour_register].view = records (maternity): stub that answer, or have the DEV server's admin move the service on Facility settings",
+        "expect": "The service is Retired (or Preparing after it ran): show it as records only, under a 'Records' marker: lists, details, prints and the corrections the server still accepts; no action that starts new work."
+      },
+      {
+        "view": "hidden",
+        "set_up": "GET /establishment answers views.screens[screen_id=labour_register].view = hidden (maternity): stub that answer, or have the DEV server's admin move the service on Facility settings",
+        "expect": "Not in any menu: the service has never run here, so the screen has nothing to show."
+      },
+      {
+        "call": "POST /api/v1/maternity/labour-register",
+        "set_up": "maternity not Active in GET /establishment",
+        "expect": "the action is hidden"
+      },
+      {
+        "call": "POST /api/v1/maternity/newborns",
+        "set_up": "maternity not Active in GET /establishment",
+        "expect": "the action is hidden"
+      }
+    ],
+    "delivery_gate": {
+      "required": true,
+      "status": "required",
+      "progress_reporting": {
+        "required": true,
+        "submit": "propose_progress",
+        "verify": "progress_proposals",
+        "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+      },
+      "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+      "compulsory": [
+        {
+          "id": "q:f1_help",
+          "label": "F1 contextual help",
+          "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+          "points": 2
+        },
+        {
+          "id": "q:role_faq",
+          "label": "Complete role-specific FAQs",
+          "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+          "points": 3
+        },
+        {
+          "id": "q:zoom",
+          "label": "Keyboard zoom: 100-250% only",
+          "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+          "points": 2
+        },
+        {
+          "id": "q:fresh_data",
+          "label": "Human review with newly created data",
+          "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+          "points": 4
+        }
+      ],
+      "zoom": {
+        "min_pct": 100.0,
+        "max_pct": 250.0,
+        "reset_pct": 100,
+        "keys": [
+          "Ctrl + or Ctrl = (zoom in)",
+          "Ctrl - (zoom out)",
+          "Ctrl 0 (reset to 100 %)",
+          "Command on macOS"
+        ],
+        "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+      },
+      "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+      "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+    },
+    "handbook_page": "screens/labour_register",
+    "workspace_guide": "get_handbook_outline('ward_nurse')",
+    "realtime": [],
+    "acceptance_rules": [
+      "Build the form from GET /maternity/labour-register/columns (never a fixed form: the hospital changes its columns): the sections Admission, Delivery, Mother and Discharge once per delivery, the Baby columns once per baby, in sort_order; the input by kind (Number with unit and min/max, YesNo, Choice, MultiChoice, Date, Text); show a column marked required, or required when its when_code has when_value, as required.",
+      "Register each baby born alive first (POST /maternity/newborns) and name it in babies; a stillbirth has no record of its own. Send an Idempotency-Key with the entry.",
+      "Save as a draft as the labour goes on (PATCH with expected_version); Sign at the end: LABOUR_ENTRY_INCOMPLETE lists details.missing (mark those columns). A signed entry never changes: show it read-only with the signer's stamp and the labels it was signed with.",
+      "Print the birth notification of each baby born alive of a signed entry and give it to the family for the union council; never call it a birth certificate (the union council issues that).",
+      "Exists for the service maternity (work): show it as GET /establishment views.screens says for screen_id labour_register (full; open_work: without its new work, with the banner \"No new ... from now on\"; records: history and corrections only; setup: only from Facility settings; hidden: in no menu), after login and again on establishment.changed. Never decide it from the profile's category.",
+      "POST /maternity/labour-register starts new maternity work: offer it only while maternity is Active (GET /establishment active).",
+      "POST /maternity/newborns starts new maternity work: offer it only while maternity is Active (GET /establishment active)."
+    ],
+    "demo_accounts": "demo_accounts() lists a login per role; sandbox_call runs each case on the DEV server"
+  },
+  "handbook": {
+    "page": "screens/labour_register",
+    "screen_id": "labour_register",
+    "title": "Labour register: record a delivery",
+    "purpose": "Each delivery into the hospital's own labour register: the mother's admission, when, who attended, the register's columns and each baby; signed, then frozen; the birth notification of a baby born alive.",
+    "tasks": [
+      {
+        "id": "labour_register::GET /maternity/labour-register/columns",
+        "task": "The labour register's columns, in order",
+        "call": "GET /maternity/labour-register/columns",
+        "is_action": false,
+        "permissions": [
+          "maternity.view",
+          "maternity.record",
+          "maternity.policy.manage"
+        ],
+        "permissions_mode": "any",
+        "access": null
+      },
+      {
+        "id": "labour_register::POST /maternity/labour-register",
+        "task": "Record a delivery in the labour register (a draft)",
+        "call": "POST /maternity/labour-register",
+        "is_action": true,
+        "permissions": [
+          "maternity.record"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "labour_register::GET /maternity/labour-register",
+        "task": "Deliveries of a period, newest first",
+        "call": "GET /maternity/labour-register",
+        "is_action": false,
+        "permissions": [
+          "maternity.view"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "labour_register::GET /maternity/labour-register/{entry_id}",
+        "task": "One delivery of the labour register",
+        "call": "GET /maternity/labour-register/{entry_id}",
+        "is_action": false,
+        "permissions": [
+          "maternity.view",
+          "maternity.record"
+        ],
+        "permissions_mode": "any",
+        "access": null
+      },
+      {
+        "id": "labour_register::PATCH /maternity/labour-register/{entry_id}",
+        "task": "Complete or correct a draft entry",
+        "call": "PATCH /maternity/labour-register/{entry_id}",
+        "is_action": true,
+        "permissions": [
+          "maternity.record"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "labour_register::POST /maternity/labour-register/{entry_id}/sign",
+        "task": "Sign an entry of the labour register",
+        "call": "POST /maternity/labour-register/{entry_id}/sign",
+        "is_action": true,
+        "permissions": [
+          "maternity.record"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "labour_register::GET /maternity/labour-register/{entry_id}/babies/{baby_no}/birth-notification/pdf",
+        "task": "A baby's birth notification for the union council (PDF)",
+        "call": "GET /maternity/labour-register/{entry_id}/babies/{baby_no}/birth-notification/pdf",
+        "is_action": false,
+        "permissions": [
+          "maternity.record",
+          "maternity.view"
+        ],
+        "permissions_mode": "any",
+        "access": null
+      },
+      {
+        "id": "labour_register::POST /maternity/newborns",
+        "task": "Register a newborn and print its band",
+        "call": "POST /maternity/newborns",
+        "is_action": true,
+        "permissions": [
+          "maternity.record",
+          "patient.wristband.print"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "labour_register::GET /maternity/newborns",
+        "task": "Newborns of a mother or a period",
+        "call": "GET /maternity/newborns",
+        "is_action": false,
+        "permissions": [
+          "maternity.view"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      }
+    ],
+    "rules_to_explain": [
+      "Build the form from GET /maternity/labour-register/columns (never a fixed form: the hospital changes its columns): the sections Admission, Delivery, Mother and Discharge once per delivery, the Baby columns once per baby, in sort_order; the input by kind (Number with unit and min/max, YesNo, Choice, MultiChoice, Date, Text); show a column marked required, or required when its when_code has when_value, as required.",
+      "Register each baby born alive first (POST /maternity/newborns) and name it in babies; a stillbirth has no record of its own. Send an Idempotency-Key with the entry.",
+      "Save as a draft as the labour goes on (PATCH with expected_version); Sign at the end: LABOUR_ENTRY_INCOMPLETE lists details.missing (mark those columns). A signed entry never changes: show it read-only with the signer's stamp and the labels it was signed with.",
+      "Print the birth notification of each baby born alive of a signed entry and give it to the family for the union council; never call it a birth certificate (the union council issues that).",
+      "Exists for the service maternity (work): show it as GET /establishment views.screens says for screen_id labour_register (full; open_work: without its new work, with the banner \"No new ... from now on\"; records: history and corrections only; setup: only from Facility settings; hidden: in no menu), after login and again on establishment.changed. Never decide it from the profile's category.",
+      "POST /maternity/labour-register starts new maternity work: offer it only while maternity is Active (GET /establishment active).",
+      "POST /maternity/newborns starts new maternity work: offer it only while maternity is Active (GET /establishment active)."
+    ],
+    "updates_by_itself_on": [],
+    "errors_the_user_can_meet": [
+      {
+        "code": "CAPABILITY_INACTIVE",
+        "message": "This service is not active here, so no new work of it can start (Settings, facility; GET /establishment).",
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      },
+      {
+        "code": "FORBIDDEN",
+        "message": "You do not have permission to do this.",
+        "ui_action": "Explain and hide the action (check x-permissions)."
+      },
+      {
+        "code": "LABOUR_ENTRY_INCOMPLETE",
+        "message": "Fill the labour register's required columns before signing the entry (details.missing lists them).",
+        "ui_action": "Show field errors from details.fields / the message."
+      },
+      {
+        "code": "LABOUR_ENTRY_SIGNED",
+        "message": "This entry of the labour register is signed: it does not change.",
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      },
+      {
+        "code": "NOT_FOUND",
+        "message": "The requested resource was not found.",
+        "ui_action": "Say 'not found'; refresh the list."
+      },
+      {
+        "code": "REFERENCE_NOT_FOUND",
+        "message": "A referenced record does not exist.",
+        "ui_action": "Show field errors from details.fields / the message."
+      },
+      {
+        "code": "VALIDATION_ERROR",
+        "message": "The request is invalid.",
+        "ui_action": "Show field errors from details.fields / the message."
+      },
+      {
+        "code": "VERSION_CONFLICT",
+        "message": "The record was changed by someone else; reload and try again.",
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      }
+    ],
+    "sections": [
+      "Purpose and audience",
+      "Step by step (one per task, where to click)",
+      "Every control and its effects",
+      "States and feedback",
+      "Messages, mistakes and recovery",
+      "Language and visual examples",
+      "Related help and delivery"
+    ],
+    "requirement_ids": [
+      "S1",
+      "S2",
+      "S3",
+      "S4",
+      "S5",
+      "S6",
+      "S7"
+    ],
+    "delivery": "F1 and contextual screen Help",
+    "requirements": [
+      {
+        "id": "S1",
+        "title": "Purpose and audience",
+        "instruction": "Explain what this screen accomplishes, when to use it, who uses it and how to open it. State the patient, visit,\nshift or other context the user must verify. Name the expected result in staff language."
+      },
+      {
+        "id": "S2",
+        "title": "Step by step (one per task, where to click)",
+        "instruction": "For every supported task give prerequisites, permissions or approvals, exact navigation and control labels,\nwhat to enter or select, validation, the ordered steps and how to recognize completion. Include demo screenshots,\nprinted output and the next task or handover. Link to the corresponding workspace FAQ answer."
+      },
+      {
+        "id": "S3",
+        "title": "Every control and its effects",
+        "instruction": "Maintain a control inventory covering buttons, fields, selectors, tabs, menus, filters, sorting, scanners, shortcuts,\ndialogs and navigation. For each user-facing control explain its label and purpose, when it is available, required\ninput, immediate effect, whether it saves or only changes the view, any confirmation, and what cancellation does.\nDescribe resulting data/state changes, notifications, printed output and consequences for other staff where relevant.\nInclude controls without API calls. Group repeated controls only when their behaviour is genuinely identical."
+      },
+      {
+        "id": "S4",
+        "title": "States and feedback",
+        "instruction": "Explain loading, no results, pending approval, success, stale data, denied actions and unavailable services. Describe\nautomatic realtime updates and how staff recognize that displayed information has changed. Explain disabled controls\nand how to meet their prerequisites. Document only states and effects the implemented UI and backend support."
+      },
+      {
+        "id": "S5",
+        "title": "Messages, mistakes and recovery",
+        "instruction": "Explain the messages staff can encounter, why an action is refused and the permitted next step. Cover corrections,\nduplicate clicks, a lost reply, concurrent changes, leaving unsaved work, session expiry, lost connection and printer\nor scanner problems where applicable. Say what may have been saved, what to check before retrying and whom to contact.\nNever promise unsupported undo or automatic offline submission. Use staff wording, not API paths or JSON."
+      },
+      {
+        "id": "S6",
+        "title": "Language and visual examples",
+        "instruction": "Supply English and Urdu pages matching the app's labels and reading direction, with legible demo-data screenshots\nfor each task and no real patient information. Keep terminology consistent across UI, FAQs and screenshots. Record\ntranslation review status; a draft must not be represented as approved clinical wording."
+      },
+      {
+        "id": "S7",
+        "title": "Related help and delivery",
+        "instruction": "Link to the role's workspace guide, related tasks and handovers. F1 and contextual Help must open this screen's page.\nVerify offline access, search, deep links, print-friendly output and the server's permission filtering. Update the\npage, control inventory and FAQ links in the same release as the UI; retain the review evidence required by Q6."
+      }
+    ],
+    "workspace_guide": "get_handbook_outline('ward_nurse')"
+  },
+  "workflows": [
+    {
+      "slug": "maternity-and-newborns",
+      "title": "Maternity and newborns",
+      "recipe": "get_workflow_recipe('maternity-and-newborns')"
+    }
+  ],
+  "scenarios": [],
+  "decisions": [
+    {
+      "id": "H02",
+      "question": "Digits in the Urdu UI and printouts: Latin 0-9 or Extended Arabic-Indic ۰-۹.",
+      "owner": [
+        "vendor"
+      ],
+      "affects": [
+        "every screen in Urdu"
+      ],
+      "meanwhile": "Latin digits; identifiers, doses and money stay left to right."
+    },
+    {
+      "id": "H03",
+      "question": "How dates and times are shown on screen, and a 12- or 24-hour clock.",
+      "owner": [
+        "vendor",
+        "clinical_lead"
+      ],
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "The server's print format (e.g. 27-Sep-2026) and the hospital time zone."
+    },
+    {
+      "id": "H04",
+      "question": "Money on screen: decimals shown, and digit grouping (1,234,567 or 12,34,567).",
+      "owner": [
+        "vendor"
+      ],
+      "affects": [
+        "every screen with money"
+      ],
+      "meanwhile": "The amounts as the API sends them, with the currency setting."
+    },
+    {
+      "id": "H08",
+      "question": "Who writes and signs off the Urdu text of the UI, above all clinical and consent wording.",
+      "owner": [
+        "vendor",
+        "translator",
+        "clinical_lead"
+      ],
+      "affects": [
+        "every screen in Urdu"
+      ],
+      "meanwhile": "Urdu you add is a draft: mark it so (the interview bank's pattern: a draft until a native speaker reviews it)."
+    },
+    {
+      "id": "H09",
+      "question": "One design system shared by every frontend team (who authors and approves it), or each team's own.",
+      "owner": [
+        "vendor",
+        "frontend_lead"
+      ],
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "Each team designs within the backend's constraints: themes Light and DarkHighContrast, zoom 100-250 %, Noto Nastaliq Urdu, status shown as text and icon, never colour alone. Follow the vendor's design principles (frontend guide 18, get_design_principles)."
+    },
+    {
+      "id": "H10",
+      "question": "How each realtime event is shown (interrupt, attention, inform, silent), alert sounds and which terminals play them. Only Code Red (interrupt), the licence and maintenance banners and the logout on session.revoked are prescribed (the event catalogue's `presentation`).",
+      "owner": [
+        "clinical_lead",
+        "vendor"
+      ],
+      "affects": [
+        "every screen with realtime events"
+      ],
+      "meanwhile": "Code Red interrupts; every other event updates the screen and, at most, a dismissible notice. `priority` is the delivery urgency, not a presentation rule."
+    },
+    {
+      "id": "H12",
+      "question": "Which workspaces run on web, Android and iOS, which cannot read a MAC address, discover the server by UDP or print silently; or are cash and printing Windows-only.",
+      "owner": [
+        "vendor",
+        "backend"
+      ],
+      "affects": [
+        "my_cash_shift",
+        "registration",
+        "every screen that prints"
+      ],
+      "meanwhile": "The guides describe the Windows (Electron) terminal; tell your developer when a screen needs a capability your platform lacks."
+    },
+    {
+      "id": "H18",
+      "question": "Noto Nastaliq Urdu everywhere, or the more compact Naskh in dense tables.",
+      "owner": [
+        "vendor",
+        "frontend_lead"
+      ],
+      "affects": [
+        "every table in Urdu"
+      ],
+      "meanwhile": "Noto Nastaliq Urdu, as the guides require."
+    },
+    {
+      "id": "H19",
+      "question": "Allergies: the patient record keeps free text, so it cannot tell \"no known allergies\" (asserted by a clinician) from \"not recorded\". Should it?",
+      "owner": [
+        "clinical_lead",
+        "backend"
+      ],
+      "affects": [
+        "every screen with a patient banner"
+      ],
+      "meanwhile": "Show the recorded text as recorded; an empty value is \"not recorded\", never \"none\"."
+    },
+    {
+      "id": "H20",
+      "question": "May unsaved form input be kept on the terminal (which fields, encrypted, for how long)?",
+      "owner": [
+        "vendor",
+        "hospital"
+      ],
+      "affects": [
+        "every form"
+      ],
+      "meanwhile": "In memory only; never a second checker's password."
+    },
+    {
+      "id": "H22",
+      "question": "Which documents may print on an unregistered terminal's default printer (sensitive A4 documents).",
+      "owner": [
+        "hospital",
+        "vendor"
+      ],
+      "affects": [
+        "every screen that prints"
+      ],
+      "meanwhile": "As the printing guide says: the hint, then the default printer."
+    },
+    {
+      "id": "H24",
+      "question": "Who approves frontend performance targets, alert thresholds and escalation timers.",
+      "owner": [
+        "vendor",
+        "clinical_lead"
+      ],
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "The server's own settings (e.g. critical_result_communicate_minutes)."
+    },
+    {
+      "id": "H25",
+      "question": "The labour register's columns are the hospital's own (owner decision M1, answered 15 October 2026): the defaults come from the Punjab HMIS delivery forms and the PHC manuals; a clinical lead reviews them before the hospital relies on them.",
+      "owner": [
+        "hospital",
+        "clinical_lead"
+      ],
+      "affects": [
+        "labour_register",
+        "labour_register_columns"
+      ],
+      "meanwhile": "Build the form from GET /maternity/labour-register/columns, never a fixed form; the hospital changes its columns on the columns screen."
+    }
+  ],
+  "examples": {
+    "GET /maternity/labour-register/columns": {
+      "request": {
+        "path": "/api/v1/maternity/labour-register/columns"
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": [
+            {
+              "field_id": 1,
+              "code": "hb_g_dl",
+              "label": "Haemoglobin",
+              "section": "Admission",
+              "kind": "Number",
+              "choices": [],
+              "unit": "g/dl",
+              "min_value": 3,
+              "max_value": 20,
+              "required": false,
+              "when_code": null,
+              "when_value": null,
+              "source": "Punjab HMIS (HISDU) manual, LHV module p61",
+              "sort_order": 10,
+              "is_active": true,
+              "row_version": 1
+            },
+            {
+              "field_id": 2,
+              "code": "bsr_mg_dl",
+              "label": "Blood sugar (random)",
+              "section": "Admission",
+              "kind": "Number",
+              "choices": [],
+              "unit": "mg/dl",
+              "min_value": 20,
+              "max_value": 600,
+              "required": false,
+              "when_code": null,
+              "when_value": null,
+              "source": "Punjab HMIS (HISDU) manual, LHV module p61",
+              "sort_order": 20,
+              "is_active": true,
+              "row_version": 1
+            },
+            {
+              "field_id": 3,
+              "code": "temperature_f_admission",
+              "label": "Temperature on admission",
+              "section": "Admission",
+              "kind": "Number",
+              "choices": [],
+              "unit": "F",
+              "min_value": 90,
+              "max_value": 110,
+              "required": false,
+              "when_code": null,
+              "when_value": null,
+              "source": "Punjab HMIS (HISDU) manual, LHV module p61",
+              "sort_order": 30,
+              "is_active": true,
+              "row_version": 1
+            }
+          ],
+          "meta": {
+            "server_time": "2026-10-15T12:12:06.850739+00:00"
+          },
+          "request_id": "95ac4748c14b44aeaee7afb2740dabf3"
+        }
+      }
+    },
+    "POST /maternity/labour-register": {
+      "request": {
+        "path": "/api/v1/maternity/labour-register",
+        "body": {
+          "admission_id": 1,
+          "delivered_at": "2026-10-15T11:42:06.760917+00:00",
+          "attended_by": 7,
+          "field_values": {
+            "mode_of_delivery": "Spontaneous vaginal",
+            "membranes_ruptured": "Yes",
+            "hours_since_rupture": "1-3 hours",
+            "amniotic_fluid": "Clear",
+            "third_stage": [
+              "Well contracted uterus",
+              "Oxytocin administered within 1 min"
+            ],
+            "father_name": "Muhammad Aslam",
+            "father_cnic": "35202-1234567-1"
+          },
+          "babies": [
+            {
+              "baby_no": 1,
+              "newborn_patient_id": 2,
+              "field_values": {
+                "sex": "Female",
+                "birth_weight_kg": 3.1,
+                "birth_doses": [
+                  "OPV-0",
+                  "BCG"
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "response": {
+        "status": 201,
+        "body": {
+          "data": {
+            "entry_id": 1,
+            "entry_number": "LR-2026-00001",
+            "patient_id": 1,
+            "mrn": "MRN-2026-000001",
+            "mother_name": "Ayesha Bibi",
+            "admission_id": 1,
+            "admission_number": "ADM-2026-00001",
+            "delivered_at": "2026-10-15T11:42:06.760917+00:00",
+            "attended_by": 7,
+            "attended_by_name": "Staff 5169",
+            "field_values": {
+              "father_cnic": "35202-1234567-1",
+              "father_name": "Muhammad Aslam",
+              "third_stage": [
+                "Oxytocin administered within 1 min",
+                "Well contracted uterus"
+              ],
+              "amniotic_fluid": "Clear",
+              "mode_of_delivery": "Spontaneous vaginal",
+              "membranes_ruptured": "Yes",
+              "hours_since_rupture": "1-3 hours"
+            },
+            "babies": [
+              {
+                "baby_no": 1,
+                "field_values": {
+                  "sex": "Female",
+                  "birth_doses": [
+                    "BCG",
+                    "OPV-0"
+                  ],
+                  "birth_weight_kg": 3.1
+                },
+                "newborn_patient_id": 2
+              }
+            ],
+            "status": "Draft",
+            "labels": null,
+            "recorded_at": "2026-10-15T12:12:06.907136+00:00",
+            "signed_at": null,
+            "author_stamp": null,
+            "row_version": 1
+          },
+          "meta": {
+            "server_time": "2026-10-15T12:12:06.926097+00:00"
+          },
+          "request_id": "4d49f0f6830843b38a96105c0a644a20"
+        }
+      }
+    },
+    "GET /maternity/labour-register": {
+      "request": {
+        "path": "/api/v1/maternity/labour-register",
+        "query": {
+          "date_from": "2026-10-15",
+          "date_to": "2026-10-15"
+        }
+      },
+      "response": {
+        "status": 200,
+        "body_preview": "{\"status\": 200, \"body\": {\"data\": [{\"entry_id\": 1, \"entry_number\": \"LR-2026-00001\", \"patient_id\": 1, \"mrn\": \"MRN-2026-000001\", \"mother_name\": \"Ayesha Bibi\", \"admission_id\": 1, \"admission_number\": \"ADM-2026-00001\", \"delivered_at\": \"2026-10-15T11:42:06.760917+00:00\", \"attended_by\": 7, \"attended_by_name\": \"Staff 5169\", \"field_values\": {\"father_cnic\": \"35202-1234567-1\", \"father_name\": \"Muhammad Aslam\", \"third_stage\": [\"Oxytocin administered within 1 min\", \"Well contracted uterus\"], \"amniotic_fluid\": \"Clear\", \"mode_of_delivery\": \"Spontaneous vaginal\", \"mother_condition\": \"Alive and healthy\", \"membranes_ruptured\": \"Yes\", \"hours_since_rupture\": \"1-3 hours\"}, \"babies\": [{\"baby_no\": 1, \"field_values\": {\"sex\": \"Female\", \"birth_doses\": [\"BCG\", \"OPV-0\"], \"baby_condition\": \"Alive and healthy\", \"birth_weight_kg\": 3.1}, \"newborn_patient_id\": 2}], \"status\": \"Signed\", \"labels\": {\"sex\": \"Sex\", \"birth_doses\": \"Birth doses given\", \"father_cnic\": \"Father's CNIC\", \"father_name\": \"Father's name\", \"third_stage\": \"Third stage (immediate steps)\", \"amniotic_fluid\": \"Amniotic fluid\", \"baby_condition\": \"Condition of the baby\", \"birth_weight_kg\": \"Birth weight\", \"mode_of_delivery\": \"Mode of delivery\", \"mother_condition\": \"Condition of the mother\", \"membranes_ruptured\": \"Membranes ruptured\", \"hours_since_rupture\": \"Hours since rupture of membranes\"}, \"recorded_at\": \"2026-10-15T12:12:06.907136+00:00\", \"signed_at\": \"2026-10-15T12:12:07.069975+00:00\", \"author_stamp\": {\"at\": \"2026-10-15T12:12:07.069975+00:00\", …"
+      }
+    },
+    "GET /maternity/labour-register/{entry_id}": {
+      "request": {
+        "path": "/api/v1/maternity/labour-register/1"
+      },
+      "response": {
+        "status": 200,
+        "body_preview": "{\"status\": 200, \"body\": {\"data\": {\"entry_id\": 1, \"entry_number\": \"LR-2026-00001\", \"patient_id\": 1, \"mrn\": \"MRN-2026-000001\", \"mother_name\": \"Ayesha Bibi\", \"admission_id\": 1, \"admission_number\": \"ADM-2026-00001\", \"delivered_at\": \"2026-10-15T11:42:06.760917+00:00\", \"attended_by\": 7, \"attended_by_name\": \"Staff 5169\", \"field_values\": {\"father_cnic\": \"35202-1234567-1\", \"father_name\": \"Muhammad Aslam\", \"third_stage\": [\"Oxytocin administered within 1 min\", \"Well contracted uterus\"], \"amniotic_fluid\": \"Clear\", \"mode_of_delivery\": \"Spontaneous vaginal\", \"mother_condition\": \"Alive and healthy\", \"membranes_ruptured\": \"Yes\", \"hours_since_rupture\": \"1-3 hours\"}, \"babies\": [{\"baby_no\": 1, \"field_values\": {\"sex\": \"Female\", \"birth_doses\": [\"BCG\", \"OPV-0\"], \"baby_condition\": \"Alive and healthy\", \"birth_weight_kg\": 3.1}, \"newborn_patient_id\": 2}], \"status\": \"Signed\", \"labels\": {\"sex\": \"Sex\", \"birth_doses\": \"Birth doses given\", \"father_cnic\": \"Father's CNIC\", \"father_name\": \"Father's name\", \"third_stage\": \"Third stage (immediate steps)\", \"amniotic_fluid\": \"Amniotic fluid\", \"baby_condition\": \"Condition of the baby\", \"birth_weight_kg\": \"Birth weight\", \"mode_of_delivery\": \"Mode of delivery\", \"mother_condition\": \"Condition of the mother\", \"membranes_ruptured\": \"Membranes ruptured\", \"hours_since_rupture\": \"Hours since rupture of membranes\"}, \"recorded_at\": \"2026-10-15T12:12:06.907136+00:00\", \"signed_at\": \"2026-10-15T12:12:07.069975+00:00\", \"author_stamp\": {\"at\": \"2026-10-15T12:12:07.069975+00:00\", \"…"
+      }
+    },
+    "PATCH /maternity/labour-register/{entry_id}": {
+      "request": {
+        "path": "/api/v1/maternity/labour-register/1",
+        "body": {
+          "field_values": {
+            "mother_condition": "Dead"
+          },
+          "expected_version": 1
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": {
+            "entry_id": 1,
+            "entry_number": "LR-2026-00001",
+            "patient_id": 1,
+            "mrn": "MRN-2026-000001",
+            "mother_name": "Ayesha Bibi",
+            "admission_id": 1,
+            "admission_number": "ADM-2026-00001",
+            "delivered_at": "2026-10-15T11:42:06.760917+00:00",
+            "attended_by": 7,
+            "attended_by_name": "Staff 5169",
+            "field_values": {
+              "father_cnic": "35202-1234567-1",
+              "father_name": "Muhammad Aslam",
+              "third_stage": [
+                "Oxytocin administered within 1 min",
+                "Well contracted uterus"
+              ],
+              "amniotic_fluid": "Clear",
+              "mode_of_delivery": "Spontaneous vaginal",
+              "mother_condition": "Dead",
+              "membranes_ruptured": "Yes",
+              "hours_since_rupture": "1-3 hours"
+            },
+            "babies": [
+              {
+                "baby_no": 1,
+                "field_values": {
+                  "sex": "Female",
+                  "birth_doses": [
+                    "BCG",
+                    "OPV-0"
+                  ],
+                  "birth_weight_kg": 3.1
+                },
+                "newborn_patient_id": 2
+              }
+            ],
+            "status": "Draft",
+            "labels": null,
+            "recorded_at": "2026-10-15T12:12:06.907136+00:00",
+            "signed_at": null,
+            "author_stamp": null,
+            "row_version": 2
+          },
+          "meta": {
+            "server_time": "2026-10-15T12:12:06.983453+00:00"
+          },
+          "request_id": "6d6000fd5ea341658e45760c7078fda0"
+        }
+      }
+    },
+    "POST /maternity/labour-register/{entry_id}/sign": {
+      "request": {
+        "path": "/api/v1/maternity/labour-register/1/sign"
+      },
+      "response": {
+        "status": 200,
+        "body_preview": "{\"status\": 200, \"body\": {\"data\": {\"entry_id\": 1, \"entry_number\": \"LR-2026-00001\", \"patient_id\": 1, \"mrn\": \"MRN-2026-000001\", \"mother_name\": \"Ayesha Bibi\", \"admission_id\": 1, \"admission_number\": \"ADM-2026-00001\", \"delivered_at\": \"2026-10-15T11:42:06.760917+00:00\", \"attended_by\": 7, \"attended_by_name\": \"Staff 5169\", \"field_values\": {\"father_cnic\": \"35202-1234567-1\", \"father_name\": \"Muhammad Aslam\", \"third_stage\": [\"Oxytocin administered within 1 min\", \"Well contracted uterus\"], \"amniotic_fluid\": \"Clear\", \"mode_of_delivery\": \"Spontaneous vaginal\", \"mother_condition\": \"Alive and healthy\", \"membranes_ruptured\": \"Yes\", \"hours_since_rupture\": \"1-3 hours\"}, \"babies\": [{\"baby_no\": 1, \"field_values\": {\"sex\": \"Female\", \"birth_doses\": [\"BCG\", \"OPV-0\"], \"baby_condition\": \"Alive and healthy\", \"birth_weight_kg\": 3.1}, \"newborn_patient_id\": 2}], \"status\": \"Signed\", \"labels\": {\"sex\": \"Sex\", \"birth_doses\": \"Birth doses given\", \"father_cnic\": \"Father's CNIC\", \"father_name\": \"Father's name\", \"third_stage\": \"Third stage (immediate steps)\", \"amniotic_fluid\": \"Amniotic fluid\", \"baby_condition\": \"Condition of the baby\", \"birth_weight_kg\": \"Birth weight\", \"mode_of_delivery\": \"Mode of delivery\", \"mother_condition\": \"Condition of the mother\", \"membranes_ruptured\": \"Membranes ruptured\", \"hours_since_rupture\": \"Hours since rupture of membranes\"}, \"recorded_at\": \"2026-10-15T12:12:06.907136+00:00\", \"signed_at\": \"2026-10-15T12:12:07.069975+00:00\", \"author_stamp\": {\"at\": \"2026-10-15T12:12:07.069975+00:00\", \"…"
+      }
+    },
+    "GET /maternity/labour-register/{entry_id}/babies/{baby_no}/birth-notification/pdf": {
+      "request": {
+        "path": "/api/v1/maternity/labour-register/1/babies/1/birth-notification/pdf"
+      },
+      "response": {
+        "status": 200,
+        "content_type": "application/pdf",
+        "bytes": 2784
+      }
+    },
+    "POST /maternity/newborns": {
+      "request": {
+        "path": "/api/v1/maternity/newborns",
+        "body": {
+          "admission_id": 1,
+          "born_at": "2026-10-14T12:32:20.381970+00:00",
+          "gender": "female"
+        }
+      },
+      "response": {
+        "status": 201,
+        "body_preview": "{\"status\": 201, \"body\": {\"data\": {\"patient_id\": 3, \"mrn\": \"MRN-2026-000003\", \"full_name\": \"Baby of Ayesha Bibi\", \"gender\": \"female\", \"born_at\": \"2026-10-14T12:32:20.381970+00:00\", \"mother_patient_id\": 1, \"mother_mrn\": \"MRN-2026-000001\", \"mother_name\": \"Ayesha Bibi\", \"birth_admission_id\": 1, \"admission_number\": \"ADM-2026-00001\", \"wristband\": {\"wristband\": {\"wristband_id\": 1, \"patient_id\": 3, \"admission_id\": 1, \"er_visit_id\": null, \"reason\": \"Newborn\", \"replacement_reason\": null, \"issued_by\": 7, \"issued_by_name\": \"uafa5898e19\", \"issued_at\": \"2026-10-14T12:52:20.396026+00:00\", \"replaced_at\": null, \"is_current\": true, \"row_version\": 1, \"patient_name\": \"Baby of Ayesha Bibi\", \"mrn\": \"MRN-2026-000003\", \"admission_number\": \"ADM-2026-00001\", \"er_number\": null}, \"print\": {\"document_type\": \"wristband\", \"printer_role\": \"label\", \"paper_width_mm\": 25, \"fields\": {\"wristband_id\": 1, \"hospital_name\": \"Haspataal Hospital\", \"patient_name\": \"Baby of Ayesha Bibi\", \"father_or_husband_name\": null, \"mrn\": \"MRN-2026-000003\", \"gender\": \"female\", \"age\": \"0d\", \"dob\": \"2026-10-14\", \"admission_number\": \"ADM-2026-00001\", \"er_number\": null, \"ward_name\": \"General Ward\", \"bed_label\": \"GW-1\", \"allergies\": null, \"blood_group\": null, \"issued_at\": \"2026-10-14T12:52:20.396026+00:00\"}, \"text\": \"Haspataal Hospital\\nBABY OF AYESHA BIBI\\nMRN-2026-000003 F 0d\\nDOB 14-Oct-2026\\nADM-2026-00001 General Ward GW-1\\n\", \"barcode_svg\": \"<svg version=\\\"1.1\\\" xmlns=\\\"http://www.w3.org/2000/svg\\\" width=\\\"53.840mm\\\" height=\\\"14.41…"
+      }
+    },
+    "GET /maternity/newborns": {
+      "request": {
+        "path": "/api/v1/maternity/newborns",
+        "query": {
+          "mother_patient_id": 1
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": [
+            {
+              "patient_id": 3,
+              "mrn": "MRN-2026-000003",
+              "full_name": "Baby of Ayesha Bibi",
+              "gender": "female",
+              "born_at": "2026-10-14T12:32:20.381970+00:00",
+              "mother_patient_id": 1,
+              "mother_mrn": "MRN-2026-000001",
+              "mother_name": "Ayesha Bibi",
+              "birth_admission_id": 1,
+              "admission_number": "ADM-2026-00001"
+            }
+          ],
+          "meta": {
+            "server_time": "2026-10-14T12:52:20.490338+00:00"
+          },
+          "request_id": "8aadafafb5ea417bb7569f1c41feba1b"
+        }
+      }
+    }
+  },
+  "schemas": {
+    "AuthorStampOut": {
+      "properties": {
+        "employee_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Employee Id"
+        },
+        "user_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "User Id"
+        },
+        "name": {
+          "type": "string",
+          "title": "Name"
+        },
+        "designation": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Designation",
+          "description": "Designation and specialty, e.g. \"Medical Officer, General Medicine\""
+        },
+        "registration": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Registration",
+          "description": "Council registration, e.g. \"PMDC 12345-P\" or \"PNC 67890\""
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "At",
+          "description": "When the entry was signed, reported or verified"
+        },
+        "text": {
+          "type": "string",
+          "title": "Text",
+          "description": "The printed line: name, designation, registration, date and time"
+        }
+      },
+      "type": "object",
+      "required": [
+        "employee_id",
+        "user_id",
+        "name",
+        "designation",
+        "registration",
+        "at",
+        "text"
+      ],
+      "title": "AuthorStampOut",
+      "description": "The author stamp of a clinical entry (MSDS IMS 147), as the author's staff record stood when they signed it\n(SQL hms_author_stamp / hms_employee_stamp, migration 0013 [STP]). Show it under the entry on screen and print\n`text` under it on paper."
+    },
+    "Envelope_LabourEntryOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/LabourEntryOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[LabourEntryOut]"
+    },
+    "Envelope_NewbornRegisteredOut_": {
+      "properties": {
+        "data": {
+          "$ref": "#/components/schemas/NewbornRegisteredOut"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[NewbornRegisteredOut]"
+    },
+    "Envelope_list_LabourEntryOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/LabourEntryOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[LabourEntryOut]]"
+    },
+    "Envelope_list_LabourFieldOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/LabourFieldOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[LabourFieldOut]]"
+    },
+    "Envelope_list_NewbornOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/NewbornOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[NewbornOut]]"
+    },
+    "HTTPValidationError": {
+      "properties": {
+        "detail": {
+          "items": {
+            "$ref": "#/components/schemas/ValidationError"
+          },
+          "type": "array",
+          "title": "Detail"
+        }
+      },
+      "type": "object",
+      "title": "HTTPValidationError"
+    },
+    "LabourBabyIn": {
+      "properties": {
+        "baby_no": {
+          "type": "integer",
+          "maximum": 8.0,
+          "minimum": 1.0,
+          "title": "Baby No",
+          "description": "1 for a single birth; 1, 2 ... for twins and more"
+        },
+        "newborn_patient_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Newborn Patient Id",
+          "description": "A baby born alive: its own record (POST /maternity/newborns), a newborn of this mother; null for a stillbirth"
+        },
+        "field_values": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "type": "object",
+          "title": "Field Values",
+          "description": "Column code -> value, the Baby columns"
+        }
+      },
+      "type": "object",
+      "required": [
+        "baby_no"
+      ],
+      "title": "LabourBabyIn"
+    },
+    "LabourBabyOut": {
+      "properties": {
+        "baby_no": {
+          "type": "integer",
+          "title": "Baby No"
+        },
+        "newborn_patient_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Newborn Patient Id"
+        },
+        "field_values": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            ]
+          },
+          "type": "object",
+          "title": "Field Values"
+        }
+      },
+      "type": "object",
+      "required": [
+        "baby_no",
+        "newborn_patient_id",
+        "field_values"
+      ],
+      "title": "LabourBabyOut"
+    },
+    "LabourEntryIn": {
+      "properties": {
+        "admission_id": {
+          "type": "integer",
+          "title": "Admission Id",
+          "description": "The mother's admission (the mother is its patient)"
+        },
+        "delivered_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Delivered At"
+        },
+        "attended_by": {
+          "type": "integer",
+          "title": "Attended By",
+          "description": "The employee who attended the delivery"
+        },
+        "field_values": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "type": "object",
+          "title": "Field Values",
+          "description": "Column code -> value: Number a number, YesNo \"Yes\"/\"No\", Choice one of its choices, MultiChoice a list of them, Date YYYY-MM-DD"
+        },
+        "babies": {
+          "items": {
+            "$ref": "#/components/schemas/LabourBabyIn"
+          },
+          "type": "array",
+          "maxItems": 8,
+          "minItems": 1,
+          "title": "Babies"
+        }
+      },
+      "type": "object",
+      "required": [
+        "admission_id",
+        "delivered_at",
+        "attended_by",
+        "babies"
+      ],
+      "title": "LabourEntryIn",
+      "description": "A delivery into the hospital's labour register, as a draft."
+    },
+    "LabourEntryOut": {
+      "properties": {
+        "entry_id": {
+          "type": "integer",
+          "title": "Entry Id"
+        },
+        "entry_number": {
+          "type": "string",
+          "title": "Entry Number",
+          "description": "LR-YYYY-NNNNN"
+        },
+        "patient_id": {
+          "type": "integer",
+          "title": "Patient Id",
+          "description": "The mother"
+        },
+        "mrn": {
+          "type": "string",
+          "title": "Mrn"
+        },
+        "mother_name": {
+          "type": "string",
+          "title": "Mother Name"
+        },
+        "admission_id": {
+          "type": "integer",
+          "title": "Admission Id"
+        },
+        "admission_number": {
+          "type": "string",
+          "title": "Admission Number"
+        },
+        "delivered_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Delivered At"
+        },
+        "attended_by": {
+          "type": "integer",
+          "title": "Attended By"
+        },
+        "attended_by_name": {
+          "type": "string",
+          "title": "Attended By Name"
+        },
+        "field_values": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            ]
+          },
+          "type": "object",
+          "title": "Field Values",
+          "description": "Column code -> value (the sections other than Baby)"
+        },
+        "babies": {
+          "items": {
+            "$ref": "#/components/schemas/LabourBabyOut"
+          },
+          "type": "array",
+          "title": "Babies"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "Draft",
+            "Signed"
+          ],
+          "title": "Status",
+          "description": "Draft (editable) or Signed (never changes)"
+        },
+        "labels": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Labels",
+          "description": "Signed: the column labels as they were when it was signed"
+        },
+        "recorded_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Recorded At"
+        },
+        "signed_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Signed At"
+        },
+        "author_stamp": {
+          "anyOf": [
+            {
+              "$ref": "#/components/schemas/AuthorStampOut"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The signer's stamp (MSDS IMS 147)"
+        },
+        "row_version": {
+          "type": "integer",
+          "title": "Row Version"
+        }
+      },
+      "type": "object",
+      "required": [
+        "entry_id",
+        "entry_number",
+        "patient_id",
+        "mrn",
+        "mother_name",
+        "admission_id",
+        "admission_number",
+        "delivered_at",
+        "attended_by",
+        "attended_by_name",
+        "field_values",
+        "babies",
+        "status",
+        "labels",
+        "recorded_at",
+        "signed_at",
+        "author_stamp",
+        "row_version"
+      ],
+      "title": "LabourEntryOut"
+    },
+    "LabourEntryPatch": {
+      "properties": {
+        "delivered_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Delivered At"
+        },
+        "attended_by": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Attended By"
+        },
+        "field_values": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Field Values"
+        },
+        "babies": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/components/schemas/LabourBabyIn"
+              },
+              "type": "array",
+              "maxItems": 8,
+              "minItems": 1
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Babies"
+        },
+        "expected_version": {
+          "type": "integer",
+          "title": "Expected Version",
+          "description": "row_version as read"
+        }
+      },
+      "type": "object",
+      "required": [
+        "expected_version"
+      ],
+      "title": "LabourEntryPatch",
+      "description": "A draft entry: the values sent change (null clears one); babies sent replace the babies."
+    },
+    "LabourFieldOut": {
+      "properties": {
+        "field_id": {
+          "type": "integer",
+          "title": "Field Id"
+        },
+        "code": {
+          "type": "string",
+          "title": "Code"
+        },
+        "label": {
+          "type": "string",
+          "title": "Label"
+        },
+        "section": {
+          "type": "string",
+          "enum": [
+            "Admission",
+            "Delivery",
+            "Mother",
+            "Baby",
+            "Discharge"
+          ],
+          "title": "Section"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "Text",
+            "Number",
+            "Choice",
+            "MultiChoice",
+            "YesNo",
+            "Date"
+          ],
+          "title": "Kind"
+        },
+        "choices": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Choices"
+        },
+        "unit": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Unit"
+        },
+        "min_value": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Min Value"
+        },
+        "max_value": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Max Value"
+        },
+        "required": {
+          "type": "boolean",
+          "title": "Required"
+        },
+        "when_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "When Code",
+          "description": "Required only when this column has when_value"
+        },
+        "when_value": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "When Value"
+        },
+        "source": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Source",
+          "description": "Where a default column comes from (the Punjab HMIS manual's page, a PHC manual); null for the hospital's own"
+        },
+        "sort_order": {
+          "type": "integer",
+          "title": "Sort Order"
+        },
+        "is_active": {
+          "type": "boolean",
+          "title": "Is Active"
+        },
+        "row_version": {
+          "type": "integer",
+          "title": "Row Version"
+        }
+      },
+      "type": "object",
+      "required": [
+        "field_id",
+        "code",
+        "label",
+        "section",
+        "kind",
+        "choices",
+        "unit",
+        "min_value",
+        "max_value",
+        "required",
+        "when_code",
+        "when_value",
+        "source",
+        "sort_order",
+        "is_active",
+        "row_version"
+      ],
+      "title": "LabourFieldOut"
+    },
+    "Meta": {
+      "properties": {
+        "server_time": {
+          "type": "string",
+          "title": "Server Time",
+          "description": "Server clock (UTC). Use it to detect terminal clock skew."
+        },
+        "page": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Page"
+        },
+        "page_size": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Page Size"
+        },
+        "total_count": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Total Count"
+        },
+        "next_cursor": {
+          "title": "Next Cursor"
+        }
+      },
+      "type": "object",
+      "required": [
+        "server_time"
+      ],
+      "title": "Meta"
+    },
+    "NewbornIn": {
+      "properties": {
+        "admission_id": {
+          "type": "integer",
+          "title": "Admission Id",
+          "description": "The mother's current admission"
+        },
+        "born_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Born At"
+        },
+        "gender": {
+          "type": "string",
+          "enum": [
+            "male",
+            "female",
+            "other",
+            "unknown"
+          ],
+          "title": "Gender"
+        }
+      },
+      "type": "object",
+      "required": [
+        "admission_id",
+        "born_at",
+        "gender"
+      ],
+      "title": "NewbornIn",
+      "description": "A baby born to a mother admitted here: a patient of its own, 'Baby of' the mother, with its own band."
+    },
+    "NewbornOut": {
+      "properties": {
+        "patient_id": {
+          "type": "integer",
+          "title": "Patient Id"
+        },
+        "mrn": {
+          "type": "string",
+          "title": "Mrn"
+        },
+        "full_name": {
+          "type": "string",
+          "title": "Full Name",
+          "description": "'Baby of' the mother until the family names the baby (the patient's record)"
+        },
+        "gender": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "male",
+                "female",
+                "other",
+                "unknown"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Gender"
+        },
+        "born_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Born At"
+        },
+        "mother_patient_id": {
+          "type": "integer",
+          "title": "Mother Patient Id"
+        },
+        "mother_mrn": {
+          "type": "string",
+          "title": "Mother Mrn"
+        },
+        "mother_name": {
+          "type": "string",
+          "title": "Mother Name"
+        },
+        "birth_admission_id": {
+          "type": "integer",
+          "title": "Birth Admission Id"
+        },
+        "admission_number": {
+          "type": "string",
+          "title": "Admission Number"
+        }
+      },
+      "type": "object",
+      "required": [
+        "patient_id",
+        "mrn",
+        "full_name",
+        "gender",
+        "born_at",
+        "mother_patient_id",
+        "mother_mrn",
+        "mother_name",
+        "birth_admission_id",
+        "admission_number"
+      ],
+      "title": "NewbornOut"
+    },
+    "NewbornRegisteredOut": {
+      "properties": {
+        "patient_id": {
+          "type": "integer",
+          "title": "Patient Id"
+        },
+        "mrn": {
+          "type": "string",
+          "title": "Mrn"
+        },
+        "full_name": {
+          "type": "string",
+          "title": "Full Name",
+          "description": "'Baby of' the mother until the family names the baby (the patient's record)"
+        },
+        "gender": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "male",
+                "female",
+                "other",
+                "unknown"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Gender"
+        },
+        "born_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Born At"
+        },
+        "mother_patient_id": {
+          "type": "integer",
+          "title": "Mother Patient Id"
+        },
+        "mother_mrn": {
+          "type": "string",
+          "title": "Mother Mrn"
+        },
+        "mother_name": {
+          "type": "string",
+          "title": "Mother Name"
+        },
+        "birth_admission_id": {
+          "type": "integer",
+          "title": "Birth Admission Id"
+        },
+        "admission_number": {
+          "type": "string",
+          "title": "Admission Number"
+        },
+        "wristband": {
+          "$ref": "#/components/schemas/WristbandIssuedOut",
+          "description": "The baby's own band on the mother's admission, ready to print"
+        }
+      },
+      "type": "object",
+      "required": [
+        "patient_id",
+        "mrn",
+        "full_name",
+        "gender",
+        "born_at",
+        "mother_patient_id",
+        "mother_mrn",
+        "mother_name",
+        "birth_admission_id",
+        "admission_number",
+        "wristband"
+      ],
+      "title": "NewbornRegisteredOut"
+    },
+    "PrintOut_WristbandFieldsOut_": {
+      "properties": {
+        "document_type": {
+          "type": "string",
+          "enum": [
+            "autopsy_order",
+            "bed_labels",
+            "blood_component_label",
+            "blood_donation_labels",
+            "clinical_note",
+            "complaint_letter",
+            "complaints_notice",
+            "consent_form",
+            "cost_estimate",
+            "cssd_labels",
+            "death_certificate",
+            "discharge_summary",
+            "dispensing_label",
+            "dose_label",
+            "id_card",
+            "imaging_report",
+            "lab_label",
+            "lab_report",
+            "mlc_intimation",
+            "opd_slip",
+            "pharmacy_receipt",
+            "prescription",
+            "referral_slip",
+            "send_out_manifest",
+            "surgical_record",
+            "triage_algorithm",
+            "wristband"
+          ],
+          "title": "Document Type"
+        },
+        "printer_role": {
+          "type": "string",
+          "enum": [
+            "receipt",
+            "label",
+            "document",
+            "card"
+          ],
+          "title": "Printer Role",
+          "description": "Which printer of the terminal to use (GET /api/v1/terminals/whoami)"
+        },
+        "paper_width_mm": {
+          "type": "integer",
+          "title": "Paper Width Mm"
+        },
+        "fields": {
+          "$ref": "#/components/schemas/WristbandFieldsOut",
+          "description": "The document's data, for frontends that render their own layout"
+        },
+        "text": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Text",
+          "description": "Pre-formatted monospace text (48 columns) for ESC/POS printers, as is"
+        },
+        "barcode_svg": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Barcode Svg"
+        },
+        "qr_svg": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Qr Svg"
+        },
+        "pdf_url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Pdf Url"
+        }
+      },
+      "type": "object",
+      "required": [
+        "document_type",
+        "printer_role",
+        "paper_width_mm",
+        "fields",
+        "text",
+        "barcode_svg",
+        "qr_svg",
+        "pdf_url"
+      ],
+      "title": "PrintOut[WristbandFieldsOut]"
+    },
+    "ValidationError": {
+      "properties": {
+        "loc": {
+          "items": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ]
+          },
+          "type": "array",
+          "title": "Location"
+        },
+        "msg": {
+          "type": "string",
+          "title": "Message"
+        },
+        "type": {
+          "type": "string",
+          "title": "Error Type"
+        },
+        "input": {
+          "title": "Input"
+        },
+        "ctx": {
+          "type": "object",
+          "title": "Context"
+        }
+      },
+      "type": "object",
+      "required": [
+        "loc",
+        "msg",
+        "type"
+      ],
+      "title": "ValidationError"
+    },
+    "WristbandFieldsOut": {
+      "properties": {
+        "wristband_id": {
+          "type": "integer",
+          "title": "Wristband Id"
+        },
+        "hospital_name": {
+          "type": "string",
+          "title": "Hospital Name"
+        },
+        "patient_name": {
+          "type": "string",
+          "title": "Patient Name"
+        },
+        "father_or_husband_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Father Or Husband Name"
+        },
+        "mrn": {
+          "type": "string",
+          "title": "Mrn",
+          "description": "Also the barcode; the QR code reads HMS:PT:<mrn>"
+        },
+        "gender": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Gender"
+        },
+        "age": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Age",
+          "description": "e.g. 34y, 8m, 5d"
+        },
+        "dob": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Dob"
+        },
+        "admission_number": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Admission Number"
+        },
+        "er_number": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Er Number"
+        },
+        "ward_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ward Name"
+        },
+        "bed_label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Bed Label"
+        },
+        "allergies": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Allergies",
+          "description": "Print prominently (a red band or a red mark) when set"
+        },
+        "blood_group": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Blood Group"
+        },
+        "issued_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Issued At"
+        }
+      },
+      "type": "object",
+      "required": [
+        "wristband_id",
+        "hospital_name",
+        "patient_name",
+        "father_or_husband_name",
+        "mrn",
+        "gender",
+        "age",
+        "dob",
+        "admission_number",
+        "er_number",
+        "ward_name",
+        "bed_label",
+        "allergies",
+        "blood_group",
+        "issued_at"
+      ],
+      "title": "WristbandFieldsOut",
+      "description": "What the band shows (print it on the wristband printer, mapped as the terminal's label printer)."
+    },
+    "WristbandIssuedOut": {
+      "properties": {
+        "wristband": {
+          "$ref": "#/components/schemas/WristbandOut"
+        },
+        "print": {
+          "$ref": "#/components/schemas/PrintOut_WristbandFieldsOut_"
+        }
+      },
+      "type": "object",
+      "required": [
+        "wristband",
+        "print"
+      ],
+      "title": "WristbandIssuedOut"
+    },
+    "WristbandOut": {
+      "properties": {
+        "wristband_id": {
+          "type": "integer",
+          "title": "Wristband Id"
+        },
+        "patient_id": {
+          "type": "integer",
+          "title": "Patient Id"
+        },
+        "admission_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Admission Id"
+        },
+        "er_visit_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Er Visit Id"
+        },
+        "reason": {
+          "type": "string",
+          "enum": [
+            "Admission",
+            "Emergency",
+            "Newborn",
+            "Replacement"
+          ],
+          "title": "Reason"
+        },
+        "replacement_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Replacement Reason"
+        },
+        "issued_by": {
+          "type": "integer",
+          "title": "Issued By"
+        },
+        "issued_by_name": {
+          "type": "string",
+          "title": "Issued By Name"
+        },
+        "issued_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Issued At"
+        },
+        "replaced_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Replaced At"
+        },
+        "is_current": {
+          "type": "boolean",
+          "title": "Is Current",
+          "description": "The band the patient wears now"
+        },
+        "row_version": {
+          "type": "integer",
+          "title": "Row Version"
+        },
+        "patient_name": {
+          "type": "string",
+          "title": "Patient Name"
+        },
+        "mrn": {
+          "type": "string",
+          "title": "Mrn"
+        },
+        "admission_number": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Admission Number"
+        },
+        "er_number": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Er Number"
+        }
+      },
+      "type": "object",
+      "required": [
+        "wristband_id",
+        "patient_id",
+        "admission_id",
+        "er_visit_id",
+        "reason",
+        "replacement_reason",
+        "issued_by",
+        "issued_by_name",
+        "issued_at",
+        "replaced_at",
+        "is_current",
+        "row_version",
+        "patient_name",
+        "mrn",
+        "admission_number",
+        "er_number"
+      ],
+      "title": "WristbandOut"
+    }
+  },
+  "unknowns": [
+    {
+      "what": "decision H02",
+      "owner": [
+        "vendor"
+      ],
+      "question": "Digits in the Urdu UI and printouts: Latin 0-9 or Extended Arabic-Indic ۰-۹.",
+      "affects": [
+        "every screen in Urdu"
+      ],
+      "meanwhile": "Latin digits; identifiers, doses and money stay left to right."
+    },
+    {
+      "what": "decision H03",
+      "owner": [
+        "vendor",
+        "clinical_lead"
+      ],
+      "question": "How dates and times are shown on screen, and a 12- or 24-hour clock.",
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "The server's print format (e.g. 27-Sep-2026) and the hospital time zone."
+    },
+    {
+      "what": "decision H04",
+      "owner": [
+        "vendor"
+      ],
+      "question": "Money on screen: decimals shown, and digit grouping (1,234,567 or 12,34,567).",
+      "affects": [
+        "every screen with money"
+      ],
+      "meanwhile": "The amounts as the API sends them, with the currency setting."
+    },
+    {
+      "what": "decision H08",
+      "owner": [
+        "vendor",
+        "translator",
+        "clinical_lead"
+      ],
+      "question": "Who writes and signs off the Urdu text of the UI, above all clinical and consent wording.",
+      "affects": [
+        "every screen in Urdu"
+      ],
+      "meanwhile": "Urdu you add is a draft: mark it so (the interview bank's pattern: a draft until a native speaker reviews it)."
+    },
+    {
+      "what": "decision H09",
+      "owner": [
+        "vendor",
+        "frontend_lead"
+      ],
+      "question": "One design system shared by every frontend team (who authors and approves it), or each team's own.",
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "Each team designs within the backend's constraints: themes Light and DarkHighContrast, zoom 100-250 %, Noto Nastaliq Urdu, status shown as text and icon, never colour alone. Follow the vendor's design principles (frontend guide 18, get_design_principles)."
+    },
+    {
+      "what": "decision H10",
+      "owner": [
+        "clinical_lead",
+        "vendor"
+      ],
+      "question": "How each realtime event is shown (interrupt, attention, inform, silent), alert sounds and which terminals play them. Only Code Red (interrupt), the licence and maintenance banners and the logout on session.revoked are prescribed (the event catalogue's `presentation`).",
+      "affects": [
+        "every screen with realtime events"
+      ],
+      "meanwhile": "Code Red interrupts; every other event updates the screen and, at most, a dismissible notice. `priority` is the delivery urgency, not a presentation rule."
+    },
+    {
+      "what": "decision H12",
+      "owner": [
+        "vendor",
+        "backend"
+      ],
+      "question": "Which workspaces run on web, Android and iOS, which cannot read a MAC address, discover the server by UDP or print silently; or are cash and printing Windows-only.",
+      "affects": [
+        "my_cash_shift",
+        "registration",
+        "every screen that prints"
+      ],
+      "meanwhile": "The guides describe the Windows (Electron) terminal; tell your developer when a screen needs a capability your platform lacks."
+    },
+    {
+      "what": "decision H18",
+      "owner": [
+        "vendor",
+        "frontend_lead"
+      ],
+      "question": "Noto Nastaliq Urdu everywhere, or the more compact Naskh in dense tables.",
+      "affects": [
+        "every table in Urdu"
+      ],
+      "meanwhile": "Noto Nastaliq Urdu, as the guides require."
+    },
+    {
+      "what": "decision H19",
+      "owner": [
+        "clinical_lead",
+        "backend"
+      ],
+      "question": "Allergies: the patient record keeps free text, so it cannot tell \"no known allergies\" (asserted by a clinician) from \"not recorded\". Should it?",
+      "affects": [
+        "every screen with a patient banner"
+      ],
+      "meanwhile": "Show the recorded text as recorded; an empty value is \"not recorded\", never \"none\"."
+    },
+    {
+      "what": "decision H20",
+      "owner": [
+        "vendor",
+        "hospital"
+      ],
+      "question": "May unsaved form input be kept on the terminal (which fields, encrypted, for how long)?",
+      "affects": [
+        "every form"
+      ],
+      "meanwhile": "In memory only; never a second checker's password."
+    },
+    {
+      "what": "decision H22",
+      "owner": [
+        "hospital",
+        "vendor"
+      ],
+      "question": "Which documents may print on an unregistered terminal's default printer (sensitive A4 documents).",
+      "affects": [
+        "every screen that prints"
+      ],
+      "meanwhile": "As the printing guide says: the hint, then the default printer."
+    },
+    {
+      "what": "decision H24",
+      "owner": [
+        "vendor",
+        "clinical_lead"
+      ],
+      "question": "Who approves frontend performance targets, alert thresholds and escalation timers.",
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "The server's own settings (e.g. critical_result_communicate_minutes)."
+    },
+    {
+      "what": "decision H25",
+      "owner": [
+        "hospital",
+        "clinical_lead"
+      ],
+      "question": "The labour register's columns are the hospital's own (owner decision M1, answered 15 October 2026): the defaults come from the Punjab HMIS delivery forms and the PHC manuals; a clinical lead reviews them before the hospital relies on them.",
+      "affects": [
+        "labour_register",
+        "labour_register_columns"
+      ],
+      "meanwhile": "Build the form from GET /maternity/labour-register/columns, never a fixed form; the hospital changes its columns on the columns screen."
+    }
+  ]
+}
