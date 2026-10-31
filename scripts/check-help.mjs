@@ -249,6 +249,7 @@ export function checkHelp({
       "WardIndent",
       "DischargeSummary",
       "TriageScale",
+      "ERBoard",
     ].map((n) => `src/screens/${n}.tsx`),
   ];
   const used = new Set(),

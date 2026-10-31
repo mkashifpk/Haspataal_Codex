@@ -4772,6 +4772,92 @@ consents_doctor: {
       ],
     ],
   },
+  er_board: {
+    title: "Emergency room tracking board",
+    titleUr: "ایمرجنسی روم ٹریکنگ بورڈ",
+    purpose: "Track every open visit in the emergency department ordered by untriaged first, then priority triage level (1 to 5) and arrival under MSDS AAC 15-20 and MSDS 18 (never first-come, first-served). Surface real-time visual warning badges (TriageOverdue, DoctorOverdue, ObservationTooLong, AdmissionWaitTooLong, ReferralWaitTooLong, MlcNotOpened, MedicoLegalUndecided), hear Code Red audio/banner notifications on er.visit.updated, register walk-in arrivals, issue temporary trauma profiles for unknown patients, and inspect on-duty staff and on-call consultants under MSDS 17 iii (rules 2422ef9b12, 618704df95, bdb901deb2, 74958f2576, 21a063e488, 9501947a0e, 141986b356).",
+    purposeUr: "ایم ایس ڈی ایس 18 کے مطابق ایمرجنسی ڈیپارٹمنٹ کے تمام زیرِ علاج مریضوں کی ترجیحی ترتیب (پہلے غیر ٹرائیج شدہ، پھر لیول 1 سے 5 اور آمد کے لحاظ سے، کبھی بھی پہلے آئیے پہلے پائیے نہیں) سے نگرانی کریں۔ تاخیر کے الرٹ بیجز دیکھیں، لیول 1 مریض پر کوڈ ریڈ سائرن اور بینر الرٹ سنیں، نئی آمد کا اندراج کریں، نامعلوم مریضوں کا فوری ٹراما پروفائل بنائیں، اور ڈیوٹی اسٹاف و آن کال کنسلٹنٹس کے فون نمبرز ملاحظہ کریں۔",
+    steps: [
+      "Open Triage -> ER board to view the dynamic tracking board of all active emergency visits.",
+      "Review the top KPI header summary tiles displaying patient counts by triage priority level, care stage, and overdue target counts (rule 618704df95).",
+      "Observe table rows: patients awaiting initial triage are pinned at the top, followed strictly by triage severity level (1 Resuscitation to 5 Non-urgent) and arrival time (rule 2422ef9b12, MSDS 18).",
+      "Inspect active warning badges on visit cards: TriageOverdue, DoctorOverdue, ObservationTooLong, AdmissionWaitTooLong, ReferralWaitTooLong, and red MlcNotOpened alerts.",
+      "Hear real-time chime and visual alert banner whenever an incoming visit is upgraded to Level 1 / Code Red via er.visit.updated (rule bdb901deb2).",
+      "Click '+ Register Arrival' to record a new patient intake with arrival mode, referred from, presenting complaint, and optional ticket ID (rule 74958f2576, 141986b356).",
+      "For unidentified or unconscious emergency arrivals, click '+ Quick Trauma' to generate an instant temporary identity (e.g. 'Unknown Male 1') before triage (rule 74958f2576).",
+      "Click 'On-Duty Staff' side panel to check nurses and emergency doctors currently on shift, along with on-call specialist consultants and their direct contact extensions (rule 21a063e488, MSDS 17 iii).",
+    ],
+    stepsUr: [
+      "ٹرائیج ورک اسپیس -> 'ایمرجنسی بورڈ' کھولیں اور تمام زیر علاج ہنگامی مریضوں کا لائیو ٹریکنگ بورڈ دیکھیں۔",
+      "سب سے اوپر کے سمری ٹائلز دیکھیں جہاں ٹرائیج لیول، علاج کے مراحل اور ہدف سے زیادہ تاخیر کے شکار مریضوں کی تعداد دکھائی گئی ہے (قاعدہ 618704df95)۔",
+      "مریضوں کی فہرست دیکھیں: غیر ٹرائیج شدہ مریض سب سے اوپر نظر آئیں گے، اس کے بعد سختی سے ٹرائیج لیول (1 سے 5) اور آمد کے وقت کی بنیاد پر ترتیب ہوگی (قاعدہ 2422ef9b12، ایم ایس ڈی ایس 18)۔",
+      "مریض کے کارڈ پر وارننگ بیجز چیک کریں: ٹرائیج تاخیر، ڈاکٹر تاخیر، آبزرویشن تاخیر، اور لال رنگ کا ایم ایل سی غیر مکمل الرٹ۔",
+      "سرور سے er.visit.updated موصول ہونے پر لیول 1 مریض کے لیے خودکار آڈیو سائرن اور سرخ الرٹ بینر سنیں (قاعدہ bdb901deb2)۔",
+      "نئے مریض کے اندراج کے لیے '+ Register Arrival' پر کلک کریں اور آمد کا طریقہ، شکایت اور ٹکٹ نمبر درج کریں (قاعدہ 74958f2576)۔",
+      "نامعلوم یا بے ہوش مریض کے لیے پہلے '+ Quick Trauma' پر کلک کر کے فوری عارضی پروفائل تیار کریں اور پھر ٹرائیج شروع کریں (قاعدہ 74958f2576)۔",
+      "ڈیوٹی پر موجود ڈاکٹرز، نرسز اور آن کال کنسلٹنٹس کے ایمرجنسی فون نمبرز دیکھنے کے لیے 'On-Duty Staff' پینل پر کلک کریں (قاعدہ 21a063e488، ایم ایس ڈی ایس 17 iii)۔",
+    ],
+    faq: [
+      [
+        "Why is the board ordered by triage level rather than registration sequence?",
+        "Under MSDS 18 and rule 2422ef9b12, emergency departments must strictly prioritize by clinical acuity, never first-come, first-served. Untriaged arrivals are shown first to ensure immediate nurse assessment, followed by Level 1 (Resuscitation) through Level 5 (Non-urgent), sub-sorted by wait duration.",
+      ],
+      [
+        "What should clinical staff do when the 'MlcNotOpened' or 'MedicoLegalUndecided' badge is visible?",
+        "Under rule 618704df95, a bright red hazard badge indicates a suspected or confirmed medico-legal case (assault, road traffic accident, poisoning, burns) where the mandatory MLC register entry has not yet been completed. Staff must immediately trigger the medico-legal workflow.",
+      ],
+      [
+        "How does the ER board handle real-time Code Red notifications?",
+        "Under rule bdb901deb2, the board subscribes to er.visit.updated realtime events. If any patient's status transitions to Level 1 (Resuscitation) or Code Red, the system sounds an audible alert chime and highlights the patient with an urgent flashing red banner.",
+      ],
+      [
+        "How are unknown, unconscious, or unidentified patients registered?",
+        "Under rule 74958f2576, triage staff click '+ Quick Trauma' to invoke POST /patients/trauma, creating a temporary profile (such as 'Unknown Male 1'). The generated temporary MRN is immediately passed to POST /er/visits for rapid triage intake without delaying resuscitation.",
+      ],
+      [
+        "What does the error 'ER_VISIT_OPEN' (409) mean and how should staff resolve it?",
+        "Under rule 74958f2576, a patient can only have one active ER visit at a time. If an arrival is submitted for a patient already in the department, the server returns 409 ER_VISIT_OPEN containing details.er_visit_id; clicking 'View Existing Visit' directs staff to the open chart.",
+      ],
+      [
+        "What contact information is displayed in the On-Duty panel under MSDS 17 iii?",
+        "Under rule 21a063e488, the GET /er/on-duty panel lists all ER medical officers, triage nurses, and ward boys currently clocked in, as well as on-call senior consultants (surgeons, orthopedics, cardiology) with verified emergency phone numbers.",
+      ],
+      [
+        "How does facility service state affect new ER arrivals?",
+        "Under rules 9501947a0e and 141986b356, new ER registrations are only permitted while emergency_department is Active. If the service is transitioning to 'open_work' or retired, existing visits remain manageable but the 'Register Arrival' button is locked with 'No new emergency visits from now on' banner.",
+      ],
+    ],
+    faqUr: [
+      [
+        "ایمرجنسی بورڈ رجسٹریشن نمبر کے بجائے ٹرائیج کی ترتیب سے کیوں دکھایا جاتا ہے؟",
+        "ایم ایس ڈی ایس 18 اور قاعدہ 2422ef9b12 کے تحت ایمرجنسی میں مریضوں کی ترتیب کلینیکل نزاکت کے مطابق ہوتی ہے، کبھی بھی پہلے آئیے پہلے پائیے کی بنیاد پر نہیں۔ غیر ٹرائیج شدہ مریض سب سے اوپر آتے ہیں، پھر لیول 1 (فوری بحالی) سے لیول 5 تک۔",
+      ],
+      [
+        "جب 'MlcNotOpened' یا 'MedicoLegalUndecided' بیج نظر آئے تو عملہ کیا کرے؟",
+        "قاعدہ 618704df95 کے تحت سرخ خطرے کا بیج ظاہر کرتا ہے کہ مریض میڈیکو لیگل نوعیت (حادثہ، تشدد، زہر) کا ہے مگر قانونی اندراج ابھی تک مکمل نہیں ہوا۔ عملے کو فوری طور پر ایم ایل سی رجسٹر کھولنا چاہیے۔",
+      ],
+      [
+        "ایمرجنسی بورڈ ریئل ٹائم کوڈ ریڈ نوٹیفکیشن کو کیسے سنبھالتا ہے؟",
+        "قاعدہ bdb901deb2 کے تحت بورڈ er.visit.updated سنتا ہے۔ جیسے ہی کوئی مریض لیول 1 (کوڈ ریڈ) بنتا ہے، سسٹم فوری طور پر آڈیو گھنٹی بجاتا ہے اور سکرین پر واضح سرخ الرٹ دکھاتا ہے۔",
+      ],
+      [
+        "نامعلوم، لاوارث یا بے ہوش ایمرجنسی مریضوں کا اندراج کیسے ہوتا ہے؟",
+        "قاعدہ 74958f2576 کے تحت عملہ '+ Quick Trauma' پر کلک کر کے فوری عارضی شناختی پروفائل (جیسے 'Unknown Male 1') بناتا ہے اور اس عارضی نمبر سے فوری آمد درج کر کے جان بچانے کا عمل شروع کیا جاتا ہے۔",
+      ],
+      [
+        "خرابی 'ER_VISIT_OPEN' (409) کا کیا مطلب ہے اور اسے کیسے حل کیا جائے؟",
+        "قاعدہ 74958f2576 کے مطابق مریض کا بیک وقت ایک ہی اوپن ایمرجنسی وزٹ ہو سکتا ہے۔ اگر مریض پہلے سے زیر علاج ہو تو سرور 409 دیتا ہے، عملہ 'View Existing Visit' پر کلک کر کے پرانے وزٹ پر جا سکتا ہے۔",
+      ],
+      [
+        "ایم ایس ڈی ایس 17 iii کے تحت آن ڈیوٹی پینل میں کیا معلومات ملتی ہیں؟",
+        "قاعدہ 21a063e488 کے تحت پینل تمام ڈیوٹی پر موجود ڈاکٹرز اور نرسز، اور آن کال سپیشلسٹ کنسلٹنٹس (سرجن، آرتھوپیڈک، امراض قلب) کے فون نمبرز دکھاتا ہے تاکہ ہنگامی رابطہ فوراً ممکن ہو۔",
+      ],
+      [
+        "سروس کا اسٹیٹس نئی ایمرجنسی آمد کے اندراج پر کیسے اثر انداز ہوتا ہے؟",
+        "قواعد 9501947a0e اور 141986b356 کے تحت نئی آمد صرف اس وقت درج ہو سکتی ہے جب سروس ایکٹو ہو۔ اگر سروس ریٹائر ہو رہی ہو تو پرانے وزٹ نمٹائے جا سکتے ہیں لیکن نیا مریض درج نہیں ہو سکتا۔",
+      ],
+    ],
+  },
   triage_scale: {
     title: "Emergency triage scale & SOP algorithm",
     titleUr: "ایمرجنسی ٹرائیج اسکیل اور تحریری الگورتھم",
