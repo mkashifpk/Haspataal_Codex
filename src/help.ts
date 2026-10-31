@@ -4686,6 +4686,92 @@ consents_doctor: {
       ],
     ],
   },
+  discharge_summary: {
+    title: "Discharge summary & referral slip",
+    titleUr: "ڈسچارج سمری اور ریفرل سلپ",
+    purpose: "Write, sign and print the discharge summary (or referral slip for transfer) before the clinical discharge. Outcome governs required fields; suggestions prefill stay data; signed summaries freeze permanently under MSDS IMS 147 (rules b6ad13f99c, b730ca524e, a0859fbcc9, 6ac70d5b94, 73f0bf7236, a8b60a1d88).",
+    purposeUr: "کلینیکل ڈسچارج سے قبل ڈسچارج سمری (یا منتقلی کی صورت میں ریفرل سلپ) لکھیں، تصدیق کریں اور پرنٹ کریں۔ ڈسچارج کا نتیجہ لازمی فیلڈز کا تعین کرتا ہے؛ تجاویز وارڈ ریکارڈ سے مدد فراہم کرتی ہیں؛ تصدیق شدہ سمری ایم ایس ڈی ایس آئی ایم ایس 147 کے تحت مستقل منجمد ہو جاتی ہے۔",
+    steps: [
+      "Open Doctor workspace -> Discharge summary and enter Inpatient Admission ID or MRN to load admission.",
+      "Select the discharge outcome first (Home, Transferred, LAMA, Absconded, or Died); the outcome dictates required clinical fields (rule b6ad13f99c).",
+      "Inspect empty fields and click '+ Use suggestion' to populate admission reason, final diagnosis, findings, procedures, and medications from stay records (rule b730ca524e).",
+      "Search and add WHO ICD-11 / ICD-10 diagnostic codes using the ICD search modal or select suggested stay codes (rule 73f0bf7236).",
+      "For Transferred patients, document receiving hospital, transfer reason, and ambulance/escort transport arrangements (rule a0859fbcc9).",
+      "For Died patients, ensure death certificate is certified first; no take-home medications or follow-up instructions are documented (rule a0859fbcc9).",
+      "Click 'Save Draft' to autosave with concurrency version checks; click 'Sign & Finalize' to permanently stamp and freeze the clinical record (rule 6ac70d5b94).",
+      "Click 'Print A4 Summary' on document printer or 'Download PDF'; if changes are required after signing, click 'Add Correction' to append an official addendum.",
+    ],
+    stepsUr: [
+      "ڈاکٹر ورک اسپیس کھولیں -> 'ڈسچارج سمری' پر جائیں اور داخلہ نمبر یا ایم آر این درج کر کے ریکارڈ لوڈ کریں۔",
+      "پہلے ڈسچارج کا نتیجہ منتخب کریں (گھر، منتقلی، لاما، فرار، یا وفات)؛ نتیجہ لازمی فیلڈز کا تعین کرتا ہے (قاعدہ b6ad13f99c)۔",
+      "خالی فیلڈز کا معائنہ کریں اور داخلے کے ریکارڈز سے تجاویز درج کرنے کے لیے '+ Use suggestion' پر کلک کریں (قاعدہ b730ca524e)۔",
+      "آئی سی ڈی پکر کے ذریعے ڈبلیو ایچ او کوڈز تلاش کریں یا نوٹس سے تجویز کردہ کوڈز منتخب کریں (قاعدہ 73f0bf7236)۔",
+      "منتقلی کے مریضوں کے لیے وصول کنندہ ہسپتال کا نام، منتقلی کا جواز اور ایمبولینس و عملے کے انتظامات درج کریں (قاعدہ a0859fbcc9)۔",
+      "وفات پانے والے مریضوں کے لیے پہلے ڈیتھ سرٹیفکیٹ تصدیق شدہ ہونا ضروری ہے؛ کوئی رخصتی ادویات یا فالو اپ ہدایات درج نہیں کی جاتیں (قاعدہ a0859fbcc9)۔",
+      "مسودہ محفوظ کرنے کے لیے 'Save Draft' اور ریکارڈ کو مہر و لائسنس کے ساتھ منجمد کرنے کے لیے 'Sign & Finalize' پر کلک کریں (قاعدہ 6ac70d5b94)۔",
+      "'Print A4 Summary' پر کلک کر کے سرکاری پرنٹ نکالیں؛ دستخط کے بعد تبدیلی کے لیے 'تصحیح شامل کریں' کے ذریعے سرکاری اضافہ درج کریں۔",
+    ],
+    faq: [
+      [
+        "Why must the discharge outcome be selected first?",
+        "Under rule b6ad13f99c, the discharge outcome (Home, Transferred, LAMA, Absconded, Died) dictates which clinical sections are displayed and required. Transferred requires receiving hospital details; LAMA requires refusal circumstances; Died disables medications.",
+      ],
+      [
+        "Can stay suggestions be silently inserted into the discharge summary?",
+        "No. Under rule b730ca524e, suggestions from the stay (lab findings, MAR doses, intake complaints) are presented beside empty fields with a '+ Use suggestion' button so the doctor explicitly reviews and edits the clinical text.",
+      ],
+      [
+        "What happens if a patient died during the inpatient stay?",
+        "Under rule a0859fbcc9, if a death was recorded, suggested.outcome is locked to Died and no other outcome can be signed (DISCHARGE_SUMMARY_PATIENT_DIED). The death certificate must be certified first (DISCHARGE_SUMMARY_DEATH_NOT_CERTIFIED).",
+      ],
+      [
+        "Can a discharge summary be edited after it has been signed?",
+        "No. Under rule 6ac70d5b94 and MSDS IMS 147, signing permanently freezes the document and clinician author stamp. Direct edits are rejected (DISCHARGE_SUMMARY_FINAL); doctors must use 'Add Correction' to append an audited addendum.",
+      ],
+      [
+        "How are ICD diagnostic codes selected and verified?",
+        "Under rule 73f0bf7236, diagnoses must use verified WHO ICD-11 or ICD-10 classification codes. The screen offers codes from stay notes as chips and provides an integrated search modal. Unknown codes are refused (ICD_CODE_UNKNOWN).",
+      ],
+      [
+        "What printed document is given when a patient is transferred to another hospital?",
+        "Under rule a0859fbcc9 and a8b60a1d88, selecting Transferred generates a formal Inter-Hospital Referral Slip detailing receiving hospital, clinical reason, oxygen/ambulance escort arrangements, and emergency contacts.",
+      ],
+      [
+        "How does the screen handle concurrent edits from another doctor or terminal?",
+        "The screen sends expected_version on draft updates and signing (rule 6ac70d5b94). If another user modified the draft concurrently, the server returns 409 VERSION_CONFLICT and the screen refreshes the latest draft safely.",
+      ],
+    ],
+    faqUr: [
+      [
+        "پہلے ڈسچارج کا نتیجہ منتخب کرنا کیوں لازمی ہے؟",
+        "قاعدہ b6ad13f99c کے تحت ڈسچارج کا نتیجہ (گھر، منتقلی، لاما، فرار، وفات) یہ طے کرتا ہے کہ کون سے فیلڈز لازمی ہیں۔ منتقلی میں ہسپتال کی تفصیلات اور لاما میں علاج سے انکار کا تفصیلی نوٹ ضروری ہوتا ہے۔",
+      ],
+      [
+        "کیا وارڈ نوٹس سے تجاویز خودکار طور پر فیلڈز میں شامل ہو سکتی ہیں؟",
+        "نہیں۔ قاعدہ b730ca524e کے تحت تجاویز خالی فیلڈز کے ساتھ بٹن کے طور پر دکھائی جاتی ہیں تاکہ معالج خود ان کا جائزہ لے اور ضرورت کے مطابق کلینیکل متن میں ترمیم کرے۔",
+      ],
+      [
+        "اگر مریض کا دورانِ داخلہ انتقال ہوا ہو تو کیا طریقہ کار ہے؟",
+        "قاعدہ a0859fbcc9 کے تحت اگر موت درج ہو چکی ہو تو نتیجہ لازماً Died ہوگا اور کوئی دوسرا نتیجہ قبول نہیں ہوگا۔ ڈیتھ سمری سے قبل ڈیتھ سرٹیفکیٹ کی تصدیق لازمی ہے۔",
+      ],
+      [
+        "کیا دستخط کے بعد ڈسچارج سمری میں ترمیم ممکن ہے؟",
+        "نہیں۔ قاعدہ 6ac70d5b94 اور MSDS IMS 147 کے تحت دستخط کے بعد سمری مستقل طور پر منجمد ہو جاتی ہے۔ معالج 'تصحیح شامل کریں' کے ذریعے سرکاری آڈٹ شدہ اضافہ درج کر سکتے ہیں۔",
+      ],
+      [
+        "آئی سی ڈی کوڈز کا انتخاب اور توثیق کیسے ہوتی ہے؟",
+        "قاعدہ 73f0bf7236 کے تحت تشخیص کے لیے ڈبلیو ایچ او آئی سی ڈی-11 یا 10 کوڈز کا استعمال لازمی ہے۔ سکرین وارڈ نوٹس سے کوڈز تجویز کرتی ہے اور سرچ پکر کے ذریعے تلاش کی سہولت دیتی ہے۔",
+      ],
+      [
+        "دیگر ہسپتال منتقلی کی صورت میں کون سا پرنٹ جاری ہوتا ہے؟",
+        "قاعدہ a0859fbcc9 کے تحت منتقلی کی صورت میں باضابطہ 'ریفرل سلپ' تیار ہوتی ہے جس میں منزل کا ہسپتال، ایمبولینس اور لائف سپورٹ کے انتظامات درج ہوتے ہیں۔",
+      ],
+      [
+        "اگر دو معالجین بیک وقت سمری میں تبدیلی کریں تو کنکرنسی کیسے سنبھالی جاتی ہے؟",
+        "سکرین expected_version بھیجتی ہے۔ اگر کسی اور نے ڈرافٹ تبدیل کیا ہو تو سرور 409 VERSION_CONFLICT جواب دیتا ہے اور سکرین نیا ڈرافٹ دوبارہ لوڈ کرتی ہے۔",
+      ],
+    ],
+  },
   ward_indent: {
     title: "Ward supply indent & inventory",
     titleUr: "وارڈ سپلائی انڈینٹ اور کیبنٹ اسٹاک",
