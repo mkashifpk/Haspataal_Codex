@@ -240,6 +240,7 @@ export function checkHelp({
       "BloodCenterRelease",
       "TransfusionBedside",
       "MaternityPolicy",
+      "ObstetricAssessment",
     ].map((n) => `src/screens/${n}.tsx`),
   ];
   const used = new Set(),

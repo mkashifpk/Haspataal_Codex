@@ -4686,6 +4686,92 @@ consents_doctor: {
       ],
     ],
   },
+  obstetric_assessment: {
+    title: "Obstetric risk assessment",
+    titleUr: "حمل و زچگی کے خطرات کا جائزہ",
+    purpose: "A woman's risk assessment at her visit or admission: deliberate high-risk determination, standard conditions tagging, mandatory counselling, plan of care, and Category I/II A nutritional status.",
+    purposeUr: "مریضہ کی وزٹ یا داخلے پر زچگی خطرات کا جائزہ: ہائی رسک کا شعوری انتخاب، علامات کی درجہ بندی، لازمی کونسلنگ، علاج یا ریفرل کا فیصلہ، اور کیٹیگری I/II A غذائی جائزہ۔",
+    steps: [
+      "Open Doctor or Maternity workspace → Obstetric risk assessment to evaluate a pregnant patient at her visit or admission.",
+      "Search for the patient by MRN, full name, or mobile phone and click her record to load her history.",
+      "Deliberately select the risk determination: click either 'Standard Risk' or 'High Risk Pregnancy'; neither button is pre-selected (rule 064bedf875).",
+      "Enter estimated gestational age in completed weeks (1–45) and confirm the linked OPD ticket or inpatient admission ID.",
+      "For high-risk pregnancies, check all identified conditions from the catalog, observing whether each is Managed here or Referred under hospital policy.",
+      "Confirm that the patient and family attendants have been informed of danger signs, and enter the mandatory clinical counselling note.",
+      "In Category I and II A hospitals, complete the mandatory nutritional assessment and corrective dietary advice (rule 272b13a3e0, MSDS Indicator 28).",
+      "Select the management plan ('Care Here' or 'Refer'); for transfers, click 'Issue External Referral' (POST /referrals), then click 'Save & Sign Risk Assessment'.",
+    ],
+    stepsUr: [
+      "حاملہ مریضہ کی وزٹ یا داخلے پر معائنے کے لیے ڈاکٹر یا زچگی ورک اسپیس سے 'حمل و زچگی خطرات کا جائزہ' کھولیں۔",
+      "مریضہ کو ایم آر این، نام یا فون نمبر کے ذریعے تلاش کر کے اس کے ریکارڈ پر کلک کریں تاکہ سابقہ ہسٹری لوڈ ہو سکے۔",
+      "خطرے کی سطح کا شعوری فیصلہ کریں: 'معمول کا خطرہ' یا 'ہائی رسک زچگی' پر کلک کریں؛ پہلے سے کوئی بٹن منتخب نہیں ہوتا (قاعدہ 064bedf875)۔",
+      "حمل کی مدت مکمل ہفتوں میں (1 تا 45) درج کریں اور متعلقہ او پی ڈی پرچی یا ان ڈور داخلہ نمبر کی تصدیق کریں۔",
+      "ہائی رسک کیسز میں فہرست سے شناخت شدہ تمام علامات منتخب کریں اور دیکھیں کہ ہسپتال کی پالیسی کے تحت ان کا علاج یہاں ہوگا یا ریفرل۔",
+      "تصدیق کریں کہ مریضہ اور تیمارداروں کو خطرے کی علامات سے آگاہ کیا گیا ہے، اور لازمی کونسلنگ نوٹ تحریر کریں۔",
+      "کیٹیگری I اور II A ہسپتالوں میں لازمی غذائی جائزہ اور اصلاحی خوراک کا مشورہ درج کریں (قاعدہ 272b13a3e0، انڈیکیٹر 28)۔",
+      "نگہداشت کا پلان (یہاں علاج یا ریفر) منتخب کریں؛ منتقلی کی صورت میں 'بیرونی ریفرل جاری کریں' سے باضابطہ خط جاری کریں اور اسسمنٹ محفوظ کریں۔",
+    ],
+    faq: [
+      [
+        "Why are neither of the two risk buttons pre-selected on the assessment form?",
+        "Under rule 064bedf875 and PHC guidelines, clinical risk determination must be an active, conscious decision by the attending doctor or nurse. Pre-filling defaults could lead clinicians to overlook high-risk danger signs.",
+      ],
+      [
+        "What happens if a high-risk condition is marked Referred under hospital policy?",
+        "When an identified condition has policy status Referred, the UI automatically highlights the referral recommendation and prompts the clinician to issue an official external referral letter (POST /referrals) with transport and destination details.",
+      ],
+      [
+        "When is nutritional assessment mandatory during an obstetric assessment?",
+        "Under rule 272b13a3e0 and MSDS Indicator 28, Category I and Category II A hospitals are legally required to document maternal nutritional status (BMI, anaemia signs, oedema) and corrective dietary advice for all high-risk obstetric cases.",
+      ],
+      [
+        "Can an existing obstetric assessment be edited or overwritten?",
+        "No. Under rule 962fcab00e, obstetric risk assessments are append-only permanent legal records. Each subsequent visit or admission generates a new assessment, and all past assessments remain viewable in chronological order.",
+      ],
+      [
+        "What permissions and clinical roles are required to record an obstetric risk assessment?",
+        "Recording an assessment requires the 'maternity.record' permission, held by clinical specialists, doctors, obstetric surgeons, head nurses, and ward nurses. Receptionists and administrative staff cannot sign clinical risk assessments.",
+      ],
+      [
+        "How does the screen behave if the hospital's maternity service is retiring or inactive?",
+        "Under rules e6bd3426e5 and b46e6c48cc, when maternity is retiring (open_work mode), a persistent banner warns that no new assessments can start while existing records remain readable. If the service is inactive, new assessments are disabled.",
+      ],
+      [
+        "How does the external referral letter link with the patient's obstetric assessment?",
+        "Creating a referral via POST /referrals assigns a unique referral number and referral ID. This ID is saved with the assessment payload, and the referral number is displayed on the patient's assessment flowsheet and printed clinical documents.",
+      ],
+    ],
+    faqUr: [
+      [
+        "اسسمنٹ فارم پر پہلے سے کوئی رسک بٹن منتخب کیوں نہیں ہوتا؟",
+        "قاعدہ 064bedf875 اور پی ایچ سی ہدایات کے مطابق ہائی رسک کا فیصلہ ایک شعوری طبی انتخاب ہونا چاہیے۔ خودکار ڈیفالٹ رکھنے سے ڈاکٹر یا نرس کی طرف سے خطرے کی علامات نظر انداز ہونے کا خدشہ ہوتا ہے۔",
+      ],
+      [
+        "اگر ہسپتال کی پالیسی میں کوئی علامت ریفرڈ ہو تو کیا ہوتا ہے؟",
+        "جب منتخب علامت کی پالیسی ریفر ہو تو سسٹم فوری طور پر ریفرل پلان کی نشاندہی کرتا ہے اور باضابطہ بیرونی ریفرل لیٹر (POST /referrals) جاری کرنے کی سہولت فراہم کرتا ہے۔",
+      ],
+      [
+        "زچگی اسسمنٹ کے دوران غذائی جائزہ کب لازمی ہوتا ہے؟",
+        "قاعدہ 272b13a3e0 اور ایم ایس ڈی ایس انڈیکیٹر 28 کے تحت کیٹیگری I اور II A ہسپتالوں میں ہائی رسک زچگی کے تمام کیسز کے لیے غذائی کیفیت (بی ایم آئی، اینیمیا) اور اصلاحی مشورہ درج کرنا قانونی طور پر لازمی ہے۔",
+      ],
+      [
+        "کیا پہلے سے محفوظ شدہ زچگی اسسمنٹ میں ترمیم کی جا سکتی ہے؟",
+        "نہیں، قاعدہ 962fcab00e کے تحت زچگی رسک اسسمنٹس ناقابلِ تنسیخ اور مستقل قانونی ریکارڈز ہیں۔ ہر نئی وزٹ پر نئی اسسمنٹ کا اضافہ ہوتا ہے اور سابقہ تمام اسسمنٹس تاریخی ریکارڈ میں موجود رہتی ہیں۔",
+      ],
+      [
+        "زچگی رسک اسسمنٹ محفوظ کرنے کے لیے کون سے کردار اور اجازت درکار ہیں؟",
+        "اس کے لیے 'maternity.record' اجازت درکار ہے جو میڈیکل آفیسرز، گائناکالوجسٹ، سرجنز، ہیڈ نرسز اور وارڈ نرسز کے پاس ہوتی ہے۔ غیر طبی عملہ اسسمنٹ سائن نہیں کر سکتا۔",
+      ],
+      [
+        "اگر زچگی سروس ریٹائر ہو رہی ہو یا بند ہو تو سکرین کیا رویہ دکھاتی ہے؟",
+        "قاعدہ e6bd3426e5 اور b46e6c48cc کے تحت ریٹائرنگ موڈ میں واضح بینر آتا ہے کہ نئی اسسمنٹس بند ہیں جبکہ پرانے ریکارڈز دیکھے جا سکتے ہیں۔ سروس بند ہونے پر نیا اندراج مکمل طور پر بلاک ہو جاتا ہے۔",
+      ],
+      [
+        "بیرونی ریفرل لیٹر مریضہ کی زچگی اسسمنٹ کے ساتھ کیسے منسلک ہوتا ہے؟",
+        "ریفرل جاری کرنے پر ایک مخصوص ریفرل آئی ڈی بنتی ہے جو اسسمنٹ ریکارڈ میں محفوظ ہو جاتی ہے اور مریضہ کے ہسٹری کارڈ اور پرنٹ شدہ دستاویزات پر ریفرل نمبر کے طور پر نظر آتی ہے۔",
+      ],
+    ],
+  },
   maternity_policy: {
     title: "High-risk pregnancy: our policy",
     titleUr: "ہائی رسک حمل: ہسپتال کی پالیسی",
