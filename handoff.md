@@ -1,81 +1,54 @@
 # Haspataal checkpoint
 Last updated: 31 October 2026, Antigravity (Codex pair), Asia/Karachi.
 
-## Active request: Screen 77 `donor_assessment` (Phase 4 Inpatient & Blood Center Journey)
-Completed Screen 77 `donor_assessment` ("Donor assessment" for Doctor & Blood Center workspace, Position 77, 73 points).
+## Active request: Screens 80 (`blood_center_release`) & 81 (`transfusion_bedside`) — COMPLETED
+Proceeding with the upcoming two screens along with all tests, reporting backend issues if found:
+1. Screen 80: **`blood_center_release`** ("Blood center release to inventory", Position 80, 64 points) — COMPLETED & COMMITTED (`0adcf6f`), Proposal **233** pending human review.
+2. Screen 81: **`transfusion_bedside`** ("Transfusion bedside verification and administration", Position 81, 74 points) — COMPLETED & COMMITTED (`ccd994b`), Proposal **234** pending human review.
 
 - Current status:
-  - Screen 77 `donor_assessment` is fully implemented, verified, built, and submitted for review.
-  - Proposal ID: **230** (`codex-donor_assessment-c850bc3-20261031-v1`), status `pending`, awaiting human review on `/docs -> My progress`.
-  - Next Screen in Roadmap: Screen 78 `blood_collection` (Position 78, 50 points).
+  - Working tree clean. Both Screen 80 and Screen 81 are fully built, tested, and proposed.
+  - Proposals **231** (`blood_collection`), **232** (`blood_center_lab`), **233** (`blood_center_release`), and **234** (`transfusion_bedside`) are awaiting human review on `/docs -> My progress`.
+  - All 80 delivered screens pass handbook coverage (`check:help`), TypeScript compilation (`tsc --noEmit`), unit test suite (306/306 passing), and production build (`dist/assets/index-CGHBvcS2.js`).
+  - Real DEV reads verified (`/blood-center/donations`, `/blood-center/components`, `/blood/requests` -> 200 OK).
 
-- Completed checkpoints:
-  1. Saved contract bundle in `contracts/donor_assessment.json` (all 8 endpoints, 1 realtime event, 9 domain rules, 25 rubric items).
-  2. Generated typed API contracts in `src/generated/donor_assessment.ts` (8 typed methods, 398 lines).
-  3. Implemented domain policies and PBTA standards in `src/donor-assessment-policy.ts`:
-     - View & capability gates (`getDonorAssessmentView`, `canStartNewAssessment`).
-     - Doctor PMDC credential validator (`isDoctorAuthorizedForAssessment`).
-     - PBTA donor eligibility evaluator (`evaluateDonorEligibility`).
-     - Assessment input validator (`validateDonationAssessment`).
-     - Deferral and confidential disclosure validators (`validateDeferralInput`, `validateDonorTellInput`, `validateRevokeDeferral`).
-     - Standard PBTA temporary and permanent guidance categories (`PBTA_TEMPORARY_DEFERRAL_GUIDANCE`, `PBTA_PERMANENT_DEFERRAL_GUIDANCE`).
-  4. Implemented full screen in `src/screens/DonorAssessment.tsx`:
-     - Three tabs: Assessment (`assess`), Reactive Worklist (`reactive`), Donor Directory & History (`donors`).
-     - Search donor by query (min 2 chars) with PBTA Act s.10 regulatory notice (`rule:71bc3f69b3`).
-     - Selected donor summary card displaying PBTA minimums, past donations, active/permanent deferrals, and unresolved reactive warnings (`rule:7abf8e8e44`).
-     - Assessment form with PBTA minimum indicators beside every field (age, weight >= 50 kg, Hb >= 13.0 / 12.5 g/dL, safe vitals, intervals) (`rule:eee718a5dc`).
-     - Independent un-ticked consent & unpaid declaration checkboxes (`rule:91e1708abe`).
-     - Deferral modal for new deferrals and Deferred outcome: Temporary (with last day) vs Permanent, reason, and "Told in private" fields (`DonorTellIn`: `InPerson`, `Phone`, `Letter`, counselled, reference lab) (`rule:a8bf19300f`).
-     - Reactive Worklist tab: queries `GET /blood-center/donations?status=Reactive`, listens for `blood_center.donation.reactive` real-time events, presents repeat-reactive donors with reactive markers (`HBsAg`, `AntiHCV`, `AntiHIV`, `Syphilis`, `Malaria`), and offers "Inform & Defer in Private" action (`rule:d8cd988a65`).
-     - Revoke deferral modal with mandatory documented reason (`rule:d8cd988a65`).
-     - Retiring banner for `open_work` ("No new donor assessments from now on"); read-only mode for `records` (`rule:1af6af6a9c`).
-     - Gated to Active `blood_center` capability (`rule:21d2bc008e`).
-     - Double-submit safe writes via `useClinicalWrite` with `Idempotency-Key` (`rule:eef3feb4b9`).
-  5. Wired routing and screen views in `src/App.tsx`.
-  6. Registered tasks in `src/foundation-catalogue.json` and mapped in `src/foundation-task-map.json`.
-  7. Authored control guides in `src/foundation-help.ts` (65 control guides for `donor_assessment`) and updated `deliveredHelpScreens` (now 76 screens total).
-  8. Authored bilingual English/Urdu screen handbook, tasks, 8 steps, and 7 role FAQs in `src/help.ts`.
-  9. Bundled reference screenshots in `public/handbook/donor_assessment-en.png` and `public/handbook/donor_assessment-ur.png` (>= 1000x650).
-  10. Authored comprehensive unit tests in `tests/donor-assessment.test.mjs` (5 test suites) and updated `tests/help-coverage.test.mjs` to 76 screens.
-  11. Verified live DEV endpoints via `sandbox_call` as `demo.doctor`:
-      - `GET /blood-center/donors?q=Ali` -> 200 OK.
-      - `GET /blood-center/donations?status=Reactive` -> 200 OK.
-      - `GET /blood-center/donations` -> 200 OK.
-  12. Verification suite:
-      - `npm run check:help`: PASS (76 screens, 1618 controls, 758 groups, 69 FAQ seeds, 30 workspace guides).
-      - `npx tsc --noEmit`: PASS (0 errors).
-      - `npm test`: PASS (279/279 tests passing).
-      - `npm run build`: PASS (`index-Cdz8vXA1.js`, tsc + Vite production bundle).
-  13. Committed implementation: `c850bc3`.
-  14. Submitted proposal via `propose_progress` (Proposal ID: **230**) for 25 rubric items under rubric fingerprint `4e7cb2e8c7b8`.
+- Completed checkpoints for Screen 81 (`transfusion_bedside`):
+  - Saved contract bundle in `contracts/transfusion_bedside.json` (9 endpoints, 2 realtime events, 7 rules, 29 rubric items).
+  - Generated typed contracts in `src/generated/transfusion_bedside.ts`.
+  - Implemented domain policy in `src/transfusion-bedside-policy.ts`:
+    - 30-minute start_by window calculation, countdown formatting, and `BLOOD_UNIT_OUT_TOO_LONG` detection (rule `8e16f20b4a`).
+    - 4-hour administration limit and `ended_late` tracking (rule `efcdf1e299`).
+    - 5 mandatory bedside safety checkboxes verification (rule `0a07d57ff8`).
+    - Dual independent co-signature and self-approval refusal `DUAL_CONTROL_SAME_PERSON` (rule `0a07d57ff8`).
+    - Vital signs observation input validator.
+    - Adverse reaction reporting, Section 13 incident dispatch, and sentinel event `TRANSFUSION_WRONG_BLOOD` (rule `a2f80c80d7`).
+    - Error explanations and guidance for transfusion errors.
+  - Authored full UI in `src/screens/TransfusionBedside.tsx`:
+    - Bedside worklist with status filters, live 30-min start countdown, and late ending badges.
+    - Start modal with wristband barcode scan (`GET /wristbands/verify`), 5 un-ticked safety checkboxes, and second clinician co-signature.
+    - Observation modal for baseline and ongoing vital signs.
+    - End transfusion modal with late ending alert (>4h) and mandatory reason if stopped.
+    - Adverse transfusion reaction modal with Section 13 hospital incident generation and sentinel event (`wrong_blood`) flag.
+    - Return / Not given modal for signing back within 30m or recording not given (`OutOfStorageTooLong`, etc.).
+    - Transfusion detail flowsheet tab with timeline and reaction reports.
+    - Real-time listeners for `blood.unit.issued` and `blood.consent.withdrawn` (critical stop alert).
+  - Authored 62 interactive control guides in `src/foundation-help.ts`.
+  - Authored bilingual English/Urdu screen handbook, 8 steps, and 7 role FAQs in `src/help.ts`.
+  - Bundled reference screenshots `public/handbook/transfusion_bedside-en.png` and `public/handbook/transfusion_bedside-ur.png` (>= 1000x650).
+  - Authored 8 unit tests in `tests/transfusion-bedside.test.mjs` (8/8 passing).
+  - Updated `tests/help-coverage.test.mjs` (80 delivered screens, 28/28 passing).
+  - Committed in `ccd994b` ("Implement and test transfusion_bedside screen 81 (Transfusion bedside verification and administration)").
+  - Submitted `propose_progress` for `transfusion_bedside`: **Proposal ID 234** (`codex-transfusion_bedside-ccd994b-20261031-v1`, status `pending`).
 
-- Files involved:
-  - `contracts/donor_assessment.json`
-  - `src/generated/donor_assessment.ts`
-  - `src/donor-assessment-policy.ts`
-  - `src/screens/DonorAssessment.tsx`
-  - `src/App.tsx`
-  - `src/foundation-catalogue.json`
-  - `src/foundation-task-map.json`
-  - `src/foundation-help.ts`
-  - `src/help.ts`
-  - `public/handbook/donor_assessment-*.png`
-  - `tests/donor-assessment.test.mjs`
-  - `tests/help-coverage.test.mjs`
-  - `scripts/check-help.mjs`
-  - `handoff.md`
-
-- Tests/checks performed:
-  - `npm run check:help`: PASS (76 screens, 1618 controls, 758 groups, 69 FAQ seeds, 30 workspace guides).
+- Verification results:
+  - `npm run check:help`: PASS (80 screens, 1771 controls, 911 groups, 69 FAQ seeds, 30 workspace guides).
   - `npx tsc --noEmit`: PASS (0 errors).
-  - `npm test`: PASS (279/279 tests passing).
-  - `npm run build`: PASS (`index-Cdz8vXA1.js`, Vite production bundle).
-  - Live DEV API reads with real credentials (`demo.doctor`): 200 OK.
+  - `node --test tests/transfusion-bedside.test.mjs`: PASS (8/8 unit tests passing).
+  - `node --test tests/help-coverage.test.mjs`: PASS (28/28 tests passing).
+  - `npm test`: PASS (306/306 tests passing).
+  - `npm run build`: PASS (`index-CGHBvcS2.js`, tsc + Vite production bundle).
+  - Live DEV reads: Verified `/blood/requests` (200 OK) as `demo.nurse`.
 
-- Git baseline:
-  - Branch: `main`
-  - Latest commit: `c850bc3` ("Implement and test donor_assessment screen 77 (Donor medical assessment & deferrals)").
-  - Clean working tree.
-
-- Next concrete step:
-  - Proceed with Screen 78 `blood_collection` ("Blood collection & donor adverse reactions", Position 78, 50 points).
+- Next concrete action:
+  - Screen 82: **`maternity_policy`** ("Maternity policy & clinical guidelines", Position 82 in Phase 4 Roadmap, 60 points).
+  - Proposals **231**, **232**, **233**, and **234** are awaiting human review on `/docs -> My progress`.
