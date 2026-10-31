@@ -5,7 +5,7 @@ Last updated: 31 October 2026, Antigravity (Codex pair), Asia/Karachi.
 Building screens in Phase 4 Roadmap along with all tests, reporting backend issues if found:
 - Screen 84: **`newborn_registration`** ("Newborn registration and identification", Position 84, 56 points) — **COMPLETED** (commit `00e120f`, Proposal **237** awaiting human review on `/docs -> My progress`).
 - Screen 85: **`labour_register`** ("Labour ward register and partograph", Position 85, 70 points) — **COMPLETED** (commit `91e0bbd`, Proposal **238** awaiting human review on `/docs -> My progress`).
-- Screen 86: **`medication_safety_ward`** ("Medication safety board", Position 86, 49 points) — **IMPLEMENTED & TESTED** (Ready to propose).
+- Screen 86: **`medication_safety_ward`** ("Medication safety board", Position 86, 49 points) — **COMPLETED** (commit `ff51508`, Proposal **239** awaiting human review on `/docs -> My progress`).
 - Screen 87: **`ward_transfer`** ("Ward patient transfer", Position 87, 48 points) — **NEXT**.
 
 ### Completed Screens Checkpoint
@@ -13,9 +13,9 @@ Building screens in Phase 4 Roadmap along with all tests, reporting backend issu
 - Screen 83: **`obstetric_assessment`** (commit `e5cda36`, Proposal **236** accepted).
 - Screen 84: **`newborn_registration`** (commit `00e120f`, Proposal **237** awaiting human review on `/docs -> My progress`).
 - Screen 85: **`labour_register`** (commit `91e0bbd`, Proposal **238** awaiting human review on `/docs -> My progress`).
-- Screen 86: **`medication_safety_ward`** (commit pending, all tests passing).
+- Screen 86: **`medication_safety_ward`** (commit `ff51508`, Proposal **239** awaiting human review on `/docs -> My progress`).
 - Proposals **231**, **232**, **233**, **234**, **235**, and **236** are accepted.
-- Proposals **237** and **238** are awaiting human review on `/docs -> My progress`.
+- Proposals **237**, **238**, and **239** are awaiting human review on `/docs -> My progress`.
 
 ### Verification for Screen 86 (`medication_safety_ward`)
 - `contracts/medication_safety_ward.json`: Screen bundle with 4 endpoints and 3 domain rules.
@@ -30,7 +30,13 @@ Building screens in Phase 4 Roadmap along with all tests, reporting backend issu
 - `npm run build`: Passed (`dist/assets/index-BrI5W3kO.js`).
 
 ### Next Concrete Actions
-1. Commit Screen 86 (`medication_safety_ward`).
-2. Submit `propose_progress` for `medication_safety_ward` via Haspataal MCP.
-3. Verify saved proposal with `progress_proposals`.
-4. Proceed to Screen 87: `ward_transfer` ("Ward patient transfer", Position 87, 48 points).
+1. Proceed to Screen 87: `ward_transfer` ("Ward patient transfer", Position 87, 48 points).
+2. Call `get_screen_bundle("ward_transfer", max_chars: 180000)` and save contract into `contracts/ward_transfer.json`.
+3. Inspect `get_ui_quality_brief("ward_transfer")` and domain rules.
+4. Call `generate_typescript` for endpoints and generate typed contracts in `src/generated/ward_transfer.ts`.
+5. Implement domain policies in `src/ward-transfer-policy.ts`.
+6. Author UI in `src/screens/WardTransfer.tsx`.
+7. Wire into `src/App.tsx`, task catalogue, help catalogue, and check help.
+8. Author unit tests in `tests/ward-transfer.test.mjs`.
+9. Verify via `npm run check:help`, `npx tsc --noEmit`, `npm test`, `npm run build`.
+10. Commit and submit `propose_progress`.
