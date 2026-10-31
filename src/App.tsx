@@ -101,6 +101,7 @@ const labels: Record<string, [string, string, string]> = {
  patient_education_ward: ["Ward health education","وارڈ میں صحت کی رہنمائی","◉"],
  mar: ["Medication administration record","دوا دینے کا ریکارڈ","▤"],
  verbal_orders_ward: ["Verbal and telephone orders","زبانی اور ٹیلی فون احکام","▤"],
+ verbal_orders_er: ["Emergency Department Verbal and Telephone Orders", "ایمرجنسی ڈیپارٹمنٹ کے زبانی اور ٹیلی فون احکام", "▤"],
  vitals_tracker: ["Vitals flowsheet","حیاتیاتی پیمائش کا چارٹ","▤"],
  nursing_assessment: ["Nursing assessment and care plan","نرسنگ جائزہ و نگہداشت منصوبہ","▤"],
  my_beds: ["My beds this shift","اس شفٹ میں میرے بستر","▤"],
@@ -192,6 +193,7 @@ const frontDeskScreens = new Set([
   'patient_education_ward',
   'mar',
   'verbal_orders_ward',
+  'verbal_orders_er',
   'vitals_tracker',
   'nursing_assessment',
   'my_beds',
@@ -873,6 +875,7 @@ export function App() {
   'patient_education_ward',
   'mar',
   'verbal_orders_ward',
+  'verbal_orders_er',
   'vitals_tracker',
   'nursing_assessment',
   'my_beds',
@@ -944,7 +947,7 @@ export function App() {
       (id !== "donor_assessment" || ["full","open_work","records","setup"].includes(est?.views.screens.find(v=>v.screen_id===id)?.view || "")) &&
       (id !== "blood_collection" || ["full","open_work","records","setup"].includes(est?.views.screens.find(v=>v.screen_id===id)?.view || "")) &&
       (id !== "blood_center_lab" || ["full","open_work","records","setup"].includes(est?.views.screens.find(v=>v.screen_id===id)?.view || "")) &&
-      (!["mar","verbal_orders_ward","vitals_tracker","patient_education_ward","nursing_assessment","my_beds","doctor_inpatients","cost_estimates_admissions","consents_admissions","wristbands_admissions","wristbands_ward","own_medicines_ward","own_medicines_pharmacy","bed_matrix","pending_admissions","imaging_repeats","imaging_outsourced","critical_results_radiology","radiology_worklist","rx_queue","dispense","order_queries","otc","charity_override","lab_only_walkin","lab_bench","lab_send_outs","lab_verification","critical_results_bench","critical_results_verifier","critical_results_doctor","critical_results_ward","consents_ward"].includes(id) || ["full", "open_work", "records"].includes(est?.views.screens.find(v => v.screen_id === id)?.view || "")),
+      (!["mar","verbal_orders_ward","verbal_orders_er","vitals_tracker","patient_education_ward","nursing_assessment","my_beds","doctor_inpatients","cost_estimates_admissions","consents_admissions","wristbands_admissions","wristbands_ward","own_medicines_ward","own_medicines_pharmacy","bed_matrix","pending_admissions","imaging_repeats","imaging_outsourced","critical_results_radiology","radiology_worklist","rx_queue","dispense","order_queries","otc","charity_override","lab_only_walkin","lab_bench","lab_send_outs","lab_verification","critical_results_bench","critical_results_verifier","critical_results_doctor","critical_results_ward","consents_ward"].includes(id) || ["full", "open_work", "records"].includes(est?.views.screens.find(v => v.screen_id === id)?.view || "")),
   );
   const view = est?.views.workspaces.find(
     (v) => v.workspace === workspace,
@@ -1346,6 +1349,7 @@ export function App() {
               {screen === 'wristbands_admissions' && est && <Wristbands key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone}/>}
               {screen === 'wristbands_ward' && est && <Wristbands screenId="wristbands_ward" key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone}/>}
               {screen === 'wristbands_er' && est && <Wristbands screenId="wristbands_er" key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone}/>}
+              {screen === 'verbal_orders_er' && est && <VerbalOrders screenId="verbal_orders_er" key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone} onNavigateScreen={(s) => navigate(s)}/>}
               {screen === 'own_medicines_ward' && est && <OwnMedicinesWard key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone} initialAdmissionId={wardAdmissionEntry?.userId===user.user_id?wardAdmissionEntry.admissionId:undefined} onBack={id=>{if(navigate('my_beds'))setWardAdmissionEntry({userId:user.user_id,admissionId:id});}}/>}
               {screen === 'own_medicines_pharmacy' && est && <OwnMedicinesPharmacy key={user.user_id} user={user} connected={connected} stream={stream} establishment={est} timeZone={meta?.hospital_timezone}/>}
               {screen === 'bed_matrix' && est && <BedMatrix key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone} onAdmission={nav.includes("pending_admissions")?id=>{if(navigate("pending_admissions"))setBedAdmissionEntry({userId:user.user_id,admissionId:id})}:undefined}/>}

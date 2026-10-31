@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { api, ApiError } from "../bridge";
 import {
   Details,
+  Empty,
   ErrorBox,
   Field,
   LoadState,
@@ -20,12 +21,29 @@ import {
   lookupStaff,
   type StaffLookupOut,
 } from "../generated/radiology_worklist";
-import * as a from "../generated/verbal_orders_ward";
+import * as a from "../generated/verbal_orders_er";
 import {
   medicationFrequencies,
   medicationRoutes,
   validateVerbalLine,
 } from "../verbal-order-policy";
+import {
+  evaluateVerbalOrdersErView,
+  canRecordVerbal,
+  canViewVerbalOrders,
+  canSearchDrugs,
+  isDispensingActive,
+  validateVerbalOrderTarget,
+  validateVerbalOrderLineSafety,
+  isVerbalOrderOverdue,
+} from "../verbal-orders-er-policy";
+import { board, type ErBoardOut, type ErVisitOut } from "../generated/er_board";
+
+export interface VerbalOrdersProps extends WardProps {
+  screenId?: "verbal_orders_ward" | "verbal_orders_er" | string;
+  onNavigateScreen?: (screen: string, contextId?: number) => void;
+}
+
 type Line = {
   key: string;
   drug?: a.DrugStockOut;
@@ -43,6 +61,7 @@ type Line = {
   instructions: string;
   self: boolean;
 };
+
 const line = (drug?: a.DrugStockOut): Line => ({
   key: crypto.randomUUID(),
   drug,
@@ -60,6 +79,7 @@ const line = (drug?: a.DrugStockOut): Line => ({
   instructions: "",
   self: false,
 });
+
 const safety = (d: a.DrugStockOut) =>
   JSON.stringify([
     d.drug_id,
@@ -70,7 +90,11 @@ const safety = (d: a.DrugStockOut) =>
     d.strength,
     d.form,
   ]);
-export function VerbalOrders(props: WardProps) {
+
+export function VerbalOrders(props: VerbalOrdersProps) {
+  if (props.screenId === "verbal_orders_er") {
+    return <ErVerbalOrders {...props} />;
+  }
   return (
     <section>
       <h1>{t("Verbal and telephone orders", "زبانی اور ٹیلی فون احکام")}</h1>
@@ -86,6 +110,1267 @@ export function VerbalOrders(props: WardProps) {
     </section>
   );
 }
+
+function ErVerbalOrders(props: VerbalOrdersProps) {
+  const { user, establishment, connected, stream, timeZone } = props;
+  const erView = evaluateVerbalOrdersErView(establishment);
+  const live = connected && stream === "Live";
+  const pharmacy = isDispensingActive(establishment.active);
+  const can = (p: string) => user.permissions.includes(p);
+
+  const [tick, setTick] = useState(0);
+  const [pending, setPending] = useState(false);
+  const [limit, setLimit] = useState(200);
+  const [filterPatientOnly, setFilterPatientOnly] = useState(true);
+  const [selectedVisit, setSelectedVisit] = useState<ErVisitOut | null>(null);
+  const [visitQuery, setVisitQuery] = useState("");
+
+  const [draft, setDraft] = useState(false);
+  const [lines, setLines] = useState<Line[]>([]);
+  const [doctorQuery, setDoctorQuery] = useState("");
+  const [doctors, setDoctors] = useState<StaffLookupOut[]>([]);
+  const [doctor, setDoctor] = useState<StaffLookupOut>();
+  const [doctorBusy, setDoctorBusy] = useState(false);
+  const [drugQuery, setDrugQuery] = useState("");
+  const [drugs, setDrugs] = useState<a.DrugStockOut[]>([]);
+  const [drugBusy, setDrugBusy] = useState(false);
+  const [mode, setMode] = useState<"Verbal" | "Telephone">("Verbal");
+  const [destination, setDestination] = useState<
+    "HospitalPharmacy" | "ExternalMarket"
+  >(pharmacy ? "HospitalPharmacy" : "ExternalMarket");
+  const [notes, setNotes] = useState("");
+  const [emergency, setEmergency] = useState(true);
+  const [readback, setReadback] = useState(false);
+  const [ack, setAck] = useState(false);
+  const [stale, setStale] = useState(false);
+  const [review, setReview] = useState<a.VerbalOrderIn>();
+  const [error, setError] = useState<unknown>();
+
+  const de = useRef(0);
+  const me = useRef(0);
+
+  const boardLoad = useLoad(
+    () =>
+      can("prescription.verbal.record") || can("prescription.view")
+        ? board()
+        : Promise.resolve(null),
+    [tick, connected, stream],
+  );
+
+  const ordersLoad = useLoad(
+    () =>
+      can("prescription.verbal.record") || can("prescription.view")
+        ? a.listVerbalOrders({
+            admission_id: selectedVisit?.admission_id || undefined,
+            pending,
+            limit,
+          })
+        : Promise.resolve([]),
+    [selectedVisit?.er_visit_id, selectedVisit?.admission_id, tick, pending, limit],
+  );
+
+  // Filter visits by query
+  const filteredVisits = useMemo(() => {
+    const list = boardLoad.data?.visits || [];
+    if (!visitQuery.trim()) return list;
+    const q = visitQuery.toLowerCase().trim();
+    return list.filter(
+      (v) =>
+        v.patient_name.toLowerCase().includes(q) ||
+        v.mrn.toLowerCase().includes(q) ||
+        v.er_number.toLowerCase().includes(q) ||
+        (v.ticket_number && v.ticket_number.toLowerCase().includes(q)),
+    );
+  }, [boardLoad.data?.visits, visitQuery]);
+
+  // Orders to display
+  const displayedOrders = useMemo(() => {
+    const list = ordersLoad.data || [];
+    if (!filterPatientOnly || !selectedVisit) return list;
+    return list.filter((o) => {
+      if (selectedVisit.admission_id && o.admission_id === selectedVisit.admission_id)
+        return true;
+      if (selectedVisit.ticket_id && o.ticket_id === selectedVisit.ticket_id)
+        return true;
+      if (o.patient_id === selectedVisit.patient_id) return true;
+      return false;
+    });
+  }, [ordersLoad.data, filterPatientOnly, selectedVisit]);
+
+  const hasValidEmergencyTarget = Boolean(
+    selectedVisit && (selectedVisit.ticket_id || selectedVisit.admission_id),
+  );
+
+  const writable =
+    live &&
+    erView.canStartNew &&
+    can("prescription.verbal.record") &&
+    selectedVisit != null &&
+    selectedVisit.stage !== "Departed" &&
+    hasValidEmergencyTarget;
+
+  const write = useClinicalWrite(
+    user,
+    "verbal-er:" + (selectedVisit?.ticket_id || selectedVisit?.er_visit_id || "none"),
+    async (value) => {
+      if (selectedVisit && value.patient_id !== selectedVisit.patient_id) {
+        throw Error(
+          "The saved order patient differs; read before recording another order.",
+        );
+      }
+      setDraft(false);
+      setReview(undefined);
+      setLines([]);
+      setDoctor(undefined);
+      setDoctors([]);
+      setDrugs([]);
+      setNotes("");
+      setReadback(false);
+      setEmergency(true);
+      setAck(false);
+      setStale(false);
+      setTick((n) => n + 1);
+    },
+  );
+
+  const stamp = (s: string | null) =>
+    s
+      ? timeZone
+        ? formatHospitalTime(s, timeZone)
+        : s
+      : t("Not countersigned", "ابھی دستخط نہیں");
+
+  const invalidate = () => {
+    setReview(undefined);
+    setReadback(false);
+    setAck(false);
+  };
+
+  useEffect(() => {
+    const stop = window.terminal.subscribe((v) => {
+      if (
+        (v.type === "event" &&
+          ["medication.order.updated", "pharmacy.stock.updated"].includes(
+            v.event_type,
+          )) ||
+        (v.type === "stream" && v.status === "Live" && v.resync)
+      ) {
+        setTick((n) => n + 1);
+        setStale(true);
+        setReview(undefined);
+        setReadback(false);
+        setAck(false);
+        setDrugs([]);
+        me.current++;
+      }
+    });
+    return stop;
+  }, [selectedVisit?.er_visit_id]);
+
+  useEffect(() => {
+    if (write.error) {
+      setReview(undefined);
+      if (
+        write.error instanceof ApiError &&
+        [
+          "VERBAL_ORDER_INVALID",
+          "REFERENCE_NOT_FOUND",
+          "CAPABILITY_INACTIVE",
+          "PRESCRIBER_NOT_AUTHORIZED",
+          "TICKET_NOT_ACTIVE",
+          "TICKET_PATIENT_MISMATCH",
+        ].includes(write.error.response.error?.code || "")
+      ) {
+        setStale(true);
+        setTick((n) => n + 1);
+      }
+    }
+  }, [write.error]);
+
+  useEffect(() => {
+    if (!draft) return;
+    const f = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = "";
+    };
+    window.addEventListener("beforeunload", f);
+    return () => window.removeEventListener("beforeunload", f);
+  }, [draft]);
+
+  function update(key: string, patch: Partial<Line>) {
+    invalidate();
+    setLines((list) =>
+      list.map((l) => (l.key === key ? { ...l, ...patch } : l)),
+    );
+  }
+
+  async function findDoctors() {
+    const q = doctorQuery.trim();
+    if (q.length < 2) return;
+    const epoch = ++de.current;
+    setDoctorBusy(true);
+    setError(undefined);
+    try {
+      const rows = await lookupStaff({ q, license_type: "PMDC", limit: 20 });
+      if (epoch === de.current) setDoctors(rows);
+    } catch (e) {
+      setError(e);
+    } finally {
+      if (epoch === de.current) setDoctorBusy(false);
+    }
+  }
+
+  async function findDrugs() {
+    const q = drugQuery.trim(),
+      epoch = ++me.current;
+    setDrugBusy(true);
+    setError(undefined);
+    try {
+      const rows = await a.searchDrugs({ q, limit: 30 });
+      if (epoch === me.current) setDrugs(rows);
+    } catch (e) {
+      setError(e);
+    } finally {
+      if (epoch === me.current) setDrugBusy(false);
+    }
+  }
+
+  function prepare() {
+    setError(undefined);
+    try {
+      if (!selectedVisit) {
+        throw Error(
+          t(
+            "Please select an active ER visit first.",
+            "برائے مہربانی پہلے فعال ایمرجنسی دورہ منتخب کریں۔",
+          ),
+        );
+      }
+      validateVerbalOrderTarget({
+        patient_id: selectedVisit.patient_id,
+        ticket_id: selectedVisit.ticket_id,
+        admission_id: selectedVisit.admission_id,
+        source: "ER",
+      });
+      if (
+        !doctor ||
+        !emergency ||
+        !readback ||
+        !ack ||
+        stale ||
+        !writable ||
+        !lines.length
+      ) {
+        throw Error(
+          t(
+            "Select the actual prescriber and lines, confirm the emergency circumstances and read-back, then review.",
+            "اصل ڈاکٹر و سطور چنیں، ہنگامی حالت اور دہرا کر تصدیق کریں، پھر جائزہ لیں۔",
+          ),
+        );
+      }
+      if (destination === "HospitalPharmacy" && !pharmacy) {
+        throw Error(
+          t(
+            "Hospital Pharmacy is not Active. Read facility status; only an external destination is available.",
+            "ہسپتال فارمیسی فعال نہیں۔ خدمت کی حالت پڑھیں؛ صرف بیرونی منزل دستیاب ہے۔",
+          ),
+        );
+      }
+      const items = lines.map((l) => {
+        validateVerbalOrderLineSafety({
+          drug: l.drug,
+          external_drug_name: l.name,
+          destination,
+        });
+        if (l.drug?.high_alert_category === "Chemotherapy") {
+          throw Error(
+            t(
+              "Chemotherapy cannot be a verbal order. Ask the doctor to write it.",
+              "کیموتھراپی زبانی حکم نہیں۔ ڈاکٹر سے تحریر لیں۔",
+            ),
+          );
+        }
+        if (!l.drug && (destination !== "ExternalMarket" || !l.name.trim())) {
+          throw Error(
+            t(
+              "Select a formulary medicine, or name an outside medicine only for External Market.",
+              "فہرست سے دوا چنیں، صرف بیرونی منزل میں بیرونی دوا کا نام لکھیں۔",
+            ),
+          );
+        }
+        if (
+          l.self &&
+          (l.drug?.high_alert_category ||
+            (destination === "ExternalMarket" && !l.drug) ||
+            ![
+              "Oral",
+              "SL",
+              "Inhaled",
+              "Topical",
+              "Ophthalmic",
+              "Otic",
+              "Nasal",
+            ].includes(l.route))
+        ) {
+          throw Error(
+            t(
+              "Self-administration must be an allowed route without a high-alert medicine.",
+              "خود دوا لینے کا مجاز راستہ اور کم خطرہ دوا لازم۔",
+            ),
+          );
+        }
+        return validateVerbalLine({
+          ...(l.drug
+            ? { drug_id: l.drug.drug_id }
+            : {
+                external_drug_name: l.name.trim(),
+                external_strength: l.strength.trim() || null,
+                external_form: l.form.trim() || null,
+              }),
+          qty_prescribed: Number(l.qty),
+          dose_text: l.dose.trim(),
+          route: l.route as a.RxItemIn["route"],
+          frequency_code: l.frequency as a.RxItemIn["frequency_code"],
+          interval_hours: l.interval ? Number(l.interval) : null,
+          duration_days: l.days ? Number(l.days) : null,
+          start_at: hospitalTimeToUtc(l.start, timeZone || ""),
+          end_at: l.end ? hospitalTimeToUtc(l.end, timeZone || "") : null,
+          instructions: l.instructions.trim() || null,
+          is_prn: l.frequency === "PRN",
+          is_stat: l.frequency === "STAT",
+          self_administration: l.self,
+        });
+      });
+
+      setReview({
+        patient_id: selectedVisit.patient_id,
+        ticket_id: selectedVisit.ticket_id || null,
+        admission_id: selectedVisit.admission_id || null,
+        source: "ER",
+        prescriber_id: doctor.employee_id,
+        order_mode: mode,
+        read_back: true,
+        destination,
+        notes: notes.trim() || null,
+        items,
+      });
+    } catch (e) {
+      setError(e);
+    }
+  }
+
+  function confirm() {
+    if (!review || !writable || stale || write.blocked || !selectedVisit) return;
+    const body = review;
+    const chosen = doctor;
+    const oldLines = lines;
+    const targetVisit = selectedVisit;
+
+    write.start(
+      {
+        method: "POST",
+        path: "/prescriptions/verbal",
+        body,
+        permission: "prescription.verbal.record",
+        protection: "idempotent",
+        reconcilePath: targetVisit.admission_id
+          ? `/verbal-orders?admission_id=${targetVisit.admission_id}`
+          : `/verbal-orders`,
+        label: t("Record verbal order", "زبانی حکم درج کریں"),
+      },
+      async () => {
+        if (!can("prescription.verbal.record")) {
+          throw Error("Permission denied: prescription.verbal.record required.");
+        }
+        const est = await api<WardProps["establishment"]>(
+          "GET",
+          "/establishment",
+        );
+        if (
+          body.destination === "HospitalPharmacy" &&
+          !est.active.includes("dispensing")
+        ) {
+          throw Error(
+            t(
+              "Pharmacy service changed. Keep the order and review its destination.",
+              "فارمیسی خدمت بدلی۔ حکم رکھ کر منزل کا جائزہ لیں۔",
+            ),
+          );
+        }
+        if (!chosen) throw Error("Select the doctor again");
+        const staff = await lookupStaff({
+          q: chosen.emp_number,
+          license_type: "PMDC",
+          limit: 20,
+        });
+        if (
+          !staff.some(
+            (d) =>
+              d.employee_id === chosen.employee_id &&
+              d.registration === chosen.registration,
+          )
+        ) {
+          throw Error(
+            t(
+              "The prescriber registration changed. Input kept; select the doctor again.",
+              "ڈاکٹر رجسٹریشن بدلی۔ معلومات رکھ کر ڈاکٹر پھر چنیں۔",
+            ),
+          );
+        }
+        for (const l of oldLines.filter((l) => l.drug)) {
+          const fresh = await a.searchDrugs({ q: l.drug!.name, limit: 100 });
+          const d = fresh.find((item) => item.drug_id === l.drug!.drug_id);
+          if (!d || safety(d) !== safety(l.drug!)) {
+            setStale(true);
+            throw Error(
+              t(
+                "Medicine safety information changed. Re-select it, read the order back and review again.",
+                "دوا کی حفاظت معلومات بدلیں۔ پھر چنیں، حکم دہرا کر جائزہ لیں۔",
+              ),
+            );
+          }
+        }
+      },
+    );
+  }
+
+  if (erView.isHidden) {
+    return (
+      <section>
+        <h1>
+          {t(
+            "Emergency Department Verbal and Telephone Orders",
+            "ایمرجنسی ڈیپارٹمنٹ کے زبانی اور ٹیلی فون احکام",
+          )}
+        </h1>
+        <div className="banner info">
+          {t(
+            "This service is not available in any menu.",
+            "یہ خدمت کسی مینو میں دستیاب نہیں ہے۔",
+          )}
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <section data-write-pending={write.blocked} data-unsaved={draft}>
+      <h1>
+        {t(
+          "Emergency Department Verbal and Telephone Orders",
+          "ایمرجنسی ڈیپارٹمنٹ کے زبانی اور ٹیلی فون احکام",
+        )}
+      </h1>
+      <p>
+        {t(
+          "When a doctor cannot write, or in an emergency, record the order exactly as heard for an emergency or admitted patient, read it back to that doctor and follow the countersignature. Chemotherapy and routine outpatients are forbidden (MSDS MOM 55).",
+          "ڈاکٹر لکھ نہ سکے یا ہنگامی حالت میں ایمرجنسی یا داخل مریض کے لیے حکم جیسا سنا لکھیں، ڈاکٹر کو دہرا کر تصدیق لیں اور دستخط کی پیروی کریں۔ کیموتھراپی اور عام او پی ڈی احکام منع ہیں۔",
+        )}
+      </p>
+
+      {erView.banner && (
+        <div className={`banner ${erView.isOpenWork ? "warning" : "info"}`}>
+          {t(erView.banner.en, erView.banner.ur)}
+        </div>
+      )}
+
+      <ErrorBox error={error} />
+      <ClinicalWriteFeedback
+        key={review ? "review" : "input"}
+        write={write}
+        onReviewed={() => {
+          setStale(true);
+          setTick((n) => n + 1);
+        }}
+      />
+
+      {/* ER Visit Selector */}
+      <fieldset className="card">
+        <legend>
+          {t("Emergency Patient Selection", "ایمرجنسی مریض کا انتخاب")}
+        </legend>
+        <Field
+          label={t("Search active ER visits", "جاری ایمرجنسی دورے تلاش کریں")}
+        >
+          <input
+            data-help="verbal.read"
+            value={visitQuery}
+            placeholder={t(
+              "Filter by patient name, MRN, ER number, ticket...",
+              "نام، ایم آر این، ایمرجنسی نمبر یا ٹکٹ سے تلاش...",
+            )}
+            onChange={(e) => setVisitQuery(e.target.value)}
+          />
+        </Field>
+        <LoadState {...boardLoad} retry={boardLoad.reload} />
+        {filteredVisits.length > 0 ? (
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))",
+              gap: "8px",
+              maxHeight: "220px",
+              overflowY: "auto",
+              marginBottom: "12px",
+            }}
+          >
+            {filteredVisits.map((v) => {
+              const isSelected = selectedVisit?.er_visit_id === v.er_visit_id;
+              return (
+                <button
+                  data-help="verbal.read"
+                  key={v.er_visit_id}
+                  type="button"
+                  style={{
+                    textAlign: "left",
+                    padding: "8px",
+                    border: isSelected
+                      ? "2px solid var(--primary, #0056b3)"
+                      : "1px solid #ccc",
+                    backgroundColor: isSelected
+                      ? "var(--highlight, #eef6ff)"
+                      : undefined,
+                  }}
+                  onClick={() => {
+                    setSelectedVisit(v);
+                    setDraft(false);
+                    setReview(undefined);
+                    invalidate();
+                  }}
+                >
+                  <strong>{v.patient_name}</strong> (<bdi>{v.mrn}</bdi>)
+                  <div>
+                    {v.er_number} · {v.stage}
+                  </div>
+                  <div>
+                    {v.ticket_number
+                      ? `Ticket: ${v.ticket_number}`
+                      : v.admission_number
+                      ? `Adm: ${v.admission_number}`
+                      : t("No ticket yet", "ابھی ٹکٹ نہیں")}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        ) : (
+          !boardLoad.loading && (
+            <p>
+              {t(
+                "No matching active ER visits found.",
+                "کوئی فعال ایمرجنسی دورہ نہیں ملا۔",
+              )}
+            </p>
+          )
+        )}
+
+        {selectedVisit && (
+          <div
+            className="card"
+            style={{
+              marginTop: "8px",
+              backgroundColor: "var(--surface-sunken, #f8f9fa)",
+            }}
+          >
+            <h3>
+              {selectedVisit.patient_name} · <bdi>{selectedVisit.mrn}</bdi>
+            </h3>
+            <p>
+              {t("Gender", "جنس")}: {selectedVisit.gender || "—"} ·{" "}
+              {t("Age", "عمر")}: {selectedVisit.age_years ?? "—"} ·{" "}
+              {t("ER Register", "رجسٹر")}: {selectedVisit.er_number} ·{" "}
+              {t("Stage", "مرحلہ")}: {selectedVisit.stage}
+            </p>
+            <p>
+              {selectedVisit.ticket_id ? (
+                <span>
+                  {t("Billing ticket", "بلنگ ٹکٹ")}:{" "}
+                  {selectedVisit.ticket_number || selectedVisit.ticket_id} (
+                  {selectedVisit.ticket_status})
+                </span>
+              ) : selectedVisit.admission_id ? (
+                <span>
+                  {t("Admission", "داخلہ")}:{" "}
+                  {selectedVisit.admission_number || selectedVisit.admission_id}{" "}
+                  ({selectedVisit.ward_name})
+                </span>
+              ) : (
+                <span className="error">
+                  {t(
+                    "No billing ticket or admission assigned. Verbal orders require an emergency ticket or admission (rule:b72c59a315).",
+                    "کوئی ٹکٹ یا داخلہ نہیں ملا۔ زبانی احکام کے لیے ایمرجنسی ٹکٹ یا داخلہ لازمی ہے۔",
+                  )}
+                </span>
+              )}
+            </p>
+          </div>
+        )}
+      </fieldset>
+
+      {/* Action buttons */}
+      <div className="actions">
+        <button
+          data-help="verbal.read"
+          disabled={write.blocked}
+          onClick={() => {
+            setTick((n) => n + 1);
+            if (draft) {
+              setStale(true);
+              invalidate();
+            }
+          }}
+        >
+          {t("Refresh verbal orders", "زبانی احکام تازہ کریں")}
+        </button>
+        <button
+          data-help="verbal.new"
+          disabled={!writable || write.blocked}
+          onClick={() => {
+            if (
+              draft &&
+              !window.confirm(
+                t("Discard the unsent verbal order?", "غیر ارسال حکم چھوڑیں؟"),
+              )
+            ) {
+              return;
+            }
+            setDraft(true);
+            setLines([]);
+            setDoctor(undefined);
+            setNotes("");
+            setEmergency(true);
+            setReadback(false);
+            setAck(false);
+            setReview(undefined);
+            setStale(false);
+            setError(undefined);
+            write.clearError();
+            setDestination(pharmacy ? "HospitalPharmacy" : "ExternalMarket");
+          }}
+        >
+          {t(
+            "Record a verbal or telephone order",
+            "زبانی یا ٹیلی فون حکم درج کریں",
+          )}
+        </button>
+      </div>
+
+      <div style={{ display: "flex", gap: "16px", alignItems: "center" }}>
+        <label>
+          <input
+            data-help="verbal.read"
+            type="checkbox"
+            checked={pending}
+            disabled={write.blocked}
+            onChange={(e) => setPending(e.target.checked)}
+          />
+          {t("Pending countersignature only", "صرف دستخط کے منتظر")}
+        </label>
+        {selectedVisit && (
+          <label>
+            <input
+              data-help="verbal.read"
+              type="checkbox"
+              checked={filterPatientOnly}
+              onChange={(e) => setFilterPatientOnly(e.target.checked)}
+            />
+            {t("Orders for this patient only", "صرف اس مریض کے احکام")}
+          </label>
+        )}
+        <Field label={t("Orders to retrieve (limit)", "احکام کی حد")}>
+          <select
+            data-help="verbal.read"
+            value={limit}
+            disabled={write.blocked}
+            onChange={(e) => setLimit(Number(e.target.value))}
+          >
+            {[50, 200, 1000].map((n) => (
+              <option key={n}>{n}</option>
+            ))}
+          </select>
+        </Field>
+      </div>
+
+      {/* Orders list */}
+      <LoadState {...ordersLoad} retry={ordersLoad.reload} />
+      {!ordersLoad.loading && !ordersLoad.error && !displayedOrders.length && (
+        <p>
+          {t(
+            "No verbal orders returned for this emergency patient and filter.",
+            "اس ایمرجنسی مریض اور فلٹر کا کوئی زبانی حکم نہیں آیا۔",
+          )}
+        </p>
+      )}
+      {displayedOrders.length === limit && (
+        <p>
+          {t(
+            "Result limit reached; increase the limit before assuming the history is complete.",
+            "حد پوری؛ تاریخ مکمل سمجھنے سے پہلے حد بڑھائیں۔",
+          )}
+        </p>
+      )}
+
+      {displayedOrders.map((r) => {
+        const overdue = isVerbalOrderOverdue(r);
+        return (
+          <article className="card" key={r.prescription_id}>
+            <h2>
+              {r.prescription_number} · {r.order_mode} · {r.status}
+            </h2>
+            <p>
+              {r.patient_name} (<bdi>{r.mrn}</bdi>) · {r.prescriber_name} ·{" "}
+              {t("Received by", "وصول کنندہ")}: {r.received_by_name} ·{" "}
+              {stamp(r.created_at)}
+            </p>
+            {r.lines.map((l, i) => (
+              <p key={i}>{l}</p>
+            ))}
+            <p className={overdue ? "error" : ""}>
+              {overdue
+                ? t(
+                    "OVERDUE — contact the prescriber for countersignature",
+                    "دستخط میں تاخیر — ڈاکٹر کو یاد دلائیں",
+                  )
+                : t("Countersign due", "دستخط مقرر")}
+              : {stamp(r.countersign_due_at)}
+            </p>
+            <p>
+              {r.countersigned_by_name} · {stamp(r.countersigned_at)}{" "}
+              {r.countersigned_late &&
+                t("Countersigned late", "دستخط تاخیر سے")}
+            </p>
+          </article>
+        );
+      })}
+
+      {/* Verbal Order Draft */}
+      {draft && selectedVisit && (
+        <fieldset className="card" disabled={write.blocked}>
+          <legend>
+            {t("Verbal order draft for", "زبانی حکم کا مسودہ برائے")}{" "}
+            {selectedVisit.patient_name} (<bdi>{selectedVisit.mrn}</bdi>)
+          </legend>
+          {stale && (
+            <p role="alert">
+              {t(
+                "Data changed. Keep all lines, refresh safety information and read back again.",
+                "معلومات بدلیں۔ سطور رکھ کر حفاظتی معلومات تازہ اور پھر دہرا کر تصدیق کریں۔",
+              )}
+            </p>
+          )}
+
+          <Field
+            label={t("Find prescribing doctor", "حکم دینے والا ڈاکٹر تلاش")}
+          >
+            <input
+              data-help="verbal.doctor"
+              value={doctorQuery}
+              maxLength={80}
+              placeholder={t("Doctor name or PMDC...", "ڈاکٹر نام یا PMDC...")}
+              onChange={(e) => {
+                de.current++;
+                setDoctorQuery(e.target.value);
+                setDoctor(undefined);
+                setDoctors([]);
+                invalidate();
+              }}
+            />
+          </Field>
+          <button
+            data-help="verbal.doctor"
+            disabled={doctorBusy || doctorQuery.trim().length < 2}
+            onClick={() => void findDoctors()}
+          >
+            {doctorBusy
+              ? t("Searching doctors…", "ڈاکٹر تلاش…")
+              : t("Search registered doctors", "رجسٹرڈ ڈاکٹر تلاش")}
+          </button>
+          {doctors.map((d) => (
+            <button
+              data-help="verbal.doctor"
+              key={d.employee_id}
+              onClick={() => {
+                setDoctor(d);
+                invalidate();
+              }}
+            >
+              {d.full_name} · {d.registration} · {d.emp_number}
+            </button>
+          ))}
+          {doctor && (
+            <p>
+              {t("Prescriber", "ڈاکٹر")}: {doctor.full_name} ·{" "}
+              {doctor.registration}
+            </p>
+          )}
+
+          <Field label={t("Order mode", "حکم کا طریقہ")}>
+            <select
+              data-help="verbal.new"
+              data-field="order_mode"
+              value={mode}
+              onChange={(e) => {
+                setMode(e.target.value as typeof mode);
+                invalidate();
+              }}
+            >
+              <option>Verbal</option>
+              <option>Telephone</option>
+            </select>
+          </Field>
+
+          <label>
+            <input
+              data-help="verbal.new"
+              type="checkbox"
+              checked={emergency}
+              onChange={(e) => {
+                setEmergency(e.target.checked);
+                invalidate();
+              }}
+            />
+            {t(
+              "Emergency or the doctor cannot write this order",
+              "ہنگامی حالت ہے یا ڈاکٹر یہ حکم لکھ نہیں سکتا",
+            )}
+          </label>
+
+          <Field label={t("Order destination", "حکم کی منزل")}>
+            <select
+              data-help="verbal.destination"
+              data-field="destination"
+              value={destination}
+              onChange={(e) => {
+                setDestination(e.target.value as typeof destination);
+                invalidate();
+              }}
+            >
+              <option value="HospitalPharmacy" disabled={!pharmacy}>
+                {t("Hospital Pharmacy", "ہسپتال فارمیسی")}{" "}
+                {!pharmacy && t("(Inactive)", "(غیر فعال)")}
+              </option>
+              <option value="ExternalMarket">
+                {t("External / local market", "بیرونی یا مقامی مارکیٹ")}
+              </option>
+            </select>
+          </Field>
+
+          <Field label={t("Find medicine for the order", "حکم کی دوا تلاش")}>
+            <input
+              data-help="verbal.drug"
+              maxLength={100}
+              value={drugQuery}
+              onChange={(e) => {
+                me.current++;
+                setDrugQuery(e.target.value);
+                setDrugs([]);
+              }}
+            />
+          </Field>
+          <button
+            data-help="verbal.drug"
+            disabled={drugBusy || !can("pharmacy.formulary.view")}
+            onClick={() => void findDrugs()}
+          >
+            {drugBusy
+              ? t("Searching medicines…", "دوا تلاش…")
+              : t("Search formulary", "دوا فہرست تلاش")}
+          </button>
+
+          {drugs.map((d) => (
+            <section key={d.drug_id}>
+              <p>
+                {d.name} · {d.strength} · {d.form} · {d.stock_status} ·{" "}
+                {d.qty_available}{" "}
+                {d.is_restricted && t("Restricted prescribing", "محدود تجویز")}
+              </p>
+              {d.high_alert_category && (
+                <p className="error">
+                  {t("HIGH ALERT", "زیادہ خطرہ")}: {d.high_alert_category}
+                </p>
+              )}
+              {!!d.lasa_with.length && (
+                <p>
+                  {t("Looks or sounds like", "ملتا جلتا نام")}:{" "}
+                  {d.lasa_with.join(", ")}
+                </p>
+              )}
+              <button
+                data-help="verbal.drug"
+                disabled={
+                  lines.length >= 40 ||
+                  !d.is_active ||
+                  d.high_alert_category === "Chemotherapy" ||
+                  (destination === "HospitalPharmacy" &&
+                    d.stock_status === "OutOfStock")
+                }
+                onClick={() => {
+                  setLines((list) => [...list, line(d)]);
+                  invalidate();
+                }}
+              >
+                {t("Add ordered medicine", "حکم کی دوا شامل کریں")} · {d.name}
+              </button>
+            </section>
+          ))}
+
+          {destination === "ExternalMarket" && (
+            <button
+              data-help="verbal.external"
+              disabled={lines.length >= 40}
+              onClick={() => {
+                setLines((list) => [...list, line()]);
+                invalidate();
+              }}
+            >
+              {t(
+                "Add medicine outside the formulary",
+                "فہرست سے باہر کی دوا شامل",
+              )}
+            </button>
+          )}
+
+          {/* Lines */}
+          {lines.map((l, i) => (
+            <fieldset key={l.key}>
+              <legend>
+                {t("Order line", "حکم سطر")} {i + 1} ·{" "}
+                {l.drug?.name || t("Outside medicine", "بیرونی دوا")}
+              </legend>
+              {l.drug?.high_alert_category && (
+                <p className="error">
+                  {t("HIGH ALERT", "زیادہ خطرہ")}: {l.drug.high_alert_category}
+                </p>
+              )}
+              {!!l.drug?.lasa_with.length && (
+                <p>
+                  {t("Looks or sounds like", "ملتا جلتا نام")}:{" "}
+                  {l.drug.lasa_with.join(", ")}
+                </p>
+              )}
+              {!l.drug &&
+                (["name", "strength", "form"] as const).map((key, j) => (
+                  <Field
+                    key={key}
+                    label={t(
+                      [
+                        "Outside medicine name",
+                        "Outside strength",
+                        "Outside form",
+                      ][j],
+                      ["بیرونی دوا نام", "بیرونی طاقت", "بیرونی شکل"][j],
+                    )}
+                  >
+                    <input
+                      data-help="verbal.external"
+                      data-field={"items." + i + ".external_drug_name"}
+                      value={l[key]}
+                      onChange={(e) =>
+                        update(l.key, { [key]: e.target.value })
+                      }
+                    />
+                  </Field>
+                ))}
+              {(
+                ["qty", "dose", "interval", "days", "instructions"] as const
+              ).map((key, j) => (
+                <Field
+                  key={key}
+                  label={t(
+                    [
+                      "Quantity in lowest units",
+                      "Ordered dose text",
+                      "Interval hours (optional)",
+                      "Duration days (optional)",
+                      "Line instructions (optional)",
+                    ][j],
+                    [
+                      "کم ترین اکائی مقدار",
+                      "حکم کی خوراک",
+                      "وقفہ گھنٹے (اختیاری)",
+                      "مدت دن (اختیاری)",
+                      "سطر ہدایات (اختیاری)",
+                    ][j],
+                  )}
+                >
+                  <input
+                    data-help="verbal.line"
+                    data-field={
+                      "items." +
+                      i +
+                      "." +
+                      [
+                        "qty_prescribed",
+                        "dose_text",
+                        "interval_hours",
+                        "duration_days",
+                        "instructions",
+                      ][j]
+                    }
+                    maxLength={key === "instructions" ? 500 : undefined}
+                    value={l[key]}
+                    onChange={(e) =>
+                      update(l.key, { [key]: e.target.value })
+                    }
+                  />
+                </Field>
+              ))}
+              <Field label={t("Ordered route", "حکم کا راستہ")}>
+                <select
+                  data-help="verbal.line"
+                  data-field={"items." + i + ".route"}
+                  value={l.route}
+                  onChange={(e) =>
+                    update(l.key, { route: e.target.value, self: false })
+                  }
+                >
+                  <option value="">{t("Choose route", "راستہ چنیں")}</option>
+                  {medicationRoutes.map((r) => (
+                    <option key={r}>{r}</option>
+                  ))}
+                </select>
+              </Field>
+              <Field label={t("Ordered frequency", "حکم کی تکرار")}>
+                <select
+                  data-help="verbal.line"
+                  data-field={"items." + i + ".frequency_code"}
+                  value={l.frequency}
+                  onChange={(e) =>
+                    update(l.key, { frequency: e.target.value })
+                  }
+                >
+                  <option value="">
+                    {t("Choose frequency", "تکرار چنیں")}
+                  </option>
+                  {medicationFrequencies.map((r) => (
+                    <option key={r}>{r}</option>
+                  ))}
+                </select>
+              </Field>
+              <Field
+                label={t(
+                  "Order starts (hospital time)",
+                  "حکم شروع (ہسپتال وقت)",
+                )}
+              >
+                <input
+                  data-help="verbal.time"
+                  data-field={"items." + i + ".start_at"}
+                  type="datetime-local"
+                  value={l.start}
+                  onChange={(e) => update(l.key, { start: e.target.value })}
+                />
+              </Field>
+              <Field
+                label={t(
+                  "Order ends (optional hospital time)",
+                  "حکم ختم (اختیاری ہسپتال وقت)",
+                )}
+              >
+                <input
+                  data-help="verbal.time"
+                  data-field={"items." + i + ".end_at"}
+                  type="datetime-local"
+                  value={l.end}
+                  onChange={(e) => update(l.key, { end: e.target.value })}
+                />
+              </Field>
+              <label>
+                <input
+                  data-help="verbal.self"
+                  type="checkbox"
+                  disabled={
+                    !!l.drug?.high_alert_category ||
+                    (destination === "ExternalMarket" && !l.drug) ||
+                    ![
+                      "Oral",
+                      "SL",
+                      "Inhaled",
+                      "Topical",
+                      "Ophthalmic",
+                      "Otic",
+                      "Nasal",
+                    ].includes(l.route)
+                  }
+                  checked={l.self}
+                  onChange={(e) => update(l.key, { self: e.target.checked })}
+                />
+                {t(
+                  "Doctor allowed the patient to take this themselves",
+                  "ڈاکٹر نے مریض کو خود لینے کی اجازت دی",
+                )}
+              </label>
+              <button
+                data-help="verbal.line"
+                onClick={() => {
+                  setLines((list) => list.filter((x) => x.key !== l.key));
+                  invalidate();
+                }}
+              >
+                {t("Remove unsent line", "غیر ارسال سطر ہٹائیں")} {i + 1}
+              </button>
+            </fieldset>
+          ))}
+
+          <Field
+            label={t(
+              "Order notes / exceptional circumstances",
+              "حکم نوٹ یا غیر معمولی حالت",
+            )}
+          >
+            <textarea
+              data-help="verbal.new"
+              data-field="notes"
+              value={notes}
+              onChange={(e) => {
+                setNotes(e.target.value);
+                invalidate();
+              }}
+            />
+          </Field>
+
+          <label>
+            <input
+              data-help="verbal.readback"
+              data-field="read_back"
+              type="checkbox"
+              checked={readback}
+              onChange={(e) => {
+                setReadback(e.target.checked);
+                setReview(undefined);
+                setAck(false);
+              }}
+            />
+            {t(
+              "I read every line back to this prescriber and they confirmed it",
+              "میں نے ہر سطر اسی ڈاکٹر کو دہرا کر ان کی تصدیق لی",
+            )}
+          </label>
+
+          <label>
+            <input
+              data-help="verbal.review"
+              type="checkbox"
+              checked={ack}
+              onChange={(e) => {
+                setAck(e.target.checked);
+                setReview(undefined);
+              }}
+            />
+            {t(
+              "I verified this patient and this exact order",
+              "میں نے مریض اور یہی حکم چیک کیا",
+            )}
+          </label>
+
+          <div className="actions">
+            <button
+              data-help="verbal.review"
+              disabled={
+                !writable ||
+                !readback ||
+                !emergency ||
+                !ack ||
+                !lines.length ||
+                !doctor ||
+                stale
+              }
+              onClick={prepare}
+            >
+              {t("Review verbal order", "زبانی حکم کا جائزہ")}
+            </button>
+            <button
+              data-help="verbal.recovery"
+              onClick={async () => {
+                try {
+                  const fresh = await a.listVerbalOrders({
+                    admission_id: selectedVisit.admission_id || undefined,
+                    pending,
+                    limit,
+                  });
+                  ordersLoad.setData(fresh);
+                  await findDrugs();
+                  setStale(false);
+                  invalidate();
+                } catch (e) {
+                  setError(e);
+                }
+              }}
+            >
+              {t(
+                "Read latest and keep order lines",
+                "تازہ پڑھیں اور سطور رکھیں",
+              )}
+            </button>
+            <button
+              data-help="verbal.review"
+              onClick={() => {
+                if (
+                  window.confirm(
+                    t(
+                      "Discard the unsent verbal order?",
+                      "غیر ارسال حکم چھوڑیں؟",
+                    ),
+                  )
+                ) {
+                  setDraft(false);
+                  setLines([]);
+                  setReview(undefined);
+                }
+              }}
+            >
+              {t("Close verbal order draft", "زبانی حکم مسودہ بند")}
+            </button>
+          </div>
+        </fieldset>
+      )}
+
+      {/* Review Modal */}
+      {review && selectedVisit && (
+        <Modal
+          title={t("Review verbal order", "زبانی حکم کا جائزہ")}
+          closable={!write.blocked}
+          onClose={() => setReview(undefined)}
+        >
+          <p>
+            {selectedVisit.patient_name} · <bdi>{selectedVisit.mrn}</bdi> ·{" "}
+            {selectedVisit.er_number} · {doctor?.full_name} ·{" "}
+            {doctor?.registration}
+          </p>
+          {lines.map((l) => (
+            <p key={l.key}>
+              {l.drug?.name || l.name} · {l.dose} · {l.route} · {l.frequency}
+            </p>
+          ))}
+          <Details value={review} />
+          <p>
+            {t(
+              "The prescriber must countersign; saving does not provide their countersignature.",
+              "ڈاکٹر کے دستخط لازم؛ محفوظ کرنا ان کے دستخط نہیں۔",
+            )}
+          </p>
+          <div className="actions">
+            <button
+              data-help="verbal.review"
+              disabled={write.blocked || !writable || stale}
+              onClick={confirm}
+            >
+              {t("Confirm verbal order once", "زبانی حکم ایک بار تصدیق")}
+            </button>
+            <button
+              data-help="verbal.review"
+              disabled={write.blocked}
+              onClick={() => setReview(undefined)}
+            >
+              {t("Back to order lines", "حکم سطور پر واپس")}
+            </button>
+          </div>
+        </Modal>
+      )}
+    </section>
+  );
+}
+
 function VerbalForm({
   ctx,
   user,
@@ -294,8 +1579,17 @@ function VerbalForm({
           );
         if (
           l.self &&
-          (l.drug?.high_alert_category || (destination === "ExternalMarket" && !l.drug) ||
-            !["Oral", "SL", "Inhaled", "Topical", "Ophthalmic", "Otic", "Nasal"].includes(l.route))
+          (l.drug?.high_alert_category ||
+            (destination === "ExternalMarket" && !l.drug) ||
+            ![
+              "Oral",
+              "SL",
+              "Inhaled",
+              "Topical",
+              "Ophthalmic",
+              "Otic",
+              "Nasal",
+            ].includes(l.route))
         )
           throw Error(
             t(
@@ -734,7 +2028,9 @@ function VerbalForm({
                       data-help="verbal.external"
                       data-field={"items." + i + ".external_drug_name"}
                       value={l[key]}
-                      onChange={(e) => update(l.key, { [key]: e.target.value })}
+                      onChange={(e) =>
+                        update(l.key, { [key]: e.target.value })
+                      }
                     />
                   </Field>
                 ))}
@@ -776,7 +2072,9 @@ function VerbalForm({
                     }
                     maxLength={key === "instructions" ? 500 : undefined}
                     value={l[key]}
-                    onChange={(e) => update(l.key, { [key]: e.target.value })}
+                    onChange={(e) =>
+                      update(l.key, { [key]: e.target.value })
+                    }
                   />
                 </Field>
               ))}
@@ -800,7 +2098,9 @@ function VerbalForm({
                   data-help="verbal.line"
                   data-field={"items." + i + ".frequency_code"}
                   value={l.frequency}
-                  onChange={(e) => update(l.key, { frequency: e.target.value })}
+                  onChange={(e) =>
+                    update(l.key, { frequency: e.target.value })
+                  }
                 >
                   <option value="">
                     {t("Choose frequency", "تکرار چنیں")}
@@ -843,8 +2143,17 @@ function VerbalForm({
                   data-help="verbal.self"
                   type="checkbox"
                   disabled={
-                    !!l.drug?.high_alert_category || (destination === "ExternalMarket" && !l.drug) ||
-                    !["Oral", "SL", "Inhaled", "Topical", "Ophthalmic", "Otic", "Nasal"].includes(l.route)
+                    !!l.drug?.high_alert_category ||
+                    (destination === "ExternalMarket" && !l.drug) ||
+                    ![
+                      "Oral",
+                      "SL",
+                      "Inhaled",
+                      "Topical",
+                      "Ophthalmic",
+                      "Otic",
+                      "Nasal",
+                    ].includes(l.route)
                   }
                   checked={l.self}
                   onChange={(e) => update(l.key, { self: e.target.checked })}

@@ -1380,6 +1380,92 @@ nursing_assessment: {
     ]
   ]
 },
+ verbal_orders_er: {
+  title: "Verbal and telephone orders: Emergency department verbal orders",
+  titleUr: "زبانی اور ٹیلی فون احکام: ایمرجنسی شعبے کے زبانی احکام",
+  purpose: "In the Emergency Department during resuscitation and acute intake, when a doctor cannot write due to emergency sterile or resuscitative procedures, the triage nurse writes down verbal or telephone orders under MSDS MOM 55, validates patient identity and the active emergency ticket or admission (rule b72c59a315), performs mandatory read-back verification (rule 06cf997499), selects formulary medicines while observing high-alert and LASA warnings, chooses hospital pharmacy or external market based on active dispensing capability (rule 7cbb490706), and follows overdue countersignatures in red until signed by the doctor (rules 21e60a9c9a, 0f229c1efb).",
+  purposeUr: "ایمرجنسی شعبے میں شدید علالت یا ابتدائی طبی امداد کے دوران جب ڈاکٹر فوری تحریر نہ کر سکے، ٹرائیج نرس ایم ایس ڈی ایس ایم او ایم 55 کے تحت زبانی یا ٹیلی فون احکام لکھتی ہے، دو شناختوں اور ہنگامی وزٹ ٹکٹ یا داخلے کی تصدیق کرتی ہے، ڈاکٹر کو دہرا کر لازمی تصدیق (ریڈ بیک) کرتی ہے، فارمولری سے زیادہ خطرہ اور ملتے جلتے ناموں والی ادویات کے انتباہات دیکھتی ہے، ہسپتال فارمیسی یا بیرونی مارکیٹ کا تعین کرتی ہے، اور ڈاکٹر کے دستخط تک تاخیر کی سرخ نگرانی کرتی ہے۔",
+  steps: [
+    "Open ER / Triage -> Verbal and telephone orders. The screen connects to live emergency department records under rule 0f229c1efb, evaluating service view modes (full, open_work with retiring banner, records, or hidden).",
+    "Under Emergency Patient Selection, review active emergency visits retrieved from GET /er/board. Use the filter input to locate the patient by name, MRN, ER number, or ticket number.",
+    "Select the emergency patient row and verify two identifiers (full name and MRN) along with age, sex, ER register number, care stage, and active billing ticket (ticket_id) or admission (admission_id). If neither ticket nor admission is present, verbal orders remain disabled under rule b72c59a315.",
+    "Inspect the existing verbal orders list for this visit or hospital-wide emergency orders. Review prescription number, order mode, prescriber, receiver, ordered lines, and countersignature due time. Overdue orders without a countersignature are prominently highlighted in red under rule 21e60a9c9a.",
+    "Click 'Record a verbal or telephone order' to start a new order draft. Use Find prescribing doctor to search registered active PMDC physicians (lookupStaff), select the doctor who gave the order, choose Verbal or Telephone mode, and confirm exceptional emergency circumstances (rule 06cf997499).",
+    "Set Order destination: choose Hospital Pharmacy (enabled only while dispensing capability is Active under rule 7cbb490706) or External / local market. Search formulary medicines to view live stock, form, strength, high-alert classification, and look-alike sound-alike (LASA) warnings. Chemotherapy is strictly prohibited under rule b72c59a315.",
+    "For each ordered line, enter positive quantity, dose text, route, frequency, start datetime in hospital timezone, optional end time, interval, duration, and instructions. Tick self-administration only if allowed by the physician for permitted oral/topical non-high-alert medicines. Enter order notes explaining why the physician could not write.",
+    "Perform read-back communication: tick 'I read every line back to this prescriber and they confirmed it' and 'I verified this patient and this exact order', then click 'Review verbal order'. Verify the frozen review modal and click 'Confirm verbal order once' to dispatch to POST /prescriptions/verbal with idempotency protection. The order updates MAR and pharmacy immediately and refreshes on medication.order.updated."
+  ],
+  stepsUr: [
+    "ٹرائیج سے زبانی اور ٹیلی فون احکام اسکرین کھولیں۔ قاعدہ 0f229c1efb کے تحت اسکرین ایمرجنسی ڈیپارٹمنٹ کی سروس حالت کا جائزہ لے کر مکمل، اوپن ورک یا ریکارڈز موڈ اپناتی ہے۔",
+    "ایمرجنسی مریض کے انتخاب میں بورڈ سے آنے والے فعال وزٹس دیکھیں۔ مریض کو نام، ایم آر این، ایمرجنسی نمبر یا ٹکٹ نمبر سے تلاش کریں۔",
+    "متعلقہ مریض کو منتخب کر کے نام اور ایم آر این کی تصدیق کریں، اور ان کا بلنگ ٹکٹ یا داخلہ نمبر چیک کریں۔ قاعدہ b72c59a315 کے مطابق بغیر ٹکٹ یا او پی ڈی مریض کے لیے زبانی حکم درج نہیں ہو سکتا۔",
+    "اس مریض کے سابقہ زبانی احکام اور دستخطوں کی تفصیل دیکھیں۔ اگر ڈاکٹر نے مقررہ وقت تک دستخط نہ کیے ہوں تو قاعدہ 21e60a9c9a کے تحت آرڈر سرخ رنگ میں تاخیر کا انتباہ دکھاتا ہے۔",
+    "نیا حکم درج کرنے کے لیے بٹن دبائیں۔ ڈاکٹر تلاش کر کے پی ایم ڈی سی رجسٹرڈ ڈاکٹر منتخب کریں، زبانی یا ٹیلی فون کا طریقہ چنیں، اور ہنگامی حالت کی تصدیق کریں۔",
+    "حکم کی منزل منتخب کریں: اگر ہسپتال فارمیسی فعال ہو تو وہ منتخب کریں ورنہ بیرونی مارکیٹ۔ ادویات تلاش کر کے ان کا اسٹاک، زیادہ خطرہ الرٹ اور ملتے جلتے نام چیک کریں۔ کیموتھراپی کا زبانی حکم ممنوع ہے۔",
+    "ہر سطر کی مقدار، خوراک، راستہ، تکرار، ہسپتال وقت کے مطابق آغاز، ہدایات اور ڈاکٹر کے نہ لکھ سکنے کی وجہ درج کریں۔",
+    "ڈاکٹر کو تمام سطور دہرا کر سنانے کے بعد لازمی تصدیق (ریڈ بیک) لگائیں، مریض کی جانچ کا نشان لگائیں اور جائزے کے بعد ایک بار محفوظ کریں۔ حکم فوری طور پر فارمیسی اور ایم اے آر پر چلا جاتا ہے۔"
+  ],
+  faq: [
+    [
+      "Under what legal and clinical conditions may an emergency verbal order be taken under MSDS MOM 55?",
+      "Under rule b72c59a315, verbal or telephone orders are permitted ONLY during acute emergencies or when the physician is unable to write immediately (e.g. performing sterile resuscitation or airway management) for an emergency patient holding an active billing ticket (ticket_id) or an inpatient (admission_id). Routine outpatients and chemotherapy are strictly prohibited (VERBAL_ORDER_INVALID)."
+    ],
+    [
+      "Why is read-back verification mandatory before saving an emergency verbal order?",
+      "Under rule 06cf997499, sound-alike drug names, ambiguous decimal doses, and emergency noise cause severe medication errors. The nurse must read every medicine, strength, dose, route, and frequency back to the ordering doctor and receive confirmation before ticking 'read_back', which is enforced as a required server constraint."
+    ],
+    [
+      "When is the Hospital Pharmacy destination available versus External Market?",
+      "Under rule 7cbb490706, destination HospitalPharmacy starts new dispensing work and is offered ONLY when the hospital's dispensing service is Active (GET /establishment active). If dispensing is inactive or retiring, the toggle restricts orders to ExternalMarket, allowing external drug names while preserving high-alert checks for formulary medicines."
+    ],
+    [
+      "How does the emergency department track overdue doctor countersignatures?",
+      "Under rule 21e60a9c9a, GET /verbal-orders calculates countersign_due_at from hospital target hours. Any un-countersigned order past its deadline is flagged in bold red with 'OVERDUE — contact the prescriber for countersignature' until the doctor countersigns via their clinical workflow. The screen updates automatically on medication.order.updated."
+    ],
+    [
+      "What happens if formulary stock or safety warnings change while drafting an order?",
+      "The screen subscribes to medication.order.updated and pharmacy.stock.updated. If a medicine becomes restricted, out of stock, or its LASA warnings update, the draft flags stale data, clears read-back approval, and prompts the nurse to re-verify current formulary stock before re-reviewing."
+    ],
+    [
+      "Why does the server refuse chemotherapy as a verbal order?",
+      "Chemotherapeutic and cytotoxic agents carry narrow therapeutic indices and catastrophic overdose risks. Under rule b72c59a315 and MSDS MOM 55, chemotherapy must always be ordered via formal signed electronic or written protocols; verbal ordering is blocked by both frontend policy and backend validation (VERBAL_ORDER_INVALID)."
+    ],
+    [
+      "How are duplicate orders prevented during emergency network fluctuations?",
+      "Every verbal order submission uses a unique client-generated Idempotency-Key retained for 24 hours. If network drops occur after dispatch, clicking Retry resubmits the identical key, returning the existing order safely without creating duplicate prescriptions on the emergency tracking board or MAR."
+    ]
+  ],
+  faqUr: [
+    [
+      "ایم ایس ڈی ایس ایم او ایم 55 کے تحت زبانی حکم کن ہنگامی حالتوں میں لیا جا سکتا ہے؟",
+      "قاعدہ b72c59a315 کے مطابق زبانی یا فون پر حکم صرف شدید ہنگامی حالت میں یا جب ڈاکٹر فوری نہ لکھ سکے، کسی ایمرجنسی ٹکٹ والے یا داخل مریض کے لیے لیا جا سکتا ہے۔ عام او پی ڈی یا کیموتھراپی کا زبانی حکم سخت منع ہے۔"
+    ],
+    [
+      "زبانی حکم کو محفوظ کرنے سے پہلے ڈاکٹر کو دہرا کر سنانا (ریڈ بیک) کیوں لازمی ہے؟",
+      "قاعدہ 06cf997499 کے تحت شور یا ملتے جلتے ناموں سے غلط دوا کے سنگین خطرات ہوتے ہیں۔ نرس کا ہر دوا، خوراک، راستہ اور وقت ڈاکٹر کو دہرا کر تصدیق لینا اور ریڈ بیک کا نشان لگانا قانونی طور پر لازم ہے۔"
+    ],
+    [
+      "ہسپتال فارمیسی اور بیرونی مارکیٹ کے انتخاب کا کیا اصول ہے؟",
+      "قاعدہ 7cbb490706 کے تحت ہسپتال فارمیسی کا انتخاب صرف اسی وقت دستیاب ہوتا ہے جب ہسپتال میں ڈسپنسنگ کی خدمت فعال ہو۔ اگر خدمت غیر فعال ہو تو صرف بیرونی مارکیٹ کا انتخاب کیا جا سکتا ہے۔"
+    ],
+    [
+      "ڈاکٹر کے دستخط میں تاخیر کی نگرانی کیسے کی جاتی ہے؟",
+      "قاعدہ 21e60a9c9a کے مطابق اگر ڈاکٹر مقررہ گھنٹوں میں دستخط نہ کرے تو اسکرین پر حکم کے ساتھ سرخ رنگ میں تاخیر کا انتباہ نمایاں ہوتا ہے تاکہ ڈاکٹر سے فوری دستخط کروائے جا سکیں۔"
+    ],
+    [
+      "اگر مسودہ تیار کرتے وقت دوا کی دستیابی یا خطرے کی معلومات بدل جائیں تو کیا ہوتا ہے؟",
+      "اسکرین خودکار طور پر ریئل ٹائم واقعات سنتی ہے۔ اگر دوا کا اسٹاک یا حفاظتی انتباہ تبدیل ہو تو مسودہ باسی قرار دے کر پرانی تصدیق ہٹا دی جاتی ہے تاکہ نرس تازہ معلومات دیکھ کر دوبارہ تصدیق کرے۔"
+    ],
+    [
+      "کیموتھراپی کی دوا کا زبانی حکم سرور پر کیوں مسترد ہوتا ہے؟",
+      "قاعدہ b72c59a315 اور طبی حفاظت کے تحت کیموتھراپی ادویات کے زہریلے اثرات بہت زیادہ ہوتے ہیں، اس لیے ان کا زبانی حکم مکمل طور پر ممنوع ہے اور ڈاکٹر سے تحریری پروٹوکول لینا لازم ہے۔"
+    ],
+    [
+      "انٹرنیٹ منقطع ہونے پر ایک ہی حکم کے دو بار درج ہونے سے کیسے بچا جاتا ہے؟",
+      "ہر زبانی حکم کے ساتھ 24 گھنٹے کی منفرد آئیڈیمپوٹینسی کلید بھیجی جاتی ہے۔ اگر رابطہ منقطع ہو تو دوبارہ کوشش کرنے پر وہی پرانا حکم واپس ملتا ہے اور نیا ڈپلیکیٹ نسخہ نہیں بنتا۔"
+    ]
+  ]
+},
  own_medicines_ward: {
   title: "Patient's own medicines",
   titleUr: "مریض کی اپنی ادویات",
