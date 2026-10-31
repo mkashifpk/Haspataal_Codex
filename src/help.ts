@@ -4686,6 +4686,92 @@ consents_doctor: {
       ],
     ],
   },
+  newborn_registration: {
+    title: "Newborn registration and identification",
+    titleUr: "نوزائیدہ کا اندراج اور شناختی کلائی بینڈ",
+    purpose: "Register baby born at mother's bedside, generate unique newborn patient record and MRN ('Baby of' mother), immediately print identity wristband, and maintain delivery log under PHC MSDS Cat I 30 and II C 69 standards.",
+    purposeUr: "والدہ کے بیڈ سائیڈ پر نوزائیدہ بچے کا باضابطہ اندراج، الگ ایم آر این اور شناختی کلائی بینڈ کا فوری پرنٹ، اور پی ایچ سی معیارات کے تحت ڈیلیوری رجسٹر لاگ۔",
+    steps: [
+      "Open Inpatient Ward or Maternity workspace → Register a newborn to record a birth at the mother's bedside.",
+      "Enter the mother's active inpatient admission ID, or search for the admitted mother by MRN or full name.",
+      "Verify the mother's name, MRN, ward, and bed label displayed on screen.",
+      "Record the exact date and time of birth; future birth times are strictly refused (rule c4dcf395e2).",
+      "Select the newborn's biological sex (female, male, other, or unknown).",
+      "Click 'Register Baby & Print Band' (POST /maternity/newborns); the baby is created as a patient named 'Baby of <Mother>' with a unique MRN and wristband.",
+      "Dispatches the issued wristband immediately to the terminal label printer and fasten securely around baby's ankle or wrist.",
+      "Click 'Labour Register' shortcut to record delivery details in the labour register (screen labour_register) and print the Union Council birth notification (rule 55a7f06927).",
+    ],
+    stepsUr: [
+      "والدہ کے بیڈ سائیڈ پر بچے کی پیدائش درج کرنے کے لیے وارڈ نرس یا زچگی ورک اسپیس سے 'نوزائیدہ کا اندراج' کھولیں۔",
+      "والدہ کے موجودہ داخلے کا نمبر درج کریں یا ایم آر این و نام سے داخل شدہ والدہ تلاش کریں۔",
+      "سکرین پر نظر آنے والے والدہ کے کوائف، وارڈ اور بستر کی تصدیق کریں۔",
+      "پیدائش کی درست تاریخ اور وقت درج کریں؛ مستقبل کا وقت درج کرنا سختی سے ممنوع ہے (قاعدہ c4dcf395e2)۔",
+      "نوزائیدہ کی جنس (لڑکی، لڑکا، دیگر یا نامعلوم) منتخب کریں۔",
+      "'بچہ رجسٹر کریں اور بینڈ پرنٹ کریں' پر کلک کریں؛ بچے کا الگ مریض ریکارڈ 'Baby of' والدہ کے نام سے اور الگ ایم آر این تیار ہو جائے گا۔",
+      "جاری کردہ شناختی کلائی بینڈ کو فوری لیبل پرنٹر پر پرنٹ کر کے نوزائیدہ کے ٹخنے یا کلائی پر محفوظ طریقے سے باندھیں۔",
+      "لیبر رجسٹر شارٹ کٹ پر کلک کر کے زچگی کی تفصیلات درج کریں اور یونین کونسل پیدائش کا باضابطہ نوٹس پرنٹ کریں (قاعدہ 55a7f06927)۔",
+    ],
+    faq: [
+      [
+        "Why is the baby registered under the name 'Baby of <Mother>' initially?",
+        "Under rule c4dcf395e2 and standard hospital identity protocols, newborns are assigned a legally unique patient record and MRN tied to the mother before the family decides on a permanent name. When the birth certificate is prepared or the family names the child, the patient record is updated.",
+      ],
+      [
+        "How is a replacement wristband issued if the baby's band falls off or is damaged?",
+        "Under rule 695cc4d1de, nurses click 'New Band' on the newborn's row in the register and submit POST /wristbands with the mother's admission ID, the baby's patient ID, and a mandatory replacement reason (e.g. Band damaged/soiled/loose).",
+      ],
+      [
+        "What happens if a baby is born to an unidentified trauma or emergency mother?",
+        "Under decision 61, a baby born to an unidentified mother has mobile recorded as null (displayed empty). Once the mother's trauma profile is merged into her permanent record, the baby automatically takes her verified name ('Baby of <Name>') and her mobile number.",
+      ],
+      [
+        "What should be done if a newborn needs independent clinical care or admission to NICU?",
+        "Under rule 1fff1897f1, while healthy newborns room-in with the mother on her admission, a baby requiring special medical care, phototherapy, or intensive treatment is formally admitted or evaluated in the emergency department as an individual patient.",
+      ],
+      [
+        "How does the system prevent registering the same baby twice?",
+        "Under rule c4dcf395e2, the client generates a unique client-side Idempotency-Key header on submission. If a network disruption occurs and the request is retried, the server returns the first registered baby and band instead of creating duplicate records.",
+      ],
+      [
+        "Where does the official birth notification for the Union Council print from?",
+        "Under rule 55a7f06927, after newborn bedside registration, the delivery details are completed in the labour register (screen labour_register), and the official bilingual birth notification for the Union Council prints from there.",
+      ],
+      [
+        "What clinical roles and permissions are required to register a newborn and print its band?",
+        "Registering a newborn requires both 'maternity.record' and 'patient.wristband.print' permissions, authorized for ward nurses and head nurses. Administrative or clerical staff without clinical maternity privileges cannot register births.",
+      ],
+    ],
+    faqUr: [
+      [
+        "نوزائیدہ کا اندراج شروع میں 'Baby of' والدہ کے نام سے کیوں ہوتا ہے؟",
+        "قاعدہ c4dcf395e2 اور ہسپتال کے شناختی ضابطے کے تحت نوزائیدہ کو فوری طور پر والدہ کے نام سے منسلک الگ ایم آر این ملتا ہے تاکہ نام رکھنے سے قبل کوئی غلطی نہ ہو۔ بعد میں فیملی کے نام رکھنے پر ریکارڈ اپ ڈیٹ ہو جاتا ہے۔",
+      ],
+      [
+        "اگر نوزائیدہ کا کلائی بینڈ خراب ہو جائے یا اتر جائے تو متبادل بینڈ کیسے ملتا ہے؟",
+        "قاعدہ 695cc4d1de کے تحت نرس رجسٹر میں بچے کے نام کے آگے 'نیا بینڈ' پر کلک کر کے والدہ کا داخلہ نمبر، بچے کا آئی ڈی اور تبدیلی کی لازمی وجہ (خراب، گندا، گر گیا) درج کر کے نیا بینڈ جاری کر سکتی ہے۔",
+      ],
+      [
+        "اگر والدہ غیر شناخت شدہ ایمرجنسی مریضہ ہو تو بچے کا اندراج کیسے ہوتا ہے؟",
+        "فیصلہ 61 کے تحت غیر شناخت شدہ والدہ کے نوزائیدہ کا موبائل نمبر خالی رہتا ہے۔ جب بعد میں والدہ کا پروفائل تصدیق ہو کر ضم ہوتا ہے تو بچے کے ریکارڈ پر بھی والدہ کا اصل نام اور رابطہ نمبر خودکار اپ ڈیٹ ہو جاتا ہے۔",
+      ],
+      [
+        "اگر نوزائیدہ کو خصوصی علاج یا این آئی سی یو داخلے کی ضرورت ہو تو کیا کیا جائے؟",
+        "قاعدہ 1fff1897f1 کے تحت تندرست بچہ والدہ کے ساتھ رہتا ہے، لیکن اگر بچے کو خصوصی علاج، فوٹو تھراپی یا نرسری کی ضرورت ہو تو اسے ایک آزاد مریض کے طور پر باضابطہ داخل یا ایمرجنسی میں دیکھا جاتا ہے۔",
+      ],
+      [
+        "سسٹم ایک ہی بچے کو غلطی سے دو بار رجسٹر ہونے سے کیسے روکتا ہے؟",
+        "قاعدہ c4dcf395e2 کے تحت ہر درخواست کے ساتھ مخصوص Idempotency-Key بھیجی جاتی ہے۔ اگر نیٹ ورک کی خرابی پر بٹن دوبارہ دب جائے تو سرور نیا ریکارڈ بنانے کے بجائے پہلے سے محفوظ شدہ ریکارڈ اور بینڈ واپس بھیجتا ہے۔",
+      ],
+      [
+        "یونین کونسل کے لیے پیدائش کا سرکاری فارم کہاں سے پرنٹ ہوتا ہے؟",
+        "قاعدہ 55a7f06927 کے تحت نوزائیدہ کے اندراج کے بعد ڈلیوری کی رپورٹ لیبر رجسٹر (سکرین labour_register) میں درج ہوتی ہے اور وہیں سے یونین کونسل کے لیے پیدائش کا سرکاری سرٹیفکیٹ پرنٹ ہوتا ہے۔",
+      ],
+      [
+        "نوزائیدہ کا اندراج کرنے اور کلائی بینڈ پرنٹ کرنے کی اجازت کن کے پاس ہے؟",
+        "اس کے لیے 'maternity.record' اور 'patient.wristband.print' دونوں اجازتیں درکار ہیں جو وارڈ نرسز اور ہیڈ نرسز کے پاس ہوتی ہیں۔ غیر طبی عملہ نوزائیدہ کا اندراج نہیں کر سکتا۔",
+      ],
+    ],
+  },
   obstetric_assessment: {
     title: "Obstetric risk assessment",
     titleUr: "حمل و زچگی کے خطرات کا جائزہ",
