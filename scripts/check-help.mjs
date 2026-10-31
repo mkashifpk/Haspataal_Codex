@@ -239,6 +239,7 @@ export function checkHelp({
       "BloodCenterLab",
       "BloodCenterRelease",
       "TransfusionBedside",
+      "MaternityPolicy",
     ].map((n) => `src/screens/${n}.tsx`),
   ];
   const used = new Set(),

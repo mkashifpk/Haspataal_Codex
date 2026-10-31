@@ -4686,6 +4686,92 @@ consents_doctor: {
       ],
     ],
   },
+  maternity_policy: {
+    title: "High-risk pregnancy: our policy",
+    titleUr: "ہائی رسک حمل: ہسپتال کی پالیسی",
+    purpose: "High-risk obstetric conditions catalog, Managed vs Referred determinations, public waiting area notice display, and stakeholder communications under PHC MSDS standards.",
+    purposeUr: "پی ایچ سی ایم ایس ڈی ایس کے تحت ہائی رسک زچگی کیسز کی فہرست، ہسپتال کے فیصلے، عوامی ڈسپلے نوٹس، اور اسٹیک ہولڈر مواصلات۔",
+    steps: [
+      "Open Quality & Safety → High-risk pregnancy: our policy to review the hospital's high-risk obstetric conditions catalog.",
+      "Review the twelve standard manual conditions; cases starting without a decision are marked Undecided in amber (rule 585417c0ea).",
+      "Click 'Decide' on each condition to record whether it is Managed here or Referred to another facility.",
+      "For any condition marked Referred, enter the mandatory referral note specifying the designated destination hospital and department (e.g. DHQ Hospital labour room).",
+      "Click '+ Add Condition' to include additional hospital-specific high-risk conditions or clinical scenarios.",
+      "Verify the activation readiness banner; all conditions must be decided (Managed or Referred) before the maternity service can be activated in Facility Settings (rule 7ac44a354a).",
+      "Open the 'Public Notice & PDF' tab and click 'Download Official PDF' or 'Print Notice' to display it at the main entrance and antenatal waiting area (rule b7a7a7f1e6).",
+      "Open the 'Stakeholder Communications' tab and click '+ Record Communication' to document how both hospital patients (board/banner/brochure/website) and referring practitioners (letters/meetings) were informed (rule 1e04f5eed7).",
+    ],
+    stepsUr: [
+      "ہسپتال کے ہائی رسک زچگی کیسز کی فہرست دیکھنے کے لیے کوالٹی و سیفٹی سے 'ہائی رسک حمل کی پالیسی' کھولیں۔",
+      "پی ایچ سی مینوئل کی بارہ معیاری مثالوں کا جائزہ لیں؛ جن کیسز کا فیصلہ نہیں ہوا وہ امبر رنگ میں غیر طے شدہ نظر آتے ہیں (قاعدہ 585417c0ea)۔",
+      "ہر کیس پر 'فیصلہ کریں' پر کلک کریں تاکہ یہ طے کیا جا سکے کہ آیا اس کا علاج یہاں ہوگا یا اسے دوسرے ہسپتال ریفر کیا جائے گا۔",
+      "ریفر کیے جانے والے ہر کیس کے لیے لازمی ریفرل نوٹ درج کریں جس میں مخصوص ہسپتال اور شعبے کا نام درج ہو (مثلاً ڈی ایچ کیو ہسپتال لیبر روم)۔",
+      "ہسپتال کے اپنے خصوصی ہائی رسک کیسز یا طبی صورتحال شامل کرنے کے لیے '+ نیا کیس شامل کریں' پر کلک کریں۔",
+      "ایکٹیویشن ریڈی نیس کارڈ چیک کریں؛ زچگی سروس فعال کرنے سے پہلے تمام کیسز کا فیصلہ ہونا لازمی ہے (قاعدہ 7ac44a354a)۔",
+      "عوامی نوٹس ٹیب کھولیں اور سرکاری پی ڈی ایف ڈاؤن لوڈ یا پرنٹ کریں تاکہ اسے مرکزی گیٹ اور اینٹی نیٹل ویٹنگ روم میں آویزاں کیا جا سکے (قاعدہ b7a7a7f1e6)۔",
+      "اسٹیک ہولڈر مواصلت ٹیب کھولیں اور '+ رابطہ درج کریں' پر کلک کر کے مریضوں اور ریفرنگ ڈاکٹرز کو دی گئی باضابطہ آگاہی کا اندراج کریں (قاعدہ 1e04f5eed7)۔",
+    ],
+    faq: [
+      [
+        "What are the twelve standard high-risk pregnancy examples in the PHC manuals?",
+        "Under rule 585417c0ea and PHC Reference Manual II C p.165, the list starts with 12 standard examples: Haemorrhage, Prolonged/obstructed labour, Postpartum sepsis, Complications of abortion, Pre-Eclampsia/Eclampsia, Ectopic pregnancy, Ruptured uterus, Foetal/newborn distress, Medical disorders in pregnancy, Malpresentation, Twin pregnancy, and Scarred uterus.",
+      ],
+      [
+        "Why is a referral note mandatory for Referred conditions?",
+        "Under rules 585417c0ea and b7a7a7f1e6, declaring a case Referred requires documenting exactly where and how patients are transferred (referral_note), ensuring continuity of care and compliant emergency handovers.",
+      ],
+      [
+        "What does the public notice say if the hospital does not run a maternity service?",
+        "Under rule b7a7a7f1e6, if the maternity capability is Inactive, the notice explicitly states that the hospital provides no maternity care and lists the designated referral destinations for all high-risk conditions.",
+      ],
+      [
+        "Where must the high-risk pregnancy policy notice be displayed?",
+        "Under rule b7a7a7f1e6 and MSDS Category I 26 / II C 66, the notice must be displayed prominently at the hospital's main entrance and in the antenatal clinic waiting area, and must be reprinted whenever decisions change.",
+      ],
+      [
+        "What is required for the stakeholder communications indicator to be fully met?",
+        "Under rule 1e04f5eed7 and MSDS Cat I p.47, the hospital must document communications to BOTH its own patients (display board, banner, brochure, website) AND to referring practitioners and facilities (formal letters or coordination meetings with named recipients). Without referrers, the indicator is only partially met.",
+      ],
+      [
+        "How does the system prevent concurrent overwriting of policy decisions?",
+        "PATCH /maternity/high-risk-conditions/{id} requires expected_version matching row_version. If another administrator updated the condition meanwhile, the server returns 409 VERSION_CONFLICT and refreshes the data.",
+      ],
+      [
+        "What must be completed before the maternity service can be activated?",
+        "Under rule 7ac44a354a, the maternity capability can only be switched on in Facility Settings once every high-risk condition on the list has a recorded decision (Managed or Referred), ensuring staff know their clinical boundary.",
+      ],
+    ],
+    faqUr: [
+      [
+        "پی ایچ سی مینوئل میں بارہ معیاری ہائی رسک زچگی کی مثالیں کون سی ہیں؟",
+        "قاعدہ 585417c0ea کے تحت فہرست بارہ معیاری کیسز سے شروع ہوتی ہے: خون کا بہاؤ، طویل یا رکی ہوئی مشقت، زچگی کے بعد کا انفیکشن، اسقاط حمل کی پیچیدگیاں، پری ایکلیمپسیا/ایکلیمپسیا، ایکٹوپک حمل، پھٹا ہوا رحم، بچے کی تکلیف، دیگر بیماریوں کے ساتھ حمل، بچے کا الٹا رخ، جڑواں بچے، اور سیزرین کا داغدار رحم۔",
+      ],
+      [
+        "ریفر کردہ کیسز کے لیے ریفرل نوٹ کیوں لازمی ہے؟",
+        "قواعد کے مطابق ریفر کیے جانے والے ہر کیس میں ہسپتال کو واضح لکھنا ہوتا ہے کہ مریض کو کس ٹرشری ہسپتال یا لیبر روم میں بھیجا جائے گا تاکہ مریض کی زندگی کو خطرہ نہ ہو۔",
+      ],
+      [
+        "اگر ہسپتال میں زچگی سروس فعال نہ ہو تو نوٹس پر کیا لکھا ہوتا ہے؟",
+        "قاعدہ b7a7a7f1e6 کے تحت اگر زچگی سروس بند ہو تو نوٹس پر واضح طور پر درج ہوتا ہے کہ ہسپتال زچگی سروس فراہم نہیں کرتا اور تمام کیسز کو مخصوص سرکاری ہسپتالوں میں ریفر کیا جاتا ہے۔",
+      ],
+      [
+        "ہائی رسک حمل کی پالیسی کا نوٹس کہاں آویزاں کرنا لازمی ہے؟",
+        "پی ایچ سی کے معیار کے مطابق یہ نوٹس ہسپتال کے مرکزی داخلی دروازے اور اینٹی نیٹل کلینک کے انتظار گاہ میں نمایاں آویزاں ہونا لازمی ہے اور کسی بھی تبدیلی پر دوبارہ پرنٹ ہونا چاہیے۔",
+      ],
+      [
+        "اسٹیک ہولڈر مواصلات کا انڈیکیٹر مکمل ہونے کے لیے کیا شرائط ہیں؟",
+        "قاعدہ 1e04f5eed7 کے تحت ہسپتال کے اپنے مریضوں کے ساتھ ساتھ علاقے کے ریفرنگ ڈاکٹرز اور مراکز کو باضابطہ خطوط یا میٹنگز کے ذریعے آگاہ کرنا لازمی ہے، ورنہ انڈیکیٹر صرف جزوی شمار ہوگا۔",
+      ],
+      [
+        "پالیسی فیصلوں میں بیک وقت دو افراد کی ترمیم سے کیسے بچا جاتا ہے؟",
+        "سسٹم expected_version کے ذریعے تصدیق کرتا ہے؛ اگر کسی دوسرے صارف نے درمیان میں ڈیٹا بدل دیا ہو تو سسٹم 409 VERSION_CONFLICT کے ساتھ تازہ ڈیٹا دکھا کر دوبارہ جائزے کی ہدایت کرتا ہے۔",
+      ],
+      [
+        "زچگی سروس فعال کرنے سے پہلے کیا مکمل ہونا ضروری ہے؟",
+        "قاعدہ 7ac44a354a کے تحت فہرست میں موجود ہر ہائی رسک کیس کا فیصلہ (یہاں علاج یا ریفر) ہونا لازمی ہے، تب ہی فیسلٹی سیٹنگز میں زچگی سروس فعال ہو سکتی ہے۔",
+      ],
+    ],
+  },
   transfusion_bedside: {
     title: "Transfusion bedside verification and administration",
     titleUr: "ٹرانسفیوژن بیڈ سائیڈ تصدیق اور منتقلی",
