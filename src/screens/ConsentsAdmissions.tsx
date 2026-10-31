@@ -77,11 +77,12 @@ export function ConsentsAdmissions({
   connected: boolean;
   stream: string;
   timeZone?: string;
-  screenId?: "consents_admissions" | "consents_ward" | "consents_doctor";
+  screenId?: "consents_admissions" | "consents_ward" | "consents_doctor" | "consents_triage";
 }) {
   const isWard = screenId === "consents_ward",
     isDoctor = screenId === "consents_doctor",
-    isClinical = isWard || isDoctor,
+    isTriage = screenId === "consents_triage",
+    isClinical = isWard || isDoctor || isTriage,
     can = (p: string) => user.permissions.includes(p),
     view = establishment.views.screens.find(
       (s) => s.screen_id === (screenId || "consents_admissions"),
@@ -752,6 +753,8 @@ export function ConsentsAdmissions({
           <h1>
             {isDoctor
               ? t("Consents: informed consent and refusal", "رضامندی: باخبر رضامندی اور انکار")
+              : isTriage
+              ? t("Consents in the emergency department", "ایمرجنسی ڈیپارٹمنٹ میں رضامندیاں")
               : isWard
               ? t("Consents of my patients", "میرے مریضوں کی رضامندی")
               : t("General consent at admission", "داخلے پر عمومی رضامندی")}
@@ -761,6 +764,11 @@ export function ConsentsAdmissions({
               ? t(
                   "The consents the doctor takes: operations, procedures, transfusion, high-risk treatments, leaving against advice; the general consent; the emergency note.",
                   "ڈاکٹر کی لی جانے والی رضامندیاں: آپریشن، طریقہ کار، انتقال خون، پرخطر علاج، مرضی کے خلاف روانگی؛ عمومی رضامندی؛ ہنگامی نوٹ۔",
+                )
+              : isTriage
+              ? t(
+                  "The general consent of emergency admissions, and the doctor's emergency note when nobody can consent.",
+                  "ہنگامی داخلوں کی عمومی رضامندی، اور جب کوئی رضامندی نہ دے سکے تو ڈاکٹر کا ہنگامی نوٹ۔",
                 )
               : isWard
               ? t(
@@ -808,7 +816,12 @@ export function ConsentsAdmissions({
       )}
       {view === "open_work" && (
         <p className="notice">
-          {isWard
+          {isTriage
+            ? t(
+                "No new emergency arrivals from now on. Existing consents and scanning continue.",
+                "اب نئی ایمرجنسی آمد نہیں؛ موجودہ رضامندیاں اور اسکین جاری۔",
+              )
+            : isWard
             ? t(
                 "No new consents from now on. Existing consents and scanning continue.",
                 "اب نئی رضامندی نہیں؛ موجودہ دستاویزات اور اسکین جاری۔",
@@ -872,7 +885,11 @@ export function ConsentsAdmissions({
                     }[r.kind]
                   }{" "}
                   · {r.admission_number || r.booking_number} · {time(r.due_at)}
-                  {r.overdue && " · " + t("Overdue", "تاخیر")}
+                  {r.overdue && (
+                    <span style={{ color: "var(--danger, #c00)", fontWeight: "bold" }}>
+                      {" · " + t("Overdue", "تاخیر")}
+                    </span>
+                  )}
                 </p>
                 {r.consent_id ? (
                   <button

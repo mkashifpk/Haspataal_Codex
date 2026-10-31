@@ -112,6 +112,7 @@ const labels: Record<string, [string, string, string]> = {
  consents_admissions: ["General consent at admission","داخلے پر عمومی رضامندی","▤"],
  consents_ward: ["Consents of my patients","میرے مریضوں کی رضامندی","▤"],
  consents_doctor: ["Consents: informed consent and refusal","رضامندی: باخبر رضامندی اور انکار","▤"],
+ consents_triage: ["Consents in emergency department","ایمرجنسی میں رضامندیاں","📋"],
  blood_sources: ["Licensed blood sources","مجاز بلڈ سنٹرز و ذرائع","🩸"],
  blood_request: ["Request blood","خون کی درخواست","🩸"],
  blood_bank: ["Blood bank","بلڈ بینک","🩸"],
@@ -207,6 +208,7 @@ const frontDeskScreens = new Set([
   'own_medicines_pharmacy',
   'critical_results_ward',
   'critical_results_er',
+  'consents_triage',
   'consents_ward',
   'consents_doctor',
   'blood_sources',
@@ -890,6 +892,7 @@ export function App() {
   'own_medicines_pharmacy',
   'critical_results_ward',
   'critical_results_er',
+  'consents_triage',
   'consents_ward',
   'consents_doctor',
   'blood_sources',
@@ -950,7 +953,7 @@ export function App() {
       (id !== "donor_assessment" || ["full","open_work","records","setup"].includes(est?.views.screens.find(v=>v.screen_id===id)?.view || "")) &&
       (id !== "blood_collection" || ["full","open_work","records","setup"].includes(est?.views.screens.find(v=>v.screen_id===id)?.view || "")) &&
       (id !== "blood_center_lab" || ["full","open_work","records","setup"].includes(est?.views.screens.find(v=>v.screen_id===id)?.view || "")) &&
-      (!["mar","verbal_orders_ward","verbal_orders_er","vitals_tracker","patient_education_ward","nursing_assessment","my_beds","doctor_inpatients","cost_estimates_admissions","consents_admissions","wristbands_admissions","wristbands_ward","own_medicines_ward","own_medicines_pharmacy","bed_matrix","pending_admissions","imaging_repeats","imaging_outsourced","critical_results_radiology","radiology_worklist","rx_queue","dispense","order_queries","otc","charity_override","lab_only_walkin","lab_bench","lab_send_outs","lab_verification","critical_results_bench","critical_results_verifier","critical_results_doctor","critical_results_ward","critical_results_er","consents_ward"].includes(id) || ["full", "open_work", "records"].includes(est?.views.screens.find(v => v.screen_id === id)?.view || "")),
+      (!["mar","verbal_orders_ward","verbal_orders_er","vitals_tracker","patient_education_ward","nursing_assessment","my_beds","doctor_inpatients","cost_estimates_admissions","consents_admissions","wristbands_admissions","wristbands_ward","own_medicines_ward","own_medicines_pharmacy","bed_matrix","pending_admissions","imaging_repeats","imaging_outsourced","critical_results_radiology","radiology_worklist","rx_queue","dispense","order_queries","otc","charity_override","lab_only_walkin","lab_bench","lab_send_outs","lab_verification","critical_results_bench","critical_results_verifier","critical_results_doctor","critical_results_ward","critical_results_er","consents_ward","consents_triage"].includes(id) || ["full", "open_work", "records"].includes(est?.views.screens.find(v => v.screen_id === id)?.view || "")),
   );
   const view = est?.views.workspaces.find(
     (v) => v.workspace === workspace,
@@ -1326,6 +1329,7 @@ export function App() {
               {screen === 'consents_admissions' && est && <ConsentsAdmissions key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone}/>}
               {screen === 'consents_ward' && est && <ConsentsAdmissions key={user.user_id+'ward'} screenId="consents_ward" user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone}/>}
               {screen === 'consents_doctor' && est && <ConsentsAdmissions key={user.user_id+'doctor'} screenId="consents_doctor" user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone}/>}
+              {screen === 'consents_triage' && est && <ConsentsAdmissions key={user.user_id+'triage'} screenId="consents_triage" user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone}/>}
               {screen === 'blood_sources' && est && <BloodSources key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} />}
               {screen === 'blood_request' && est && <BloodRequest key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} onNavigateToConsent={() => navigate('consents_doctor')} />}
               {screen === 'blood_bank' && est && <BloodBank key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} />}

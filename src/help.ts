@@ -1552,6 +1552,100 @@ nursing_assessment: {
     ]
   ]
 },
+ consents_triage: {
+  title: "Consents in the emergency department: Informed consent and emergency notes",
+  titleUr: "ایمرجنسی ڈیپارٹمنٹ میں رضامندیاں: باخبر رضامندی اور ہنگامی نوٹ",
+  purpose: "In the Emergency Department, triage staff, emergency nurses, and attending physicians obtain and record informed consent under MSDS PRE 72-75, COP 35, 43, and AAC 23. The screen displays the consent worklist first (rule e9d9f576df) showing missing general consents, unconsented emergency surgeries, and unscanned signed forms with red OVERDUE indicators. Staff prepare the appropriate hospital consent form in the language the patient understands (rule d84307d9b2), print and format right-to-left Nastaliq forms (rule fea5622fc5), record signed or refused decisions using the patient's dynamic who_decides hierarchy, or record an emergency note with two PMDC doctors when nobody can consent (rule b7bacc1ffb, rule cb2f327ee7, rule f811c03843), and upload paper scans separately (rule 8b7301ca0f) while respecting emergency department service views (rule e0a2eac3db).",
+  purposeUr: "ایمرجنسی ڈیپارٹمنٹ میں ٹرائیج عملہ، نرسیں اور ڈاکٹر ایم ایس ڈی ایس پی آر ای 72-75، سی او پی 35، 43 اور اے اے سی 23 کے تحت باخبر رضامندی حاصل اور درج کرتے ہیں۔ یہ اسکرین منتظر کام کی فہرست پہلے دکھاتی ہے (قاعدہ e9d9f576df) جس میں غیر موجود عمومی رضامندی، بغیر رضامندی ہنگامی آپریشن اور غیر اسکین شدہ فارم سرخ تاخیر کے نشان کے ساتھ نظر آتے ہیں۔ عملہ مریض کی سمجھی زبان میں ہسپتال کا مجاز فارم تیار کرتا ہے (قاعدہ d84307d9b2)، دائیں سے بائیں نستعلیق فارم پرنٹ کرتا ہے (قاعدہ fea5622fc5)، باخبر رضامندی یا انکار کا اندراج کرتا ہے، یا جب کوئی رضامندی نہ دے سکے تو دو پی ایم ڈی سی ڈاکٹروں کے ساتھ ہنگامی نوٹ لکھتا ہے (قاعدہ b7bacc1ffb، cb2f327ee7، f811c03843)، اور دستخط شدہ کاغذ الگ اپ لوڈ کرتا ہے (قاعدہ 8b7301ca0f)۔",
+  steps: [
+    "Open Triage & Emergency → Consents in the emergency department. The Consent work waiting list appears first on the left, displaying admissions missing general consent, urgent procedures without consent, and signed papers waiting to scan. Overdue items display a prominent red Overdue tag with their deadline.",
+    "To handle an existing work item, click 'Open prepared consent' to resume a draft, or 'Prepare for this admission' to start a new consent from the patient's emergency arrival.",
+    "Under Prepare consent, select the hospital's approved consent form and choose the language the patient understands. Complete the clinical explanation fields: need for emergency admission/procedure, estimated stay in days, and estimated cost in PKR.",
+    "Print the prepared consent form using 'Print this consent form' or preview the terminal layout. The system formats Urdu and local languages right-to-left using Nastaliq fonts. Read the explanation aloud to the patient or attendant, answer all questions, and confirm they understand before signing.",
+    "Under Record decision, select the Decision mode: Signed paper, Doctor's emergency note, or Witnessed verbal refusal.",
+    "For a signed paper, verify who decides from the server's who_decides rules: select Patient if permitted, or an authorized Decision Maker from the policy priority list (recording their name, relationship, CNIC, and incapacity reason). Record questions asked and tick that the patient explained it back.",
+    "When an unconscious or incapacitated emergency patient has no attendant and treatment cannot wait, choose 'Doctor's emergency note'. Enter why treatment cannot wait, and select a concurring registered PMDC doctor via staff lookup when required by hospital policy.",
+    "Once the physical document is signed or thumb-printed, upload the file under 'Upload this consent scan' as a patient Consent document, then attach it to the permanent consent record via 'Attach the signed scan'."
+  ],
+  stepsUr: [
+    "ٹرائیج و ایمرجنسی میں ایمرجنسی ڈیپارٹمنٹ میں رضامندیاں کھولیں۔ بائیں جانب منتظر کام کی فہرست پہلے نظر آتی ہے جس میں عمومی رضامندی کے بغیر داخلے، رضامندی کے بغیر ہنگامی آپریشن اور اسکین کے منتظر کاغذات درج ہوتے ہیں۔ تاخیر شدہ اشیاء کے ساتھ سرخ رنگ میں اوور ڈیو لکھا ہوتا ہے۔",
+    "کسی زیر التوا کام پر کام کرنے کے لیے، پہلے سے تیار مسودہ کھولنے کے لیے 'اوپن پریپیئرڈ کنسنٹ' پر کلک کریں، یا نئی رضامندی شروع کرنے کے لیے 'اس داخلے کی رضامندی تیار کریں' پر کلک کریں۔",
+    "رضامندی کی تیاری کے تحت ہسپتال کا منظور شدہ فارم منتخب کریں اور وہ زبان منتخب کریں جو مریض سمجھتا ہو۔ وضاحتی خانے پر کریں: داخلے یا علاج کی ضرورت، متوقع قیام دنوں میں، اور متوقع اخراجات روپوں میں۔",
+    "فارم پرنٹ کرنے کے لیے 'پرنٹ دس کنسنٹ فارم' پر کلک کریں۔ نظام اردو اور علاقائی زبانوں کو نستعلیق فونٹ میں دائیں سے بائیں ترتیب دیتا ہے۔ مریض یا تیماردار کو باآواز بلند سمجھائیں، سوالات کے جوابات دیں، اور دستخط سے پہلے ان کے فہم کی تصدیق کریں۔",
+    "فیصلہ درج کرنے کے لیے طریقہ کار منتخب کریں: دستخط شدہ کاغذ، ڈاکٹر کا ہنگامی نوٹ، یا باگواہ زبانی انکار۔",
+    "دستخط شدہ فارم کی صورت میں، سرور کی پالیسی کے تحت فیصلہ کنندہ منتخب کریں: اگر اجازت ہو تو مریض، بصورت دیگر مجاز نمائندہ (نام، رشتہ، شناختی کارڈ اور مریض کے دستخط نہ کر سکنے کی وجہ درج کریں)۔ سوال و جواب درج کریں اور مریض کے واپس سمجھانے کی تصدیق کریں۔",
+    "جب مریض بے ہوش یا معذور ہو، کوئی تیماردار موجود نہ ہو اور علاج میں تاخیر جان لیوا ہو، تو 'ڈاکٹر کا ہنگامی نوٹ' منتخب کریں۔ تاخیر نہ کر سکنے کی وجہ لکھیں اور پالیسی کے مطابق اسٹاف تلاش سے دوسرا رجسٹرڈ پی ایم ڈی سی ڈاکٹر چنیں۔",
+    "کاغذ پر دستخط یا انگوٹھے کے بعد، 'اسکین اپ لوڈ' کے ذریعے پی ڈی ایف یا تصویر اپ لوڈ کریں اور پھر 'دستخط شدہ اسکین کا ربط' دبا کر مستقل ریکارڈ کے ساتھ منسلک کریں۔"
+  ],
+  faq: [
+    [
+      "The Consents in the emergency department screen says \"The consent policy does not accept this decision: who signed, for which patient, with which witness or second doctor.\" (CONSENT_SIGNER_INVALID). Why, and what do I do?",
+      "Hospital policy enforces who may decide on this specific consent: if the patient is a minor or lacks capacity under who_decides, only authorized decision makers listed in policy order may sign. For emergency notes, a second registered PMDC doctor must be chosen when required. Correct the selected signer or relationship to match the allowed policy list."
+    ],
+    [
+      "The Consents in the emergency department screen says \"The form has no text in that language: add it, or choose another language.\" (CONSENT_TEXT_MISSING). Why, and what do I do?",
+      "The chosen consent template has not had an approved declaration registered in that language. Select one of the available languages registered for this form, or ask the hospital policy administrator to register the official translated text."
+    ],
+    [
+      "The Consents in the emergency department screen says \"Invalid OT booking state change.\" (OT_BOOKING_STATE_INVALID). Why, and what do I do?",
+      "An emergency surgical consent is linked to an operating theatre booking: if the booking was cancelled or already transitioned past the sign-in check, consent modifications are rejected. Review the current theatre board before retrying."
+    ],
+    [
+      "The Consents in the emergency department screen says \"The consent cannot change that way: a decided consent is final (withdraw it and take a new one).\" (CONSENT_STATE_INVALID). Why, and what do I do?",
+      "Under MSDS PRE 75, once a consent decision is finalized (Given or Refused), it cannot be edited in place. If the clinical plan changes or the patient revokes consent, use 'Withdraw given consent' with a factual reason, and prepare a fresh consent."
+    ],
+    [
+      "The Consents in the emergency department screen says \"The server prints the PDF of Latin-script languages only: print this form from the print payload (fields) on the terminal.\" (CONSENT_PDF_UNAVAILABLE). Why, and what do I do?",
+      "Right-to-left languages such as Urdu, Punjabi, Pashto, and Sindhi require Nastaliq typography and are rendered locally on the terminal rather than server-side headless PDF engines. Use the terminal's built-in Print button or Save terminal PDF."
+    ],
+    [
+      "The Consents in the emergency department screen says \"This consent is explained and taken by a registered doctor (for anaesthesia: a doctor of the anaesthesia team).\" (CONSENT_TAKER_NOT_AUTHORIZED). Why, and what do I do?",
+      "Informed clinical consents for surgical procedures, anaesthesia, and high-risk interventions must be taken by a registered medical practitioner (PMDC). Triage nurses can prepare general admission consents, but clinical procedure consents require a qualified doctor's sign-off."
+    ],
+    [
+      "The Consents in the emergency department screen says \"The consent is missing what the form needs (details.missing lists it).\" (CONSENT_INCOMPLETE). Why, and what do I do?",
+      "The draft consent has mandatory clinical explanation fields that remain empty (such as procedure risks, benefits, alternatives, or admission stay/cost estimates). Open the draft, fill all missing fields indicated by the validation tags, and re-review."
+    ],
+    [
+      "The Consents in the emergency department screen says \"The patient's transfusion consent of this stay is needed first (signed, or the doctor's emergency note): the consent register.\" (BLOOD_CONSENT_REQUIRED). Why, and what do I do?",
+      "Under Blood Safety protocols, emergency blood administration requires an active signed transfusion consent or an emergency note on file before issuing blood units. Navigate to the consent register, prepare the transfusion consent, and obtain sign-off before requesting release."
+    ]
+  ],
+  faqUr: [
+    [
+      "جب اسکرین کہے کہ پالیسی اس فیصلے، دستخط کنندہ یا دوسرے ڈاکٹر کو قبول نہیں کرتی (CONSENT_SIGNER_INVALID) تو کیا کریں؟",
+      "ہسپتال کی پالیسی کے تحت مریض کے بالغ ہونے یا ہوش و حواس کے مطابق صرف منظور شدہ افراد ہی فیصلہ کر سکتے ہیں۔ اگر مریض نابالغ ہے تو صرف پالیسی کے منظور شدہ رشتہ دار ہی دستخط کر سکتے ہیں۔ ہنگامی نوٹ میں دوسرا پی ایم ڈی سی ڈاکٹر چننا لازم ہے۔ اجازت شدہ فہرست کے مطابق درست انتخاب کریں۔"
+    ],
+    [
+      "جب اسکرین کہے کہ فارم کا اس زبان میں متن موجود نہیں (CONSENT_TEXT_MISSING) تو کیا کریں؟",
+      "منتخب کردہ فارم کا اس زبان میں ترجمہ ابھی درج نہیں ہے۔ فارم کی دستیاب زبانوں میں سے انتخاب کریں یا ایڈمنسٹریٹر سے کہیں کہ وہ اس فارم کا منظور شدہ متن شامل کرے۔"
+    ],
+    [
+      "جب اسکرین کہے کہ آپریشن بکنگ کی حالت غلط ہے (OT_BOOKING_STATE_INVALID) تو کیا کریں؟",
+      "ہنگامی آپریشن کی رضامندی تھیٹر کی بکنگ سے جڑی ہوتی ہے۔ اگر بکنگ منسوخ ہو چکی ہو یا سائن اِن مکمل ہو چکا ہو تو ترمیم نہیں ہو سکتی۔ پہلے آپریشن تھیٹر کے بورڈ پر بکنگ کی موجودہ حالت دیکھیں۔"
+    ],
+    [
+      "جب اسکرین کہے کہ حتمی رضامندی بدلی نہیں جا سکتی (CONSENT_STATE_INVALID) تو کیا کریں؟",
+      "ایم ایس ڈی ایس کے تحت ایک بار دی گئی یا مسترد شدہ رضامندی حتمی ہو جاتی ہے۔ اگر مریض کا ارادہ بدلے تو 'رضامندی واپس لیں' (Withdraw) دبا کر وجہ درج کریں اور نیا فارم تیار کریں۔"
+    ],
+    [
+      "جب اسکرین کہے کہ سرور پی ڈی ایف صرف لاطینی زبانوں کے لیے ہے (CONSENT_PDF_UNAVAILABLE) تو کیا کریں؟",
+      "اردو اور علاقائی دائیں سے بائیں زبانوں کے نستعلیق فونٹس سرور کی بجائے ٹرمینل پر مقامی طور پر پرنٹ ہوتے ہیں۔ ٹرمینل کا اپنا پرنٹ یا پی ڈی ایف محفوظ کرنے کا بٹن استعمال کریں۔"
+    ],
+    [
+      "جب اسکرین کہے کہ رضامندی صرف رجسٹرڈ ڈاکٹر لے سکتا ہے (CONSENT_TAKER_NOT_AUTHORIZED) تو کیا کریں؟",
+      "آپریشن اور بے ہوشی جیسی پرخطر طبی کارروائیوں کی رضامندی صرف رجسٹرڈ پی ایم ڈی سی ڈاکٹر لے سکتا ہے۔ داخلے کی عمومی رضامندی نرس لے سکتی ہے، لیکن پروسیجر کے لیے ڈاکٹر کا لاگ اِن درکار ہے۔"
+    ],
+    [
+      "جب اسکرین کہے کہ رضامندی میں مطلوبہ معلومات نامکمل ہیں (CONSENT_INCOMPLETE) تو کیا کریں؟",
+      "مسودے میں علاج کے خطرات، فوائد، متبادل یا قیام اور خرچ کے مطلوبہ خانے خالی رہ گئے ہیں۔ مسودہ کھولیں، سرخ نشان زدہ خانے پر کریں اور دوبارہ جائزے کے لیے پیش کریں۔"
+    ],
+    [
+      "جب اسکرین کہے کہ انتقالِ خون سے پہلے رضامندی لازمی ہے (BLOOD_CONSENT_REQUIRED) تو کیا کریں؟",
+      "محفوظ انتقال خون کے قوانین کے مطابق خون لگانے سے پہلے دستخط شدہ رضامندی یا ڈاکٹر کا ہنگامی نوٹ لازمی ہے۔ پہلے کنسنٹ اسکرین سے انتقال خون کی رضامندی درج کریں، پھر بلڈ بینک سے خون طلب کریں۔"
+    ]
+  ]
+},
  own_medicines_ward: {
   title: "Patient's own medicines",
   titleUr: "مریض کی اپنی ادویات",
