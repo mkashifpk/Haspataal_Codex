@@ -20,6 +20,7 @@ export const phase1Screens = [
 const approvalScreens = ["approval_queue", "charity_approvals"];
 // Coverage grows screen by screen; Phase 1 acceptance remains separate.
 export const deliveredHelpScreens = [
+  "ward_indent",
   "ward_transfer_head_nurse",
   "ward_transfer",
   "medication_safety_ward",
@@ -98,6 +99,34 @@ const g = (
 // IDs are also attached to the actual controls. The build rejects missing
 // mappings and empty translations instead of treating a page as coverage.
 export const controlGuides: Record<string, ControlGuide> = {
+"ward_indent.back": g(["ward_indent"],["Back navigation button","واپس جائیں بٹن"],["Navigates back to the head nurse workspace or previous screen.","ہیڈ نرس ورک اسپیس یا پچھلی سکرین پر واپس جاتا ہے۔"]),
+"ward_indent.btn_dismiss_realtime": g(["ward_indent"],["Dismiss realtime alert","ریئل ٹائم الرٹ ہٹائیں"],["Dismisses the real-time event notification banner.","ریئل ٹائم اطلاع کا بینر بند کرتا ہے۔"]),
+"ward_indent.ward_id": g(["ward_indent"],["Ward selector dropdown","وارڈ سلیکٹر ڈراپ ڈاؤن"],["Selects the hospital ward whose cabinet inventory and indents are being managed.","ہسپتال کا وہ وارڈ منتخب کرتا ہے جس کی کیبنٹ اور انڈینٹ کا انتظام کیا جا رہا ہے۔"]),
+"ward_indent.refresh_inventory": g(["ward_indent"],["Refresh stock button","اسٹاک تازہ کریں بٹن"],["Rereads current medicine inventory and batch statuses for the selected ward from the server.","سرور سے منتخب وارڈ کے کیبنٹ اسٹاک اور بیجز کی تازہ ترین صورتحال حاصل کرتا ہے۔"]),
+"ward_indent.tab_cabinet": g(["ward_indent"],["Ward Medicine Cabinet tab","وارڈ میڈیسن کیبنٹ ٹیب"],["Opens the ward medicine cabinet inventory view with batch safety inspections.","بیچ سیفٹی معائنے کے ساتھ وارڈ میڈیسن کیبنٹ کا اسٹاک ویو کھولتا ہے۔"]),
+"ward_indent.tab_create": g(["ward_indent"],["Create Supply Indent tab","نئی سپلائی انڈینٹ ٹیب"],["Opens the requisition drafting interface to request medicines from central pharmacy.","مرکزی فارمیسی سے ادویات منگوانے کے لیے انڈینٹ درخواست فارم کھولتا ہے۔"]),
+"ward_indent.tab_track": g(["ward_indent"],["Track Requisition tab","درخواست ٹریک کریں ٹیب"],["Opens the requisition tracking interface to inspect approval status and central stock.","مرکزی فارمیسی ایڈمن کی منظوری اور اسٹاک چیک کرنے کے لیے انڈینٹ ٹریکر کھولتا ہے۔"]),
+"ward_indent.filter_status_all": g(["ward_indent"],["Filter all batches button","تمام بیجز فلٹر بٹن"],["Shows all medicine batches in the ward cabinet.","وارڈ کیبنٹ کے تمام ادویات کے بیجز دکھاتا ہے۔"]),
+"ward_indent.filter_status_usable": g(["ward_indent"],["Filter usable stock button","قابل استعمال اسٹاک فلٹر بٹن"],["Filters cabinet inventory to show only usable non-expired and non-recalled stock.","کیبنٹ اسٹاک میں صرف قابل استعمال ادویات دکھاتا ہے۔"]),
+"ward_indent.filter_status_expired": g(["ward_indent"],["Filter expired stock button","میعاد ختم اسٹاک فلٹر بٹن"],["Filters cabinet inventory to show only expired batches requiring write-off.","کیبنٹ اسٹاک میں صرف میعاد ختم بیجز دکھاتا ہے جنہیں رائٹ آف کرنا ضروری ہے۔"]),
+"ward_indent.filter_status_recalled": g(["ward_indent"],["Filter recalled stock button","واپس طلب اسٹاک فلٹر بٹن"],["Filters cabinet inventory to show only recalled batches requiring return.","کیبنٹ اسٹاک میں صرف واپس طلب شدہ بیجز دکھاتا ہے جنہیں فارمیسی واپس کرنا ہے۔"]),
+"ward_indent.open_remove_modal": g(["ward_indent"],["Remove or write off batch button","بیچ ہٹائیں یا رائٹ آف کریں بٹن"],["Opens the removal dialog to write off expired/damaged stock or return goods to pharmacy.","میعاد ختم یا خراب دوا کو رائٹ آف کرنے یا فارمیسی واپس بھیجنے کا ڈائیلاگ کھولتا ہے۔"]),
+"ward_indent.remove_modal_close": g(["ward_indent"],["Close removal dialog button","ڈائیلاگ بند کریں بٹن"],["Closes the stock removal modal dialog.","اسٹاک ہٹانے کا موڈل ڈائیلاگ بند کرتا ہے۔"]),
+"ward_indent.remove_reason": g(["ward_indent"],["Removal reason selector","ہٹانے کی وجہ سلیکٹر"],["Selects reason for stock removal: Expiry, Damage, or ReturnToPharmacy (MSDS 59, 60).","اسٹاک ہٹانے کی وجہ منتخب کرتا ہے: میعاد ختم، خرابی، یا فارمیسی واپسی۔"]),
+"ward_indent.remove_qty": g(["ward_indent"],["Quantity to remove input","ہٹانے کی تعداد فیلڈ"],["Specifies the quantity of the batch to remove or return.","بیچ کی وہ تعداد درج کرتا ہے جسے ہٹانا یا واپس بھیجنا مقصود ہو۔"]),
+"ward_indent.remove_note": g(["ward_indent"],["Removal action note textarea","کارروائی کا تفصیلی نوٹ"],["Documents disposal, destruction, or pharmacy return justification (3 to 500 characters).","دوا کو ضائع کرنے یا واپسی کے پروٹوکول کا تفصیلی نوٹ درج کرتا ہے (3 سے 500 حروف)۔"]),
+"ward_indent.remove_cancel": g(["ward_indent"],["Cancel removal button","ہٹانا منسوخ کریں بٹن"],["Closes the stock removal dialog without saving changes.","بغیر کسی تبدیلی کے اسٹاک ہٹانے کا ڈائیلاگ بند کرتا ہے۔"]),
+"ward_indent.remove_submit": g(["ward_indent"],["Confirm stock removal button","اسٹاک ہٹانے کی تصدیق کریں بٹن"],["Submits the stock write-off or return to the server, updating ward inventory.","سرور پر اسٹاک رائٹ آف یا واپسی جمع کروا کر وارڈ انوینٹری کو اپ ڈیٹ کرتا ہے۔"]),
+"ward_indent.search_query": g(["ward_indent"],["Formulary search input","فارمولری تلاش فیلڈ"],["Captures drug name or generic search query to look up central pharmacy stock.","مرکزی فارمیسی اسٹاک سے ادویات تلاش کرنے کے لیے نام یا جینرک درج کرتا ہے۔"]),
+"ward_indent.search_button": g(["ward_indent"],["Search formulary button","فارمولری تلاش بٹن"],["Executes drug search across hospital formulary and returns availability status.","ہسپتال فارمولری میں ادویات تلاش کر کے دستیابی ظاہر کرتا ہے۔"]),
+"ward_indent.add_drug_button": g(["ward_indent"],["Add drug to indent button","دوا انڈینٹ میں شامل کریں بٹن"],["Adds selected formulary medicine to the ward supply requisition list.","منتخب دوا کو وارڈ سپلائی کی درخواست کی فہرست میں شامل کرتا ہے۔"]),
+"ward_indent.item_qty": g(["ward_indent"],["Requisition item quantity input","طلب کردہ تعداد فیلڈ"],["Specifies the quantity of the medicine being requisitioned from central store.","مرکزی اسٹور سے طلب کی جانے والی دوا کی مطلوبہ تعداد درج کرتا ہے۔"]),
+"ward_indent.item_note": g(["ward_indent"],["Line item clinical note input","آئٹم کا طبی نوٹ فیلڈ"],["Captures specific clinical justification or emergency instructions for this medicine.","اس دوا کے لیے مخصوص کلینیکل جواز یا ایمرجنسی ہدایات درج کرتا ہے۔"]),
+"ward_indent.remove_line_button": g(["ward_indent"],["Remove line button","لائن ہٹائیں بٹن"],["Removes a medicine item from the requisition draft.","درخواست کے مسودے سے دوا کا آئٹم ہٹاتا ہے۔"]),
+"ward_indent.indent_note": g(["ward_indent"],["Indent general note textarea","انڈینٹ کا عمومی نوٹ فیلڈ"],["Captures general requisition instructions for central pharmacy administration.","مرکزی فارمیسی ایڈمنسٹریشن کے لیے انڈینٹ کی عمومی ہدایات درج کرتا ہے۔"]),
+"ward_indent.submit_indent": g(["ward_indent"],["Submit supply indent button","انڈینٹ جمع کروائیں بٹن"],["Submits the supply requisition to central pharmacy, initiating approval workflow.","سپلائی کی درخواست مرکزی فارمیسی کو بھیجتا ہے جس سے منظوری کا مرحلہ شروع ہوتا ہے۔"]),
+"ward_indent.track_indent_id": g(["ward_indent"],["Indent tracking ID input","انڈینٹ ٹریکنگ نمبر فیلڈ"],["Specifies the indent requisition ID to look up on the server.","سرور پر تلاش کرنے کے لیے انڈینٹ درخواست کا نمبر درج کرتا ہے۔"]),
+"ward_indent.track_button": g(["ward_indent"],["Track requisition button","درخواست ٹریک کریں بٹن"],["Fetches requisition lines, central stock levels, and approval status from server.","سرور سے انڈینٹ کی اشیاء، مرکزی اسٹاک اور منظوری کی صورتحال حاصل کرتا ہے۔"]),
 "ward_transfer_head_nurse.btn_back": g(["ward_transfer_head_nurse"],["Back button","واپس جائیں بٹن"],["Navigates back to the previous screen or ward view.","پچھلی سکرین یا وارڈ ویو پر واپس جاتا ہے۔"]),
 "ward_transfer_head_nurse.btn_dismiss_realtime": g(["ward_transfer_head_nurse"],["Dismiss realtime alert","ریئل ٹائم الرٹ ہٹائیں"],["Dismisses the real-time event notification banner.","ریئل ٹائم اطلاع کا بینر بند کرتا ہے۔"]),
 "ward_transfer_head_nurse.search_admission": g(["ward_transfer_head_nurse"],["Inpatient Admission ID input","مریض کا داخلہ نمبر فیلڈ"],["Specifies the admission ID or MRN of the admitted patient to transfer.","منتقلی کے لیے زیر علاج مریض کا داخلہ نمبر یا ایم آر این درج کرتا ہے۔"]),

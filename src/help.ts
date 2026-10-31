@@ -4686,6 +4686,92 @@ consents_doctor: {
       ],
     ],
   },
+  ward_indent: {
+    title: "Ward supply indent & inventory",
+    titleUr: "وارڈ سپلائی انڈینٹ اور کیبنٹ اسٹاک",
+    purpose: "Request stock from central pharmacy; pharmacy admin approves (partial allowed). Manage ward-local medicine supplies, flag expired or recalled stock in red, and record write-offs or returns (MSDS 59, 60, rule 6c0ce3ff85).",
+    purposeUr: "مرکزی فارمیسی سے ادویات منگوانے کے لیے انڈینٹ بنائیں (ایڈمن کی جزوی یا مکمل منظوری)۔ وارڈ کیبنٹ کی ادویات کا معائنہ کریں، میعاد ختم یا واپس طلب ادویات کو سرخ رنگ میں دیکھیں، اور رائٹ آف یا واپسی ریکارڈ کریں (MSDS 59, 60، قاعدہ 6c0ce3ff85)۔",
+    steps: [
+      "Open Head Nurse workspace -> Ward supply indent.",
+      "Select the designated hospital ward to inspect the live medicine cabinet inventory.",
+      "Review cabinet safety inspection: expired batches (MSDS 59) and recalled batches (MSDS 60) are prominently highlighted in red.",
+      "For expired or damaged stock, click 'Write-off / Return', select reason 'Expiry' or 'Damage', document disposal note, and confirm removal.",
+      "For unneeded good stock or active recalls, click 'Write-off / Return', select reason 'ReturnToPharmacy', and confirm physical return.",
+      "To requisition supplies, switch to 'Create Supply Indent' tab, search hospital formulary by drug or generic name, and click '+ Add'.",
+      "Specify requested quantity and optional clinical note per line, enter overall requisition instructions, and click 'Submit Indent to Pharmacy'.",
+      "Switch to 'Track Requisition' tab to monitor pharmacy admin approval status; real-time event approval.resolved refreshes allocations automatically.",
+    ],
+    stepsUr: [
+      "ہیڈ نرس ورک اسپیس کھولیں -> 'وارڈ سپلائی انڈینٹ' پر جائیں۔",
+      "وارڈ میڈیسن کیبنٹ کے لائیو اسٹاک کا جائزہ لینے کے لیے متعلقہ وارڈ منتخب کریں۔",
+      "کیبنٹ کا سیفٹی معائنہ چیک کریں: میعاد ختم (MSDS 59) اور واپس طلب شدہ ادویات (MSDS 60) نمایاں طور پر سرخ رنگ میں دکھائی جاتی ہیں۔",
+      "میعاد ختم یا خراب اسٹاک کے لیے 'رائٹ آف / واپسی' پر کلک کریں، وجہ 'Expiry' یا 'Damage' منتخب کریں، تفصیلی نوٹ درج کریں اور ہٹانے کی تصدیق کریں۔",
+      "غیر ضروری درست اسٹاک یا ری کال شدہ ادویات کے لیے 'ReturnToPharmacy' منتخب کریں اور فارمیسی کو طبعی واپسی کی تصدیق کریں۔",
+      "نئی ادویات منگوانے کے لیے 'نئی سپلائی انڈینٹ بنائیں' ٹیب پر جائیں، فارمولری سے دوا تلاش کریں اور '+ Add' پر کلک کریں۔",
+      "ہر دوا کے لیے مطلوبہ تعداد اور طبی نوٹ درج کریں، انڈینٹ کی عمومی ہدایات لکھیں اور 'فارمیسی کو انڈینٹ بھیجیں' پر کلک کریں۔",
+      "'درخواست ٹریک کریں' ٹیب پر جا کر فارمیسی ایڈمن کی منظوری کی صورتحال مانیٹر کریں؛ منظوری پر ریئل ٹائم اپ ڈیٹ خودکار ہوتا ہے۔",
+    ],
+    faq: [
+      [
+        "Who is authorized to create a ward supply indent?",
+        "Holders of ward.indent.create (the head nurse) can create supply indents. Central pharmacy administrators approve them (partial approval allowed).",
+      ],
+      [
+        "Why are expired and recalled batches displayed in red on the cabinet table?",
+        "Under rule 6c0ce3ff85 and MSDS 59/60, expired and recalled medicines must NEVER be given to patients. They are highlighted in red with an explicit hazard banner until removed.",
+      ],
+      [
+        "What is the difference between Expiry, Damage, and ReturnToPharmacy removal reasons?",
+        "Expiry and Damage write off the stock from the hospital books (written off / destroyed). ReturnToPharmacy physically transfers good unneeded or recalled stock back to the central pharmacy store.",
+      ],
+      [
+        "What happens when the central pharmacy administrator approves an indent?",
+        "The server emits approval.resolved. The screen's real-time listener catches this event without polling, refreshes the tracked indent, and updates the ward inventory once medicines are received.",
+      ],
+      [
+        "Can a head nurse modify an indent requisition after submitting it?",
+        "Once submitted, the requisition is frozen in 'Pending' status awaiting pharmacy admin decision. If changes are needed, the admin may partially approve, or the nurse can submit an additional indent.",
+      ],
+      [
+        "What happens if another terminal removes stock concurrently?",
+        "If available batch quantity is lower than requested, the server answers 409 INSUFFICIENT_STOCK. The screen explains the refusal and reloads live cabinet inventory.",
+      ],
+      [
+        "How does the screen behave when the inpatient supply service is Retiring?",
+        "Under rule af4d84840c, in open_work mode a warning banner states 'No new patient supply indents from now on'. Existing cabinet stock removal and tracked requisitions continue, but new indents are disabled.",
+      ],
+    ],
+    faqUr: [
+      [
+        "وارڈ سپلائی انڈینٹ بنانے کا مجاز کون ہے؟",
+        "وارڈ انڈینٹ بنانے کا اختیار صرف ہیڈ نرس (ward.indent.create) کے پاس ہے۔ مرکزی فارمیسی ایڈمنسٹریٹر اس کی جزوی یا مکمل منظوری دیتے ہیں۔",
+      ],
+      [
+        "میعاد ختم اور واپس طلب شدہ بیجز کو سرخ رنگ میں کیوں دکھایا جاتا ہے؟",
+        "قاعدہ 6c0ce3ff85 اور MSDS 59/60 کے تحت میعاد ختم یا واپس طلب شدہ ادویات مریض کو ہرگز نہیں دی جا سکتیں۔ جب تک انہیں ہٹایا نہ جائے، وہ سرخ رنگ اور وارننگ بینر کے ساتھ ظاہر ہوتی ہیں۔",
+      ],
+      [
+        "اسٹاک ہٹانے کی وجوہات (Expiry, Damage, ReturnToPharmacy) میں کیا فرق ہے؟",
+        "Expiry اور Damage اسٹاک کو ہسپتال کے کھاتوں سے خارج (رائٹ آف / ضائع) کر دیتے ہیں۔ ReturnToPharmacy غیر ضروری درست یا ری کال شدہ ادویات کو واپس مرکزی فارمیسی منتقل کرتی ہے۔",
+      ],
+      [
+        "جب فارمیسی ایڈمن انڈینٹ منظور کرتا ہے تو کیا ہوتا ہے؟",
+        "سرور approval.resolved ایونٹ جاری کرتا ہے۔ سکرین بغیر کسی پولنگ کے اس ایونٹ کو وصول کرتی ہے، ٹریک کردہ انڈینٹ کو اپ ڈیٹ کرتی ہے اور اسٹاک موصول ہونے پر کیبنٹ انوینٹری تازہ ہو جاتی ہے۔",
+      ],
+      [
+        "کیا انڈینٹ جمع کروانے کے بعد اس میں تبدیلی کی جا سکتی ہے؟",
+        "جمع ہونے کے بعد انڈینٹ 'Pending' حالت میں منجمد ہو جاتا ہے۔ اگر تبدیلی درکار ہو تو فارمیسی ایڈمن جزوی منظوری دے سکتا ہے یا ہیڈ نرس اضافی انڈینٹ بھیج سکتی ہے۔",
+      ],
+      [
+        "اگر دو ٹرمینلز بیک وقت اسٹاک ہٹائیں تو کیا ہوگا؟",
+        "اگر مطلوبہ تعداد دستیاب اسٹاک سے بڑھ جائے تو سرور 409 INSUFFICIENT_STOCK جواب دیتا ہے۔ سکرین اس کی وضاحت کرتی ہے اور تازہ ترین اسٹاک دوبارہ لوڈ کر دیتی ہے۔",
+      ],
+      [
+        "ریٹائرنگ سروس کے دوران سکرین کا رویہ کیا ہوتا ہے؟",
+        "قاعدہ af4d84840c کے تحت اوپن ورک موڈ میں بینر ظاہر ہوتا ہے کہ 'اب سے کوئی نیا سپلائی انڈینٹ نہیں'۔ موجودہ اسٹاک ہٹانے اور کھلی درخواستوں کا کام جاری رہتا ہے لیکن نئے انڈینٹ بند ہو جاتے ہیں۔",
+      ],
+    ],
+  },
   ward_transfer_head_nurse: {
     title: "Head Nurse: ward patient transfer",
     titleUr: "ہیڈ نرس: مریض کی وارڈ منتقلی",

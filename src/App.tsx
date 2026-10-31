@@ -57,6 +57,7 @@ import { LabourRegister } from './screens/LabourRegister';
 import { MedicationSafetyWard } from './screens/MedicationSafetyWard';
 import { WardTransfer } from './screens/WardTransfer';
 import { WardTransferHeadNurse } from './screens/WardTransferHeadNurse';
+import { WardIndent } from './screens/WardIndent';
 import { Wristbands } from './screens/Wristbands';
 import { OwnMedicinesWard } from './screens/OwnMedicinesWard';
 import { OwnMedicinesPharmacy } from './screens/OwnMedicinesPharmacy';
@@ -1329,6 +1330,7 @@ export function App() {
               {screen === 'medication_safety_ward' && est && <MedicationSafetyWard key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} onNavigateScreen={navigate} />}
               {screen === 'ward_transfer' && est && <WardTransfer key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone} onNavigateScreen={(s) => navigate(s)} />}
               {screen === 'ward_transfer_head_nurse' && est && <WardTransferHeadNurse key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone} onNavigateScreen={(s) => navigate(s)} />}
+              {screen === 'ward_indent' && est && <WardIndent key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone} onNavigateScreen={(s) => navigate(s)} />}
               {screen === 'wristbands_admissions' && est && <Wristbands key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone}/>}
               {screen === 'wristbands_ward' && est && <Wristbands screenId="wristbands_ward" key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone}/>}
               {screen === 'own_medicines_ward' && est && <OwnMedicinesWard key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone} initialAdmissionId={wardAdmissionEntry?.userId===user.user_id?wardAdmissionEntry.admissionId:undefined} onBack={id=>{if(navigate('my_beds'))setWardAdmissionEntry({userId:user.user_id,admissionId:id});}}/>}
