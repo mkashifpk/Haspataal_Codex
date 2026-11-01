@@ -1,98 +1,120 @@
 # Haspataal checkpoint
 Last updated: 01 November 2026, Antigravity (Codex pair), Asia/Karachi.
 
-## Active request: Phase 6 Screen 110 `theatre_checklist_setup` (Surgical safety checklist setup & configuration)
+## Active request: Phase 6 Screen 112 `cssd_board` (Sterilization board and load tracking)
 Executing the Phase 6 Roadmap ("Theatre and sterile supply") in dependency order along with all tests and MCP progress reporting:
 - Screen 108: **`transfusion_bedside_er`** ("Bedside transfusion observation - ER", Position 108, 74 points) — **COMPLETED** (commit `2803cf0`, Proposal **261** awaiting human review on `/docs -> My progress`). Marks Phase 5 100% complete!
 - Screen 109: **`clinical_privileges`** ("Clinical privileges", Position 109, 55 points) — **COMPLETED** (commit `5ddbd89`, Proposal **262** awaiting human review on `/docs -> My progress`). First screen of Phase 6!
-- Screen 110: **`theatre_checklist_setup`** ("Surgical safety checklist configuration", Position 110, 52 points) — **NEXT / IN PROGRESS**.
+- Screen 110: **`theatre_checklist_setup`** ("Surgical safety checklist configuration", Position 110, 52 points) — **COMPLETED** (commit `5a0e80c`, Proposal **263** awaiting human review on `/docs -> My progress`).
+- Screen 111: **`cssd_setup`** ("Sterile supply: sets, sterilizers, recalls", Position 111, 75 points) — **COMPLETED** (commit `5466f90`, Proposal **264** awaiting human review on `/docs -> My progress`).
+- Screen 112: **`cssd_board`** ("Sterilization board", Position 112, 67 points) — **NEXT / IN PROGRESS**.
 
 ---
 
-### Completed Screen 108 (`transfusion_bedside_er`) Checkpoint
-- **Workflow & Standards**: Bedside blood transfusion observation, 2-person bedside identity and unit verification, 30-minute cold chain expiry countdown, vital signs monitoring, acute reaction alerting with Section 13 dispatch, and safe unit return in the Emergency Department; Position 108 (74 points), Workspace `triage`.
+### Completed Screen 111 (`cssd_setup`) Checkpoint
+- **Workflow & Standards**: Sterile supply sets, sterilizers, packaging shelf life presets, biological breakdown recalls under MSDS IPC 90–92 with exposed patient tracking, and committee audit reports; Position 111 (75 points), Workspace `infection_control`.
 - **Contracts**:
-  - `contracts/transfusion_bedside_er.json`: Real MCP screen bundle covering 9 endpoints (`GET /blood/requests`, `GET /blood/requests/{request_id}`, `GET /blood/transfusions/{transfusion_id}`, `POST /blood/transfusions/{transfusion_id}/observations`, `POST /blood/transfusions/{transfusion_id}/start`, `POST /blood/transfusions/{transfusion_id}/end`, `POST /blood/transfusions/{transfusion_id}/reaction`, `POST /blood/transfusions/{transfusion_id}/return`, `GET /wristbands/verify`), 2 realtime events (`blood.unit.issued`, `blood.consent.withdrawn`), and domain rules (`rule:e1211e09ae`, `rule:8e16f20b4a`, `rule:0a07d57ff8`, `rule:efcdf1e299`, `rule:a2f80c80d7`, `rule:877e58cf09`, `rule:78e01b2ba4`).
-  - `src/generated/transfusion_bedside_er.ts`: Re-exported from `./transfusion_bedside`.
-- **Domain Policies & Statutory Rules (`src/transfusion-bedside-policy.ts`)**:
-  - Parameterized `getTransfusionBedsideScreenView(establishment, "transfusion_bedside_er")` supporting runtime service view evaluation (`rule:78e01b2ba4`, `rule:877e58cf09`).
-  - 30-minute cold chain threshold (`rule:8e16f20b4a`): countdown to `start_by`. Beyond 30 minutes, server enforces `BLOOD_UNIT_OUT_TOO_LONG` and mandatory return as Not Given with `OutOfStorageTooLong`.
-  - Bedside dual independent verification (`rule:0a07d57ff8`): wristband scan or two-identifier confirmation, 5 mandatory checkboxes (none pre-ticked), step-up credential verification for second qualified clinician (blocks `DUAL_CONTROL_SAME_PERSON`).
-  - Observations & 4-hour limit (`rule:efcdf1e299`): baseline before start, periodic observations, end vitals; flags `ended_late` if exceeding 4 hours.
-  - Adverse reaction & Section 13 alerting (`rule:a2f80c80d7`): automatic Section 13 hospital incident dispatch, sentinel event on wrong blood, detailed capture of delayed haemolytic / bacterial reactions.
-  - Consent withdrawal (`rule:e1211e09ae`): immediate halt on `blood.consent.withdrawn`, blocking unstarted units (`BLOOD_CONSENT_REQUIRED`).
-- **UI Architecture (`src/screens/TransfusionBedsideER.tsx`)**:
-  - Dedicated ER wrapper passing `screenId="transfusion_bedside_er"` to `src/screens/TransfusionBedside.tsx`.
-  - Active blood transfusion queue, unit verification modal, dual step-up co-signature dialog, bedside vitals recorder, reaction reporting dialog, and bag return workflow.
+  - `contracts/cssd_setup.json`: Real MCP screen bundle covering 12 endpoints (`GET /cssd/set-types`, `POST /cssd/set-types`, `PATCH /cssd/set-types/{set_type_id}`, `GET /cssd/sterilizers`, `POST /cssd/sterilizers`, `PATCH /cssd/sterilizers/{sterilizer_id}`, `GET /cssd/cycles`, `GET /cssd/cycles/{cycle_id}`, `POST /cssd/cycles/{cycle_id}/recall`, `GET /cssd/procedure/pdf`, `GET /cssd/log/pdf`, `GET /ops/assets`), 1 event (`cssd.cycle.updated`), and statutory rules (`rule:494306e208`, `rule:dc520ffa20`, `rule:d26b399f0d`, `rule:37dd1f7236`).
+  - `src/generated/cssd_setup.ts`: Typed endpoint call functions and data models.
+- **Domain Policies & Statutory Rules (`src/cssd-setup-policy.ts`)**:
+  - Runtime service capability evaluation (`rule:37dd1f7236`): `cssd` capability (`full`, `open_work` with banner, `records`, `setup`, `hidden`).
+  - Packaging shelf life standards and implant biological indicator gating (`rule:494306e208`): Container (180-365d), SMS wrap (90d), Pouch (60d), Linen wrap (30d max). Flags implant sets requiring passing biological spore tests before release. Safe retirement (`is_active: false`) rather than hard deletion to preserve immutable clinical audit records.
+  - Load recall & exposed patient tracking (`rule:dc520ffa20`, MSDS IPC 92): Recall can be triggered from failed biological test recall candidates or any released load; mandates clinical justification; traces exposed packs and exposed patients (`patients_exposed`) for clinical surveillance and Section 13 incident filing.
+  - Sterilization SOP & Committee Log (`rule:d26b399f0d`): Downloads procedure PDF for Infection Prevention Committee approval and cycle log PDF for audit inspections.
+  - Role permissions: `cssd.manage` for configuration, sterilizers, and recall writes; `cssd.view` / `cssd.operate` for read access; `ops.asset.view` for medical equipment asset linking.
+- **UI Architecture (`src/screens/CSSDSetup.tsx`)**:
+  - Sets & Packs catalog: searchable and filterable table with packaging badges, shelf life days, implant flags, active/retired status, and add/edit modal with presets.
+  - Sterilizers & Autoclaves register: chamber methods, location bays, linked biomedical equipment asset monitor tags (`GET /ops/assets`), and registration/edit modal.
+  - Cycle inspection & load recall management: parameter verification (temperature, pressure, hold time), mechanical/chemical/biological indicator results, pack inspection, and statutory load recall under MSDS IPC 92.
+  - Exposed patient tracking: immediate display of MRNs for surgical patients who received instruments from a recalled load to drive clinical follow-up and incident reporting.
+  - Documents & Audit Logs: standard operating procedure PDF (`GET /cssd/procedure/pdf`) and date-range sterilization log PDF (`GET /cssd/log/pdf`).
 - **Help, Handbook & Navigation**:
-  - Wired into `src/App.tsx`, `src/foundation-catalogue.json` (9 tasks), `src/foundation-task-map.json` (9 controls), `src/foundation-help.ts` (62 controls mapped).
-  - Authored comprehensive handbook entry (`src/help.ts`) with bilingual title, clinical purpose, 8 operational steps, and 11 role FAQs for ER triage nurse.
-  - Bundled screenshots: `public/handbook/transfusion_bedside_er-en.png` and `public/handbook/transfusion_bedside_er-ur.png`.
+  - Wired into `src/App.tsx`, `src/foundation-catalogue.json` (12 tasks), `src/foundation-task-map.json` (12 controls).
+  - Contextual F1 help (`src/foundation-help.ts`): added `cssd_setup` to `deliveredHelpScreens` and all 45 controls mapped.
+  - Authored comprehensive handbook entry (`src/help.ts`) with bilingual title, purpose, 12 operational steps, and 6 role FAQs for IPC nurse.
+  - Bundled screenshots: `public/handbook/cssd_setup-en.png` and `public/handbook/cssd_setup-ur.png`.
 - **Verification**:
-  - Automated unit tests: `tests/transfusion-bedside-er.test.mjs` (6/6 passing).
-  - Full test suite: `npm test` passed (460/460 passing across all suites).
-  - Help check: `npm run check:help` passed (107 screens).
+  - Automated unit tests: `tests/cssd-setup.test.mjs` (6/6 passing).
+  - Full test suite: `npm test` passed (479/479 passing across all suites).
+  - Help check: `npm run check:help` passed (110 screens, 2533 controls, 1611 groups, 69 FAQ seeds, 30 workspace guides).
   - TypeScript compiler: `npx tsc --noEmit` passed with 0 errors.
-  - Production build: `npm run build` succeeded (`dist/assets/index-BMBMpaQo.js`).
+  - Production build: `npm run build` succeeded (`dist/assets/index-DysOeHbx.js`).
 - **Commit & Proposal**:
-  - Implementation commit: `2803cf0`.
-  - Proposal ID: **261** (status: `pending` on `/docs -> My progress`).
+  - Implementation commit: `5466f90`.
+  - Proposal ID: **264** (status: `pending` on `/docs -> My progress`).
 
 ---
 
-### Completed Screen 109 (`clinical_privileges`) Checkpoint
-- **Workflow & Standards**: Clinical privileges catalog & staff credentialing register under Punjab MSDS COP 32, 39, and 45. Regulates who may operate in theatre, administer anaesthesia, conduct pre-anaesthesia assessments, and authorize recovery discharges; Position 109 (55 points), Workspace `owner_dashboard`.
-- **Contracts**:
-  - `contracts/clinical_privileges.json`: Real MCP screen bundle covering 6 endpoints (`GET /ot/privileges`, `POST /ot/privileges`, `PATCH /ot/privileges/{privilege_id}`, `POST /ot/privileges/{privilege_id}/revoke`, `GET /hr/employees`, `GET /ot/theatre-policy/pdf`) and domain rules (`rule:fe3c4d2fab`, `rule:aedb3bf41a`, `rule:fa7737b903`, `rule:caf82033b4`).
-  - `src/generated/clinical_privileges.ts`: Typed endpoint call functions and data models.
-- **Domain Policies & Statutory Rules (`src/clinical-privileges-policy.ts`)**:
-  - Service view capability evaluation (`rule:caf82033b4`): `surgery` service (`full`, `open_work` with banner, `records`, `setup`, `hidden`).
-  - One live grant constraint (`rule:fe3c4d2fab`): duplicate grants rejected (`OT_PRIVILEGE_EXISTS`) with clear instructions to extend or revoke prior grant.
-  - Revocation audit trail (`rule:aedb3bf41a`): permanent immutable revocation with mandatory reason; signatures requiring the privilege rejected from then on; visible via `include_revoked`.
-  - Annual review & 30-day warning (`rule:fa7737b903`): automatically computes and flags grants expiring within 30 days in amber to prompt annual review and committee renewals before surgical signatures are blocked (`OT_PRIVILEGE_REQUIRED`).
-  - Dual permission gating: `ot.privilege.manage` for write/update/revoke actions; `ot.status.view` for read-only register viewing.
-- **UI Architecture (`src/screens/ClinicalPrivileges.tsx`)**:
-  - Privileges register table with KPI metrics (Active, Expiring Soon, Expired, Revoked).
-  - Search by clinician name, license number, or scope; filter by category; toggle revoked history.
-  - Grant Privilege modal with real-time HR employee search (`GET /hr/employees`) and autocomplete.
-  - Edit / Renew modal with `expected_version` concurrency protection.
-  - Revoke modal with statutory impact warning and required reason.
-  - Detail drawer and Theatre Policy PDF preview/download modal.
-- **Help, Handbook & Navigation**:
-  - Wired into `src/App.tsx`, `src/foundation-catalogue.json` (6 tasks), `src/foundation-task-map.json` (6 controls).
-  - Contextual F1 help (`src/foundation-help.ts`): added `clinical_privileges` to `deliveredHelpScreens` and all 35 controls mapped.
-  - Authored comprehensive handbook entry (`src/help.ts`) with bilingual title, clinical purpose, 11 operational steps, and 6 role FAQs.
-  - Bundled screenshots: `public/handbook/clinical_privileges-en.png` and `public/handbook/clinical_privileges-ur.png`.
-- **Verification**:
-  - Automated unit tests: `tests/clinical-privileges.test.mjs` (7/7 passing).
-  - Full test suite: `npm test` passed (467/467 passing across all suites).
-  - Help check: `npm run check:help` passed (108 screens, 2447 controls, 1532 groups, 69 FAQ seeds, 30 workspace guides).
-  - TypeScript compiler: `npx tsc --noEmit` passed with 0 errors.
-  - Production build: `npm run build` succeeded (`dist/assets/index-BV6tcdKb.js`).
-- **Commit & Proposal**:
-  - Implementation commit: `5ddbd89`.
-  - Proposal ID: **262** (status: `pending` on `/docs -> My progress`).
-
----
-
-## Plan for Screen 110 (`theatre_checklist_setup`)
-- **Workflow & Standards**: Surgical safety checklist setup & configuration (Sign In, Time Out, Sign Out items under WHO surgical safety checklist and MSDS COP standards); Position 110 (52 points), Workspace `owner_dashboard` / `theatre_admin`.
+## Plan for Screen 112 (`cssd_board`)
+- **Workflow & Standards**: Daily sterilization board and load tracking under MSDS IPC 90–92 (daily Bowie-Dick morning test, load start with packs & counts, pack labels printing, physical parameters recording, chemical & biological indicator verification, load quarantine/release); Position 112 (67 points), Workspace `cssd`.
 - **Bundle & Contracts**:
-  - Fetch contract bundle via `get_screen_bundle("theatre_checklist_setup")`.
-  - Fetch quality brief via `get_ui_quality_brief(screen_id="theatre_checklist_setup")`.
-  - Generate TypeScript contracts (`src/generated/theatre_checklist_setup.ts`).
-  - Save contract bundle to `contracts/theatre_checklist_setup.json`.
-- **Domain Policies & Statutory Rules**:
-  - WHO surgical safety checklist phases: Sign In (before anaesthesia), Time Out (before skin incision), Sign Out (before leaving operating room).
-  - Custom checklist item configuration, mandatory vs optional flags, specialty overrides.
-- **UI Architecture & Help**:
-  - Create `src/screens/TheatreChecklistSetup.tsx`.
-  - Wire into `src/App.tsx`, `src/foundation-catalogue.json`, `src/foundation-task-map.json`.
-  - Contextual F1 help and handbook entry in `src/help.ts` with role FAQs.
-  - Screenshots in `public/handbook/theatre_checklist_setup-en.png` and `theatre_checklist_setup-ur.png`.
-  - Automated unit tests in `tests/theatre-checklist-setup.test.mjs`.
-  - Verify via `check:help`, `tsc`, `npm test`, `npm run build`.
-  - Commit Screen 110 and submit `propose_progress`.
+  - Contract bundle: `get_screen_bundle("cssd_board")`.
+  - Quality brief: `get_ui_quality_brief(screen_id="cssd_board")`.
+  - Generate TypeScript contracts (`src/generated/cssd_board.ts`).
+  - Endpoints (8): `POST /cssd/cycles`, `GET /cssd/cycles`, `GET /cssd/cycles/{cycle_id}`, `POST /cssd/cycles/{cycle_id}/results`, `GET /cssd/cycles/{cycle_id}/labels`, `GET /cssd/set-types`, `GET /cssd/sterilizers`, `GET /cssd/log/pdf`.
+  - Events (1): `cssd.cycle.updated`.
+  - Statutory Rules:
+    - `rule:2e3fcc57c7`: Morning: per steam sterilizer, a BowieDick cycle (no packs) and its result; until it passes, no steam load is released (`CSSD_DAILY_TEST_REQUIRED`).
+    - `rule:9a5570e2a6`: A load: choose sterilizer, add sets and counts (only sets matching its method), start; print pack labels immediately (label printer) and stick one on each pack.
+    - `rule:4d7517d090`: When cycle ends: record physical parameters (temp, pressure, hold time), mechanical and chemical indicators, biological indicator (Pending for implant loads / weekly tests: Quarantined until Pass or Fail recorded). Any fail: load fails, packs returned for reprocessing.
+    - `rule:b48c7fa7a8`: Running and Quarantined loads stay at the top; failed BiologicalTest shows recall_candidates.
+    - `rule:dfad4a25d2`: Runtime `cssd` service capability gating.
+    - `rule:0bdd7f9ba6`: `POST /cssd/cycles` starts new cssd work: offer only while cssd is Active.
+- **Domain Policies & Statutory Rules (`src/cssd-board-policy.ts`)**:
+  - Morning Bowie-Dick validation per autoclave before release.
+  - Compatible method set selection (steam sets for autoclave, plasma sets for plasma).
+  - Multi-indicator verification & quarantine rules for implant loads.
+  - Realtime refresh on `cssd.cycle.updated`.
+- **UI Architecture (`src/screens/CSSDBoard.tsx`)**:
+  - Sterilizers status row: Bowie-Dick pass indicator, autoclave readiness, active load counters.
+  - Active & Quarantined loads prioritized at top.
+  - "Start Sterilization Cycle" modal: cycle type (Load, Bowie-Dick, Leak Test, Biological Test), sterilizer selector, pack item adder with counts.
+  - Pack labels print trigger (`GET /cssd/cycles/{id}/labels`).
+  - "Record Cycle Results" modal: temperature (°C), pressure (kPa), hold time (min), mechanical pass, chemical indicator (Pass/Fail), biological indicator (Pending/Pass/Fail).
+  - Cycle log PDF download.
+- **Help, Handbook & Navigation**:
+  - Contextual F1 help with controls mapped in `src/foundation-help.ts`.
+  - Task mapping in `src/foundation-catalogue.json` and `src/foundation-task-map.json`.
+  - Handbook entry in `src/help.ts` with role FAQs for CSSD technician.
+  - Bundled screenshots: `public/handbook/cssd_board-en.png` and `cssd_board-ur.png`.
+- **Automated Verification**:
+  - `tests/cssd-board.test.mjs`.
+  - `npm test`, `npm run check:help`, `npx tsc --noEmit`, `npm run build`.
+  - Commit and submit `propose_progress` (Proposal 265).
+
+---
+
+### Completed Screen 110 (`theatre_checklist_setup`) Checkpoint
+- **Workflow & Standards**: Surgical safety checklist setup & configuration across WHO surgical safety checklist phases (Sign In, Time Out, Sign Out) and post-anaesthesia recovery criteria under MSDS COP 31, 39, 41, and 44; Position 110 (52 points), Workspace `quality` / `owner_dashboard`.
+- **Contracts**:
+  - `contracts/theatre_checklist_setup.json`: Real MCP screen bundle covering 5 endpoints (`GET /ot/checklist-items`, `POST /ot/checklist-items`, `PATCH /ot/checklist-items/{item_id}`, `GET /ot/theatre-policy/pdf`, `GET /ot/privileges`) and statutory rules (`rule:dfc29fbd11`, `rule:e7c038dc17`, `rule:db51912b86`, `rule:9c5c94d2a1`).
+  - `src/generated/theatre_checklist_setup.ts`: Typed endpoint call functions and data models.
+- **Domain Policies & Statutory Rules (`src/theatre-checklist-policy.ts`)**:
+  - Runtime service view capability evaluation (`rule:9c5c94d2a1`): `surgery` service (`full`, `open_work` with banner, `records`, `setup`, `hidden`).
+  - Checklist item retirement rather than deletion (`rule:dfc29fbd11`): setting `is_active: false` preserves immutable clinical-legal evidence on prior surgical charts.
+  - Recovery discharge criteria settings (`rule:e7c038dc17`): Aldrete score (>= 9), pain score (<= 2), observation frequency (15m), max stay (120m), anaesthesia chart interval (5m).
+  - Theatre Policy PDF documentation (`rule:db51912b86`): formal written policy download via `GET /ot/theatre-policy/pdf` for annual committee review and Medical Director signature.
+  - Role permissions: `ot.checklist.configure` for configuration; `ot.clinical.view` / `ot.checklist.record` for read-only access.
+- **UI Architecture (`src/screens/TheatreChecklistSetup.tsx`)**:
+  - Phase tabs (Sign In, Time Out, Sign Out) and Recovery Criteria settings tab.
+  - Filterable checklist items list with search and retired items toggle.
+  - Modal for adding new checklist items with phase, question type, mandatory notes, and references.
+  - Modal for editing/retiring items with concurrency protection.
+  - Theatre Policy PDF preview/download modal.
+- **Help, Handbook & Navigation**:
+  - Wired into `src/App.tsx`, `src/foundation-catalogue.json` (5 tasks), `src/foundation-task-map.json` (5 controls).
+  - Contextual F1 help (`src/foundation-help.ts`): added `theatre_checklist_setup` to `deliveredHelpScreens` and all 34 controls mapped.
+  - Authored comprehensive handbook entry (`src/help.ts`) with bilingual title, purpose, 12 operational steps, and 6 role FAQs.
+  - Bundled screenshots: `public/handbook/theatre_checklist_setup-en.png` and `public/handbook/theatre_checklist_setup-ur.png`.
+- **Verification**:
+  - Automated unit tests: `tests/theatre-checklist-setup.test.mjs` (6/6 passing).
+  - Full test suite: `npm test` passed (473/473 passing across all suites).
+  - Help check: `npm run check:help` passed (109 screens, 2485 controls, 1566 groups, 69 FAQ seeds, 30 workspace guides).
+  - TypeScript compiler: `npx tsc --noEmit` passed with 0 errors.
+  - Production build: `npm run build` succeeded (`dist/assets/index-fucclXTm.js`).
+- **Commit & Proposal**:
+  - Implementation commit: `5a0e80c`.
+  - Proposal ID: **263** (status: `pending` on `/docs -> My progress`).
 
 ---
 
@@ -123,5 +145,7 @@ Executing the Phase 6 Roadmap ("Theatre and sterile supply") in dependency order
 - Screen 107: **`patient_programmes_triage`** (commit `40efb78`, Proposal **260** awaiting human review on `/docs -> My progress`).
 - Screen 108: **`transfusion_bedside_er`** (commit `2803cf0`, Proposal **261** awaiting human review on `/docs -> My progress`).
 - Screen 109: **`clinical_privileges`** (commit `5ddbd89`, Proposal **262** awaiting human review on `/docs -> My progress`).
+- Screen 110: **`theatre_checklist_setup`** (commit `5a0e80c`, Proposal **263** awaiting human review on `/docs -> My progress`).
+- Screen 111: **`cssd_setup`** (commit `5466f90`, Proposal **264** awaiting human review on `/docs -> My progress`).
 - Proposals **231**, **232**, **233**, **234**, **235**, and **236** are accepted.
-- Proposals **237** through **262** are awaiting human review on `/docs -> My progress`.
+- Proposals **237** through **264** are awaiting human review on `/docs -> My progress`.
