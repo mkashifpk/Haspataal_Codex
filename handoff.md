@@ -7,7 +7,7 @@ Executing the Phase 6 Roadmap ("Theatre and sterile supply") in dependency order
 - Screen 109: **`clinical_privileges`** ("Clinical privileges", Position 109, 55 points) — **COMPLETED** (commit `5ddbd89`, Proposal **262** awaiting human review on `/docs -> My progress`). First screen of Phase 6!
 - Screen 110: **`theatre_checklist_setup`** ("Surgical safety checklist configuration", Position 110, 52 points) — **COMPLETED** (commit `5a0e80c`, Proposal **263** awaiting human review on `/docs -> My progress`).
 - Screen 111: **`cssd_setup`** ("Sterile supply: sets, sterilizers, recalls", Position 111, 75 points) — **COMPLETED** (commit `5466f90`, Proposal **264** awaiting human review on `/docs -> My progress`).
-- Screen 112: **`cssd_board`** ("Sterilization board", Position 112, 67 points) — **NEXT / IN PROGRESS**.
+- Screen 112: **`cssd_board`** ("Sterilization board", Position 112, 67 points) — **IN PROGRESS** (Generated contracts in `src/generated/cssd_board.ts` and policy in `src/cssd-board-policy.ts` created as uncommitted files; ready to write `src/screens/CSSDBoard.tsx` and wire into App, tests, catalogue, and submit proposal).
 
 ---
 
