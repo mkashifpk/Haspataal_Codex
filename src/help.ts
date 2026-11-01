@@ -8998,6 +8998,76 @@ sterile_packs_ward: {
       ]
     ]
   },
+  transfusion_bedside_ot: {
+    title: "Blood transfusion at the bedside - OT",
+    titleUr: "او ٹی میں مریض کے بستر پر خون کی منتقلی",
+    purpose: "Operating theatre bedside blood transfusion verification and administration in ot_nurse workspace (MSDS COP 38, 41, PBTA standards): dual-clinician 5-point safety check, wristband barcode verification, 30-minute cold chain start countdown, vital signs monitoring, 4-hour administration limit tracking, acute adverse reaction reporting with automated Section 13 incident dispatch, safe sign-back of unstarted units, and runtime service capability gating from GET /establishment views for screen_id transfusion_bedside_ot under Rule 4d48db6f97.",
+    purposeUr: "آپریشن تھیٹر میں خون کی منتقلی کی تصدیق اور ترسیل (او ٹی نرس ورک اسپیس، ایم ایس ڈی ایس سی او پی 38، 41): دو معالجین کا 5 نکاتی حفاظتی چیک، رسٹ بینڈ بارکوڈ تصدیق، 30 منٹ کولڈ چین کا الٹی گنتی ٹائمر، حیاتیاتی علامات کی نگرانی، 4 گھنٹے کی حد، دفعہ 13 کے تحت منفی ردعمل کی رپورٹنگ، نہ لگنے والے خون کی محفوظ واپسی اور اسٹیبلشمنٹ سروس کے تحت اسکرین ویو کی دستیابی (قاعدہ 4d48db6f97)۔",
+    steps: [
+      "Open Operating Theater → Bedside Transfusion (transfusion_bedside_ot) to inspect blood units issued for intra-operative and recovery transfusion.",
+      "Monitor the 30-minute start countdown timer (rule 8e16f20b4a): transfusion must begin within 30 minutes of blood bank issue to maintain cold chain. After 30 minutes the server refuses start with BLOOD_UNIT_OUT_TOO_LONG.",
+      "Initiate intra-operative bedside verification: scan the patient's identity wristband barcode (GET /wristbands/verify) or record manual two-identifier clinical concordance if unscannable (rule 0a07d57ff8).",
+      "Complete all 5 mandatory bedside safety checkboxes: patient identity concordance, unit number match, expiry date verification, prescribed product match, and visual bag integrity inspection. None are pre-ticked.",
+      "Execute dual independent co-signature (rule 0a07d57ff8): have a second qualified clinician (anaesthetist, surgeon, or circulating nurse) enter their credentials.",
+      "Record vital signs observations (rule efcdf1e299): document baseline vitals before beginning infusion, at 15 minutes, and periodically until completion.",
+      "Report adverse reactions immediately (rule a2f80c80d7): if clinical symptoms appear, click 'Report Reaction' to document onset time, reaction class, and clinical interventions; the server automatically dispatches Section 13 hospital incident and sentinel event reports.",
+      "End or return transfusion: click 'End Transfusion' upon completing the unit (flagged ended_late if exceeding 4 hours), or click 'Return Unit' to sign back an unstarted unit within 30 minutes or record it as Not Given."
+    ],
+    stepsUr: [
+      "آپریشن تھیٹر ورک اسپیس میں بیڈ سائیڈ ٹرانسفیوژن (transfusion_bedside_ot) کھولیں تاکہ سرجری کے دوران جاری کردہ بلڈ بیگز کا معائنہ کیا جا سکے۔",
+      "30 منٹ کی الٹی گنتی ٹائمر کی نگرانی کریں (قاعدہ 8e16f20b4a): کولڈ چین برقرار رکھنے کے لیے 30 منٹ کے اندر خون شروع کرنا لازمی ہے۔",
+      "مریض تصدیق شروع کریں: مریض کے رسٹ بینڈ کا بارکوڈ اسکین کریں (GET /wristbands/verify) یا دو شناختی حوالوں سے تصدیق درج کریں (قاعدہ 0a07d57ff8)۔",
+      "تمام 5 لازمی بیڈ سائیڈ حفاظتی چیک باکسز کی تصدیق کریں: مریض کی شناخت، یونٹ نمبر کا ملاپ، ایکسپائری، پروڈکٹ اور بیگ کی ظاہری درستگی۔",
+      "مشترکہ تصدیقی دستخط کی تعمیل کریں (قاعدہ 0a07d57ff8): دوسرے مستند معالج (اینستھیٹسٹ، سرجن یا نرس) سے تصدیق کروائیں۔",
+      "حیاتیاتی علامات کی نگرانی درج کریں (قاعدہ efcdf1e299): خون شروع کرنے سے پہلے، 15 منٹ بعد اور تکمیل تک علامات کا باقاعدہ اندراج کریں۔",
+      "منفی ردعمل کی فوری رپورٹنگ (قاعدہ a2f80c80d7): علامات ظاہر ہونے پر 'منفی ردعمل رپورٹ کریں' منتخب کریں؛ سرور دفعہ 13 کے تحت خودکار رپورٹ جاری کرتا ہے۔",
+      "ٹرانسفیوژن کا اختتام یا واپسی: خون مکمل ہونے پر 'ٹرانسفیوژن ختم کریں' درج کریں یا نہ لگنے والا بیگ بلڈ بینک واپس کریں۔"
+    ],
+    faq: [
+      [
+        "What is the theatre nurse's responsibility during intra-operative blood transfusion?",
+        "The OT nurse coordinates blood pickup, checks storage temperature and 30-minute cold chain expiry, executes the 5-point safety check with the anaesthetist or circulating nurse, charts vitals observations, and monitors for acute transfusion reactions."
+      ],
+      [
+        "Can an intra-operative blood unit be started if more than 30 minutes have elapsed since issue?",
+        "No. Under rule 8e16f20b4a, blood components removed from blood bank refrigeration must be started within 30 minutes. After 30 minutes, the server refuses start with BLOOD_UNIT_OUT_TOO_LONG and mandates returning the unit as Not Given with discard reason OutOfStorageTooLong."
+      ],
+      [
+        "Who can perform the second check and co-sign in the operating theatre?",
+        "Under rule 0a07d57ff8 and clinical governance policies, any qualified registered clinician holding the blood.transfuse permission (anaesthetist, surgeon, or another registered theatre nurse) can co-sign. Self-approval is strictly rejected (DUAL_CONTROL_SAME_PERSON)."
+      ],
+      [
+        "What occurs if an acute haemolytic reaction or severe anaphylaxis develops in theatre?",
+        "Under rule a2f80c80d7 and PBTA Section 13 standards, the nurse or anaesthetist immediately stops the transfusion, initiates resuscitation, and clicks 'Report Reaction'. The system records the clinical presentation and automatically files a high-priority incident and sentinel event report with hospital QA."
+      ],
+      [
+        "How is an unused unit returned if surgical bleeding is less than anticipated?",
+        "If a crossmatched unit is not needed and remains within the 30-minute start window with intact cold chain and bag integrity, click 'Return Unit' with fit_for_use set to true. If out of temperature storage for >30 minutes, it is signed back as Not Given with discard reason OutOfStorageTooLong."
+      ]
+    ],
+    faqUr: [
+      [
+        "آپریشن تھیٹر میں خون کی منتقلی کے دوران او ٹی نرس کی کیا ذمہ داری ہے؟",
+        "او ٹی نرس خون کی منتقلی، 30 منٹ کولڈ چین کی میعاد، اینستھیٹسٹ کے ساتھ 5 نکاتی مشترکہ حفاظتی چیک، علامات کے اندراج اور منفی ردعمل کی نگرانی کی ذمہ دار ہے۔"
+      ],
+      [
+        "کیا 30 منٹ گزر جانے کے بعد آپریشن تھیٹر میں خون لگایا جا سکتا ہے؟",
+        "ہرگز نہیں۔ قاعدہ 8e16f20b4a کے تحت فریج سے نکلنے کے 30 منٹ بعد خون لگانا منع ہے اور سرور BLOOD_UNIT_OUT_TOO_LONG کے تحت عمل روک دیتا ہے۔"
+      ],
+      [
+        "تھیٹر میں دوسرا تصدیقی چیک کون کر سکتا ہے؟",
+        "قاعدہ 0a07d57ff8 کے تحت اینستھیٹسٹ، سرجن یا کوئی دوسری مستند نرس دوسرا چیک کر سکتی ہے۔ خود اپنے عمل کی تصدیق ممنوع ہے۔"
+      ],
+      [
+        "اگر سرجری کے دوران خون کا منفی ردعمل ہو تو کیا کیا جائے؟",
+        "قاعدہ a2f80c80d7 کے تحت خون فوراً روک دیا جاتا ہے اور 'منفی ردعمل رپورٹ کریں' کے ذریعے اسپتال کوالٹی کو سینٹینل رپورٹ بھیجی جاتی ہے۔"
+      ],
+      [
+        "اگر آپریشن کے دوران خون کی ضرورت نہ رہے تو بیگ کیسے واپس کیا جائے؟",
+        "اگر بیگ 30 منٹ کے اندر اور محفوظ حالت میں ہو تو اسے fit_for_use کے ساتھ بلڈ بینک واپس کیا جا سکتا ہے۔ اگر 30 منٹ گزر چکے ہوں تو ضائع کرنے کے لیے واپس کیا جاتا ہے۔"
+      ]
+    ]
+  },
   blood_center_release: {
     title: "Blood center release to inventory",
     titleUr: "بلڈ سنٹر انوینٹری ریلیز",

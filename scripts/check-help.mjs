@@ -241,6 +241,7 @@ export function checkHelp({
       "BloodCenterRelease",
       "TransfusionBedside",
       "TransfusionBedsideER",
+      "TransfusionBedsideOT",
       "MaternityPolicy",
       "ObstetricAssessment",
       "NewbornRegistration",
