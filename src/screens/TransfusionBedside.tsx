@@ -47,18 +47,22 @@ import {
 } from "../transfusion-bedside-policy";
 import { useClinicalWrite, ClinicalWriteFeedback } from "../clinical-write";
 
+export type TransfusionBedsideProps = {
+  user: ClinicalUser & { username?: string; roles?: string[]; registration?: string | null; designation?: string | null };
+  establishment: EstablishmentOut;
+  connected: boolean;
+  stream: string;
+  screenId?: string;
+};
+
 export function TransfusionBedside({
   user,
   establishment,
   connected,
   stream,
-}: {
-  user: ClinicalUser & { username?: string; roles?: string[]; registration?: string | null; designation?: string | null };
-  establishment: EstablishmentOut;
-  connected: boolean;
-  stream: string;
-}) {
-  const view = getTransfusionBedsideScreenView(establishment);
+  screenId = "transfusion_bedside",
+}: TransfusionBedsideProps) {
+  const view = getTransfusionBedsideScreenView(establishment, screenId);
   const activeOrRetiring = isBloodTransfusionActiveOrRetiring(establishment);
   const canView = user.permissions?.includes("blood.view") ?? false;
   const canTransfuse = user.permissions?.includes("blood.transfuse") ?? false;

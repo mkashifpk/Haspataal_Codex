@@ -50,6 +50,7 @@ import { BloodCollection } from './screens/BloodCollection';
 import { BloodCenterLab } from './screens/BloodCenterLab';
 import { BloodCenterRelease } from './screens/BloodCenterRelease';
 import { TransfusionBedside } from './screens/TransfusionBedside';
+import { TransfusionBedsideER } from './screens/TransfusionBedsideER';
 import { MaternityPolicy } from './screens/MaternityPolicy';
 import { ObstetricAssessment } from './screens/ObstetricAssessment';
 import { NewbornRegistration } from './screens/NewbornRegistration';
@@ -130,6 +131,8 @@ const labels: Record<string, [string, string, string]> = {
  body_release_er: ["Bodies awaiting handover (ER)", "میت کی حوالگی کا رجسٹر (ایمرجنسی)", "🤝"],
  blood_sources: ["Licensed blood sources","مجاز بلڈ سنٹرز و ذرائع","🩸"],
  blood_request: ["Request blood","خون کی درخواست","🩸"],
+ transfusion_bedside: ["Bedside transfusion observation", "خون کی منتقلی کی نگرانی", "🩸"],
+ transfusion_bedside_er: ["Bedside transfusion observation (ER)", "خون کی منتقلی کی نگرانی (ایمرجنسی)", "🩸"],
  blood_bank: ["Blood bank","بلڈ بینک","🩸"],
  blood_donors: ["Blood donors","خون کے عطیہ دہندگان","🩸"],
  donor_assessment: ["Donor assessment","عطیہ دہندہ کا معائنہ","🩸"],
@@ -233,6 +236,7 @@ const frontDeskScreens = new Set([
   'body_release_ward',
   'body_release_er',
   'patient_programmes_triage',
+  'transfusion_bedside_er',
   'consents_ward',
   'consents_doctor',
   'blood_sources',
@@ -925,6 +929,7 @@ export function App() {
   'body_release_ward',
   'body_release_er',
   'patient_programmes_triage',
+  'transfusion_bedside_er',
   'consents_ward',
   'consents_doctor',
   'blood_sources',
@@ -985,7 +990,7 @@ export function App() {
       (id !== "donor_assessment" || ["full","open_work","records","setup"].includes(est?.views.screens.find(v=>v.screen_id===id)?.view || "")) &&
       (id !== "blood_collection" || ["full","open_work","records","setup"].includes(est?.views.screens.find(v=>v.screen_id===id)?.view || "")) &&
       (id !== "blood_center_lab" || ["full","open_work","records","setup"].includes(est?.views.screens.find(v=>v.screen_id===id)?.view || "")) &&
-      (!["mar","verbal_orders_ward","verbal_orders_er","vitals_tracker","patient_education_ward","nursing_assessment","my_beds","doctor_inpatients","cost_estimates_admissions","consents_admissions","wristbands_admissions","wristbands_ward","own_medicines_ward","own_medicines_pharmacy","bed_matrix","pending_admissions","imaging_repeats","imaging_outsourced","critical_results_radiology","radiology_worklist","rx_queue","dispense","order_queries","otc","charity_override","lab_only_walkin","lab_bench","lab_send_outs","lab_verification","critical_results_bench","critical_results_verifier","critical_results_doctor","critical_results_ward","critical_results_er","consents_ward","consents_triage","er_board_doctor","er_visit_doctor","mlc_cases","mlc_cases_doctor","death_record","body_release_ward","body_release_er","patient_programmes_triage"].includes(id) || ["full", "open_work", "records"].includes(est?.views.screens.find(v => v.screen_id === id)?.view || "")),
+      (!["mar","verbal_orders_ward","verbal_orders_er","vitals_tracker","patient_education_ward","nursing_assessment","my_beds","doctor_inpatients","cost_estimates_admissions","consents_admissions","wristbands_admissions","wristbands_ward","own_medicines_ward","own_medicines_pharmacy","bed_matrix","pending_admissions","imaging_repeats","imaging_outsourced","critical_results_radiology","radiology_worklist","rx_queue","dispense","order_queries","otc","charity_override","lab_only_walkin","lab_bench","lab_send_outs","lab_verification","critical_results_bench","critical_results_verifier","critical_results_doctor","critical_results_ward","critical_results_er","consents_ward","consents_triage","er_board_doctor","er_visit_doctor","mlc_cases","mlc_cases_doctor","death_record","body_release_ward","body_release_er","patient_programmes_triage","transfusion_bedside_er"].includes(id) || ["full", "open_work", "records"].includes(est?.views.screens.find(v => v.screen_id === id)?.view || "")),
   );
   const view = est?.views.workspaces.find(
     (v) => v.workspace === workspace,
@@ -1371,6 +1376,7 @@ export function App() {
               {screen === 'blood_center_lab' && est && <BloodCenterLab key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} />}
               {screen === 'blood_center_release' && est && <BloodCenterRelease key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} />}
               {screen === 'transfusion_bedside' && est && <TransfusionBedside key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} />}
+              {screen === 'transfusion_bedside_er' && est && <TransfusionBedsideER key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} />}
               {screen === 'maternity_policy' && est && <MaternityPolicy key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} />}
               {screen === 'obstetric_assessment' && est && <ObstetricAssessment key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} />}
               {screen === 'newborn_registration' && est && <NewbornRegistration key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} onNavigateScreen={navigate} />}

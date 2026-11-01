@@ -7130,6 +7130,124 @@ consents_doctor: {
       ],
     ],
   },
+  transfusion_bedside_er: {
+    title: "Blood transfusion at the bedside",
+    titleUr: "خون کی منتقلی کی نگرانی",
+    purpose: "Emergency department bedside blood transfusion verification and administration: dual-clinician 5-point safety check, wristband barcode verification, 30-minute cold chain start countdown, vital signs monitoring, 4-hour administration limit tracking, acute adverse reaction reporting with automated Section 13 incident dispatch, and safe sign-back of unstarted units. Urdu remains a draft until a native speaker reviews it.",
+    purposeUr: "ایمرجنسی ڈیپارٹمنٹ میں بیڈ سائیڈ خون کی منتقلی کی تصدیق اور نگرانی: دو معالجین کی 5 نکاتی حفاظتی جانچ، کلائی پٹی بارکوڈ تصدیق، 30 منٹ کولڈ چین کا الٹی گنتی ٹائمر، علامات کی نگرانی، 4 گھنٹے کی حد، دفعہ 13 کے تحت منفی ردعمل کی رپورٹنگ، اور نہ لگنے والے خون کی بلڈ بینک واپسی۔ اردو انسانی جائزے تک مسودہ ہے۔",
+    steps: [
+      "Open Emergency / Triage → Blood transfusion at the bedside (transfusion_bedside_er) to inspect blood units issued by the blood bank for emergency resuscitation and trauma casualties.",
+      "Monitor the 30-minute start countdown timer (rule 8e16f20b4a): transfusion must begin within 30 minutes of blood bank issue to maintain cold chain. After 30 minutes the server refuses start with BLOOD_UNIT_OUT_TOO_LONG and mandates returning the unit as Not Given with discard reason OutOfStorageTooLong.",
+      "Initiate bedside verification: scan the patient's identity wristband barcode (GET /wristbands/verify) or record manual two-identifier clinical concordance if unscannable (rule 0a07d57ff8).",
+      "Complete all 5 mandatory bedside safety checkboxes: patient identity concordance, unit number match, expiry date verification, prescribed product match, and visual bag integrity inspection. None are pre-ticked.",
+      "Execute dual independent co-signature (rule 0a07d57ff8): have a second qualified clinician (nurse or doctor) enter their credentials. Logged-in user self-approval is rejected with DUAL_CONTROL_SAME_PERSON.",
+      "Record vital signs observations (rule efcdf1e299): document baseline vitals (temperature, pulse, blood pressure, respiratory rate) before beginning infusion, at 15 minutes, and periodically until completion.",
+      "Report adverse reactions immediately (rule a2f80c80d7): if clinical symptoms appear, click 'Report Reaction' to document onset time, reaction class, and clinical interventions; the server automatically dispatches Section 13 hospital incident and sentinel event reports.",
+      "End or return transfusion: click 'End Transfusion' upon completing the unit (flagged ended_late if exceeding 4 hours), or click 'Return Unit' to sign back an unstarted unit within 30 minutes or record it as Not Given."
+    ],
+    stepsUr: [
+      "ایمرجنسی ٹرائیج سے بیڈ سائیڈ خون کی منتقلی (transfusion_bedside_er) کھولیں تاکہ ہنگامی صدمے اور حادثات کے مریضوں کے لیے بلڈ بینک سے جاری شدہ خون کے بیگز کا جائزہ لیا جا سکے۔",
+      "30 منٹ کے الٹی گنتی ٹائمر کی نگرانی کریں (قاعدہ 8e16f20b4a): کولڈ چین برقرار رکھنے کے لیے بلڈ بینک سے ملنے کے 30 منٹ کے اندر خون شروع کرنا لازمی ہے۔ 30 منٹ بعد سرور BLOOD_UNIT_OUT_TOO_LONG کے تحت عمل روک دیتا ہے اور Not Given کا اندراج لازمی ہو جاتا ہے۔",
+      "بیڈ سائیڈ تصدیق شروع کریں: مریض کی کلائی پٹی کا بارکوڈ اسکین کریں (GET /wristbands/verify) یا بارکوڈ نہ ہونے پر فائل اور لیبل سے دوہری شناختی تصدیق درج کریں (قاعدہ 0a07d57ff8)۔",
+      "تمام 5 لازمی بیڈ سائیڈ حفاظتی چیک باکسز کی تصدیق کریں: مریض کی شناخت، یونٹ نمبر کا ملاپ، میعاد، تجویز کردہ پراڈکٹ اور بیگ کی درستگی و سالمیت۔ کوئی بھی چیک باکس پہلے سے ٹک نہیں ہوتا۔",
+      "دوہرے آزادانہ کنٹرول کی توثیق کریں (قاعدہ 0a07d57ff8): دوسرے مستند معالج (نرس یا ڈاکٹر) سے یوزرنیم اور پاس ورڈ درج کروائیں۔ لاگ ان شدہ صارف کا خود تصدیق کرنا DUAL_CONTROL_SAME_PERSON سے مسترد ہوتا ہے۔",
+      "حیاتیاتی علامات کی نگرانی درج کریں (قاعدہ efcdf1e299): خون شروع کرنے سے پہلے بنیادی علامات، 15 منٹ بعد اور تکمیل تک وقتاً فوقتاً علامات کا باقاعدہ اندراج کریں۔",
+      "منفی ردعمل کی فوری رپورٹنگ (قاعدہ a2f80c80d7): علامات ظاہر ہونے پر فوری 'منفی ردعمل رپورٹ کریں' منتخب کریں؛ سرور خودکار طور پر دفعہ 13 کے تحت ہسپتال حادثاتی اور سینٹینل رپورٹ جاری کرتا ہے۔",
+      "ٹرانسفیوژن کا اختتام یا واپسی: خون مکمل ہونے پر 'ٹرانسفیوژن ختم کریں' درج کریں (4 گھنٹے سے زیادہ وقت پر تاخیری اختتام نشان زد ہوتا ہے)، یا نہ لگنے والا بیگ 30 منٹ میں بلڈ بینک واپس کریں۔"
+    ],
+    faq: [
+      [
+        "The Blood transfusion at the bedside screen says \"One or more checks at the bedside failed: do not start the unit, and return it to the blood bank.\" (BLOOD_BEDSIDE_CHECK_FAILED). Why, and what do I do?",
+        "Under rule 0a07d57ff8, all 5 bedside safety checks (patient identity, unit number, expiry, product type, and bag integrity) must pass completely. If any check fails (e.g. barcode mismatch, leaking bag, or visible clots), transfusion must NOT be started. Click 'Return Unit / Not Given' with fit_for_use set to false and document the discrepancy to return the bag safely to the blood bank."
+      ],
+      [
+        "The Blood transfusion at the bedside screen says \"A second authorised person must co-sign this action.\" (STEP_UP_REQUIRED). Why, and what do I do?",
+        "Under rule 0a07d57ff8 and PBTA standards, high-risk bedside blood administration requires dual independent co-signature to prevent fatal ABO incompatibility errors. A qualified registered nurse or doctor must verify the bedside checks and enter their credentials in the co-signer dialog."
+      ],
+      [
+        "The Blood transfusion at the bedside screen says \"The second approver must be a different person.\" (DUAL_CONTROL_SAME_PERSON). Why, and what do I do?",
+        "Under rule 0a07d57ff8, dual control requires four eyes from two distinct clinical staff members. The server strictly forbids self-approval; the second checker must type their own unique username and password."
+      ],
+      [
+        "The Blood transfusion at the bedside screen says \"Medicines are given (and double-checked) by a registered nurse or doctor, or by staff the hospital allows.\" (ADMINISTRATION_NOT_AUTHORIZED). Why, and what do I do?",
+        "Under clinical governance policies, blood administration and co-signing are restricted to registered clinical staff with the blood.transfuse permission (triage_nurse, ward_nurse, doctor, clinical_specialist, surgeon, anaesthetist). Non-clinical or unauthorized accounts cannot initiate or co-sign transfusions."
+      ],
+      [
+        "The Blood transfusion at the bedside screen says \"More than 30 minutes since the unit left the blood bank: it is unsafe; record it as not given and return it for disposal (the II C manual, p157).\" (BLOOD_UNIT_OUT_TOO_LONG). Why, and what do I do?",
+        "Under rule 8e16f20b4a, blood components removed from temperature-controlled refrigeration warm rapidly. If not initiated within 30 minutes of blood bank release, cold chain is broken and administration is refused. The unit cannot be transfused; select 'Return Unit' and record it as Not Given with discard reason OutOfStorageTooLong."
+      ],
+      [
+        "The Blood transfusion at the bedside screen says \"The unit has expired: it is not received, tested, issued or transfused; discard it.\" (BLOOD_UNIT_EXPIRED). Why, and what do I do?",
+        "Expired blood components carry high risks of hemolysis, bacterial growth, and loss of oxygen-carrying capacity. Expired units must never be transfused under any circumstance. Open 'Return Unit' and record discard reason Expired."
+      ],
+      [
+        "The Blood transfusion at the bedside screen says \"Too many failed attempts; the account is temporarily locked.\" (ACCOUNT_LOCKED). Why, and what do I do?",
+        "To protect patient safety and credential security, repeated incorrect password entries trigger an automated account lockout. Have a different qualified nurse or doctor step up to perform the second check, or contact IT to reset credentials."
+      ],
+      [
+        "The Blood transfusion at the bedside screen says \"A reaction is already reported for this transfusion: add to its incident instead.\" (BLOOD_REACTION_EXISTS). Why, and what do I do?",
+        "Under rule a2f80c80d7, each transfusion unit permits only one adverse reaction record to prevent contradictory or split reporting. If new clinical signs develop, inspect the existing reaction report and record additional findings in the linked hospital incident investigation."
+      ],
+      [
+        "The Blood transfusion at the bedside screen says \"This incident type is no longer on the hospital's list.\" (INCIDENT_TYPE_INACTIVE). Why, and what do I do?",
+        "Adverse transfusion reactions are linked to active hospital incident classifications. If an incident category has been deactivated by hospital quality administration, select an active incident category (such as Transfusion Reaction or Sentinel Event) from the classification dropdown."
+      ],
+      [
+        "What do the states of a blood request mean (Open, Closed, Cancelled), and what moves it from one to the next?",
+        "A blood request is Open while units are being crossmatched, issued, or transfused. It transitions to Closed when all requested units have completed administration or final disposal. It transitions to Cancelled if clinical staff cancel the order before units are issued."
+      ],
+      [
+        "What do the states of a blood transfusion mean (Issued, InProgress, Completed, Stopped, Returned), and what moves it from one to the next?",
+        "A transfusion begins in Issued state upon release from the blood bank with an active 30-minute countdown. Starting transfusion transitions it to InProgress. Once the bag finishes it transitions to Completed (or ended_late if >4 hours). If an adverse reaction or clinical complication occurs, it transitions to Stopped. If the unit cannot be started or is sent back, it transitions to Returned."
+      ]
+    ],
+    faqUr: [
+      [
+        "سکرین پر 'بیڈ سائیڈ پر ایک یا زیادہ چیک ناکام ہو گئے: یونٹ شروع نہ کریں اور بلڈ بینک واپس کریں' (BLOOD_BEDSIDE_CHECK_FAILED) کیوں آتا ہے؟",
+        "قاعدہ 0a07d57ff8 کے تحت تمام 5 حفاظتی چیکس (مریض، یونٹ نمبر، ایکسپائری، پراڈکٹ، بیگ سالمیت) پاس ہونا لازمی ہیں۔ کوئی چیک فیل ہونے پر خون شروع نہ کریں، بلکہ 'یونٹ واپس کریں / Not Given' منتخب کر کے بلڈ بینک کو واپس کریں۔"
+      ],
+      [
+        "سکرین پر 'دوسرے مجاز فرد کا دستخط لازمی ہے' (STEP_UP_REQUIRED) کیوں آتا ہے؟",
+        "قاعدہ 0a07d57ff8 کے تحت جان لیوا غلطیوں کی روک تھام کے لیے بیڈ سائیڈ پر دوسرے آزاد معالج یا نرس کی باقاعدہ توثیق لازمی ہے۔ دوسرا اہل فرد اپنے یوزرنیم اور پاس ورڈ سے توثیق کرے گا۔"
+      ],
+      [
+        "سکرین پر 'دوسرا تصدیق کنندہ کوئی اور فرد ہونا چاہیے' (DUAL_CONTROL_SAME_PERSON) کیوں آتا ہے؟",
+        "دوہرے کنٹرول کے تحت دو الگ افراد کا جائزہ ضروری ہے۔ لاگ ان شدہ صارف خود کو ہی دوسرا تصدیق کنندہ نہیں بنا سکتا؛ دوسرا اہل معالج اپنے کوائف درج کرے۔"
+      ],
+      [
+        "سکرین پر 'ادویات اور خون کا عمل رجسٹرڈ نرس یا ڈاکٹر ہی کر سکتا ہے' (ADMINISTRATION_NOT_AUTHORIZED) کیوں آتا ہے؟",
+        "خون کی منتقلی صرف blood.transfuse کی مجاز اجازت رکھنے والے رجسٹرڈ کلینیکل عملے (ٹرائیج نرس، وارڈ نرس، ڈاکٹر، سرجن) کے لیے مختص ہے۔ غیر مجاز عملہ یہ کارروائی نہیں کر سکتا۔"
+      ],
+      [
+        "سکرین پر 'بلڈ بینک سے نکلے 30 منٹ سے زیادہ ہو گئے: یہ غیر محفوظ ہے، Not Given درج کریں' (BLOOD_UNIT_OUT_TOO_LONG) کیوں آتا ہے؟",
+        "قاعدہ 8e16f20b4a کے مطابق 30 منٹ میں خون شروع نہ ہونے پر کولڈ چین ٹوٹ جاتی ہے۔ سرور ٹرانسفیوژن روک دیتا ہے اور Not Given بمعہ تلفی کی وجہ OutOfStorageTooLong کا اندراج لازمی ہو جاتا ہے۔"
+      ],
+      [
+        "سکرین پر 'یونٹ کی میعاد ختم ہو چکی ہے: اسے ضائع کریں' (BLOOD_UNIT_EXPIRED) کیوں آتا ہے؟",
+        "میعاد ختم شدہ خون لگانا شدید خطرات کا باعث ہے۔ ایکسپائرڈ خون کسی صورت نہیں لگایا جا سکتا؛ 'یونٹ واپس کریں' میں جا کر Expired کے تحت تلفی ریکارڈ کریں۔"
+      ],
+      [
+        "سکرین پر 'غلط کوششوں کی وجہ سے اکاؤنٹ عارضی طور پر بند ہو گیا' (ACCOUNT_LOCKED) کیوں آتا ہے؟",
+        "سیکیورٹی وجوہات پر غلط پاس ورڈ کی تکرار پر اکاؤنٹ مقفل ہو جاتا ہے۔ دوسری نرس یا معالج سے تصدیق کروائیں یا آئی ٹی سے رابطہ کریں۔"
+      ],
+      [
+        "سکرین پر 'اس ٹرانسفیوژن کے لیے پہلے سے ردعمل رپورٹ موجود ہے' (BLOOD_REACTION_EXISTS) کیوں آتا ہے؟",
+        "قاعدہ a2f80c80d7 کے تحت ایک یونٹ کے لیے ایک ہی ردعمل رپورٹ ہو سکتی ہے۔ نئی علامات کی صورت میں سابقہ رپورٹ کا جائزہ لیں اور منسلک انویسٹی گیشن میں تفصیلات درج کریں۔"
+      ],
+      [
+        "سکرین پر 'یہ حادثاتی قسم ہسپتال کی فعال فہرست میں نہیں ہے' (INCIDENT_TYPE_INACTIVE) کیوں آتا ہے؟",
+        "اگر منتخب حادثاتی قسم غیر فعال ہو چکی ہو تو ڈراپ ڈاؤن سے فعال کیٹیگری (جیسے ٹرانسفیوژن ری ایکشن یا سینٹینل ایونٹ) منتخب کریں۔"
+      ],
+      [
+        "خون کی درخواست کی حالتوں (Open, Closed, Cancelled) کا کیا مطلب ہے؟",
+        "درخواست اس وقت تک Open رہتی ہے جب تک بیگز لگ رہے ہوں۔ تمام یونٹس مکمل ہونے پر یہ Closed ہو جاتی ہے، اور خون جاری ہونے سے پہلے منسوخ کرنے پر Cancelled ہو جاتی ہے۔"
+      ],
+      [
+        "خون کی منتقلی کی حالتوں (Issued, InProgress, Completed, Stopped, Returned) کا کیا مطلب ہے؟",
+        "بلڈ بینک سے اخراج پر حالت Issued ہوتی ہے۔ خون شروع ہونے پر InProgress بن جاتی ہے۔ مکمل ہونے پر Completed، ردعمل یا پیچیدگی پر Stopped، اور نہ لگنے یا واپس ہونے پر Returned ہو جاتی ہے۔"
+      ]
+    ]
+  },
   blood_center_release: {
     title: "Blood center release to inventory",
     titleUr: "بلڈ سنٹر انوینٹری ریلیز",

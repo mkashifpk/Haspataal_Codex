@@ -36,18 +36,19 @@ export interface EstablishmentContext {
  * Determine screen view mode for `transfusion_bedside` (rule:d97564a224).
  */
 export function getTransfusionBedsideScreenView(
-  establishment: EstablishmentContext | EstablishmentOut | null | undefined
+  establishment: EstablishmentContext | EstablishmentOut | null | undefined,
+  screenId: string = "transfusion_bedside"
 ): ScreenView {
   if (!establishment?.views?.screens) {
     return "full";
   }
   const screens = establishment.views.screens;
   if (Array.isArray(screens)) {
-    const item = screens.find((s) => s.screen_id === "transfusion_bedside");
+    const item = screens.find((s) => s.screen_id === screenId);
     return item ? (item.view as ScreenView) : "full";
   }
-  if (typeof screens === "object" && "transfusion_bedside" in screens) {
-    return (screens as Record<string, ScreenView>)["transfusion_bedside"] ?? "full";
+  if (typeof screens === "object" && screenId in screens) {
+    return (screens as Record<string, ScreenView>)[screenId] ?? "full";
   }
   return "full";
 }

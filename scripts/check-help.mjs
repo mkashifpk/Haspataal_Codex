@@ -240,6 +240,7 @@ export function checkHelp({
       "BloodCenterLab",
       "BloodCenterRelease",
       "TransfusionBedside",
+      "TransfusionBedsideER",
       "MaternityPolicy",
       "ObstetricAssessment",
       "NewbornRegistration",
