@@ -104,6 +104,100 @@ export const help: Record<string, HelpPage> = {
       ]
     ],
   },
+  body_release_er: {
+    title: "Bodies awaiting handover (ER)",
+    titleUr: "میت کی حوالگی کا رجسٹر (ایمرجنسی)",
+    purpose: "Manage and record the formal handover of deceased emergency casualties and brought-dead patients to family next-of-kin or police escorts under Punjab MSDS indicators 106 and 154 (GET /deaths, POST /deaths/{death_id}/body-release). Emergency department nursing staff inspect the handover queue for casualties in resuscitation and triage areas. Under statutory rule cd68894ad3, deceased records with status 'Draft' appear greyed out with disabled handover controls; the body cannot leave the emergency department until an emergency physician certifies the cause of death (DEATH_RECORD_NOT_CERTIFIED). For next-of-kin release, staff verify the receiver's full name, relationship to the deceased, and verified CNIC/ID number (rule 60aea191e4). Medico-legal casualties (carrying death.mlc_number) display a prominent red warning banner and mandate recording an official police dispatch letter or roznamcha daily diary reference before release. Upon completion, the nurse prints the official A4 death certificate carrying the handover declaration, receiver credentials, and dual signature lines for the receiver and nurse (GET /deaths/{death_id}/print-payload, rules 15e617c197, d0ca07a547).",
+    purposeUr: "پنجاب ہیلتھ کیئر کمیشن کے ایم ایس ڈی ایس انڈیکیٹرز 106 اور 154 کے تحت ایمرجنسی ڈیپارٹمنٹ اور مردہ لائے گئے مریضوں (Brought Dead) کی میت کی باضابطہ قانونی حوالگی کا انتظام۔ ایمرجنسی نرسنگ عملہ میت کی حوالگی کے رجسٹر کی نگرانی کرتا ہے۔ رول cd68894ad3 کے تحت جن اموات کا سرٹیفکیٹ ابھی ڈرافٹ ہو، وہ گرے رنگ میں غیر فعال دکھائی دیتے ہیں اور جب تک پی ایم ڈی سی ڈاکٹر اسباب کی حتمی تصدیق نہ کر دے، میت ایمرجنسی سے روانہ نہیں ہو سکتی۔ لواحقین کے حوالے کرتے وقت وصول کنندہ کا نام، رشتہ اور قومی شناختی کارڈ نمبر درج کیا جاتا ہے۔ میڈیکو لیگل کیسز میں تھانے کا باضابطہ مراسلہ یا روزنامچہ ڈائری نمبر لازمی ہے۔ حوالگی کے بعد اے 4 سرکاری سرٹیفکیٹ پرنٹ کیا جاتا ہے جس پر وصول کنندہ اور نرس کے باضابطہ دستخط ثبت ہوتے ہیں۔",
+    steps: [
+      "1. Access Emergency Handover Register: Open 'Bodies awaiting handover (ER)' from the Triage/ER Nurse workspace navigation or emergency tracking board. Review the list of deceased casualties awaiting release.",
+      "2. Verify Physician Certification: Check the certificate status column. Deceased patients marked 'Certified' with green badges are ready for handover. Records marked 'Draft' cannot be released; prompt the attending emergency medical officer to certify the death record first (rule cd68894ad3).",
+      "3. Inspect Medico-Legal Hazard Alert: Check if the casualty carries an MLC number. Medico-legal deaths feature a prominent red MEDICO-LEGAL banner indicating statutory police jurisdiction.",
+      "4. Launch Handover Dialog: For a certified deceased casualty, click 'Hand Over Body' to launch the release dialog and verify patient MRN, name, and emergency arrival details.",
+      "5. Select Recipient Entity: Choose 'Next of Kin / Family', 'Police Officer / Escort', 'Hospital Mortuary', or 'Other Authorized Authority'.",
+      "6. Document Receiver Identity & Police Dispatch: For next-of-kin, enter receiver full name, kinship relationship (e.g. Spouse, Son, Daughter), and verified CNIC number (rule 60aea191e4). For medico-legal casualties, enter the police daily diary roznamcha reference and investigating officer details.",
+      "7. Record Belongings & Valuables Inventory: In the notes section, record any personal items, jewelry, cash, or clothing dispatched with the casualty.",
+      "8. Submit Handover & Print Certificate: Click 'Confirm Handover & Release' to record the release (POST /deaths/{id}/body-release). Click 'Print Certificate' to generate the official A4 document with dual signature lines for the family receiver and emergency nurse (rules 15e617c197, d0ca07a547).",
+    ],
+    stepsUr: [
+      "1. ایمرجنسی حوالگی رجسٹر کھولیں: ٹریج یا ایمرجنسی نرس ورک اسپیس سے 'میت کی حوالگی کا رجسٹر (ایمرجنسی)' اسکرین کھولیں۔ ایمرجنسی میں وفات پانے والے یا مردہ لائے گئے مریضوں کی فہرست دیکھیں۔",
+      "2. معالج کی حتمی تصدیق چیک کریں: سرٹیفکیٹ اسٹیٹس کالم دیکھیں۔ گرین بیج والے تصدیق شدہ (Certified) مریض حوالگی کے لیے تیار ہیں۔ جن پر ڈرافٹ (Draft) لکھا ہو وہ غیر فعال ہیں اور ڈاکٹر کی تصدیق سے پہلے ایمرجنسی سے نہیں جا سکتے۔",
+      "3. میڈیکو لیگل الرٹ کی جانچ: چیک کریں کہ آیا میت میڈیکو لیگل کیس ہے۔ ایم ایل سی کیسز پر لال بینر ظاہر ہوتا ہے جس کی میت صرف پولیس کو دی جا سکتی ہے۔",
+      "4. حوالگی ڈائیلاگ کھولیں: تصدیق شدہ مریض کی سطر میں 'میت حوالے کریں' پر کلک کریں اور مریض کے کوائف کی توثیق کریں۔",
+      "5. وصول کنندہ کا انتخاب کریں: 'لواحقین / اہل خانہ'، 'پولیس اہلکار / تحویل'، یا 'ہسپتال سرد خانہ' میں سے مناسب آپشن منتخب کریں۔",
+      "6. شناختی کوائف اور پولیس حوالہ درج کریں: لواحقین کی صورت میں وصول کنندہ کا نام، رشتہ اور شناختی کارڈ نمبر درج کریں۔ ایم ایل سی کیس میں پولیس روزنامچہ کا حوالہ نمبر درج کریں۔",
+      "7. سامان اور زیورات کی تفصیل درج کریں: نوٹس کے خانے میں میت کے ہمراہ بھیجے گئے ذاتی سامان، نقدی یا کپڑوں کی تفصیل درج کریں۔",
+      "8. حوالگی مکمل کریں اور سرٹیفکیٹ پرنٹ کریں: 'حوالگی کی تصدیق کریں' پر کلک کر کے اندراج محفوظ کریں۔ اس کے بعد 'پرنٹ' پر کلک کر کے اے 4 سرکاری حوالگی رسید اور سرٹیفکیٹ پرنٹ کریں جس پر لواحقین اور نرس کے دستخط لیے جائیں گے۔",
+    ],
+    faq: [
+      [
+        "The Bodies awaiting handover (ER) screen says \"The doctor has not certified the cause of death yet: the body cannot leave the ward.\" (DEATH_RECORD_NOT_CERTIFIED). Why, and what do I do?",
+        "Under statutory healthcare regulations and rule cd68894ad3, a deceased casualty's body cannot leave the Emergency Department while the cause-of-death record remains in 'Draft' status. The handover button is disabled in the UI. Contact the attending emergency physician or medical officer to complete and certify the WHO cause of death certificate on the Death Record screen. Once certified, the handover action becomes immediately active."
+      ],
+      [
+        "The Bodies awaiting handover (ER) screen says \"The body has already been handed over.\" (BODY_ALREADY_RELEASED). Why, and what do I do?",
+        "This error indicates that another triage nurse or clinical staff member on another terminal has already submitted the body release transaction for this casualty. A body cannot be handed over more than once. The client automatically refreshes the register to display the release timestamp and recipient details."
+      ],
+      [
+        "The Bodies awaiting handover (ER) screen says \"A medico-legal death: the body is handed over against the police letter or diary number.\" (BODY_RELEASE_POLICE_REFERENCE_REQUIRED). Why, and what do I do?",
+        "Under statutory medico-legal rules and rule 60aea191e4, when an emergency casualty has an active MLC number or is flagged as a medico-legal death (e.g. road traffic accident, assault, poisoning, firearm injury), release to private individuals is prohibited without official police authorization. The system mandates entering the police dispatch letter number or jurisdictional police station roznamcha daily diary reference in the police reference field before release can be confirmed."
+      ],
+      [
+        "How does the triage nurse handle body release for casualties who were brought dead to the emergency department?",
+        "For 'Brought Dead' casualties, the doctor verifies the arrival time and conducts an external examination to determine whether clinical resuscitation or an immediate MLC notification is required. Once the doctor certifies the death certificate, the triage nurse verifies next-of-kin credentials (or police dispatch in suspected unnatural deaths) and completes the handover dialog."
+      ],
+      [
+        "What identity credentials must the emergency nurse document before releasing a body to family next of kin?",
+        "Under rule 60aea191e4, the nurse must verify and record the receiver's full legal name, kinship relationship to the deceased (Spouse, Son, Daughter, Father, Mother, Brother, Sister, or Legal Guardian), and verified National Identity Card (CNIC) number. This ensures a legally unbroken chain of custody for emergency mortuary handovers."
+      ],
+      [
+        "How does the emergency nurse obtain the printed certificate with handover signatures?",
+        "After clicking 'Confirm Handover & Release', locate the patient in the register and click 'Print'. The system fetches the official A4 document (GET /deaths/{id}/print-payload) formatted with institutional letterhead, WHO cause of death sequence, handover recipient particulars, and dual signature lines for the receiving family member and the emergency nurse per rule 15e617c197."
+      ],
+      [
+        "What should the emergency triage team do if the Emergency Department service capability is placed in Retiring mode?",
+        "Under rule d0ca07a547, when emergency capability is in Retiring mode, the screen displays a warning banner ('No new emergency arrivals from now on. Completing existing body handovers and printing continue.'). New emergency intakes are halted, but staff can freely finalize body handovers, dispatch deceased casualties, and print certificates for all existing deaths."
+      ],
+      [
+        "How does the emergency body release screen update when a physician certifies a death certificate in real time?",
+        "The application subscribes to the realtime 'death.recorded' event. Whenever an emergency physician declares a death or certifies a cause-of-death certificate on another terminal, the handover register automatically reloads without requiring manual page refresh or periodic polling."
+      ]
+    ],
+    faqUr: [
+      [
+        "اسکرین کہتی ہے کہ 'ڈاکٹر نے ابھی تک وفات کے اسباب کی تصدیق نہیں کی: میت روانہ نہیں ہو سکتی' (DEATH_RECORD_NOT_CERTIFIED)۔ کیا کریں؟",
+        "طبی و قانونی ضوابط اور رول cd68894ad3 کے تحت جب تک ڈیتھ سرٹیفکیٹ 'ڈرافٹ' ہو، میت ایمرجنسی سے باہر نہیں جا سکتی۔ متعلقہ ڈیوٹی ایمرجنسی ڈاکٹر سے رابطہ کریں تاکہ وہ ڈیتھ ریکارڈ اسکرین پر جا کر سرٹیفکیٹ کی حتمی تصدیق (Certify) کرے۔ تصدیق ہوتے ہی حوالگی کا بٹن فعال ہو جائے گا۔"
+      ],
+      [
+        "اسکرین کہتی ہے کہ 'میت پہلے ہی باضابطہ طور پر حوالے کی جا چکی ہے' (BODY_ALREADY_RELEASED)۔ کیا کریں؟",
+        "اس کا مطلب ہے کہ کسی دوسرے عملے نے پہلے ہی اس میت کی حوالگی کا اندراج مکمل کر لیا ہے۔ ایک میت کی دوبارہ حوالگی درج نہیں ہو سکتی۔ سسٹم رجسٹر کو ریفریش کر کے حوالگی کا وقت اور وصول کنندہ ظاہر کر دیتا ہے۔"
+      ],
+      [
+        "اسکرین کہتی ہے کہ 'میڈیکو لیگل میت پولیس کے مراسلے یا روزنامچہ ڈائری نمبر کے بغیر حوالے نہیں ہو سکتی' (BODY_RELEASE_POLICE_REFERENCE_REQUIRED)۔ کیا کریں؟",
+        "قانونی ضوابط اور رول 60aea191e4 کے تحت ایمرجنسی کے میڈیکو لیگل کیس میں میت براہِ راست لواحقین کو نہیں دی جا سکتی۔ پولیس کے روزنامچے کا اندراج نمبر یا باضابطہ مراسلہ حوالہ درج کرنا لازمی ہے۔ تھانے کے اہلکار سے مراسلہ لے کر نمبر درج کریں۔"
+      ],
+      [
+        "مردہ لائے گئے مریضوں (Brought Dead) کی میت کی حوالگی کیسے کی جاتی ہے؟",
+        "مردہ لائے گئے مریضوں کا وقتِ آمد اور بیرونی معائنہ ڈاکٹر درج کرتا ہے۔ اگر واقعہ غیر قدرتی ہو تو میڈیکو لیگل کیس کھولا جاتا ہے۔ ڈاکٹر کی سرٹیفکیٹ تصدیق کے بعد نرس لواحقین یا پولیس کے شناختی کوائف چیک کر کے حوالگی کا اندراج مکمل کرتی ہے۔"
+      ],
+      [
+        "لواحقین کے حوالے کرتے وقت ایمرجنسی نرس کو کون سے شناختی کوائف چیک کرنے چاہئیں؟",
+        "رول 60aea191e4 کے مطابق نرس کو وصول کنندہ کا پورا نام، میت سے رشتہ (مثلاً بیوی، بیٹا، بیٹی، والد وغیرہ) اور قومی شناختی کارڈ (CNIC) کا نمبر چیک کر کے فارم میں درج کرنا لازمی ہے۔"
+      ],
+      [
+        "میت کی حوالگی کے بعد سرکاری پرنٹ کیسے حاصل کیا جائے؟",
+        "حوالگی مکمل کرنے کے بعد رجسٹر میں 'پرنٹ' پر کلک کریں۔ سسٹم اے 4 سائز کا سرکاری سرٹیفکیٹ اور رسید کھولے گا جس پر ہسپتال کا مونوگرام، وفات کے اسباب، اور وصول کنندہ و نرس کے باضابطہ دستخط کی جگہیں موجود ہوتی ہیں (رول 15e617c197)۔"
+      ],
+      [
+        "اگر ایمرجنسی سروس ریٹائرنگ موڈ میں چلی جائے تو کیا میت حوالے کی جا سکتی ہے؟",
+        "جی ہاں، رول d0ca07a547 کے مطابق ریٹائرنگ موڈ میں نئی ایمرجنسی آمد بند ہوتی ہے لیکن پہلے سے موجود مریضوں کی دیکھ بھال، میت کی حوالگی اور پرنٹنگ کا کام معمول کے مطابق جاری رہتا ہے۔"
+      ],
+      [
+        "کیا ڈاکٹر کے سرٹیفکیٹ تصدیق کرنے پر یہ اسکرین خودکار تازہ ہو جاتی ہے؟",
+        "جی ہاں، یہ اسکرین 'death.recorded' ایونٹ سنتی ہے۔ جیسے ہی کوئی ڈاکٹر کسی بھی کمپیوٹر پر ڈیتھ سرٹیفکیٹ کی تصدیق کرتا ہے، یہ رجسٹر خود بخود تازہ ہو جاتا ہے اور بٹن فعال ہو جاتا ہے۔"
+      ]
+    ]
+  },
   body_release_ward: {
     title: "Bodies awaiting handover",
     titleUr: "میت کی حوالگی کا رجسٹر",
