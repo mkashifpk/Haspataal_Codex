@@ -4,7 +4,7 @@ Last updated: 01 November 2026, Antigravity (Codex pair), Asia/Karachi.
 ## Active request: Phase 5 Screen 104 `death_record` (Death record & certificate)
 Building screens in Phase 5 Roadmap (Emergency, deaths and medico-legal cases) along with all tests, reporting backend issues if found:
 - Screen 103: **`mlc_cases_doctor`** ("Medico-legal cases (Doctor)", Position 103, 73 points) — **COMPLETED** (commit `b3c34e8`, Proposal **256** awaiting human review on `/docs -> My progress`).
-- Screen 104: **`death_record`** ("Death record & certificate", Position 104, 90 points) — **COMPLETED & VERIFIED**.
+- Screen 104: **`death_record`** ("Death record & certificate", Position 104, 90 points) — **COMPLETED** (commit `2d501bf`, Proposal **257** awaiting human review on `/docs -> My progress`).
 
 ### Completed Screen 104 (`death_record`) Checkpoint
 - **Workflow & Standards**: WHO International Form of Medical Certificate of Cause of Death, Punjab MSDS indicators 106 and 154; Position 104 (90 points), Workspace `doctor`.
@@ -41,6 +41,9 @@ Building screens in Phase 5 Roadmap (Emergency, deaths and medico-legal cases) a
   - TypeScript compiler: `npx tsc --noEmit` passed with 0 errors.
   - Full test suite: `npm test` passed (437/437 passing across all suites).
   - Production build: `npm run build` produced `dist/assets/index-Daql6nGC.js`.
+- **Commit & Proposal**:
+  - Implementation commit: `2d501bf`.
+  - Proposal ID: **257** (status: `pending` on `/docs -> My progress`).
 
 ---
 
@@ -65,14 +68,11 @@ Building screens in Phase 5 Roadmap (Emergency, deaths and medico-legal cases) a
 - Screen 101: **`er_visit_doctor`** (commit `c371446`, Proposal **254** awaiting human review on `/docs -> My progress`).
 - Screen 102: **`mlc_cases`** (commit `4e60002`, Proposal **255** awaiting human review on `/docs -> My progress`).
 - Screen 103: **`mlc_cases_doctor`** (commit `b3c34e8`, Proposal **256** awaiting human review on `/docs -> My progress`).
+- Screen 104: **`death_record`** (commit `2d501bf`, Proposal **257** awaiting human review on `/docs -> My progress`).
 - Proposals **231**, **232**, **233**, **234**, **235**, and **236** are accepted.
-- Proposals **237**, **238**, **239**, **240**, **241**, **242**, **243**, **244**, **245**, **246**, **247**, **248**, **249**, **250**, **251**, **252**, **253**, **254**, **255**, and **256** are awaiting human review on `/docs -> My progress`.
+- Proposals **237**, **238**, **239**, **240**, **241**, **242**, **243**, **244**, **245**, **246**, **247**, **248**, **249**, **250**, **251**, **252**, **253**, **254**, **255**, **256**, and **257** are awaiting human review on `/docs -> My progress`.
 
 ---
 
-## Next Concrete Actions
-1. Commit Screen 104 (`death_record`): `git add -A` and `git commit -m "Implement Screen 104: death_record (Death record & certificate)"`.
-2. Submit `propose_progress` for `death_record` with rubric fingerprint `4e7cb2e8c7b8` and 33 tested items (excluding `q:fresh_data`).
-3. Verify via `progress_proposals(implementation_id: 1)`.
-4. Update `handoff.md` with proposal ID and commit handoff update.
-5. Check next screen in roadmap dependency order via `get_build_roadmap()`.
+## Next Screen in Roadmap
+- Query `get_build_roadmap()` to identify Screen 105 in Phase 5 / Phase 6.
