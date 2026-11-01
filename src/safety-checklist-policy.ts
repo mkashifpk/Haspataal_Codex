@@ -19,17 +19,21 @@ export interface ClinicalUser {
 }
 
 /**
- * Evaluates the runtime screen view mode for safety_checklist according to Rule 63f7754901.
- * Uses GET /establishment views.screens.safety_checklist. Never decides from facility category.
+ * Evaluates the runtime screen view mode for safety_checklist (Rule 63f7754901)
+ * or safety_checklist_admin (Rule 3028300996).
+ * Uses GET /establishment views.screens[screen_id]. Never decides from facility category.
  */
-export function getSafetyChecklistScreenView(establishment?: EstablishmentOut | null): ScreenViewMode {
+export function getSafetyChecklistScreenView(
+  establishment?: EstablishmentOut | null,
+  screenId: string = "safety_checklist"
+): ScreenViewMode {
   if (!establishment) {
     return "full";
   }
 
   // 1. Check server-declared screen view
   const screens = establishment.views?.screens || [];
-  const screenEntry = screens.find((s) => s.screen_id === "safety_checklist");
+  const screenEntry = screens.find((s) => s.screen_id === screenId);
   if (screenEntry?.view) {
     return screenEntry.view;
   }
@@ -68,9 +72,11 @@ export function canOperateChecklist(user: ClinicalUser | null | undefined): bool
   if (!user || !user.permissions) return false;
   return (
     user.permissions.includes("ot.checklist.manage") ||
+    user.permissions.includes("ot.checklist.record") ||
     user.permissions.includes("ot.clinical.record") ||
     user.permissions.includes("ot.clinical.view") ||
-    user.permissions.includes("doctor.view")
+    user.permissions.includes("doctor.view") ||
+    (Array.isArray(user.roles) && user.roles.includes("ot_admin"))
   );
 }
 

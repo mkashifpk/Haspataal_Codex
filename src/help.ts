@@ -7772,6 +7772,88 @@ consents_doctor: {
       ]
     ]
   },
+  safety_checklist_admin: {
+    title: "Surgical safety checklist (OT Admin)",
+    titleUr: "جراحی سیفٹی چیک لسٹ (او ٹی ایڈمن)",
+    purpose: "Administrative oversight, theatre pause auditing, clinical privilege compliance, intra-operative incident tracking, and permanent correction audit for the operating theatre department under Rule cafa8b3761, Rule b410c48dc4, Rule a90b6173b4, Rule c4919df195, Rule 45c2bd9ac6, Rule 9e9cb593cb, Rule 3028300996, and MSDS COP 37, 44.",
+    purposeUr: "او ٹی ایڈمن ورک اسپیس کے تحت جراحی سیفٹی چیک لسٹ کی نگرانی، طبی اختیارات کی پاسداری، توقف کی بروقت تکمیل، تھیٹر کے غیر متوقع واقعات کی رپورٹنگ اور مستقل ریکارڈز کی قانونی تصحیحی آڈٹ۔",
+    steps: [
+      "Open Surgical safety checklist from the OT Admin workspace to audit departmental pause completion across operating suites.",
+      "Filter the worklist by timeframe (1, 3, 7, 14 days) or search by patient MRN, surgeon, or surgical procedure to locate specific cases.",
+      "Select an active or completed surgical case to audit the 3-phase checklist status (Sign In, Time Out, Sign Out).",
+      "Inspect the prerequisite gate for Sign In (Rule a90b6173b4): verify pre-operative surgical note, pre-anaesthesia clinic fitness clearance, and signed informed consents.",
+      "Verify that Sign In was conducted prior to induction with mandatory verbal verification of patient identity, site marking, and allergies (Rule cafa8b3761).",
+      "Audit the Time Out pause: verify that the primary operating surgeon and anaesthetist physically present held active clinical privileges (Rule c4919df195, Rule db3a19e806).",
+      "Review the recorded attendance of scrub and circulating nursing personnel during the intra-operative pause.",
+      "Audit Sign Out execution: ensure sponge, needle, and instrument counts were verified correct and specimen labelling confirmed before theatre departure (Rule 45c2bd9ac6).",
+      "Review any intra-operative adverse incident or discrepancy reports submitted to the Quality & Safety Committee via POST /incidents.",
+      "Inspect post-signature correction addenda attached under Rule 9e9cb593cb to ensure full statutory audit trail integrity without record alteration."
+    ],
+    stepsUr: [
+      "او ٹی ایڈمن ورک اسپیس سے 'جراحی سیفٹی چیک لسٹ' کھولیں اور تمام تھیٹرز میں حفاظتی مراحل کی تکمیل کا جائزہ لیں۔",
+      "ایام کے مطابق فلٹر کریں یا مریض کے ایم آر این، سرجن یا آپریشن کے نام سے کیس تلاش کریں۔",
+      "کسی بھی فعال یا مکمل شدہ کیس کو منتخب کریں تاکہ تینوں مراحل (سائن ان، ٹائم آؤٹ، سائن آؤٹ) کا آڈٹ کیا جا سکے۔",
+      "سائن ان کی پیشگی شرائط کا جائزہ لیں: سرجن کا پری آپریٹو نوٹ، اینستھیزیا کی فٹنس کلیئرنس، اور دستخط شدہ رضامندی فارمز کی جانچ کریں (قاعدہ a90b6173b4)۔",
+      "تصدیق کریں کہ بے ہوشی سے قبل سائن ان کا مرحلہ مریض کی شناخت، سائٹ مارکنگ اور الرجی کی جانچ کے ساتھ مکمل کیا گیا (قاعدہ cafa8b3761)۔",
+      "ٹائم آؤٹ کا آڈٹ کریں: تصدیق کریں کہ حاضر پرائمری سرجن اور اینستھیٹسٹ کے پاس ہسپتال کے فعال کلینیکل استحقاق موجود تھے (قاعدہ c4919df195)۔",
+      "اسکرب اور سرکولیٹنگ نرسوں کی حاضری اور زبانی توثیق کے باضابطہ ریکارڈ کی توثیق کریں۔",
+      "سائن آؤٹ مرحلے کا آڈٹ کریں: اس بات کو یقینی بنائیں کہ پٹیاں، سوئیاں، اوزار اور نمونہ جات کی جانچ مریض کے نکلنے سے قبل مکمل ہوئی (قاعدہ 45c2bd9ac6)۔",
+      "کوالٹی کمیٹی کو بھیجے گئے کسی بھی غیر متوقع واقعے یا گنتی کے فرق کی رپورٹس کا جائزہ لیں۔",
+      "قاعدہ 9e9cb593cb کے تحت شامل کیے گئے تصحیحی ضمیموں کا معائنہ کریں تاکہ ریکارڈ کی قانونی سالمیت برقرار رہے۔"
+    ],
+    faq: [
+      [
+        "What is the OT Administrator's role in the Surgical Safety Checklist?",
+        "The OT Administrator oversees theatre compliance with WHO / MSDS COP 37, 44, audits pause completion across all surgical rooms, verifies that only privileged practitioners authorize Time Out, and monitors reported adverse incidents and count discrepancies."
+      ],
+      [
+        "How are clinical privileges audited in the OT Admin checklist?",
+        "Under Rule c4919df195 and Rule db3a19e806, the system validates the primary surgeon and anaesthetist against active clinical privilege grants (GET /ot/privileges). Any missing privilege halts the pause with OT_PRIVILEGE_REQUIRED."
+      ],
+      [
+        "Can an OT administrator edit or erase a signed surgical pause?",
+        "No. Under Rule 9e9cb593cb, all signed pauses are immutable permanent medical records (OT_RECORD_FINAL). Amendments can only be recorded via post-finality correction addenda with clinical rationale (POST /ot/bookings/{id}/corrections)."
+      ],
+      [
+        "What occurs if a surgical case is closed without Sign Out?",
+        "Under Rule 45c2bd9ac6, completing surgery on the server (complete-surgery) returns OT_CHECKLIST_INCOMPLETE. The theatre team must execute Sign Out before closing the surgical record."
+      ],
+      [
+        "How are intra-operative safety incidents tracked from this screen?",
+        "Discrepancies such as incorrect sponge counts or equipment failures reported via the screen are immediately submitted to the hospital's Quality & Safety Committee and risk managers via POST /incidents."
+      ],
+      [
+        "How does runtime service gating apply to safety_checklist_admin?",
+        "Under Rule 3028300996, the screen evaluates GET /establishment views for screen_id safety_checklist_admin (full, open_work, records, setup, hidden) based on the surgery capability state, never by facility category."
+      ]
+    ],
+    faqUr: [
+      [
+        "او ٹی ایڈمن کا جراحی سیفٹی چیک لسٹ میں کیا کردار ہے؟",
+        "او ٹی ایڈمن ڈبلیو ایچ او اور ایم ایس ڈی ایس کے تحت تمام تھیٹرز میں حفاظتی مراحل کی تکمیل کی نگرانی کرتا ہے، ڈاکٹرز کے کلینیکل استحقاق کی جانچ کرتا ہے اور پیش آنے والے واقعات کا آڈٹ کرتا ہے۔"
+      ],
+      [
+        "او ٹی ایڈمن چیک لسٹ میں کلینیکل اختیارات کی جانچ کیسے ہوتی ہے؟",
+        "قاعدہ c4919df195 اور db3a19e806 کے تحت پرائمری سرجن اور اینستھیٹسٹ کے فعال اختیارات کی تصدیق کی جاتی ہے۔ اختیار نہ ہونے کی صورت میں سسٹم سرجری روک دیتا ہے۔"
+      ],
+      [
+        "کیا او ٹی ایڈمن مکمل شدہ چیک لسٹ کو تبدیل یا حذف کر سکتا ہے؟",
+        "نہیں۔ قاعدہ 9e9cb593cb کے تحت مکمل شدہ مراحل مستقل اور ناقابلِ ترمیم ہوتے ہیں۔ صرف باضابطہ تصحیحی ضمیمہ شامل کیا جا سکتا ہے۔"
+      ],
+      [
+        "اگر سائن آؤٹ کے بغیر سرجری بند کی جائے تو کیا ہوتا ہے؟",
+        "قاعدہ 45c2bd9ac6 کے تحت سرور سائن آؤٹ کے بغیر سرجری مکمل کرنے سے انکار کر دیتا ہے (OT_CHECKLIST_INCOMPLETE)۔"
+      ],
+      [
+        "تھیٹر کے حادثات اور واقعات کی نگرانی کیسے کی جاتی ہے؟",
+        "اسکرین سے رپورٹ کیے جانے والے واقعات براہ راست ہسپتال کی کوالٹی و سیفٹی کمیٹی کو ارسال ہوتے ہیں جہاں ان کا باضابطہ آڈٹ کیا جاتا ہے۔"
+      ],
+      [
+        "او ٹی ایڈمن چیک لسٹ پر سروس گیٹنگ کا کیا اطلاق ہے؟",
+        "قاعدہ 3028300996 کے تحت ہسپتال کے قیام کی ترتیبات (GET /establishment) کے مطابق اسکرین کے حقوق اور نظارے کا تعین ہوتا ہے۔"
+      ]
+    ]
+  },
   maternity_policy: {
     title: "High-risk pregnancy: our policy",
     titleUr: "ہائی رسک حمل: ہسپتال کی پالیسی",

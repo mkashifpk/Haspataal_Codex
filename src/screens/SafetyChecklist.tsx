@@ -39,6 +39,7 @@ export interface SafetyChecklistProps {
   connected?: boolean;
   stream?: any;
   timeZone?: string;
+  screenId?: string;
   onNavigate?: (screenId: string) => void;
   onNavigateScreen?: (screenId: string) => void;
 }
@@ -49,10 +50,11 @@ export const SafetyChecklist: React.FC<SafetyChecklistProps> = ({
   connected = true,
   stream,
   timeZone = "Asia/Karachi",
+  screenId = "safety_checklist",
   onNavigate,
   onNavigateScreen,
 }) => {
-  const viewMode = getSafetyChecklistScreenView(establishment);
+  const viewMode = getSafetyChecklistScreenView(establishment, screenId);
   const surgeryActive = isSurgeryActive(establishment);
   const authorized = canOperateChecklist(currentUser);
 
