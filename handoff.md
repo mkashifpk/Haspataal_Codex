@@ -1,7 +1,7 @@
 # Haspataal checkpoint
 Last updated: 01 November 2026, Antigravity (Codex pair), Asia/Karachi.
 
-## Active request: Phase 6 Screen 118 `safety_checklist` (Surgical safety checklist - Sign In / Time Out / Sign Out)
+## Active request: Phase 6 Screen 119 `safety_checklist_admin` (Surgical safety checklist - OT Admin workspace)
 Executing the Phase 6 Roadmap ("Theatre and sterile supply") in dependency order along with all tests and MCP progress reporting:
 - Screen 108: **`transfusion_bedside_er`** ("Bedside transfusion observation - ER", Position 108, 74 points) — **COMPLETED** (commit `2803cf0`, Proposal **261** awaiting human review on `/docs -> My progress`). Marks Phase 5 100% complete!
 - Screen 109: **`clinical_privileges`** ("Clinical privileges", Position 109, 55 points) — **COMPLETED** (commit `5ddbd89`, Proposal **262** awaiting human review on `/docs -> My progress`). First screen of Phase 6!
@@ -13,7 +13,52 @@ Executing the Phase 6 Roadmap ("Theatre and sterile supply") in dependency order
 - Screen 115: **`ot_board`** ("Live OT status board", Position 115, 36 points) — **COMPLETED** (commit `c559db6`, Proposal **268** awaiting human review on `/docs -> My progress`).
 - Screen 116: **`pre_anaesthesia_clinic`** ("Pre-anaesthesia clinic", Position 116, 104 points, workspace `anaesthesia` / `doctor`) — **COMPLETED** (commit `c6167d3`, Proposal **269** awaiting human review on `/docs -> My progress`).
 - Screen 117: **`consents_anaesthesia`** ("Anaesthesia consent", Position 117, 92 points, workspace `anaesthesia` / `doctor`) — **COMPLETED** (commit `e85395b`, Proposal **270** awaiting human review on `/docs -> My progress`).
-- Screen 118: **`safety_checklist`** ("Surgical safety checklist - Sign In / Time Out / Sign Out", Position 118, 79 points, workspace `ot_nurse` / `theatre`) — **NEXT**.
+- Screen 118: **`safety_checklist`** ("Surgical safety checklist - Sign In / Time Out / Sign Out", Position 118, 79 points, workspace `ot_nurse` / `theatre`) — **COMPLETED** (commit `57bda5f`, Proposal **271** awaiting human review on `/docs -> My progress`).
+- Screen 119: **`safety_checklist_admin`** ("Surgical safety checklist - OT Admin workspace", Position 119, 79 points, workspace `ot_admin`) — **NEXT / IN PROGRESS**.
+
+---
+
+### Completed Screen 118 (`safety_checklist`) Checkpoint
+- **Workflow & Standards**: WHO Surgical Safety Checklist (MSDS COP 39, 41) spanning three chronological operative pauses:
+  1. **Sign In**: Before anaesthesia induction (verifies patient identity, marked site, consent, anaesthesia safety check, pulse oximeter, allergies, difficult airway, blood loss risk >= 500ml). Prerequisite gate strictly blocks sign-in if PreOpNote is missing (`OT_PRE_OP_NOTE_REQUIRED`), PAC assessment finding fit is missing (`OT_PRE_ANAESTHESIA_REQUIRED`), or surgical/anaesthesia consents are not `Given` (`CONSENT_REQUIRED`).
+  2. **Time Out**: Before skin incision (introduction of all team members by name and role, verbal confirmation of patient identity, procedure, site, critical events, antibiotic prophylaxis within 60 mins, essential imaging displayed). Mandates operating surgeon and anaesthetist physically present in theatre, verified from active clinical privileges (`GET /ot/privileges`, Rule c4919df195, Rule db3a19e806).
+  3. **Sign Out**: Before patient leaves theatre (nurse verbally confirms procedure name, instrument, sponge and needle counts correct, specimen labelled, equipment issues, recovery plan). Operation cannot be completed before Sign Out (Rule 45c2bd9ac6).
+- **Contracts**:
+  - `contracts/safety_checklist.json`: Saved real MCP screen bundle (10 endpoints, 2 realtime events, 8 statutory rules, 30 rubric items).
+  - `src/generated/safety_checklist.ts`: Generated TypeScript contracts for all 10 operations and data models.
+- **Domain Policies & Statutory Rules (`src/safety-checklist-policy.ts`)**:
+  - Runtime service capability gating (`rule:63f7754901`): evaluates `GET /establishment` views for `safety_checklist` (`full`, `open_work`, `records`, `setup`, `hidden`).
+  - Active surgery check (`isSurgeryActive`).
+  - Role permissions (`canOperateChecklist`: `ot.checklist.manage`, `ot.clinical.record`, `ot.clinical.view`, `doctor.view`).
+  - Strict pause order (`determineNextPhase`, `rule:cafa8b3761`): Sign In -> Time Out -> Sign Out.
+  - Prerequisite validation (`checkPhasePrerequisites`, `rule:a90b6173b4`): PreOpNote, Fit PAC assessment, and Given consents required.
+  - Answer verification (`validateChecklistAnswers`, `rule:b410c48dc4`): Yes on confirmations, notes on `note_when`.
+  - Team attendance validation (`validateTimeOutTeam`, `rule:c4919df195`): requires PrimarySurgeon and Anesthetist.
+  - Bilingual error explanations (`explainSafetyChecklistError`).
+- **UI Architecture (`src/screens/SafetyChecklist.tsx`)**:
+  - Surgical case worklist (`GET /ot/clinical-worklist`) with 1, 3, 7, 14 days and `mine` filter (`rule:cafa8b3761`).
+  - 3-phase stepper tabs with visual completion badges.
+  - Prerequisite alert banner with dynamic blocker itemization (`rule:a90b6173b4`).
+  - Interactive checklist form with Confirm and Question controls, notes, and verbal pause certification.
+  - Time Out team selector for Primary Surgeon and Anaesthetist from active privileges (`GET /ot/privileges`).
+  - Immutable completed pause display (`OT_RECORD_FINAL`, `rule:9e9cb593cb`).
+  - Post-finality addendum correction modal (`POST /ot/bookings/{id}/corrections`).
+  - In-theatre adverse event and near-miss reporting modal (`POST /incidents`, `GET /incident-types`).
+  - Realtime synchronization: auto-refreshes on `ot.clinical.updated` and `ot.booking.updated` events.
+- **Help, Handbook & Navigation**:
+  - Wired into `src/App.tsx`, `src/foundation-catalogue.json` (10 tasks), `src/foundation-task-map.json` (10 controls).
+  - Contextual F1 help (`src/foundation-help.ts`): added `safety_checklist` to `deliveredHelpScreens` and all 29 controls mapped.
+  - Authored comprehensive handbook entry (`src/help.ts`) with bilingual title, purpose, 10 operational steps, and 6 role FAQs.
+  - Bundled screenshots: `public/handbook/safety_checklist-en.png` and `safety_checklist-ur.png`.
+- **Verification**:
+  - Automated unit tests: `tests/safety-checklist.test.mjs` (8/8 passing).
+  - Full test suite: `npm test` passed (533/533 passing across all suites).
+  - Help check: `npm run check:help` passed (117 screens, 2793 controls, 1832 groups, 69 FAQ seeds, 30 workspace guides).
+  - TypeScript compiler: `npx tsc --noEmit` passed with 0 errors.
+  - Production build: `npm run build` succeeded (`dist/assets/index-D0q1mpP3.js`).
+- **Commit & Proposal**:
+  - Implementation commit: `57bda5f`.
+  - Proposal ID: **271** (status: `pending` on `/docs -> My progress`).
 
 ---
 
@@ -68,43 +113,34 @@ Executing the Phase 6 Roadmap ("Theatre and sterile supply") in dependency order
 
 ---
 
-## Plan for Screen 118 (`safety_checklist`)
-- **Workflow & Standards**: Surgical Safety Checklist (WHO / MSDS COP 39, 41) spanning three critical operative phases:
-  1. **Sign In**: Before anaesthesia induction (patient identity confirmed, site marked, consent verified, anaesthesia safety check, pulse oximeter on, allergy check, difficult airway/aspiration risk, blood loss risk >= 500ml).
-  2. **Time Out**: Before skin incision (introduction of all team members by name and role, verbal confirmation of patient name, procedure, and incision site, surgeon review of critical steps and blood loss, anaesthetist review of specific patient concerns, nursing review of sterility and equipment, antibiotic prophylaxis administered within 60 minutes, essential imaging displayed).
-  3. **Sign Out**: Before patient leaves operating theatre (nurse verbally confirms procedure name, instrument, sponge and needle counts correct, specimen labelled with patient name, whether any equipment problems, surgeon, anaesthetist and nurse review key recovery and management concerns).
-- **Position & Workspace**: Position 118 (79 points), Workspace `ot_nurse` / `theatre`.
-- **Bundle & Contracts**:
-  - Retrieve real screen bundle via `get_screen_bundle("safety_checklist", max_chars=200000)`.
-  - Quality brief via `get_ui_quality_brief(screen_id="safety_checklist")`.
-  - Generate TypeScript contracts (`src/generated/safety_checklist.ts`).
-  - Examine endpoints, rules, and rubric items.
-- **Domain Policies & Statutory Rules (`src/safety-checklist-policy.ts`)**:
-  - Surgical phase lifecycle enforcement (Sign In -> Time Out -> Sign Out).
-  - Mandatory checks per phase per WHO / PHC MSDS standards.
-  - Team verification & practitioner authorization checks.
-  - Bilingual error explanations.
-- **UI Architecture (`src/screens/SafetyChecklist.tsx`)**:
-  - Active surgical cases worklist and room selector.
-  - Phase-by-phase interactive checklist forms with visual completion status badges.
-  - Verbal pause confirmation modal.
-  - Team attendance and practitioner roles display.
-  - Immediate incident / discrepancy reporting (e.g. incorrect sponge count).
-- **Help, Handbook & Navigation**:
-  - Contextual F1 help with all controls mapped in `src/foundation-help.ts`.
-  - Task mapping in `src/foundation-catalogue.json` and `src/foundation-task-map.json`.
-  - Handbook entry in `src/help.ts` with role FAQs for OT Nurse / Surgeon / Anaesthetist.
-  - Bundled screenshots: `public/handbook/safety_checklist-en.png` and `safety_checklist-ur.png`.
-- **Automated Verification**:
-  - `tests/safety-checklist.test.mjs`.
+## Plan for Screen 119 (`safety_checklist_admin`)
+- **Workflow & Standards**: Surgical Safety Checklist configuration and monitoring in the `ot_admin` workspace (WHO / MSDS COP 37, 44):
+  - Same component family as `safety_checklist` (`same_component_as: ["safety_checklist", "safety_checklist_anaesthesia"]`).
+  - Gated by Rule `3028300996`: runtime capability views for `safety_checklist_admin` in `ot_admin`.
+  - Roles allowed: `ot_admin`, `head_nurse`, `hospital_admin`, `clinical_specialist`, etc.
+  - Endpoints consumed: identical 10 endpoints (`GET /ot/clinical-worklist`, `GET /ot/bookings/{id}/surgical-record`, `GET /ot/checklist-items`, `POST /ot/bookings/{id}/safety-checks`, `POST /ot/bookings/{id}/corrections`, `POST /incidents`, `GET /incident-types`, `GET /ot/privileges`, `GET /consents/{id}`, `GET /staff/lookup`).
+  - Realtime events: `ot.clinical.updated` and `ot.booking.updated`.
+- **Position & Workspace**: Position 119 (79 points), Workspace `ot_admin`.
+- **Contracts**:
+  - `contracts/safety_checklist_admin.json`: Saved real MCP screen bundle (10 endpoints, 2 realtime events, 8 statutory rules, 30 rubric items).
+- **Navigation & Gating**:
+  - Add `safety_checklist_admin` to `src/App.tsx` routes, catalogue, and task map.
+  - Runtime service gating for `safety_checklist_admin` view mode via `getSafetyChecklistScreenView(establishment, "safety_checklist_admin")`.
+- **Handbook & F1 Help**:
+  - `src/foundation-help.ts`: map all controls for `safety_checklist_admin`.
+  - `src/help.ts`: handbook page and role FAQs for OT Administrator.
+  - Screenshot files in `public/handbook/safety_checklist_admin-en.png` and `safety_checklist_admin-ur.png`.
+  - Check help passing (`npm run check:help` 118 screens).
+- **Verification**:
+  - `tests/safety-checklist-admin.test.mjs`.
   - `npm test`, `npm run check:help`, `npx tsc --noEmit`, `npm run build`.
-  - Commit and submit `propose_progress` (Proposal 271).
+  - Commit and submit `propose_progress` (Proposal 272).
 
 ---
 
 ## Completed Screens Checkpoint
 - Proposals **231**, **232**, **233**, **234**, **235**, and **236** are accepted.
-- Proposals **237** through **270** are awaiting human review on `/docs -> My progress`.
+- Proposals **237** through **271** are awaiting human review on `/docs -> My progress`.
 - Completed screens in Phase 6 so far:
   - Screen 109: `clinical_privileges` (Proposal 262)
   - Screen 110: `theatre_checklist_setup` (Proposal 263)
@@ -115,6 +151,7 @@ Executing the Phase 6 Roadmap ("Theatre and sterile supply") in dependency order
   - Screen 115: `ot_board` (Proposal 268)
   - Screen 116: `pre_anaesthesia_clinic` (Proposal 269)
   - Screen 117: `consents_anaesthesia` (Proposal 270)
+  - Screen 118: `safety_checklist` (Proposal 271)
 
 ---
 
