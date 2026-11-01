@@ -8094,6 +8094,86 @@ consents_doctor: {
       ]
     ]
   },
+  sterile_packs_ot: {
+    title: "Sterile packs: scan when opened",
+    titleUr: "جراثیم سے پاک پیک: استعمال پر اسکین (او ٹی نرسنگ)",
+    purpose: "Point-of-use scanning of sterile packs as they are opened in the operating theatre (POST /cssd/packs/use) linked to surgical bookings for statutory MSDS IPC 91 & 92 infection prevention traceability, verification of pack sterility and expiration bounds with expiring-soon warnings (Rule 5eabbbecca), critical CSSD recall response and quarantine procedures (Rule 4357be8acb), and runtime service capability gating from GET /establishment views for screen_id sterile_packs_ot under Rule 26e45f89a1.",
+    purposeUr: "آپریشن تھیٹر میں استعمال ہونے والے سٹرائل پیکس کا کھولتے وقت بارکوڈ اسکیننگ کے ذریعے اندراج اور مریض کے سرجیکل ریکارڈ سے ربط (قاعدہ d8f4d7af47، ایم ایس ڈی ایس آئی پی سی 91 و 92)، زائد المیعاد یا فیل شدہ پیکس کی سخت ممانعت (قاعدہ 5eabbbecca)، سٹرلائزیشن سائیکل کی واپسی کی ہنگامی صورتحال میں فوری قرنطینہ (قاعدہ 4357be8acb) اور قاعدہ 26e45f89a1 کے تحت سی ایس ایس ڈی سروس کی تصدیق۔",
+    steps: [
+      "Select the active surgical case from the left-hand theatre queue or search by patient name, MRN, or procedure.",
+      "Verify patient context in the identity banner (Patient Name, MRN, Theatre Room, Primary Surgeon, Operative Status).",
+      "Scan the sterile pack's barcode label using the handheld scanner into the barcode input field, or enter the pack code manually and click 'Inspect Pack'.",
+      "Inspect the pack card details: Set name & code, sterilization cycle number, cycle status, pack status, and expiry date.",
+      "Check for expiry warnings: If the pack is expiring soon, its expiry date is highlighted in red/amber; prioritize using it under FEFO rules.",
+      "If the pack is expired, failed, or recalled, the system displays a critical CSSD_PACK_UNUSABLE alert under Rule 5eabbbecca; do NOT use it, set it aside, and send it back to CSSD.",
+      "When verified usable, click 'Record Pack Opened for Surgery' to call POST /cssd/packs/use and link the pack code to the surgical booking.",
+      "Review the Sterile Packs Ledger below to verify that the pack status transitioned to 'Used' and is associated with the patient's MRN.",
+      "If a critical recall alert banner appears (Rule 4357be8acb), click 'Filter Recalled Packs', identify any affected packs in theatre, and quarantine them immediately."
+    ],
+    stepsUr: [
+      "بائیں جانب موجود ورک لسٹ سے سرجری کیس منتخب کریں یا مریض کے نام، ایم آر این یا تھیٹر سے تلاش کریں۔",
+      "مریض کے شناختی بینر کی تصدیق کریں جس میں نام، ایم آر این، آپریشن تھیٹر، سرجن اور کیس کا اسٹیٹس ظاہر ہوتا ہے۔",
+      "سٹرائل پیک کے لیبل پر موجود بارکوڈ کو ہینڈ ہیلڈ اسکینر سے اسکین کریں یا کوڈ درج کر کے 'پیک کی جانچ' پر کلک کریں۔",
+      "پیک کارڈ کی تفصیلات چیک کریں: سیٹ کا نام اور کوڈ، سٹرلائزیشن سائیکل نمبر، سائیکل کا اسٹیٹس اور ایکسپائری تاریخ۔",
+      "میعاد کی جانچ کریں: اگر پیک کی میعاد ختم ہونے کے قریب ہو تو تاریخ سرخ رنگ میں نمایاں ہو گی، اسے FEFO اصول کے تحت ترجیح دیں۔",
+      "اگر پیک زائد المیعاد، فیل یا منسوخ شدہ ہو تو قاعدہ 5eabbbecca کے تحت CSSD_PACK_UNUSABLE کی وارننگ ظاہر ہو گی، اسے ہرگز استعمال نہ کریں۔",
+      "پیک کے درست ہونے پر 'پیک کا اندراج کریں' پر کلک کریں تاکہ POST /cssd/packs/use کے ذریعے سرجری کیس کے ساتھ پیک کا اندراج ہو جائے۔",
+      "نیچے دی گئی جدول میں تصدیق کریں کہ پیک کی کیفیت 'Used' میں تبدیل ہو گئی ہے اور مریض کے کوائف منسلک ہو چکے ہیں۔",
+      "اگر سٹرلائزیشن لاٹ کی واپسی (Recalled) کا ہنگامی بینر ظاہر ہو تو 'منسوخ شدہ فلٹر' پر کلک کریں اور تھیٹر میں موجود پیکس کو فوری قرنطینہ کریں۔"
+    ],
+    faq: [
+      [
+        "Why must sterile packs be scanned at the exact moment they are opened?",
+        "Under MSDS IPC 91 & 92 and statutory Rule d8f4d7af47, scanning the sterile pack label as it is opened links the specific sterilization batch and load to the patient's surgical record. If a sterilization defect or infection control recall occurs later, the hospital can immediately trace every patient who received instruments from that cycle."
+      ],
+      [
+        "What happens if a sterile pack has expired or failed sterilization?",
+        "Under Rule 5eabbbecca, the server strictly refuses use with CSSD_PACK_UNUSABLE. The UI highlights the expiration date in red, displays an explicit refusal alert, and disables the 'Record Pack Opened' button. Staff must immediately take another valid pack and return the defective one to CSSD."
+      ],
+      [
+        "How does the screen handle a CSSD cycle recall alert (Rule 4357be8acb)?",
+        "When a cssd.cycle.updated WebSocket event is received with status 'Recalled', the screen instantly displays a high-priority red recall alert banner with the cycle number and provides a one-click button to filter recalled packs from GET /cssd/packs?status=Recalled so theatre staff can isolate and return them."
+      ],
+      [
+        "Can a sterile pack be recorded without selecting a surgical case?",
+        "No. Under schema cross-field rules and Rule d8f4d7af47, POST /cssd/packs/use requires either a booking_id (theatre operation) or an admission_id (ward stay). The UI disables submission and provides clear validation guidance if no case is selected."
+      ],
+      [
+        "What does 'expiring_soon' mean on the sterile pack card?",
+        "CSSD packs carry an alert threshold (cssd_expiry_alert_days). When a pack is approaching its expiration date, expires_on is displayed in bold red warning text to encourage operating theatre staff to consume nearest-expiry packs first (FEFO rule)."
+      ],
+      [
+        "How does runtime service capability gating apply to sterile_packs_ot under Rule 26e45f89a1?",
+        "The screen checks GET /establishment views for screen_id sterile_packs_ot (full, open_work, records, setup, hidden) based on the CSSD service state, ensuring consistent permission and view enforcement without branching on facility category."
+      ]
+    ],
+    faqUr: [
+      [
+        "سٹرائل پیکس کو کھولتے وقت اسکین کرنا کیوں لازمی ہے؟",
+        "ایم ایس ڈی ایس آئی پی سی 91 و 92 اور قانونی قاعدہ d8f4d7af47 کے تحت پیک کے کھلتے وقت اسکیننگ سے سٹرلائزیشن بیچ اور سائیکل کا مریض کے ساتھ قطعی ثبوت محفوظ ہو جاتا ہے تاکہ کسی بھی خرابی یا انفیکشن کے خطرے پر فوری سراغ لگایا جا سکے۔"
+      ],
+      [
+        "اگر سٹرائل پیک زائد المیعاد ہو یا ٹیسٹ میں فیل ہو جائے تو کیا ہوتا ہے؟",
+        "قاعدہ 5eabbbecca کے تحت سرور CSSD_PACK_UNUSABLE کی خرابی کے ساتھ استعمال سے انکار کر دیتا ہے۔ اسکرین تاریخ کو سرخ کر دیتی ہے اور اندراج کا بٹن بند ہو جاتا ہے۔ عملہ نیا پیک لیتا ہے اور خراب پیک سی ایس ایس ڈی واپس بھیجتا ہے۔"
+      ],
+      [
+        "قاعدہ 4357be8acb کے تحت سٹرلائزیشن سائیکل کی واپسی کا الرٹ کیسے کام کرتا ہے؟",
+        "جب ریئل ٹائم میں cssd.cycle.updated کا ایونٹ 'Recalled' حالت کے ساتھ آتا ہے، تو اسکرین پر ہنگامی سرخ بینر ابھرتا ہے اور تھیٹر میں موجود اس سائیکل کے تمام پیکس کو ایک کلک سے فلٹر کر کے واپس کرنے کی سہولت ملتی ہے۔"
+      ],
+      [
+        "کیا سرجری کیس منتخب کیے بغیر سٹرائل پیک کا اندراج ہو سکتا ہے؟",
+        "ہرگز نہیں۔ قاعدہ d8f4d7af47 کے تحت POST /cssd/packs/use کے لیے سرجیکل بکنگ یا وارڈ داخلہ کا ہونا لازمی ہے ورنہ سرور درخواست مسترد کر دیتا ہے۔"
+      ],
+      [
+        "سٹرائل پیک پر 'expiring_soon' کا کیا مطلب ہے؟",
+        "سی ایس ایس ڈی ترتیبات کے مطابق جب پیک کی میعاد ختم ہونے میں چند دن رہ جائیں تو تاریخ سرخ رنگ میں نمایاں ہوتی ہے تاکہ پہلے زائد المیعاد ہونے والے سامان کو پہلے استعمال (FEFO) کیا جا سکے۔"
+      ],
+      [
+        "قاعدہ 26e45f89a1 کے تحت سروس کی اہلیت کیسے لاگو ہوتی ہے؟",
+        "اسکرین GET /establishment کے ذریعے سی ایس ایس ڈی سروس کی کیفیت جانچتی ہے اور اسکرین کی کیفیت (مکمل، اوپن ورک، ریکارڈز، سیٹ اپ، پوشیدہ) کے مطابق کام کرتی ہے۔"
+      ]
+    ]
+  },
   maternity_policy: {
     title: "High-risk pregnancy: our policy",
     titleUr: "ہائی رسک حمل: ہسپتال کی پالیسی",
