@@ -264,6 +264,7 @@ export function checkHelp({
       "CSSDBoard",
       "CSSDStock",
       "OTScheduling",
+      "OTBoard",
     ].map((n) => `src/screens/${n}.tsx`),
   ];
   const used = new Set(),

@@ -7464,6 +7464,68 @@ consents_doctor: {
       ]
     ]
   },
+  ot_board: {
+    title: "Live OT status board",
+    titleUr: "براہ راست آپریشن تھیٹر سٹیٹس بورڈ",
+    purpose: "Airport-style live operating theatre status board visible from any hospital terminal, displaying real-time suite readiness (🟢 Available, 🔴 In-Surgery, 🟡 Cleaning-Prep, ⚠️ Emergency Hold, ⚪ Out of Service), active surgical procedure and primary surgeon, timing metrics, and next scheduled procedure, with strict patient anonymity under Rule 01511e9050 and MSDS COP 31-33.",
+    purposeUr: "ایم ایس ڈی ایس سی او پی 31 تا 33 اور قاعدہ 01511e9050 کے تحت ہسپتال کے کسی بھی ٹرمینل پر فلائٹ بورڈ کے طرز پر آپریشن تھیٹرز کی لائیو صورتحال (دستیاب، زیر سرجری، صفائی/تیاری، ہنگامی ہولڈ، غیر فعال)، جاری جراحی اور سرجن کا نام، وقت کی پیمائش اور اگلے آپریشن کی معلومات بغیر مریض کی شناخت ظاہر کیے دیکھنا۔",
+    steps: [
+      "Open Operating Theatre → Live OT Status Board (ot_board) to view real-time suite readiness across all surgical rooms.",
+      "Review the summary status counters: monitor total suites, in-surgery cases, available rooms, cleaning turnover, emergency holds, and out-of-service rooms at a glance.",
+      "Check room readiness indicators: green (🟢 Available), pulsing red (🔴 In-Surgery), yellow (🟡 Cleaning-Prep), orange alert (⚠️ Emergency Hold), and grey (⚪ Out of Service) per Rule 01511e9050.",
+      "Inspect active surgical case: for rooms in surgery, review the procedure and primary surgeon details, actual start time, and elapsed surgical duration.",
+      "Verify patient anonymity: note that no patient names or MRNs appear on this terminal display board to preserve privacy under Rule 01511e9050.",
+      "Review next scheduled procedure: see upcoming surgical cases and scheduled start times to anticipate room turnover and patient transfer from wards.",
+      "Toggle view layouts: click 'Table View' for a compact airport departure-style layout, or 'Grid View' for rich room cards.",
+      "Inspect suite details: click 'Inspect' on any theatre room to view full timeline metrics, turnover buffer status, and upcoming bookings."
+    ],
+    stepsUr: [
+      "آپریشن تھیٹر مینو سے 'براہ راست آپریشن تھیٹر سٹیٹس بورڈ' (ot_board) کھولیں تاکہ تمام تھیٹرز کی تازہ ترین صورتحال کا جائزہ لیا جا سکے۔",
+      "خلاصہ کاؤنٹرز کا جائزہ لیں: کل تھیٹرز، زیر سرجری کمرے، دستیاب، صفائی کی حالت اور ایمرجنسی ہولڈز کی تعداد ایک نظر میں دیکھیں۔",
+      "تھیٹر کی تیاری کے رنگین اشاریے دیکھیں: سبز (دستیاب)، سرخ (سرجری جاری ہے)، پیلا (صفائی/تیاری)، نارنجی (ہنگامی ہولڈ) اور سرمئی (غیر فعال) قاعدہ 01511e9050 کے تحت۔",
+      "جاری سرجری کی تفصیلات دیکھیں: جاری آپریشن، سرجن کا نام، آغاز کا وقت اور کتنا وقت گزر چکا ہے ملاحظہ کریں۔",
+      "مریض کی رازداری کی تصدیق: اس عوامی ڈسپلے بورڈ پر کسی بھی مریض کا نام یا ایم آر این ظاہر نہیں کیا جاتا (قاعدہ 01511e9050)۔",
+      "اگلے شیڈول شدہ آپریشن کا جائزہ لیں: اگلی سرجری اور اس کے شروع ہونے کا وقت دیکھیں تاکہ وارڈ سے مریض کی منتقلی اور کمرے کی تیاری کی پیشگی منصوبہ بندی ہو سکے۔",
+      "ترتیب تبدیل کریں: فلائٹ انفارمیشن بورڈ کے انداز کے لیے 'ٹیبل ویو' یا تفصیلی کارڈز کے لیے 'گرڈ ویو' کا انتخاب کریں۔",
+      "کمرے کی تفصیلی جانچ: کسی بھی تھیٹر پر 'معائنہ' دبائیں تاکہ وقت کا مکمل ریکارڈ اور اگلی بکنگز دیکھی جا سکیں۔"
+    ],
+    faq: [
+      [
+        "Why are patient names hidden on the live OT board?",
+        "Rule 01511e9050 and healthcare privacy guidelines mandate that live airport-style tracking boards displayed across ward corridors, waiting lounges, and scrub areas must never display patient names or sensitive identifiers. Only procedure names and primary surgeons are shown."
+      ],
+      [
+        "How often does the live board refresh?",
+        "The board is connected to realtime event streams (ot.status.updated). Any state transition (e.g. starting surgery, beginning cleaning, or releasing a room) instantly refreshes the board across all connected terminals without manual polling."
+      ],
+      [
+        "What does the yellow Cleaning-Prep status signify?",
+        "Cleaning-Prep indicates that the previous surgical case has completed, and the room is undergoing mandatory 20-minute post-operative cleaning, surface disinfection, and air turnover before the next patient can be transferred in."
+      ],
+      [
+        "Can a room on Emergency Hold be assigned to an elective surgery?",
+        "No. An Emergency Hold status locks the suite for an incoming critical or Code Red trauma/resuscitation surgery, superseding all elective schedules."
+      ]
+    ],
+    faqUr: [
+      [
+        "لائیو او ٹی بورڈ پر مریضوں کے نام کیوں نہیں دکھائے جاتے؟",
+        "قاعدہ 01511e9050 اور مریضوں کی رازداری کے قوانین کے مطابق کوریڈورز اور لاؤنجز میں لگے بورڈز پر مریض کا نام یا شناختی نمبر ظاہر نہیں کیا جاتا، صرف طریقہ کار اور سرجن کا نام دکھایا جاتا ہے۔"
+      ],
+      [
+        "لائیو بورڈ کتنی دیر بعد ریفریش ہوتا ہے؟",
+        "یہ بورڈ ریئل ٹائم ایونٹ (ot.status.updated) سے منسلک ہے۔ کسی بھی تھیٹر کی حالت تبدیل ہوتے ہی تمام ٹرمینلز پر بغیر کسی دستی کوشش کے ڈیٹا خودکار اپ ڈیٹ ہو جاتا ہے۔"
+      ],
+      [
+        "پیلے رنگ کا صفائی/تیاری (Cleaning-Prep) سٹیٹس کیا ظاہر کرتا ہے؟",
+        "یہ ظاہر کرتا ہے کہ پچھلا آپریشن مکمل ہو چکا ہے اور اگلی سرجری سے پہلے کمرے میں 20 منٹ کی جراثیم کشی اور صفائی کی جا رہی ہے۔"
+      ],
+      [
+        "کیا ہنگامی ہولڈ والے کمرے میں الیکٹیو سرجری ہو سکتی ہے؟",
+        "نہیں۔ ایمرجنسی ہولڈ کا مطلب ہے کہ تھیٹر کو کسی ہنگامی یا کوڈ ریڈ مریض کے لیے محفوظ کر لیا گیا ہے اور تمام عام آپریشنز معطل ہیں۔"
+      ]
+    ]
+  },
   maternity_policy: {
     title: "High-risk pregnancy: our policy",
     titleUr: "ہائی رسک حمل: ہسپتال کی پالیسی",

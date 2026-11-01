@@ -20,6 +20,7 @@ export const phase1Screens = [
 const approvalScreens = ["approval_queue", "charity_approvals"];
 // Coverage grows screen by screen; Phase 1 acceptance remains separate.
 export const deliveredHelpScreens = [
+  "ot_board",
   "ot_scheduling",
   "cssd_stock",
   "cssd_board",
@@ -124,6 +125,16 @@ const g = (
 // IDs are also attached to the actual controls. The build rejects missing
 // mappings and empty translations instead of treating a page as coverage.
 export const controlGuides: Record<string, ControlGuide> = {
+  // Screen 115: ot_board (Live OT status board)
+  "ot_board.dismiss_alert_button": g(["ot_board"], ["Dismiss alert button", "انتباہ خارج کریں بٹن"], ["Dismisses the current status or error alert banner.", "موجودہ انتباہی بینر کو بند کرتا ہے۔"]),
+  "ot_board.back_button": g(["ot_board"], ["Back button", "واپسی کا بٹن"], ["Navigates back to the operating theatre scheduling screen.", "آپریشن تھیٹر شیڈولنگ اسکرین پر واپس جاتا ہے۔"]),
+  "ot_board.refresh_button": g(["ot_board"], ["Refresh board button", "ریفریش بٹن"], ["Fetches fresh live room states and active cases via GET /ot/status-board.", "سرور سے تھیٹرز کی تازہ ترین صورتحال اور فعال سرجریز لوڈ کرتا ہے۔"]),
+  "ot_board.toggle_view_mode": g(["ot_board"], ["Toggle view layout button", "ترتیب تبدیل کریں بٹن"], ["Switches between grid cards and airport departure table layouts.", "گرڈ کارڈز اور فلائٹ بورڈ طرز کے ٹیبل لے آؤٹ کے درمیان تبدیلی کرتا ہے۔"]),
+  "ot_board.filter_state_select": g(["ot_board"], ["Filter room state dropdown", "سٹیٹس فلٹر ڈراپ ڈاؤن"], ["Filters display by state: Available, In-Surgery, Cleaning-Prep, Emergency Hold, or Out of Service.", "تھیٹر کی حالت کے مطابق ڈسپلے کو فلٹر کرتا ہے۔"]),
+  "ot_board.filter_type_select": g(["ot_board"], ["Filter theatre type dropdown", "تھیٹر قسم فلٹر ڈراپ ڈاؤن"], ["Filters board display by operating room specialty type.", "آپریشن تھیٹر کی قسم کے مطابق بورڈ کو فلٹر کرتا ہے۔"]),
+  "ot_board.search_input": g(["ot_board"], ["Search room or procedure input", "تلاش ان پٹ"], ["Searches board by room name, suite code, or active procedure name (zero patient names per Rule 01511e9050).", "کمرے کے نام، کوڈ یا سرجری کے نام سے تلاش کرتا ہے۔"]),
+  "ot_board.inspect_theater_button": g(["ot_board"], ["Inspect theatre details button", "معائنہ بٹن"], ["Opens modal dialog with full suite timeline and upcoming procedure schedule.", "تھیٹر کے اوقات اور اگلے آپریشن کی مکمل تفصیلات کھولتا ہے۔"]),
+  "ot_board.close_modal_button": g(["ot_board"], ["Close inspect modal button", "بند کریں بٹن"], ["Closes the theatre inspection modal dialog.", "تھیٹر تفصیلات کی ماڈل ونڈو بند کرتا ہے۔"]),
   // Screen 114: ot_scheduling (Operating theatre request queue & calendar)
   "ot_scheduling.dismiss_alert_button": g(["ot_scheduling"], ["Dismiss alert button", "انتباہ خارج کریں بٹن"], ["Dismisses the current error or status notification banner.", "موجودہ انتباہ یا نوٹیفکیشن بینر کو بند کرتا ہے۔"]),
   "ot_scheduling.back_button": g(["ot_scheduling"], ["Back button", "واپسی کا بٹن"], ["Navigates back to the operating theatre operations board.", "آپریشن تھیٹر کے مرکزی بورڈ پر واپس جاتا ہے۔"]),

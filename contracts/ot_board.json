@@ -1,0 +1,1352 @@
+{
+  "screen_id": "ot_board",
+  "contract_fingerprint": "f253171154eef6044fa2",
+  "knowledge_revision": "bbf3ad4e2e48dc00",
+  "delivery_gate": {
+    "required": true,
+    "status": "required",
+    "progress_reporting": {
+      "required": true,
+      "submit": "propose_progress",
+      "verify": "progress_proposals",
+      "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+    },
+    "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+    "compulsory": [
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+        "points": 2
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+        "points": 3
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+        "points": 2
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+        "points": 4
+      }
+    ],
+    "zoom": {
+      "min_pct": 100,
+      "max_pct": 250,
+      "reset_pct": 100,
+      "keys": [
+        "Ctrl + or Ctrl = (zoom in)",
+        "Ctrl - (zoom out)",
+        "Ctrl 0 (reset to 100 %)",
+        "Command on macOS"
+      ],
+      "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+    },
+    "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+    "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+  },
+  "ui_quality": {
+    "source": "frontend-docs/guides/16-ui-quality.md",
+    "standard_revision": "7795bdfe5246755d",
+    "context": {
+      "workspace": "*",
+      "purpose": "Airport-style board visible from any terminal.",
+      "roles": [],
+      "screens": [
+        {
+          "id": "ot_board",
+          "title": "Live OT status board"
+        }
+      ],
+      "also_uses": [],
+      "handbook": "get_handbook_outline('*')",
+      "screen_id": "ot_board",
+      "workflow": "§5.3",
+      "contract": "get_screen_bundle('ot_board')",
+      "service": {
+        "services": [
+          "surgery"
+        ],
+        "role": "work"
+      }
+    },
+    "requirements": [
+      {
+        "id": "Q1",
+        "title": "Establish the purpose and staff context",
+        "instruction": "Before choosing a layout, state who is doing what, what starts the task, what success looks like and what could\nconfuse them. Use the screen's purpose, workspace, playbook and demo role. Distinguish a busy reception counter,\nbedside nursing, a laboratory scanner and an office review. Record the relevant input devices, interruptions,\nlanguage and display conditions. Keep the patient, visit, money or stock context clear throughout the task.\n\nWrite down why the proposed interaction fits this work. Use actual staff-task evidence and references approved by\nthe frontend lead; do not substitute an attractive generic dashboard for the job. Do not invent software screens\nfor staff whose specified interaction is a physical badge tap."
+      },
+      {
+        "id": "Q2",
+        "title": "Reuse intent through complete patterns",
+        "instruction": "Use the frontend team's approved design system and record its version and owner. Where no shared system has been\napproved, use the team's established components within the backend constraints and record the outstanding decision.\nReuse complete patterns: patient selection and identity, search and selection, a validated write and its result,\npending approval and handover, printing and recovery, corrections to finalized records. Follow the relevant\nplaybook; a template must preserve the permissions and transitions of this particular task.\n\nDocument the reason for a variation. Explore alternatives where they make a task clearer or reduce effort, then\nreview them in the whole journey. Do not introduce arbitrary colours, motion, alerts or different meanings for the\nsame control. Read the relevant standards when building or reviewing the flow; do not rely on an old chat summary."
+      },
+      {
+        "id": "Q3",
+        "title": "Complete the interaction and its recovery",
+        "instruction": "For every task show prerequisites, editable and read-only information, validation, the pending state, the confirmed\nresult and the next step. Distinguish loading, empty, unavailable, denied, stale and failed states. Explain disabled\nactions when the user needs to know how to proceed. Include keyboard and scanner interactions, focus after actions,\nconfirmation, cancellation and navigation with unsaved work.\n\nUse each endpoint's repeat rules, version checks and reconciliation instructions after an uncertain result. Never\nshow success merely because a button was pressed, queue clinical or money writes offline, or offer an unsupported\nundo. Follow the existing guides for printing, reconnects, sessions, realtime refreshes and in-memory form recovery.\nNever persist a co-signer's credentials. Distinguish server-owned rules from frontend presentation choices."
+      },
+      {
+        "id": "Q4",
+        "title": "Make the details work in the actual environment",
+        "instruction": "Review both Light and DarkHighContrast, 100-250 percent zoom, English and Urdu, right-to-left layout, mixed-direction\nidentifiers, long names and dense tables. Bundle the required Urdu font. Keep meaning available through text and\nicons, not colour alone. Verify labels, focus order, keyboard operation and readable status messages using the\nfrontend's accessibility tests and a person using the app.\n\nKeyboard zoom shortcuts are compulsory: Ctrl++ (including Ctrl+=) increases, Ctrl+- decreases, and Ctrl+0 resets\nto 100%; use Command on macOS. Clamp the application's zoom to **100% through 250%, inclusive**. Settings, keyboard,\nmenu and any enabled wheel/pinch zoom must share that bound and one zoom state. Persist `ui_scale_pct` through\n`PUT /settings/me` and restore it on login; do not layer CSS scaling over an independent browser zoom. Touch clients\nmust expose equivalent visible controls and handle shortcuts when a hardware keyboard is attached. Test both bounds,\nreset, intermediate values, reopened windows and dense forms/tables without clipped controls or lost data.\n\nUse the actual terminal workflow and supported devices: a scanner must not type into the wrong field, a printer\nproblem must leave the task understandable, and a realtime update must not silently change the selected patient.\nReview consistency across screens and helpful details such as an explicit selected date, shift or patient. Give\nthe product character through clarity, wording and care for staff, within the approved visual system. Any new\nperformance target or clinical presentation rule needs its designated owner's decision."
+      },
+      {
+        "id": "Q5",
+        "title": "Teach the delivered UI as part of building it",
+        "instruction": "Create or revise the screen handbook and the workspace guide with its role-specific FAQ in the same change as\nthe UI. Follow `get_end_user_handbook_brief` and `get_handbook_outline(workspace)` and the\n[end-user handbook contract](12-end-user-handbook.md). Explain every user-facing control and meaningful outcome,\nincluding frontend-only filters, navigation and dialogs that have no API call. Use actual labels and demo-data\nscreenshots in English and Urdu; flag translations awaiting human review.\n\nCover every supported job task in the role's workspace FAQ, including shared screens and handovers. A help page's\nexistence does not establish completeness. Kiosks also need an operator job aid available through the authorized\nstaff help or training material; do not add a login to the kiosk to deliver it."
+      },
+      {
+        "id": "Q6",
+        "title": "Require evidence before reporting completion",
+        "instruction": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.\n\nThe frontend repository must make these checks part of its build or CI:\n\n- Maintain an inventory of implemented screens, workspaces, supported role tasks and interactive controls. Map each\n  to handbook pages and sections in both languages. Include frontend-only behaviour; catalogue tasks are a minimum.\n- Fail on missing or empty pages/sections, uncovered tasks or controls, broken help links or missing referenced\n  screenshots. Test F1, screen Help, workspace Help, offline help, deep links, search and permission filtering; changing\n  user or roles must not retain another user's navigation or search results.\n- Run the relevant API scenario and frontend interaction tests, including repeat submissions, concurrent edits,\n  uncertain outcomes and hardware failures. A non-applicable case needs a reason, not a silent omission.\n- Apply every section of the [human workspace acceptance checklist](17-workspace-review-checklist.md) to each role\n  and supported task. Create fresh synthetic records through the UI, then read, update and cancel/deactivate/delete\n  only as the API permits. Test refusal where deletion or editing is forbidden. Read-only roles inspect new records\n  created by an authorized upstream role. Record the actual new IDs and outcomes; never treat seeded records alone\n  or an agent's API calls as a human journey pass.\n- Record the standards revision, implemented scope, test results, guide paths, demo screenshots and outstanding\n  decisions in the change's review evidence. A named human reviewer must walk through a complete role journey using\n  only the handbook, check that it matches the UI and review translations. Revise misleading or incomplete details.\n\nThe frontend lead owns the component and flow patterns, the delivery checks and their maintenance. The designated\nclinical/language owners approve their wording and decisions. The backend supplies the contract and examples.\nMCP supplies requirements, not proof that a frontend file exists, that a build passed or that staff can use it.\nAn agent may critique the work and collect evidence; it cannot approve its own human review or award progress."
+      }
+    ],
+    "human_review": {
+      "source": "frontend-docs/guides/17-workspace-review-checklist.md",
+      "required": true,
+      "checklist": [
+        {
+          "id": "R1",
+          "title": "Identify the implementation and complete scope",
+          "instruction": "- [ ] Record implementation ID/name, repository, commit/build, backend/standards revision, workspace, roles,\n  reviewer, date, device/OS, languages and peripherals tested (the review's *Start* step: the portal fills in what it\n  knows).\n- [ ] Inventory each role's screens, tasks, controls, permissions and required handovers. Every task needs a test\n  result and matching FAQ answer. A read-only role or non-applicable operation needs a specific contract-based reason."
+        },
+        {
+          "id": "R2",
+          "title": "Create fresh data through the frontend",
+          "instruction": "- [ ] With the review code in your app's DEV settings, create new records through each applicable create form:\n  patient/visit, request/order, master record, transaction or register entry. The review lists them with their IDs as\n  the server sees them; where a free-text field permits it, you may type the code there too, to find them again.\n- [ ] Try required fields missing, invalid values, duplicate identifiers and cancellation before saving. Verify\n  the visible validation, server refusal and that no partial or duplicate business record is reported as saved.\n- [ ] Complete the valid path and check the generated number, defaults, ownership, patient/visit context and next step.\n  A seeded master may be a prerequisite; the transaction being accepted must be new. Do not create destructive test\n  masters on a shared server without coordinating with its backend team."
+        },
+        {
+          "id": "R3",
+          "title": "Read and retrieve those new records",
+          "instruction": "- [ ] Find each new record by its actual ID/number and relevant search/filter/sort controls. Open list and detail\n  views, refresh, navigate away/back and sign in again. Confirm persistence and exact values, units, dates and status.\n- [ ] Check empty/no-match results and pagination where applicable. A read-only role must read a fresh record created\n  by an authorized upstream role and demonstrate that write actions are unavailable/refused."
+        },
+        {
+          "id": "R4",
+          "title": "Update, correct and exercise permitted deletion",
+          "instruction": "- [ ] Edit each supported field on the new record, save and re-read it. Check cancellation, unsaved-work navigation,\n  stale versions and simultaneous edits from a second session; one user's changes must not silently replace another's.\n- [ ] Test the actual permitted lifecycle: delete a draft where supported, or cancel, deactivate, stop, reverse or\n  append a correction with the required reason/approval. Verify list/detail/history and downstream effects afterwards.\n- [ ] Where deletion or editing is forbidden (for example finalized clinical or financial records), verify the\n  frontend offers the permitted correction and the server refuses the forbidden action. Never invent hard deletion\n  to tick a CRUD box. Record an explicit not-applicable/refused result with the supporting contract."
+        },
+        {
+          "id": "R5",
+          "title": "Permissions, handovers and end-to-end outcomes",
+          "instruction": "- [ ] Test allowed and denied actions with the appropriate accounts, including separation of requester/approver,\n  sign-off, counter-signature and multi-role switching. Check patient and workspace context after every switch.\n- [ ] Follow the new record into the next role's queue and complete the supported journey. Verify live refresh,\n  balances/stock/bed state where relevant, notifications and printable output against the new record's values.\n- [ ] Shared task coverage belongs to every role that uses it; do not mark a workspace done with an unfinished handover."
+        },
+        {
+          "id": "R6",
+          "title": "F1 help and detailed role FAQs",
+          "instruction": "- [ ] Press **F1** on each screen and with a field/dialog focused. Correct contextual help must open without losing\n  input; closing it restores focus. Test visible Help, workspace help, offline reading, search and deep links.\n- [ ] Follow each role task's FAQ using only its instructions. Check prerequisites, actual labels, steps, outcomes,\n  errors, recovery and handovers in English and Urdu. Missing/generic answers fail acceptance.\n- [ ] Change user/permissions and verify restricted pages/search results disappear. Login/locked/kiosk help must\n  reveal only permitted public/operator guidance. Hardware keyboard shortcuts and touch Help must both work where supported."
+        },
+        {
+          "id": "R7",
+          "title": "Zoom, language and usable layouts",
+          "instruction": "- [ ] Test Ctrl++/Ctrl+=, Ctrl+-, Ctrl+0 (Command equivalents on macOS), Settings and any enabled wheel/pinch/menu\n  routes. Verify **100% minimum, 250% maximum**, reset to 100%, persistence and a single shared application zoom state.\n- [ ] Repeatedly try beyond both bounds. Test at 100%, 150%, 200% and 250%, in both themes and languages, including\n  Urdu reading direction, long labels, tables, dialogs, validation messages and Help. All actions remain reachable.\n- [ ] Check tab order, focus, scanner input and visible controls on touch clients. Do not confuse OS magnification\n  with the application's saved zoom preference."
+        },
+        {
+          "id": "R8",
+          "title": "Failures, retries and devices",
+          "instruction": "- [ ] Test double submit, lost reply, disconnect/reconnect, session expiry, stale data and refused operations on\n  the new records. Confirm honest pending/error messages, correct reconciliation and no duplicate writes.\n- [ ] Test required printers/scanners/cameras, denied device permission and unavailable hardware. Verify recovery\n  preserves appropriate form context and does not display success before the server confirms it.\n- [ ] Patient workflows: register and admit a new patient **without** a photo (the form must let you skip it with no\n  reason), then take one and see it on the patient and the admission; a PDF as the photo must be refused. Upload a\n  synthetic outside report with its facility and date, re-open it under the correct patient and check it is labelled\n  as an outside report, never shown as this hospital's result."
+        },
+        {
+          "id": "R9",
+          "title": "Keep reproducible evidence",
+          "instruction": "- [ ] The review on the portal is the evidence, kept on the DEV server: what the server saw your app do (records new\n  and existing, refusals, each operation by lifecycle step and screen), your answers and a note for every Fail and N/A\n  (what failed and how to reproduce it, or why it does not apply). Keep screenshots and longer test output with your\n  app; mention where in the note.\n- [ ] *Test in the app* is a to-do list that ticks itself: an operation turns **Done on a new record** when the server\n  sees your app do it with the code, **Done on existing records only** when it changed demo data alone (the inspectors\n  see that), **Refused** when you tested a refusal. Mark only what is not seen: *Not applicable* or *Fail*, with the note.\n- [ ] *Screens*: for each screen, F1 help, the role FAQs and zoom (one click passes a whole column; then mark the\n  exceptions). The **fresh-data** column is the server's: it passes where your app made new records with that screen's\n  own write operations (any new record, for a screen that only reads); you can only reject it.\n- [ ] *Export* gives the review as one Markdown file for your repository or review system, whenever you want it.\n- [ ] Accepting or reporting **F1 help, the role FAQs, zoom or the fresh-data review** (on a proposal, on *Save this\n  screen* or in the transfer of legacy work) needs **your signed review** of that screen's workspace. The portal\n  preselects the review that passes them and refuses, saying why (`details.field` = `review_id`), an item without a\n  signed review, on a review that does not cover the screen or one that does not pass it there. The backend team's\n  inspectors see the review beside your agent's proposals.\n- [ ] **Approve all reported progress** is one human declaration for the displayed selection; untick any untested items\n  first. Each proposal retains its build, the review it was accepted with and your decision."
+        },
+        {
+          "id": "R10",
+          "title": "Decide and report honestly",
+          "instruction": "- [ ] Every applicable task and mandatory quality check must pass. A blocker, missing FAQ, broken F1, out-of-bounds\n  zoom or untested fresh-data lifecycle keeps the screen/workspace pending. Partial item acceptance remains possible.\n- [ ] The named human signs the review for this build (its *Sign* step: every question answered or decided by the\n  server, the declaration that the writes with the code are theirs, not their agent's), clears the code from the app,\n  accepts only tested proposal items or reports them manually, and returns failures: the agent reads the signed\n  review's failures and notes (`progress_proposals` → `human_reviews`). Agents cannot start, fill or sign a review, nor\n  approve their own claims. Backend inspection can confirm or withdraw accepted claims; verified points are a subset of\n  completion, never an additional award.\n- [ ] Retest affected tasks after fixes or backend changes; stale evidence does not establish the new build's behavior."
+        }
+      ],
+      "workspace_checklist": "- [ ] **Create:** log in, change your password, report an incident, record a rehearsal of an interview question.\n- [ ] **Read:** notifications, the help center (F1) and approvals as the roles that see them.\n- [ ] **Update / correct:** your settings (theme, language, zoom 100–250 % with the keys and the slider, saved and\n  restored after logging in again); mark notifications read.\n- [ ] **Cancel / delete:** withdraw your own pending approval request; log out (all sessions).\n- [ ] **Hand over:** approval decisions reach the requester at once.\n\n#### The Settings window, tier by tier\n\n- [ ] **Before login (This terminal):** open Settings from the login screen; the connection test, the server's addresses\n  and CA fingerprint, this terminal's location and printers; change the login screen's language and zoom and see them\n  kept on the terminal, then replaced by the user's own after login. Nothing is written on the server.\n- [ ] **My settings (everyone):** theme, language, zoom, document downloads and the password, saved and restored after\n  logging in again.\n- [ ] **Facility (Owner, Hospital Admin, Directors):** preview and apply a change of the PHC profile or a service; change\n  a policy setting; as a Hospital Admin change a control setting and see it wait as a change request until an Owner\n  approves it.\n- [ ] **System (IT):** a terminal, a printer and a badge station mapped and seen in This terminal; maintenance mode and\n  the kill switch ask for confirmation (danger) and say what they do.\n- [ ] **Refused:** a receptionist sees My settings and This terminal only; a facility or system section never appears\n  for a user without its permission, and its calls answer FORBIDDEN if forced.",
+      "operations": {
+        "create": [],
+        "update_or_correct": [],
+        "cancel_or_delete": [],
+        "other_actions": []
+      },
+      "operations_rule": "Exercise each operation on records you create new in this review, through the app: create, then read them back, update or correct them, and cancel, withdraw or delete them where the contract allows (and see the refusal where it does not). The other_actions are the steps of the record's life (sign, approve, dispense ...).",
+      "portal_review": "The human tester records this review on the portal (My progress → the workspace → Start the review), with its code in the app's DEV settings: the server sees the operations the app did on new records, the tester answers the rest and signs. The four compulsory items need that signed review; fresh data needs the server's evidence. You build the Review code setting (dev_build_headers), never start, fill or sign a review; progress_proposals → human_reviews lists the failures to fix.",
+      "dev_build_headers": {
+        "send": [
+          "X-Haspataal-Developer: <portal username>",
+          "X-Haspataal-Implementation: <implementation id>",
+          "X-Haspataal-Review: <the DEV settings' Review code, while the tester has one set>"
+        ],
+        "review_code_setting": "One app-wide field, Review code, in Settings → This terminal (open before login too), empty by default; the shared API client adds the header. Not on any screen or the login form.",
+        "release_build": "The field and all three headers behind the DEV build flag (compiled out, never a runtime switch): the hospital's release build has neither (guide 19, I6 and I9).",
+        "never": "Never set a review code yourself, in tests or scripts: only the tester's writes with it count."
+      }
+    },
+    "verification": {
+      "frontend_files_inspected": false,
+      "progress_recorded": false,
+      "rule": "Requirements only. Frontend CI checks coverage; a named human reviews the working journey."
+    }
+  },
+  "screen": {
+    "id": "ot_board",
+    "workspace": "*",
+    "title": "Live OT status board",
+    "purpose": "Airport-style board visible from any terminal.",
+    "workflow": "§5.3",
+    "rule_objects": [
+      {
+        "id": "rule:01511e9050",
+        "text": "🟢 Available / 🔴 In-Surgery / 🟡 Cleaning-Prep / ⚠ Emergency hold; no patient names on this board.",
+        "cites": []
+      },
+      {
+        "id": "rule:cc0fcec2de",
+        "text": "Exists for the service surgery (work): show it as GET /establishment views.screens says for screen_id ot_board (full; open_work: without its new work, with the banner \"No new ... from now on\"; records: history and corrections only; setup: only from Facility settings; hidden: in no menu), after login and again on establishment.changed. Never decide it from the profile's category.",
+        "cites": []
+      }
+    ],
+    "related_workflows": [
+      "operating-theater"
+    ],
+    "service": {
+      "services": [
+        "surgery"
+      ],
+      "role": "work",
+      "views": {
+        "full": "Show it; every action the user's permissions allow.",
+        "open_work": "The service is Retiring: show it with the banner 'No new <new_work> from now on' and its open work; hide the actions that start new work of it (x-capability-gates; continues_while_retiring ones stay); keep every other action (completing, transferring, settling, correcting).",
+        "records": "The service is Retired (or Preparing after it ran): show it as records only, under a 'Records' marker: lists, details, prints and the corrections the server still accepts; no action that starts new work.",
+        "setup": "Not in the daily menus: reach it from Facility settings (a preview's prerequisites link to it) to set the service up before switching it on.",
+        "hidden": "Not in any menu: the service has never run here, so the screen has nothing to show."
+      },
+      "how": "GET /establishment after login and on establishment.changed: views.screens gives this screen's view (one frontend build for every profile; never decide it from the profile's category)"
+    }
+  },
+  "rules_in_force": null,
+  "build_order": {
+    "screen": "ot_board",
+    "title": "Live OT status board",
+    "workspace": "*",
+    "phase": "P6",
+    "position": 115,
+    "points": 36,
+    "capabilities": [
+      "realtime",
+      "f1_help",
+      "zoom"
+    ],
+    "depends_on": [
+      {
+        "from": "ot_board",
+        "to": "code_red",
+        "kind": "data",
+        "evidence": "it receives ot.status.updated, which code_red's calls emitted in the tests",
+        "ordering": true,
+        "forward": false
+      },
+      {
+        "from": "ot_board",
+        "to": "ot_intraop",
+        "kind": "data",
+        "evidence": "it receives ot.status.updated, which ot_intraop's calls emitted in the tests",
+        "ordering": false,
+        "forward": false
+      },
+      {
+        "from": "ot_board",
+        "to": "ot_scheduling",
+        "kind": "data",
+        "evidence": "it receives ot.status.updated, which ot_scheduling's calls emitted in the tests",
+        "ordering": true,
+        "forward": false
+      }
+    ],
+    "needed_by": [],
+    "go_live_setup": false,
+    "note": "`forward`: a dependency on a later phase; use the demo data or a scenario (sandbox_scenario) until that screen exists. `ordering: false`: a hand-off or a hint, not a reason to wait."
+  },
+  "definition_of_done": {
+    "points": 36,
+    "items": [
+      {
+        "id": "ep:GET /ot/status-board",
+        "label": "GET /ot/status-board",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ev:ot.status.updated",
+        "label": "ot.status.updated",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "rule:01511e9050",
+        "label": "🟢 Available / 🔴 In-Surgery / 🟡 Cleaning-Prep / ⚠ Emergency hold; no patient names on this board.",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "rule:cc0fcec2de",
+        "label": "Exists for the service surgery (work): show it as GET /establishment views.screens says for screen_id ot_board (full; open_work: without its new work, with the banner \"No new ... from now on\"; records: history and corrections only; setup: only from Facility settings; hidden: in no menu), after login and again on establishment.changed. Never decide it from the profile's category.",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:states",
+        "label": "Loading, empty and error states",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:permissions",
+        "label": "Actions by permission",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:tested",
+        "label": "Test plan passed",
+        "points": 4,
+        "claimed": false
+      },
+      {
+        "id": "q:handbook",
+        "label": "Handbook page",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "points": 4,
+        "claimed": false
+      },
+      {
+        "id": "q:character",
+        "label": "Design principles applied",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "q:editor",
+        "label": "Editor's pass",
+        "points": 2,
+        "claimed": false
+      }
+    ],
+    "rule": "Agents MUST submit propose_progress after implementing this screen and verify it with progress_proposals. Only the developer accepts items on My progress for what this implementation does on the DEV server. No tool awards progress."
+  },
+  "endpoints": [
+    {
+      "endpoint": "GET /ot/status-board",
+      "summary": "Live OT board (🟢 Available / 🔴 In-Surgery / 🟡 Cleaning-Prep)",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "ot.status.view"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of ot.status.view",
+        "roles_allowed": [
+          "admissions_officer",
+          "anaesthetist",
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "ipc_nurse",
+          "ot_admin",
+          "ot_nurse",
+          "owner",
+          "quality_officer",
+          "receptionist",
+          "super_admin",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_TheaterBoardOut__"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      }
+    }
+  ],
+  "realtime": {
+    "topics": [
+      "ot.status.updated",
+      "session.*",
+      "system.*",
+      "notification.created"
+    ],
+    "handlers": [
+      {
+        "event": "ot.status.updated",
+        "priority": "normal",
+        "presentation": null,
+        "emitted_by_operations": [
+          "POST /admissions/code-red",
+          "POST /ot/bookings/{booking_id}/cancel",
+          "POST /ot/bookings/{booking_id}/complete-cleaning",
+          "POST /ot/bookings/{booking_id}/complete-surgery",
+          "POST /ot/bookings/{booking_id}/schedule",
+          "POST /ot/bookings/{booking_id}/start",
+          "POST /ot/theaters/{ot_id}/state"
+        ],
+        "refresh": [
+          "GET /ot/status-board"
+        ]
+      }
+    ],
+    "rule": "Refresh the listed reads when the event arrives (a list without a path id: every time; a detail read: when the payload names the same id). Never poll."
+  },
+  "handoffs": [],
+  "patient_context": null,
+  "value_lists": [
+    {
+      "values": [
+        "Available",
+        "EmergencyHold",
+        "InSurgery",
+        "CleaningPrep",
+        "OutOfService"
+      ],
+      "column": "operating_theaters.current_state",
+      "used_at": "GET /ot/status-board[].current_state",
+      "labels": {
+        "Available": "Available",
+        "EmergencyHold": "Emergency hold",
+        "InSurgery": "In surgery",
+        "CleaningPrep": "Cleaning prep",
+        "OutOfService": "Out of service"
+      }
+    },
+    {
+      "values": [
+        "Requested",
+        "Scheduled",
+        "InProgress",
+        "Cleaning",
+        "Completed",
+        "Cancelled",
+        "EmergencyHold"
+      ],
+      "column": "ot_bookings.status",
+      "used_at": "GET /ot/status-board[].active_status",
+      "labels": {
+        "Requested": "Requested",
+        "Scheduled": "Scheduled",
+        "InProgress": "In progress",
+        "Cleaning": "Cleaning",
+        "Completed": "Completed",
+        "Cancelled": "Cancelled",
+        "EmergencyHold": "Emergency hold"
+      }
+    }
+  ],
+  "states": [
+    {
+      "state": "loading",
+      "why": "every read"
+    },
+    {
+      "state": "error",
+      "why": "every call (show error.code's message)"
+    },
+    {
+      "state": "empty",
+      "why": "a list can be empty: say why and what to do next"
+    },
+    {
+      "state": "forbidden",
+      "why": "actions hidden or disabled by permission (GET /auth/me)"
+    },
+    {
+      "state": "stale / reconnecting",
+      "why": "realtime: show Live / Reconnecting, reload after a truncated replay"
+    }
+  ],
+  "scanner": [],
+  "copy": {
+    "workspace": null,
+    "error_messages": {},
+    "wording_quoted_in_rules": [
+      "No new ... from now on"
+    ],
+    "note": "Server-owned strings only: the error messages (English), the workspace labels (English and Urdu) and the wording the rules quote. The UI's own copy and its Urdu are yours (decision H08)."
+  },
+  "same_component_as": [],
+  "roles": {
+    "full": [
+      "super_admin",
+      "owner",
+      "hospital_admin",
+      "hospital_director",
+      "clinic_director",
+      "receptionist",
+      "admissions_officer",
+      "triage_nurse",
+      "doctor",
+      "clinical_specialist",
+      "surgeon",
+      "ot_admin",
+      "anaesthetist",
+      "ot_nurse",
+      "ward_nurse",
+      "head_nurse",
+      "quality_officer",
+      "ipc_nurse"
+    ],
+    "partial": [],
+    "page_for": [
+      "super_admin",
+      "owner",
+      "hospital_admin",
+      "hospital_director",
+      "clinic_director",
+      "receptionist",
+      "admissions_officer",
+      "triage_nurse",
+      "doctor",
+      "clinical_specialist",
+      "surgeon",
+      "ot_admin",
+      "anaesthetist",
+      "ot_nurse",
+      "ward_nurse",
+      "head_nurse",
+      "quality_officer",
+      "ipc_nurse"
+    ],
+    "note": "page_for: the roles whose GET /meta/handbook lists this screen (its menu entry and F1 page; for a user with that one role, every service Active). A partial role outside page_for only makes some of these calls from screens of its own: never offer it this screen. Build the menu from the logged-in user's GET /meta/handbook."
+  },
+  "test_plan": {
+    "screen": "ot_board",
+    "title": "Live OT status board",
+    "cases": [
+      {
+        "id": "case:GET /ot/status-board",
+        "call": "GET /api/v1/ot/status-board",
+        "summary": "Live OT board (🟢 Available / 🔴 In-Surgery / 🟡 Cleaning-Prep)",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "billing_admin",
+            "cashier",
+            "cssd_technician",
+            "employee_self"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [],
+        "as_one_of": [
+          "admissions_officer",
+          "anaesthetist",
+          "clinic_director",
+          "clinical_specialist",
+          "doctor",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "ipc_nurse",
+          "ot_admin",
+          "ot_nurse",
+          "owner",
+          "quality_officer",
+          "receptionist",
+          "super_admin",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ]
+      }
+    ],
+    "service_cases": [
+      {
+        "view": "full",
+        "set_up": "GET /establishment answers views.screens[screen_id=ot_board].view = full (surgery): stub that answer, or have the DEV server's admin move the service on Facility settings",
+        "expect": "Show it; every action the user's permissions allow."
+      },
+      {
+        "view": "open_work",
+        "set_up": "GET /establishment answers views.screens[screen_id=ot_board].view = open_work (surgery): stub that answer, or have the DEV server's admin move the service on Facility settings",
+        "expect": "The service is Retiring: show it with the banner 'No new <new_work> from now on' and its open work; hide the actions that start new work of it (x-capability-gates; continues_while_retiring ones stay); keep every other action (completing, transferring, settling, correcting)."
+      },
+      {
+        "view": "records",
+        "set_up": "GET /establishment answers views.screens[screen_id=ot_board].view = records (surgery): stub that answer, or have the DEV server's admin move the service on Facility settings",
+        "expect": "The service is Retired (or Preparing after it ran): show it as records only, under a 'Records' marker: lists, details, prints and the corrections the server still accepts; no action that starts new work."
+      },
+      {
+        "view": "hidden",
+        "set_up": "GET /establishment answers views.screens[screen_id=ot_board].view = hidden (surgery): stub that answer, or have the DEV server's admin move the service on Facility settings",
+        "expect": "Not in any menu: the service has never run here, so the screen has nothing to show."
+      }
+    ],
+    "delivery_gate": {
+      "required": true,
+      "status": "required",
+      "progress_reporting": {
+        "required": true,
+        "submit": "propose_progress",
+        "verify": "progress_proposals",
+        "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+      },
+      "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+      "compulsory": [
+        {
+          "id": "q:f1_help",
+          "label": "F1 contextual help",
+          "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+          "points": 2
+        },
+        {
+          "id": "q:role_faq",
+          "label": "Complete role-specific FAQs",
+          "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+          "points": 3
+        },
+        {
+          "id": "q:zoom",
+          "label": "Keyboard zoom: 100-250% only",
+          "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+          "points": 2
+        },
+        {
+          "id": "q:fresh_data",
+          "label": "Human review with newly created data",
+          "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+          "points": 4
+        }
+      ],
+      "zoom": {
+        "min_pct": 100,
+        "max_pct": 250,
+        "reset_pct": 100,
+        "keys": [
+          "Ctrl + or Ctrl = (zoom in)",
+          "Ctrl - (zoom out)",
+          "Ctrl 0 (reset to 100 %)",
+          "Command on macOS"
+        ],
+        "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+      },
+      "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+      "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+    },
+    "handbook_page": "screens/ot_board",
+    "workspace_guide": "get_handbook_outline('*')",
+    "realtime": [
+      {
+        "event": "ot.status.updated",
+        "check": "the screen refreshes without polling"
+      }
+    ],
+    "acceptance_rules": [
+      "🟢 Available / 🔴 In-Surgery / 🟡 Cleaning-Prep / ⚠ Emergency hold; no patient names on this board.",
+      "Exists for the service surgery (work): show it as GET /establishment views.screens says for screen_id ot_board (full; open_work: without its new work, with the banner \"No new ... from now on\"; records: history and corrections only; setup: only from Facility settings; hidden: in no menu), after login and again on establishment.changed. Never decide it from the profile's category."
+    ],
+    "demo_accounts": "demo_accounts() lists a login per role; sandbox_call runs each case on the DEV server"
+  },
+  "handbook": {
+    "page": "screens/ot_board",
+    "screen_id": "ot_board",
+    "title": "Live OT status board",
+    "purpose": "Airport-style board visible from any terminal.",
+    "tasks": [
+      {
+        "id": "ot_board::GET /ot/status-board",
+        "task": "Live OT board (🟢 Available / 🔴 In-Surgery / 🟡 Cleaning-Prep)",
+        "call": "GET /ot/status-board",
+        "is_action": false,
+        "permissions": [
+          "ot.status.view"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      }
+    ],
+    "rules_to_explain": [
+      "🟢 Available / 🔴 In-Surgery / 🟡 Cleaning-Prep / ⚠ Emergency hold; no patient names on this board.",
+      "Exists for the service surgery (work): show it as GET /establishment views.screens says for screen_id ot_board (full; open_work: without its new work, with the banner \"No new ... from now on\"; records: history and corrections only; setup: only from Facility settings; hidden: in no menu), after login and again on establishment.changed. Never decide it from the profile's category."
+    ],
+    "updates_by_itself_on": [
+      "ot.status.updated"
+    ],
+    "errors_the_user_can_meet": [],
+    "sections": [
+      "Purpose and audience",
+      "Step by step (one per task, where to click)",
+      "Every control and its effects",
+      "States and feedback",
+      "Messages, mistakes and recovery",
+      "Language and visual examples",
+      "Related help and delivery"
+    ],
+    "requirement_ids": [
+      "S1",
+      "S2",
+      "S3",
+      "S4",
+      "S5",
+      "S6",
+      "S7"
+    ],
+    "delivery": "F1 and contextual screen Help",
+    "requirements": [
+      {
+        "id": "S1",
+        "title": "Purpose and audience",
+        "instruction": "Explain what this screen accomplishes, when to use it, who uses it and how to open it. State the patient, visit,\nshift or other context the user must verify. Name the expected result in staff language."
+      },
+      {
+        "id": "S2",
+        "title": "Step by step (one per task, where to click)",
+        "instruction": "For every supported task give prerequisites, permissions or approvals, exact navigation and control labels,\nwhat to enter or select, validation, the ordered steps and how to recognize completion. Include demo screenshots,\nprinted output and the next task or handover. Link to the corresponding workspace FAQ answer."
+      },
+      {
+        "id": "S3",
+        "title": "Every control and its effects",
+        "instruction": "Maintain a control inventory covering buttons, fields, selectors, tabs, menus, filters, sorting, scanners, shortcuts,\ndialogs and navigation. For each user-facing control explain its label and purpose, when it is available, required\ninput, immediate effect, whether it saves or only changes the view, any confirmation, and what cancellation does.\nDescribe resulting data/state changes, notifications, printed output and consequences for other staff where relevant.\nInclude controls without API calls. Group repeated controls only when their behaviour is genuinely identical."
+      },
+      {
+        "id": "S4",
+        "title": "States and feedback",
+        "instruction": "Explain loading, no results, pending approval, success, stale data, denied actions and unavailable services. Describe\nautomatic realtime updates and how staff recognize that displayed information has changed. Explain disabled controls\nand how to meet their prerequisites. Document only states and effects the implemented UI and backend support."
+      },
+      {
+        "id": "S5",
+        "title": "Messages, mistakes and recovery",
+        "instruction": "Explain the messages staff can encounter, why an action is refused and the permitted next step. Cover corrections,\nduplicate clicks, a lost reply, concurrent changes, leaving unsaved work, session expiry, lost connection and printer\nor scanner problems where applicable. Say what may have been saved, what to check before retrying and whom to contact.\nNever promise unsupported undo or automatic offline submission. Use staff wording, not API paths or JSON."
+      },
+      {
+        "id": "S6",
+        "title": "Language and visual examples",
+        "instruction": "Supply English and Urdu pages matching the app's labels and reading direction, with legible demo-data screenshots\nfor each task and no real patient information. Keep terminology consistent across UI, FAQs and screenshots. Record\ntranslation review status; a draft must not be represented as approved clinical wording."
+      },
+      {
+        "id": "S7",
+        "title": "Related help and delivery",
+        "instruction": "Link to the role's workspace guide, related tasks and handovers. F1 and contextual Help must open this screen's page.\nVerify offline access, search, deep links, print-friendly output and the server's permission filtering. Update the\npage, control inventory and FAQ links in the same release as the UI; retain the review evidence required by Q6."
+      }
+    ],
+    "workspace_guide": "get_handbook_outline('*')"
+  },
+  "workflows": [
+    {
+      "slug": "operating-theater",
+      "title": "Operating theater",
+      "recipe": "get_workflow_recipe('operating-theater')"
+    }
+  ],
+  "scenarios": [],
+  "decisions": [
+    {
+      "id": "H02",
+      "question": "Digits in the Urdu UI and printouts: Latin 0-9 or Extended Arabic-Indic ۰-۹.",
+      "owner": [
+        "vendor"
+      ],
+      "affects": [
+        "every screen in Urdu"
+      ],
+      "meanwhile": "Latin digits; identifiers, doses and money stay left to right."
+    },
+    {
+      "id": "H03",
+      "question": "How dates and times are shown on screen, and a 12- or 24-hour clock.",
+      "owner": [
+        "vendor",
+        "clinical_lead"
+      ],
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "The server's print format (e.g. 27-Sep-2026) and the hospital time zone."
+    },
+    {
+      "id": "H04",
+      "question": "Money on screen: decimals shown, and digit grouping (1,234,567 or 12,34,567).",
+      "owner": [
+        "vendor"
+      ],
+      "affects": [
+        "every screen with money"
+      ],
+      "meanwhile": "The amounts as the API sends them, with the currency setting."
+    },
+    {
+      "id": "H08",
+      "question": "Who writes and signs off the Urdu text of the UI, above all clinical and consent wording.",
+      "owner": [
+        "vendor",
+        "translator",
+        "clinical_lead"
+      ],
+      "affects": [
+        "every screen in Urdu"
+      ],
+      "meanwhile": "Urdu you add is a draft: mark it so (the interview bank's pattern: a draft until a native speaker reviews it)."
+    },
+    {
+      "id": "H09",
+      "question": "One design system shared by every frontend team (who authors and approves it), or each team's own.",
+      "owner": [
+        "vendor",
+        "frontend_lead"
+      ],
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "Each team designs within the backend's constraints: themes Light and DarkHighContrast, zoom 100-250 %, Noto Nastaliq Urdu, status shown as text and icon, never colour alone. Follow the vendor's design principles (frontend guide 18, get_design_principles)."
+    },
+    {
+      "id": "H10",
+      "question": "How each realtime event is shown (interrupt, attention, inform, silent), alert sounds and which terminals play them. Only Code Red (interrupt), the licence and maintenance banners and the logout on session.revoked are prescribed (the event catalogue's `presentation`).",
+      "owner": [
+        "clinical_lead",
+        "vendor"
+      ],
+      "affects": [
+        "every screen with realtime events"
+      ],
+      "meanwhile": "Code Red interrupts; every other event updates the screen and, at most, a dismissible notice. `priority` is the delivery urgency, not a presentation rule."
+    },
+    {
+      "id": "H12",
+      "question": "Which workspaces run on web, Android and iOS, which cannot read a MAC address, discover the server by UDP or print silently; or are cash and printing Windows-only.",
+      "owner": [
+        "vendor",
+        "backend"
+      ],
+      "affects": [
+        "my_cash_shift",
+        "registration",
+        "every screen that prints"
+      ],
+      "meanwhile": "The guides describe the Windows (Electron) terminal; tell your developer when a screen needs a capability your platform lacks."
+    },
+    {
+      "id": "H18",
+      "question": "Noto Nastaliq Urdu everywhere, or the more compact Naskh in dense tables.",
+      "owner": [
+        "vendor",
+        "frontend_lead"
+      ],
+      "affects": [
+        "every table in Urdu"
+      ],
+      "meanwhile": "Noto Nastaliq Urdu, as the guides require."
+    },
+    {
+      "id": "H19",
+      "question": "Allergies: the patient record keeps free text, so it cannot tell \"no known allergies\" (asserted by a clinician) from \"not recorded\". Should it?",
+      "owner": [
+        "clinical_lead",
+        "backend"
+      ],
+      "affects": [
+        "every screen with a patient banner"
+      ],
+      "meanwhile": "Show the recorded text as recorded; an empty value is \"not recorded\", never \"none\"."
+    },
+    {
+      "id": "H20",
+      "question": "May unsaved form input be kept on the terminal (which fields, encrypted, for how long)?",
+      "owner": [
+        "vendor",
+        "hospital"
+      ],
+      "affects": [
+        "every form"
+      ],
+      "meanwhile": "In memory only; never a second checker's password."
+    },
+    {
+      "id": "H22",
+      "question": "Which documents may print on an unregistered terminal's default printer (sensitive A4 documents).",
+      "owner": [
+        "hospital",
+        "vendor"
+      ],
+      "affects": [
+        "every screen that prints"
+      ],
+      "meanwhile": "As the printing guide says: the hint, then the default printer."
+    },
+    {
+      "id": "H24",
+      "question": "Who approves frontend performance targets, alert thresholds and escalation timers.",
+      "owner": [
+        "vendor",
+        "clinical_lead"
+      ],
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "The server's own settings (e.g. critical_result_communicate_minutes)."
+    }
+  ],
+  "examples": {
+    "GET /ot/status-board": {
+      "request": {
+        "path": "/api/v1/ot/status-board"
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": [
+            {
+              "ot_id": 1,
+              "code": "OT1",
+              "name": "Main OT 1",
+              "theater_type": "General",
+              "current_state": "InSurgery",
+              "state_changed_at": "2026-09-27T17:42:37.433761+00:00",
+              "active_booking_id": 1,
+              "active_procedure": "Appendectomy - Dr Tariq",
+              "active_status": "InProgress",
+              "actual_start": "2026-09-27T17:42:37.433761+00:00",
+              "expected_end": "2026-09-28T10:30:00+00:00",
+              "next_start": null,
+              "next_procedure": null
+            },
+            {
+              "ot_id": 2,
+              "code": "OT2",
+              "name": "Main OT 2",
+              "theater_type": "General",
+              "current_state": "Available",
+              "state_changed_at": "2026-09-27T17:42:37.010318+00:00",
+              "active_booking_id": null,
+              "active_procedure": null,
+              "active_status": null,
+              "actual_start": null,
+              "expected_end": null,
+              "next_start": null,
+              "next_procedure": null
+            }
+          ],
+          "meta": {
+            "server_time": "2026-09-27T17:42:37.447812+00:00"
+          },
+          "request_id": "a1f689db25974a6d842f7679358c93cb"
+        }
+      }
+    }
+  },
+  "schemas": {
+    "Envelope_list_TheaterBoardOut__": {
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/components/schemas/TheaterBoardOut"
+          },
+          "type": "array",
+          "title": "Data"
+        },
+        "meta": {
+          "$ref": "#/components/schemas/Meta"
+        },
+        "request_id": {
+          "type": "string",
+          "title": "Request Id"
+        }
+      },
+      "type": "object",
+      "required": [
+        "data",
+        "meta",
+        "request_id"
+      ],
+      "title": "Envelope[list[TheaterBoardOut]]"
+    },
+    "Meta": {
+      "properties": {
+        "server_time": {
+          "type": "string",
+          "title": "Server Time",
+          "description": "Server clock (UTC). Use it to detect terminal clock skew."
+        },
+        "page": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Page"
+        },
+        "page_size": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Page Size"
+        },
+        "total_count": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Total Count"
+        },
+        "next_cursor": {
+          "title": "Next Cursor"
+        }
+      },
+      "type": "object",
+      "required": [
+        "server_time"
+      ],
+      "title": "Meta"
+    },
+    "TheaterBoardOut": {
+      "properties": {
+        "ot_id": {
+          "type": "integer",
+          "title": "Ot Id"
+        },
+        "code": {
+          "type": "string",
+          "title": "Code"
+        },
+        "name": {
+          "type": "string",
+          "title": "Name"
+        },
+        "theater_type": {
+          "type": "string",
+          "title": "Theater Type"
+        },
+        "current_state": {
+          "type": "string",
+          "enum": [
+            "Available",
+            "EmergencyHold",
+            "InSurgery",
+            "CleaningPrep",
+            "OutOfService"
+          ],
+          "title": "Current State"
+        },
+        "state_changed_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "State Changed At"
+        },
+        "active_booking_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Active Booking Id"
+        },
+        "active_procedure": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Active Procedure",
+          "description": "\"<procedure> - <surgeon>\""
+        },
+        "active_status": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "Requested",
+                "Scheduled",
+                "InProgress",
+                "Cleaning",
+                "Completed",
+                "Cancelled",
+                "EmergencyHold"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Active Status"
+        },
+        "actual_start": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Actual Start"
+        },
+        "expected_end": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Expected End"
+        },
+        "next_start": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Next Start"
+        },
+        "next_procedure": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Next Procedure"
+        }
+      },
+      "type": "object",
+      "required": [
+        "ot_id",
+        "code",
+        "name",
+        "theater_type",
+        "current_state",
+        "state_changed_at",
+        "active_booking_id",
+        "active_procedure",
+        "active_status",
+        "actual_start",
+        "expected_end",
+        "next_start",
+        "next_procedure"
+      ],
+      "title": "TheaterBoardOut",
+      "description": "A theater on the live OT board, with its active case and the next scheduled one."
+    }
+  },
+  "unknowns": [
+    {
+      "what": "decision H02",
+      "owner": [
+        "vendor"
+      ],
+      "question": "Digits in the Urdu UI and printouts: Latin 0-9 or Extended Arabic-Indic ۰-۹.",
+      "affects": [
+        "every screen in Urdu"
+      ],
+      "meanwhile": "Latin digits; identifiers, doses and money stay left to right."
+    },
+    {
+      "what": "decision H03",
+      "owner": [
+        "vendor",
+        "clinical_lead"
+      ],
+      "question": "How dates and times are shown on screen, and a 12- or 24-hour clock.",
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "The server's print format (e.g. 27-Sep-2026) and the hospital time zone."
+    },
+    {
+      "what": "decision H04",
+      "owner": [
+        "vendor"
+      ],
+      "question": "Money on screen: decimals shown, and digit grouping (1,234,567 or 12,34,567).",
+      "affects": [
+        "every screen with money"
+      ],
+      "meanwhile": "The amounts as the API sends them, with the currency setting."
+    },
+    {
+      "what": "decision H08",
+      "owner": [
+        "vendor",
+        "translator",
+        "clinical_lead"
+      ],
+      "question": "Who writes and signs off the Urdu text of the UI, above all clinical and consent wording.",
+      "affects": [
+        "every screen in Urdu"
+      ],
+      "meanwhile": "Urdu you add is a draft: mark it so (the interview bank's pattern: a draft until a native speaker reviews it)."
+    },
+    {
+      "what": "decision H09",
+      "owner": [
+        "vendor",
+        "frontend_lead"
+      ],
+      "question": "One design system shared by every frontend team (who authors and approves it), or each team's own.",
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "Each team designs within the backend's constraints: themes Light and DarkHighContrast, zoom 100-250 %, Noto Nastaliq Urdu, status shown as text and icon, never colour alone. Follow the vendor's design principles (frontend guide 18, get_design_principles)."
+    },
+    {
+      "what": "decision H10",
+      "owner": [
+        "clinical_lead",
+        "vendor"
+      ],
+      "question": "How each realtime event is shown (interrupt, attention, inform, silent), alert sounds and which terminals play them. Only Code Red (interrupt), the licence and maintenance banners and the logout on session.revoked are prescribed (the event catalogue's `presentation`).",
+      "affects": [
+        "every screen with realtime events"
+      ],
+      "meanwhile": "Code Red interrupts; every other event updates the screen and, at most, a dismissible notice. `priority` is the delivery urgency, not a presentation rule."
+    },
+    {
+      "what": "decision H12",
+      "owner": [
+        "vendor",
+        "backend"
+      ],
+      "question": "Which workspaces run on web, Android and iOS, which cannot read a MAC address, discover the server by UDP or print silently; or are cash and printing Windows-only.",
+      "affects": [
+        "my_cash_shift",
+        "registration",
+        "every screen that prints"
+      ],
+      "meanwhile": "The guides describe the Windows (Electron) terminal; tell your developer when a screen needs a capability your platform lacks."
+    },
+    {
+      "what": "decision H18",
+      "owner": [
+        "vendor",
+        "frontend_lead"
+      ],
+      "question": "Noto Nastaliq Urdu everywhere, or the more compact Naskh in dense tables.",
+      "affects": [
+        "every table in Urdu"
+      ],
+      "meanwhile": "Noto Nastaliq Urdu, as the guides require."
+    },
+    {
+      "what": "decision H19",
+      "owner": [
+        "clinical_lead",
+        "backend"
+      ],
+      "question": "Allergies: the patient record keeps free text, so it cannot tell \"no known allergies\" (asserted by a clinician) from \"not recorded\". Should it?",
+      "affects": [
+        "every screen with a patient banner"
+      ],
+      "meanwhile": "Show the recorded text as recorded; an empty value is \"not recorded\", never \"none\"."
+    },
+    {
+      "what": "decision H20",
+      "owner": [
+        "vendor",
+        "hospital"
+      ],
+      "question": "May unsaved form input be kept on the terminal (which fields, encrypted, for how long)?",
+      "affects": [
+        "every form"
+      ],
+      "meanwhile": "In memory only; never a second checker's password."
+    },
+    {
+      "what": "decision H22",
+      "owner": [
+        "hospital",
+        "vendor"
+      ],
+      "question": "Which documents may print on an unregistered terminal's default printer (sensitive A4 documents).",
+      "affects": [
+        "every screen that prints"
+      ],
+      "meanwhile": "As the printing guide says: the hint, then the default printer."
+    },
+    {
+      "what": "decision H24",
+      "owner": [
+        "vendor",
+        "clinical_lead"
+      ],
+      "question": "Who approves frontend performance targets, alert thresholds and escalation timers.",
+      "affects": [
+        "every screen"
+      ],
+      "meanwhile": "The server's own settings (e.g. critical_result_communicate_minutes)."
+    }
+  ]
+}
