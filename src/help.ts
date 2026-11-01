@@ -8254,6 +8254,86 @@ consents_doctor: {
       ]
     ]
   },
+  sterile_packs_ward: {
+    title: "Sterile packs: scan when opened (Ward)",
+    titleUr: "جراثیم سے پاک پیک: استعمال پر اسکین (وارڈ نرسنگ)",
+    purpose: "Point-of-use scanning of sterile instrument packs as they are opened on inpatient wards for bedside procedures, dressings, and catheterization (POST /cssd/packs/use) linked to admission records for statutory MSDS IPC 91 & 92 infection prevention traceability, verification of pack sterility and expiration bounds with expiring-soon warnings (Rule 5eabbbecca), critical CSSD recall response and quarantine procedures (Rule 4357be8acb), and runtime service capability gating from GET /establishment views for screen_id sterile_packs_ward under Rule b531dda372.",
+    purposeUr: "ان ڈور وارڈز میں بیڈ سائیڈ پروسیجرز، ڈریسنگ اور کیتھیٹرائزیشن کے دوران سٹرائل پیکس کا کھولتے وقت بارکوڈ اسکیننگ کے ذریعے اندراج اور مریض کے داخلے سے ربط (قاعدہ d8f4d7af47، ایم ایس ڈی ایس آئی پی سی 91 و 92)، زائد المیعاد یا فیل شدہ پیکس کی سخت ممانعت (قاعدہ 5eabbbecca)، سٹرلائزیشن سائیکل کی واپسی پر فوری قرنطینہ (قاعدہ 4357be8acb) اور قاعدہ b531dda372 کے تحت سی ایس ایس ڈی سروس کی تصدیق۔",
+    steps: [
+      "Select the inpatient from the active ward admissions list or search by patient name, MRN, ward, or bed label.",
+      "Inspect the patient context identity banner verifying Patient Name, MRN, Ward Name, Bed Label, and Admission Number.",
+      "Scan the sterile pack barcode label into the scanner input or enter the pack code manually and click 'Inspect Pack'.",
+      "Inspect the pack details card: Set name & code, sterilization cycle number, cycle status, pack status, and expiry date.",
+      "Check expiration status: If the pack is expiring soon, its expiry date is highlighted in bold red warning text to encourage First-Expired, First-Out (FEFO) usage.",
+      "If the pack is expired, failed, or recalled, the system displays a critical CSSD_PACK_UNUSABLE alert under Rule 5eabbbecca; do NOT use it, set it aside, and send it back to CSSD.",
+      "When verified usable, click 'Record Pack Opened for Ward Inpatient' to call POST /cssd/packs/use and link the pack code to the patient admission.",
+      "Review the Sterile Packs Ledger below to verify that the pack status transitioned to 'Used' and is associated with the patient's MRN.",
+      "If a critical recall alert banner appears (Rule 4357be8acb), click 'Filter Recalled Packs', identify any affected packs on the ward, and quarantine them immediately."
+    ],
+    stepsUr: [
+      "وارڈ کے داخل مریضوں کی فہرست سے مریض منتخب کریں یا نام، ایم آر این، وارڈ یا بیڈ کے ذریعے تلاش کریں۔",
+      "مریض کے شناختی بینر کی تصدیق کریں جس میں نام، ایم آر این، وارڈ کا نام، بیڈ کا لیبل اور داخلہ نمبر ظاہر ہوتا ہے۔",
+      "سٹرائل پیک کے لیبل پر موجود بارکوڈ اسکین کریں یا کوڈ درج کر کے 'پیک کی جانچ' پر کلک کریں۔",
+      "پیک کارڈ کی تفصیلات چیک کریں: سیٹ کا نام اور کوڈ، سٹرلائزیشن سائیکل نمبر، سائیکل کا اسٹیٹس اور ایکسپائری تاریخ۔",
+      "میعاد کی جانچ کریں: اگر پیک کی میعاد ختم ہونے کے قریب ہو تو تاریخ سرخ رنگ میں نمایاں ہو گی، اسے FEFO اصول کے تحت ترجیح دیں۔",
+      "اگر پیک زائد المیعاد، فیل یا منسوخ شدہ ہو تو قاعدہ 5eabbbecca کے تحت CSSD_PACK_UNUSABLE کی وارننگ ظاہر ہو گی، اسے ہرگز استعمال نہ کریں۔",
+      "پیک کے درست ہونے پر 'پیک کا اندراج کریں' پر کلک کریں تاکہ POST /cssd/packs/use کے ذریعے وارڈ داخلہ کے ساتھ پیک کا اندراج ہو جائے۔",
+      "نیچے دی گئی جدول میں تصدیق کریں کہ پیک کی کیفیت 'Used' میں تبدیل ہو گئی ہے اور مریض کے کوائف منسلک ہو چکے ہیں۔",
+      "اگر سٹرلائزیشن لاٹ کی واپسی (Recalled) کا ہنگامی بینر ظاہر ہو تو 'منسوخ شدہ فلٹر' پر کلک کریں اور وارڈ میں موجود پیکس کو فوری قرنطینہ کریں۔"
+    ],
+    faq: [
+      [
+        "Why must sterile packs opened on inpatient wards be scanned to an admission?",
+        "Under MSDS IPC 91 & 92 and statutory Rule d8f4d7af47, scanning the sterile pack label as it is opened for a wound dressing, suture removal, or catheterization binds that specific sterilization batch to the inpatient admission. This provides full traceability if a healthcare-associated infection or autoclave recall occurs."
+      ],
+      [
+        "What should a ward nurse do when CSSD_PACK_UNUSABLE is triggered?",
+        "Under Rule 5eabbbecca, never use an expired, failed, or recalled pack. Place it in the soiled utility / returns area, tag it for return to CSSD, and obtain an available sterile pack from the ward clean utility room."
+      ],
+      [
+        "How does the ward respond to a CSSD cycle recall alert (Rule 4357be8acb)?",
+        "When a cssd.cycle.updated WebSocket event signals a recalled cycle, a high-priority red alert appears with the cycle number. The charge nurse clicks 'Filter Recalled Packs' to inspect ward stock, immediately isolates those packs, and returns them to CSSD."
+      ],
+      [
+        "Can a sterile pack be used on the ward without selecting an admission?",
+        "No. Schema cross-field rules and Rule d8f4d7af47 strictly require an admission_id or booking_id. The UI prevents submission until a patient admission is selected, preventing untraceable pack consumption."
+      ],
+      [
+        "What does an expiring-soon warning mean for ward stock management?",
+        "When a pack is approaching its expiration date (within cssd_expiry_alert_days), its date is highlighted in bold red. Ward nurses must prioritize using near-expiry packs first to minimize stock waste while maintaining clinical safety."
+      ],
+      [
+        "How does runtime service capability gating apply to sterile_packs_ward under Rule b531dda372?",
+        "The screen checks GET /establishment views for screen_id sterile_packs_ward (full, open_work, records, setup, hidden) based on CSSD service readiness, allowing inpatients to use existing stock during retiring mode while restricting new setups when retired."
+      ]
+    ],
+    faqUr: [
+      [
+        "وارڈ میں کھولے جانے والے سٹرائل پیکس کو داخلے سے منسلک کرنا کیوں لازمی ہے؟",
+        "ایم ایس ڈی ایس آئی پی سی 91 و 92 اور قاعدہ d8f4d7af47 کے تحت ڈریسنگ یا کیتھیٹرائزیشن کے دوران سٹرائل پیک کے کھلتے وقت اسکیننگ سے سٹرلائزیشن بیچ اور سائیکل کا مریض کے داخلے سے قطعی ثبوت محفوظ ہو جاتا ہے۔"
+      ],
+      [
+        "وارڈ نرس کو CSSD_PACK_UNUSABLE کی صورت میں کیا کرنا چاہیے؟",
+        "قاعدہ 5eabbbecca کے تحت زائد المیعاد یا فیل شدہ پیک کا استعمال سختی سے ممنوع ہے۔ اسے فوری طور پر یوٹیلٹی ایریا میں رکھیں، سی ایس ایس ڈی واپسی کے لیے ٹیگ کریں اور کلین یوٹیلٹی سے نیا درست پیک حاصل کریں۔"
+      ],
+      [
+        "وارڈ پر سٹرلائزیشن سائیکل کی واپسی (قاعدہ 4357be8acb) پر کیسے عمل ہوتا ہے؟",
+        "ریئل ٹائم میں cssd.cycle.updated کا ریکال الرٹ ملنے پر انچارج نرس 'منسوخ شدہ فلٹر' پر کلک کر کے وارڈ اسٹاک کی جانچ کرتی ہیں اور اس سائیکل کے تمام پیکس کو فوری قرنطینہ کر کے واپس بھیجتی ہیں۔"
+      ],
+      [
+        "کیا وارڈ مریض کے انتخاب کے بغیر سٹرائل پیک استعمال ہو سکتا ہے؟",
+        "ہرگز نہیں۔ قاعدہ d8f4d7af47 کے تحت داخلہ نمبر کے بغیر پیک کا اندراج نہیں کیا جا سکتا تاکہ ہر سٹرائل آئٹم کا مکمل ٹریس ایبل ریکارڈ موجود ہو۔"
+      ],
+      [
+        "وارڈ میں جلد ختم ہونے والی میعاد (expiring_soon) کی وارننگ کا کیا مقصد ہے؟",
+        "جب سٹرائل پیک کی میعاد ختم ہونے کے قریب ہو تو تاریخ سرخ ہو جاتی ہے تاکہ نرسیں پرانے پیکس کو ضائع ہونے سے بچانے کے لیے FEFO اصول کے مطابق پہلے استعمال کریں۔"
+      ],
+      [
+        "قاعدہ b531dda372 کے تحت وارڈ پر سی ایس ایس ڈی سروس کی اہلیت کیسے لاگو ہوتی ہے؟",
+        "اسکرین GET /establishment کے ذریعے سی ایس ایس ڈی سروس کی حالت چیک کرتی ہے تاکہ سروس کی کیفیت (مکمل، اوپن ورک، ریکارڈز، سیٹ اپ، پوشیدہ) کے مطابق ہی اختیارات میسر آئیں۔"
+      ]
+    ]
+  },
   maternity_policy: {
     title: "High-risk pregnancy: our policy",
     titleUr: "ہائی رسک حمل: ہسپتال کی پالیسی",

@@ -20,6 +20,7 @@ export const phase1Screens = [
 const approvalScreens = ["approval_queue", "charity_approvals"];
 // Coverage grows screen by screen; Phase 1 acceptance remains separate.
 export const deliveredHelpScreens = [
+  "sterile_packs_ward",
   "sterile_packs_ot_admin",
   "sterile_packs_ot",
   "ot_intraop",
@@ -134,6 +135,18 @@ const g = (
 // IDs are also attached to the actual controls. The build rejects missing
 // mappings and empty translations instead of treating a page as coverage.
 export const controlGuides: Record<string, ControlGuide> = {
+  // Screen 125: sterile_packs_ward (Sterile packs: scan when opened - Ward Nurse)
+  "sterile_packs_ward.refresh_button": g(["sterile_packs_ward"], ["Refresh sterile packs button", "تازہ کاری بٹن"], ["Refreshes the sterile packs inventory and active inpatients.", "سٹرائل پیکس اور وارڈ مریضوں کی فہرست کو تازہ کرتا ہے۔"]),
+  "sterile_packs_ward.recall_filter": g(["sterile_packs_ward"], ["Filter recalled packs button", "منسوخ شدہ فلٹر"], ["Filters the packs ledger to display recalled items immediately.", "واپس منگوائے گئے پیکس کو فوری فلٹر کرتا ہے۔"]),
+  "sterile_packs_ward.dismiss_alert": g(["sterile_packs_ward"], ["Dismiss alert banner", "اطلاع ختم کریں"], ["Dismisses status or recall alert message banner.", "پیغام یا اطلاع کے بینر کو بند کرتا ہے۔"]),
+  "sterile_packs_ward.admission_search": g(["sterile_packs_ward"], ["Search ward inpatients input", "مریض تلاش کریں"], ["Filters ward inpatients by patient name, MRN, ward, or bed.", "مریض کے نام، ایم آر این یا بیڈ سے وارڈ داخلہ تلاش کرتا ہے۔"]),
+  "sterile_packs_ward.admission_select": g(["sterile_packs_ward"], ["Select ward inpatient button", "مریض منتخب کریں"], ["Selects the active ward admission to link scanned sterile packs (Rule d8f4d7af47).", "وارڈ مریض منتخب کرتا ہے تاکہ سٹرائل پیک اس سے منسلک ہو سکے (قاعدہ d8f4d7af47)۔"]),
+  "sterile_packs_ward.barcode_input": g(["sterile_packs_ward"], ["Pack barcode scanner input", "بارکوڈ ان پٹ"], ["Scans or enters the sterile pack barcode label as it is opened (MSDS IPC 92).", "کھولے جانے والے سٹرائل پیک کا بارکوڈ اسکین یا درج کرتا ہے۔"]),
+  "sterile_packs_ward.lookup_button": g(["sterile_packs_ward"], ["Inspect sterile pack button", "پیک کی جانچ"], ["Looks up pack sterilization and expiry details from GET /cssd/packs/{code}.", "پیک کی سٹرلائزیشن اور ایکسپائری کی تفصیلات جانچتا ہے۔"]),
+  "sterile_packs_ward.clear_pack": g(["sterile_packs_ward"], ["Clear scanned pack button", "پیک صاف کریں"], ["Clears the inspected pack card without recording use.", "جانچے گئے پیک کا کارڈ ہٹاتا ہے۔"]),
+  "sterile_packs_ward.use_button": g(["sterile_packs_ward"], ["Record pack opened button", "پیک کا اندراج کریں"], ["Records pack opened for ward inpatient via POST /cssd/packs/use (Rule d8f4d7af47).", "وارڈ کے مریض کے لیے سٹرائل پیک کے استعمال کا اندراج کرتا ہے۔"]),
+  "sterile_packs_ward.search_input": g(["sterile_packs_ward"], ["Filter packs ledger input", "پیکس تلاش کریں"], ["Filters the sterile packs ledger by code, set name, or patient.", "سٹرائل پیکس کے رجسٹر کو نام یا کوڈ سے فلٹر کرتا ہے۔"]),
+  "sterile_packs_ward.status_filter": g(["sterile_packs_ward"], ["Pack status filter dropdown", "اسٹیٹس فلٹر"], ["Filters packs ledger by lifecycle status (Available, Issued, Used, Recalled).", "پیکس کو کیفیت کی بنیاد پر فلٹر کرتا ہے۔"]),
   // Screen 123: sterile_packs_ot, Screen 124: sterile_packs_ot_admin
   "sterile_packs.refresh_button": g(["sterile_packs_ot", "sterile_packs_ot_admin"], ["Refresh sterile packs button", "تازہ کاری بٹن"], ["Refreshes the sterile packs inventory and active cases.", "سٹرائل پیکس اور سرجیکل کیسز کی فہرست کو تازہ کرتا ہے۔"]),
   "sterile_packs.recall_filter": g(["sterile_packs_ot", "sterile_packs_ot_admin"], ["Filter recalled packs button", "منسوخ شدہ فلٹر"], ["Filters the packs ledger to display recalled items immediately.", "واپس منگوائے گئے پیکس کو فوری فلٹر کرتا ہے۔"]),
