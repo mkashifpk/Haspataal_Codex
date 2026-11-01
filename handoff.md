@@ -1,7 +1,7 @@
 # Haspataal checkpoint
 Last updated: 01 November 2026, Antigravity (Codex pair), Asia/Karachi.
 
-## Active request: Phase 6 Screen 123 `sterile_packs_ot` (Sterile packs: scan when opened - OT Nurse workspace)
+## Active request: Phase 6 Screen 124 `sterile_packs_ot_admin` (Sterile packs: scan when opened - OT Admin workspace)
 Executing the Phase 6 Roadmap ("Theatre and sterile supply") in dependency order along with all tests and MCP progress reporting:
 - Screen 108: **`transfusion_bedside_er`** ("Bedside transfusion observation - ER", Position 108, 74 points) — **COMPLETED** (commit `2803cf0`, Proposal **261** awaiting human review on `/docs -> My progress`). Marks Phase 5 100% complete!
 - Screen 109: **`clinical_privileges`** ("Clinical privileges", Position 109, 55 points) — **COMPLETED** (commit `5ddbd89`, Proposal **262** awaiting human review on `/docs -> My progress`). First screen of Phase 6!
@@ -18,20 +18,56 @@ Executing the Phase 6 Roadmap ("Theatre and sterile supply") in dependency order
 - Screen 120: **`safety_checklist_anaesthesia`** ("Surgical safety checklist - Anaesthesia workspace", Position 120, 79 points, workspace `anaesthesia`) — **COMPLETED** (commit `b1b524e`, Proposal **273** awaiting human review on `/docs -> My progress`).
 - Screen 121: **`ot_consumables_nurse`** ("OT consumables & implants", Position 121, 47 points, workspace `ot_nurse`) — **COMPLETED** (commit `aae6250`, Proposal **274** awaiting human review on `/docs -> My progress`).
 - Screen 122: **`ot_intraop`** ("Intra-op consumables", Position 122, 53 points, workspace `ot_admin`) — **COMPLETED** (commit `efb8527`, Proposal **275** awaiting human review on `/docs -> My progress`).
-- Screen 123: **`sterile_packs_ot`** ("Sterile packs: scan when opened", Position 123, 48 points, workspace `ot_nurse`) — **READY TO IMPLEMENT**.
+- Screen 123: **`sterile_packs_ot`** ("Sterile packs: scan when opened", Position 123, 48 points, workspace `ot_nurse`) — **COMPLETED** (commit `ab7a6d9`, Proposal **276** awaiting human review on `/docs -> My progress`).
+- Screen 124: **`sterile_packs_ot_admin`** ("Sterile packs: scan when opened - OT Admin", Position 124, 48 points, workspace `ot_admin`) — **READY TO IMPLEMENT**.
 
 ---
 
-### Current Implementation: Screen 123 (`sterile_packs_ot`)
-- **Workflow & Standards**: Sterile packs barcode scanning when opened in the operating theatre (MSDS IPC 92): Point-of-use scan (`POST /cssd/packs/use` with `booking_id`), pack detail lookups (`GET /cssd/packs/{pack_code}`), pack list filtering (`GET /cssd/packs`), expired/recalled pack rejection (`CSSD_PACK_UNUSABLE`, Rule 5eabbbecca), realtime recall alert integration on `cssd.cycle.updated` (Rule 4357be8acb: fetch affected packs with `GET /cssd/packs?status=Recalled`), and runtime service capability gating from `GET /establishment` views for `screen_id: "sterile_packs_ot"` under Rule 26e45f89a1; Position 123 (48 points), Workspace `ot_nurse`.
+### Current Implementation: Screen 124 (`sterile_packs_ot_admin`)
+- **Workflow & Standards**: Sterile packs barcode scanning and theatre administrative audit in `ot_admin` (MSDS IPC 92): Point-of-use scan (`POST /cssd/packs/use` with `booking_id`), pack detail lookups (`GET /cssd/packs/{pack_code}`), pack list filtering (`GET /cssd/packs`), expired/recalled pack rejection (`CSSD_PACK_UNUSABLE`, Rule 5eabbbecca), realtime recall alert integration on `cssd.cycle.updated` (Rule 4357be8acb: fetch affected packs with `GET /cssd/packs?status=Recalled`), and runtime service capability gating from `GET /establishment` views for `screen_id: "sterile_packs_ot_admin"` under Rule 0eebdc7ae5; Position 124 (48 points), Workspace `ot_admin`.
 - **Planned Files**:
-  - `contracts/sterile_packs_ot.json`: Saved MCP screen bundle.
-  - `src/generated/sterile_packs_ot.ts`: Generated TypeScript contracts for 3 endpoints.
-  - `src/sterile-packs-policy.ts`: Domain policies, capability view gating (`rule:26e45f89a1`), pack usability validation (`rule:5eabbbecca`), point-of-use linkage (`rule:d8f4d7af47`), recall handling (`rule:4357be8acb`), role permissions, and bilingual error explanations.
-  - `src/screens/SterilePacksOT.tsx`: Point-of-use sterile pack scanner UI, active surgical case selector, scanned packs table, recall alert banner, and manual pack lookup.
-  - `tests/sterile-packs-ot.test.mjs`: Automated unit test suite.
+  - `contracts/sterile_packs_ot_admin.json`: Saved MCP screen bundle.
+  - Reuses `src/generated/sterile_packs_ot.ts` and domain policy `src/sterile-packs-policy.ts`.
+  - Reuses `src/screens/SterilePacksOT.tsx` with screenId prop `"sterile_packs_ot_admin"` or dedicated wrapper.
+  - Unit tests in `tests/sterile-packs-ot-admin.test.mjs`.
   - Wire into `src/App.tsx`, `src/foundation-catalogue.json`, `src/foundation-task-map.json`, `src/foundation-help.ts`, and `src/help.ts`.
-- **Next Concrete Step**: Save contract bundle to `contracts/sterile_packs_ot.json`, generate TypeScript client in `src/generated/sterile_packs_ot.ts`, and implement domain policy with unit tests.
+- **Next Concrete Step**: Save contract bundle to `contracts/sterile_packs_ot_admin.json`, verify rule objects, and wire `sterile_packs_ot_admin` into App and help files.
+
+---
+
+### Completed Screen 123 (`sterile_packs_ot`) Checkpoint
+- **Workflow & Standards**: Sterile packs barcode scanning when opened in the operating theatre (MSDS IPC 92): Point-of-use scan (`POST /cssd/packs/use` with `booking_id`), pack detail lookups (`GET /cssd/packs/{pack_code}`), pack list filtering (`GET /cssd/packs`), expired/recalled pack rejection (`CSSD_PACK_UNUSABLE`, Rule 5eabbbecca), realtime recall alert integration on `cssd.cycle.updated` (Rule 4357be8acb: fetch affected packs with `GET /cssd/packs?status=Recalled`), and runtime service capability gating from `GET /establishment` views for `screen_id: "sterile_packs_ot"` under Rule 26e45f89a1; Position 123 (48 points), Workspace `ot_nurse`.
+- **Contracts**:
+  - `contracts/sterile_packs_ot.json`: Saved real MCP screen bundle (3 endpoints, 1 realtime event, 4 statutory rules, 18 rubric items).
+  - `src/generated/sterile_packs_ot.ts`: Generated TypeScript contracts for all 3 operations and data models.
+- **Domain Policies & Statutory Rules (`src/sterile-packs-policy.ts`)**:
+  - Runtime service capability gating (`rule:26e45f89a1`): evaluates `GET /establishment` views for `sterile_packs_ot` (`full`, `open_work`, `records`, `setup`, `hidden`).
+  - Role permissions: `canUsePack` (`cssd.pack.use`, nursing roles), `canViewPacks` (`cssd.view`, `cssd.operate`, `cssd.manage`, `cssd.pack.use`).
+  - Pack usability validation (`isPackUsable`, `rule:5eabbbecca`): enforces that expired, failed, or recalled packs (or packs from failed/recalled cycles) can never be opened (`CSSD_PACK_UNUSABLE`).
+  - Point-of-use linkage validation (`validatePackUseInput`, `rule:d8f4d7af47`): requires pack code and at least one of `booking_id` or `admission_id`.
+  - Expiry warning check (`isPackExpiringSoon`): displays red warning styling when approaching expiration.
+  - Critical recall event detection (`isCssdRecallEvent`, `rule:4357be8acb`): catches `Recalled` cycle updates.
+  - Bilingual error explanations (`explainSterilePackError`): covers `CSSD_PACK_UNUSABLE`, `REFERENCE_NOT_FOUND`, and `VALIDATION_ERROR`.
+- **UI Architecture (`src/screens/SterilePacksOT.tsx`)**:
+  - Surgical case queue (`listBookings`) with search filter and patient context card.
+  - Patient Context & Identity Banner: Preserves name, MRN, theatre room, primary surgeon, and current operative lifecycle state.
+  - Point-of-Use Pack Scanner (`POST /cssd/packs/use`): Inspects pack sterilization cycle and expiry, displays clear usability status, and blocks unusable packs.
+  - Critical Recall Alert Banner: Displays high-priority warning on cycle recall with one-click filter to isolate affected packs.
+  - Sterile Packs Stock & Usage Ledger: Filterable by status (Available, Issued, Used, Recalled, Expired, Failed) and search.
+- **Help, Handbook & Navigation**:
+  - Wired into `src/App.tsx`, `src/foundation-catalogue.json` (3 tasks), `src/foundation-task-map.json` (3 controls).
+  - Contextual F1 help (`src/foundation-help.ts`): added `sterile_packs_ot` to `deliveredHelpScreens` and all 11 controls mapped.
+  - Authored comprehensive handbook entry (`src/help.ts`) with bilingual title, purpose, 9 operational steps, and 6 role FAQs for `ot_nurse`.
+  - Bundled screenshots: `public/handbook/sterile_packs_ot-en.png` and `sterile_packs_ot-ur.png`.
+- **Verification**:
+  - Automated unit tests: `tests/sterile-packs-ot.test.mjs` (6/6 passing).
+  - Full test suite: `npm test` passed (567/567 passing across all suites).
+  - Help check: `npm run check:help` passed (122 screens, 2855 controls, 1886 groups, 69 FAQ seeds, 30 workspace guides).
+  - TypeScript compiler: `npx tsc --noEmit` passed with 0 errors.
+  - Production build: `npm run build` succeeded (`dist/assets/index-B9x0Cc7Q.js`).
+- **Commit & Proposal**:
+  - Implementation commit: `ab7a6d9`.
+  - Proposal ID: **276** (status: `pending` on `/docs -> My progress`).
 
 ---
 
