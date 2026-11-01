@@ -66,6 +66,7 @@ import { ERVisit } from './screens/ERVisit';
 import { ERVisitDoctor } from './screens/ERVisitDoctor';
 import { MLCCases } from './screens/MLCCases';
 import { MLCCasesDoctor } from './screens/MLCCasesDoctor';
+import { DeathRecord } from './screens/DeathRecord';
 import { CodeRed } from './screens/CodeRed';
 import { TraumaMerge } from './screens/TraumaMerge';
 import { Wristbands } from './screens/Wristbands';
@@ -121,6 +122,7 @@ const labels: Record<string, [string, string, string]> = {
  er_visit_doctor: ["ER visit: triage, stages, departure", "ایمرجنسی وزٹ چارٹ", "📋"],
  mlc_cases: ["Medico-legal cases", "میڈیکو لیگل کیسز", "⚖️"],
  mlc_cases_doctor: ["Medico-legal cases", "میڈیکو لیگل کیسز", "⚖️"],
+ death_record: ["Death record & certificate", "ڈیتھ ریکارڈ اور سرٹیفکیٹ", "📜"],
  blood_sources: ["Licensed blood sources","مجاز بلڈ سنٹرز و ذرائع","🩸"],
  blood_request: ["Request blood","خون کی درخواست","🩸"],
  blood_bank: ["Blood bank","بلڈ بینک","🩸"],
@@ -221,6 +223,7 @@ const frontDeskScreens = new Set([
   'er_visit_doctor',
   'mlc_cases',
   'mlc_cases_doctor',
+  'death_record',
   'consents_ward',
   'consents_doctor',
   'blood_sources',
@@ -909,6 +912,7 @@ export function App() {
   'er_visit_doctor',
   'mlc_cases',
   'mlc_cases_doctor',
+  'death_record',
   'consents_ward',
   'consents_doctor',
   'blood_sources',
@@ -969,7 +973,7 @@ export function App() {
       (id !== "donor_assessment" || ["full","open_work","records","setup"].includes(est?.views.screens.find(v=>v.screen_id===id)?.view || "")) &&
       (id !== "blood_collection" || ["full","open_work","records","setup"].includes(est?.views.screens.find(v=>v.screen_id===id)?.view || "")) &&
       (id !== "blood_center_lab" || ["full","open_work","records","setup"].includes(est?.views.screens.find(v=>v.screen_id===id)?.view || "")) &&
-      (!["mar","verbal_orders_ward","verbal_orders_er","vitals_tracker","patient_education_ward","nursing_assessment","my_beds","doctor_inpatients","cost_estimates_admissions","consents_admissions","wristbands_admissions","wristbands_ward","own_medicines_ward","own_medicines_pharmacy","bed_matrix","pending_admissions","imaging_repeats","imaging_outsourced","critical_results_radiology","radiology_worklist","rx_queue","dispense","order_queries","otc","charity_override","lab_only_walkin","lab_bench","lab_send_outs","lab_verification","critical_results_bench","critical_results_verifier","critical_results_doctor","critical_results_ward","critical_results_er","consents_ward","consents_triage","er_board_doctor","er_visit_doctor","mlc_cases","mlc_cases_doctor"].includes(id) || ["full", "open_work", "records"].includes(est?.views.screens.find(v => v.screen_id === id)?.view || "")),
+      (!["mar","verbal_orders_ward","verbal_orders_er","vitals_tracker","patient_education_ward","nursing_assessment","my_beds","doctor_inpatients","cost_estimates_admissions","consents_admissions","wristbands_admissions","wristbands_ward","own_medicines_ward","own_medicines_pharmacy","bed_matrix","pending_admissions","imaging_repeats","imaging_outsourced","critical_results_radiology","radiology_worklist","rx_queue","dispense","order_queries","otc","charity_override","lab_only_walkin","lab_bench","lab_send_outs","lab_verification","critical_results_bench","critical_results_verifier","critical_results_doctor","critical_results_ward","critical_results_er","consents_ward","consents_triage","er_board_doctor","er_visit_doctor","mlc_cases","mlc_cases_doctor","death_record"].includes(id) || ["full", "open_work", "records"].includes(est?.views.screens.find(v => v.screen_id === id)?.view || "")),
   );
   const view = est?.views.workspaces.find(
     (v) => v.workspace === workspace,
@@ -1371,6 +1375,7 @@ export function App() {
               {screen === 'er_visit_doctor' && est && <ERVisitDoctor key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone} onNavigateScreen={(s) => navigate(s)} onBack={() => navigate('er_board_doctor')} />}
               {screen === 'mlc_cases' && est && <MLCCases key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone} onNavigateScreen={(s) => navigate(s)} onBack={() => navigate('er_board')} />}
               {screen === 'mlc_cases_doctor' && est && <MLCCasesDoctor key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone} onNavigateScreen={(s) => navigate(s)} onBack={() => navigate('er_board_doctor')} />}
+              {screen === 'death_record' && est && <DeathRecord key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone} onNavigateScreen={(s) => navigate(s)} onBack={() => navigate('er_board_doctor')} />}
               {screen === 'code_red' && est && <CodeRed key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone} onNavigateScreen={(s) => navigate(s)} onBack={() => navigate('er_board')} />}
               {screen === 'trauma_merge' && est && <TraumaMerge key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone} onNavigateScreen={(s) => navigate(s)} onBack={() => navigate('er_board')} />}
               {screen === 'wristbands_admissions' && est && <Wristbands key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone}/>}

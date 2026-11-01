@@ -104,6 +104,148 @@ export const help: Record<string, HelpPage> = {
       ]
     ],
   },
+  death_record: {
+    title: "Death record & certificate",
+    titleUr: "ڈیتھ ریکارڈ اور سرٹیفکیٹ",
+    purpose: "Declare and certify patient deaths under WHO International Form of Medical Certificate of Cause of Death standards and Punjab MSDS indicators 106 and 154. Registered PMDC medical officers record the initial declaration immediately upon death (POST /patients/{patient_id}/death), document the direct causal sequence in Part I lines (a) leading directly to death, due to (b), due to (c), and due to (d) with respective onset-to-death intervals and validated ICD codes (GET /icd/codes, GET /icd/browse), identify the underlying cause from the lowest filled line, document Part II contributory conditions, evaluate clinical suggestion chips from active charts, classify the manner of death and external causes for non-natural deaths, verify recent surgical interventions within 4 weeks, capture pregnancy status for females aged 10-54, record perinatal parameters for infant deaths, autosave draft versions (PUT /deaths/{death_id}), permanently lock the certificate upon formal certification (POST /deaths/{death_id}/certify), append factual post-certification corrections with audit justification (POST /deaths/{death_id}/corrections), manage hospital clinical autopsies for non-medico-legal deaths (POST /deaths/{death_id}/autopsy, POST /deaths/{death_id}/autopsy/report, POST /deaths/{death_id}/autopsy/cancel), and generate official A4 certificates for Union Council registration and family bereavement (GET /deaths/{death_id}/print-payload, GET /deaths/{death_id}/pdf; rules 8c2341a2ff, 4a9cf9f9a8, 9e98e4c3ec, 8c96251e09, 0cf8a9f905, 274cc0ed96, 1c932068b1).",
+    purposeUr: "عالمی ادارہ صحت (ڈبلیو ایچ او) کے بین الاقوامی میڈیکل سرٹیفکیٹ فارم اور پنجاب ہیلتھ کیئر کمیشن کے ایم ایس ڈی ایس انڈیکیٹرز 106 اور 154 کے تحت مریض کی وفات کا اندراج اور اسباب کی تصدیق۔ پی ایم ڈی سی سے رجسٹرڈ ڈاکٹرز فوری طور پر وفات کا باضابطہ اعلان کرتے ہیں، حصہ اول کی سطور (الف تا د) میں موت کا فوری اور بنیادی سبب دورانیے اور آئی سی ڈی کوڈز کے ساتھ درج کرتے ہیں، سب سے نچلی سطر سے اصل بنیاد بننے والی بیماری کا تعین کرتے ہیں، حصہ دوم میں دیگر معاون امراض، غیر طبعی اموات میں حادثے یا حملے کے خارجی اسباب، گزشتہ 4 ہفتوں کی سرجری، خواتین کے لیے حالتِ حمل، اور نوزائیدہ بچوں کے پیدائشی کوائف درج کرتے ہیں، ڈرافٹ محفوظ کرتے ہیں، حتمی تصدیق کے بعد ریکارڈ لاک کرتے ہیں، تصحیح کی صورت میں ٹھوس وجہ کے ساتھ ترمیمی اندراج کرتے ہیں، غیر قانونی اموات میں طبی پوسٹ مارٹم کی نگرانی کرتے ہیں، اور یونین کونسل کے قانونی اندراج کے لیے سرکاری اے 4 سرٹیفکیٹ جاری کرتے ہیں۔",
+    steps: [
+      "1. Access Death Register: Navigate to 'Death record & certificate' from the Doctor workspace or clinical tools menu. Inspect the central death register for active draft certificates, finalized records, and setting breakdowns.",
+      "2. Record Initial Death Declaration: Click 'Record Death' to open the declaration modal. Enter the patient MRN/ID, verified death timestamp, clinical setting (Inpatient, Emergency, Outpatient, Brought Dead), arrival time if brought dead, expected/unexpected indicator, and immediate terminal event. Submit via POST /patients/{patient_id}/death.",
+      "3. Construct WHO Part I Causal Chain: In the certificate editor, document line (a) immediate disease leading directly to death with its interval. If antecedent conditions exist, document line (b) due to, (c) due to, and (d) due to. The system automatically designates the lowest completed line as the underlying cause.",
+      "4. Select ICD Diagnostic Codes & Suggestions: Use 'Pick ICD Code' on any line to browse or search active ICD-10/11 terminology. Review clinical condition chips surfaced from recent patient charts; click chips to populate cause lines without manual retyping.",
+      "5. Document Part II & Contextual Attributes: Enter other significant conditions in Part II. Select the manner of death. For violent or accidental deaths, complete external cause description, place of occurrence, and date. Note any surgery within 4 weeks, pregnancy status for females aged 10-54, and perinatal birth metrics for infant mortalities under 1 year.",
+      "6. Save Draft Certificate: Click 'Save Draft' to persist current entries via versioned PUT /deaths/{death_id}. Draft certificates remain editable across clinical shifts while pending laboratory, histology, or senior review.",
+      "7. Certify Cause of Death: Verify that all mandatory fields are complete. Click 'Certify Cause of Death' to transmit POST /deaths/{death_id}/certify. Certification permanently locks the certificate against direct modifications and stamps the certifier's PMDC credentials.",
+      "8. Append Correction or Print A4 Certificate: For post-certification amendments, click 'Add Correction' to append factual additions with required clinical justification (POST /deaths/{death_id}/corrections). Click 'Print Certificate (A4)' to fetch the official print payload (GET /deaths/{death_id}/print-payload) formatted for the family and Union Council registration.",
+    ],
+    stepsUr: [
+      "1. ڈیتھ رجسٹر کھولیں: ڈاکٹر ورک اسپیس یا کلینیکل مینو سے 'ڈیتھ ریکارڈ اور سرٹیفکیٹ' اسکرین پر جائیں۔ رجسٹر میں تمام اموات کی فہرست، ڈرافٹ اور تصدیق شدہ سرٹیفکیٹس کی حالت دیکھیں۔",
+      "2. وفات کا ابتدائی اعلان درج کریں: 'وفات درج کریں' بٹن پر کلک کریں۔ مریض کا شناختی نمبر، وقتِ وفات، وفات کا شعبہ (ان ڈور، ایمرجنسی، او پی ڈی، مردہ لایا گیا)، متوقع/غیر متوقع کی تفصیل درج کر کے بیک اینڈ پر محفوظ کریں۔",
+      "3. ڈبلیو ایچ او حصہ اول کے اسباب درج کریں: سرٹیفکیٹ ایڈیٹر میں سطر (الف) پر موت کا فوری سبب اور دورانیہ درج کریں۔ اگر پس پردہ دیگر بیماریاں ہوں تو سطر (ب)، (ج) اور (د) میں درج کریں۔ سب سے نچلی پر کی گئی سطر کو خودکار طور پر اصل بنیادی سبب قرار دیا جائے گا۔",
+      "4. آئی سی ڈی کوڈز اور تجویز کردہ تشخیصی چپس: ہر سطر پر 'آئی سی ڈی کوڈ منتخب کریں' سے کوڈ براؤز کریں۔ مریض کے حالیہ کلینیکل چارٹ سے موصول شدہ تشخیصی چپس پر کلک کر کے متعلقہ سطر میں منتقل کریں۔",
+      "5. حصہ دوم اور اضافی کوائف درج کریں: حصہ دوم میں دیگر معاون امراض لکھیں۔ طریقۂ وفات منتخب کریں۔ غیر قدرتی اموات میں خارجی اسباب، مقام اور تاریخ درج کریں۔ گزشتہ 4 ہفتوں کی سرجری، خواتین میں حالتِ حمل اور بچوں کے پیدائشی کوائف مکمل کریں۔",
+      "6. سرٹیفکیٹ ڈرافٹ محفوظ کریں: 'ڈرافٹ محفوظ کریں' پر کلک کر کے اب تک کا کام محفوظ کریں تاکہ اگلی شفٹ کا ڈاکٹر یا ٹیسٹ نتائج آنے پر مزید اندراج کیا جا سکے۔",
+      "7. وفات کے اسباب کی حتمی تصدیق کریں: تمام ضروری خانے چیک کرنے کے بعد 'سرٹیفکیٹ کی حتمی تصدیق' پر کلک کریں۔ اس سے سرٹیفکیٹ مستقل لاک ہو جائے گا اور ڈاکٹر کی پی ایم ڈی سی رجسٹریشن ثبت ہو جائے گی۔",
+      "8. تصحیح کا اندراج یا اے 4 پرنٹ: تصدیق کے بعد کسی بھی ترمیم کے لیے 'تصحیح درج کریں' سے ٹھوس وجہ کے ساتھ نیا اندراج کریں۔ یونین کونسل کے باضابطہ اندراج اور لواحقین کے لیے 'سرٹیفکیٹ پرنٹ کریں' پر کلک کر کے اے 4 سرکاری دستاویز پرنٹ کریں۔",
+    ],
+    faq: [
+      [
+        "The Death record screen says \"Only a doctor registered with the PMDC can record or certify a death.\" (DEATH_CERTIFIER_NOT_DOCTOR). Why, and what do I do?",
+        "Under statutory healthcare regulations and rule 8c2341a2ff, recording a death and certifying the cause of death are restricted to licensed medical practitioners registered with the Pakistan Medical & Dental Council (PMDC) holding the 'doctor', 'clinical_specialist', 'surgeon', or 'anaesthetist' role. Nursing and administrative staff cannot sign death certificates. Log in with authorized medical officer credentials to complete the certification."
+      ],
+      [
+        "The Death record screen says \"The patient's death is already recorded.\" (PATIENT_ALREADY_DECEASED). Why, and what do I do?",
+        "This error occurs if another clinical user or emergency ward has already submitted the initial death declaration for this patient record. A patient cannot be declared deceased more than once. The client automatically refreshes the death register; locate the patient's existing death record in the table to view or continue editing the cause of death certificate."
+      ],
+      [
+        "The Death record screen says \"The time of death cannot be in the future.\" (DEATH_TIME_INVALID). Why, and what do I do?",
+        "Under clinical validation rules, the documented time of death cannot exceed the current hospital system clock, nor can it precede the patient's recorded hospital admission or birth date. Verify the clock on your terminal and adjust the timestamp to reflect the exact verified clinical moment of death."
+      ],
+      [
+        "The Death record screen says \"The patient is admitted: the death is an inpatient death.\" (DEATH_SETTING_INVALID). Why, and what do I do?",
+        "If the patient currently has an active, un-discharged inpatient ward admission, the system mandates selecting 'Inpatient' as the death setting. Selecting 'Outpatient' or 'Brought Dead' for an admitted patient is prohibited. Ensure 'Inpatient' is chosen, or review the patient's admission status."
+      ],
+      [
+        "The Death record screen says \"An inpatient death is recorded on the patient's current admission.\" (DEATH_ADMISSION_NOT_ACTIVE). Why, and what do I do?",
+        "An inpatient death must correlate directly to an active hospital admission. If the admission has already been marked discharged, transferred, or cancelled by another terminal, this refusal is triggered. Reload the patient chart to confirm the current admission status before submitting."
+      ],
+      [
+        "The Death record screen says \"This patient record was merged; use the master record.\" (PATIENT_MERGED_CANNOT_TRANSACT). Why, and what do I do?",
+        "When two duplicate medical records are merged, transactions on the secondary merged record are permanently blocked. Use the master MRN identified in the merge notification to record the death declaration and cause-of-death certificate."
+      ],
+      [
+        "The Death record screen says \"The death record is certified: it cannot be modified.\" (DEATH_RECORD_FINAL). Why, and what do I do?",
+        "Under WHO legal certification guidelines and rule 8c96251e09, a certified death certificate is legally binding and permanently locked against direct editing. To add or adjust factual information (such as post-mortem biopsy results or corrected intervals), click 'Add Correction' to append an audited post-certification correction record (POST /deaths/{id}/corrections) with mandatory factual justification."
+      ],
+      [
+        "The Death record screen says \"Complete the required fields before certifying: details.missing lists what is missing.\" (DEATH_CERTIFICATE_INCOMPLETE). Why, and what do I do?",
+        "Certification requires a complete WHO cause-of-death declaration. The server checks that: (1) line (a) immediate cause is documented, (2) intervals are supplied for each populated cause line, (3) valid ICD codes are selected, (4) manner of death is specified, (5) external causes are detailed if manner is non-natural, and (6) pregnancy questions are answered if the patient is a female aged 10-54. Review the highlighted missing items in the alert banner, complete them, and click 'Certify' again."
+      ],
+      [
+        "The Death record screen says \"The death record must be certified before this action.\" (DEATH_RECORD_NOT_CERTIFIED). Why, and what do I do?",
+        "Official legal documents and certain formal notifications (such as appending a post-certification correction or Union Council vital statistics reporting) require an officially certified death record. Review the draft certificate, resolve any missing fields, and click 'Certify Cause of Death' before attempting this action."
+      ],
+      [
+        "The Death record screen says \"A medico-legal death is not eligible for a clinical autopsy.\" (AUTOPSY_MEDICO_LEGAL). Why, and what do I do?",
+        "Under statutory law and rule 0cf8a9f905, any death flagged as a medico-legal case (carrying death.mlc_number or an open MLC file) falls under the exclusive jurisdiction of the state police and government forensic medico-legal officers. Hospital clinical autopsies (MSDS 154) are strictly prohibited for medico-legal cases. Forensic post-mortems must be ordered by the police and conducted by a government forensic examiner."
+      ],
+      [
+        "The Death record screen says \"An autopsy request already exists for this death.\" (AUTOPSY_EXISTS). Why, and what do I do?",
+        "Only one clinical autopsy procedure can be requested per deceased patient. If an autopsy request has already been logged, you cannot submit a second request. Open the existing autopsy requisition from the case actions drawer to review its status or record the pathologist's correlation report."
+      ],
+      [
+        "The Death record screen says \"The autopsy cannot move to that status.\" (AUTOPSY_TRANSITION_INVALID). Why, and what do I do?",
+        "Autopsy workflow follows a strict state progression: Requested -> Completed (with report) or Cancelled. You cannot cancel an autopsy that has already been completed, nor report findings on a cancelled requisition. Check the current autopsy status and refresh data before proceeding."
+      ],
+      [
+        "How does the WHO cause of death underlying cause rule work on this screen?",
+        "Under WHO international standards (rule 4a9cf9f9a8), Part I represents the causal sequence. Line (a) is the immediate disease directly causing death. Lines (b), (c), and (d) represent antecedent underlying conditions leading up to line (a). The system automatically evaluates the lowest completed line in Part I and designates it as the 'Underlying Cause of Death', which is highlighted with a green badge and transmitted for vital statistics reporting."
+      ],
+      [
+        "How should the doctor use the suggested condition chips from recent charts?",
+        "Under rule 9e98e4c3ec, the system surfaces active conditions from recent inpatient or emergency encounters as clickable suggestion chips. To maintain doctor clinical ownership, lines are never silently auto-populated. The physician reviews the chips and clicks on a suggestion to assign it to line a, b, c, d, or Part II, then verifies the duration and ICD code."
+      ]
+    ],
+    faqUr: [
+      [
+        "اسکرین کہتی ہے کہ 'صرف پی ایم ڈی سی رجسٹرڈ ڈاکٹر ہی وفات کا اندراج یا تصدیق کر سکتا ہے' (DEATH_CERTIFIER_NOT_DOCTOR)۔ کیا کریں؟",
+        "طبی و قانونی ضوابط اور رول 8c2341a2ff کے تحت ڈیتھ سرٹیفکیٹ جاری کرنا صرف پاکستان میڈیکل اینڈ ڈینٹل کونسل (پی ایم ڈی سی) سے رجسٹرڈ ڈاکٹر، اسپیشلسٹ، سرجن یا اینستھیٹسٹ کا قانونی اختیار ہے۔ نرسنگ یا انتظامی عملہ سرٹیفکیٹ کی تصدیق نہیں کر سکتا۔ مجاز ڈاکٹر کے اکاؤنٹ سے لاگ ان ہو کر تصدیق مکمل کریں۔"
+      ],
+      [
+        "اسکرین کہتی ہے کہ 'مریض کی وفات پہلے سے درج ہے' (PATIENT_ALREADY_DECEASED)۔ اس کا کیا مطلب ہے اور کیا کریں؟",
+        "اگر ہسپتال کے کسی دوسرے وارڈ یا ڈاکٹر نے اس مریض کی وفات کا ابتدائی اندراج پہلے ہی جمع کرا دیا ہو تو دوبارہ اندراج کی اجازت نہیں ہوتی۔ سسٹم خودکار طور پر ڈیتھ رجسٹر تازہ کر دیتا ہے؛ رجسٹر میں مریض کا ڈیتھ ریکارڈ تلاش کریں اور سرٹیفکیٹ کا جائزہ لیں۔"
+      ],
+      [
+        "اسکرین کہتی ہے کہ 'وقتِ وفات مستقبل کا نہیں ہو سکتا' (DEATH_TIME_INVALID)۔ کیا کریں؟",
+        "طبی تصدیق کے اصولوں کے مطابق وفات کا وقت ہسپتال کی گھڑی کے موجودہ وقت سے آگے نہیں ہو سکتا، اور نہ ہی مریض کے داخلے یا پیدائش سے پہلے کا ہو سکتا ہے۔ اپنے کمپیوٹر کا وقت چیک کریں اور وفات کا درست وقت منتخب کریں۔"
+      ],
+      [
+        "اسکرین کہتی ہے کہ 'مریض داخل ہے: وفات کا شعبہ ان ڈور ہونا لازمی ہے' (DEATH_SETTING_INVALID)۔ کیا کریں؟",
+        "اگر مریض پہلے سے کسی ان ڈور وارڈ میں باضابطہ داخل ہو تو وفات کا شعبہ لازمی طور پر 'Inpatient' منتخب کیا جانا چاہیے۔ داخل مریض کے لیے او پی ڈی یا مردہ لایا گیا منتخب کرنے پر یہ خرابی آتی ہے۔ شعبہ ان ڈور درست کریں۔"
+      ],
+      [
+        "اسکرین کہتی ہے کہ 'ان ڈور وفات مریض کے موجودہ داخلے پر درج کی جاتی ہے' (DEATH_ADMISSION_NOT_ACTIVE)۔ کیا کریں؟",
+        "ان ڈور وفات کا تعلق مریض کے فعال ہسپتال داخلے سے ہوتا ہے۔ اگر داخلہ پہلے ہی خارج، منتقل یا منسوخ ہو چکا ہو تو یہ ایرر آتا ہے۔ مریض کے داخلے کا اسٹیٹس چیک کریں۔"
+      ],
+      [
+        "اسکرین کہتی ہے کہ 'یہ مریض ریکارڈ ضم ہو چکا ہے؛ ماسٹر ریکارڈ استعمال کریں' (PATIENT_MERGED_CANNOT_TRANSACT)۔ کیا کریں؟",
+        "جب دو مریضوں کی فائلیں آپس میں ضم کر دی جائیں تو پرانے غیر فعال ریکارڈ پر کوئی کارروائی نہیں ہو سکتی۔ نوٹیفکیشن میں دیا گیا بنیادی (ماسٹر) ایم آر این استعمال کر کے وفات کا اندراج کریں۔"
+      ],
+      [
+        "اسکرین کہتی ہے کہ 'ڈیتھ ریکارڈ حتمی تصدیق شدہ ہے: اس میں ترمیم نہیں ہو سکتی' (DEATH_RECORD_FINAL)۔ کیا کریں؟",
+        "ڈبلیو ایچ او اور قانونی ضوابط (رول 8c96251e09) کے تحت تصدیق شدہ ڈیتھ سرٹیفکیٹ میں براہ راست تبدیلی ممنوع ہے۔ اگر کوئی نئی طبی معلومات یا بائیوپسی رپورٹ شامل کرنی ہو تو 'تصحیح درج کریں' پر کلک کریں اور قانونی وجہ کے ساتھ وضاحتی تصحیح منسلک کریں۔"
+      ],
+      [
+        "اسکرین کہتی ہے کہ 'تصدیق سے پہلے ضروری خانے پر کریں' (DEATH_CERTIFICATE_INCOMPLETE)۔ کیا کریں؟",
+        "سرٹیفکیٹ کی تصدیق کے لیے ضروری ہے کہ سطر (الف) پر موت کا فوری سبب لکھا ہو، ہر سطر کا دورانیہ اور آئی سی ڈی کوڈ موجود ہو، طریقۂ وفات منتخب ہو، اور 10 تا 54 سالہ خواتین کے لیے حالتِ حمل درج ہو۔ الرٹ بینر میں دی گئی نامکمل معلومات کو مکمل کر کے دوبارہ تصدیق کریں۔"
+      ],
+      [
+        "اسکرین کہتی ہے کہ 'اس کارروائی سے پہلے ڈیتھ ریکارڈ کی تصدیق لازمی ہے' (DEATH_RECORD_NOT_CERTIFIED)۔ کیا کریں؟",
+        "تصحیح کے اندراج یا یونین کونسل کے لیے حتمی رپورٹ کے لیے ضروری ہے کہ سرٹیفکیٹ ڈرافٹ نہ ہو بلکہ باضابطہ تصدیق شدہ ہو۔ پہلے سرٹیفکیٹ کی حتمی تصدیق کریں پھر یہ عمل انجام دیں۔"
+      ],
+      [
+        "اسکرین کہتی ہے کہ 'میڈیکو لیگل کیس میں ہسپتال کا طبی پوسٹ مارٹم نہیں ہو سکتا' (AUTOPSY_MEDICO_LEGAL)۔ کیا کریں؟",
+        "قانونی ضوابط اور رول 0cf8a9f905 کے تحت جو وفات میڈیکو لیگل کیس (ایم ایل سی) کے تحت ہو، اس کا پوسٹ مارٹم صرف پولیس کی درخواست پر سرکاری فرانزک میڈیکل آفیسر ہی کر سکتا ہے۔ ہسپتال کے اندرونی طبی پوسٹ مارٹم (MSDS 154) کی ایم ایل سی کیسز میں سختی سے ممانعت ہے۔"
+      ],
+      [
+        "اسکرین کہتی ہے کہ 'اس وفات کے لیے پوسٹ مارٹم کی درخواست پہلے سے موجود ہے' (AUTOPSY_EXISTS)۔ کیا کریں؟",
+        "ایک وفات کے لیے صرف ایک بار طبی پوسٹ مارٹم کی درخواست دی جا سکتی ہے۔ کیس کی تفصیلات میں موجود پہلے سے درج شدہ درخواست پر رپورٹ درج کریں یا ضرورت نہ ہونے پر منسوخ کریں۔"
+      ],
+      [
+        "اسکرین کہتی ہے کہ 'پوسٹ مارٹم کو اس کیفیت میں منتقل نہیں کیا جا سکتا' (AUTOPSY_TRANSITION_INVALID)۔ کیا کریں؟",
+        "پوسٹ مارٹم کی درخواست صرف 'مکمل' یا 'منسوخ' ہو سکتی ہے۔ جو پوسٹ مارٹم پہلے مکمل ہو چکا ہو اسے منسوخ نہیں کیا جا سکتا۔ ڈیٹا ریفریش کر کے دوبارہ دیکھیں۔"
+      ],
+      [
+        "ڈبلیو ایچ او کے مطابق اصل بنیادی سببِ وفات کا تعین کیسے ہوتا ہے؟",
+        "ڈبلیو ایچ او کے طریقہ کار (رول 4a9cf9f9a8) کے مطابق حصہ اول میں بیماریوں کا سلسلہ وار تعلق لکھا جاتا ہے۔ سطر (الف) فوری سبب ہوتا ہے جبکہ سطر (ب)، (ج) اور (د) اس کی اندرونی وجوہات ہوتی ہیں۔ حصہ اول میں لکھی گئی سب سے نچلی سطر کو سسٹم خودکار طور پر اصل بنیادی سبب (Underlying Cause) قرار دیتا ہے اور گرین بیج سے نمایاں کرتا ہے۔"
+      ],
+      [
+        "پچھلے چارٹس سے ملنے والی تشخیصی چپس کو کیسے استعمال کیا جائے؟",
+        "رول 9e98e4c3ec کے تحت سسٹم مریض کے پچھلے داخلوں کی تشخیصات کو چپس کی صورت میں ظاہر کرتا ہے۔ ڈاکٹر کی کلینیکل توثیق یقینی بنانے کے لیے سسٹم خودکار طور پر کوئی سطر پر نہیں کرتا۔ معالج متعلقہ چپ پر کلک کر کے اسے سطر الف، ب، ج، د یا حصہ دوم میں شامل کرتا ہے۔"
+      ]
+    ]
+  },
   mlc_cases_doctor: {
     title: "Medico-legal cases",
     titleUr: "میڈیکو لیگل کیسز",

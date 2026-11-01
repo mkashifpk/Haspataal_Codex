@@ -254,6 +254,7 @@ export function checkHelp({
       "CodeRed",
       "TraumaMerge",
       "MLCCases",
+      "DeathRecord",
     ].map((n) => `src/screens/${n}.tsx`),
   ];
   const used = new Set(),
