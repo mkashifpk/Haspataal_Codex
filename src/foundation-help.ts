@@ -20,6 +20,7 @@ export const phase1Screens = [
 const approvalScreens = ["approval_queue", "charity_approvals"];
 // Coverage grows screen by screen; Phase 1 acceptance remains separate.
 export const deliveredHelpScreens = [
+  "ot_scheduling",
   "cssd_stock",
   "cssd_board",
   "cssd_setup",
@@ -123,6 +124,39 @@ const g = (
 // IDs are also attached to the actual controls. The build rejects missing
 // mappings and empty translations instead of treating a page as coverage.
 export const controlGuides: Record<string, ControlGuide> = {
+  // Screen 114: ot_scheduling (Operating theatre request queue & calendar)
+  "ot_scheduling.dismiss_alert_button": g(["ot_scheduling"], ["Dismiss alert button", "انتباہ خارج کریں بٹن"], ["Dismisses the current error or status notification banner.", "موجودہ انتباہ یا نوٹیفکیشن بینر کو بند کرتا ہے۔"]),
+  "ot_scheduling.back_button": g(["ot_scheduling"], ["Back button", "واپسی کا بٹن"], ["Navigates back to the operating theatre operations board.", "آپریشن تھیٹر کے مرکزی بورڈ پر واپس جاتا ہے۔"]),
+  "ot_scheduling.tab_calendar": g(["ot_scheduling"], ["Schedule calendar tab", "شیڈول کیلنڈر ٹیب"], ["Switches to the surgical schedule calendar and room timeline view.", "سرجیکل شیڈول کیلنڈر اور تھیٹر کے اوقات پر منتقل ہوتا ہے۔"]),
+  "ot_scheduling.tab_queue": g(["ot_scheduling"], ["Unscheduled queue tab", "انتظار کی فہرست ٹیب"], ["Switches to the unscheduled surgical requests waiting queue.", "سرجری کی موصولہ درخواستوں کی انتظار کی فہرست پر منتقل ہوتا ہے۔"]),
+  "ot_scheduling.tab_bookings": g(["ot_scheduling"], ["All bookings tab", "تمام بکنگز ٹیب"], ["Switches to comprehensive surgical bookings log and filter view.", "تمام جراحی بکنگز کی فہرست اور فلٹرز پر منتقل ہوتا ہے۔"]),
+  "ot_scheduling.tab_theaters": g(["ot_scheduling"], ["Theatres & readiness tab", "تھیٹرز کی حالت ٹیب"], ["Switches to the operating theatre suites and readiness status view.", "آپریشن تھیٹرز کی تیاری اور سروس کی حالت پر منتقل ہوتا ہے۔"]),
+  "ot_scheduling.refresh_button": g(["ot_scheduling"], ["Refresh scheduling data button", "ریفریش بٹن"], ["Reloads theatre schedule calendar, waiting queue, and theatre states.", "تھیٹر کا شیڈول، ویٹنگ لسٹ اور تیاری کی حالت دوبارہ لوڈ کرتا ہے۔"]),
+  "ot_scheduling.new_booking_button": g(["ot_scheduling"], ["Request OT slot button", "نئی بکنگ کی درخواست بٹن"], ["Opens modal dialog to request new surgical booking slot (POST /ot/bookings).", "نئی سرجری بکنگ کی درخواست کے لیے ڈائیلاگ کھولتا ہے۔"]),
+  "ot_scheduling.filter_date_input": g(["ot_scheduling"], ["Calendar date filter", "تاریخ فلٹر ان پٹ"], ["Filters calendar timeline to show surgical procedures for selected date.", "منتخب تاریخ کے مطابق سرجری کیلنڈر دکھاتا ہے۔"]),
+  "ot_scheduling.filter_theater_select": g(["ot_scheduling"], ["Filter theatre dropdown", "تھیٹر فلٹر ڈراپ ڈاؤن"], ["Filters calendar blocks to display bookings for selected operating theatre suite.", "منتخب تھیٹر کے مطابق شیڈول کو فلٹر کرتا ہے۔"]),
+  "ot_scheduling.filter_status_select": g(["ot_scheduling"], ["Filter status dropdown", "سٹیٹس فلٹر ڈراپ ڈاؤن"], ["Filters bookings table by lifecycle status.", "بکنگ کی حالت کے مطابق فہرست کو فلٹر کرتا ہے۔"]),
+  "ot_scheduling.toggle_mine_only": g(["ot_scheduling"], ["My bookings only toggle", "میری بکنگز چیک باکس"], ["Filters list to show only surgical procedures requested by current surgeon.", "صرف موجودہ سرجن کی درخواست کردہ سرجریز دکھاتا ہے۔"]),
+  "ot_scheduling.patient_id_input": g(["ot_scheduling"], ["Patient ID input", "مریض کا نمبر ان پٹ"], ["Enter hospital patient identifier for surgical procedure booking.", "سرجری کے لیے مریض کا شناختی نمبر درج کریں۔"]),
+  "ot_scheduling.procedure_name_input": g(["ot_scheduling"], ["Procedure name input", "طریقہ کار کا نام ان پٹ"], ["Name of surgical procedure to be scheduled.", "شیڈول کی جانے والی سرجری یا طریقہ کار کا نام۔"]),
+  "ot_scheduling.booking_type_select": g(["ot_scheduling"], ["Booking type dropdown", "نوعیت ڈراپ ڈاؤن"], ["Selects booking urgency: Scheduled, Emergency, or CodeRed.", "سرجری کی نوعیت کا انتخاب کرتا ہے: الیکٹیو، ایمرجنسی، یا کوڈ ریڈ۔"]),
+  "ot_scheduling.emergency_reason_input": g(["ot_scheduling"], ["Emergency justification input", "ہنگامی وجہ ان پٹ"], ["Clinical justification required for emergency or code red surgical bookings.", "ہنگامی یا کوڈ ریڈ سرجری کے لیے لازمی کلینیکل جواز۔"]),
+  "ot_scheduling.anesthesia_select": g(["ot_scheduling"], ["Anaesthesia type dropdown", "اینستھیزیا ڈراپ ڈاؤن"], ["Selects required anaesthesia method (General, Spinal, Epidural, Regional, Local, Sedation).", "مطلوبہ اینستھیزیا کی قسم کا انتخاب کرتا ہے۔"]),
+  "ot_scheduling.preferred_start_input": g(["ot_scheduling"], ["Preferred start time input", "مطلوبہ وقت ان پٹ"], ["Requested preferred surgical start datetime.", "سرجن کی طرف سے تجویز کردہ سرجری کا ابتدائی وقت۔"]),
+  "ot_scheduling.confirm_booking_button": g(["ot_scheduling"], ["Submit booking request button", "درخواست جمع کریں بٹن"], ["Submits surgical slot request via POST /ot/bookings (Rule ae87186675).", "سرجری بکنگ کی درخواست باضابطہ جمع کرتا ہے۔"]),
+  "ot_scheduling.schedule_booking_button": g(["ot_scheduling"], ["Schedule booking button", "شیڈول کریں بٹن"], ["Opens theatre slot assignment modal for waiting surgical booking.", "منتخب بکنگ کو تھیٹر اور وقت الاٹ کرنے کا ماڈل کھولتا ہے۔"]),
+  "ot_scheduling.slot_theater_select": g(["ot_scheduling"], ["Assign theatre dropdown", "تھیٹر منتخب کریں ڈراپ ڈاؤن"], ["Selects active operating theatre suite for the scheduled procedure.", "سرجری کے لیے فعال آپریشن تھیٹر منتخب کرتا ہے۔"]),
+  "ot_scheduling.slot_start_input": g(["ot_scheduling"], ["Scheduled start time input", "تاریخ و وقت ان پٹ"], ["Sets scheduled surgical start datetime.", "سرجری شروع ہونے کی باقاعدہ تاریخ اور وقت مقرر کرتا ہے۔"]),
+  "ot_scheduling.slot_duration_input": g(["ot_scheduling"], ["Surgery duration input", "دورانیہ ان پٹ"], ["Estimated surgery duration in minutes; mandatory 20-min turnover buffer added automatically (Rule 992db951e1).", "سرجری کا متوقع وقت؛ 20 منٹ صفائی کا وقفہ خودکار شامل ہوتا ہے۔"]),
+  "ot_scheduling.use_suggested_slot_button": g(["ot_scheduling"], ["Use suggested slot button", "تجویز کردہ وقت لیں بٹن"], ["Applies next free non-conflicting time slot suggested by the scheduling engine.", "تصادم سے پاک اگلا دستیاب وقت خودکار منتخب کرتا ہے۔"]),
+  "ot_scheduling.confirm_schedule_button": g(["ot_scheduling"], ["Confirm schedule assignment button", "شیڈول کی تصدیق کریں بٹن"], ["Confirms theatre room and time slot via POST /ot/bookings/{id}/schedule.", "تھیٹر اور وقت کی حتمی الاٹمنٹ محفوظ کرتا ہے۔"]),
+  "ot_scheduling.cancel_booking_button": g(["ot_scheduling"], ["Cancel booking button", "بکنگ منسوخ کریں بٹن"], ["Opens cancellation dialog for scheduled or requested surgical procedure.", "سرجری کی بکنگ منسوخ کرنے کا ڈائیلاگ کھولتا ہے۔"]),
+  "ot_scheduling.cancel_reason_input": g(["ot_scheduling"], ["Cancellation reason input", "منسوخی کی وجہ ان پٹ"], ["Enters mandatory cancellation reason; scanned consumables return to stock.", "منسوخی کی وجہ درج کریں؛ سامان خودکار انوینٹری میں واپس آ جائے گا۔"]),
+  "ot_scheduling.confirm_cancel_button": g(["ot_scheduling"], ["Confirm cancellation button", "منسوخی کی تصدیق کریں بٹن"], ["Submits surgical booking cancellation via POST /ot/bookings/{id}/cancel.", "سرجری کی منسوخی کی حتمی تصدیق کرتا ہے۔"]),
+  "ot_scheduling.theater_state_button": g(["ot_scheduling"], ["Change theatre state button", "تھیٹر کی حالت تبدیل کریں بٹن"], ["Opens dialog to take theatre out of service or restore to active service.", "تھیٹر کو دیکھ بھال کے لیے بند یا دوبارہ فعال کرنے کا ڈائیلاگ کھولتا ہے۔"]),
+  "ot_scheduling.theater_state_reason_input": g(["ot_scheduling"], ["State change reason input", "وجہ ان پٹ"], ["Enters justification for changing theatre service state.", "تھیٹر کی حالت تبدیل کرنے کی وجہ درج کریں۔"]),
+  "ot_scheduling.confirm_state_button": g(["ot_scheduling"], ["Confirm state change button", "حالت کی تصدیق کریں بٹن"], ["Updates theatre availability status via POST /ot/theaters/{id}/state.", "تھیٹر کی نئی حالت کو محفوظ کرتا ہے۔"]),
+  "ot_scheduling.close_modal_button": g(["ot_scheduling"], ["Close modal dialog button", "ڈائیلاگ بند کریں بٹن"], ["Dismisses modal dialog without saving changes.", "تبدیلیوں کے بغیر ماڈل ونڈو بند کرتا ہے۔"]),
   // Screen 113: cssd_stock (Sterile stock and issue)
   "cssd_stock.dismiss_alert_button": g(["cssd_stock"], ["Dismiss alert button", "انتباہ خارج کریں بٹن"], ["Dismisses the current error or warning banner.", "موجودہ انتباہ یا خرابی کے بینر کو بند کرتا ہے۔"]),
   "cssd_stock.back_button": g(["cssd_stock"], ["Back button", "واپسی کا بٹن"], ["Navigates back to the CSSD dashboard.", "سٹرائل سپلائی کے مرکزی ڈیش بورڈ پر واپس جاتا ہے۔"]),

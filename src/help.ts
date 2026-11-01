@@ -7382,6 +7382,88 @@ consents_doctor: {
       ]
     ]
   },
+  ot_scheduling: {
+    title: "Operating theatre request queue & calendar",
+    titleUr: "او ٹی شیڈولنگ اور کیلنڈر",
+    purpose: "Manage operating theatre scheduling, surgeon booking requests, room slot assignments with double-booking prevention and automatic turnover buffers, elective and emergency queue prioritization, and theatre maintenance states under MSDS COP 31-33.",
+    purposeUr: "ایم ایس ڈی ایس سی او پی 31 تا 33 کے تحت آپریشن تھیٹر کے شیڈولنگ کا انتظام، سرجنز کی موصولہ درخواستیں، ڈبل بکنگ کی روک تھام اور صفائی کے خودکار وقفوں کے ساتھ تھیٹر اور وقت کی الاٹمنٹ، الیکٹیو اور ایمرجنسی جراحی ترجیحات، اور تھیٹرز کی دیکھ بھال کی حالت کا انتظام۔",
+    steps: [
+      "Open Operating Theatre → OT Request Queue & Calendar (ot_scheduling) to view scheduled procedures, waiting requests, and theatre readiness.",
+      "Review the schedule calendar: view active surgical procedures by date and theatre suite; inspect scheduled start/end times and surgeon assignments.",
+      "Submit new surgical booking request: click '+ Request OT Slot' (Rule ae87186675), enter patient ID and procedure name, select booking urgency (Scheduled, Emergency, or CodeRed), and choose anaesthesia type.",
+      "Provide emergency justification: if requesting Emergency or CodeRed surgery, enter mandatory clinical justification for priority theatre allocation.",
+      "Review unscheduled queue: switch to the 'Unscheduled Queue' tab to view pending surgeon requests sorted priority-first (Rule 992db951e1).",
+      "Assign theatre suite and time: click 'Assign Theatre & Time' on any waiting queue request, select an active theatre suite, enter scheduled start time, and estimated surgery duration.",
+      "Double-booking conflict check: the scheduling engine automatically verifies proposed slot against existing bookings and adds a mandatory 20-minute post-op turnover buffer (Rule 992db951e1).",
+      "Apply suggested free slot: if a time overlap is detected, click 'Use Free Slot' to instantly apply the next available non-conflicting time slot calculated from the calendar.",
+      "Cancel surgical booking: click 'Cancel' on any scheduled or requested booking, provide mandatory reason; any scanned consumables automatically return to pharmacy stock.",
+      "Manage theatre maintenance state: switch to 'Theatres & Readiness' tab to take an operating room out of service for fumigation or maintenance, or restore an out-of-service theatre back to active surgery."
+    ],
+    stepsUr: [
+      "آپریشن تھیٹر مینو سے 'او ٹی شیڈولنگ اور کیلنڈر' (ot_scheduling) کھولیں تاکہ تمام شیڈول شدہ سرجریز، انتظار کی فہرست اور تھیٹرز کی تیاری کا جائزہ لیا جا سکے۔",
+      "شیڈول کیلنڈر کا جائزہ لیں: منتخب تاریخ اور تھیٹر کے مطابق آپریشنز، اوقات اور سرجنز کی تفصیلات دیکھیں (قاعدہ 992db951e1)۔",
+      "نئی سرجری بکنگ کی درخواست دیں: '+ نئی بکنگ' پر کلک کریں (قاعدہ ae87186675)، مریض کا نمبر اور آپریشن کا نام درج کریں، نوعیت (الیکٹیو، ایمرجنسی، کوڈ ریڈ) اور اینستھیزیا منتخب کریں۔",
+      "ہنگامی جواز فراہم کریں: ایمرجنسی یا کوڈ ریڈ کی صورت میں فوری سرجری کا طبی جواز درج کرنا لازمی ہے۔",
+      "انتظار کی فہرست کا معائنہ کریں: 'انتظار کی فہرست' ٹیب پر جائیں جہاں سرجنز کی درخواستیں ترجیحی بنیاد پر درج ہوتی ہیں (قاعدہ 992db951e1)۔",
+      "تھیٹر اور وقت کی الاٹمنٹ: ویٹنگ لسٹ میں کسی بھی درخواست پر 'شیڈول کریں' دبائیں، تھیٹر منتخب کریں، وقت اور متوقع دورانیہ درج کریں۔",
+      "ڈبل بکنگ کی تصدیق: سسٹم خودکار طریقے سے تصدیق کرتا ہے کہ کوئی وقت کا ٹکراؤ نہ ہو اور آپریشن کے بعد 20 منٹ کی صفائی کا وقفہ لازمی شامل کرتا ہے (قاعدہ 992db951e1)۔",
+      "تجویز کردہ وقت کا استعمال: اگر وقت کا تصادم ہو تو 'تجویز کردہ وقت لیں' دبائیں تاکہ سسٹم خود اگلا دستیاب وقت منتخب کر لے۔",
+      "سرجری بکنگ منسوخ کریں: کسی بھی بکنگ کو منسوخ کرنے کے لیے 'منسوخ' پر کلک کریں اور وجہ درج کریں؛ جاری شدہ سامان خودکار سٹاک میں واپس آ جائے گا۔",
+      "تھیٹر کی دیکھ بھال کی حالت تبدیل کریں: 'تھیٹرز کی حالت' ٹیب پر جا کر کسی بھی تھیٹر کو صفائی یا مرمت کے لیے غیر فعال کریں یا دوبارہ فعال کریں۔"
+    ],
+    faq: [
+      [
+        "How does the system prevent theatre double-booking?",
+        "Under Rule 992db951e1, the scheduling engine validates every slot against existing bookings and adds a mandatory 20-minute post-operative cleaning and disinfection turnover buffer. If an overlap occurs, the server raises OT_DOUBLE_BOOKING and suggests the next free slot."
+      ],
+      [
+        "Can a surgeon schedule a procedure without approved clinical privileges?",
+        "No. Under MSDS COP 31, assigning a surgeon to a specialized procedure requires approved clinical privileges for that surgery. If privileges are missing, the server raises OT_PRIVILEGE_REQUIRED."
+      ],
+      [
+        "What happens to surgical consumables when a booking is cancelled?",
+        "When a booking is cancelled via POST /ot/bookings/{id}/cancel, all pre-scanned drugs, sets, and implants linked to the booking are automatically returned to pharmacy and CSSD stock without manual intervention."
+      ],
+      [
+        "Can new bookings be made when the surgery capability is retiring or inactive?",
+        "No. Under Rule ae87186675 and Rule b5f0fd9a68, POST /ot/bookings is strictly prohibited while surgery is inactive or retiring. Only existing scheduled bookings may be completed."
+      ],
+      [
+        "How are Emergency and Code Red bookings prioritized over elective surgeries?",
+        "Emergency and Code Red requests enter the queue with elevated priority values and visual alert badges. While scheduling, coordinators can prioritize emergency slots or place elective bookings on hold."
+      ],
+      [
+        "Why is a theatre turnover buffer required between surgeries?",
+        "MSDS IPC and COP standards require room decontamination, air changes, and surface cleaning between surgical cases to prevent surgical site cross-infection. The system enforces this buffer automatically."
+      ]
+    ],
+    faqUr: [
+      [
+        "سسٹم آپریشن تھیٹر میں ڈبل بکنگ کو کیسے روکتا ہے؟",
+        "قاعدہ 992db951e1 کے تحت سسٹم ہر نئے وقت کی الاٹمنٹ کو پرانی بکنگز اور 20 منٹ کے لازمی صفائی کے وقفے کے ساتھ جانچتا ہے۔ وقت کے ٹکراؤ پر سسٹم OT_DOUBLE_BOOKING دیتا ہے اور اگلا دستیاب وقت تجویز کرتا ہے۔"
+      ],
+      [
+        "کیا سرجن منظور شدہ کلینیکل اختیارات کے بغیر سرجری کر سکتا ہے؟",
+        "نہیں۔ ایم ایس ڈی ایس قواعد کے تحت سرجن کے پاس متعلقہ جراحی کے کلینیکل اختیارات ہونا لازمی ہیں بصورت دیگر OT_PRIVILEGE_REQUIRED کا ایرر آتا ہے۔"
+      ],
+      [
+        "جب بکنگ منسوخ کی جائے تو پہلے سے جاری شدہ سامان کا کیا ہوتا ہے؟",
+        "بکنگ کی منسوخی پر تمام سکین شدہ ادویات، سیٹس اور امپلانٹس خودکار طریقے سے فارمیسی اور سی ایس ایس ڈی کے سٹاک میں واپس آ جاتے ہیں۔"
+      ],
+      [
+        "اگر سرجری سروس ریٹائر یا غیر فعال ہو تو کیا نئی بکنگ ہو سکتی ہے؟",
+        "نہیں۔ قاعدہ ae87186675 کے مطابق غیر فعال سروس میں نئی بکنگز بند ہوتی ہیں؛ صرف پہلے سے موجود بکنگز مکمل کی جا سکتی ہیں۔"
+      ],
+      [
+        "ایمرجنسی اور کوڈ ریڈ بکنگز کو کیسے ترجیح دی جاتی ہے؟",
+        "ایمرجنسی بکنگز کو ویٹنگ لسٹ میں نمایاں بیج کے ساتھ سب سے اوپر دکھایا جاتا ہے تاکہ کوآرڈینیٹر فوری تھیٹر الاٹ کر سکے۔"
+      ],
+      [
+        "آپریشنز کے درمیان صفائی کا وقفہ کیوں لازمی ہے؟",
+        "انفیکشن کنٹرول اور ایم ایس ڈی ایس قواعد کے تحت دو مریضوں کے درمیان تھیٹر کی جراثیم کشی اور صفائی لازمی ہے تاکہ جراثیم کی منتقلی سے بچا جا سکے۔"
+      ]
+    ]
+  },
   maternity_policy: {
     title: "High-risk pregnancy: our policy",
     titleUr: "ہائی رسک حمل: ہسپتال کی پالیسی",
