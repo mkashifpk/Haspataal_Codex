@@ -1,33 +1,67 @@
 # Haspataal checkpoint
 Last updated: 01 November 2026, Antigravity (Codex pair), Asia/Karachi.
 
-## Active request: Phase 6 Screen 132 `ot_settlement` (Post-op settlement - OT Admin workspace)
-Executing the Phase 6 Roadmap ("Theatre and sterile supply") in dependency order along with all tests and MCP progress reporting:
-- Screen 108: **`transfusion_bedside_er`** ("Bedside transfusion observation - ER", Position 108, 74 points) — **COMPLETED** (commit `2803cf0`, Proposal **261** awaiting human review on `/docs -> My progress`). Marks Phase 5 100% complete!
-- Screen 109: **`clinical_privileges`** ("Clinical privileges", Position 109, 55 points) — **COMPLETED** (commit `5ddbd89`, Proposal **262** awaiting human review on `/docs -> My progress`). First screen of Phase 6!
-- Screen 110: **`theatre_checklist_setup`** ("Surgical safety checklist configuration", Position 110, 52 points) — **COMPLETED** (commit `5a0e80c`, Proposal **263** awaiting human review on `/docs -> My progress`).
-- Screen 111: **`cssd_setup`** ("Sterile supply: sets, sterilizers, recalls", Position 111, 75 points) — **COMPLETED** (commit `5466f90`, Proposal **264** awaiting human review on `/docs -> My progress`).
-- Screen 112: **`cssd_board`** ("Sterilization board", Position 112, 67 points) — **COMPLETED** (commit `348ec1e`, Proposal **265** awaiting human review on `/docs -> My progress`).
-- Screen 113: **`cssd_stock`** ("Sterile stock and issue", Position 113, 56 points) — **COMPLETED** (commit `1fb7878`, Proposal **266** awaiting human review on `/docs -> My progress`). Completes the entire `cssd` workspace!
-- Screen 114: **`ot_scheduling`** ("OT request queue & calendar", Position 114, 63 points) — **COMPLETED** (commit `2671989`, Proposal **267** awaiting human review on `/docs -> My progress`).
-- Screen 115: **`ot_board`** ("Live OT status board", Position 115, 36 points) — **COMPLETED** (commit `c559db6`, Proposal **268** awaiting human review on `/docs -> My progress`).
-- Screen 116: **`pre_anaesthesia_clinic`** ("Pre-anaesthesia clinic", Position 116, 104 points, workspace `anaesthesia` / `doctor`) — **COMPLETED** (commit `c6167d3`, Proposal **269** awaiting human review on `/docs -> My progress`).
-- Screen 117: **`consents_anaesthesia`** ("Anaesthesia consent", Position 117, 92 points, workspace `anaesthesia` / `doctor`) — **COMPLETED** (commit `e85395b`, Proposal **270** awaiting human review on `/docs -> My progress`).
-- Screen 118: **`safety_checklist`** ("Surgical safety checklist - Sign In / Time Out / Sign Out", Position 118, 79 points, workspace `ot_nurse` / `theatre`) — **COMPLETED** (commit `57bda5f`, Proposal **271** awaiting human review on `/docs -> My progress`).
-- Screen 119: **`safety_checklist_admin`** ("Surgical safety checklist - OT Admin workspace", Position 119, 79 points, workspace `ot_admin`) — **COMPLETED** (commit `6660458`, Proposal **272** awaiting human review on `/docs -> My progress`).
-- Screen 120: **`safety_checklist_anaesthesia`** ("Surgical safety checklist - Anaesthesia workspace", Position 120, 79 points, workspace `anaesthesia`) — **COMPLETED** (commit `b1b524e`, Proposal **273** awaiting human review on `/docs -> My progress`).
-- Screen 121: **`ot_consumables_nurse`** ("OT consumables & implants", Position 121, 47 points, workspace `ot_nurse`) — **COMPLETED** (commit `aae6250`, Proposal **274** awaiting human review on `/docs -> My progress`).
-- Screen 122: **`ot_intraop`** ("Intra-op consumables", Position 122, 53 points, workspace `ot_admin`) — **COMPLETED** (commit `efb8527`, Proposal **275** awaiting human review on `/docs -> My progress`).
-- Screen 123: **`sterile_packs_ot`** ("Sterile packs: scan when opened", Position 123, 48 points, workspace `ot_nurse`) — **COMPLETED** (commit `ab7a6d9`, Proposal **276** awaiting human review on `/docs -> My progress`).
-- Screen 124: **`sterile_packs_ot_admin`** ("Sterile packs: scan when opened - OT Admin", Position 124, 48 points, workspace `ot_admin`) — **COMPLETED** (commit `d076dbf`, Proposal **277** awaiting human review on `/docs -> My progress`).
-- Screen 125: **`sterile_packs_ward`** ("Sterile packs: scan when opened - Ward", Position 125, 48 points, workspace `ward_nurse`) — **COMPLETED** (commit `994aeb4`, Proposal **278** awaiting human review on `/docs -> My progress`).
-- Screen 126: **`anaesthesia_record`** ("Anaesthesia record", Position 126, 69 points, workspace `anaesthesia`) — **COMPLETED** (commit `7184c76`, Proposal **279** awaiting human review on `/docs -> My progress`).
-- Screen 127: **`surgical_record_surgeon`** ("Surgical record: operative note & closure", Position 127, 123 points, workspace `doctor` / `surgeon`) — **COMPLETED** (commit `6178963`, Proposal **280** awaiting human review on `/docs -> My progress`).
-- Screen 128: **`recovery_board`** ("Live PACU recovery board", Position 128, 65 points, workspace `ot_nurse`) — **COMPLETED** (commit `4e8f4db`, Proposal **281** awaiting human review on `/docs -> My progress`).
-- Screen 129: **`recovery_board_admin`** ("Live PACU recovery board - OT Admin", Position 129, 65 points, workspace `ot_admin`) — **COMPLETED** (commit `7cf0069`, Proposal **282** awaiting human review on `/docs -> My progress`).
-- Screen 130: **`recovery_board_anaesthesia`** ("Live PACU recovery board - Anaesthesia", Position 130, 65 points, workspace `anaesthesia`) — **COMPLETED** (commit `6c9c9da`, Proposal **283** awaiting human review on `/docs -> My progress`). All 3 recovery board workspaces completed!
-- Screen 131: **`transfusion_bedside_ot`** ("Bedside transfusion observation - OT", Position 131, 74 points, workspace `ot_nurse`) — **COMPLETED** (commit `0876f7c`, Proposal **284** awaiting human review on `/docs -> My progress`).
-- Screen 132: **`ot_settlement`** ("Post-op settlement & reconciliation", Position 132, 49 points, workspace `ot_admin`) — **IN PROGRESS** (Final screen of Phase 6!).
+## Active request: Phase 7 Screen 133 `accountant_cockpit` (Accountant cockpit - Accountant workspace)
+Executing the Haspataal HMS Roadmap in dependency order along with all tests and MCP progress reporting:
+- **Phase 5 ("Ward and emergency clinical nursing")**: 100% COMPLETE (Screens 78–108, Proposals 231–261).
+- **Phase 6 ("Theatre and sterile supply")**: **100% COMPLETE** across all 24 surgical, sterile supply, and theatre administration screens!
+  - Screen 109: **`clinical_privileges`** ("Clinical privileges", Position 109, 55 points) — **COMPLETED** (commit `5ddbd89`, Proposal **262** awaiting human review on `/docs -> My progress`).
+  - Screen 110: **`theatre_checklist_setup`** ("Surgical safety checklist configuration", Position 110, 52 points) — **COMPLETED** (commit `5a0e80c`, Proposal **263** awaiting human review on `/docs -> My progress`).
+  - Screen 111: **`cssd_setup`** ("Sterile supply: sets, sterilizers, recalls", Position 111, 75 points) — **COMPLETED** (commit `5466f90`, Proposal **264** awaiting human review on `/docs -> My progress`).
+  - Screen 112: **`cssd_board`** ("Sterilization board", Position 112, 67 points) — **COMPLETED** (commit `348ec1e`, Proposal **265** awaiting human review on `/docs -> My progress`).
+  - Screen 113: **`cssd_stock`** ("Sterile stock and issue", Position 113, 56 points) — **COMPLETED** (commit `1fb7878`, Proposal **266** awaiting human review on `/docs -> My progress`).
+  - Screen 114: **`ot_scheduling`** ("OT request queue & calendar", Position 114, 63 points) — **COMPLETED** (commit `2671989`, Proposal **267** awaiting human review on `/docs -> My progress`).
+  - Screen 115: **`ot_board`** ("Live OT status board", Position 115, 36 points) — **COMPLETED** (commit `c559db6`, Proposal **268** awaiting human review on `/docs -> My progress`).
+  - Screen 116: **`pre_anaesthesia_clinic`** ("Pre-anaesthesia clinic", Position 116, 104 points, workspace `anaesthesia` / `doctor`) — **COMPLETED** (commit `c6167d3`, Proposal **269** awaiting human review on `/docs -> My progress`).
+  - Screen 117: **`consents_anaesthesia`** ("Anaesthesia consent", Position 117, 92 points, workspace `anaesthesia` / `doctor`) — **COMPLETED** (commit `e85395b`, Proposal **270** awaiting human review on `/docs -> My progress`).
+  - Screen 118: **`safety_checklist`** ("Surgical safety checklist - Sign In / Time Out / Sign Out", Position 118, 79 points, workspace `ot_nurse` / `theatre`) — **COMPLETED** (commit `57bda5f`, Proposal **271** awaiting human review on `/docs -> My progress`).
+  - Screen 119: **`safety_checklist_admin`** ("Surgical safety checklist - OT Admin workspace", Position 119, 79 points, workspace `ot_admin`) — **COMPLETED** (commit `6660458`, Proposal **272** awaiting human review on `/docs -> My progress`).
+  - Screen 120: **`safety_checklist_anaesthesia`** ("Surgical safety checklist - Anaesthesia workspace", Position 120, 79 points, workspace `anaesthesia`) — **COMPLETED** (commit `b1b524e`, Proposal **273** awaiting human review on `/docs -> My progress`).
+  - Screen 121: **`ot_consumables_nurse`** ("OT consumables & implants", Position 121, 47 points, workspace `ot_nurse`) — **COMPLETED** (commit `aae6250`, Proposal **274** awaiting human review on `/docs -> My progress`).
+  - Screen 122: **`ot_intraop`** ("Intra-op consumables", Position 122, 53 points, workspace `ot_admin`) — **COMPLETED** (commit `efb8527`, Proposal **275** awaiting human review on `/docs -> My progress`).
+  - Screen 123: **`sterile_packs_ot`** ("Sterile packs: scan when opened", Position 123, 48 points, workspace `ot_nurse`) — **COMPLETED** (commit `ab7a6d9`, Proposal **276** awaiting human review on `/docs -> My progress`).
+  - Screen 124: **`sterile_packs_ot_admin`** ("Sterile packs: scan when opened - OT Admin", Position 124, 48 points, workspace `ot_admin`) — **COMPLETED** (commit `d076dbf`, Proposal **277** awaiting human review on `/docs -> My progress`).
+  - Screen 125: **`sterile_packs_ward`** ("Sterile packs: scan when opened - Ward", Position 125, 48 points, workspace `ward_nurse`) — **COMPLETED** (commit `994aeb4`, Proposal **278** awaiting human review on `/docs -> My progress`).
+  - Screen 126: **`anaesthesia_record`** ("Anaesthesia record", Position 126, 69 points, workspace `anaesthesia`) — **COMPLETED** (commit `7184c76`, Proposal **279** awaiting human review on `/docs -> My progress`).
+  - Screen 127: **`surgical_record_surgeon`** ("Surgical record: operative note & closure", Position 127, 123 points, workspace `doctor` / `surgeon`) — **COMPLETED** (commit `6178963`, Proposal **280** awaiting human review on `/docs -> My progress`).
+  - Screen 128: **`recovery_board`** ("Live PACU recovery board", Position 128, 65 points, workspace `ot_nurse`) — **COMPLETED** (commit `4e8f4db`, Proposal **281** awaiting human review on `/docs -> My progress`).
+  - Screen 129: **`recovery_board_admin`** ("Live PACU recovery board - OT Admin", Position 129, 65 points, workspace `ot_admin`) — **COMPLETED** (commit `7cf0069`, Proposal **282** awaiting human review on `/docs -> My progress`).
+  - Screen 130: **`recovery_board_anaesthesia`** ("Live PACU recovery board - Anaesthesia", Position 130, 65 points, workspace `anaesthesia`) — **COMPLETED** (commit `6c9c9da`, Proposal **283** awaiting human review on `/docs -> My progress`). All 3 recovery board workspaces completed!
+  - Screen 131: **`transfusion_bedside_ot`** ("Bedside transfusion observation - OT", Position 131, 74 points, workspace `ot_nurse`) — **COMPLETED** (commit `0876f7c`, Proposal **284** awaiting human review on `/docs -> My progress`).
+  - Screen 132: **`ot_settlement`** ("Post-op settlement & reconciliation", Position 132, 49 points, workspace `ot_admin`) — **COMPLETED** (commit `90fda83`, Proposal **285** awaiting human review on `/docs -> My progress`). Marks Phase 6 100% complete!
+- **Phase 7 ("Pharmacy and Billing")**:
+  - Screen 133: **`accountant_cockpit`** ("Accountant cockpit", Position 133, 83 points, workspace `accountant`) — **READY TO IMPLEMENT**.
+
+---
+
+### Completed Screen 132 (`ot_settlement`) Checkpoint
+- **Workflow & Standards**: Post-operative financial bill settlement, reconciliation, and consultant fee split in `ot_admin` workspace (MSDS COP 31, 33, hospital financial regulations):
+  - Theatre room personnel logging (Primary Surgeon, Assistant Surgeon, Anesthetist, Scrub Nurse, Circulating Nurse, Other) via live staff lookup (`GET /staff/lookup`).
+  - Mandatory settlement split preview (`rule:5228072102`): Computes gross procedure revenue, intra-operative consumables revenue, gross total, consumable deductions, net procedure profit, and consultant commissions before finalization (`POST /ot/bookings/{id}/settlement-preview`).
+  - Commission cap exceeded audit gate (`rule:015f73a404`): When commissions exceed net profit, strictly requires documented hospital policy override justification (`OT_COMMISSION_CAP_EXCEEDED`).
+  - Atomic finalization & trigger split (`POST /ot/bookings/{id}/finalize`): Locks financial split and generates audit invoice with Idempotency-Key header protection.
+  - Consultant contracts inspector (`GET /finance/consultant-contracts`): Inspects agreed commission rules and terms.
+  - Printable settlement summary voucher.
+  - Real-time synchronization on `ot.settlement.finalized` WebSocket events.
+  - Runtime service capability gating (`rule:7c9fedfb50`): Governed by `GET /establishment` views for `ot_settlement`.
+- **Contracts**: `contracts/ot_settlement.json` (4 endpoints, 1 realtime event, 3 statutory rules, 19 rubric items).
+- **Domain Policies & Statutory Rules (`src/ot-settlement-policy.ts`)**:
+  - Runtime service capability views under `rule:7c9fedfb50` (`full`, `open_work`, `records`, `setup`, `hidden`).
+  - Permissions and roles verified for `ot_admin`.
+  - Preview gate (`rule:5228072102`) and cap override validation (`rule:015f73a404`).
+- **UI Architecture (`src/screens/OtSettlement.tsx`)**:
+  - Live post-op settlement component wired into `src/App.tsx`, `src/foundation-catalogue.json` (4 tasks), `src/foundation-task-map.json` (4 controls), `src/foundation-help.ts` (all 25 controls mapped).
+  - Authored comprehensive handbook entry (`src/help.ts`) with bilingual title, purpose, 8 operational steps, and 5 role FAQs for `ot_admin`. Bundled screenshots in `public/handbook/ot_settlement-en.png` and `ot_settlement-ur.png`.
+- **Verification**:
+  - Automated unit tests: `tests/ot-settlement.test.mjs` (7/7 passing).
+  - Help check: `npm run check:help` passed (131 screens, 3072 controls, 2089 groups, 69 FAQ seeds, 30 workspace guides).
+  - Help coverage test: `tests/help-coverage.test.mjs` (28/28 passing).
+  - Full test suite: `npm test` passed (628/628 passing across all suites).
+  - TypeScript compiler: `npx tsc --noEmit` passed with 0 errors.
+  - Production build: `npm run build` succeeded (`dist/assets/index-CgZsWaBJ.js`).
+- **Commit & Proposal**:
+  - Implementation commit: `90fda83`.
+  - Proposal ID: **285** (status: `pending` on `/docs -> My progress`).
 
 ---
 
@@ -781,42 +815,35 @@ Executing the Phase 6 Roadmap ("Theatre and sterile supply") in dependency order
 
 ---
 
-## Plan for Screen 132 (`ot_settlement`)
-- **Workflow & Standards**: Post-operative billing settlement & reconciliation, participant logging, revenue/consumables cost calculation, consultant commissions split calculation, commission cap override auditing, and atomic surgery finalization under MSDS COP 31, 33 and hospital finance standards; Position 132 (49 points), Workspace `ot_admin`.
+## Plan for Screen 133 (`accountant_cockpit`)
+- **Workflow & Standards**: Accountant cockpit, daily financial balance sheet, revenue recognition, cash shift drawer reconciliation, bank deposit audits, refund/credit note approvals, and trial balance generation in `accountant` workspace; Position 133 (83 points), Workspace `accountant`.
 - **Bundle & Contracts**:
-  - Saved `contracts/ot_settlement.json` (4 endpoints, 1 realtime event `ot.settlement.finalized`, 3 statutory rules, 15 rubric items).
-  - TypeScript contracts generated: `src/generated/ot_settlement.ts`.
-- **Domain Policies & Statutory Rules (`src/ot-settlement-policy.ts`)**:
-  - Runtime service capability views under `rule:7c9fedfb50` (`full`, `open_work`, `records`, `setup`, `hidden`).
-  - Permissions and role check for `ot_admin` (`ot.finalize`, `ot.contract.view`).
-  - Mandatory preview gate before irreversible finalize (`rule:5228072102`).
-  - Commission cap override check (`rule:015f73a404`): When `exceeds_cap` is true, requires documented policy override reason before allowing finalization.
-  - Participant validation and role formatting.
-  - Bilingual error explanations for `OT_ALREADY_SETTLED`, `OT_COMMISSION_CAP_EXCEEDED`, `OT_PROCEDURE_PRICE_MISSING`, `OT_SURGERY_NOT_COMPLETE`, etc.
-- **UI Architecture (`src/screens/OtSettlement.tsx`)**:
-  - Surgery booking selector / completed surgeries worklist.
-  - Room participant roster (Primary Surgeon, Assistant Surgeon, Anesthetist, Scrub Nurse, Circulating Nurse, Other) with live staff search (`GET /staff/lookup`).
-  - Live split preview computation (`POST /ot/bookings/{id}/settlement-preview`): Procedure revenue, consumables revenue, gross revenue, consumables cost, net profit, participant commission breakdown, total commissions, hospital net.
-  - Commission cap warning banner and documented override reason field (`rule:015f73a404`).
-  - Finalize Surgery & Trigger Split modal with Idempotency-Key protection (`POST /ot/bookings/{id}/finalize`).
-  - Finalized settlement receipt & details view with invoice ID, timestamps, and audit row version.
-  - Realtime synchronization on `ot.settlement.finalized`.
+  - Fetch bundle via `get_screen_bundle("accountant_cockpit", max_chars=200000)`.
+  - Save to `contracts/accountant_cockpit.json`.
+  - Quality brief via `get_ui_quality_brief(screen_id="accountant_cockpit")`.
+  - Generate TypeScript contracts: `src/generated/accountant_cockpit.ts`.
+- **Domain Policies & Statutory Rules (`src/accountant-cockpit-policy.ts`)**:
+  - Accountant role permissions and double-entry reconciliation guards.
+  - Runtime service capability gating.
+  - Bilingual error explanations.
+- **UI Architecture (`src/screens/AccountantCockpit.tsx`)**:
+  - Financial dashboard, cash shifts auditing, bank deposit batches, general ledger trial balance.
 - **Help, Handbook & Navigation**:
   - Contextual F1 help with controls mapped in `src/foundation-help.ts`.
   - Task mapping in `src/foundation-catalogue.json` and `src/foundation-task-map.json`.
-  - Handbook entry in `src/help.ts` with 5 role FAQs for `ot_admin`.
-  - Bundled screenshots: `public/handbook/ot_settlement-en.png` and `ot_settlement-ur.png`.
+  - Handbook entry in `src/help.ts` with 5 role FAQs for `accountant`.
+  - Bundled screenshots: `public/handbook/accountant_cockpit-en.png` and `accountant_cockpit-ur.png`.
 - **Automated Verification**:
-  - `tests/ot-settlement.test.mjs`.
+  - `tests/accountant-cockpit.test.mjs`.
   - `npm test`, `npm run check:help`, `npx tsc --noEmit`, `npm run build`.
-  - Commit and submit `propose_progress` (Proposal 285).
+  - Commit and submit `propose_progress` (Proposal 286).
 
 ---
 
 ## Completed Screens Checkpoint
 - Proposals **231**, **232**, **233**, **234**, **235**, and **236** are accepted.
-- Proposals **237** through **284** are awaiting human review on `/docs -> My progress` (latest: 284 for `transfusion_bedside_ot`).
-- Completed screens in Phase 6 so far:
+- Proposals **237** through **285** are awaiting human review on `/docs -> My progress` (latest: 285 for `ot_settlement`).
+- Phase 6 ("Theatre and sterile supply") is **100% COMPLETE** (Screens 109–132, Proposals 262–285):
   - Screen 109: `clinical_privileges` (Proposal 262)
   - Screen 110: `theatre_checklist_setup` (Proposal 263)
   - Screen 111: `cssd_setup` (Proposal 264)
@@ -824,6 +851,23 @@ Executing the Phase 6 Roadmap ("Theatre and sterile supply") in dependency order
   - Screen 113: `cssd_stock` (Proposal 266)
   - Screen 114: `ot_scheduling` (Proposal 267)
   - Screen 115: `ot_board` (Proposal 268)
+  - Screen 116: `pre_anaesthesia_clinic` (Proposal 269)
+  - Screen 117: `consents_anaesthesia` (Proposal 270)
+  - Screen 118: `safety_checklist` (Proposal 271)
+  - Screen 119: `safety_checklist_admin` (Proposal 272)
+  - Screen 120: `safety_checklist_anaesthesia` (Proposal 273)
+  - Screen 121: `ot_consumables_nurse` (Proposal 274)
+  - Screen 122: `ot_intraop` (Proposal 275)
+  - Screen 123: `sterile_packs_ot` (Proposal 276)
+  - Screen 124: `sterile_packs_ot_admin` (Proposal 277)
+  - Screen 125: `sterile_packs_ward` (Proposal 278)
+  - Screen 126: `anaesthesia_record` (Proposal 279)
+  - Screen 127: `surgical_record_surgeon` (Proposal 280)
+  - Screen 128: `recovery_board` (Proposal 281)
+  - Screen 129: `recovery_board_admin` (Proposal 282)
+  - Screen 130: `recovery_board_anaesthesia` (Proposal 283)
+  - Screen 131: `transfusion_bedside_ot` (Proposal 284)
+  - Screen 132: `ot_settlement` (Proposal 285)
   - Screen 116: `pre_anaesthesia_clinic` (Proposal 269)
   - Screen 117: `consents_anaesthesia` (Proposal 270)
   - Screen 118: `safety_checklist` (Proposal 271)
