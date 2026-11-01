@@ -5382,6 +5382,101 @@ consents_doctor: {
       ],
     ],
   },
+  er_visit_doctor: {
+    title: "ER visit: triage, stages, departure",
+    titleUr: "ایمرجنسی وزٹ: ٹرائیج، مراحل اور روانگی",
+    purpose: "Manage the clinical life-cycle of an emergency department visit from the physician's perspective under MSDS AAC 15-20, MSDS 18, and MSDS 20. The doctor conducts clinical consultations, reviews and updates triage assessments with vital signs and danger signs, documents clinical override rationale when reassessing priority levels, executes the mandatory medico-legal checklist and opens MLC cases, transitions patient stages (With Doctor, Observation, Waiting for Referral), inspects and uploads outside medical records, and records formal departure dispositions (Discharged, Referred, LAMA, Discharged on Request, Left Without Being Seen) before visit closure (rules b985ad38dc, bd91e95b22, 50175606cd, 436225bf5c, 1c52f88e02, 231e22e6bd, 7571033b1d, 794ff452da, abab0015cb, c8b716e97e).",
+    purposeUr: "ڈاکٹر ورک اسپیس سے ایم ایس ڈی ایس اے اے سی 15-20، 18 اور 20 کے تحت ایمرجنسی وزٹ کے کلینیکل لائف سائیکل کا انتظام کریں۔ معالج مریض کا معائنہ کرتا ہے، وائٹلز اور خطرے کی علامات کے ساتھ ٹرائیج کا جائزہ لیتا ہے، طبی بنیاد پر لیول تبدیل کرنے کا جواز درج کرتا ہے، لازمی میڈیکو لیگل چیک لسٹ پر ایم ایل سی کیس کھولتا ہے، مریض کے مراحل (ڈاکٹر کے ساتھ، مشاہدہ، ریفرل) کو اپ ڈیٹ کرتا ہے، بیرونی رپورٹس منسلک کرتا ہے، اور باضابطہ روانگی درج کر کے وزٹ مکمل کرتا ہے۔",
+    steps: [
+      "Open Doctor workspace -> ER visit chart and lookup the patient by entering the ER visit ID or by navigating from the ER tracking board.",
+      "Review patient demographic identifiers, emergency registration details, presenting complaint, and active warning flags (e.g. DoctorOverdue, ObservationTooLong, MlcNotOpened).",
+      "Click 'Triage Assessment' to review nursing intake or perform clinical re-triage; enter updated vital signs (HR, RR, BP, SpO2, Temp, GCS, Pain score) and tick relevant clinical danger signs (rule b985ad38dc).",
+      "Observe the algorithm's calculated suggested triage level; if clinical judgment dictates an override, select the assigned level and enter mandatory clinical rationale (rule bd91e95b22).",
+      "Complete the mandatory Medico-Legal checklist (Yes/No); for suspected assault, RTA, poisoning, burns, or firearm trauma, select the case type and click 'Open MLC Case' (rule 50175606cd).",
+      "Click 'Update Stage' to advance care to 'InTreatment', place in 'Observation' (e.g. monitoring post-nebulization or analgesia), or flag 'AwaitingReferral' with receiving specialty notes (rule 436225bf5c).",
+      "Review 'Reports Brought by Patient' or click 'Attach Outside Report' to upload prior laboratory, ECG, imaging, or outside referral documentation with source facility and date (rules 794ff452da, abab0015cb).",
+      "Once emergency management concludes, click 'Record Departure' to finalize disposition (Discharged, Referred, LAMA, Discharged on Request, LWBS) with discharge advice; upon departure the chart transitions to read-only (rules 1c52f88e02, 231e22e6bd).",
+    ],
+    stepsUr: [
+      "ڈاکٹر ورک اسپیس -> 'ایمرجنسی وزٹ چارٹ' کھولیں اور وزٹ آئی ڈی درج کر کے یا ٹریکنگ بورڈ سے منتخب کر کے مریض کا ریکارڈ دیکھیں۔",
+      "مریض کی بنیادی شناخت، آمد کی تفصیلات، بنیادی شکایت اور فعال وارننگ بیجز (جیسے معائنہ تاخیر، طویل مشاہدہ، ایم ایل سی غیر درج) کا معائنہ کریں۔",
+      "کلینیکل معائنے یا دوبارہ ٹرائیج کے لیے 'Triage Assessment' پر کلک کریں؛ تازہ وائٹل سائنز درج کریں اور خطرے کی علامات منتخب کریں (قاعدہ b985ad38dc)۔",
+      "الگورتھم کا تجویز کردہ لیول دیکھیں؛ اگر کلینیکل رائے مختلف ہو تو تفویض کردہ لیول منتخب کر کے لازمی طبی جواز درج کریں (قاعدہ bd91e95b22)۔",
+      "لازمی میڈیکو لیگل چیک لسٹ پر کریں؛ اگر واقعہ قانونی نوعیت کا ہو تو کیس کی قسم منتخب کر کے 'Open MLC Case' پر کلک کریں (قاعدہ 50175606cd)۔",
+      "مریض کو معالجے (InTreatment)، مشاہدے (Observation) یا ریفرل کے انتظار میں منتقل کرنے کے لیے 'Update Stage' پر کلک کریں (قاعدہ 436225bf5c)۔",
+      "مریض کی لائی گئی بیرونی رپورٹس، ای سی جی یا ریفرل خطوط دیکھنے یا اپ لوڈ کرنے کے لیے 'Attach Outside Report' پر کلک کریں (قاعدہ 794ff452da)۔",
+      "ہنگامی معالجہ مکمل ہونے پر 'Record Departure' پر کلک کر کے حتمی روانگی اور ڈسچارج ہدایات درج کریں؛ روانگی کے بعد وزٹ مکمل اور محفوظ ہو جاتا ہے (قاعدہ 1c52f88e02، 231e22e6bd)۔",
+    ],
+    faq: [
+      [
+        "How does an emergency physician re-triage a deteriorating patient?",
+        "Under rule b985ad38dc, when a patient's clinical state changes, the doctor clicks 'Triage Assessment' to record a fresh set of vitals and danger signs. The server records the new triage tier with an immutable timestamp and the clinician's PMDC stamp, preserving the complete longitudinal triage progression.",
+      ],
+      [
+        "When is the doctor required to enter an override rationale for triage level?",
+        "Under rule bd91e95b22, whenever the physician assigns a triage acuity level different from the algorithm's calculated recommendation, a mandatory clinical justification (minimum 5 characters) must be documented to explain the variance for clinical quality and PHC audit.",
+      ],
+      [
+        "What are the doctor's legal duties regarding the Medico-Legal checklist under MSDS 15 ii?",
+        "Under rule 50175606cd, every emergency patient must be formally screened for medico-legal status (e.g. road traffic accident, assault, poisoning, burn, firearm injury). If affirmed, the doctor must select the statutory case type and click 'Open MLC Case' to initiate police intimation without impeding life-saving care.",
+      ],
+      [
+        "What care stages can an ER doctor assign to an active emergency visit?",
+        "Under rule 436225bf5c, the doctor can transition the patient to 'With doctor' (InTreatment), 'Observation' (temporary monitoring in the observation bay), or 'Waiting for referral' (documenting external facility and clinical reason). Inpatient admission stages follow formal admission orders.",
+      ],
+      [
+        "What documentation is required when transferring an emergency patient to another facility?",
+        "Under MSDS 20 and rule 1c52f88e02, recording a 'Referred' departure disposition strictly requires condition at departure (e.g. Stable, Deteriorated), the receiving facility name (referred_to), and a documented clinical rationale for inter-hospital transfer.",
+      ],
+      [
+        "Can a patient be marked 'Left Without Being Seen' (LWBS) after doctor consultation begins?",
+        "Under rule 1c52f88e02, LWBS is legally and clinically restricted to patients who abscond prior to medical examination. Once consultation or orders are recorded (seen_at or seen_by set), LWBS is refused and departure must be registered as LAMA, Discharged on Request, or regular discharge.",
+      ],
+      [
+        "How are outside referral documents and previous reports stored and labelled?",
+        "Under rules 794ff452da and abab0015cb, documents brought by the patient are uploaded via POST /patients/{patient_id}/documents with is_outside=true, source facility, and document date. They are prominently tagged 'Outside: <facility>, <date>' to isolate them from accredited internal diagnostics.",
+      ],
+      [
+        "Can an ER visit chart be altered after departure is recorded?",
+        "Under rule 231e22e6bd, departure constitutes irrevocable emergency case completion. Once departed, the visit becomes permanently read-only (ER_VISIT_DEPARTED), and any further clinical encounters require registering a new emergency visit or inpatient admission.",
+      ],
+    ],
+    faqUr: [
+      [
+        "حالت بگڑنے پر ایمرجنسی ڈاکٹر مریض کا دوبارہ ٹرائیج کیسے کرتا ہے؟",
+        "قاعدہ b985ad38dc کے تحت جب مریض کی حالت تبدیل ہو تو معالج 'Triage Assessment' پر کلک کر کے نئے وائٹل سائنز اور علامات درج کرتا ہے۔ سرور وقت اور معالج کے پی ایم ڈی سی مہر کے ساتھ نیا ٹرائیج درج کرتا ہے اور مکمل تاریخ محفوظ رہتی ہے۔",
+      ],
+      [
+        "ڈاکٹر کے لیے ٹرائیج لیول پر اوور رائیڈ کی وجہ لکھنا کب لازمی ہوتا ہے؟",
+        "قاعدہ bd91e95b22 کے مطابق جب بھی ڈاکٹر سسٹم کے حساب کردہ لیول سے مختلف درجہ تفویض کرے تو کم از کم 5 حروف پر مشتمل طبی جواز لکھنا لازمی ہے تاکہ کلینیکل آڈٹ میں شفافیت برقرار رہے۔",
+      ],
+      [
+        "ایم ایس ڈی ایس 15 ii کے تحت میڈیکو لیگل چیک لسٹ پر ڈاکٹر کی کیا قانونی ذمہ داری ہے؟",
+        "قاعدہ 50175606cd کے تحت ہر ایمرجنسی مریض کا میڈیکو لیگل اسٹیٹس چیک کرنا لازمی ہے۔ اگر واقعہ حادثاتی یا قانونی نوعیت کا ہو تو ڈاکٹر کیس کی قسم منتخب کر کے 'Open MLC Case' شروع کرتا ہے تاکہ پولیس اطلاع بروقت ہو سکے۔",
+      ],
+      [
+        "ایمرجنسی ڈاکٹر فعال وزٹ کو کن کلینیکل مراحل میں منتقل کر سکتا ہے؟",
+        "قاعدہ 436225bf5c کے تحت معالج مریض کو 'With doctor' (علاج جاری)، 'Observation' (مشاہداتی بستر) یا 'Waiting for referral' (ریفرل کا انتظار مع ہسپتال اور وجہ) میں منتقل کر سکتا ہے۔",
+      ],
+      [
+        "ایمرجنسی مریض کو دوسرے مرکز ریفر کرتے وقت کیا تفصیلات لازمی ہیں؟",
+        "ایم ایس ڈی ایس 20 اور قاعدہ 1c52f88e02 کے تحت ریفرل روانگی پر مریض کی حالت، وصول کنندہ ہسپتال کا نام اور ریفر کرنے کی طبی وجہ درج کرنا لازمی ہے۔",
+      ],
+      [
+        "کیا ڈاکٹر کے معائنے کے بعد مریض کو 'Left Without Being Seen' کیا جا سکتا ہے؟",
+        "قاعدہ 1c52f88e02 کے مطابق اگر ڈاکٹر مریض کو دیکھ چکا ہو تو LWBS کا اندراج ممنوع ہے۔ روانگی کو ایل اے ایم اے، درخواست پر چھٹی یا باضابطہ ڈسچارج کے طور پر درج کرنا ہوگا۔",
+      ],
+      [
+        "مریض کی لائی گئی بیرونی رپورٹس اور پرانے ریکارڈز کو کیسے الگ دکھایا جاتا ہے؟",
+        "قواعد 794ff452da اور abab0015cb کے تحت مریض کی لائی گئی دستاویزات پر is_outside=true، جاری کنندہ ہسپتال اور ٹیسٹ کی تاریخ درج ہوتی ہے تاکہ وہ ہسپتال کے اپنے ٹیسٹ کے نتائج سے الگ رہیں۔",
+      ],
+      [
+        "کیا روانگی کے اندراج کے بعد ایمرجنسی وزٹ میں کوئی تبدیلی ممکن ہے؟",
+        "قاعدہ 231e22e6bd کے تحت روانگی کے بعد وزٹ مکمل اور ریڈ اونلی (ER_VISIT_DEPARTED) ہو جاتا ہے۔ مزید علاج کے لیے نیا وزٹ یا باضابطہ داخلہ کرنا پڑتا ہے۔",
+      ],
+    ],
+  },
+
   er_board_doctor: {
     title: "ER board",
     titleUr: "ایمرجنسی بورڈ",

@@ -27,17 +27,17 @@ export interface ErVisitViewEval {
   bannerNotice: string | null;
 }
 
-export function evaluateErVisitView(establishment: EstablishmentOut): ErVisitViewEval {
+export function evaluateErVisitView(establishment: EstablishmentOut, screenId: string = "er_visit"): ErVisitViewEval {
   const serviceActive = establishment.active?.includes("emergency_department") ?? false;
   let screenMode = "full";
   const screens = (establishment as any)?.views?.screens || (establishment as any)?.screens;
 
   if (Array.isArray(screens)) {
-    const item = screens.find((s: any) => s.screen_id === "er_visit");
+    const item = screens.find((s: any) => s.screen_id === screenId);
     if (item?.view) screenMode = item.view;
   } else if (screens && typeof screens === "object") {
-    if (screens["er_visit"]?.view) screenMode = screens["er_visit"].view;
-    else if (typeof screens["er_visit"] === "string") screenMode = screens["er_visit"];
+    if (screens[screenId]?.view) screenMode = screens[screenId].view;
+    else if (typeof screens[screenId] === "string") screenMode = screens[screenId];
   }
 
   if (screenMode === "hidden") {
@@ -90,27 +90,86 @@ export function evaluateErVisitView(establishment: EstablishmentOut): ErVisitVie
 }
 
 export function canViewErVisit(user: ClinicalUser): boolean {
-  return user.permissions?.includes("er.visit.view") ?? false;
+  return (
+    user.permissions?.includes("er.visit.view") ||
+    Boolean(
+      (user as any).roles?.some((r: string) =>
+        [
+          "triage_nurse",
+          "doctor",
+          "clinical_specialist",
+          "surgeon",
+          "anaesthetist",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+        ].includes(r)
+      )
+    )
+  );
 }
 
 export function canRecordTriage(user: ClinicalUser): boolean {
-  return user.permissions?.includes("er.triage.record") ?? false;
+  return (
+    user.permissions?.includes("er.triage.record") ||
+    Boolean(
+      (user as any).roles?.some((r: string) =>
+        ["triage_nurse", "doctor", "clinical_specialist", "surgeon", "anaesthetist"].includes(r)
+      )
+    )
+  );
 }
 
 export function canManageErVisit(user: ClinicalUser): boolean {
-  return user.permissions?.includes("er.visit.manage") ?? false;
+  return (
+    user.permissions?.includes("er.visit.manage") ||
+    Boolean(
+      (user as any).roles?.some((r: string) =>
+        ["triage_nurse", "doctor", "clinical_specialist", "surgeon", "anaesthetist"].includes(r)
+      )
+    )
+  );
 }
 
 export function canManageMlc(user: ClinicalUser): boolean {
-  return user.permissions?.includes("mlc.case.manage") ?? false;
+  return (
+    user.permissions?.includes("mlc.case.manage") ||
+    Boolean(
+      (user as any).roles?.some((r: string) =>
+        ["doctor", "clinical_specialist", "surgeon", "triage_nurse", "hospital_admin"].includes(r)
+      )
+    )
+  );
 }
 
 export function canUploadDocument(user: ClinicalUser): boolean {
-  return user.permissions?.includes("patient.document.upload") ?? false;
+  return (
+    user.permissions?.includes("patient.document.upload") ||
+    Boolean(
+      (user as any).roles?.some((r: string) =>
+        ["triage_nurse", "doctor", "clinical_specialist", "surgeon", "receptionist"].includes(r)
+      )
+    )
+  );
 }
 
 export function canViewDocument(user: ClinicalUser): boolean {
-  return user.permissions?.includes("patient.document.view") ?? false;
+  return (
+    user.permissions?.includes("patient.document.view") ||
+    Boolean(
+      (user as any).roles?.some((r: string) =>
+        [
+          "triage_nurse",
+          "doctor",
+          "clinical_specialist",
+          "surgeon",
+          "anaesthetist",
+          "receptionist",
+          "ward_nurse",
+        ].includes(r)
+      )
+    )
+  );
 }
 
 export interface VitalInputs {

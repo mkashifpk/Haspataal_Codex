@@ -60,6 +60,7 @@ export interface ERVisitProps {
   initialVisitId?: number;
   onNavigateScreen?: (screen: string) => void;
   onBack?: () => void;
+  screenId?: string;
 }
 
 export function ERVisit({
@@ -71,6 +72,7 @@ export function ERVisit({
   initialVisitId,
   onNavigateScreen,
   onBack,
+  screenId = "er_visit",
 }: ERVisitProps) {
   // Active visit selection state
   const [selectedVisitId, setSelectedVisitId] = useState<number | null>(
@@ -93,7 +95,7 @@ export function ERVisit({
   const [codeRedAlert, setCodeRedAlert] = useState<string | null>(null);
 
   // View Evaluation & permissions
-  const viewEval = evaluateErVisitView(establishment);
+  const viewEval = evaluateErVisitView(establishment, screenId);
   const canView = canViewErVisit(user) && viewEval.canShow;
   const canTriage = canRecordTriage(user) && !viewEval.isReadOnly;
   const canManage = canManageErVisit(user) && !viewEval.isReadOnly;
@@ -167,7 +169,7 @@ export function ERVisit({
   }, [visit?.patient_id]);
 
   // Write controller
-  const write = useClinicalWrite(user, "er_visit", () => {
+  const write = useClinicalWrite(user, screenId, () => {
     visitLoad.reload();
     if (visit?.patient_id) {
       loadDocuments(visit.patient_id);
@@ -547,11 +549,13 @@ export function ERVisit({
               data-help="er_visit.back"
               onClick={onBack}
             >
-              ← {t("ER Board", "ایمرجنسی بورڈ")}
+              ← {screenId === "er_visit_doctor" ? t("ER Board (Doctor)", "ایمرجنسی بورڈ (ڈاکٹر)") : t("ER Board", "ایمرجنسی بورڈ")}
             </button>
           )}
           <h4 className="mb-0">
-            {t("Emergency Visit Chart", "ایمرجنسی وزٹ چارٹ")}
+            {screenId === "er_visit_doctor"
+              ? t("Emergency Visit Chart (Doctor)", "ایمرجنسی وزٹ چارٹ (ڈاکٹر)")
+              : t("Emergency Visit Chart", "ایمرجنسی وزٹ چارٹ")}
             {visit && (
               <span className="badge bg-secondary ms-2 fs-6">
                 {visit.er_number}

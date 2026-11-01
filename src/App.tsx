@@ -63,6 +63,7 @@ import { TriageScale } from './screens/TriageScale';
 import { ERBoard } from './screens/ERBoard';
 import { ERBoardDoctor } from './screens/ERBoardDoctor';
 import { ERVisit } from './screens/ERVisit';
+import { ERVisitDoctor } from './screens/ERVisitDoctor';
 import { CodeRed } from './screens/CodeRed';
 import { TraumaMerge } from './screens/TraumaMerge';
 import { Wristbands } from './screens/Wristbands';
@@ -115,6 +116,7 @@ const labels: Record<string, [string, string, string]> = {
  consents_doctor: ["Consents: informed consent and refusal","رضامندی: باخبر رضامندی اور انکار","▤"],
  consents_triage: ["Consents in emergency department","ایمرجنسی میں رضامندیاں","📋"],
  er_board_doctor: ["ER board", "ایمرجنسی بورڈ", "🚨"],
+ er_visit_doctor: ["ER visit: triage, stages, departure", "ایمرجنسی وزٹ چارٹ", "📋"],
  blood_sources: ["Licensed blood sources","مجاز بلڈ سنٹرز و ذرائع","🩸"],
  blood_request: ["Request blood","خون کی درخواست","🩸"],
  blood_bank: ["Blood bank","بلڈ بینک","🩸"],
@@ -212,6 +214,7 @@ const frontDeskScreens = new Set([
   'critical_results_er',
   'consents_triage',
   'er_board_doctor',
+  'er_visit_doctor',
   'consents_ward',
   'consents_doctor',
   'blood_sources',
@@ -897,6 +900,7 @@ export function App() {
   'critical_results_er',
   'consents_triage',
   'er_board_doctor',
+  'er_visit_doctor',
   'consents_ward',
   'consents_doctor',
   'blood_sources',
@@ -957,7 +961,7 @@ export function App() {
       (id !== "donor_assessment" || ["full","open_work","records","setup"].includes(est?.views.screens.find(v=>v.screen_id===id)?.view || "")) &&
       (id !== "blood_collection" || ["full","open_work","records","setup"].includes(est?.views.screens.find(v=>v.screen_id===id)?.view || "")) &&
       (id !== "blood_center_lab" || ["full","open_work","records","setup"].includes(est?.views.screens.find(v=>v.screen_id===id)?.view || "")) &&
-      (!["mar","verbal_orders_ward","verbal_orders_er","vitals_tracker","patient_education_ward","nursing_assessment","my_beds","doctor_inpatients","cost_estimates_admissions","consents_admissions","wristbands_admissions","wristbands_ward","own_medicines_ward","own_medicines_pharmacy","bed_matrix","pending_admissions","imaging_repeats","imaging_outsourced","critical_results_radiology","radiology_worklist","rx_queue","dispense","order_queries","otc","charity_override","lab_only_walkin","lab_bench","lab_send_outs","lab_verification","critical_results_bench","critical_results_verifier","critical_results_doctor","critical_results_ward","critical_results_er","consents_ward","consents_triage","er_board_doctor"].includes(id) || ["full", "open_work", "records"].includes(est?.views.screens.find(v => v.screen_id === id)?.view || "")),
+      (!["mar","verbal_orders_ward","verbal_orders_er","vitals_tracker","patient_education_ward","nursing_assessment","my_beds","doctor_inpatients","cost_estimates_admissions","consents_admissions","wristbands_admissions","wristbands_ward","own_medicines_ward","own_medicines_pharmacy","bed_matrix","pending_admissions","imaging_repeats","imaging_outsourced","critical_results_radiology","radiology_worklist","rx_queue","dispense","order_queries","otc","charity_override","lab_only_walkin","lab_bench","lab_send_outs","lab_verification","critical_results_bench","critical_results_verifier","critical_results_doctor","critical_results_ward","critical_results_er","consents_ward","consents_triage","er_board_doctor","er_visit_doctor"].includes(id) || ["full", "open_work", "records"].includes(est?.views.screens.find(v => v.screen_id === id)?.view || "")),
   );
   const view = est?.views.workspaces.find(
     (v) => v.workspace === workspace,
@@ -1356,6 +1360,7 @@ export function App() {
               {screen === 'er_board' && est && <ERBoard key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone} onNavigateScreen={(s) => navigate(s)} />}
               {screen === 'er_board_doctor' && est && <ERBoardDoctor key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone} onNavigateScreen={(s) => navigate(s)} />}
               {screen === 'er_visit' && est && <ERVisit key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone} onNavigateScreen={(s) => navigate(s)} onBack={() => navigate('er_board')} />}
+              {screen === 'er_visit_doctor' && est && <ERVisitDoctor key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone} onNavigateScreen={(s) => navigate(s)} onBack={() => navigate('er_board_doctor')} />}
               {screen === 'code_red' && est && <CodeRed key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone} onNavigateScreen={(s) => navigate(s)} onBack={() => navigate('er_board')} />}
               {screen === 'trauma_merge' && est && <TraumaMerge key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone} onNavigateScreen={(s) => navigate(s)} onBack={() => navigate('er_board')} />}
               {screen === 'wristbands_admissions' && est && <Wristbands key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone}/>}
