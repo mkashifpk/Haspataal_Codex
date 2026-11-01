@@ -16,7 +16,46 @@ Executing the Phase 6 Roadmap ("Theatre and sterile supply") in dependency order
 - Screen 118: **`safety_checklist`** ("Surgical safety checklist - Sign In / Time Out / Sign Out", Position 118, 79 points, workspace `ot_nurse` / `theatre`) — **COMPLETED** (commit `57bda5f`, Proposal **271** awaiting human review on `/docs -> My progress`).
 - Screen 119: **`safety_checklist_admin`** ("Surgical safety checklist - OT Admin workspace", Position 119, 79 points, workspace `ot_admin`) — **COMPLETED** (commit `6660458`, Proposal **272** awaiting human review on `/docs -> My progress`).
 - Screen 120: **`safety_checklist_anaesthesia`** ("Surgical safety checklist - Anaesthesia workspace", Position 120, 79 points, workspace `anaesthesia`) — **COMPLETED** (commit `b1b524e`, Proposal **273** awaiting human review on `/docs -> My progress`).
-- Screen 121: **`ot_consumables_nurse`** ("OT consumables & implants", Position 121, 47 points, workspace `ot_nurse`) — **NEXT**.
+- Screen 121: **`ot_consumables_nurse`** ("OT consumables & implants", Position 121, 47 points, workspace `ot_nurse`) — **COMPLETED** (commit `aae6250`, Proposal **274** awaiting human review on `/docs -> My progress`).
+- Screen 122: **`ot_intraop`** ("Intra-operative nursing record", Position 122, 53 points, workspace `ot_nurse`) — **NEXT**.
+
+---
+
+### Completed Screen 121 (`ot_consumables_nurse`) Checkpoint
+- **Workflow & Standards**: Intra-operative consumables, implants, and pharmacy stock scanning (FEFO) into surgical bookings under Rule 0a80234be9 (mistaken scans reversed with reason, never deleted) and Rule 77e2100829 (runtime service capability gating from `GET /establishment` views for `ot_consumables_nurse`); Position 121 (47 points), Workspace `ot_nurse`.
+- **Contracts**:
+  - `contracts/ot_consumables_nurse.json`: Saved real MCP screen bundle (4 endpoints, 1 realtime event, 2 statutory rules, 17 rubric items).
+  - `src/generated/ot_consumables_nurse.ts`: Generated TypeScript contracts for all 4 operations and data models.
+- **Domain Policies & Statutory Rules (`src/ot-consumables-nurse-policy.ts`)**:
+  - Runtime service capability gating (`rule:77e2100829`): evaluates `GET /establishment` views for `ot_consumables_nurse` (`full`, `open_work`, `records`, `setup`, `hidden`).
+  - Active surgery validation (`isSurgeryActive`): prevents scan/reversal writes on completed or cancelled cases.
+  - Role permissions: `canViewBookings` (`ot.booking.view`, `ot.booking.manage`), `canRecordConsumables` (`ot.consumable.record`).
+  - Scan validation (`validateConsumableScan`): enforces positive quantity and item identifier (barcode, drug ID, implant description, or asset ID).
+  - Reversal validation (`validateReversalReason`, `canReverseConsumable`, `rule:0a80234be9`): requires mandatory reason (3-1000 characters), prevents reversing already reversed rows or reversal rows themselves.
+  - Bilingual error explanations (`explainConsumablesError`): covers `OT_BOOKING_NOT_ACTIVE`, `OT_CONSUMABLE_REVERSAL_INVALID`, `REFERENCE_NOT_FOUND`, and `VALIDATION_ERROR`.
+- **UI Architecture (`src/screens/OTConsumablesNurse.tsx`)**:
+  - Surgical case queue (`GET /ot/bookings`) with status filter (InProgress, Scheduled, Cleaning, Completed, EmergencyHold, All), `mine` filter, case search, and patient context cards.
+  - Patient Context & Identity Banner: Preserves name, MRN, procedure, theater room, primary surgeon, and operative status.
+  - Dual Scan Mode:
+    1. Barcode Scan (Pharmacy stock with automatic FEFO inventory deduction via `POST /ot/bookings/{id}/consumables`).
+    2. Vendor Implant / Non-stock (specialized custom implants with description, unit cost, and retail price).
+  - Statutory Reversal Modal (`POST /ot/consumables/{id}/reverse`, `rule:0a80234be9`): Enforces audit reasons for reversals; hard deletion is strictly prohibited.
+  - Scanned Items Table with live totals, active consumables count, reversed count, and billing revenue metrics.
+  - Realtime synchronization: auto-refreshes on `ot.booking.updated` events without polling.
+- **Help, Handbook & Navigation**:
+  - Wired into `src/App.tsx`, `src/foundation-catalogue.json` (4 tasks), `src/foundation-task-map.json` (4 controls).
+  - Contextual F1 help (`src/foundation-help.ts`): added `ot_consumables_nurse` to `deliveredHelpScreens` and all 20 controls mapped.
+  - Authored comprehensive handbook entry (`src/help.ts`) with bilingual title, purpose, 8 operational steps, and 6 role FAQs.
+  - Bundled screenshots: `public/handbook/ot_consumables_nurse-en.png` and `ot_consumables_nurse-ur.png`.
+- **Verification**:
+  - Automated unit tests: `tests/ot-consumables-nurse.test.mjs` (7/7 passing).
+  - Full test suite: `npm test` passed (554/554 passing across all suites).
+  - Help check: `npm run check:help` passed (120 screens, 2816 controls, 1852 groups, 69 FAQ seeds, 30 workspace guides).
+  - TypeScript compiler: `npx tsc --noEmit` passed with 0 errors.
+  - Production build: `npm run build` succeeded (`dist/assets/index-DElxGgUI.js`).
+- **Commit & Proposal**:
+  - Implementation commit: `aae6250`.
+  - Proposal ID: **274** (status: `pending` on `/docs -> My progress`).
 
 ---
 
