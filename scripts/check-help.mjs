@@ -265,6 +265,7 @@ export function checkHelp({
       "CSSDStock",
       "OTScheduling",
       "OTBoard",
+      "PreAnaesthesiaClinic",
     ].map((n) => `src/screens/${n}.tsx`),
   ];
   const used = new Set(),

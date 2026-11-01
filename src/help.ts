@@ -7526,6 +7526,88 @@ consents_doctor: {
       ]
     ]
   },
+  pre_anaesthesia_clinic: {
+    title: "Pre-anaesthesia clinic",
+    titleUr: "پری اینستھیزیا کلینک (پی اے سی)",
+    purpose: "Comprehensive pre-operative anaesthetic assessment, airway grading (Mallampati I–IV), ASA physical status score classification (I–VI, with 'E' modifier for emergency cases), fasting/NPO verification, informed anaesthesia consent generation, and multi-tier fitness clearance under Rule a91aa7215a, Rule d4ca3b3bcc, Rule d5b2105887, and MSDS COP 31, 32, 39.",
+    purposeUr: "ایم ایس ڈی ایس سی او پی 31، 32، 39 اور قواعد a91aa7215a، d4ca3b3bcc، d5b2105887 کے تحت آپریشن سے قبل اینستھیزیا کا جامع جائزہ، سانس کی نالی کی جانچ (میلم پاٹی 1 تا 4)، جسمانی صحت کی درجہ بندی (اے ایس اے 1 تا 6 مع ایمرجنسی موڈیفائر E)، فاقہ (NPO) کی جانچ، باضابطہ رضامندی فارم کا اجراء اور فٹنس کی حتمی منظوری۔",
+    steps: [
+      "Open Pre-anaesthesia clinic from the Anaesthesia or Doctor workspace to review upcoming surgical candidates.",
+      "Filter the clinical worklist by timeframe (1, 3, 7, or 14 days ahead) or toggle 'My patients only' to focus on your assigned cases.",
+      "Search for surgical bookings by patient name, MRN, procedure, or assigned surgeon.",
+      "Select a booking row and click 'Open Assessment' to launch the detailed pre-anaesthetic evaluation form.",
+      "Record pre-operative baseline vitals including resting heart rate, blood pressure, oxygen saturation on room air, and body weight.",
+      "Document comprehensive medical, surgical, and previous anaesthetic exposure history, current medications, drug allergies, and physical examination findings.",
+      "Evaluate airway anatomy: assign Mallampati class (I to IV) and note mouth opening, neck mobility, dentition, and difficult intubation risk factors.",
+      "Assign ASA physical status classification (ASA I to ASA VI) and toggle the emergency 'E' modifier if the case is urgent (MSDS COP 31).",
+      "Formulate the anaesthetic plan: select planned technique (General, Spinal, Epidural, Regional, Sedation, or Local), document airway management, premedication orders, and NPO fasting instructions.",
+      "Record fitness decision (Fit, FitWithConditions, Deferred, or NotFit) with mandatory clinical justification notes for non-standard clearances, save draft, or sign with active clinical privilege; initiate informed anaesthesia consent."
+    ],
+    stepsUr: [
+      "آئندہ سرجریز کے امیدوار مریضوں کا معائنہ کرنے کے لیے اینستھیزیا یا ڈاکٹر ورک اسپیس سے 'پری اینستھیزیا کلینک' کھولیں۔",
+      "مطلوبہ ایام (1، 3، 7 یا 14 دن) کے مطابق فہرست فلٹر کریں یا صرف اپنے تفویض کردہ کیسز دیکھنے کے لیے 'میرے مریض' پر کلک کریں۔",
+      "مریض کے نام، ایم آر این، آپریشن کے نام یا سرجن کے نام سے سرجری کی بکنگ تلاش کریں۔",
+      "کسی بھی قطار کا انتخاب کریں اور تفصیلی پری اینستھیٹک معائنہ فارم کھولنے کے لیے 'جائزہ کھولیں' پر کلک کریں۔",
+      "آپریشن سے قبل کے بنیادی علامات (نبض، بلڈ پریشر، آکسیجن اور وزن) درستگی سے درج کریں۔",
+      "طبی، جراحی اور سابقہ اینستھیزیا کی تاریخ، جاری ادویات، الرجی اور جسمانی معائنے کے نتائج تفصیلاً قلمبند کریں۔",
+      "سانس کی نالی کا جائزہ لیں: میلم پاٹی درجہ (کلاس 1 تا 4) منتخب کریں اور منہ کھلنے، گردن کی لچک اور دانتوں کی حالت درج کریں۔",
+      "اے ایس اے درجہ بندی (1 تا 6) تفویض کریں اور ہنگامی سرجری کی صورت میں 'E' موڈیفائر منتخب کریں (ایم ایس ڈی ایس سی او پی 31)۔",
+      "اینستھیزیا کا منصوبہ منتخب کریں (جنرل، سپائنل، ایپی ڈیورل وغیرہ)، ایئر وے مینیجمنٹ، پری میڈیکیشن اور فاقہ (NPO) کی ہدایات درج کریں۔",
+      "فٹنس کا حتمی فیصلہ (فٹ، مشروط فٹ، موخر، غیر موزوں) بمعہ لازمی جواز درج کریں، ڈرافٹ محفوظ کریں یا باضابطہ دستخط کریں، اور اینستھیزیا رضامندی فارم تیار کریں۔"
+    ],
+    faq: [
+      [
+        "Who is authorized to sign a pre-anaesthesia assessment?",
+        "Under Rule d4ca3b3bcc and MSDS COP 31, signing requires an active PreAnaesthesiaAssessment or Anaesthesia clinical privilege verified against the hospital privileges registry. Doctors without this active privilege may only save drafts."
+      ],
+      [
+        "Why is a decision note strictly required for FitWithConditions, Deferred, or NotFit?",
+        "Under Rule a91aa7215a, any non-standard fitness clearance alters the patient's surgical journey and perioperative risk. A detailed clinical rationale ensures patient safety, transparent risk communication, and regulatory compliance."
+      ],
+      [
+        "Can a signed pre-anaesthesia assessment be edited directly?",
+        "No. Under Rule 9e9cb593cb, once an assessment is signed and finalized, it becomes part of the permanent medical record (OT_RECORD_FINAL). Any subsequent changes require a formal addendum or starting a new reassessment cycle via 'Reassess Patient'."
+      ],
+      [
+        "How does the pre-anaesthesia clinic interact with informed anaesthesia consent?",
+        "Under Rule d5b2105887, once an anaesthetic technique is planned, the anaesthetist can prepare the specialized Anaesthesia Consent form (POST /consents with form_code ANAESTHESIA). The form is pre-filled with the planned technique and practitioner, printed for bilingual counseling, and signed before surgery."
+      ],
+      [
+        "What happens if a patient is marked 'NotFit' or 'Deferred'?",
+        "Under Rule a91aa7215a, marking a patient NotFit or Deferred prevents theatre check-in and sign-in until an anaesthetist re-evaluates the patient, addresses the contraindication, and signs a new assessment certifying them as fit."
+      ],
+      [
+        "What are the mandatory pre-operative fasting (NPO) guidelines?",
+        "In accordance with standard anaesthetic guidelines, clear liquids are permitted up to 2 hours before anaesthesia induction, while solids and non-human milk require at least 6 hours of fasting (8 hours for heavy meals)."
+      ]
+    ],
+    faqUr: [
+      [
+        "پری اینستھیزیا اسسمنٹ پر دستخط کرنے کا مجاز کون ہے؟",
+        "قاعدہ d4ca3b3bcc اور ایم ایس ڈی ایس کے تحت دستخط کے لیے ہسپتال کے استحقاق رجسٹر میں فعال اینستھیزیا یا پی اے سی پریولج ہونا لازمی ہے۔ بغیر استحقاق کے معالج صرف ڈرافٹ محفوظ کر سکتے ہیں۔"
+      ],
+      [
+        "مشروط منظوری، التواء یا غیر موزوں ہونے کی صورت میں نوٹ لکھنا کیوں ضروری ہے؟",
+        "قاعدہ a91aa7215a کے تحت کسی بھی غیر معمولی فیصلے کی صورت میں مریض کے آپریشن کا رسک بڑھ جاتا ہے۔ تفصیلی طبی جواز مریض کے تحفظ اور قانونی تقاضوں کے لیے لازمی ہے۔"
+      ],
+      [
+        "کیا دستخط شدہ اسسمنٹ میں براہ راست ترمیم کی جا سکتی ہے؟",
+        "نہیں۔ قاعدہ 9e9cb593cb کے تحت فائنل شدہ ریکارڈ مستقل بن جاتا ہے (OT_RECORD_FINAL)۔ مزید تبدیلیوں کے لیے ضمیمہ یا 'دوبارہ جائزہ لیں' کے ذریعے نیا اسسمنٹ شروع کرنا پڑتا ہے۔"
+      ],
+      [
+        "پی اے سی کا اینستھیزیا رضامندی (Consent) سے کیا تعلق ہے؟",
+        "قاعدہ d5b2105887 کے مطابق مجوزہ طریقہ کار طے ہونے کے بعد مخصوص اینستھیزیا کنسنٹ فارم تیار کیا جاتا ہے جو مریض کو سمجھا کر باضابطہ دستخط اور پرنٹ کیا جاتا ہے۔"
+      ],
+      [
+        "اگر مریض کو غیر موزوں (NotFit) یا موخر (Deferred) قرار دیا جائے تو کیا ہوتا ہے؟",
+        "قاعدہ a91aa7215a کے مطابق ایسا مریض آپریشن تھیٹر میں داخل نہیں ہو سکتا جب تک کہ اینستھیٹسٹ دوبارہ معائنہ کر کے نیا فٹنس سرٹیفکیٹ جاری نہ کرے۔"
+      ],
+      [
+        "آپریشن سے قبل فاقہ (NPO) کی بنیادی ہدایات کیا ہیں؟",
+        "معیاری طبی اصولوں کے تحت شفاف مائعات آپریشن سے 2 گھنٹے پہلے تک دیے جا سکتے ہیں، جبکہ ٹھوس غذا اور دودھ کے لیے کم از کم 6 گھنٹے کا فاقہ لازمی ہے۔"
+      ]
+    ]
+  },
   maternity_policy: {
     title: "High-risk pregnancy: our policy",
     titleUr: "ہائی رسک حمل: ہسپتال کی پالیسی",
