@@ -92,6 +92,7 @@ import { ReferralRegister } from "./screens/ReferralRegister";
 import { PatientEducation } from "./screens/PatientEducation";
 import { HomeVisitRecord } from "./screens/HomeVisitRecord";
 import { PatientProgrammes } from "./screens/PatientProgrammes";
+import { PatientProgrammesTriage } from "./screens/PatientProgrammesTriage";
 import { PrescriptionQueue } from "./screens/PrescriptionQueue";
 import { Dispense } from "./screens/Dispense";
 import { OrderQueries } from "./screens/OrderQueries";
@@ -152,6 +153,7 @@ const labels: Record<string, [string, string, string]> = {
   rx_queue: ["Prescription queue", "نسخوں کی قطار", "Rx"],
   home_visit_record: ["Record a home visit", "گھر کے دورے کا اندراج", "⌂"],
   patient_programmes: ["Preventive programmes of a patient", "مریض کے حفاظتی پروگرام", "◷"],
+  patient_programmes_triage: ["Preventive programmes of a patient (Triage)", "مریض کے حفاظتی پروگرام (ٹرائیج)", "◷"],
   patient_education: ["Health education given", "دی گئی صحت کی رہنمائی", "◉"],
   referral_register: ["Referral register", "حوالہ رجسٹر", "▤"],
   external_referral: ["Refer out (external referral)", "بیرونی مرکز کو حوالہ", "↗"],
@@ -230,6 +232,7 @@ const frontDeskScreens = new Set([
   'death_record',
   'body_release_ward',
   'body_release_er',
+  'patient_programmes_triage',
   'consents_ward',
   'consents_doctor',
   'blood_sources',
@@ -921,6 +924,7 @@ export function App() {
   'death_record',
   'body_release_ward',
   'body_release_er',
+  'patient_programmes_triage',
   'consents_ward',
   'consents_doctor',
   'blood_sources',
@@ -981,7 +985,7 @@ export function App() {
       (id !== "donor_assessment" || ["full","open_work","records","setup"].includes(est?.views.screens.find(v=>v.screen_id===id)?.view || "")) &&
       (id !== "blood_collection" || ["full","open_work","records","setup"].includes(est?.views.screens.find(v=>v.screen_id===id)?.view || "")) &&
       (id !== "blood_center_lab" || ["full","open_work","records","setup"].includes(est?.views.screens.find(v=>v.screen_id===id)?.view || "")) &&
-      (!["mar","verbal_orders_ward","verbal_orders_er","vitals_tracker","patient_education_ward","nursing_assessment","my_beds","doctor_inpatients","cost_estimates_admissions","consents_admissions","wristbands_admissions","wristbands_ward","own_medicines_ward","own_medicines_pharmacy","bed_matrix","pending_admissions","imaging_repeats","imaging_outsourced","critical_results_radiology","radiology_worklist","rx_queue","dispense","order_queries","otc","charity_override","lab_only_walkin","lab_bench","lab_send_outs","lab_verification","critical_results_bench","critical_results_verifier","critical_results_doctor","critical_results_ward","critical_results_er","consents_ward","consents_triage","er_board_doctor","er_visit_doctor","mlc_cases","mlc_cases_doctor","death_record","body_release_ward","body_release_er"].includes(id) || ["full", "open_work", "records"].includes(est?.views.screens.find(v => v.screen_id === id)?.view || "")),
+      (!["mar","verbal_orders_ward","verbal_orders_er","vitals_tracker","patient_education_ward","nursing_assessment","my_beds","doctor_inpatients","cost_estimates_admissions","consents_admissions","wristbands_admissions","wristbands_ward","own_medicines_ward","own_medicines_pharmacy","bed_matrix","pending_admissions","imaging_repeats","imaging_outsourced","critical_results_radiology","radiology_worklist","rx_queue","dispense","order_queries","otc","charity_override","lab_only_walkin","lab_bench","lab_send_outs","lab_verification","critical_results_bench","critical_results_verifier","critical_results_doctor","critical_results_ward","critical_results_er","consents_ward","consents_triage","er_board_doctor","er_visit_doctor","mlc_cases","mlc_cases_doctor","death_record","body_release_ward","body_release_er","patient_programmes_triage"].includes(id) || ["full", "open_work", "records"].includes(est?.views.screens.find(v => v.screen_id === id)?.view || "")),
   );
   const view = est?.views.workspaces.find(
     (v) => v.workspace === workspace,
@@ -1419,6 +1423,7 @@ export function App() {
               {screen === "doctor_queue" && <DoctorQueue key={user.user_id} permissions={user.permissions} connected={connected} stream={stream} timeZone={meta?.hospital_timezone} onConsultation={nav.includes("consultation") ? id=>{if(navigate("consultation"))setClinicalSelection({userId:user.user_id,ticketId:id})}:undefined} readOnly={view === "records" || est?.views.screens.find(s => s.screen_id === "doctor_queue")?.view === "records"} />}
               {screen === "home_visit_record" && <HomeVisitRecord key={user.user_id} user={user} revision={revision} initialTicket={clinicalSelection?.userId===user.user_id?clinicalSelection.ticketId:undefined} readOnly={view==="records"||est?.views.screens.find(s=>s.screen_id==="home_visit_record")?.view==="records"} connected={connected} timeZone={meta?.hospital_timezone} establishment={est}/>}
               {screen === "patient_programmes" && <PatientProgrammes key={user.user_id} user={user} revision={revision} initialTicket={clinicalSelection?.userId===user.user_id?clinicalSelection.ticketId:undefined} readOnly={view==="records"||est?.views.screens.find(s=>s.screen_id==="patient_programmes")?.view==="records"} connected={connected} timeZone={meta?.hospital_timezone} establishment={est}/>}
+              {screen === "patient_programmes_triage" && <PatientProgrammesTriage key={user.user_id} user={user} revision={revision} initialTicket={clinicalSelection?.userId===user.user_id?clinicalSelection.ticketId:undefined} readOnly={view==="records"||est?.views.screens.find(s=>s.screen_id==="patient_programmes_triage")?.view==="records"} connected={connected} timeZone={meta?.hospital_timezone} establishment={est}/>}
               {screen === "patient_education" && <PatientEducation key={user.user_id} user={user} revision={revision} initialTicket={clinicalSelection?.userId===user.user_id?clinicalSelection.ticketId:undefined} readOnly={view==="records"||est?.views.screens.find(s=>s.screen_id==="patient_education")?.view==="records"} connected={connected} timeZone={meta?.hospital_timezone}/>}
               {screen === "referral_register" && <ReferralRegister key={user.user_id} user={user} revision={revision} connected={connected} timeZone={meta?.hospital_timezone}/>}
               {screen === "external_referral" && <ExternalReferral key={user.user_id} user={user} revision={revision} initialTicket={clinicalSelection?.userId===user.user_id?clinicalSelection.ticketId:undefined} readOnly={view==="records"||est?.views.screens.find(s=>s.screen_id==="external_referral")?.view==="records"} connected={connected} timeZone={meta?.hospital_timezone} availableScreens={nav} onRoute={(next,id)=>{if(navigate(next)&&id)setClinicalSelection({userId:user.user_id,ticketId:id})}}/>}

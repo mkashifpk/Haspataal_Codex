@@ -19,7 +19,7 @@ import { hospitalTimeToUtc, formatHospitalTime } from "../hospital-time";
 import { programmeEntryIssues, programmeWork } from "../programme-rules";
 import type { EstablishmentOut } from "../generated/facility_profile";
 import * as prog from "../generated/patient_programmes";
-type Props = {
+export type PatientProgrammesProps = {
   user: ClinicalUser;
   revision: number;
   initialTicket?: number;
@@ -27,7 +27,9 @@ type Props = {
   connected: boolean;
   timeZone?: string;
   establishment?: EstablishmentOut;
+  screenId?: string;
 };
+type Props = PatientProgrammesProps;
 export function PatientProgrammes(props: Props) {
   const [patient, setPatient] = useState<number>();
   const [changes, setChanges] = useState(0);

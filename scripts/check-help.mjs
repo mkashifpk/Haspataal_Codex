@@ -192,6 +192,7 @@ export function checkHelp({
       "ReferralRegister",
       "PatientEducation",
       "PatientProgrammes",
+      "PatientProgrammesTriage",
       "HomeVisitRecord",
       "PrescriptionQueue",
       "Dispense",

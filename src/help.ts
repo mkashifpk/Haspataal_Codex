@@ -3777,6 +3777,100 @@ consents_ward: {
    faq:[["Who records or manages programme care?","Doctors/clinical specialists and triage, ward or head nurses with programme.give perform permitted enrolment/service/closure. programme.view/manage controls history and programme.view the due list. Quality/authorized setup staff maintain offered programmes and national guidance in their separate workspace. Never infer clinical authority from a role name or facility category."],["What remains available when service retires?","No new enrolment from now on. An existing eligible Active enrolment from before retirement can still record service and close. History stays readable in records view. The server is authoritative and is re-read before every write; a never-offered Available service is hidden from daily menus, not falsely shown Active for testing."],["Where does the next date come from?","Only the actual programme card. It begins blank; no vaccine schedule, interval, dose or suggested next date is computed. Given time is explicit, converted from hospital timezone and checked against authenticated server time; next date cannot precede the given local day. Record the actual vaccine/medicine batch where applicable. National guidance is displayed unchanged for the clinician to interpret."],["What if already enrolled, closed or corrected?","PROGRAMME_ENROLLED means read/open that patient's actual existing Active enrolment. A closed enrolment cannot receive new services or closure; deliberately re-enrol for a new course when permitted. Entries are append-only and stamped; a mistake is followed by a correct entry with explanatory note, never editing the original or fabricating a vaccination."],["How do due-list and closure actions work?","Due query date defaults to server hospital today and uses the latest card-written next_due_on of open enrolments, with real phone numbers. Reads are logged; no automatic communication. Completed closes, transfer-out requires where and discontinued requires why. Closing is not an idempotent replay: read the original after an uncertain reply before another action."],["What can be printed and what remains to test?","Authorized managers/MSDS viewers can open the official offered-programme list PDF; inactive service prints that none is provided. No app-generated patient card/schedule/certificate exists. On authorized Active DEV setup the named clinician/nurse must create fresh enrolments, record actual card services, close in all permitted ways, check already-enrolled/closed/future/inactive refusal, due follow-up, original-key recovery, F1/dialog focus, both languages/themes250% and native Urdu/editor/printed list. Current inactive previews/units do not establish positive delivery or fill the human worksheet."]],
    faqUr:[["پروگرام کی نگہداشت کون کرتا ہے؟","اصل اجازت والے ڈاکٹر/ماہر، ٹرائیج، وارڈ یا ہیڈ نرس اندراج/خدمت/بندش؛ تاریخ کو پڑھائی/انتظام اور واجب فہرست کو پڑھائی کی اجازت۔ کوالٹی/مجاز ترتیب الگ پروگرام و قومی رہنما رکھتی ہے۔ کردار یا ہسپتال کی قسم سے طبی اجازت فرض نہیں۔"],["خدمت ریٹائر ہو تو کیا باقی؟","اب نیا اندراج نہیں۔ پہلے کا موزوں کھلا اندراج خدمت و بندش جاری رکھ سکتا ہے۔ ریکارڈ منظر میں تاریخ۔ ہر عمل سے پہلے اصل سرور؛ کبھی نہ دی گئی دستیاب خدمت مینو سے غائب، ٹیسٹ کے لیے جھوٹی فعال نہیں۔"],["اگلی تاریخ کہاں سے؟","صرف اصل کارڈ، ابتدا خالی؛ ویکسین شیڈول، وقفہ، خوراک یا تجویز نہیں۔ اصل وقت ہسپتال سے تبدیل اور سرور کے وقت سے چیک؛ اگلی تاریخ دینے کے مقامی دن سے پہلے نہیں۔ جہاں لازم اصل بیچ؛ قومی رہنما بعینہ معالج پڑھے۔"],["پہلے درج، بند یا غلطی پر؟","پہلے درج پر اسی مریض کا اصل کھلا اندراج پڑھ/کھولیں۔ بند میں خدمت/دوبارہ بندش نہیں؛ مناسب فعال خدمت میں نیا کورس۔ مہر والے صرف اضافے، غلطی پر وضاحت سے نیا درست اندراج؛ اصل بدلنا یا فرضی ویکسین نہیں۔"],["واجب فہرست اور بندش کیسے؟","تلاش سرور کا ہسپتال آج، کھلے اندراج کی اصل آخری کارڈ تاریخ و فون؛ رسائی درج، خود رابطہ نہیں۔ مکمل بند، منتقل کو منزل، ختم کو وجہ۔ گم بندش محفوظ تکرار نہیں؛ پہلے اصل حالت پڑھیں۔"],["پرنٹ اور باقی جائزہ؟","مجاز منتظم/معیار اصل دستیاب فہرست پی ڈی ایف؛ غیر فعال پر نہ دینے کا بیان۔ ایپ کارڈ/شیڈول/سرٹیفکیٹ نہیں بناتی۔ مجاز فعال ڈی وی میں نام زد ڈاکٹر/نرس نئے اندراج، اصل کارڈ خدمت، بندش، پہلے درج/بند/مستقبل/غیرفعال انکار، واجب رابطہ، اصل کوشش، ایف۱، دونوں زبان250فیصد و اصل اردو/مدیر/فہرست پرنٹ چیک کرے۔ موجودہ غیر فعال مثال/اکائی ٹیسٹ مثبت خدمت یا انسانی شیٹ نہیں۔"]]
   },
+  patient_programmes_triage: {
+    title: "Preventive programmes of a patient",
+    titleUr: "مریض کے حفاظتی پروگرام",
+    purpose: "Emergency department triage nurses and clinicians enrol acute and walk-in patients in offered preventive programmes (such as tetanus toxoid, rabies post-exposure prophylaxis, hepatitis immunization, or family planning), record services given from the physical programme card, follow up due patients, and close enrolments upon completion, transfer or discontinuation. Care follows national clinical guidelines and the patient's card; the system never computes a vaccine schedule or next appointment date. Urdu remains a draft until a native speaker reviews it.",
+    purposeUr: "ایمرجنسی ٹرائیج نرس اور معالجین مریضوں کو ہنگامی حفاظتی پروگرامز (جیسے تشنج، کتے کا کاٹنا، ہیپاٹائٹس، حفاظتی ٹیکہ جات یا خاندانی منصوبہ بندی) میں درج کرتے ہیں، فزیکل کارڈ کے مطابق خدمت درج کرتے ہیں، واجب مریضوں سے رابطہ کرتے ہیں اور تکمیل پر اندراج بند کرتے ہیں۔ نگہداشت قومی رہنمائی کے تحت ہے؛ سسٹم کوئی شیڈول یا اگلی تاریخ خود حساب نہیں کرتا۔ اردو انسانی جائزے تک مسودہ ہے۔",
+    steps: [
+      "Open Triage → Preventive programmes of a patient (patient_programmes_triage). Select the acute trauma, animal bite, or walk-in patient from the ER board or search by MRN/name across the hospital register. Verify patient identity, age, and critical alert badges.",
+      "Inspect the preventive_programmes service status: Active permits initiating new emergency enrolments (rule:79051b4dae); Retiring displays 'No new enrolment from now on' but permits administering doses to already-enrolled patients (rule:595bd3d226); and records view allows read-only historical inspection.",
+      "Review the Programme catalogue and national guidelines (GET /preventive-programmes): examine offered programmes (Immunization, FamilyPlanning, Tuberculosis, Malaria, Dengue, Other), national guidelines, and authorized service lists. Select only currently offered programmes for new enrolments.",
+      "Enrol patient in programme (rule:aeeeb885d1): select the offered programme (e.g., Tetanus Immunization or Rabies Prophylaxis) and transcribe the physical emergency vaccination card or register number into the Card number field. Click 'Enrol in programme' once (POST /patients/{id}/programmes with idempotent protection).",
+      "Resolve duplicate enrolment warnings: if PROGRAMME_ENROLLED error occurs, click 'Read and open existing enrolment' to safely reload and view the patient's existing active card record rather than creating a duplicate or guessing identifiers.",
+      "Record administered emergency dose (rule:d4a008a82a): under an Active enrolment, click 'Record service'. Choose the administered vaccine/service, specify the hospital administration time (never in the future), enter the vaccine batch number, and record the next appointment date exactly as handwritten on the card. Next appointment date starts blank and is never auto-calculated.",
+      "Close completed or discontinued courses (rule:692d8bf9d7): click 'Close' to transition the enrolment to Completed (series finished), TransferredOut (destination facility required in note), or Discontinued (clinical rationale required in note). Once closed, enrolments reject further writes with PROGRAMME_ENROLMENT_CLOSED; re-enrol to start a fresh course.",
+      "Follow up due emergency immunizations (rule:4740c21f9f): review the 'Patients due by their programme cards' worklist (GET /preventive-programmes/due?on=today). Filter by programme to view overdue tetanus or rabies doses, inspect registered mobile phone numbers, and contact patients for life-saving booster appointments."
+    ],
+    stepsUr: [
+      "ٹرائیج سے مریض کے حفاظتی پروگرام (patient_programmes_triage) کھولیں۔ ایمرجنسی بورڈ سے چوٹ، کتے کے کاٹے یا واک ان مریض کو منتخب کریں یا ایم آر این/نام سے تلاش کریں۔ مریض کی شناخت، عمر اور الرجی بینرز کی تصدیق کریں۔",
+      "حفاظتی پروگرام کی سروس کی حالت دیکھیں: فعال (Active) ہونے پر نیا اندراج ممکن ہے؛ ریٹائرنگ (Retiring) پر 'اب نیا اندراج نہیں' کا بینر ظاہر ہوتا ہے لیکن پہلے سے درج مریضوں کو خوراک دینا جاری رہتا ہے؛ اور ریکارڈز موڈ میں سابقہ تاریخ صرف پڑھی جا سکتی ہے۔",
+      "پروگرام کیٹلاگ اور قومی رہنما اصول دیکھیں (GET /preventive-programmes): پیش کردہ پروگرامز (حفاظتی ٹیکہ جات، خاندانی منصوبہ بندی، ٹی بی، ملیریا، ڈینگی)، رہنمائی اور منظور شدہ خدمات کا معائنہ کریں۔ صرف فعال پیش کردہ پروگرامز میں ہی نیا اندراج کریں۔",
+      "پروگرام میں مریض کا اندراج کریں (اصول aeeeb885d1): متعلقہ پروگرام (جیسے تشنج یا اینٹی ریبیز) منتخب کریں اور اصل فزیکل ایمرجنسی کارڈ یا رجسٹر نمبر درج کریں۔ 'پروگرام میں اندراج' پر ایک بار کلک کریں (POST /patients/{id}/programmes)۔",
+      "پہلے سے موجود اندراج کا حل: اگر PROGRAMME_ENROLLED کا انتباہ آئے تو 'اصل اندراج پڑھ کر کھولیں' پر کلک کریں تاکہ سرور سے مریض کا پہلے سے فعال کارڈ کھل جائے، نیا یا ڈپلیکیٹ ریکارڈ نہ بنائیں۔",
+      "ہنگامی ویکسین یا خدمت درج کریں (اصول d4a008a82a): کھلے فعال اندراج پر 'خدمت درج کریں' منتخب کریں۔ دی گئی خدمت چنیں، ہسپتال کے وقت میں وقت درج کریں (جو مستقبل کا نہ ہو)، ویکسین کا بیچ نمبر لکھیں، اور کارڈ پر لکھی اگلی تاریخ درج کریں۔ اگلی تاریخ کا خانہ خالی ہوتا ہے اور خود حساب نہیں ہوتا۔",
+      "کورس کی تکمیل یا منسوخی پر بند کریں (اصول 692d8bf9d7): 'بند کریں' پر کلک کر کے مکمل (Completed)، منتقل شدہ (TransferredOut بمعہ منزل)، یا ترک شدہ (Discontinued بمعہ وجہ) درج کریں۔ بند اندراج پر مزید خدمات PROGRAMME_ENROLMENT_CLOSED سے بلاک ہوتی ہیں؛ نئے علاج کے لیے دوبارہ اندراج کریں۔",
+      "واجب ٹیکہ جات کا فالو اپ (اصول 4740c21f9f): کارڈ کے مطابق واجب مریضوں کی فہرست (GET /preventive-programmes/due) دیکھیں۔ تشنج یا کتے کے کاٹے کے فالو اپ مریضوں کے فون نمبرز دیکھ کر اگلی خوراک کے لیے رابطہ کریں۔"
+    ],
+    faq: [
+      [
+        "The Preventive programmes of a patient screen says \"The patient's enrolment in this programme is still open: record the service on it, or close it first.\" (PROGRAMME_ENROLLED). Why, and what do I do?",
+        "Under rule:aeeeb885d1, each patient may have only one active enrolment per preventive programme at a time to prevent duplicate schedules or fragmented tracking. When PROGRAMME_ENROLLED is returned, the system displays a 'Read and open existing enrolment' button. Click this button to load and inspect the currently active enrolment from the server. You can then record the emergency dose/service against this existing card or close the prior course before creating a new one."
+      ],
+      [
+        "The Preventive programmes of a patient screen says \"This programme enrolment is closed (completed, transferred out or discontinued): enrol the patient again to continue.\" (PROGRAMME_ENROLMENT_CLOSED). Why, and what do I do?",
+        "Under rule:692d8bf9d7, once an enrolment is finalized as Completed, TransferredOut, or Discontinued, its audit record is permanently sealed and rejects any further service appends or repeat closures. If the patient presents again requiring a new preventive course (e.g. fresh trauma requiring a tetanus booster or a new immunization round), initiate a brand new enrolment using their new or renewed card under the offered programme."
+      ],
+      [
+        "What do the states of a programme enrolment mean (Active, Completed, TransferredOut, Discontinued), and what moves it from one to the next?",
+        "A programme enrolment begins in Active state upon registration (POST /patients/{id}/programmes) when the service is Active. While Active, nursing staff record each administered vaccine or prophylactic service (POST /programme-enrolments/{id}/entries). The enrolment transitions to a terminal state via POST /programme-enrolments/{id}/close: Completed indicates the full prescribed protocol or vaccination series was finished; TransferredOut indicates the patient was referred to another clinic/hospital (mandatory destination note); and Discontinued indicates therapy was terminated due to adverse reaction, contraindication, or patient request (mandatory clinical explanation note)."
+      ],
+      [
+        "How does the triage nurse record post-exposure emergency prophylaxis (tetanus toxoid, rabies vaccine, anti-rabies serum)?",
+        "For trauma, animal bites, or open wounds, verify patient identity and enroll the patient in the corresponding preventive programme (e.g., Tetanus Immunization or Rabies Prophylaxis). Enter the physical emergency card number, record the dose given in hospital time, specify the manufacturer vaccine batch number, and record the next appointment date exactly as written on the emergency vaccination card (rule:d4a008a82a). Never guess an interval; national guidelines must be followed."
+      ],
+      [
+        "What actions remain permissible if the preventive_programmes service transitions to Retiring state?",
+        "Under rule:288e88802f and rule:595bd3d226, when preventive_programmes is in Retiring state, new enrolments are blocked with the notice 'No new enrolment from now on'. However, triage nurses can continue recording follow-up services and closing existing active enrolments that were initiated prior to retirement. Complete history remains readable in records view."
+      ],
+      [
+        "Why does the system reject a next due date that falls before or on the given date?",
+        "Under rule:d4a008a82a and programmeEntryIssues policy, a service entry cannot record a next due date in the past relative to the local administration day. Furthermore, the given timestamp cannot be set in the future relative to the authenticated server clock. The next due date field is intentionally left blank upon opening to prevent automated guessing; staff must transcribe the exact date handwritten on the card."
+      ],
+      [
+        "How should the triage nurse utilize the preventive programmes due list?",
+        "The due list (GET /preventive-programmes/due?on=today) displays patients enrolled in active programmes whose physical cards indicate a follow-up service is due on or before today (rule:4740c21f9f). Filter by programme to review patient MRN, name, registered mobile phone number, and last recorded service. Reads are audited in server logs. Contact the patient or attendant using the recorded number to schedule their emergency follow-up booster."
+      ],
+      [
+        "What happens if network connectivity drops while submitting an enrolment or service entry?",
+        "Enrolment and entry submissions use client-generated idempotency keys and state reconciliation (q:writes). If a network interruption or timeout occurs, the UI freezes ordinary input to prevent duplicate administration records. Retry with the identical key within 24 hours or refresh patient history to verify if the server committed the transaction."
+      ]
+    ],
+    faqUr: [
+      [
+        "سکرین پر 'مریض کا اندراج ابھی کھلا ہے، خدمت درج کریں یا بند کریں' (PROGRAMME_ENROLLED) کیوں آتا ہے؟",
+        "اصول aeeeb885d1 کے تحت شیڈول کی ڈپلیکیشن روکنے کے لیے ایک پروگرام میں بیک وقت ایک ہی فعال اندراج ہو سکتا ہے۔ جب یہ خرابی آئے تو سکرین پر 'اصل اندراج پڑھ کر کھولیں' کا بٹن ظاہر ہوتا ہے۔ اس پر کلک کر کے سرور سے کھلا ریکارڈ دیکھیں، اسی کارڈ پر ہنگامی خدمت درج کریں یا نیا اندراج بنانے سے پہلے پرانا بند کریں۔"
+      ],
+      [
+        "سکرین پر 'یہ اندراج بند ہے، دوبارہ اندراج کریں' (PROGRAMME_ENROLMENT_CLOSED) کیوں آتا ہے؟",
+        "اصول 692d8bf9d7 کے تحت مکمل، منتقل شدہ یا ترک شدہ اندراج پر مزید خدمت یا بندش بلاک ہو جاتی ہے۔ اگر مریض کو نئے حادثے کے بعد دوبارہ تشنج یا ویکسین کی ضرورت ہو تو فعال پروگرام کے تحت اس کے نئے کارڈ سے نیا اندراج شروع کریں۔"
+      ],
+      [
+        "پروگرام اندراج کی حالتوں (Active, Completed, TransferredOut, Discontinued) کا کیا مطلب ہے؟",
+        "اندراج کے وقت حالت فعال (Active) ہوتی ہے۔ اس دوران نرس ہر دی گئی ویکسین یا خدمت (POST /entries) درج کرتی ہے۔ پوسٹ کلوز سے یہ حتمی حالتوں میں منتقل ہوتا ہے: مکمل (Completed) یعنی تمام خوراکیں مکمل ہو گئیں؛ منتقل شدہ (TransferredOut) یعنی دوسرے ہسپتال بھیجا گیا (منزل لازمی ہے)؛ اور ترک شدہ (Discontinued) یعنی ری ایکشن یا مریض کے انکار پر علاج روکا گیا (وجہ لازمی ہے)۔"
+      ],
+      [
+        "ٹرائیج نرس ہنگامی حفاظتی ٹیکہ جات (تشنج، ریبیز ویکسین) کیسے درج کرے؟",
+        "زخمی یا جانور کے کاٹے مریض کی شناخت تصدیق کر کے متعلقہ پروگرام میں داخل کریں۔ فزیکل کارڈ نمبر درج کریں، ہسپتال کے وقت میں دی گئی خوراک درج کریں، ویکسین کا بیچ نمبر لکھیں اور کارڈ پر لکھی اگلی تاریخ درج کریں (اصول d4a008a82a)۔ تاریخ کا خود اندازہ نہ لگائیں۔"
+      ],
+      [
+        "اگر سروس کی حالت ریٹائرنگ (Retiring) ہو جائے تو کیا اعمال ممکن ہیں؟",
+        "اصول 288e88802f اور 595bd3d226 کے تحت نئے اندراج پر 'اب نیا اندراج نہیں' کا بینر آتا ہے۔ تاہم نرسیں ریٹائرمنٹ سے پہلے کے کھلے اندراجات پر خدمات اور بندش جاری رکھ سکتی ہیں۔ سابقہ ریکارڈز تاریخ میں پڑھے جا سکتے ہیں۔"
+      ],
+      [
+        "سسٹم دی گئی تاریخ سے پہلے کی اگلی تاریخ کیوں مسترد کرتا ہے؟",
+        "اصول d4a008a82a کے تحت اگلی تاریخ دی گئی تاریخ سے پہلے یا ماضی کی نہیں ہو سکتی۔ اس کے علاوہ دی گئی تاریخ سرور کی گھڑی سے مستقبل کی نہیں ہو سکتی۔ خودکار اندازہ روکنے کے لیے اگلی تاریخ کا خانہ ابتدا میں خالی رہتا ہے۔"
+      ],
+      [
+        "ٹرائیج نرس واجب خدمات کی فہرست (Due list) کیسے استعمال کرے؟",
+        "واجب فہرست (GET /preventive-programmes/due) ان مریضوں کو دکھاتی ہے جن کے کارڈ کے مطابق آج یا اس سے پہلے اگلی خوراک واجب ہے (اصول 4740c21f9f)۔ پروگرام فلٹر لگا کر مریض کا نام، ایم آر این اور فون نمبر دیکھیں اور اگلی خوراک کے لیے رابطہ کریں۔"
+      ],
+      [
+        "اگر اندراج یا خدمت بھیجتے وقت انٹرنیٹ منقطع ہو جائے تو کیا ہوتا ہے؟",
+        "تمام ترسیلات محفوظ کلید (idempotency key) کے ساتھ بھیجی جاتی ہیں (q:writes)۔ کنکشن ٹوٹنے کی صورت میں ڈپلیکیٹ ریکارڈ سے بچنے کے لیے سکرین عام ان پٹ مقفل کر دیتی ہے۔ 24 گھنٹے کے اندر اسی کلید سے دوبارہ کوشش کریں یا ہسٹری تازہ کر کے چیک کریں۔"
+      ]
+    ]
+  },
 consents_doctor: {
   title: "Consents: informed consent and refusal",
   titleUr: "رضامندی: باخبر رضامندی اور انکار",
