@@ -1,7 +1,7 @@
 # Haspataal checkpoint
 Last updated: 01 November 2026, Antigravity (Codex pair), Asia/Karachi.
 
-## Active request: Phase 6 Screen 131 `transfusion_bedside_ot` (Bedside transfusion observation - OT workspace)
+## Active request: Phase 6 Screen 132 `ot_settlement` (Post-op settlement - OT Admin workspace)
 Executing the Phase 6 Roadmap ("Theatre and sterile supply") in dependency order along with all tests and MCP progress reporting:
 - Screen 108: **`transfusion_bedside_er`** ("Bedside transfusion observation - ER", Position 108, 74 points) — **COMPLETED** (commit `2803cf0`, Proposal **261** awaiting human review on `/docs -> My progress`). Marks Phase 5 100% complete!
 - Screen 109: **`clinical_privileges`** ("Clinical privileges", Position 109, 55 points) — **COMPLETED** (commit `5ddbd89`, Proposal **262** awaiting human review on `/docs -> My progress`). First screen of Phase 6!
@@ -26,7 +26,33 @@ Executing the Phase 6 Roadmap ("Theatre and sterile supply") in dependency order
 - Screen 128: **`recovery_board`** ("Live PACU recovery board", Position 128, 65 points, workspace `ot_nurse`) — **COMPLETED** (commit `4e8f4db`, Proposal **281** awaiting human review on `/docs -> My progress`).
 - Screen 129: **`recovery_board_admin`** ("Live PACU recovery board - OT Admin", Position 129, 65 points, workspace `ot_admin`) — **COMPLETED** (commit `7cf0069`, Proposal **282** awaiting human review on `/docs -> My progress`).
 - Screen 130: **`recovery_board_anaesthesia`** ("Live PACU recovery board - Anaesthesia", Position 130, 65 points, workspace `anaesthesia`) — **COMPLETED** (commit `6c9c9da`, Proposal **283** awaiting human review on `/docs -> My progress`). All 3 recovery board workspaces completed!
-- Screen 131: **`transfusion_bedside_ot`** ("Bedside transfusion observation - OT", Position 131, 74 points, workspace `ot_nurse`) — **READY TO IMPLEMENT**.
+- Screen 131: **`transfusion_bedside_ot`** ("Bedside transfusion observation - OT", Position 131, 74 points, workspace `ot_nurse`) — **COMPLETED** (commit `0876f7c`, Proposal **284** awaiting human review on `/docs -> My progress`).
+- Screen 132: **`ot_settlement`** ("Post-op settlement & reconciliation", Position 132, 49 points, workspace `ot_admin`) — **IN PROGRESS** (Final screen of Phase 6!).
+
+---
+
+### Completed Screen 131 (`transfusion_bedside_ot`) Checkpoint
+- **Workflow & Standards**: Bedside blood transfusion administration and monitoring in `ot_nurse` workspace (MSDS COP 38, 41, PBTA standards):
+  - Bedside safety verification protocol (`rule:0a07d57ff8`): Wristband barcode scanning via `GET /wristbands/verify`, 5 mandatory bedside checkboxes, and dual independent sign-off (`STEP_UP_REQUIRED`, `DUAL_CONTROL_SAME_PERSON`).
+  - Cold chain countdown (`rule:8e16f20b4a`): 30-minute start timer; units not started within 30 minutes are refused with `BLOOD_UNIT_OUT_TOO_LONG` and routed to Safe Return ledger as 'Not Given' (`OutOfStorageTooLong`).
+  - Vital signs flowsheet and 4-hour administration limit (`rule:efcdf1e299`): Baseline and ongoing vitals recorded via `POST /blood/transfusions/{id}/observations`, amber late indicator if administration exceeds 4 hours.
+  - Transfusion acute reaction reporting (`rule:a2f80c80d7`): Submits adverse event via `POST /blood/transfusions/{id}/reaction` and automatically creates Section 13 incident report.
+  - Consent withdrawal protection (`rule:e1211e09ae`): Real-time lock and immediate cessation upon `blood.consent.withdrawn`.
+  - Service capability gating (`rule:4d48db6f97`, `rule:877e58cf09`): Governed by server `GET /establishment` views for `transfusion_bedside_ot`.
+- **Contracts**: `contracts/transfusion_bedside_ot.json` (saved with `max_chars: 200000`, 9 endpoints, 2 events, 7 statutory rules, 28 rubric items).
+- **UI Architecture (`src/screens/TransfusionBedsideOT.tsx`)**:
+  - Reused bedside transfusion component configured for `screenId="transfusion_bedside_ot"`.
+  - Registered in `src/App.tsx`, `src/foundation-catalogue.json` (9 tasks), `src/foundation-task-map.json` (9 controls), `src/foundation-help.ts` (all 62 controls mapped).
+  - Authored comprehensive handbook entry (`src/help.ts`) with bilingual title, purpose, operational steps, and 5 role FAQs for `ot_nurse`. Bundled screenshots in `public/handbook/transfusion_bedside_ot-en.png` and `transfusion_bedside_ot-ur.png`.
+- **Verification**:
+  - Automated unit tests: `tests/transfusion-bedside-ot.test.mjs` (6/6 passing).
+  - Help check: `npm run check:help` passed (130 screens, 3047 controls, 2064 groups, 69 FAQ seeds, 30 workspace guides).
+  - Full test suite: `npm test` passed (621/621 passing across all suites).
+  - TypeScript compiler: `npx tsc --noEmit` passed with 0 errors.
+  - Production build: `npm run build` succeeded (`dist/assets/index-CUPONwKj.js`).
+- **Commit & Proposal**:
+  - Implementation commit: `0876f7c`.
+  - Proposal ID: **284** (status: `pending` on `/docs -> My progress`).
 
 ---
 
@@ -755,39 +781,41 @@ Executing the Phase 6 Roadmap ("Theatre and sterile supply") in dependency order
 
 ---
 
-## Plan for Screen 116 (`pre_anaesthesia_clinic`)
-- **Workflow & Standards**: Pre-anaesthesia evaluation (PAC), ASA physical status classification (I-VI, E for emergency), airway assessment (Mallampati I-IV, thyromental distance, neck mobility), fasting status verification (NPO guidelines), medical history and cardiac/pulmonary clearance, anaesthesia risk consent readiness under MSDS COP 31, 32, 39; Position 116 (104 points), Workspace `anaesthesia` / `doctor`.
+## Plan for Screen 132 (`ot_settlement`)
+- **Workflow & Standards**: Post-operative billing settlement & reconciliation, participant logging, revenue/consumables cost calculation, consultant commissions split calculation, commission cap override auditing, and atomic surgery finalization under MSDS COP 31, 33 and hospital finance standards; Position 132 (49 points), Workspace `ot_admin`.
 - **Bundle & Contracts**:
-  - Retrieve real screen bundle via `get_screen_bundle("pre_anaesthesia_clinic")`.
-  - Quality brief via `get_ui_quality_brief(screen_id="pre_anaesthesia_clinic")`.
-  - Generate TypeScript contracts (`src/generated/pre_anaesthesia_clinic.ts`).
-  - Examine endpoints, rules, and rubric items.
-- **Domain Policies & Statutory Rules (`src/pre-anaesthesia-clinic-policy.ts`)**:
-  - Anaesthesia / surgery capability view evaluation.
-  - ASA physical status score classification rules.
-  - Mallampati airway scoring and difficult intubation risk flags.
-  - Fasting status bounds (solids vs clear liquids hours).
-  - Fitness for surgery clearance decision (Fit, Fit with High Risk, Unfit / Postpone).
-  - Bilingual error explanations.
-- **UI Architecture (`src/screens/PreAnaesthesiaClinic.tsx`)**:
-  - PAC patient assessment worklist and pre-op booking queue.
-  - Comprehensive clinical assessment form: ASA score, Airway exam, Organ system review, NPO compliance, Investigations review.
-  - Fitness certification & anaesthesia plan selection (General, Spinal, Epidural, Regional, MAC, Local).
+  - Saved `contracts/ot_settlement.json` (4 endpoints, 1 realtime event `ot.settlement.finalized`, 3 statutory rules, 15 rubric items).
+  - TypeScript contracts generated: `src/generated/ot_settlement.ts`.
+- **Domain Policies & Statutory Rules (`src/ot-settlement-policy.ts`)**:
+  - Runtime service capability views under `rule:7c9fedfb50` (`full`, `open_work`, `records`, `setup`, `hidden`).
+  - Permissions and role check for `ot_admin` (`ot.finalize`, `ot.contract.view`).
+  - Mandatory preview gate before irreversible finalize (`rule:5228072102`).
+  - Commission cap override check (`rule:015f73a404`): When `exceeds_cap` is true, requires documented policy override reason before allowing finalization.
+  - Participant validation and role formatting.
+  - Bilingual error explanations for `OT_ALREADY_SETTLED`, `OT_COMMISSION_CAP_EXCEEDED`, `OT_PROCEDURE_PRICE_MISSING`, `OT_SURGERY_NOT_COMPLETE`, etc.
+- **UI Architecture (`src/screens/OtSettlement.tsx`)**:
+  - Surgery booking selector / completed surgeries worklist.
+  - Room participant roster (Primary Surgeon, Assistant Surgeon, Anesthetist, Scrub Nurse, Circulating Nurse, Other) with live staff search (`GET /staff/lookup`).
+  - Live split preview computation (`POST /ot/bookings/{id}/settlement-preview`): Procedure revenue, consumables revenue, gross revenue, consumables cost, net profit, participant commission breakdown, total commissions, hospital net.
+  - Commission cap warning banner and documented override reason field (`rule:015f73a404`).
+  - Finalize Surgery & Trigger Split modal with Idempotency-Key protection (`POST /ot/bookings/{id}/finalize`).
+  - Finalized settlement receipt & details view with invoice ID, timestamps, and audit row version.
+  - Realtime synchronization on `ot.settlement.finalized`.
 - **Help, Handbook & Navigation**:
-  - Contextual F1 help with all controls mapped in `src/foundation-help.ts`.
+  - Contextual F1 help with controls mapped in `src/foundation-help.ts`.
   - Task mapping in `src/foundation-catalogue.json` and `src/foundation-task-map.json`.
-  - Handbook entry in `src/help.ts` with role FAQs for Anaesthetist / PAC Nurse.
-  - Bundled screenshots: `public/handbook/pre_anaesthesia_clinic-en.png` and `pre_anaesthesia_clinic-ur.png`.
+  - Handbook entry in `src/help.ts` with 5 role FAQs for `ot_admin`.
+  - Bundled screenshots: `public/handbook/ot_settlement-en.png` and `ot_settlement-ur.png`.
 - **Automated Verification**:
-  - `tests/pre-anaesthesia-clinic.test.mjs`.
+  - `tests/ot-settlement.test.mjs`.
   - `npm test`, `npm run check:help`, `npx tsc --noEmit`, `npm run build`.
-  - Commit and submit `propose_progress` (Proposal 269).
+  - Commit and submit `propose_progress` (Proposal 285).
 
 ---
 
 ## Completed Screens Checkpoint
 - Proposals **231**, **232**, **233**, **234**, **235**, and **236** are accepted.
-- Proposals **237** through **268** are awaiting human review on `/docs -> My progress`.
+- Proposals **237** through **284** are awaiting human review on `/docs -> My progress` (latest: 284 for `transfusion_bedside_ot`).
 - Completed screens in Phase 6 so far:
   - Screen 109: `clinical_privileges` (Proposal 262)
   - Screen 110: `theatre_checklist_setup` (Proposal 263)
@@ -796,3 +824,19 @@ Executing the Phase 6 Roadmap ("Theatre and sterile supply") in dependency order
   - Screen 113: `cssd_stock` (Proposal 266)
   - Screen 114: `ot_scheduling` (Proposal 267)
   - Screen 115: `ot_board` (Proposal 268)
+  - Screen 116: `pre_anaesthesia_clinic` (Proposal 269)
+  - Screen 117: `consents_anaesthesia` (Proposal 270)
+  - Screen 118: `safety_checklist` (Proposal 271)
+  - Screen 119: `safety_checklist_admin` (Proposal 272)
+  - Screen 120: `safety_checklist_anaesthesia` (Proposal 273)
+  - Screen 121: `ot_consumables_nurse` (Proposal 274)
+  - Screen 122: `ot_intraop` (Proposal 275)
+  - Screen 123: `sterile_packs_ot` (Proposal 276)
+  - Screen 124: `sterile_packs_ot_admin` (Proposal 277)
+  - Screen 125: `sterile_packs_ward` (Proposal 278)
+  - Screen 126: `anaesthesia_record` (Proposal 279)
+  - Screen 127: `surgical_record_surgeon` (Proposal 280)
+  - Screen 128: `recovery_board` (Proposal 281)
+  - Screen 129: `recovery_board_admin` (Proposal 282)
+  - Screen 130: `recovery_board_anaesthesia` (Proposal 283)
+  - Screen 131: `transfusion_bedside_ot` (Proposal 284)

@@ -8998,6 +8998,76 @@ sterile_packs_ward: {
       ]
     ]
   },
+  ot_settlement: {
+    title: "Post-op settlement",
+    titleUr: "پوسٹ آپریٹو سیٹلمنٹ",
+    purpose: "Post-operative billing settlement, reconciliation, and consultant fee split in ot_admin workspace (MSDS COP 31, 33, hospital financial regulations): Logging theatre room clinical participants (Primary Surgeon, Assistant Surgeon, Anesthetist, Scrub Nurse, Circulating Nurse, Other) via live staff registry lookup (GET /staff/lookup), mandatory settlement split preview calculating gross procedure price, intra-operative consumables revenue, consumable cost deductions, net procedure profit, and consultant commission breakdowns prior to irreversible finalization (POST /ot/bookings/{id}/settlement-preview, Rule 5228072102), enforcement of commission cap override justification when total commissions exceed net profit (OT_COMMISSION_CAP_EXCEEDED, Rule 015f73a404), atomic finalization locking financial splits and generating audit invoices with Idempotency-Key protection (POST /ot/bookings/{id}/finalize), viewing active consultant contracts (GET /finance/consultant-contracts), real-time synchronization on ot.settlement.finalized WebSocket events, and runtime service capability gating from GET /establishment views for screen_id ot_settlement under Rule 7c9fedfb50.",
+    purposeUr: "اوٹی ایڈمن ورک اسپیس میں آپریشن کے بعد بلنگ سیٹلمنٹ، مالیاتی مصالحت اور کنسلٹنٹ کمیشن کی تقسیم (ایم ایس ڈی ایس سی او پی 31، 33 اور مالیاتی معیارات): عملے کے اندراج (پرائمری سرجن، اسسٹنٹ سرجن، اینستھیٹسٹ، اسکرب نرس، سرکولیٹنگ نرس) کے لیے لائیو اسٹاف سرچ (GET /staff/lookup)، حتمی کارروائی سے قبل لازمی پیش نظارہ جس میں مجموعی آمدنی، استعمال شدہ سامان کے اخراجات، خالص منافع اور کمیشن کی تقسیم کا حساب دکھایا جاتا ہے (قاعدہ 5228072102)، خالص منافع سے کمیشن تجاوز کرنے پر باقاعدہ پالیسی اوور رائیڈ وجہ کی لازمی شرط (قاعدہ 015f73a404)، حتمی سیٹلمنٹ کا عمل اور خودکار انوائس جنریشن بذریعہ آئیڈیمپوٹینسی کی (قاعدہ 7c9fedfb50) اور ریئل ٹائم او ٹی سیٹلمنٹ ایونٹ سنکرونائزیشن۔",
+    steps: [
+      "Select a completed or cleaning surgical booking from the theatre queue to initiate financial reconciliation.",
+      "Inspect the surgery details: procedure name, surgeon, scheduled vs actual timestamps, and recorded intra-operative consumables.",
+      "Verify the procedure price is populated; if missing (OT_PROCEDURE_PRICE_MISSING), coordinate with billing to assign the procedure tariff.",
+      "Add all clinical personnel present in theatre (Primary Surgeon, Assistant Surgeon, Anesthetist, Scrub Nurse, Circulating Nurse) using staff lookup (GET /staff/lookup).",
+      "Click 'Preview Split Math' to calculate gross procedure revenue, consumables deductions, net profit, and each consultant's commission (Rule 5228072102).",
+      "Review the financial breakdown: if commissions exceed net profit (exceeds_cap is true), provide a mandatory documented hospital policy override reason (Rule 015f73a404).",
+      "Optionally click 'Consultant Contracts' to inspect applicable percentage or fixed fee terms registered in the finance module (GET /finance/consultant-contracts).",
+      "Click 'Finalize Surgery & Trigger Split' and confirm irreversible execution, which generates the financial split ledger entries and invoice (POST /ot/bookings/{id}/finalize)."
+    ],
+    stepsUr: [
+      "مالیاتی حساب کتاب شروع کرنے کے لیے تھیٹر کی فہرست سے مکمل یا صفائی کے مرحلے میں موجود سرجری بکنگ منتخب کریں۔",
+      "سرجری کی تفصیلات کا معائنہ کریں: طریقہ کار کا نام، سرجن، شیڈول اور اصل اوقات، اور استعمال شدہ سامان کی فہرست۔",
+      "پروسیجر کی قیمت کی تصدیق کریں؛ اگر قیمت موجود نہ ہو تو بلنگ ڈیپارٹمنٹ سے ٹیرف درج کروائیں۔",
+      "اسٹاف تلاش کے ذریعے تھیٹر میں موجود تمام عملے (پرائمری سرجن، اسسٹنٹ، اینستھیٹسٹ، نرسز) کا ان کے کردار کے مطابق اندراج کریں۔",
+      "حتمی شکل دینے سے قبل 'سیٹلمنٹ کا پیش نظارہ دیکھیں' پر کلک کر کے آمدنی، اخراجات اور کمیشن کی تقسیم کا معائنہ کریں (قاعدہ 5228072102)۔",
+      "اگر کل کمیشن خالص منافع سے زیادہ ہو تو لازمی طور پر ہسپتال پالیسی کے تحت باقاعدہ اوور رائیڈ وجہ درج کریں (قاعدہ 015f73a404)۔",
+      "ضرورت پڑنے پر فنانس ماڈیول میں رجسٹرڈ کنسلٹنٹ معاہدے دیکھنے کے لیے 'کنسلٹنٹ معاہدے' کے بٹن پر کلک کریں۔",
+      "'سرجری سیٹلمنٹ مکمل کریں' پر کلک کر کے حتمی کارروائی کی تصدیق کریں، جس سے مالیاتی واؤچر اور انوائس خودکار طور پر تیار ہو جائیں گے۔"
+    ],
+    faq: [
+      [
+        "What is the primary function of the Post-op Settlement screen for an OT Administrator?",
+        "The screen enables the OT Administrator to record the exact team present in theatre during surgery, compute hospital revenue minus intra-operative consumable costs, apply consultant contract commission rules, and atomically finalize the financial settlement and invoice."
+      ],
+      [
+        "Why does the system mandate running the Settlement Preview before Finalizing?",
+        "Under statutory Rule 5228072102, finalization is an irreversible financial action. The system requires administrators to preview gross revenue, consumables deduction, net profit, and individual commissions to verify accuracy before triggering split ledger entries."
+      ],
+      [
+        "What happens when total consultant commissions exceed the surgery's net profit?",
+        "Under Rule 015f73a404 (OT_COMMISSION_CAP_EXCEEDED), the server strictly rejects finalization unless the administrator provides a documented hospital policy override reason (such as an approved indigent patient care subsidy or medical director authorization)."
+      ],
+      [
+        "Can a surgery be finalized if the booking is still 'InProgress'?",
+        "No. The server returns OT_SURGERY_NOT_COMPLETE (HTTP 409). Surgery must reach 'Completed' or 'Cleaning' status following surgical closure and patient transfer before post-operative settlement can be executed."
+      ],
+      [
+        "How does the system ensure double submissions do not duplicate financial splits?",
+        "The finalize call uses an Idempotency-Key header. If the network drops or the button is double-clicked, the server returns the first finalized result (Idempotent-Replay: true) without duplicating invoice records or commissions."
+      ]
+    ],
+    faqUr: [
+      [
+        "او ٹی ایڈمنسٹریٹر کے لیے پوسٹ آپریٹو سیٹلمنٹ اسکرین کا بنیادی مقصد کیا ہے؟",
+        "یہ اسکرین ایڈمنسٹریٹر کو سرجری کے دوران کمرے میں موجود ٹیم کے اندراج، ہسپتال کی آمدنی سے سامان کے اخراجات منہا کرنے، ڈاکٹرز کے کمیشن کا حساب لگانے اور حتمی سیٹلمنٹ انوائس تیار کرنے کی سہولت فراہم کرتی ہے۔"
+      ],
+      [
+        "حتمی فائنلائز سے پہلے سیٹلمنٹ پری ویو چلانا کیوں ضروری ہے؟",
+        "قاعدہ 5228072102 کے تحت سیٹلمنٹ ایک ناقابل واپسی مالیاتی عمل ہے۔ کسی بھی غلطی سے بچنے کے لیے مجموعی آمدنی، سامان کے اخراجات، خالص منافع اور ڈاکٹرز کے کمیشن کا پیش نظارہ دیکھنا قانونی طور پر لازمی ہے۔"
+      ],
+      [
+        "جب ڈاکٹرز کا کل کمیشن سرجری کے خالص منافع سے تجاوز کر جائے تو کیا ہوتا ہے؟",
+        "قاعدہ 015f73a404 (OT_COMMISSION_CAP_EXCEEDED) کے تحت سرور فائنلائزیشن مسترد کر دیتا ہے جب تک کہ ایڈمنسٹریٹر ہسپتال پالیسی کے تحت باقاعدہ تحریری اوور رائیڈ وجہ درج نہ کرے۔"
+      ],
+      [
+        "کیا سرجری کے دوران (InProgress حالت میں) سیٹلمنٹ فائنلائز کی جا سکتی ہے؟",
+        "ہرگز نہیں۔ سرور OT_SURGERY_NOT_COMPLETE کی خرابی واپس کرتا ہے۔ سیٹلمنٹ کے لیے ضروری ہے کہ سرجری مکمل (Completed یا Cleaning) ہو چکی ہو۔"
+      ],
+      [
+        "نظام ڈبل سبمیشن کی صورت میں کمیشن کے دوہرے اندراج کو کیسے روکتا ہے؟",
+        "فائنلائزیشن کے لیے آئیڈیمپوٹینسی کی (Idempotency-Key) کا استعمال کیا جاتا ہے، جس کی بدولت ایک ہی عمل کو دوبارہ چلانے پر وہی پہلا نتیجہ واپس ملتا ہے اور دوہرا بل نہیں بنتا۔"
+      ]
+    ]
+  },
   transfusion_bedside_ot: {
     title: "Blood transfusion at the bedside - OT",
     titleUr: "او ٹی میں مریض کے بستر پر خون کی منتقلی",

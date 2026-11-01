@@ -276,6 +276,7 @@ export function checkHelp({
       "AnaesthesiaRecord",
       "SurgicalRecordSurgeon",
       "RecoveryBoard",
+      "OtSettlement",
     ].map((n) => `src/screens/${n}.tsx`),
   ];
   const used = new Set(),
