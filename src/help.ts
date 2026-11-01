@@ -10,6 +10,92 @@ export type HelpPage = {
   faqUr: [string, string][];
 };
 export const help: Record<string, HelpPage> = {
+  theatre_checklist_setup: {
+    title: "Surgical safety checklist and theatre policy",
+    titleUr: "سرجیکل سیفٹی چیک لسٹ اور تھیٹر پالیسی",
+    purpose: "Define, configure, and adapt the hospital's surgical safety checklist modelled on the WHO Surgical Safety Checklist (MSDS COP 31, 39, 41, 44). Covers three core operative pauses: Sign In (before induction of anaesthesia), Time Out (before surgical skin incision), and Sign Out (before leaving the operating room). Configures post-anaesthesia recovery discharge criteria (Aldrete score >= 9, VAS pain <= 2, 15-minute vitals) and provides written operating theatre policy document generation for Medical Director approval and annual review.",
+    purposeUr: "ڈبلیو ایچ او کی سرجیکل سیفٹی چیک لسٹ کے مطابق ہسپتال کی آپریشن تھیٹر چیک لسٹ کی ترتیب و تشکیل (ایم ایس ڈی ایس 31، 39، 41، 44)۔ تین بنیادی مراحل کا احاطہ کرتی ہے: سائن اِن (بے ہوشی سے پہلے)، ٹائم آؤٹ (جراحی وقفہ، چیرا لگانے سے پہلے)، اور سائن آؤٹ (تھیٹر چھوڑنے سے پہلے)۔ اینستھیزیا کے بعد ریکوری کے معیارات (ایلڈریٹ اسکور 9، درد 2، پندرہ منٹ کا وقفہ) اور میڈیکل ڈائریکٹر کے سالانہ جائزے کے لیے تحریری تھیٹر پالیسی دستاویز تیار کرتی ہے۔",
+    steps: [
+      "Open Quality / Admin → Surgical safety checklist and theatre policy (theatre_checklist_setup) to inspect active and retired checklist prompts across all operative phases.",
+      "Switch phase tabs to review items: 1. Sign In (before induction), 2. Time Out (before skin incision), or 3. Sign Out (before leaving operating theatre).",
+      "Review post-anaesthesia recovery standards: click 'Recovery Criteria Settings' tab to inspect minimum Aldrete score (>= 9), maximum pain score (<= 2), and observation intervals (Rule e7c038dc17).",
+      "Search checklist items: enter prompt keywords, clinical terms (e.g. airway, pulse oximeter, consent), or standard citations (e.g. MSDS 44).",
+      "Toggle 'Include retired items': inspect historical checklist prompts retired under Rule dfc29fbd11.",
+      "Add new checklist verification item: click 'Add Checklist Item' to open configuration modal (requires ot.checklist.configure permission).",
+      "Specify phase, prompt wording, and response kind: select Confirm (Yes/Confirmed) or Question (Yes/No), and configure if 'Not Applicable' is allowable (e.g. site marking for midline incisions).",
+      "Configure mandatory note conditions: specify if answering Yes or No requires operating staff to document a clinical explanatory note (e.g. allergy details, difficult airway precautions).",
+      "Save checklist item: submit POST /ot/checklist-items with Idempotency-Key protection. New item immediately integrates into intraoperative surgical pauses.",
+      "Edit or reorder existing items: click 'Edit' to update prompt text, sort order, or guidelines via PATCH /ot/checklist-items/{id} with concurrency protection.",
+      "Retire items safely: click 'Retire' (setting is_active to false) rather than deleting (Rule dfc29fbd11). Completed surgical pause records retain original question text.",
+      "Generate Theatre Policy document: click 'Theatre Policy (PDF)' to download and print the formal hospital policy for Medical Director signature and annual review (Rule db51912b86)."
+    ],
+    stepsUr: [
+      "کوالٹی یا ایڈمن ڈیش بورڈ سے سرجیکل سیفٹی چیک لسٹ (theatre_checklist_setup) کھولیں تاکہ تینوں جراحی مراحل کے فعال اور ریٹائر شدہ سوالات کا جائزہ لیا جا سکے۔",
+      "مراحل کے ٹیبز پر جائیں: 1. سائن اِن (بے ہوشی سے پہلے)، 2. ٹائم آؤٹ (چیرا لگانے سے پہلے)، یا 3. سائن آؤٹ (تھیٹر سے منتقلی سے پہلے)۔",
+      "اینستھیزیا کے بعد ریکوری معیارات کا جائزہ لیں: 'ریکوری معیارات و سیٹنگز' ٹیب پر کلک کر کے ایلڈریٹ اسکور (9)، درد کی حد (2) اور معائنے کا وقفہ دیکھیں (قاعدہ e7c038dc17)۔",
+      "چیک لسٹ میں تلاش کریں: سرچ بار میں سوال کے الفاظ، طبی اصطلاح (جیسے رضامندی، پلس آکسی میٹر، ایئر وے) یا قانونی ریفرنس درج کریں۔",
+      "ریٹائر شدہ آئٹمز دکھائیں: پرانے یا تبدیل شدہ سوالات دیکھنے کے لیے چیک باکس منتخب کریں تاکہ آڈٹ ٹریل برقرار رہے (قاعدہ dfc29fbd11)۔",
+      "نیا چیک لسٹ آئٹم شامل کریں: 'نیا آئٹم شامل کریں' پر کلک کر کے نیا تصدیقی سوال درج کریں (اس کے لیے ot.checklist.configure کی اجازت درکار ہے)۔",
+      "مرحلہ، سوال اور نوعیت منتخب کریں: سائن اِن، ٹائم آؤٹ یا سائن آؤٹ چنیں، تصدیقی یا دو انتخابی سوال چنیں، اور غیر متعلقہ (N/A) کی اجازت کی نشاندہی کریں۔",
+      "لازمی نوٹ کی شرط طے کریں: واضح کریں کہ کس جواب پر عملے کے لیے وضاحتی نوٹ درج کرنا لازمی ہے (جیسے الرجی، مشکل سانس کی نالی یا خون کا انتظام)۔",
+      "آئٹم محفوظ کریں: سرور پر نیا آئٹم شامل کرنے کے لیے 'آئٹم شامل کریں' دبائیں۔ نیا سوال فوری طور پر آپریشن تھیٹر کے لائیو ریکارڈز میں شامل ہو جائے گا۔",
+      "آئٹم میں ترمیم یا ترتیب بدلیں: سوال میں تبدیلی، نیا ریفرنس یا ترتیب نمبر بدلنے کے لیے 'ترمیم' پر کلک کریں (PATCH /ot/checklist-items/{id})۔",
+      "آئٹم باحفاظت ریٹائر کریں: آئٹم کو ڈیلیٹ کرنے کے بجائے 'ریٹائر' کریں (قاعدہ dfc29fbd11) تاکہ سابقہ آپریشنز کے قانونی ریکارڈز متاثر نہ ہوں۔",
+      "تھیٹر پالیسی دستاویز پرنٹ کریں: میڈیکل ڈائریکٹر کے دستخط اور سالانہ جائزے کے لیے باضابطہ پی ڈی ایف دستاویز کھولنے یا پرنٹ کرنے کے لیے 'تھیٹر پالیسی (پی ڈی ایف)' پر کلک کریں۔"
+    ],
+    faq: [
+      [
+        "Why does the system retire checklist items by setting is_active to false instead of permanently deleting them (Rule dfc29fbd11)?",
+        "Under healthcare statutory standards (MSDS COP 44), surgical safety pauses completed during past operations constitute permanent clinical-legal evidence. Permanently deleting an item would orphan or corrupt historical surgical charts. Retiring an item removes it from future operations while preserving the exact question text on all completed surgeries."
+      ],
+      [
+        "Why does the screen report 'A checklist item with this prompt already exists in this phase' (CHECKLIST_ITEM_EXISTS)?",
+        "Duplicate checklist items within the same operative phase (Sign In, Time Out, or Sign Out) are rejected to prevent redundant prompts during surgery. If you need to revise the wording or allow 'Not Applicable', click 'Edit' on the existing item instead."
+      ],
+      [
+        "What post-anaesthesia recovery criteria are required before a patient can be discharged from the recovery room (Rule e7c038dc17)?",
+        "Under hospital policy and MSDS COP 47, discharge from the post-anaesthesia recovery room requires meeting all objective discharge criteria: an Aldrete recovery score >= 9 (covering respiration, circulation, consciousness, activity, and oxygenation), controlled post-op pain (VAS score <= 2), stable vital signs monitored at 15-minute intervals, and absence of active bleeding or surgical airway compromise."
+      ],
+      [
+        "When saving checklist item edits, the screen reports 'This checklist item was modified by another administrator' (VERSION_CONFLICT). How do I recover?",
+        "Another theatre administrator made simultaneous changes to this item. The system reloads the fresh item state from the server. Review the updated wording and sort order, then re-apply your changes if needed."
+      ],
+      [
+        "Why are the 'Add Checklist Item', 'Edit', and 'Retire' buttons disabled or hidden (FORBIDDEN)?",
+        "Configuring the surgical safety checklist requires the 'ot.checklist.configure' permission. Clinical users with 'ot.clinical.view' or 'ot.checklist.record' have read-only inspection access. Furthermore, if the surgery service is Retiring (open_work view) or Retired (records view), new items cannot be configured (Rule 9c5c94d2a1)."
+      ],
+      [
+        "Who signs the Operating Theatre policy and how often must it be reviewed (Rule db51912b86)?",
+        "The written theatre policy document (combining the checklist prompts, recovery criteria, and clinical privilege schedules) is printed via 'Theatre Policy (PDF)' for the Medical Director's and Credentials Committee Chair's formal signatures. Healthcare regulations require a mandatory review at least annually or whenever surgical protocols change."
+      ]
+    ],
+    faqUr: [
+      [
+        "سسٹم چیک لسٹ آئٹمز کو مستقل ڈیلیٹ کرنے کے بجائے is_active کو false کر کے ریٹائر کیوں کرتا ہے (قاعدہ dfc29fbd11)؟",
+        "طبی قواعد (ایم ایس ڈی ایس 44) کے مطابق ماضی کے آپریشنز کے دوران مکمل کیے گئے جراحی وقفے مستقل قانونی شواہد ہوتے ہیں۔ آئٹم کو مستقل مٹانے سے پرانے سرجیکل ریکارڈز خراب ہو سکتے ہیں۔ ریٹائر کرنے سے وہ آئٹم آئندہ آپریشنز کے لیے ختم ہو جاتا ہے جبکہ پچھلے ریکارڈز میں محفوظ رہتا ہے۔"
+      ],
+      [
+        "سکرین پر 'اس مرحلے میں اس عبارت کا چیک لسٹ آئٹم پہلے سے موجود ہے' (CHECKLIST_ITEM_EXISTS) کیوں آتا ہے؟",
+        "سرجری کے دوران تکرار سے بچنے کے لیے ایک ہی مرحلے میں ایک جیسے دو سوالات مسترد کر دیے جاتے ہیں۔ اگر آپ عبارت بدلنا یا N/A کی اجازت دینا چاہتے ہیں تو موجودہ آئٹم پر 'ترمیم' کا بٹن دبائیں۔"
+      ],
+      [
+        "مریض کو ریکوری روم سے وارڈ منتقل کرنے سے پہلے اینستھیزیا کے بعد کن ریکوری معیارات پر پورا اترنا لازمی ہے (قاعدہ e7c038dc17)؟",
+        "ہسپتال پالیسی اور ایم ایس ڈی ایس 47 کے تحت ریکوری سے وارڈ منتقلی کے لیے تمام شرائط کا پورا ہونا لازمی ہے: ایلڈریٹ اسکور 9 یا زیادہ، درد کی شدت 2 یا کم، مستحکم نبض و بلڈ پریشر (ہر 15 منٹ پر تصدیق شدہ)، اور سرجیکل خون یا سانس کا کوئی خطرہ نہ ہو۔"
+      ],
+      [
+        "آئٹم میں ترمیم محفوظ کرتے وقت 'اس آئٹم کو کسی دوسرے ایڈمن نے تبدیل کر دیا ہے' (VERSION_CONFLICT) آنے پر کیا کریں؟",
+        "کسی دوسرے ایڈمن نے اسی وقت اس آئٹم میں کوئی ترمیم کی ہے۔ سسٹم سرور سے تازہ ترین حالت حاصل کرتا ہے۔ نئی تبدیلیاں دیکھیں اور اگر ضرورت ہو تو دوبارہ ترمیم درج کریں۔"
+      ],
+      [
+        "نیا آئٹم شامل کرنے یا ترمیم و ریٹائر کے بٹن غیر فعال یا غائب (FORBIDDEN) کیوں ہیں؟",
+        "چیک لسٹ کی ترتیبات میں تبدیلی کے لیے 'ot.checklist.configure' کی اجازت ضروری ہے۔ عام کلینیکل عملے کے پاس صرف معائنے کی اجازت ہوتی ہے۔ نیز اگر سرجری سروس ریٹائر ہو رہی ہو تو نئے آئٹمز کی شمولیت بند ہو جاتی ہے (قاعدہ 9c5c94d2a1)۔"
+      ],
+      [
+        "آپریشن تھیٹر پالیسی پر کون دستخط کرتا ہے اور اس کا کتنے عرصے بعد جائزہ لینا ضروری ہے (قاعدہ db51912b86)؟",
+        "آپریشن تھیٹر پالیسی (بمعہ چیک لسٹ، ریکوری معیارات اور ڈاکٹروں کے اختیارات) کو 'تھیٹر پالیسی (پی ڈی ایف)' کے ذریعے پرنٹ کر کے میڈیکل ڈائریکٹر اور کریڈینشلز کمیٹی سے دستخط کروائے جاتے ہیں۔ قانونی قواعد کے تحت سال میں کم از کم ایک بار اس کا باضابطہ جائزہ لینا لازمی ہے۔"
+      ]
+    ]
+  },
   clinical_privileges: {
     title: "Clinical privileges",
     titleUr: "کلینیکل اختیارات",
