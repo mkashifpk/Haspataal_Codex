@@ -104,6 +104,100 @@ export const help: Record<string, HelpPage> = {
       ]
     ],
   },
+  mlc_cases_doctor: {
+    title: "Medico-legal cases",
+    titleUr: "میڈیکو لیگل کیسز",
+    purpose: "Open, examine, and finalize medico-legal cases from the Doctor workspace under Punjab MSDS indicators 15, 16, and 20. Medical officers, emergency physicians, and surgeons manage statutory records for road traffic accidents, assaults, firearm injuries, burns, poisonings, or sudden unexpected deaths (GET /mlc/case-types). Unidentified casualties receive an emergency trauma profile first (POST /patients/trauma). The clinician documents the alleged history in the teller's exact words, performs physical examination and notes wound characteristics (PATCH /mlc/cases/{id}), verifies or files statutory police intimation (GET /mlc/contacts) with immediate red hazard alerts for overdue notifications, generates official A4 police intimation printouts (GET /mlc/cases/{id}/print-payload), maintains an unbroken chain of custody by handing over recovered bullets, clothing, and biological evidence with tamper-evident seal numbers (POST /mlc/cases/{id}/evidence), settles the Medico-Legal Report (MLR) disposition (Issued Here, Referred, or Not Required), and securely closes the case once all statutory obligations are satisfied (POST /mlc/cases/{id}/close; rules 4d698e4d1b, 5bc7258288, 280a8e8493, 2b6e9d023c, 044cdb5a52, ca37655fad, 81b46f9cf6).",
+    purposeUr: "ڈاکٹر ورک اسپیس سے پنجاب ہیلتھ کیئر کمیشن کے ایم ایس ڈی ایس انڈیکیٹرز 15، 16 اور 20 کے تحت قانونی و طبی (میڈیکو لیگل) کیسز کی نگرانی اور تکمیل۔ معالجین ٹریفک حادثات، تشدد، گولی لگنے، جلنے یا زہر خورانی کے واقعات پر باضابطہ قانونی کیس کھولتے ہیں، نامعلوم مریضوں کی پہلے ایمرجنسی ٹراما پروفائل بناتے ہیں، راوی کے اصل الفاظ میں واقعہ اور زخموں کا طبی معائنہ درج کرتے ہیں، تھانے کو قانونی اطلاع کی توثیق کرتے ہیں، مادی شواہد سیل نمبر کے ساتھ پولیس کے حوالے کرتے ہیں، میڈیکو لیگل رپورٹ جاری یا ریفر کرتے ہیں، اور قانونی ضوابط کی تکمیل پر کیس کو باضابطہ بند کرتے ہیں۔",
+    steps: [
+      "1. Open or Select Medico-Legal Case: Access Medico-Legal Cases from the Doctor workspace navigation or ER tracking board. Click 'Open Medico-Legal Case' for an unscheduled intake, or select an active case from the register to inspect its current status and timeline.",
+      "2. Document Alleged History & Teller Identity: Ensure the circumstances, weapon mechanism, and time of occurrence are recorded in the teller's exact words, noting their name and relationship to the casualty (rule 5bc7258288).",
+      "3. Record Physical Examination Findings: Examine the patient and document dimensions, margins, anatomical location, and age of all lacerations, contusions, abrasions, burns, or firearm entrance/exit wounds. Update examination findings via inline patch (PATCH /mlc/cases/{id}).",
+      "4. Monitor Statutory Police Intimation: Check the police intimation status. If overdue (marked with a prominent red hazard banner and sorted to the top), immediately contact the jurisdictional police station (GET /mlc/contacts) and record the duty officer's name, rank, and roznamcha daily diary reference.",
+      "5. Print A4 Police Intimation Document: Click 'Print Intimation (A4)' to fetch the official print payload (GET /mlc/cases/{id}/print-payload) with institutional letterhead, patient demographics, MLC serial number, alleged history, and officer signature blocks for formal police dispatch.",
+      "6. Hand Over Physical Evidence Under Chain of Custody: Secure bullet fragments, foreign bodies, clothing, or toxicology specimens in sealed containers. Log each article's description, tamper-evident seal serial number, receiving officer details (name, rank, belt #), and station receipt reference (POST /mlc/cases/{id}/evidence).",
+      "7. Settle Medico-Legal Report (MLR) Disposition: Record the final MLR status as Issued Here (entering the hospital MLR serial number and issuance date), Referred (selecting the designated government MLR referral hospital), or Not Required (recording clinical justification).",
+      "8. Finalize and Close Medico-Legal Case: Review all statutory requirements (police informed, MLR settled). Provide a clinical closure summary of at least 3 characters and click 'Close Medico-Legal Case' to lock the record permanently against further modifications.",
+    ],
+    stepsUr: [
+      "1. میڈیکو لیگل کیس کھولیں یا منتخب کریں: ڈاکٹر ورک اسپیس یا ایمرجنسی بورڈ سے میڈیکو لیگل رجسٹر کھولیں، نئے کیس کے اندراج کے لیے 'نیا کیس کھولیں' پر کلک کریں یا زیر علاج مریض کا کیس منتخب کریں۔",
+      "2. مبینہ واقعہ اور راوی کا اندراج: چوٹ لگنے کے حالات اور طریقہ کار کو راوی کے ہو بہو الفاظ میں درج کریں، اور راوی کا نام و تعلق واضح طور پر محفوظ کریں۔",
+      "3. طبی معائنہ اور زخموں کی تفصیل: مریض کا تفصیلی معائنہ کریں اور زخموں کے سائز، کناروں، مقام اور ساخت کو درست طبی اصطلاحات میں درج کر کے اپ ڈیٹ کریں۔",
+      "4. تھانے کو قانونی اطلاع کی نگرانی: اگر اطلاع کا وقت گزر چکا ہو (سرخ الرٹ کے ساتھ لسٹ میں سب سے اوپر)، تو فوری طور پر متعلقہ تھانے سے رابطہ کریں اور ڈیوٹی افسر کے کوائف اور روزنامچہ نمبر درج کریں۔",
+      "5. باضابطہ اے 4 اطلاع نامہ پرنٹ کریں: 'اطلاع نامہ پرنٹ کریں' پر کلک کر کے سرکاری لیٹر ہیڈ اور دستخطی خانوں کے ساتھ قانونی اطلاع نامہ تیار کر کے پولیس کے لیے پرنٹ نکالیں۔",
+      "6. مادی شواہد کی چین آف کسٹڈی منتقلی: دوران علاج برآمد شدہ گولی کے ٹکڑے، کپڑے یا کیمیائی نمونے سیل کر کے وصول کنندہ پولیس افسر کے نام، بیلٹ نمبر اور رسید کے ساتھ درج کریں۔",
+      "7. میڈیکو لیگل رپورٹ (ایم ایل آر) کا تصفیہ: رپورٹ کا باضابطہ تصفیہ کریں: ہسپتال کی جاری کردہ رپورٹ کا نمبر اور تاریخ درج کریں، یا نامزد ہسپتال کو ریفر کریں، یا قانونی وجہ لکھ کر غیر ضروری قرار دیں۔",
+      "8. قانونی کیس کا باضابطہ اختتام: تمام قانونی تقاضے پورے ہونے پر کم از کم 3 حروف پر مشتمل اختتامی نوٹ درج کر کے کیس کو مستقل طور پر بند کریں۔",
+    ],
+    faq: [
+      [
+        "The Medico-legal cases screen says \"Choose a police station (or, for a referral, a hospital designated for medico-legal reports) from the contact list.\" (MLC_CONTACT_TYPE_INVALID). Why, and what do I do?",
+        "When recording a police intimation, the chosen contact must be of type 'PoliceStation'. If you are settling the Medico-Legal Report with disposition 'Referred', the target hospital must have contact_type 'MlrHospital'. Selecting an ambulance service, fire brigade, or general health office triggers MLC_CONTACT_TYPE_INVALID. Always select from the filtered contacts dropdown provided by the application."
+      ],
+      [
+        "The Medico-legal cases screen says \"A closed medico-legal case cannot change.\" (MLC_CLOSED). Why, and what do I do?",
+        "Once an MLC case is formally closed, its legal record is permanently sealed to maintain judicial integrity and prevent post-facto tampering. The server refuses all PATCH updates, evidence additions, and intimation changes with MLC_CLOSED. To review historical notes, inspect the read-only case details. If an official addendum is subpoenaed by a magistrate or court, consult the medical superintendent or hospital legal director."
+      ],
+      [
+        "The Medico-legal cases screen says \"The police intimation is recorded and cannot change.\" (MLC_POLICE_ALREADY_INFORMED). Why, and what do I do?",
+        "Under statutory medico-legal regulations and rule 280a8e8493, an official police intimation entry is immutable once filed; the system does not allow rewriting or re-submitting an intimation to prevent tampering with legal timelines. If another terminal has already submitted the intimation, the client automatically reloads and displays the existing station, officer, and reference details."
+      ],
+      [
+        "The Medico-legal cases screen says \"Inform the police and settle the medico-legal report before closing the case.\" (MLC_NOT_READY_TO_CLOSE). Why, and what do I do?",
+        "Under rule 044cdb5a52, an MLC case cannot be closed while statutory obligations remain incomplete. The server refuses closure (MLC_NOT_READY_TO_CLOSE) if: (1) statutory police intimation has not yet been recorded, or (2) the Medico-Legal Report status remains 'Pending'. To close the case, first record the police intimation, then settle the MLR status as Issued Here (with MLR # and date), Referred (with designated hospital), or Not Required (with justification), and provide a closure note of at least 3 characters."
+      ],
+      [
+        "How does the duty doctor document clinical examination findings and alleged history for an MLC casualty?",
+        "Open the case details drawer and inspect the Alleged History and Examination Findings fields. Click 'Edit Findings' to record or update observed external lacerations, contusions, burns, bullet entry/exit wounds, or toxicology observations. The history must reflect the narrator's exact words. Click 'Save Findings' to transmit a versioned PATCH /mlc/cases/{id} request."
+      ],
+      [
+        "How does an emergency physician or specialist surgeon settle the Medico-Legal Report (MLR) before hospital discharge?",
+        "In the case details modal, locate the Medico-Legal Report (MLR) Settlement section. Select 'Issued Here' if the facility is authorized to issue reports (recording the MLR serial number and issuance date), 'Referred' if the casualty must be evaluated at a designated tertiary MLR facility, or 'Not Required' with clinical justification. Once settled, the case becomes eligible for closure."
+      ],
+      [
+        "How does the clinical team handle physical evidence recovered during surgery or wound debridement under chain of custody?",
+        "Click 'Hand Over Evidence Item' in the case detail view. Enter an exact description of each retrieved foreign body, projectile, or clothing item, record the tamper-evident seal bag serial number, and input the receiving police officer's full name, rank, belt number, and station acknowledgment reference. Each item is logged with an immutable audit record per rule 2b6e9d023c."
+      ],
+      [
+        "What should a doctor do if a casualty's police intimation deadline is overdue in red on the board?",
+        "Under Punjab MSDS regulations and rule 280a8e8493, hospitals have a strict statutory deadline (mlc_police_intimation_minutes) to notify the local police station of non-police casualties. Overdue cases are elevated to the top of the register in bold red. The doctor or triage nurse must promptly telephone or send written notice to the jurisdictional police station from GET /mlc/contacts and record the dispatch to resolve the overdue violation."
+      ]
+    ],
+    faqUr: [
+      [
+        "اسکرین کہتی ہے کہ 'رابطہ فہرست سے تھانہ یا نامزد ہسپتال منتخب کریں' (MLC_CONTACT_TYPE_INVALID)۔ کیا کریں؟",
+        "پولیس اطلاع درج کرتے وقت منتخب کردہ رابطہ کا 'PoliceStation' ہونا لازمی ہے، اور اگر ایم ایل آر کے لیے ریفر کیا جا رہا ہو تو رابطہ 'MlrHospital' ہونا چاہیے۔ ایمبولینس یا دیگر غیر مجاز ادارے منتخب کرنے پر یہ خرابی آتی ہے۔ رابطہ فہرست سے متعلقہ تھانہ یا نامزد سرکاری ہسپتال منتخب کریں۔"
+      ],
+      [
+        "اسکرین کہتی ہے کہ 'بند شدہ میڈیکو لیگل کیس تبدیل نہیں ہو سکتا' (MLC_CLOSED)۔ اس کا کیا مطلب ہے اور کیا کریں؟",
+        "جب کوئی میڈیکو لیگل کیس حتمی طور پر بند (Closed) کر دیا جائے تو عدالتی و قانونی ریکارڈ کے تحفظ کے لیے اس میں مزید کوئی ترمیم (جیسے تاریخ، معائنہ یا شواہد) نہیں کی جا سکتی۔ کیس کا قانونی اندراج مکمل ہو چکا ہے۔ اگر عدالت یا پولیس کی جانب سے اضافی سوالات ہوں تو ہسپتال ڈائریکٹر یا ایم ایل سی انچارج سے رابطہ کریں۔"
+      ],
+      [
+        "اسکرین کہتی ہے کہ 'پولیس اطلاع درج ہو چکی ہے اور تبدیل نہیں ہو سکتی' (MLC_POLICE_ALREADY_INFORMED)۔ اس کا کیا مطلب ہے؟",
+        "قانونی ضابطے اور رول 280a8e8493 کے تحت ایک بار تھانے کی اطلاع کا اندراج ہو جائے تو قانونی ریکارڈ میں ردوبدل روکنے کے لیے اسے تبدیل نہیں کیا جا سکتا۔ اگر ٹریج نرس یا کسی دوسرے معالج نے پہلے ہی اطلاع درج کر دی ہو تو سسٹم موجودہ تفصیلات (تھانہ، افسر، روزنامچہ نمبر) دکھاتا ہے۔"
+      ],
+      [
+        "اسکرین کہتی ہے کہ 'کیس بند کرنے سے پہلے پولیس اطلاع اور ایم ایل آر رپورٹ کا تصفیہ کریں' (MLC_NOT_READY_TO_CLOSE)۔ کیا کریں؟",
+        "رول 044cdb5a52 کے تحت قانونی فرائض کی عدم تکمیل پر سسٹم کیس بند نہیں ہونے دیتا۔ کیس بند کرنے کے لیے ضروری ہے کہ: (1) تھانے کو باضابطہ اطلاع درج ہو چکی ہو، اور (2) میڈیکو لیگل رپورٹ (MLR) کا تصفیہ جاری شدہ (Issued Here بمعہ نمبر اور تاریخ)، ریفرڈ (نامزد ہسپتال کے ساتھ) یا غیر ضروری (واضح طبی وجہ کے ساتھ) ہو چکا ہو، اور کم از کم 3 حروف کا اختتامی نوٹ درج ہو۔"
+      ],
+      [
+        "ڈیوٹی ڈاکٹر میڈیکو لیگل مریض کا طبی معائنہ اور مبینہ واقعہ کیسے درج کرے؟",
+        "کیس کی تفصیل کھول کر معائنہ جات کے خانے میں ظاہری زخموں، گولی یا جلنے کے نشانات، اور اندرونی چوٹوں کی مکمل تفصیل درج کریں۔ مبینہ واقعہ (Alleged History) راوی کے ہو بہو الفاظ میں درج کریں اور تبدیلی محفوظ کرنے کے لیے 'معائنہ محفوظ کریں' پر کلک کریں (PATCH /mlc/cases/{id})۔"
+      ],
+      [
+        "معالج یا سرجن ہسپتال سے فراغت سے قبل میڈیکو لیگل رپورٹ (ایم ایل آر) کا تصفیہ کیسے کرے؟",
+        "کیس کے تفصیلی پینل میں جا کر 'ایم ایل آر رپورٹ کا تصفیہ' منتخب کریں۔ اگر ہسپتال میں رپورٹ تیار ہو چکی ہے تو 'جاری شدہ' (Issued Here) منتخب کر کے ایم ایل آر نمبر اور تاریخ درج کریں؛ اگر ہسپتال مجاز نہیں ہے تو نامزد ٹیچنگ ہسپتال منتخب کر کے 'ریفرڈ' کریں؛ یا قانونی وجہ لکھ کر 'غیر ضروری' منتخب کریں۔"
+      ],
+      [
+        "آپریشن یا زخموں کی صفائی کے دوران برآمد ہونے والے مادی شواہد کو چین آف کسٹڈی کے تحت پولیس کے حوالے کیسے کریں؟",
+        "'شواہد کا اندراج کریں' پر کلک کریں۔ کپڑوں، برآمد شدہ گولی، چاقو کے ٹکڑے یا کیمیائی نمونوں کی مکمل تفصیل لکھیں، سیل شدہ پیکٹ کا نمبر درج کریں، اور وصول کنندہ پولیس افسر کا نام، رینک، بیلٹ نمبر اور تھانے کی رسید درج کر کے قانونی چین آف کسٹڈی مکمل کریں۔"
+      ],
+      [
+        "اگر بورڈ پر کسی مریض کی پولیس اطلاع سرخ رنگ میں زائد المیعاد (Overdue) نظر آئے تو ڈاکٹر کیا کرے؟",
+        "پنجاب ایم ایس ڈی ایس ریگولیشن اور رول 280a8e8493 کے تحت ہسپتال پر مقررہ وقت میں تھانے کو مطلع کرنا فرض ہے۔ وقت ختم ہونے پر کیس سرخ رنگ میں نمایاں ہو جاتا ہے۔ معالج یا ڈیوٹی سٹاف کو فوری طور پر متعلقہ تھانے کو فون یا باضابطہ مراسلے کے ذریعے اطلاع دے کر ریکارڈ درج کرنا چاہیے تاکہ قانونی خلاف ورزی ختم ہو۔"
+      ]
+    ],
+  },
 medication_orders_doctor: {
   title: "Verbal orders to countersign and pharmacy queries",
   titleUr: "زبانی احکامات کی توثیق اور فارمیسی کے سوالات",
