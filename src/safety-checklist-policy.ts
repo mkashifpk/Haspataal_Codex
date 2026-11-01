@@ -75,8 +75,9 @@ export function canOperateChecklist(user: ClinicalUser | null | undefined): bool
     user.permissions.includes("ot.checklist.record") ||
     user.permissions.includes("ot.clinical.record") ||
     user.permissions.includes("ot.clinical.view") ||
+    user.permissions.includes("ot.clinical.anaesthesia") ||
     user.permissions.includes("doctor.view") ||
-    (Array.isArray(user.roles) && user.roles.includes("ot_admin"))
+    (Array.isArray(user.roles) && (user.roles.includes("ot_admin") || user.roles.includes("anaesthetist")))
   );
 }
 

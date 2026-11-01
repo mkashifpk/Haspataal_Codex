@@ -7854,6 +7854,88 @@ consents_doctor: {
       ]
     ]
   },
+  safety_checklist_anaesthesia: {
+    title: "Surgical safety checklist (Anaesthesia)",
+    titleUr: "جراحی سیفٹی چیک لسٹ (اینستھیزیا)",
+    purpose: "Anaesthetist surgical safety checklist execution (WHO / MSDS COP 37, 44): pre-induction Sign In verification of patient airway and blood loss risk, pre-incision Time Out attendance verification with PMDC clinical privileges, and post-procedure Sign Out review of anaesthetic recovery concerns under Rule cafa8b3761, Rule b410c48dc4, Rule a90b6173b4, Rule c4919df195, Rule 45c2bd9ac6, Rule 9e9cb593cb, and Rule 02fc9c5710.",
+    purposeUr: "اینستھیزیا ورک اسپیس کے تحت جراحی سیفٹی چیک لسٹ کا نفاذ: بے ہوشی سے قبل سائن ان میں سانس کی نالی اور خون کے بہاؤ کی جانچ، کٹ سے قبل ٹائم آؤٹ میں حاضر اینستھیٹسٹ کے طبی استحقاق کی توثیق اور سرجری کے بعد ریکوری کے طبی خدشات کا جائزہ۔",
+    steps: [
+      "Open Surgical safety checklist from the Anaesthesia workspace to review surgical cases requiring anaesthetic pauses.",
+      "Filter the worklist by timeframe or search by patient MRN, surgeon, or operative procedure.",
+      "Select an operative case to launch the 3-phase surgical checklist interface.",
+      "Review the prerequisite gate for Sign In (Rule a90b6173b4): confirm surgeon's pre-operative note, signed PAC fitness assessment, and informed anaesthesia consent.",
+      "Execute Phase 1 'Sign In' before induction: verbally confirm difficult airway assessment, aspiration risk, pulse oximeter calibration, and blood loss risk >= 500ml (Rule b410c48dc4).",
+      "For Phase 2 'Time Out', certify physical presence in the theatre alongside the primary operating surgeon verified against active PMDC privileges (Rule c4919df195).",
+      "Participate in the verbal pause: confirm patient identity, procedure, antibiotic prophylaxis administration within 60 minutes, and anaesthesia-specific patient concerns.",
+      "For Phase 3 'Sign Out', confirm surgical recovery concerns, airway management, and post-operative pain instructions before theatre discharge (Rule 45c2bd9ac6).",
+      "Certify verbal pause execution and sign the pause via POST /ot/bookings/{id}/safety-checks.",
+      "Document any intra-operative adverse events or attach post-finality addendum corrections via POST /ot/bookings/{id}/corrections (Rule 9e9cb593cb)."
+    ],
+    stepsUr: [
+      "اینستھیزیا ورک اسپیس سے 'جراحی سیفٹی چیک لسٹ' کھولیں اور بے ہوشی کے مراحل کے متلاشی کیسز کا معائنہ کریں۔",
+      "ایام کے فلٹر کا انتخاب کریں یا مریض کے ایم آر این، سرجن یا آپریشن کے نام سے تلاش کریں۔",
+      "مطلوبہ آپریشن منتخب کر کے تین مرحلہ وار سیفٹی چیک لسٹ انٹرفیس کھولیں۔",
+      "سائن ان کی پیشگی شرائط کا جائزہ لیں: سرجن کا پری آپریٹو نوٹ، اینستھیزیا فٹنس اور باضابطہ رضامندی فارم کی تصدیق کریں (قاعدہ a90b6173b4)۔",
+      "بے ہوشی سے قبل مرحلہ 1 'سائن ان' انجام دیں: ایئر وے اسکور، نبض کی آکسیجن کی پیمائش، الرجی اور خون کے بہاؤ کے خطرے کی مثبت تصدیق کریں (قاعدہ b410c48dc4)۔",
+      "مرحلہ 2 'ٹائم آؤٹ' کے لیے تھیٹر میں اپنی جسمانی موجودگی اور فعال طبی اختیارات کی تصدیق کریں (قاعدہ c4919df195)۔",
+      "زبانی توقف میں حصہ لیں: مریض کی شناخت، آپریشن، اینٹی بائیوٹک کا وقت اور اینستھیزیا سے متعلق خصوصی ہدایات کی تصدیق کریں۔",
+      "مرحلہ 3 'سائن آؤٹ' کے دوران مریض کو تھیٹر سے باہر بھیجنے سے قبل سانس، درد کے کنٹرول اور ریکوری کے خدشات کا جائزہ لیں (قاعدہ 45c2bd9ac6)۔",
+      "زبانی توثیق کے خانے پر نشان لگا کر چیک لسٹ پر باضابطہ دستخط کریں اور محفوظ کریں۔",
+      "کسی بھی غیر متوقع واقعے کی رپورٹ بھیجیں یا ضرورت پڑنے پر ریکارڈ میں باضابطہ تصحیحی ضمیمہ درج کریں (قاعدہ 9e9cb593cb)۔"
+    ],
+    faq: [
+      [
+        "What is the anaesthetist's statutory responsibility during Sign In?",
+        "Under Rule a90b6173b4 and MSDS COP 39, the anaesthetist must ensure that difficult airway equipment is at hand, aspiration risk is evaluated, blood and IV access are confirmed, and informed anaesthesia consent is signed prior to inducing anaesthesia."
+      ],
+      [
+        "Can anaesthesia induction proceed if the PAC assessment found the patient 'Deferred'?",
+        "No. Under Rule a90b6173b4, only a patient assessed as 'Fit' or 'FitWithConditions' can proceed to Sign In. A patient evaluated as 'Deferred' or 'NotFit' cannot receive anaesthesia until formally reassessed."
+      ],
+      [
+        "Why must the anaesthetist be present for Time Out before skin incision?",
+        "Under Rule c4919df195, Time Out is a multidisciplinary surgical pause requiring the physical presence of the operating surgeon, anaesthetist, and theatre nursing staff. The surgeon cannot make an incision without the anaesthetist confirming patient physiological stability."
+      ],
+      [
+        "What anaesthetic details are reviewed during Sign Out?",
+        "During Sign Out (Rule 45c2bd9ac6), the anaesthetist, surgeon, and nurse review critical airway management during emergence, post-operative analgesic and haemodynamic orders, and recovery ward placement."
+      ],
+      [
+        "How are emergency surgical cases handled when pre-induction prerequisites are incomplete?",
+        "In life-threatening surgical emergencies, an Emergency Note signed with a concurring second PMDC-registered doctor allows emergency surgical access under Rule cb2f327ee7 and Rule a90b6173b4."
+      ],
+      [
+        "How does runtime service gating affect the anaesthesia checklist screen?",
+        "Under Rule 02fc9c5710, the screen evaluates GET /establishment views for screen_id safety_checklist_anaesthesia (full, open_work, records, setup, hidden) based on active surgery capability, never by facility category."
+      ]
+    ],
+    faqUr: [
+      [
+        "سائن ان کے دوران اینستھیٹسٹ کی قانونی ذمہ داری کیا ہے؟",
+        "قاعدہ a90b6173b4 اور ایم ایس ڈی ایس کے تحت اینستھیٹسٹ پر لازم ہے کہ وہ مشکل ایئر وے کے آلات کی دستیابی، الرجی، آئی وی لائنز اور دستخط شدہ رضامندی کی تصدیق کرے۔"
+      ],
+      [
+        "اگر پری اینستھیزیا جائزے میں مریض 'موخر' ہوا ہو تو کیا بے ہوش کیا جا سکتا ہے؟",
+        "نہیں۔ قاعدہ a90b6173b4 کے تحت صرف 'فٹ' قرار دیے گئے مریض کا ہی سائن ان ہو سکتا ہے۔ موخر شدہ مریض کو دوبارہ معائنے کے بغیر بے ہوش کرنا ممنوع ہے۔"
+      ],
+      [
+        "کٹ لگانے سے قبل ٹائم آؤٹ میں اینستھیٹسٹ کی موجودگی کیوں لازمی ہے؟",
+        "قاعدہ c4919df195 کے مطابق ٹائم آؤٹ پوری ٹیم کا مشترکہ توقف ہے۔ جب تک اینستھیٹسٹ مریض کی طبی حالت کے مستحکم ہونے کی تصدیق نہ کرے، سرجن کٹ نہیں لگا سکتا۔"
+      ],
+      [
+        "سائن آؤٹ کے دوران اینستھیزیا کے کن پہلوؤں کا جائزہ لیا جاتا ہے؟",
+        "قاعدہ 45c2bd9ac6 کے تحت بے ہوشی سے بیداری کے دوران سانس کی بحالی، درد کے کنٹرول کی ادویات اور ریکوری روم میں منتقلی کی ہدایات طے کی جاتی ہیں۔"
+      ],
+      [
+        "ہنگامی سرجری کی صورت میں اگر سائن ان کی شرائط ادھوری ہوں تو کیا ہوگا؟",
+        "جان لیوا ایمرجنسی میں قاعدہ cb2f327ee7 کے تحت دوسرے پی ایم ڈی سی ڈاکٹر کے ساتھ مل کر ایمرجنسی نوٹ کے ذریعے ہنگامی کارروائی کی جا سکتی ہے۔"
+      ],
+      [
+        "اینستھیزیا چیک لسٹ اسکرین پر سروس گیٹنگ کا کیا اثر ہے؟",
+        "قاعدہ 02fc9c5710 کے تحت قیام کی ترتیبات کے مطابق سرجری سروس کی کیفیت کی بنیاد پر اسکرین کے اختیارات کا تعین ہوتا ہے۔"
+      ]
+    ]
+  },
   maternity_policy: {
     title: "High-risk pregnancy: our policy",
     titleUr: "ہائی رسک حمل: ہسپتال کی پالیسی",
