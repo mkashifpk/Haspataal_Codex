@@ -1,49 +1,39 @@
 # Haspataal checkpoint
 Last updated: 01 November 2026, Antigravity (Codex pair), Asia/Karachi.
 
-## Active request: Phase 5 Screen 104 `death_record` (Death record & certificate)
+## Active request: Phase 5 Screen 105 `body_release_ward` (Bodies awaiting handover - Ward)
 Building screens in Phase 5 Roadmap (Emergency, deaths and medico-legal cases) along with all tests, reporting backend issues if found:
-- Screen 103: **`mlc_cases_doctor`** ("Medico-legal cases (Doctor)", Position 103, 73 points) — **COMPLETED** (commit `b3c34e8`, Proposal **256** awaiting human review on `/docs -> My progress`).
 - Screen 104: **`death_record`** ("Death record & certificate", Position 104, 90 points) — **COMPLETED** (commit `2d501bf`, Proposal **257** awaiting human review on `/docs -> My progress`).
+- Screen 105: **`body_release_ward`** ("Bodies awaiting handover - Ward", Position 105, 54 points) — **IN PROGRESS**.
 
-### Completed Screen 104 (`death_record`) Checkpoint
-- **Workflow & Standards**: WHO International Form of Medical Certificate of Cause of Death, Punjab MSDS indicators 106 and 154; Position 104 (90 points), Workspace `doctor`.
+### Implementation Plan for Screen 105 (`body_release_ward`) & Screen 106 (`body_release_er`)
+- **Workflow & Standards**: Deceased patient body handover to next of kin or police; Punjab MSDS indicators 106, 154; Position 105 (54 points), Workspace `ward` / `nurse`; Position 106 (54 points), Workspace `triage` / `er`.
 - **Contracts**:
-  - `contracts/death_record.json`: Real MCP screen bundle covering 15 endpoints (`POST /patients/{patient_id}/death`, `GET /deaths/{death_id}`, `PUT /deaths/{death_id}`, `POST /deaths/{death_id}/certify`, `POST /deaths/{death_id}/corrections`, `GET /deaths/{death_id}/print-payload`, `GET /deaths/{death_id}/pdf`, `POST /deaths/{death_id}/autopsy`, `POST /deaths/{death_id}/autopsy/report`, `POST /deaths/{death_id}/autopsy/cancel`, `GET /deaths`, `GET /icd/codes`, `GET /icd/browse`, `GET /icd/codes/{code}`, `GET /icd/releases`), event `death.recorded`, and domain rules.
-  - `src/generated/death_record.ts`: Generated TypeScript contracts for all 15 endpoints and data structures.
-- **Domain Policies & WHO Standards (`src/death-record-policy.ts`)**:
-  - Service view capability evaluation (`rule:81b46f9cf6`): `emergency_department` and inpatient views (`full`, `open_work` with banner 'No new death records from now on. Completing existing death certificates and autopsies continue.', `records`, `hidden`).
-  - Doctor workspace role permissions gating: `death.record` and `death.certify` restricted strictly to registered PMDC doctors (`doctor`, `clinical_specialist`, `surgeon`, `anaesthetist`); `death.register.view` open to clinical and administrative roles; `death.autopsy.authorize` open to senior medical staff.
-  - Initial death declaration validation (`rule:8c2341a2ff`): validates patient identity, past/current death timestamp, setting (`Inpatient`, `Emergency`, `Outpatient`, `BroughtDead`), arrival timestamp for brought dead, and terminal mode of dying.
-  - WHO Cause-of-Death Causal Sequence (`rule:4a9cf9f9a8`): Part I lines (a) leading directly to death, due to (b), due to (c), due to (d) with respective onset-to-death intervals and validated ICD codes. The system automatically designates the lowest filled line in Part I as the underlying cause. Part II records other significant contributory conditions.
-  - Diagnostic suggestion chips (`rule:9e98e4c3ec`): surfaces active conditions from previous charts as clickable chips to assign to cause lines; never silently populates.
-  - Contextual attributes: manner of death (`Disease`, `Accident`, `IntentionalSelfHarm`, `Assault`, `LegalIntervention`, `War`, `PendingInvestigation`, `CouldNotBeDetermined`); mandatory external cause, place of occurrence, and incident date for violent/accidental deaths; surgery within 4 weeks check with indication; pregnancy status for females aged 10-54; perinatal birth weight, gestation weeks, hours survived, and maternal conditions for infants under 1 year.
-  - Versioned draft autosave & post-certification immutability (`rule:8c96251e09`): draft saved with `PUT /deaths/{id}` (`expected_version: row_version`). Once certified, editing is locked permanently and corrections must be appended (`POST /deaths/{id}/corrections`) with mandatory factual justification (min 3 chars).
-  - Medico-legal death banner & autopsy restriction (`rule:0cf8a9f905`): if `death.mlc_number` or `death.mlc_id` exists, prominent red MEDICO-LEGAL banner is displayed, and clinical autopsy is strictly forbidden (police post-mortem only).
-  - Clinical Autopsy workflow (MSDS 154): requisition reasons, macroscopic/histopathology report, clinicopathological correlation (`Confirmed`, `MinorDiscrepancy`, `MajorDiscrepancy`), and cancellation.
-  - A4 certificate print preview (`rule:274cc0ed96`): fetches print payload (`GET /deaths/{id}/print-payload`) and PDF link (`GET /deaths/{id}/pdf`) for family bereavement and Union Council registration.
-  - Domain error explanations: maps `DEATH_CERTIFIER_NOT_DOCTOR`, `DEATH_ADMISSION_NOT_ACTIVE`, `DEATH_SETTING_INVALID`, `DEATH_TIME_INVALID`, `PATIENT_ALREADY_DECEASED`, `PATIENT_MERGED_CANNOT_TRANSACT`, `DEATH_RECORD_FINAL`, `DEATH_CERTIFICATE_INCOMPLETE`, `DEATH_RECORD_NOT_CERTIFIED`, `AUTOPSY_TRANSITION_INVALID`, `AUTOPSY_MEDICO_LEGAL`, `AUTOPSY_EXISTS`, `ICD_CODE_UNKNOWN`, `VERSION_CONFLICT`, `VALIDATION_ERROR`.
-- **UI Architecture (`src/screens/DeathRecord.tsx`)**:
-  - Central Death Register with status badges (`Draft`, `Certified`), setting filter, date range, search by MRN/Name/Death #.
-  - "Record Death" modal for initial declaration.
-  - WHO Cause of Death Certificate editor with causal chain lines (a-d), interval fields, interactive ICD search/picker modal, suggestion chips, Part II conditions, manner dropdown, external cause inputs, surgery section, pregnancy fields, perinatal details, and certifier stamp.
-  - Action drawers: Save Draft, Certify confirmation with incomplete requirements check, Append Correction dialog, Request Autopsy dialog, Record Autopsy Report modal, and formal A4 certificate print preview.
+  - `contracts/body_release_ward.json` & `contracts/body_release_er.json`: Real MCP screen bundles covering 5 endpoints (`GET /deaths`, `GET /deaths/{death_id}`, `POST /deaths/{death_id}/body-release`, `GET /deaths/{death_id}/print-payload`, `GET /deaths/{death_id}/pdf`), realtime event `death.recorded`, and domain rules (`rule:cd68894ad3`, `rule:60aea191e4`, `rule:15e617c197`, `rule:20c304a0c8`).
+  - `src/generated/body_release.ts`: Generated TypeScript contracts for the 5 endpoints.
+- **Domain Policies (`src/body-release-policy.ts`)**:
+  - Service view capability evaluation:
+    - For `body_release_ward`: service `inpatient_wards` (`full`, `open_work` with banner 'No new body handovers from now on. Completing existing body releases and certificate printing continue.', `records`, `hidden`).
+    - For `body_release_er`: service `emergency_department`.
+  - Role permissions check: `death.body.release` authorized for `ward_nurse`, `head_nurse`, `triage_nurse`, `doctor`, `clinical_specialist`, `surgeon`, `anaesthetist`.
+  - Certification lock verification (`rule:cd68894ad3`): body release is strictly refused (`DEATH_RECORD_NOT_CERTIFIED`) if `status === "Draft"`. Draft records are displayed in the queue with a disabled, greyed handover button and warning tooltip informing nursing staff that the doctor must certify first.
+  - Recipient identity verification (`rule:60aea191e4`):
+    - Non-MLC release (to next of kin): receiver name, relationship (e.g. Spouse, Son, Daughter, Father, Mother, Brother, Sister, Legal Guardian), CNIC or verified national ID number, contact telephone number, and signed acknowledgment.
+    - MLC release (to police or forensic escort): prominent red MEDICO-LEGAL banner, police daily diary (roznamcha) or dispatch letter reference, police station name, and officer identity (name, rank, belt #).
+  - Printable certificate with handover audit (`rule:15e617c197`): fetches print payload (`GET /deaths/{id}/print-payload`) and PDF url (`GET /deaths/{id}/pdf`) carrying receiver credentials, time of release, and nurse signature block.
+  - Domain error explanations for `DEATH_RECORD_NOT_CERTIFIED`, `BODY_ALREADY_RELEASED`, `VALIDATION_ERROR`, `FORBIDDEN`.
+- **UI Architecture (`src/screens/BodyRelease.tsx`)**:
+  - Reusable clinical screen parameterized with `screenId: "body_release_ward" | "body_release_er"`, filterable pending body handover queue, status indicators (`Certified - Ready for Handover`, `Draft - Pending Doctor Certification`, `Released`), KPI cards, search by MRN/Name/Death #.
+  - Modal dialog for Body Handover to Next of Kin or Police Escort.
+  - A4 Handover & Certificate print preview modal.
   - Bounded 100–250% zoom, Light/DarkHighContrast themes, and bilingual English/Urdu interface.
 - **Help, Handbook & Navigation**:
-  - Wired into `src/App.tsx` (navigation, labels, frontDeskScreens, service view filters, render routing).
-  - Registered in `src/foundation-catalogue.json` (15 taskCalls) and `src/foundation-task-map.json` (15 control mappings).
-  - Contextual F1 help (`src/foundation-help.ts`): added `death_record` to `deliveredHelpScreens` and all 79 `death_record.*` interactive controls mapped with bilingual titles and operational descriptions.
-  - Authored comprehensive handbook entry (`src/help.ts`) with bilingual title, clinical purpose, 8 operational steps, and 14 doctor role FAQs covering all 12 domain error codes and WHO guidelines.
-  - Bundled screenshots: `public/handbook/death_record-en.png` and `public/handbook/death_record-ur.png`.
+  - Wire into `src/App.tsx`, task catalogue, task map, `foundation-help.ts`, handbook in `src/help.ts`, and bundle screenshots.
 - **Verification**:
-  - Automated unit tests: `tests/death-record.test.mjs` (9/9 passing).
-  - Help check: `npm run check:help` passed (103 screens, 2382 controls, 1474 groups, 69 FAQ seeds, 30 workspace guides).
-  - TypeScript compiler: `npx tsc --noEmit` passed with 0 errors.
-  - Full test suite: `npm test` passed (437/437 passing across all suites).
-  - Production build: `npm run build` produced `dist/assets/index-Daql6nGC.js`.
-- **Commit & Proposal**:
-  - Implementation commit: `2d501bf`.
-  - Proposal ID: **257** (status: `pending` on `/docs -> My progress`).
+  - Unit tests in `tests/body-release.test.mjs`.
+  - `npm.cmd run check:help`, `npx.cmd tsc --noEmit`, `npm.cmd test`, `npm.cmd run build`.
+- **Progress Submission**:
+  - Commit implementation, submit `propose_progress` for `body_release_ward`, and update `handoff.md`.
 
 ---
 
@@ -71,8 +61,3 @@ Building screens in Phase 5 Roadmap (Emergency, deaths and medico-legal cases) a
 - Screen 104: **`death_record`** (commit `2d501bf`, Proposal **257** awaiting human review on `/docs -> My progress`).
 - Proposals **231**, **232**, **233**, **234**, **235**, and **236** are accepted.
 - Proposals **237**, **238**, **239**, **240**, **241**, **242**, **243**, **244**, **245**, **246**, **247**, **248**, **249**, **250**, **251**, **252**, **253**, **254**, **255**, **256**, and **257** are awaiting human review on `/docs -> My progress`.
-
----
-
-## Next Screen in Roadmap
-- Query `get_build_roadmap()` to identify Screen 105 in Phase 5 / Phase 6.
