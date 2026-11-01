@@ -10,6 +10,92 @@ export type HelpPage = {
   faqUr: [string, string][];
 };
 export const help: Record<string, HelpPage> = {
+  cssd_setup: {
+    title: "Sterile supply: sets, sterilizers, recalls",
+    titleUr: "سٹرائل سپلائی: سیٹس، سٹرلائزرز اور ریکالز",
+    purpose: "Maintain sterile instrument sets and pack specifications, configure sterilizer autoclaves and link biomedical assets, manage breakdown recalls under MSDS IPC 92 with exposed patient tracking, and generate formal sterilization procedures and audit log documents for Infection Prevention and Control committee review (MSDS IPC 90-92).",
+    purposeUr: "سٹرائل آلات کے سیٹس اور پیکس کی ترتیب، سٹرلائزر آٹوکلیوز کی رجسٹریشن اور بائیو میڈیکل اثاثوں کا ربط، ایم ایس ڈی ایس آئی پی سی 92 کے تحت بریک ڈاؤن پر پیکس کی واپسی (ریکال) اور متاثرہ مریضوں کی ٹریکنگ، اور انفیکشن کنٹرول کمیٹی کے لیے باضابطہ سٹرلائزیشن طریقہ کار اور آڈٹ لاگ دستاویزات کی تیاری (ایم ایس ڈی ایس 90-92)۔",
+    steps: [
+      "Open Infection Control → Sterile supply: sets, sterilizers, recalls (cssd_setup) to manage the CSSD master catalog, autoclaves, cycle histories, and breakdown recalls.",
+      "Switch to 'Sets & Packs Catalog' tab: view all active and retired instrument sets, linen packs, and single pouches, with packaging shelf life and implant indicators.",
+      "Search and filter sets: search by set code or clinical name, or filter by packaging kind (InstrumentSet, Pack, Linen, Single) and sterilization method (Steam, EtO, Plasma, DryHeat).",
+      "Add new sterile set or pack: click '+ Add Set or Pack' (requires cssd.manage permission) to enter set code, name, packaging kind, and shelf life days.",
+      "Set packaging shelf life preset: choose from standard packaging presets under MSDS IPC 91 (e.g. Linen wrap 30 days, single pouch 60 days, SMS wrap 90 days, rigid container 180 days).",
+      "Flag implant-bearing sets: check 'Contains surgical implants' if the set holds implants, ensuring loads are held until biological spore indicators pass (MSDS IPC 91).",
+      "Switch to 'Sterilizers & Autoclaves' tab: inspect autoclave chambers, operating methods, installation bays, and linked biomedical equipment asset tags.",
+      "Register new sterilizer: click '+ Register Autoclave / Sterilizer' and link the machine to its biomedical maintenance asset tag from GET /ops/assets.",
+      "Switch to 'Cycle Inspection & Recall' tab: inspect running, quarantined, released, failed, and recalled sterilization loads with mechanical, chemical, and biological results.",
+      "Inspect load details and pack lists: click 'Details & Packs' on any cycle to view temperature, pressure, exposure time, operator, pack items, destination wards, and exposed patients.",
+      "Recall compromised released load: click 'Recall Load' on any released cycle when a breakdown or biological indicator failure is identified (Rule dc520ffa20 and MSDS IPC 92).",
+      "Review exposed patients and download audit reports: track the MRNs of exposed patients for immediate clinical follow-up, and download procedure/log PDFs for committee review."
+    ],
+    stepsUr: [
+      "انفیکشن کنٹرول سے 'سٹرائل سپلائی: سیٹس، سٹرلائزرز اور ریکالز' (cssd_setup) کھولیں تاکہ ماسٹر کیٹلاگ، آٹوکلیوز اور ریکال کا انتظام کیا جا سکے۔",
+      "سیٹس اور پیکس ٹیب پر جائیں: تمام فعال اور ریٹائر شدہ آلات کے سیٹس، لینن پیکس اور پاؤچز کا شیلف لائف اور امپلانٹ سمیت جائزہ لیں۔",
+      "سیٹس تلاش اور فلٹر کریں: کوڈ یا نام درج کر کے تلاش کریں، یا پیکجنگ کی قسم (کنٹینر، ایس ایم ایس پیک، لینن، پاؤچ) اور سٹرلائزیشن طریقہ کے مطابق فلٹر کریں۔",
+      "نیا سٹرائل سیٹ یا پیک شامل کریں: نیا کوڈ، نام، پیکجنگ قسم اور شیلف لائف درج کرنے کے لیے '+ سیٹ یا پیک شامل کریں' پر کلک کریں (cssd.manage درکار ہے)۔",
+      "پیکجنگ کے مطابق معیاری شیلف لائف منتخب کریں: ایم ایس ڈی ایس قواعد کے تحت معیاری پری سیٹ منتخب کریں (جیسے لینن 30 دن، پاؤچ 60 دن، ایس ایم ایس 90 دن، کنٹینر 180 دن)۔",
+      "امپلانٹ والے سیٹس کی نشاندہی کریں: اگر سیٹ میں جراحی امپلانٹس ہوں تو چیک باکس منتخب کریں تاکہ لوڈ حیاتیاتی ٹیسٹ پاس ہونے سے پہلے جاری نہ ہو (قاعدہ 494306e208)۔",
+      "سٹرلائزرز اور آٹوکلیوز ٹیب پر جائیں: آٹوکلیوز کے چیمبرز، طریقہ کار، تنصیب کے کمرے اور منسلک بائیو میڈیکل اثاثہ جات کا جائزہ لیں۔",
+      "نیا سٹرلائزر رجسٹر کریں: '+ سٹرلائزر رجسٹر کریں' پر کلک کریں اور مشین کو دیکھ بھال اور کیلیبریشن کے لیے بائیو میڈیکل اثاثے (ops/assets) سے منسلک کریں۔",
+      "سائیکلز اور ریکال ٹیب پر جائیں: جاری، قرنطینہ، جاری شدہ، ناکام اور واپس طلب شدہ سائیکلز کے مکینیکل، کیمیکل اور بائیولوجیکل نتائج دیکھیں۔",
+      "سائیکل اور پیکس کی تفصیلات کھولیں: کسی بھی سائیکل پر 'تفصیلات اور پیکس' پر کلک کر کے درجہ حرارت، دباؤ، ہولڈ ٹائم، عملہ اور پیکس کا مقام دیکھیں۔",
+      "متاثرہ لوڈ واپس طلب کریں (ریکال): بریک ڈاؤن یا بائیولوجیکل ٹیسٹ فیل ہونے پر 'لوڈ ریکال' پر کلک کریں اور لازمی کلینیکل وجہ درج کریں (ایم ایس ڈی ایس 92)۔",
+      "متاثرہ مریضوں کی ٹریکنگ اور رپورٹس: متاثرہ مریضوں کے ایم آر این دیکھ کر فوری فالو اپ کریں، اور کمیٹی کے لیے طریقہ کار اور آڈٹ لاگ پی ڈی ایف ڈاؤن لوڈ کریں۔"
+    ],
+    faq: [
+      [
+        "How is sterile shelf life determined for CSSD sets and packs under MSDS IPC 91 (Rule 494306e208)?",
+        "Under MSDS IPC 91(iii), shelf life depends strictly on the validated packaging barrier: standard woven cotton linen wraps are valid for maximum 30 days, single heat-sealed plastic/paper peel pouches for 60 days, double-layer SMS non-woven wraps for 90 days, and rigid containers with biological microbial filters for 180 to 365 days. If a pack exceeds its shelf life or package integrity is breached, it must be returned to CSSD for decontamination and re-sterilization."
+      ],
+      [
+        "Why must surgical implant sets be flagged and held until biological spore indicators are verified (Rule 494306e208)?",
+        "Surgical implants (such as orthopedic screws, plates, prosthetic mesh, and cardiac valves) introduce foreign material with high foreign-body infection risk. Hospital policy and MSDS IPC 91 mandate that any load containing implant sets must include a Biological Indicator (Geobacillus stearothermophilus spore ampoule) and remain strictly Quarantined until the incubator confirms negative microbial growth (Pass)."
+      ],
+      [
+        "When a biological indicator fails, how does the system identify loads at risk under MSDS IPC 92 (Rule dc520ffa20)?",
+        "When a BiologicalTest cycle fails, GET /cssd/cycles/{id} returns recall_candidates: all loads sterilized in that specific autoclave since the last verified passing biological test. Under MSDS IPC 92, the Infection Control nurse must immediately inspect those candidate loads and issue a statutory recall for any packs released to operating rooms or wards."
+      ],
+      [
+        "What clinical and operational actions are required after recalling a sterilization load (Rule dc520ffa20)?",
+        "Recalling a load immediately marks all unused packs as 'Recalled' across OTs and wards. Crucially, the response provides patients_exposed: the MRNs of every surgical patient who received an instrument or implant from that compromised load. The IPC nurse must notify the primary surgical teams for prophylactic antibiotic surveillance, wound inspection, and submit a mandatory Section 13 hospital incident report."
+      ],
+      [
+        "Why does the system retire set types and sterilizers by setting is_active to false instead of deleting them (Rule 494306e208)?",
+        "Sterile set definitions and autoclave identities are permanently embedded in historical patient surgery charts, implant registries, and sterilization audit logs. Deleting a set type or sterilizer would break legal traceability. Retiring a set removes it from future packing while keeping all past pack records, lot numbers, and recall links fully intact."
+      ],
+      [
+        "Why should sterilizers be linked to the biomedical asset monitor from GET /ops/assets?",
+        "Linking sterilizers to equipment assets establishes a complete audit trail connecting autoclave chamber performance to preventive maintenance, autoclave gasket replacements, vacuum leak tests, and calibration records required during hospital licensing inspections."
+      ]
+    ],
+    faqUr: [
+      [
+        "ایم ایس ڈی ایس 91 کے تحت سٹرائل پیکس کی شیلف لائف کا تعین کیسے کیا جاتا ہے (قاعدہ 494306e208)؟",
+        "قواعد کے مطابق شیلف لائف کا انحصار پیکجنگ میٹریل پر ہوتا ہے: روایتی سوتی کپڑے کے ریپ زیادہ سے زیادہ 30 دن، ہیٹ سیل شدہ پاؤچ 60 دن، ڈبل ایس ایم ایس نان ووون ریپ 90 دن، اور مائیکروبیل فلٹر والے سخت کنٹینرز 180 سے 365 دن تک کارآمد ہوتے ہیں۔ اگر مدت ختم ہو جائے یا پیک کھل جائے تو اسے دوبارہ سٹرلائز کرنا لازمی ہے۔"
+      ],
+      [
+        "جراحی امپلانٹس والے سیٹس کو حیاتیاتی ٹیسٹ کے نتائج تک روکنا کیوں ضروری ہے (قاعدہ 494306e208)؟",
+        "امپلانٹس (جیسے آرتھوپیڈک اسکرو، پلیٹس یا پروسٹیٹک میش) میں انفیکشن کا شدید خطرہ ہوتا ہے۔ پالیسی کے تحت جس لارڈ میں امپلانٹ ہو اس میں بائیولوجیکل انڈیکیٹر رکھنا لازمی ہے اور جب تک انکیوبیٹر بیکٹیریا کی عدم موجودگی (Pass) کی تصدیق نہ کرے، لارڈ قرنطینہ میں رکھی جاتی ہے۔"
+      ],
+      [
+        "جب بائیولوجیکل ٹیسٹ فیل ہو جائے تو سسٹم خطرے والے لوڈز کی نشاندہی کیسے کرتا ہے (قاعدہ dc520ffa20)؟",
+        "جب کوئی حیاتیاتی ٹیسٹ فیل ہوتا ہے تو سرور اس آٹوکلیو کے تمام ایسے لوڈز کی فہرست (recall_candidates) فراہم کرتا ہے جو پچھلے پاس ٹیسٹ کے بعد جاری کیے گئے تھے۔ انفیکشن کنٹرول نرس کو فوری طور پر ان تمام لارڈز کا معائنہ کر کے ریکال جاری کرنا ہوتا ہے۔"
+      ],
+      [
+        "لوڈ ریکال کرنے کے بعد کن کلینیکل اور انتظامی اقدامات کی ضرورت ہوتی ہے (قاعدہ dc520ffa20)؟",
+        "لوڈ ریکال ہوتے ہی تمام غیر استعمال شدہ پیکس فوراً واپس ہو جاتی ہیں اور سسٹم ان تمام مریضوں کے ایم آر این (patients_exposed) فراہم کرتا ہے جن پر اس لارڈ کے آلات استعمال ہوئے۔ نرس کو متعلقہ سرجنز کو انفیکشن کی نگرانی کے لیے مطلع کرنا اور سیکشن 13 کے تحت ہسپتال کا واقعہ رپورٹ کرنا ہوتا ہے۔"
+      ],
+      [
+        "سیٹس اور سٹرلائزرز کو ڈیلیٹ کرنے کے بجائے ریٹائر کیوں کیا جاتا ہے (قاعدہ 494306e208)؟",
+        "سٹرائل سیٹس کے نام مریضوں کے جراحی ریکارڈز، امپلانٹ لاگز اور آڈٹ ٹریل میں مستقل محفوظ ہوتے ہیں۔ انہیں ڈیلیٹ کرنے سے قانونی ریکارڈ متاثر ہو سکتا ہے۔ اس لیے انہیں غیر فعال (is_active: false) کیا جاتا ہے تاکہ وہ آئندہ استعمال نہ ہوں مگر پرانا ریکارڈ سلامت رہے۔"
+      ],
+      [
+        "سٹرلائزرز کو بائیو میڈیکل اثاثوں (ops/assets) سے جوڑنا کیوں ضروری ہے؟",
+        "مشین کو اثاثہ جات سے منسلک کرنے سے آٹوکلیو کی کارکردگی کا اس کی حفاظتی دیکھ بھال، گیسکٹ کی تبدیلی، پریشر کیلیبریشن اور سالانہ معائنے کے ریکارڈ کے ساتھ باضابطہ ربط قائم رہتا ہے جو ہسپتال کے لائسنس کے لیے لازمی ہے۔"
+      ]
+    ]
+  },
   theatre_checklist_setup: {
     title: "Surgical safety checklist and theatre policy",
     titleUr: "سرجیکل سیفٹی چیک لسٹ اور تھیٹر پالیسی",
