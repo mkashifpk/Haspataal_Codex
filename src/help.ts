@@ -8254,6 +8254,76 @@ consents_doctor: {
       ]
     ]
   },
+  recovery_board_admin: {
+    title: "Recovery board - OT Admin",
+    titleUr: "ریکوری بورڈ - اوٹی ایڈمن",
+    purpose: "Live post-anaesthesia care unit (PACU) recovery oversight board in ot_admin workspace (MSDS COP 38, 39, 41, 46): Real-time PACU occupancy tracking with patient cards sorted longest-in-recovery first, last observation display, and alert flags for overdue observations and long stays (Rule f995066a59), mandatory physiological vitals flowsheet charting covering pulse, BP, respiration, SpO2, airway patency, AVPU consciousness, and pain (Rule 08ba1ce134, MSDS 38), PACU discharge prerequisite gates enforcing signed operative notes (OT_OPERATIVE_NOTE_REQUIRED) and signed anaesthesia records, modified Aldrete scoring evaluation against minimum discharge threshold with clinical override rationale (Rule 99dea44a26), recovery clinical privileges verification (Rule 1653612103), opening recovery for local anaesthesia arrivals (POST /ot/bookings/{id}/recovery), read-only finality and retrospective correction addenda (Rule 9e9cb593cb), in-theatre adverse incident reporting (POST /incidents, Rule fe0c435dc9), and runtime service capability gating from GET /establishment views for screen_id recovery_board_admin under Rule 8cb63655de.",
+    purposeUr: "اوٹی ایڈمن ورک اسپیس میں لائیو پوسٹ اینستھیزیا کیئر یونٹ (پی اے سی یو) ریکوری بورڈ (ایم ایس ڈی ایس سی او پی 38، 39، 41، 46): پی اے سی یو مریضوں کی نگرانی، طویل ترین قیام کے مطابق ترتیب اور تاخیر کے الرٹس (قاعدہ f995066a59)، اہم علامات کا فلو شیٹ اندراج (قاعدہ 08ba1ce134)، سرجن کے آپریٹو نوٹ اور اینستھیزیا ریکارڈ کی شرط برائے ڈسچارج (قاعدہ 2b25651d1e)، ایلڈریٹ اسکورنگ سسٹم کے تحت وارڈ منتقلی کی تصدیق (قاعدہ 99dea44a26)، کلینیکل مراعات کی جانچ (قاعدہ 1653612103)، ریکارڈ میں تصحیحی ترمیم (قاعدہ 9e9cb593cb)، ناخوشگوار واقعات کی رپورٹنگ (قاعدہ fe0c435dc9) اور اسٹیبلشمنٹ سروس کے تحت اسکرین ویو کی دستیابی (قاعدہ 8cb63655de)۔",
+    steps: [
+      "Inspect the live PACU recovery board displaying all active recovery patients sorted longest-in-recovery first (Rule f995066a59).",
+      "Review patient badges: check for red NoObservation / ObservationOverdue flags, amber LongStay warnings, and prerequisite holds (OperativeNoteUnsigned, AnaesthesiaRecordOpen).",
+      "If a patient arrives following local or regional anaesthesia, click '+ Open Recovery Stay', enter the Booking ID, and confirm arrival (Rule 1653612103).",
+      "Select a patient card to load their recovery timeline, discharge prerequisite checklist, and physiological observation history.",
+      "Review or record vitals: pulse, BP systolic/diastolic, respiratory rate, SpO2, airway patency, AVPU, and pain score (Rule 08ba1ce134, MSDS 38).",
+      "Verify that the primary surgeon signed the operative note and post-op care orders, and that the anaesthetist signed the anaesthesia record before approving PACU discharge.",
+      "When the patient meets discharge criteria, click '✓ Discharge Patient' to record destination (Ward, ICU, HDU, Home) and verify the 5 modified Aldrete criteria (Rule 99dea44a26).",
+      "Ensure administrative audit compliance, file incident reports for clinical complications (POST /incidents), and submit retrospective correction addenda when justified (Rule 9e9cb593cb)."
+    ],
+    stepsUr: [
+      "پی اے سی یو ریکوری بورڈ پر سرجری کے بعد زیر نگرانی تمام مریضوں کی فہرست طویل ترین قیام کے مطابق دیکھیں (قاعدہ f995066a59)۔",
+      "مریض کے بیجز دیکھیں: سرخ بیجز (غیر اندراج شدہ یا تاخیر شدہ وائٹلز) اور امبر بیجز (طویل قیام) کی نشاندہی کریں۔",
+      "لوکل اینستھیزیا کے مریض کے لیے '+ اوپن ریکوری اسٹے' منتخب کر کے بکنگ نمبر درج کریں (قاعدہ 1653612103)۔",
+      "کسی بھی مریض کا کارڈ منتخب کر کے وائٹلز فلو شیٹ اور ڈسچارج کی شرائط کا معائنہ کریں۔",
+      "وائٹلز ریکارڈز کا جائزہ لیں: نبض، بلڈ پریشر، سانس، آکسیجن، ایئر وے اور درد کا اسکور (قاعدہ 08ba1ce134)۔",
+      "اس بات کی تصدیق کریں کہ سرجن نے آپریٹو نوٹ اور اینستھیٹسٹ نے اینستھیزیا ریکارڈ مکمل کر لیا ہے۔",
+      "مریض کی وارڈ یا آئی سی یو منتقلی کے لیے ایلڈریٹ اسکور کی تصدیق کریں اور ڈسچارج مکمل کریں (قاعدہ 99dea44a26)۔",
+      "انتظامی آڈٹ کے تقاضے پورے کریں، ناخوشگوار واقعات کی رپورٹنگ کریں اور ضروری تصحیحات کا اندراج کریں (قاعدہ 9e9cb593cb)۔"
+    ],
+    faq: [
+      [
+        "What is the role of the OT Administrator on the PACU Recovery Board?",
+        "The OT Administrator oversees PACU throughput, monitors patient turnover from theatres to wards, ensures non-delayed transfers (addressing LongStay flags), and verifies that surgical and anaesthetic documentation prerequisites are satisfied before inpatient bed shifting."
+      ],
+      [
+        "How does the OT Administrator track cases exceeding standard recovery duration?",
+        "Under Rule f995066a59, cases with prolonged recovery display the amber 'LongStay' badge. The administrator coordinates with theatre coordinators and ward supervisors to expedite bed allocation and handover."
+      ],
+      [
+        "Can a patient be discharged from recovery if the surgeon's operative note is pending?",
+        "No. Under statutory Rule 2b25651d1e (OT_OPERATIVE_NOTE_REQUIRED), the server strictly forbids discharging the patient from PACU until the primary surgeon completes and signs the operative note with mandatory post-op care orders."
+      ],
+      [
+        "What happens if an Aldrete score is below 9 when discharging to a general ward?",
+        "Under Rule 99dea44a26, the system raises an OT_RECOVERY_CRITERIA_NOT_MET block. Transferring an unstable patient requires an authorized clinical override rationale signed by the attending anaesthetist or surgeon."
+      ],
+      [
+        "How are adverse events in PACU audited by the OT Administrator?",
+        "Under Rule fe0c435dc9, clicking 'Report Incident' files an adverse event directly to the hospital Quality Assurance committee and flags it on theatre quality management ledgers."
+      ]
+    ],
+    faqUr: [
+      [
+        "پی اے سی یو ریکوری بورڈ پر اوٹی ایڈمنسٹریٹر کا کیا کردار ہے؟",
+        "اوٹی ایڈمنسٹریٹر ریکوری روم کی گنجائش، تھیٹر سے وارڈ میں مریضوں کی بروقت منتقلی اور طویل قیام کے کیسز کی نگرانی کرتا ہے تاکہ وارڈ بیڈز کی دستیابی کو یقینی بنایا جا سکے۔"
+      ],
+      [
+        "اوٹی ایڈمنسٹریٹر طویل قیام والے کیسز کو کیسے مانیٹر کرتا ہے؟",
+        "قاعدہ f995066a59 کے تحت طویل قیام والے مریضوں پر امبر رنگ کا 'LongStay' بیج ظاہر ہوتا ہے، جس پر ایڈمنسٹریٹر متعلقہ وارڈز سے فوری رابطہ کر کے بیڈ تفویض کرواتا ہے۔"
+      ],
+      [
+        "کیا سرجن کے آپریٹو نوٹ کے بغیر مریض کو ریکوری سے ڈسچارج کیا جا سکتا ہے؟",
+        "ہرگز نہیں۔ قاعدہ 2b25651d1e کے تحت سرور اس وقت تک ڈسچارج روکتا ہے جب تک سرجن آپریشن کا تفصیلی نوٹ اور بعد از آپریشن ہدایات پر دستخط نہ کر دے۔"
+      ],
+      [
+        "اگر وارڈ منتقلی کے وقت ایلڈریٹ اسکور 9 سے کم ہو تو کیا ہوتا ہے؟",
+        "قاعدہ 99dea44a26 کے تحت نظام منتقلی کو بلاک کر دیتا ہے اور ڈاکٹر کی جانب سے باضابطہ کلینیکل استثنائی وجہ لکھنا لازمی قرار دیتا ہے۔"
+      ],
+      [
+        "پی اے سی یو میں پیش آنے والے واقعات کا ایڈمن آڈٹ کیسے ہوتا ہے؟",
+        "قاعدہ fe0c435dc9 کے تحت 'رپورٹ واقعہ' کا بٹن دبا کر اسپتال کی کوالٹی ایشورنس کمیٹی کو براہ راست رپورٹ ارسال کی جاتی ہے۔"
+      ]
+    ]
+  },
   recovery_board: {
     title: "Live PACU recovery board",
     titleUr: "لائیو پی اے سی یو ریکوری بورڈ",
