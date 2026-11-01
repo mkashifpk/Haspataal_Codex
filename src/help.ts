@@ -8254,6 +8254,76 @@ consents_doctor: {
       ]
     ]
   },
+  recovery_board_anaesthesia: {
+    title: "Recovery board - Anaesthesia",
+    titleUr: "ریکوری بورڈ - اینستھیزیا",
+    purpose: "Live post-anaesthesia care unit (PACU) clinical recovery board in anaesthesia workspace (MSDS COP 38, 39, 41, 46): Real-time PACU recovery tracking with patient cards sorted longest-in-recovery first, last observation display, and alert flags for overdue observations and long stays (Rule f995066a59), mandatory physiological vitals flowsheet charting covering pulse, BP, respiration, SpO2, airway patency, AVPU consciousness, and pain (Rule 08ba1ce134, MSDS 38), PACU discharge prerequisite gates enforcing signed operative notes (OT_OPERATIVE_NOTE_REQUIRED) and signed anaesthesia records, modified Aldrete scoring evaluation against minimum discharge threshold with clinical override rationale (Rule 99dea44a26), recovery clinical privileges verification (Rule 1653612103), opening recovery for local anaesthesia arrivals (POST /ot/bookings/{id}/recovery), read-only finality and retrospective correction addenda (Rule 9e9cb593cb), in-theatre adverse incident reporting (POST /incidents, Rule fe0c435dc9), and runtime service capability gating from GET /establishment views for screen_id recovery_board_anaesthesia under Rule b919e98af8.",
+    purposeUr: "اینستھیزیا ورک اسپیس میں لائیو پوسٹ اینستھیزیا کیئر یونٹ (پی اے سی یو) کلینیکل ریکوری بورڈ (ایم ایس ڈی ایس سی او پی 38، 39، 41، 46): اینستھیزیا کے بعد مریضوں کی دیکھ بھال، طویل ترین قیام کے مطابق ترتیب اور تاخیر کے الرٹس (قاعدہ f995066a59)، اہم علامات کا فلو شیٹ اندراج (قاعدہ 08ba1ce134)، سرجن کے آپریٹو نوٹ اور اینستھیزیا ریکارڈ کی شرط برائے ڈسچارج (قاعدہ 2fc0c843dc)، ایلڈریٹ اسکورنگ سسٹم کے تحت وارڈ منتقلی کی جانچ (قاعدہ 99dea44a26)، کلینیکل مراعات کی جانچ (قاعدہ 1653612103)، ریکارڈ میں تصحیحی ترمیم (قاعدہ 9e9cb593cb)، ناخوشگوار واقعات کی رپورٹنگ (قاعدہ fe0c435dc9) اور اسٹیبلشمنٹ سروس کے تحت اسکرین ویو کی دستیابی (قاعدہ b919e98af8)۔",
+    steps: [
+      "Open the recovery board to inspect active patients emerging from anaesthesia in PACU, sorted longest-in-recovery first (Rule f995066a59).",
+      "Check vital signs and warning badges: red NoObservation / ObservationOverdue flags and amber LongStay indicators.",
+      "For regional or local block patients transferred directly, open recovery stay via '+ Open Recovery Stay' (Rule 1653612103).",
+      "Review the patient's continuous vitals flowsheet (HR, BP, RR, SpO2, airway patency, AVPU consciousness, pain, PONV nausea) under Rule 08ba1ce134.",
+      "Confirm that intra-operative anaesthesia notes and post-procedure summaries are finalized and signed before PACU discharge.",
+      "Evaluate Modified Aldrete recovery domains (Activity, Respiration, Circulation, Consciousness, SpO2) against target score (≥9) via '✓ Discharge Patient' (Rule 99dea44a26).",
+      "If discharging with an Aldrete score < 9 or elevated pain, record an explicit clinical override reason and complete the shifting handover note (MSDS 39).",
+      "Chart adverse events or unexpected emergence complications via 'Report Incident' (POST /incidents, Rule fe0c435dc9) and append correction addenda when needed (Rule 9e9cb593cb)."
+    ],
+    stepsUr: [
+      "پی اے سی یو ریکوری بورڈ کھول کر اینستھیزیا کے بعد ہوش میں آنے والے مریضوں کا جائزہ لیں (قاعدہ f995066a59)۔",
+      "اہم علامات اور وارننگ بیجز دیکھیں: سرخ بیجز (غیر اندراج شدہ وائٹلز) اور امبر بیجز (طویل قیام)۔",
+      "لوکل یا ریجنل اینستھیزیا کے مریضوں کے لیے '+ اوپن ریکوری اسٹے' منتخب کر کے بکنگ نمبر درج کریں (قاعدہ 1653612103)۔",
+      "مریض کے نبض، بلڈ پریشر، سانس، آکسیجن، ایئر وے، ہوش اور متلی/درد کے ریکارڈز کا معائنہ کریں (قاعدہ 08ba1ce134)۔",
+      "ڈسچارج سے قبل اینستھیزیا ریکارڈ اور سرجن کے آپریٹو نوٹ کے مکمل ہونے کی تصدیق کریں۔",
+      "ایلڈریٹ اسکور کے پانچوں شعبوں کی جانچ کریں اور مطلوبہ حد (≥9) کی تصدیق کریں (قاعدہ 99dea44a26)۔",
+      "اگر ایلڈریٹ اسکور مطلوبہ حد سے کم ہو تو کلینیکل استثنا کی وجہ درج کریں اور وارڈ نرس کے لیے ہینڈ اوور نوٹ لکھیں۔",
+      "کسی بھی ہنگامی پیچیدگی کی صورت میں واقعہ رپورٹ کریں (قاعدہ fe0c435dc9) اور ضروری تصحیحات کا اندراج کریں (قاعدہ 9e9cb593cb)۔"
+    ],
+    faq: [
+      [
+        "What is the anaesthetist's clinical responsibility on the PACU Recovery Board?",
+        "The anaesthetist oversees patient emergence from general, regional, or neuraxial anaesthesia, manages airway patency and post-operative analgesia/PONV, evaluates readiness for transfer using the Modified Aldrete Score, and authorizes discharge to inpatient beds or step-down units."
+      ],
+      [
+        "Why does PACU discharge require a finalized anaesthesia record?",
+        "Under Rule 2fc0c843dc and hospital safety governance, complete documentation of agents administered, intra-operative fluid balance, airway difficulty, and recovery orders must be finalized so inpatient ward teams can safely continue postoperative monitoring."
+      ],
+      [
+        "Can an anaesthetist authorize transfer if the Aldrete score is below 9?",
+        "Under Rule 99dea44a26, transfer with Aldrete score < 9 requires an explicit clinical override rationale (OT_RECOVERY_CRITERIA_NOT_MET) explaining why early transfer is medically sound (e.g. transfer directly to ICU for continued mechanical ventilation)."
+      ],
+      [
+        "What airway criteria are required before patient discharge from recovery?",
+        "Under Rule 08ba1ce134 and MSDS COP 38, the patient's airway must be Patent without artificial support unless being transferred directly to ICU with an established endotracheal tube or tracheostomy."
+      ],
+      [
+        "How are emergence complications (delirium, laryngospasm, respiratory depression) reported?",
+        "Under Rule fe0c435dc9, clicking 'Report Incident' logs the adverse event with classification (e.g. PACU_RESP_DEPRESSION) and immediate clinical measures to hospital quality assurance."
+      ]
+    ],
+    faqUr: [
+      [
+        "پی اے سی یو ریکوری بورڈ پر اینستھیٹسٹ کی کلینیکل ذمہ داری کیا ہے؟",
+        "اینستھیٹسٹ بے ہوشی کے بعد مریض کے ہوش میں آنے، ایئر وے کی بحالی، درد اور متلی کے علاج کی نگرانی کرتا ہے اور ایلڈریٹ اسکور کے ذریعے وارڈ منتقلی کی حتمی منظوری دیتا ہے۔"
+      ],
+      [
+        "پی اے سی یو سے ڈسچارج کے لیے اینستھیزیا ریکارڈ کا مکمل ہونا کیوں ضروری ہے؟",
+        "قاعدہ 2fc0c843dc کے تحت آپریشن کے دوران دی جانے والی ادویات، سیال اشیا اور ریکوری کی ہدایات کا مکمل ہونا ضروری ہے تاکہ وارڈ کا عملہ مریض کی مناسب نگہداشت جاری رکھ سکے۔"
+      ],
+      [
+        "اگر ایلڈریٹ اسکور 9 سے کم ہو تو کیا اینستھیٹسٹ منتقلی کی اجازت دے سکتا ہے؟",
+        "قاعدہ 99dea44a26 کے تحت اگر مریض کو وینٹی لیٹر سپورٹ پر آئی سی یو منتقل کیا جا رہا ہو تو باضابطہ کلینیکل استثنا کی وجہ لکھ کر منتقلی کی اجازت دی جا سکتی ہے۔"
+      ],
+      [
+        "ریکوری سے ڈسچارج سے پہلے ایئر وے کے کیا معیارات درکار ہیں؟",
+        "قاعدہ 08ba1ce134 کے تحت مریض کا ایئر وے بغیر کسی بیرونی سپورٹ کے مکمل طور پر کھلا (Patent) ہونا ضروری ہے۔"
+      ],
+      [
+        "ہوش میں آنے کی پیچیدگیوں (جیسے سانس کی تنگی یا ڈیلیریئم) کی رپورٹنگ کیسے ہوتی ہے؟",
+        "قاعدہ fe0c435dc9 کے تحت 'رپورٹ واقعہ' کا بٹن دبا کر اسپتال کی کوالٹی ایشورنس کمیٹی کو فوری رپورٹ بھیجی جاتی ہے۔"
+      ]
+    ]
+  },
   recovery_board_admin: {
     title: "Recovery board - OT Admin",
     titleUr: "ریکوری بورڈ - اوٹی ایڈمن",
