@@ -1,7 +1,7 @@
 # Haspataal checkpoint
 Last updated: 01 November 2026, Antigravity (Codex pair), Asia/Karachi.
 
-## Active request: Phase 6 Screen 121 `ot_consumables_nurse` (OT consumables & implants - OT Nurse workspace)
+## Active request: Phase 6 Screen 123 `sterile_packs_ot` (Sterile packs: scan when opened - OT Nurse workspace)
 Executing the Phase 6 Roadmap ("Theatre and sterile supply") in dependency order along with all tests and MCP progress reporting:
 - Screen 108: **`transfusion_bedside_er`** ("Bedside transfusion observation - ER", Position 108, 74 points) — **COMPLETED** (commit `2803cf0`, Proposal **261** awaiting human review on `/docs -> My progress`). Marks Phase 5 100% complete!
 - Screen 109: **`clinical_privileges`** ("Clinical privileges", Position 109, 55 points) — **COMPLETED** (commit `5ddbd89`, Proposal **262** awaiting human review on `/docs -> My progress`). First screen of Phase 6!
@@ -17,7 +17,59 @@ Executing the Phase 6 Roadmap ("Theatre and sterile supply") in dependency order
 - Screen 119: **`safety_checklist_admin`** ("Surgical safety checklist - OT Admin workspace", Position 119, 79 points, workspace `ot_admin`) — **COMPLETED** (commit `6660458`, Proposal **272** awaiting human review on `/docs -> My progress`).
 - Screen 120: **`safety_checklist_anaesthesia`** ("Surgical safety checklist - Anaesthesia workspace", Position 120, 79 points, workspace `anaesthesia`) — **COMPLETED** (commit `b1b524e`, Proposal **273** awaiting human review on `/docs -> My progress`).
 - Screen 121: **`ot_consumables_nurse`** ("OT consumables & implants", Position 121, 47 points, workspace `ot_nurse`) — **COMPLETED** (commit `aae6250`, Proposal **274** awaiting human review on `/docs -> My progress`).
-- Screen 122: **`ot_intraop`** ("Intra-operative nursing record", Position 122, 53 points, workspace `ot_nurse`) — **NEXT**.
+- Screen 122: **`ot_intraop`** ("Intra-op consumables", Position 122, 53 points, workspace `ot_admin`) — **COMPLETED** (commit `efb8527`, Proposal **275** awaiting human review on `/docs -> My progress`).
+- Screen 123: **`sterile_packs_ot`** ("Sterile packs: scan when opened", Position 123, 48 points, workspace `ot_nurse`) — **READY TO IMPLEMENT**.
+
+---
+
+### Current Implementation: Screen 123 (`sterile_packs_ot`)
+- **Workflow & Standards**: Sterile packs barcode scanning when opened in the operating theatre (MSDS IPC 92): Point-of-use scan (`POST /cssd/packs/use` with `booking_id`), pack detail lookups (`GET /cssd/packs/{pack_code}`), pack list filtering (`GET /cssd/packs`), expired/recalled pack rejection (`CSSD_PACK_UNUSABLE`, Rule 5eabbbecca), realtime recall alert integration on `cssd.cycle.updated` (Rule 4357be8acb: fetch affected packs with `GET /cssd/packs?status=Recalled`), and runtime service capability gating from `GET /establishment` views for `screen_id: "sterile_packs_ot"` under Rule 26e45f89a1; Position 123 (48 points), Workspace `ot_nurse`.
+- **Planned Files**:
+  - `contracts/sterile_packs_ot.json`: Saved MCP screen bundle.
+  - `src/generated/sterile_packs_ot.ts`: Generated TypeScript contracts for 3 endpoints.
+  - `src/sterile-packs-policy.ts`: Domain policies, capability view gating (`rule:26e45f89a1`), pack usability validation (`rule:5eabbbecca`), point-of-use linkage (`rule:d8f4d7af47`), recall handling (`rule:4357be8acb`), role permissions, and bilingual error explanations.
+  - `src/screens/SterilePacksOT.tsx`: Point-of-use sterile pack scanner UI, active surgical case selector, scanned packs table, recall alert banner, and manual pack lookup.
+  - `tests/sterile-packs-ot.test.mjs`: Automated unit test suite.
+  - Wire into `src/App.tsx`, `src/foundation-catalogue.json`, `src/foundation-task-map.json`, `src/foundation-help.ts`, and `src/help.ts`.
+- **Next Concrete Step**: Save contract bundle to `contracts/sterile_packs_ot.json`, generate TypeScript client in `src/generated/sterile_packs_ot.ts`, and implement domain policy with unit tests.
+
+---
+
+### Completed Screen 122 (`ot_intraop`) Checkpoint
+- **Workflow & Standards**: Theatre lifecycle and consumables management in `ot_admin`: Starting surgery (`POST /ot/bookings/{id}/start`), intra-operative consumable/implant barcode scanning (`POST /ot/bookings/{id}/consumables`), statutory mistake reversals with mandatory reason (`POST /ot/consumables/{id}/reverse`, Rule f228c617bd), completing surgery with WHO checklist prerequisite verification (`POST /ot/bookings/{id}/complete-surgery`), and completing theatre cleaning / restoring suite to Available (`POST /ot/bookings/{id}/complete-cleaning`), under Rule 23588c8fc8 (runtime capability gating from `GET /establishment` views for `ot_intraop`); Position 122 (53 points), Workspace `ot_admin`.
+- **Contracts**:
+  - `contracts/ot_intraop.json`: Saved real MCP screen bundle (6 endpoints, 1 realtime event, 2 statutory rules, 19 rubric items).
+  - `src/generated/ot_intraop.ts`: Generated TypeScript contracts for all 6 operations and data models.
+- **Domain Policies & Statutory Rules (`src/ot-intraop-policy.ts`)**:
+  - Runtime service capability gating (`rule:23588c8fc8`): evaluates `GET /establishment` views for `ot_intraop` (`full`, `open_work`, `records`, `setup`, `hidden`).
+  - Lifecycle state machine: Validates permitted transitions (`Scheduled`/`EmergencyHold` -> `InProgress`, `InProgress` -> `Cleaning`, `Cleaning` -> `Completed`).
+  - Role permissions: `canManageBookings` (`ot.booking.manage`), `canRecordConsumables` (`ot.consumable.record`), `canViewBookings` (`ot.booking.view`), `canStartSurgery`, `canCompleteSurgery`, `canCompleteCleaning`, `canAddConsumables`.
+  - Scan validation (`validateConsumableScan`): enforces positive quantity and item reference (barcode or non-stock description).
+  - Reversal validation (`validateReversalReason`, `canReverseConsumable`, `rule:f228c617bd`): requires mandatory reason (3-1000 characters), prevents reversing already reversed items or reversal rows.
+  - Bilingual error explanations (`explainOtIntraopError`): covers `OT_BOOKING_NOT_ACTIVE`, `OT_CHECKLIST_INCOMPLETE`, `OT_CONSUMABLE_REVERSAL_INVALID`, `REFERENCE_NOT_FOUND`, and `VALIDATION_ERROR`.
+- **UI Architecture (`src/screens/OTIntraop.tsx`)**:
+  - Theatre lifecycle actions: Start Surgery, Complete Surgery, Complete Cleaning with visual room status indicators (In-Surgery 🔴, Cleaning 🟡, Available 🟢).
+  - Surgical case queue with status filter tabs (Scheduled, InProgress, Cleaning, Completed, EmergencyHold, All), case search, and patient context cards.
+  - Patient Context & Identity Banner: Preserves name, MRN, gender/age, theater room, primary surgeon, anaesthetist, and current lifecycle state.
+  - Dual Scan Modes:
+    1. Barcode Scan (Pharmacy stock with automated FEFO inventory deduction).
+    2. Vendor Implant / Non-stock (specialized custom implants with description, unit cost, and retail price).
+  - Statutory Reversal Modal (`POST /ot/consumables/{id}/reverse`, `rule:f228c617bd`): Enforces audit reasons for reversals; hard deletion is prohibited.
+  - Realtime synchronization: Subscribes to `ot.booking.updated` WebSocket events to refresh the booking queue and active booking details.
+- **Help, Handbook & Navigation**:
+  - Wired into `src/App.tsx`, `src/foundation-catalogue.json` (6 tasks), `src/foundation-task-map.json` (6 controls).
+  - Contextual F1 help (`src/foundation-help.ts`): added `ot_intraop` to `deliveredHelpScreens` and all 23 controls mapped.
+  - Authored comprehensive handbook entry (`src/help.ts`) with bilingual title, purpose, 9 operational steps, and 6 role FAQs for `ot_admin`.
+  - Bundled screenshots: `public/handbook/ot_intraop-en.png` and `ot_intraop-ur.png`.
+- **Verification**:
+  - Automated unit tests: `tests/ot-intraop.test.mjs` (7/7 passing).
+  - Full test suite: `npm test` passed (561/561 passing across all suites).
+  - Help check: `npm run check:help` passed (121 screens, 2842 controls, 1875 groups, 69 FAQ seeds, 30 workspace guides).
+  - TypeScript compiler: `npx tsc --noEmit` passed with 0 errors.
+  - Production build: `npm run build` succeeded (`dist/assets/index-B64JnLsa.js`).
+- **Commit & Proposal**:
+  - Implementation commit: `efb8527`.
+  - Proposal ID: **275** (status: `pending` on `/docs -> My progress`).
 
 ---
 
