@@ -1,7 +1,7 @@
 # Haspataal checkpoint
 Last updated: 01 November 2026, Antigravity (Codex pair), Asia/Karachi.
 
-## Active request: Phase 6 Screen 127 `surgical_record_surgeon` (Surgical record: operative note & closure - Surgeon workspace)
+## Active request: Phase 6 Screen 128 `recovery_board` (Live PACU recovery board - OT Nurse workspace)
 Executing the Phase 6 Roadmap ("Theatre and sterile supply") in dependency order along with all tests and MCP progress reporting:
 - Screen 108: **`transfusion_bedside_er`** ("Bedside transfusion observation - ER", Position 108, 74 points) — **COMPLETED** (commit `2803cf0`, Proposal **261** awaiting human review on `/docs -> My progress`). Marks Phase 5 100% complete!
 - Screen 109: **`clinical_privileges`** ("Clinical privileges", Position 109, 55 points) — **COMPLETED** (commit `5ddbd89`, Proposal **262** awaiting human review on `/docs -> My progress`). First screen of Phase 6!
@@ -22,7 +22,71 @@ Executing the Phase 6 Roadmap ("Theatre and sterile supply") in dependency order
 - Screen 124: **`sterile_packs_ot_admin`** ("Sterile packs: scan when opened - OT Admin", Position 124, 48 points, workspace `ot_admin`) — **COMPLETED** (commit `d076dbf`, Proposal **277** awaiting human review on `/docs -> My progress`).
 - Screen 125: **`sterile_packs_ward`** ("Sterile packs: scan when opened - Ward", Position 125, 48 points, workspace `ward_nurse`) — **COMPLETED** (commit `994aeb4`, Proposal **278** awaiting human review on `/docs -> My progress`).
 - Screen 126: **`anaesthesia_record`** ("Anaesthesia record", Position 126, 69 points, workspace `anaesthesia`) — **COMPLETED** (commit `7184c76`, Proposal **279** awaiting human review on `/docs -> My progress`).
-- Screen 127: **`surgical_record_surgeon`** ("Surgical record: operative note & closure", Position 127, 123 points, workspace `doctor` / `surgeon`) — **READY TO IMPLEMENT**.
+- Screen 127: **`surgical_record_surgeon`** ("Surgical record: operative note & closure", Position 127, 123 points, workspace `doctor` / `surgeon`) — **COMPLETED** (commit `6178963`, Proposal **280** awaiting human review on `/docs -> My progress`).
+- Screen 128: **`recovery_board`** ("Live PACU recovery board", Position 128, 65 points, workspace `ot_nurse`) — **READY TO IMPLEMENT**.
+
+---
+
+### Completed Screen 127 (`surgical_record_surgeon`) Checkpoint
+- **Workflow & Standards**: Intra-operative surgical clinical record, surgeon's pre-operative clinical evaluation, informed operation consent, and operative note in `doctor` / `surgeon` workspace (MSDS COP 32, 33, 35, 38):
+  - Pre-operative clinical evaluation (`rule:8bbdbdc51d`, MSDS COP 32): history & physical exam, provisional diagnosis, ICD-10 term search (`GET /icd/codes`), laterality marking (Left, Right, Bilateral, NotApplicable), and planned procedure. Read-only lock enforced upon WHO Checklist Sign In pause.
+  - Operation informed consent gate (`rule:451c4b4945`, MSDS COP 33): form `OPERATION` (`POST /consents` / `PATCH /consents/{id}`), procedure name, performing surgeon, risks, benefits, alternatives, language, read aloud verification; physical/thumbprint/digital signing modal (`POST /consents/{id}/sign`) with surrogate decision maker relation (`GET /consent-decision-makers`), signer CNIC, and clinical witness; refusal modal (`POST /consents/{id}/refuse`). Must be Given prior to Sign In and incision (`CONSENT_REQUIRED`).
+  - Comprehensive operative note & post-operative plan (`rule:2b25651d1e`, MSDS COP 35): procedure performed, post-op diagnosis, surgical findings, detailed technique narrative, incision type/location, closure, CDC wound classification, estimated blood loss (EBL), fluid balance, blood transfusion, implants left in situ toggle, surgical drains toggle, specimens to histopathology toggle, and condition at conclusion.
+  - Mandatory post-operative care orders with one-click 'Not needed' toggles: monitoring orders, statutory ward monitoring interval (15, 30, 60, 120 min), analgesia/antibiotics, wound care, drains/catheters, nutrition, and specialty referrals.
+  - Primary surgeon final signing gate (`POST /ot/bookings/{id}/operative-note/sign`): strictly required before patient can be discharged from PACU recovery (`OT_OPERATIVE_NOTE_REQUIRED`). Automatically establishes the inpatient ward's vitals monitoring interval (`monitoring_interval_minutes`).
+  - Parts stepper strip (`rule:3e99378238`): visual status strip (Missing grey, Draft amber, Final green) and `next_step` call to action.
+  - Draft missing indicators (`rule:552e1a1764`): highlights required fields for signing.
+  - Official A4 printable surgical record (`rule:40d4b7c1c0`): print payload text and PDF download (`GET /ot/bookings/{id}/surgical-record/print-payload`, `GET /ot/bookings/{id}/surgical-record/pdf`).
+  - Read-only finality & retrospective corrections (`rule:9e9cb593cb`): post-finality correction addenda (`POST /ot/bookings/{id}/corrections`).
+  - In-theatre adverse incident reporting (`rule:fe0c435dc9`): reports incidents to hospital QA (`POST /incidents`).
+  - Active clinical privileges check (`rule:db3a19e806`): validates surgeon privileges (`OT_PRIVILEGE_REQUIRED`).
+  - Runtime service capability gating from `GET /establishment` views for `screen_id: "surgical_record_surgeon"` under Rule 7bb3ca4e1d; Position 127 (123 points), Workspace `doctor` / `surgeon`.
+- **Contracts**:
+  - `contracts/surgical_record_surgeon.json`: Saved real MCP screen bundle (24 endpoints, 2 realtime events, 9 statutory rules, 46 rubric items).
+  - `src/generated/surgical_record_surgeon.ts`: Generated TypeScript contracts for all 24 operations and models.
+- **Domain Policies & Statutory Rules (`src/surgical-record-surgeon-policy.ts`)**:
+  - Runtime service capability gating (`rule:7bb3ca4e1d`): evaluates `GET /establishment` views for `surgical_record_surgeon` (`full`, `open_work`, `records`, `setup`, `hidden`).
+  - Role permissions: `canViewSurgicalRecord`, `canRecordPreOpNote`, `canRecordOperativeNote`, `canManageConsents`, `canCorrectSurgicalRecord`, `canReportIncident`.
+  - Input validations: `validatePreOpNote`, `validateOperativeNoteDraft`, `validateOperativeNoteSigning`, `validateCorrectionInput`, `validateIncidentInput`.
+  - Bilingual error explanations (`explainSurgicalRecordSurgeonError`): handles `OT_BOOKING_STATE_INVALID`, `OT_CHECKLIST_INCOMPLETE`, `CONSENT_REQUIRED`, `OT_OPERATIVE_NOTE_REQUIRED`, `OT_PRIVILEGE_REQUIRED`, `OT_RECORD_FINAL`, `OT_RECORD_INCOMPLETE`, `OT_RECORD_NOT_SIGNED`, `INCIDENT_DETAILS_REQUIRED`, `INCIDENT_TYPE_INACTIVE`, etc.
+- **UI Architecture (`src/screens/SurgicalRecordSurgeon.tsx`)**:
+  - Surgical case queue (`GET /ot/clinical-worklist`) with search and full surgical record detail loading (`getSurgicalRecord`).
+  - Patient Context & Identity Banner with PACU Discharge Prerequisite alert indicator.
+  - Parts Stepper Strip with progress indicators and Next Step action.
+  - Tab 1: Pre-Op Note with ICD-10 term search and laterality options.
+  - Tab 2: Operation Consent with printable A4 preview, physical/thumbprint signing modal, and refusal modal.
+  - Tab 3: Operative Note & Post-Op Orders with one-click "Not needed" toggles and Sign Operative Note action.
+  - Tab 4: Record Overview with A4 printable payload preview, PDF download, and audit log.
+  - Post-Finality Correction Addendum Modal (`POST /ot/bookings/{id}/corrections`).
+  - In-Theatre Adverse Incident Modal (`POST /incidents`).
+  - Realtime WebSocket synchronization on `ot.clinical.updated` and `ot.booking.updated`.
+- **Help, Handbook & Navigation**:
+  - Wired into `src/App.tsx`, `src/foundation-catalogue.json` (24 tasks), `src/foundation-task-map.json` (24 controls).
+  - Contextual F1 help (`src/foundation-help.ts`): added `surgical_record_surgeon` to `deliveredHelpScreens` and all 74 controls mapped.
+  - Authored comprehensive handbook entry (`src/help.ts`) with bilingual title, purpose, 10 operational steps, and 6 role FAQs for `surgeon`.
+  - Bundled screenshots: `public/handbook/surgical_record_surgeon-en.png` and `surgical_record_surgeon-ur.png`.
+- **Verification**:
+  - Automated unit tests: `tests/surgical-record-surgeon.test.mjs` (7/7 passing).
+  - Help check: `npm run check:help` passed (126 screens, 3000 controls, 2021 groups, 69 FAQ seeds, 30 workspace guides).
+  - Help coverage test: `tests/help-coverage.test.mjs` (28/28 passing).
+  - Full test suite: `npm test` passed (594/594 passing across all suites).
+  - TypeScript compiler: `npx tsc --noEmit` passed with 0 errors.
+  - Production build: `npm run build` succeeded (`dist/assets/index-CnLDgiNy.js`).
+- **Commit & Proposal**:
+  - Implementation commit: `6178963`.
+  - Proposal ID: **280** (status: `pending` on `/docs -> My progress`).
+
+---
+
+### Plan for Screen 128 (`recovery_board`)
+- **Workflow & Standards**: Live PACU recovery board in `ot_nurse` workspace (MSDS COP 39, 41, 42):
+  - Post-anaesthesia recovery room occupancy, bay status, and patient arrival tracking.
+  - Modified Aldrete scoring and physiological vitals flowsheet during recovery.
+  - Inpatient ward bed assignment and readiness check.
+  - Pre-requisites for PACU discharge: signed anaesthesia record (`rule:2fc0c843dc`) and signed operative note with post-op orders (`rule:2b25651d1e`, `OT_OPERATIVE_NOTE_REQUIRED`).
+  - PACU discharge / transfer out execution (`POST /ot/bookings/{id}/recovery/discharge`).
+  - Position 128 (65 points), Workspace `ot_nurse`.
+- **Next Concrete Step**: Fetch screen bundle `get_screen_bundle("recovery_board")` and save to `contracts/recovery_board.json`.
 
 ---
 
