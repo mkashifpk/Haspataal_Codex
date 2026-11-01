@@ -8254,7 +8254,89 @@ consents_doctor: {
       ]
     ]
   },
-  sterile_packs_ward: {
+      anaesthesia_record: {
+    title: "Anaesthesia record and flowsheet",
+    titleUr: "اینستھیزیا ریکارڈ اور فلو شیٹ",
+    purpose: "Intra-operative anaesthesia record, monitoring flowsheet, and drug administration in anaesthesia workspace (MSDS COP 34, 36, 37, 40): Pre-induction evaluation (Rule eda7089766), vital signs and airway management, time stamping for induction and incision with WHO Surgical Safety Checklist prerequisite enforcement (OT_CHECKLIST_INCOMPLETE), periodic physiological vitals charting with chart gaps detection (Rule c7bd8c2650), intra-operative medication, fluid, and blood administration, adverse event reporting to hospital quality assurance (POST /incidents, Rule fe0c435dc9), record finality and signing (Rule 2fc0c843dc), post-finality correction addenda (Rule 9e9cb593cb), clinical privileges authorization check (Rule db3a19e806), and runtime service capability gating from GET /establishment views for screen_id anaesthesia_record under Rule 2285735141.",
+    purposeUr: "اینستھیزیا ورک اسپیس میں انٹرا آپریٹو مانیٹرنگ اور فلو شیٹ کا مکمل انتظام (ایم ایس ڈی ایس سی او پی 34، 36، 37، 40): پری انڈکشن معائنہ اور فاسٹنگ کی تصدیق (قاعدہ eda7089766)، سرجیکل چیک لسٹ کی پابندی کے ساتھ انڈکشن اور کٹ کے اوقات کا اندراج (OT_CHECKLIST_INCOMPLETE)، دوران آپریشن ہر 5 سے 15 منٹ بعد وائٹلز کی چارٹنگ اور وقفوں کا انتباہ (قاعدہ c7bd8c2650)، ادویات، مائعات اور خون کے حصول کا اندراج، ناخوشگوار واقعات کی کوالٹی ایشورنس کو فوری رپورٹ (قاعدہ fe0c435dc9)، اینستھیزیا ریکارڈ کی تکمیل پر حتمی دستخط (قاعدہ 2fc0c843dc)، تصحیحی ضمیمہ کا قانونی انتظام (قاعدہ 9e9cb593cb)، کلینیکل اجازت نامے کی جانچ (قاعدہ db3a19e806) اور قاعدہ 2285735141 کے تحت سروس کی تصدیق۔",
+    steps: [
+      "Select the surgical case from the active OT cases queue or search by patient name, MRN, or procedure.",
+      "Verify the patient identity banner: Name, MRN, Gender, Age, Procedure, Theatre room, and Primary Surgeon.",
+      "Fill in the Pre-Induction panel: Baseline heart rate, blood pressure, SpO2, and clinical findings since the pre-anaesthesia clinic assessment (Rule eda7089766).",
+      "If the anaesthetic plan has changed, tick the plan changed toggle and enter a mandatory clinical rationale.",
+      "Confirm technique (General, Spinal, Epidural, Regional, Sedation, Local) and airway device (FaceMask, LMA, ETT, Tracheostomy), then click 'Save Pre-Induction Evaluation'.",
+      "Stamp Induction: Click 'Stamp Induction'; ensure the WHO Surgical Safety Checklist Sign In pause is already recorded (OT_CHECKLIST_INCOMPLETE).",
+      "Stamp Incision: Click 'Stamp Incision' before skin incision; ensure the multidisciplinary Time Out pause is already recorded.",
+      "Chart periodic vitals: Enter HR, cardiac rhythm, BP, respiratory rate, SpO2, EtCO2, temperature, and airway patency, then click 'Record Vitals Reading' (MSDS 36).",
+      "Chart medications, fluids, and blood products: Select category, enter drug name, dose, and administration route, then click 'Record Event'.",
+      "Review post-procedure summary, enter total fluids, estimated blood loss, urine output, and recovery handover instructions, then click 'Sign Anaesthesia Record' (Rule 2fc0c843dc)."
+    ],
+    stepsUr: [
+      "فعال سرجیکل کیسز کی فہرست سے مریض منتخب کریں یا نام، ایم آر این یا طریقہ کار کے ذریعے تلاش کریں۔",
+      "مریض کے شناختی بینر کی تصدیق کریں: نام، ایم آر این، جنس، عمر، پروسیجر، تھیٹر روم اور سرجن کا نام۔",
+      "پری انڈکشن پینل پر کریں: بنیادی دل کی دھڑکن، بلڈ پریشر، آکسیجن اور کلینک کے بعد رونما ہونے والے مشاہدات (قاعدہ eda7089766)۔",
+      "اگر اینستھیزیا کا منصوبہ تبدیل ہوا ہو تو آپشن کو منتخب کر کے لازمی طبی جواز درج کریں۔",
+      "تکنیک اور ایئروے ڈیوائس کا انتخاب کریں اور 'پری انڈکشن محفوظ کریں' پر کلک کریں۔",
+      "انڈکشن کا وقت درج کریں: 'انڈکشن کا وقت' پر کلک کریں اور یقینی بنائیں کہ ڈبلیو ایچ او سائن ان مکمل ہو چکا ہے۔",
+      "کٹ کا وقت درج کریں: 'کٹ کا وقت' پر کلک کریں اور یقینی بنائیں کہ تمام ٹیم کا ٹائم آؤٹ مکمل ہو چکا ہے۔",
+      "پیریوڈک وائٹلز درج کریں: دل کی دھڑکن، تال، بی پی، سانس کی رفتار، آکسیجن، درجہ حرارت اور ایئروے کی حالت درج کر کے محفوظ کریں (ایم ایس ڈی ایس 36)۔",
+      "ادویات، مائعات اور خون درج کریں: کیٹیگری منتخب کریں، دوا کا نام، خوراک اور طریقہ درج کر کے 'واقعہ محفوظ کریں' پر کلک کریں۔",
+      "خلاصہ درج کریں: مجموعی مائعات، خون کا ضیاع، پیشاب کی مقدار اور ریکوری ہینڈ اوور نوٹ لکھ کر 'اینستھیزیا ریکارڈ پر دستخط کریں' پر کلک کریں (قاعدہ 2fc0c843dc)۔"
+    ],
+    faq: [
+      [
+        "Why is Pre-Induction baseline evaluation mandatory before induction?",
+        "Under MSDS COP 34 and statutory Rule eda7089766, patient physiology and fasting status may change acutely between the pre-anaesthesia clinic visit and arrival in theatre. The anaesthetist must document baseline vitals and any clinical changes, and explicitly record a rationale if the technique or management plan is altered."
+      ],
+      [
+        "How do Induction and Incision time stamps enforce WHO Surgical Safety Checklist pauses?",
+        "Rule eda7089766 enforces that anaesthesia induction cannot proceed without a completed Sign In pause, and surgical incision cannot proceed without a completed Time Out pause. Attempting to stamp these timestamps when pauses are pending returns OT_CHECKLIST_INCOMPLETE to protect surgical safety."
+      ],
+      [
+        "What happens when monitoring chart gaps occur between vital readings?",
+        "Under Rule c7bd8c2650 and MSDS 36, intra-operative vital signs must be recorded continuously or at intervals no greater than the hospital standard policy (typically 5 to 15 minutes). If the elapsed time exceeds the setting, the system highlights a bold amber Chart Gap warning requiring immediate observation charting."
+      ],
+      [
+        "How are in-theatre adverse events and near misses documented and reported?",
+        "Under Rule fe0c435dc9, critical complications (e.g. difficult intubation, severe hypotension, malignant hyperthermia, anaphylaxis) are charted directly into the anaesthesia flowsheet and formally reported to hospital quality assurance via POST /incidents with area 'Anaesthesia'."
+      ],
+      [
+        "What is the legal effect of signing the Anaesthesia Record?",
+        "Under Rule 2fc0c843dc and Rule 9e9cb593cb, signing finalizes the intra-operative record (OT_RECORD_FINAL). Once signed, the record is locked and read-only. The patient cannot be discharged from PACU recovery until the anaesthesia record has been finalized."
+      ],
+      [
+        "How can an anaesthetist append corrections to a signed record post-finality?",
+        "Under Rule 9e9cb593cb, retrospective clinical modifications to a signed record must be submitted as a correction addendum via POST /ot/bookings/{id}/corrections with part 'Anaesthesia', the correction text, and an audit reason. The corrections are permanently preserved and printed directly below the part."
+      ]
+    ],
+    faqUr: [
+      [
+        "انڈکشن سے قبل پری انڈکشن معائنہ کیوں لازمی ہے؟",
+        "ایم ایس ڈی ایس سی او پی 34 اور قاعدہ eda7089766 کے تحت، کلینک کے معائنے اور آپریشن تھیٹر آمد کے درمیانی وقفے میں مریض کی حالت تبدیل ہو سکتی ہے۔ اینستھیٹسٹ پر بنیادی وائٹلز کی تصدیق اور پلان میں تبدیلی کی صورت میں لازمی جواز لکھنا قانونی طور پر لازم ہے۔"
+      ],
+      [
+        "انڈکشن اور کٹ کے اوقات کس طرح سرجیکل چیک لسٹ کی پابندی کرواتے ہیں؟",
+        "قاعدہ eda7089766 کے تحت سائن ان مکمل ہوئے بغیر انڈکشن اور ٹائم آؤٹ مکمل ہوئے بغیر کٹ کا وقت درج نہیں ہو سکتا۔ نامکمل چیک لسٹ پر سسٹم OT_CHECKLIST_INCOMPLETE کی صورت میں عمل کو روک دیتا ہے۔"
+      ],
+      [
+        "اگر وائٹلز کی چارٹنگ کے درمیان طویل وقفہ ہو جائے تو کیا ہوتا ہے؟",
+        "قاعدہ c7bd8c2650 اور ایم ایس ڈی ایس 36 کے تحت وائٹلز ہر 5 سے 15 منٹ بعد درج ہونا ضروری ہیں۔ طویل وقفے کی صورت میں سسٹم چارٹ گیپ کا انتباہ جاری کرتا ہے تاکہ فوری طور پر مریض کی نگرانی درج کی جا سکے۔"
+      ],
+      [
+        "آپریشن تھیٹر میں رونما ہونے والے ہنگامی واقعات کی رپورٹنگ کیسے ہوتی ہے؟",
+        "قاعدہ fe0c435dc9 کے تحت تمام پیچیدگیاں جیسے مشکل انٹیوبیشن یا منفی ردعمل فلو شیٹ میں درج کرنے کے علاوہ ہسپتال کے کوالٹی ایشورنس کو فوری طور پر POST /incidents کے ذریعے رپورٹ کی جاتی ہیں۔"
+      ],
+      [
+        "اینستھیزیا ریکارڈ پر دستخط کرنے کی قانونی حیثیت کیا ہے؟",
+        "قاعدہ 2fc0c843dc اور قاعدہ 9e9cb593cb کے تحت دستخط کے بعد ریکارڈ حتمی ہو جاتا ہے اور اس میں براہ راست ترمیم ممکن نہیں رہتی۔ ریکارڈ حتمی ہوئے بغیر مریض کو ریکوری وارڈ سے فارغ نہیں کیا جا سکتا۔"
+      ],
+      [
+        "دستخط کے بعد ریکارڈ میں کوئی تصحیح کیسے شامل کی جا سکتی ہے؟",
+        "قاعدہ 9e9cb593cb کے تحت دستخط کے بعد کی جانے والی کسی بھی تصحیح کو ایک تصحیحی ضمیمہ کے طور پر معقول آڈٹ وجہ کے ساتھ POST /ot/bookings/{id}/corrections کے ذریعے درج کیا جاتا ہے جو ہمیشہ کے لیے ریکارڈ کا حصہ بن جاتا ہے۔"
+      ]
+    ]
+  },
+sterile_packs_ward: {
     title: "Sterile packs: scan when opened (Ward)",
     titleUr: "جراثیم سے پاک پیک: استعمال پر اسکین (وارڈ نرسنگ)",
     purpose: "Point-of-use scanning of sterile instrument packs as they are opened on inpatient wards for bedside procedures, dressings, and catheterization (POST /cssd/packs/use) linked to admission records for statutory MSDS IPC 91 & 92 infection prevention traceability, verification of pack sterility and expiration bounds with expiring-soon warnings (Rule 5eabbbecca), critical CSSD recall response and quarantine procedures (Rule 4357be8acb), and runtime service capability gating from GET /establishment views for screen_id sterile_packs_ward under Rule b531dda372.",

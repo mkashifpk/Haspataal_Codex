@@ -65,6 +65,7 @@ import { OTConsumablesNurse } from './screens/OTConsumablesNurse';
 import { OTIntraop } from './screens/OTIntraop';
 import { SterilePacksOT } from './screens/SterilePacksOT';
 import { SterilePacksWard } from './screens/SterilePacksWard';
+import { AnaesthesiaRecord } from './screens/AnaesthesiaRecord';
 import { MaternityPolicy } from './screens/MaternityPolicy';
 import { ObstetricAssessment } from './screens/ObstetricAssessment';
 import { NewbornRegistration } from './screens/NewbornRegistration';
@@ -164,6 +165,7 @@ const labels: Record<string, [string, string, string]> = {
  sterile_packs_ot: ["Sterile packs scan", "سٹرائل پیکس کا اسکین", "📦"],
  sterile_packs_ot_admin: ["Sterile packs audit", "سٹرائل پیکس کا آڈٹ", "📦"],
  sterile_packs_ward: ["Sterile packs scan", "سٹرائل پیکس کا اسکین", "📦"],
+  anaesthesia_record: ["Anaesthesia record", "اینستھیزیا ریکارڈ", "🩺"],
  blood_bank: ["Blood bank","بلڈ بینک","🩸"],
  blood_donors: ["Blood donors","خون کے عطیہ دہندگان","🩸"],
  donor_assessment: ["Donor assessment","عطیہ دہندہ کا معائنہ","🩸"],
@@ -285,6 +287,7 @@ const frontDeskScreens = new Set([
   'sterile_packs_ot',
   'sterile_packs_ot_admin',
   'sterile_packs_ward',
+  'anaesthesia_record',
   'consents_ward',
   'consents_doctor',
   'blood_sources',
@@ -1072,6 +1075,7 @@ export function App() {
       (id !== "sterile_packs_ot" || ["full","open_work","records","setup"].includes(est?.views.screens.find(v=>v.screen_id===id)?.view || "")) &&
       (id !== "sterile_packs_ot_admin" || ["full","open_work","records","setup"].includes(est?.views.screens.find(v=>v.screen_id===id)?.view || "")) &&
       (id !== "sterile_packs_ward" || ["full","open_work","records","setup"].includes(est?.views.screens.find(v=>v.screen_id===id)?.view || "")) &&
+      (id !== "anaesthesia_record" || ["full","open_work","records","setup"].includes(est?.views.screens.find(v=>v.screen_id===id)?.view || "")) &&
       (!["mar","verbal_orders_ward","verbal_orders_er","vitals_tracker","patient_education_ward","nursing_assessment","my_beds","doctor_inpatients","cost_estimates_admissions","consents_admissions","wristbands_admissions","wristbands_ward","own_medicines_ward","own_medicines_pharmacy","bed_matrix","pending_admissions","imaging_repeats","imaging_outsourced","critical_results_radiology","radiology_worklist","rx_queue","dispense","order_queries","otc","charity_override","lab_only_walkin","lab_bench","lab_send_outs","lab_verification","critical_results_bench","critical_results_verifier","critical_results_doctor","critical_results_ward","critical_results_er","consents_ward","consents_triage","er_board_doctor","er_visit_doctor","mlc_cases","mlc_cases_doctor","death_record","body_release_ward","body_release_er","patient_programmes_triage","transfusion_bedside_er"].includes(id) || ["full", "open_work", "records"].includes(est?.views.screens.find(v => v.screen_id === id)?.view || "")),
   );
   const view = est?.views.workspaces.find(
@@ -1476,6 +1480,7 @@ export function App() {
               {screen === 'sterile_packs_ot' && <SterilePacksOT key={user.user_id} currentUser={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone} onNavigate={(s) => navigate(s)} />}
               {screen === 'sterile_packs_ot_admin' && <SterilePacksOT screenId="sterile_packs_ot_admin" key={user.user_id} currentUser={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone} onNavigate={(s) => navigate(s)} />}
               {screen === 'sterile_packs_ward' && <SterilePacksWard key={user.user_id} currentUser={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone} onNavigate={(s) => navigate(s)} />}
+              {screen === 'anaesthesia_record' && <AnaesthesiaRecord key={user.user_id} currentUser={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone} onNavigate={(s) => navigate(s)} />}
               {screen === 'maternity_policy' && est && <MaternityPolicy key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} />}
               {screen === 'obstetric_assessment' && est && <ObstetricAssessment key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} />}
               {screen === 'newborn_registration' && est && <NewbornRegistration key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} onNavigateScreen={navigate} />}
