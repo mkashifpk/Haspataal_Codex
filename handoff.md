@@ -1,7 +1,7 @@
 # Haspataal checkpoint
 Last updated: 01 November 2026, Antigravity (Codex pair), Asia/Karachi.
 
-## Active request: Phase 6 Screen 126 `anaesthesia_record` (Anaesthesia record - Anaesthesia workspace)
+## Active request: Phase 6 Screen 127 `surgical_record_surgeon` (Surgical record: operative note & closure - Surgeon workspace)
 Executing the Phase 6 Roadmap ("Theatre and sterile supply") in dependency order along with all tests and MCP progress reporting:
 - Screen 108: **`transfusion_bedside_er`** ("Bedside transfusion observation - ER", Position 108, 74 points) — **COMPLETED** (commit `2803cf0`, Proposal **261** awaiting human review on `/docs -> My progress`). Marks Phase 5 100% complete!
 - Screen 109: **`clinical_privileges`** ("Clinical privileges", Position 109, 55 points) — **COMPLETED** (commit `5ddbd89`, Proposal **262** awaiting human review on `/docs -> My progress`). First screen of Phase 6!
@@ -21,29 +21,69 @@ Executing the Phase 6 Roadmap ("Theatre and sterile supply") in dependency order
 - Screen 123: **`sterile_packs_ot`** ("Sterile packs: scan when opened", Position 123, 48 points, workspace `ot_nurse`) — **COMPLETED** (commit `ab7a6d9`, Proposal **276** awaiting human review on `/docs -> My progress`).
 - Screen 124: **`sterile_packs_ot_admin`** ("Sterile packs: scan when opened - OT Admin", Position 124, 48 points, workspace `ot_admin`) — **COMPLETED** (commit `d076dbf`, Proposal **277** awaiting human review on `/docs -> My progress`).
 - Screen 125: **`sterile_packs_ward`** ("Sterile packs: scan when opened - Ward", Position 125, 48 points, workspace `ward_nurse`) — **COMPLETED** (commit `994aeb4`, Proposal **278** awaiting human review on `/docs -> My progress`).
-- Screen 126: **`anaesthesia_record`** ("Anaesthesia record", Position 126, 69 points, workspace `anaesthesia`) — **ACTIVE IMPLEMENTATION**.
+- Screen 126: **`anaesthesia_record`** ("Anaesthesia record", Position 126, 69 points, workspace `anaesthesia`) — **COMPLETED** (commit `7184c76`, Proposal **279** awaiting human review on `/docs -> My progress`).
+- Screen 127: **`surgical_record_surgeon`** ("Surgical record: operative note & closure", Position 127, 123 points, workspace `doctor` / `surgeon`) — **READY TO IMPLEMENT**.
 
 ---
 
-### Current Implementation: Screen 126 (`anaesthesia_record`)
-- **Workflow & Standards**: Intra-operative anaesthesia record, monitoring flowsheet, and drug administration in `anaesthesia` workspace (MSDS COP 34, 36, 37, 40):
-  - Pre-induction panel first (`rule:eda7089766`): baseline vital signs, what changed since PAC assessment, whether the plan changed.
-  - Induction and Incision timestamp buttons: requires Sign In and Time Out pauses (`OT_CHECKLIST_INCOMPLETE`).
-  - Monitoring flowsheet chart grid (`rule:c7bd8c2650`, MSDS 36): periodic vitals charting (HR, rhythm, BP systolic/diastolic, RR, SpO2, EtCO2, Temp, airway patency). Highlights chart gaps (`ChartGapOut`) when readings exceed hospital intervals.
-  - Intra-operative events, drugs, fluids, blood products (`POST /ot/bookings/{id}/anaesthesia-record/events`).
-  - Adverse events tracking and incident reporting (`rule:fe0c435dc9`): charts adverse events and files incident (`POST /incidents` with `booking_id`, `ot_phase: "Anaesthesia"`, and type from `GET /incident-types?area=Anaesthesia`).
-  - Record signing and finality (`rule:2fc0c843dc`, `rule:9e9cb593cb`): signing finalizes the record (`OT_RECORD_FINAL`). Signed parts are read-only; mistakes corrected via addenda (`POST /ot/bookings/{id}/corrections`).
-  - Clinical privilege gate (`rule:db3a19e806`): requires active PMDC clinical privilege (`OT_PRIVILEGE_REQUIRED`).
+### Completed Screen 126 (`anaesthesia_record`) Checkpoint
+- **Workflow & Standards**: Intra-operative anaesthesia record, physiological flowsheet, and drug administration in `anaesthesia` workspace (MSDS COP 34, 36, 37, 40):
+  - Pre-induction baseline evaluation (`rule:eda7089766`): baseline HR, BP, SpO2, findings since PAC, mandatory plan change clinical rationale.
+  - Induction and Incision timestamping: requires WHO Surgical Safety Checklist Sign In and Time Out pauses (`OT_CHECKLIST_INCOMPLETE`).
+  - Monitoring flowsheet grid (`rule:c7bd8c2650`, MSDS 36): periodic vitals charting (HR, rhythm, BP, RR, SpO2, EtCO2, Temp, airway patency) with real-time chart gaps detection (`chart_gaps`).
+  - Intra-operative events flowsheet (`POST /ot/bookings/{id}/anaesthesia-record/events`): Drugs, Fluids, Blood products, Events.
+  - Post-procedure summary and PACU recovery handover notes (`rule:2fc0c843dc`).
+  - Final signing gate (`POST /ot/bookings/{id}/anaesthesia-record/sign`, `rule:2fc0c843dc`).
+  - Read-only finality and retrospective correction addenda (`POST /ot/bookings/{id}/corrections`, `rule:9e9cb593cb`).
+  - In-theatre adverse incident and complication reporting (`POST /incidents`, `rule:fe0c435dc9`).
+  - Active clinical privileges verification (`rule:db3a19e806`).
+  - Runtime service capability gating from `GET /establishment` views for `screen_id: "anaesthesia_record"` under Rule 2285735141; Position 126 (69 points), Workspace `anaesthesia`.
+- **Contracts**:
+  - `contracts/anaesthesia_record.json`: Saved real MCP screen bundle (8 endpoints, 1 realtime event, 7 statutory rules, 26 rubric items).
+  - `src/generated/anaesthesia_record.ts`: Generated TypeScript contracts for all 8 operations and data models.
+- **Domain Policies & Statutory Rules (`src/anaesthesia-record-policy.ts`)**:
   - Runtime service capability gating (`rule:2285735141`): evaluates `GET /establishment` views for `anaesthesia_record` (`full`, `open_work`, `records`, `setup`, `hidden`).
-- **Files Involved**:
-  - Contract: `contracts/anaesthesia_record.json` (saved).
-  - Generated client: `src/generated/anaesthesia_record.ts` (saved).
-  - Domain Policy: `src/anaesthesia-record-policy.ts` (new).
-  - Automated Tests: `tests/anaesthesia-record.test.mjs` (new).
-  - Component: `src/screens/AnaesthesiaRecord.tsx` (new).
-  - Mappings & Wiring: `src/App.tsx`, `scripts/check-help.mjs`, `src/foundation-catalogue.json`, `src/foundation-task-map.json`, `src/foundation-help.ts`, `src/help.ts`.
-  - Screenshots: `public/handbook/anaesthesia_record-en.png` and `anaesthesia_record-ur.png`.
-- **Next Concrete Step**: Implement domain policy `src/anaesthesia-record-policy.ts` and automated unit tests `tests/anaesthesia-record.test.mjs`.
+  - Role permissions: `canViewAnaesthesiaRecord`, `canRecordAnaesthesia` (`ot.anaesthesia.record`), `canCorrectAnaesthesia`, `canReportIncident`.
+  - Input validations: `validatePreInduction`, `validateVitalsEntry`, `validateEventEntry`, `validateRecordSigning`, `validateCorrectionInput`, `validateIncidentInput`.
+  - Bilingual error explanations (`explainAnaesthesiaRecordError`): handles `OT_BOOKING_STATE_INVALID`, `OT_CHECKLIST_INCOMPLETE`, `OT_PRIVILEGE_REQUIRED`, `OT_RECORD_FINAL`, `OT_RECORD_INCOMPLETE`, `OT_RECORD_NOT_SIGNED`, `INCIDENT_DETAILS_REQUIRED`, `INCIDENT_TYPE_INACTIVE`, etc.
+- **UI Architecture (`src/screens/AnaesthesiaRecord.tsx`)**:
+  - Surgical case queue (`clinicalWorklist`) with case search and full surgical record detail loading (`getSurgicalRecord`).
+  - Full Patient & Operative Identity Context Card.
+  - Pre-Induction Evaluation Panel with baseline physiological bounds and technique/airway device selector.
+  - Operative Key Times Actions: Induction, Incision, Surgery End, Anaesthesia End.
+  - Periodic Vitals Monitoring Flowsheet with chart gaps alert banner and chronological observations table.
+  - Intra-operative Medications, Fluids, Blood, and Events Flowsheet.
+  - Post-Procedure Summary & Recovery Handover Panel with Final Sign action.
+  - Post-Finality Correction Addendum Modal (`POST /ot/bookings/{id}/corrections`).
+  - In-Theatre Adverse Incident Modal (`POST /incidents`).
+  - Realtime WebSocket synchronization on `ot.clinical.updated`.
+- **Help, Handbook & Navigation**:
+  - Wired into `src/App.tsx`, `src/foundation-catalogue.json` (8 tasks), `src/foundation-task-map.json` (8 controls).
+  - Contextual F1 help (`src/foundation-help.ts`): added `anaesthesia_record` to `deliveredHelpScreens` and all 50 controls mapped.
+  - Authored comprehensive handbook entry (`src/help.ts`) with bilingual title, purpose, 10 operational steps, and 6 role FAQs for `anaesthetist`.
+  - Bundled screenshots: `public/handbook/anaesthesia_record-en.png` and `anaesthesia_record-ur.png`.
+- **Verification**:
+  - Automated unit tests: `tests/anaesthesia-record.test.mjs` (8/8 passing).
+  - Help check: `npm run check:help` passed (125 screens, 2918 controls, 1947 groups, 69 FAQ seeds, 30 workspace guides).
+  - Help coverage test: `tests/help-coverage.test.mjs` (28/28 passing).
+  - Full test suite: `npm test` passed (587/587 passing across all suites).
+  - TypeScript compiler: `npx tsc --noEmit` passed with 0 errors.
+  - Production build: `npm run build` succeeded (`dist/assets/index-B7kgYAFU.js`).
+- **Commit & Proposal**:
+  - Implementation commit: `7184c76`.
+  - Proposal ID: **279** (status: `pending` on `/docs -> My progress`).
+
+---
+
+### Plan for Screen 127 (`surgical_record_surgeon`)
+- **Workflow & Standards**: Complete intra-operative surgical record, surgeon's operative note, findings, technique, closure, implant verification, specimen handling, and post-op orders in `doctor` / `surgeon` workspace:
+  - Surgical case worklist and operative record detail (`GET /ot/bookings/{booking_id}/surgical-record`).
+  - Operative note authoring (`PUT /ot/bookings/{booking_id}/operative-note`).
+  - Surgical findings, procedure performed, laterality, incision details, operative technique, blood loss, specimen sent to pathology, swab/instrument count reconciliation, and post-op care orders.
+  - Final operative note signing (`POST /ot/bookings/{booking_id}/operative-note/sign`) by primary surgeon holding active surgical clinical privileges (`OT_PRIVILEGE_REQUIRED`).
+  - Read-only finality and retrospective corrections (`POST /ot/bookings/{booking_id}/corrections`).
+  - Position 127 (123 points), Workspace `doctor` / `surgeon`.
+- **Next Concrete Step**: Fetch screen bundle `get_screen_bundle("surgical_record_surgeon")` and save to `contracts/surgical_record_surgeon.json`.
 
 ---
 
