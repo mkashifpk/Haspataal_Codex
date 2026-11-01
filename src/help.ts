@@ -7936,6 +7936,84 @@ consents_doctor: {
       ]
     ]
   },
+  ot_consumables_nurse: {
+    title: "Consumables scan",
+    titleUr: "سامان کا اسکین (او ٹی نرسنگ)",
+    purpose: "Intra-operative barcode scanning of consumables, implants, and pharmacy medications (FEFO) into active surgical bookings, tracking vendor implant specifications and serials, and executing statutory mistake reversals under Rule 0a80234be9 (mistaken scans reversed with reason, never deleted) and Rule 77e2100829 (runtime service capability gating from GET /establishment views for screen_id ot_consumables_nurse).",
+    purposeUr: "سرجری کے دوران استعمال ہونے والے طبی سامان، ادویات اور امپلانٹس کا بارکوڈ اسکیننگ کے ذریعے اندراج، وینڈر امپلانٹس کے کوائف کا اندراج، اور قاعدہ 0a80234be9 کے تحت غلطی سے اسکین شدہ اشیاء کی لازمی وجہ کے ساتھ منسوخی (ریکارڈ کبھی حذف نہیں کیا جاتا) اور قاعدہ 77e2100829 کے تحت سروس کی تصدیق۔",
+    steps: [
+      "Select the active surgical case from the left-hand queue or use the search filter by patient name, MRN, or procedure.",
+      "Verify the patient identity banner showing Name, MRN, OT Room, primary surgeon, and current operative status.",
+      "For standard pharmacy stock and sutures, select Barcode Scan mode and scan the lot barcode with the handheld scanner (FEFO deduction).",
+      "Verify the quantity used; for multi-unit packages, adjust the quantity number before confirming.",
+      "For non-stock vendor implants (e.g. titanium plates, mesh, prosthetics), switch to Vendor Implant mode and enter the description, unit cost, and retail price.",
+      "Click Record Scan to save the consumable into the booking via POST /ot/bookings/{id}/consumables with idempotent protection.",
+      "Inspect the Scanned Consumables table to confirm item description, lot/batch number, scanned timestamp, and billing revenue.",
+      "If an item was scanned by mistake, click Reverse Scan, enter a mandatory clinical explanation (min 3 characters), and confirm to add a mirrored reversal record under Rule 0a80234be9."
+    ],
+    stepsUr: [
+      "بائیں جانب موجود ورک لسٹ سے متعلقہ سرجری کا انتخاب کریں یا مریض کے نام، ایم آر این یا پروسیجر سے تلاش کریں۔",
+      "مریض کے شناختی بینر کی تصدیق کریں جس میں نام، ایم آر این، آپریشن تھیٹر روم، سرجن اور کیس کا اسٹیٹس ظاہر ہوتا ہے۔",
+      "فارمیسی اسٹاک کی ادویات یا دھاگوں کے لیے بارکوڈ اسکین موڈ منتخب کریں اور ہینڈ ہیلڈ اسکینر سے بارکوڈ اسکین کریں۔",
+      "استعمال شدہ تعداد کی تصدیق کریں اور ضرورت پڑنے پر تعداد کی فیلڈ میں درست مقدار درج کریں۔",
+      "وینڈر امپلانٹس (مثلاً پلیٹس، میش، یا جوڑوں کے امپلانٹ) کے لیے وینڈر امپلانٹ موڈ منتخب کریں اور تفصیل و قیمت درج کریں۔",
+      "اسکین محفوظ کریں کے بٹن پر کلک کریں تاکہ سامان محفوظ ہو جائے اور فارمیسی اسٹاک سے کٹوتی ہو جائے۔",
+      "نیچے دی گئی جدول میں آئٹم کا نام، بیچ نمبر، وقت اور چارجز کی تصدیق کریں۔",
+      "اگر غلطی سے کوئی آئٹم اسکین ہو گیا ہو تو 'اسکین منسوخ کریں' پر کلک کریں، لازمی وضاحتی وجہ درج کریں اور قاعدہ 0a80234be9 کے تحت منسوخی کا اندراج کریں۔"
+    ],
+    faq: [
+      [
+        "Can a scanned consumable item be deleted from a surgical record?",
+        "No. Under statutory Rule 0a80234be9, mistaken scans must never be deleted. They must be reversed via POST /ot/consumables/{id}/reverse with a mandatory audit reason, creating a mirrored reversal record in the permanent theatre ledger."
+      ],
+      [
+        "What is the difference between Barcode Scan and Vendor Implant mode?",
+        "Barcode Scan mode matches pharmacy formulary items and automatically deducts hospital inventory using First-Expired, First-Out (FEFO) rules. Vendor Implant mode allows recording non-stock specialized implants with bespoke acquisition costs and patient retail pricing."
+      ],
+      [
+        "Why is scanning disabled for a selected surgical case?",
+        "Consumables and implants can only be recorded when the surgery is active (InProgress, Scheduled, or Cleaning). Once a case is Completed or Cancelled, the server returns OT_BOOKING_NOT_ACTIVE to protect the billing settlement."
+      ],
+      [
+        "What is the minimum character requirement for a reversal reason?",
+        "Under Rule 0a80234be9, the reversal reason must be at least 3 characters and at most 1000 characters, providing clear clinical justification (e.g. 'Scanned wrong tray barcode', 'Contaminated before placement')."
+      ],
+      [
+        "How do realtime updates affect the consumables scan screen?",
+        "When an ot.booking.updated event is received from the WebSocket, the surgical case queue and active booking details automatically refresh without polling or losing uncommitted form draft state."
+      ],
+      [
+        "How does runtime service capability gating apply to ot_consumables_nurse under Rule 77e2100829?",
+        "The screen evaluates GET /establishment views for screen_id ot_consumables_nurse (full, open_work, records, setup, hidden) based on the surgery capability state, never deciding access from the facility's profile category."
+      ]
+    ],
+    faqUr: [
+      [
+        "کیا سرجری کے ریکارڈ سے اسکین شدہ آئٹم کو حذف کیا جا سکتا ہے؟",
+        "ہرگز نہیں۔ قانونی قاعدہ 0a80234be9 کے تحت غلط اسکین کو حذف کرنا ممنوع ہے۔ اس کے بجائے لازمی وضاحتی وجہ کے ساتھ منسوخی کا اندراج کیا جاتا ہے تاکہ آڈٹ ٹریل برقرار رہے۔"
+      ],
+      [
+        "بارکوڈ اسکین اور وینڈر امپلانٹ موڈ میں کیا فرق ہے؟",
+        "بارکوڈ اسکین اسپتال کی فارمیسی کے اسٹاک کو FEFO اصول کے مطابق خودکار طور پر کم کرتا ہے۔ جبکہ وینڈر امپلانٹ موڈ نان اسٹاک اور خصوصی امپلانٹس کی لاگت اور قیمت درج کرنے کے لیے استعمال ہوتا ہے۔"
+      ],
+      [
+        "منتخب کیس میں اسکین کا بٹن غیر فعال کیوں ہو جاتا ہے؟",
+        "سامان اور امپلانٹس صرف فعال سرجری (جاری یا شیڈول شدہ) میں ہی اسکین کیے جا سکتے ہیں۔ سرجری مکمل یا منسوخ ہو جانے پر سرور مزید اشیاء شامل کرنے کی اجازت نہیں دیتا۔"
+      ],
+      [
+        "منسوخی کی وجہ کے لیے کم از کم کتنے حروف درکار ہیں؟",
+        "قاعدہ 0a80234be9 کے تحت منسوخی کی وجہ کم از کم 3 حروف پر مشتمل ہونی چاہیے تاکہ واضح طبی یا تکنیکی وجہ محفوظ ہو سکے۔"
+      ],
+      [
+        "ریئل ٹائم اپڈیٹس اسکرین پر کیسے اثر انداز ہوتی ہیں؟",
+        "جب ot.booking.updated کا ایونٹ موصول ہوتا ہے تو اسکرین بغیر پولنگ کے سرجری کیسز اور تفصیلات کو خود بخود تازہ کر دیتی ہے۔"
+      ],
+      [
+        "قاعدہ 77e2100829 کے تحت اسکرین کی سروس گیٹنگ کیسے کام کرتی ہے؟",
+        "اسکرین GET /establishment کے جواب میں سرجری سروس کی حالت (فعال، ریٹائرنگ، ریکارڈز، سیٹ اپ، پوشیدہ) کا جائزہ لیتی ہے اور کیٹیگری کی بنیاد پر فیصلہ نہیں کرتی۔"
+      ]
+    ]
+  },
   maternity_policy: {
     title: "High-risk pregnancy: our policy",
     titleUr: "ہائی رسک حمل: ہسپتال کی پالیسی",

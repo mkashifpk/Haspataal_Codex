@@ -268,6 +268,7 @@ export function checkHelp({
       "PreAnaesthesiaClinic",
       "ConsentsAnaesthesia",
       "SafetyChecklist",
+      "OTConsumablesNurse",
     ].map((n) => `src/screens/${n}.tsx`),
   ];
   const used = new Set(),
@@ -332,3 +333,4 @@ if (process.argv[1]?.replaceAll("\\", "/").endsWith("scripts/check-help.mjs")) {
     `Handbook coverage passed: ${r.screens} screens, ${r.controls} controls, ${r.controlGroups} groups, ${r.faqSeeds} FAQ seeds, ${r.workspaceGuides} workspace guides.`,
   );
 }
+

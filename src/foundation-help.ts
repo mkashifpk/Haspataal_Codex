@@ -20,6 +20,7 @@ export const phase1Screens = [
 const approvalScreens = ["approval_queue", "charity_approvals"];
 // Coverage grows screen by screen; Phase 1 acceptance remains separate.
 export const deliveredHelpScreens = [
+  "ot_consumables_nurse",
   "safety_checklist_anaesthesia",
   "safety_checklist_admin",
   "safety_checklist",
@@ -130,6 +131,27 @@ const g = (
 // IDs are also attached to the actual controls. The build rejects missing
 // mappings and empty translations instead of treating a page as coverage.
 export const controlGuides: Record<string, ControlGuide> = {
+  // Screen 121: ot_consumables_nurse (OT consumables & implants)
+  "ot_consumables.dismiss_alert": g(["ot_consumables_nurse"], ["Dismiss alert banner", "انتباہ خارج کریں"], ["Dismisses status or error message banner.", "انتباہی پیغام کو بند کرتا ہے۔"]),
+  "ot_consumables.setup_link": g(["ot_consumables_nurse"], ["Facility Settings link", "سہولت کی ترتیبات"], ["Opens Facility settings when surgical service setup is required.", "جب سروس کی ترتیب درکار ہو تو سہولت کی ترتیبات کھولتا ہے۔"]),
+  "ot_consumables.refresh_btn": g(["ot_consumables_nurse"], ["Refresh cases button", "کیسز تازہ کریں"], ["Refreshes the surgical cases queue from GET /ot/bookings.", "سرجری کیسز کی فہرست کو سرور سے دوبارہ حاصل کرتا ہے۔"]),
+  "ot_consumables.view_records_btn": g(["ot_consumables_nurse"], ["OT status board button", "او ٹی اسٹیٹس بورڈ"], ["Navigates to the live operating theatre board.", "لائیو آپریشن تھیٹر بورڈ کھولتا ہے۔"]),
+  "ot_consumables.filter_status": g(["ot_consumables_nurse"], ["Booking status filter", "اسٹیٹس فلٹر"], ["Filters surgical cases by operative lifecycle status (InProgress, Scheduled, Cleaning, Completed).", "کیسز کو سرجری کے مراحل کے لحاظ سے فلٹر کرتا ہے۔"]),
+  "ot_consumables.filter_mine": g(["ot_consumables_nurse"], ["My assigned cases checkbox", "میرے کیسز چیک باکس"], ["Limits surgical cases list to those assigned to the logged-in user.", "صرف لاگ ان صارف کے تفویض کردہ کیسز دکھاتا ہے۔"]),
+  "ot_consumables.search_input": g(["ot_consumables_nurse"], ["Search cases input", "کیسز تلاش"], ["Searches cases by patient name, MRN, procedure, or OT room.", "مریض کے نام، ایم آر این یا پروسیجر کے ذریعے تلاش کرتا ہے۔"]),
+  "ot_consumables.scan_mode_barcode": g(["ot_consumables_nurse"], ["Barcode scan mode button", "بارکوڈ موڈ"], ["Switches scanner mode to pharmacy barcode scanning (FEFO).", "فارمیسی اسٹاک بارکوڈ اسکیننگ موڈ منتخب کرتا ہے۔"]),
+  "ot_consumables.scan_mode_custom": g(["ot_consumables_nurse"], ["Implant / Non-stock mode button", "امپلانٹ موڈ"], ["Switches mode to custom vendor implant or non-stock consumable entry.", "امپلانٹ یا نان اسٹاک اشیاء کے اندراج کا موڈ منتخب کرتا ہے۔"]),
+  "ot_consumables.barcode_input": g(["ot_consumables_nurse"], ["Consumable barcode input", "بارکوڈ اندراج"], ["Scans or enters the item barcode for automatic pharmacy lot deduction (FEFO).", "سامان کا بارکوڈ درج یا اسکین کرتا ہے۔"]),
+  "ot_consumables.qty_input": g(["ot_consumables_nurse"], ["Item quantity input", "تعداد"], ["Quantity of consumables or implants used in the surgical procedure.", "سرجری میں استعمال شدہ سامان کی تعداد۔"]),
+  "ot_consumables.description_input": g(["ot_consumables_nurse"], ["Implant description input", "تفصیل اندراج"], ["Description, specification, or model of the non-stock implant.", "امپلانٹ یا سامان کی تفصیل اور ماڈل۔"]),
+  "ot_consumables.unit_cost_input": g(["ot_consumables_nurse"], ["Unit cost input", "لاگت قیمت"], ["Hospital acquisition unit cost of the implant in PKR.", "امپلانٹ کی لاگت قیمت پاکستانی روپوں میں۔"]),
+  "ot_consumables.unit_retail_input": g(["ot_consumables_nurse"], ["Unit retail input", "فروخت قیمت"], ["Billing unit price charged to patient account in PKR.", "مریض کے کھاتے میں چارج کی جانے والی قیمت۔"]),
+  "ot_consumables.clear_form_btn": g(["ot_consumables_nurse"], ["Clear form button", "فارم صاف کریں"], ["Clears all scan form inputs without saving.", "تمام اندراجات کو بغیر محفوظ کیے صاف کرتا ہے۔"]),
+  "ot_consumables.scan_submit_btn": g(["ot_consumables_nurse"], ["Record scan button", "اسکین محفوظ کریں"], ["Submits scanned item into surgery booking via POST /ot/bookings/{id}/consumables.", "اسکین شدہ سامان کو سرجری ریکارڈ میں شامل کرتا ہے۔"]),
+  "ot_consumables.reverse_btn": g(["ot_consumables_nurse"], ["Reverse scan button", "اسکین منسوخ کریں"], ["Opens the statutory reversal dialog to undo a mistaken scan (Rule 0a80234be9).", "غلطی سے اسکین شدہ آئٹم کو منسوخ کرنے کا ڈائیلاگ کھولتا ہے۔"]),
+  "ot_consumables.reverse_reason_input": g(["ot_consumables_nurse"], ["Reversal reason textarea", "منسوخی کی وجہ"], ["Mandatory explanatory reason for reversing the consumable scan (Rule 0a80234be9).", "اسکین منسوخ کرنے کی لازمی وضاحتی وجہ۔"]),
+  "ot_consumables.reverse_cancel_btn": g(["ot_consumables_nurse"], ["Cancel reversal button", "منسوخی چھوڑیں"], ["Dismisses the reversal dialog without making changes.", "منسوخی کے عمل کو بغیر تبدیلی کے بند کرتا ہے۔"]),
+  "ot_consumables.reverse_confirm_btn": g(["ot_consumables_nurse"], ["Confirm reversal button", "منسوخی تصدیق کریں"], ["Submits mirrored reversal record with reason via POST /ot/consumables/{id}/reverse (Rule 0a80234be9).", "وضاحتی وجہ کے ساتھ منسوخی کا ریکارڈ سرور پر بھیجتا ہے۔"]),
   // Screen 118: safety_checklist, Screen 119: safety_checklist_admin, Screen 120: safety_checklist_anaesthesia
   "safety_checklist.dismiss_alert_button": g(["safety_checklist", "safety_checklist_admin", "safety_checklist_anaesthesia"], ["Dismiss alert banner", "انتباہ خارج کریں"], ["Dismisses current alert or status banner.", "موجودہ انتباہی پیغام کو بند کرتا ہے۔"]),
   "safety_checklist.tab_signin_button": g(["safety_checklist", "safety_checklist_admin", "safety_checklist_anaesthesia"], ["Sign In tab button", "سائن ان مرحلہ"], ["Navigates to Sign In pause before anaesthesia induction (Rule a90b6173b4).", "بے ہوشی سے قبل سائن ان مرحلے کا فارم کھولتا ہے۔"]),

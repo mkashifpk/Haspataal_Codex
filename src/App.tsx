@@ -61,6 +61,7 @@ import { OTBoard } from './screens/OTBoard';
 import { PreAnaesthesiaClinic } from './screens/PreAnaesthesiaClinic';
 import { ConsentsAnaesthesia } from './screens/ConsentsAnaesthesia';
 import { SafetyChecklist } from './screens/SafetyChecklist';
+import { OTConsumablesNurse } from './screens/OTConsumablesNurse';
 import { MaternityPolicy } from './screens/MaternityPolicy';
 import { ObstetricAssessment } from './screens/ObstetricAssessment';
 import { NewbornRegistration } from './screens/NewbornRegistration';
@@ -155,6 +156,7 @@ const labels: Record<string, [string, string, string]> = {
  safety_checklist: ["Surgical safety checklist", "جراحی سیفٹی چیک لسٹ", "🛡️"],
  safety_checklist_admin: ["Surgical safety checklist", "جراحی سیفٹی چیک لسٹ", "🛡️"],
  safety_checklist_anaesthesia: ["Surgical safety checklist", "جراحی سیفٹی چیک لسٹ", "🛡️"],
+ ot_consumables_nurse: ["Consumables scan", "سامان کا اسکین", "📦"],
  blood_bank: ["Blood bank","بلڈ بینک","🩸"],
  blood_donors: ["Blood donors","خون کے عطیہ دہندگان","🩸"],
  donor_assessment: ["Donor assessment","عطیہ دہندہ کا معائنہ","🩸"],
@@ -271,6 +273,7 @@ const frontDeskScreens = new Set([
   'safety_checklist',
   'safety_checklist_admin',
   'safety_checklist_anaesthesia',
+  'ot_consumables_nurse',
   'consents_ward',
   'consents_doctor',
   'blood_sources',
@@ -976,6 +979,7 @@ export function App() {
   'safety_checklist',
   'safety_checklist_admin',
   'safety_checklist_anaesthesia',
+  'ot_consumables_nurse',
   'consents_ward',
   'consents_doctor',
   'blood_sources',
@@ -1048,6 +1052,7 @@ export function App() {
       (id !== "safety_checklist" || ["full","open_work","records","setup"].includes(est?.views.screens.find(v=>v.screen_id===id)?.view || "")) &&
       (id !== "safety_checklist_admin" || ["full","open_work","records","setup"].includes(est?.views.screens.find(v=>v.screen_id===id)?.view || "")) &&
       (id !== "safety_checklist_anaesthesia" || ["full","open_work","records","setup"].includes(est?.views.screens.find(v=>v.screen_id===id)?.view || "")) &&
+      (id !== "ot_consumables_nurse" || ["full","open_work","records","setup"].includes(est?.views.screens.find(v=>v.screen_id===id)?.view || "")) &&
       (!["mar","verbal_orders_ward","verbal_orders_er","vitals_tracker","patient_education_ward","nursing_assessment","my_beds","doctor_inpatients","cost_estimates_admissions","consents_admissions","wristbands_admissions","wristbands_ward","own_medicines_ward","own_medicines_pharmacy","bed_matrix","pending_admissions","imaging_repeats","imaging_outsourced","critical_results_radiology","radiology_worklist","rx_queue","dispense","order_queries","otc","charity_override","lab_only_walkin","lab_bench","lab_send_outs","lab_verification","critical_results_bench","critical_results_verifier","critical_results_doctor","critical_results_ward","critical_results_er","consents_ward","consents_triage","er_board_doctor","er_visit_doctor","mlc_cases","mlc_cases_doctor","death_record","body_release_ward","body_release_er","patient_programmes_triage","transfusion_bedside_er"].includes(id) || ["full", "open_work", "records"].includes(est?.views.screens.find(v => v.screen_id === id)?.view || "")),
   );
   const view = est?.views.workspaces.find(
@@ -1447,6 +1452,7 @@ export function App() {
               {screen === 'safety_checklist' && <SafetyChecklist key={user.user_id} currentUser={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone} onNavigate={(s) => navigate(s)} />}
               {screen === 'safety_checklist_admin' && <SafetyChecklist screenId="safety_checklist_admin" key={user.user_id} currentUser={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone} onNavigate={(s) => navigate(s)} />}
               {screen === 'safety_checklist_anaesthesia' && <SafetyChecklist screenId="safety_checklist_anaesthesia" key={user.user_id} currentUser={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone} onNavigate={(s) => navigate(s)} />}
+              {screen === 'ot_consumables_nurse' && <OTConsumablesNurse key={user.user_id} currentUser={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone} onNavigate={(s) => navigate(s)} />}
               {screen === 'maternity_policy' && est && <MaternityPolicy key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} />}
               {screen === 'obstetric_assessment' && est && <ObstetricAssessment key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} />}
               {screen === 'newborn_registration' && est && <NewbornRegistration key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} onNavigateScreen={navigate} />}
