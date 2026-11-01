@@ -10,6 +10,100 @@ export type HelpPage = {
   faqUr: [string, string][];
 };
 export const help: Record<string, HelpPage> = {
+  mlc_cases: {
+    title: "Medico-legal cases",
+    titleUr: "میڈیکو لیگل کیسز رجسٹر",
+    purpose: "Open, maintain, and finalize medico-legal cases under Punjab MSDS indicators 15, 16, and 20. Triage nurses and emergency doctors open statutory entries for road traffic accidents, physical assaults, firearm injuries, burns, poisonings, or sudden unexpected deaths (GET /mlc/case-types). Unidentified or unconscious casualties receive an emergency trauma profile first (POST /patients/trauma). The clinician records the alleged history in the teller's exact words, documents external injuries and clinical examination findings, immediately dispatches statutory police intimation (GET /mlc/contacts) with prominent red alerts for overdue notifications, generates official A4 police intimation printouts, maintains unbroken chain-of-custody by logging handed-over physical evidence item-by-item with seal numbers and police acknowledgments, settles the Medico-Legal Report (Issued Here, Referred to a designated hospital, or Not Required), and securely closes cases once all statutory prerequisites are met (rules 4d698e4d1b, 5bc7258288, 280a8e8493, 2b6e9d023c, 044cdb5a52, ca37655fad, 81b46f9cf6).",
+    purposeUr: "پنجاب ہیلتھ کیئر کمیشن کے ایم ایس ڈی ایس انڈیکیٹرز 15، 16 اور 20 کے تحت قانونی و طبی (میڈیکو لیگل) کیسز کا اندراج، پولیس اطلاع، شواہد کی حوالگی اور ایم ایل آر رپورٹ کا باضابطہ انتظام۔ ٹرائی ایج نرس اور ایمرجنسی ڈاکٹر حادثات، تشدد، گولی کے زخم، جلنے، زہر خوری اور مشتبہ اموات کے کیسز درج کرتے ہیں؛ نا معلوم مریضوں کے لیے پہلے ٹراما پروفائل بنائی جاتی ہے۔ راوی کے اصل الفاظ میں واقعہ درج کیا جاتا ہے، طبی معائنے اور زخموں کا ریکارڈ تیار کیا جاتا ہے، متعلقہ تھانے کو قانونی اطلاع (اور تاخیر کی صورت میں سرخ الرٹ) دی جاتی ہے، اے 4 سائز کا باضابطہ اطلاع نامہ پرنٹ کیا جاتا ہے، سیل شدہ شواہد پولیس کے حوالے کر کے چین آف کسٹڈی لاگ کی جاتی ہے، اور ایم ایل آر رپورٹ کے تصفیے کے بعد کیس بند کیا جاتا ہے۔",
+    steps: [
+      "1. Open Medico-Legal Case: Whenever a casualty presents with suspected trauma, assault, poisoning, or medico-legal history, click 'Open Medico-Legal Case'. For unknown patients, generate a trauma identity profile first via POST /patients/trauma.",
+      "2. Select Case Category & Escort: Choose the statutory case type from the dropdown (GET /mlc/case-types) and specify who brought the patient (Police, Rescue 1122, Ambulance, Relatives, Self, Bystander, or Other). Record the escort's name and telephone.",
+      "3. Record Alleged History: Document the circumstances and mechanism of injury in the teller's exact words ('Alleged History') and record who narrated the history and their relationship to the patient.",
+      "4. Document Examination Findings: Note all observed external lacerations, contusions, burns, firearm wounds, or systemic clinical signs. Additional findings may be added or updated later via inline edit (PATCH /mlc/cases/{id}).",
+      "5. Dispatch Police Intimation: If the patient was not brought by police, immediately notify the jurisdictional police station from the contact directory (GET /mlc/contacts). Record the communication method (Phone, In Person, Written), the duty officer's name/rank, and the police daily diary (roznamcha) or FIR number. Cases with overdue intimation display a prominent red hazard badge.",
+      "6. Print Statutory Intimation (A4): Click 'Print Intimation (A4)' to fetch the formatted print payload (GET /mlc/cases/{id}/print-payload) containing facility headers, patient demographics, MLC serial number, alleged history, and officer signature blocks for police dispatch.",
+      "7. Hand Over Physical Evidence: Secure all patient clothing, bullet fragments, chemical containers, or biological samples in tamper-evident sealed bags. Click 'Hand Over Evidence' to record the description, seal number, receiving officer details (name, rank, belt number), and police receipt reference.",
+      "8. Settle MLR and Close Case: Settle the Medico-Legal Report disposition as Issued Here (with MLR number and date), Referred (selecting the designated government MLR hospital), or Not Required (recording clinical justification). Enter a mandatory clinical closure note (min 3 characters) and click 'Close Medico-Legal Case' to permanently lock the record.",
+    ],
+    stepsUr: [
+      "1. نیا میڈیکو لیگل کیس درج کریں: جیسے ہی کوئی زخمی، حادثے، تشدد یا زہر خوری کا شکار مریض آئے، 'نیا ایم ایل سی کیس کھولیں' پر کلک کریں۔ نامعلوم مریض کے لیے پہلے 'ٹراما پروفائل' بنائیں۔",
+      "2. کیس کی قسم اور لانے والے کا انتخاب: سرکاری فہرست سے کیس کی قسم منتخب کریں اور درج کریں کہ مریض کو کون لایا (پولیس، ریسکیو 1122، ایمبولینس، لواحقین، خود یا راہگیر) اور لانے والے کا نام و رابطہ درج کریں۔",
+      "3. بیان کردہ واقعہ درج کریں: راوی کے اصل الفاظ میں واقعہ کی تفصیل درج کریں اور واضح کریں کہ یہ بیان کس نے دیا اور مریض کے ساتھ اس کا کیا رشتہ ہے۔",
+      "4. طبی معائنہ اور زخموں کی تفصیل: ظاہری زخم، چوٹیں، نشانات، جلنے کے زخم یا گولی کے نشانات درج کریں۔ معائنے کی تفصیل بعد میں بھی ترمیم بٹن کے ذریعے اپ ڈیٹ کی جا سکتی ہے۔",
+      "5. تھانے کو فوری قانونی اطلاع دیں: اگر مریض پولیس کے ہمراہ نہیں آیا تو فوری طور پر ہسپتال ڈائرکٹری سے متعلقہ تھانہ منتخب کر کے فون، بالمشافہ یا تحریری اطلاع درج کریں، موصول کنندہ ڈیوٹی افسر کا نام اور روزنامچہ یا ایف آئی آر نمبر درج کریں۔ تاخیر شدہ اطلاع سرخ الرٹ سے نمایاں ہوتی ہے۔",
+      "6. سرکاری اطلاع نامہ پرنٹ کریں: 'اطلاع نامہ پرنٹ کریں' پر کلک کر کے اے 4 سائز کا سرکاری فارم حاصل کریں جس پر ہسپتال کا مونوگرام، مریض کی تفصیلات، ایم ایل سی نمبر اور دستخط کی جگہ موجود ہوتی ہے۔",
+      "7. شواہد پولیس کے حوالے کریں: کپڑے، گولی یا دیگر شواہد سیل شدہ لفافے میں بند کر کے 'شواہد کا اندراج کریں' پر کلک کریں اور سیل نمبر، وصول کنندہ پولیس افسر کا نام، بیلٹ نمبر اور رسید نمبر درج کریں۔",
+      "8. ایم ایل آر رپورٹ کا تصفیہ اور کیس بندش: رپورٹ کی نوعیت درج کریں (ہسپتال سے جاری مع نمبر و تاریخ، نامزد ہسپتال ریفر، یا غیر ضروری مع وجہ)۔ اختتامی نوٹ لکھ کر 'کیس بند کریں' پر کلک کر کے ریکارڈ کو مستقل طور پر لاک کر دیں۔",
+    ],
+    faq: [
+      [
+        "How do I open a new medico-legal case when an assault or accident casualty arrives?",
+        "Click 'Open Medico-Legal Case' (+), enter the patient ID (or link an open emergency ticket/admission), select the statutory case type (GET /mlc/case-types), select who brought the patient, and write the alleged history in the narrator's exact words. If the patient is unknown or unconscious, first register an emergency trauma profile (POST /patients/trauma) to assign a temporary identity before opening the MLC record (rule 4d698e4d1b)."
+      ],
+      [
+        "Why does the register display a prominent red hazard badge on certain open cases?",
+        "Under Punjab MSDS regulations and rule 280a8e8493, hospitals have a strict statutory time window (mlc_police_intimation_minutes) to notify the local police station of any non-police-accompanied medico-legal casualty. When this time expires without recorded intimation, the system marks police_intimation_overdue as true and places the case at the very top of the register in bold red. The triage nurse or duty doctor must immediately contact the police station and record the dispatch to clear the violation."
+      ],
+      [
+        "How do I print the formal A4 police intimation document and obtain officer acknowledgment?",
+        "Open the case detail modal and click 'Print Intimation (A4)'. The client calls GET /mlc/cases/{id}/print-payload to load the official hospital header, patient demographics, MLC serial number, alleged history, and officer acknowledgment blocks. Print this document on an A4 sheet for the hospital runner or police officer, and retain the signed/stamped duplicate in the department's medico-legal dispatch file."
+      ],
+      [
+        "How do I record physical evidence handed over to the police under chain of custody?",
+        "Click 'Hand Over Evidence Item' in the case detail drawer. Enter a precise description of the article (e.g. blood-stained shirt, fired bullet cartridge, stomach wash specimen), record the tamper-evident seal number, enter the full name, police rank, and belt number of the receiving officer, and record their station receipt reference. Each physical item is logged item-by-item per rule 2b6e9d023c."
+      ],
+      [
+        "The Medico-legal cases screen says 'This patient record was merged; use the master record.' (PATIENT_MERGED_CANNOT_TRANSACT). Why, and what do I do?",
+        "This error occurs when the patient profile was originally created as a temporary or duplicate profile (such as an emergency trauma casualty) and was subsequently merged into a verified master patient record. The backend prevents any new medico-legal transactions against archived secondary identities. Look up the patient using their master MRN or CNIC and open or update the MLC entry under that verified master patient profile."
+      ],
+      [
+        "The Medico-legal cases screen says 'Choose a police station (or, for a referral, a hospital designated for medico-legal reports) from the contact list.' (MLC_CONTACT_TYPE_INVALID). Why, and what do I do?",
+        "When recording a police intimation, the chosen contact must be of type 'PoliceStation'. If you are settling the Medico-Legal Report with disposition 'Referred', the target hospital must have contact_type 'MlrHospital'. Selecting an ambulance service, fire brigade, or general health office triggers MLC_CONTACT_TYPE_INVALID. Always select from the filtered contacts dropdown provided by the application."
+      ],
+      [
+        "The Medico-legal cases screen says 'The police intimation is recorded and cannot change.' (MLC_POLICE_ALREADY_INFORMED). Why, and what do I do?",
+        "Under statutory medico-legal regulations and rule 280a8e8493, an official police intimation entry is immutable once filed; the system does not allow rewriting or re-submitting an intimation to prevent tampering with legal timelines. If another terminal has already submitted the intimation, the client automatically reloads and displays the existing station, officer, and reference details."
+      ],
+      [
+        "The Medico-legal cases screen says 'Inform the police and settle the medico-legal report before closing the case.' (MLC_NOT_READY_TO_CLOSE). Why, and what do I do?",
+        "Under rule 044cdb5a52, an MLC case cannot be closed while statutory obligations remain incomplete. The server refuses closure (MLC_NOT_READY_TO_CLOSE) if: (1) statutory police intimation has not yet been recorded, or (2) the Medico-Legal Report status remains 'Pending'. To close the case, first record the police intimation, then settle the MLR status as Issued Here (with MLR # and date), Referred (with designated hospital), or Not Required (with justification), and provide a closure note of at least 3 characters."
+      ]
+    ],
+    faqUr: [
+      [
+        "تشدد یا حادثے کا شکار مریض آنے پر نیا میڈیکو لیگل کیس کیسے کھولا جائے؟",
+        "'نیا ایم ایل سی کیس کھولیں' پر کلک کریں، مریض کا آئی ڈی درج کریں، کیس کی قانونی قسم منتخب کریں، لانے والے کا انتخاب کریں اور راوی کے اصل الفاظ میں واقعہ لکھیں۔ اگر مریض نامعلوم یا بے ہوش ہے تو پہلے 'ٹراما پروفائل' بنا کر عارضی شناخت حاصل کریں، پھر ایم ایل سی کھولیں۔"
+      ],
+      [
+        "رجسٹر میں بعض کھلے کیسز پر سرخ الرٹ بیج کیوں نظر آتا ہے؟",
+        "پنجاب ہیلتھ کیئر کمیشن کے قوانین اور رول 280a8e8493 کے تحت ہسپتال پر لازم ہے کہ وہ مقررہ وقت کے اندر متعلقہ تھانے کو قانونی اطلاع دے۔ وقت گزرنے پر سسٹم کیس پر سرخ الرٹ لگا کر اسے لسٹ میں سب سے اوپر رکھتا ہے۔ عملہ فوری طور پر تھانے کو مطلع کر کے اندراج مکمل کرے۔"
+      ],
+      [
+        "تھانے کے لیے باضابطہ اے 4 اطلاع نامہ کیسے پرنٹ کریں اور افسر کے دستخط لیں؟",
+        "کیس تفصیل میں جا کر 'اطلاع نامہ پرنٹ کریں' پر کلک کریں۔ سسٹم ہسپتال کے سرکاری لیٹر ہیڈ، مریض کی تفصیلات، ایم ایل سی نمبر اور پولیس افسر کے دستخطی خانے کے ساتھ باضابطہ اے 4 پیش منظر دکھاتا ہے۔ پرنٹ نکال کر تھانے کے اہلکار سے دستخط و مہر کروا کر ریکارڈ میں رکھیں۔"
+      ],
+      [
+        "پولیس کے حوالے کیے گئے شواہد کا چین آف کسٹڈی کے تحت اندراج کیسے کیا جائے؟",
+        "'شواہد کا اندراج کریں' پر کلک کریں۔ شواہد کی درست تفصیل (مثلاً خون آلود کپڑے، گولی کا خول، معدے کا نمونہ)، سیل نمبر، وصول کنندہ پولیس افسر کا پورا نام، عہدہ، بیلٹ نمبر اور تھانے کی رسید کا نمبر درج کریں۔ ہر چیز فرداً فرداً ضابطے کے تحت محفوظ کی جاتی ہے۔"
+      ],
+      [
+        "اسکرین کہتی ہے کہ 'یہ مریض ریکارڈ ضم ہو چکا ہے؛ ماسٹر ریکارڈ استعمال کریں' (PATIENT_MERGED_CANNOT_TRANSACT)۔ اس کی کیا وجہ ہے اور کیا کریں؟",
+        "یہ خرابی تب پیش آتی ہے جب عارضی یا ڈپلیکیٹ مریض پروفائل (مثلاً ٹراما پروفائل) کو مستقل ماسٹر ریکارڈ میں ضم کر دیا گیا ہو۔ بیک اینڈ ضم شدہ ریکارڈ پر نئی کارروائی کی اجازت نہیں دیتا۔ مریض کو اس کے ماسٹر ایم آر این سے تلاش کریں اور درست ریکارڈ پر کام کریں۔"
+      ],
+      [
+        "اسکرین کہتی ہے کہ 'رابطہ فہرست سے تھانہ یا نامزد ہسپتال منتخب کریں' (MLC_CONTACT_TYPE_INVALID)۔ کیا کریں؟",
+        "پولیس اطلاع درج کرتے وقت منتخب کردہ رابطہ کا 'PoliceStation' ہونا لازمی ہے، اور اگر ایم ایل آر کے لیے ریفر کیا جا رہا ہو تو رابطہ 'MlrHospital' ہونا چاہیے۔ ایمبولینس یا دیگر دفاتر منتخب کرنے پر یہ خرابی آتی ہے۔ ڈراپ ڈاؤن فہرست سے درست رابطہ چنیں۔"
+      ],
+      [
+        "اسکرین کہتی ہے کہ 'پولیس اطلاع درج ہو چکی ہے اور تبدیل نہیں ہو سکتی' (MLC_POLICE_ALREADY_INFORMED)۔ اس کا کیا مطلب ہے؟",
+        "قانونی ضابطے کے تحت ایک بار تھانے کی اطلاع درج ہو جائے تو قانونی ریکارڈ میں ردوبدل روکنے کے لیے اسے تبدیل نہیں کیا جا سکتا۔ اگر کسی دوسرے ٹرمینل سے اطلاع درج ہو چکی ہو تو سسٹم موجودہ تفصیلات دکھاتا ہے۔"
+      ],
+      [
+        "اسکرین کہتی ہے کہ 'کیس بند کرنے سے پہلے پولیس اطلاع اور ایم ایل آر رپورٹ کا تصفیہ کریں' (MLC_NOT_READY_TO_CLOSE)۔ کیا کریں؟",
+        "رول 044cdb5a52 کے تحت جب تک قانونی تقاضے پورے نہ ہوں کیس بند نہیں ہو سکتا۔ اگر تھانے کی اطلاع درج نہ ہو یا ایم ایل آر رپورٹ زیر التواء ہو تو سسٹم بندش مسترد کر دے گا۔ پہلے تھانے کو مطلع کریں، پھر رپورٹ کا تصفیہ کریں (جاری شدہ، ریفر یا غیر ضروری)، پھر اختتامی نوٹ لکھ کر کیس بند کریں۔"
+      ]
+    ],
+  },
 medication_orders_doctor: {
   title: "Verbal orders to countersign and pharmacy queries",
   titleUr: "زبانی احکامات کی توثیق اور فارمیسی کے سوالات",

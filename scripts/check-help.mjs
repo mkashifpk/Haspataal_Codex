@@ -253,6 +253,7 @@ export function checkHelp({
       "ERVisit",
       "CodeRed",
       "TraumaMerge",
+      "MLCCases",
     ].map((n) => `src/screens/${n}.tsx`),
   ];
   const used = new Set(),
