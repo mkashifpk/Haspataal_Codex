@@ -20,6 +20,7 @@ export const phase1Screens = [
 const approvalScreens = ["approval_queue", "charity_approvals"];
 // Coverage grows screen by screen; Phase 1 acceptance remains separate.
 export const deliveredHelpScreens = [
+  "ot_intraop",
   "ot_consumables_nurse",
   "safety_checklist_anaesthesia",
   "safety_checklist_admin",
@@ -131,6 +132,30 @@ const g = (
 // IDs are also attached to the actual controls. The build rejects missing
 // mappings and empty translations instead of treating a page as coverage.
 export const controlGuides: Record<string, ControlGuide> = {
+  // Screen 122: ot_intraop (Intra-op consumables - OT Admin)
+  "ot_intraop.dismiss_alert": g(["ot_intraop"], ["Dismiss alert banner", "انتباہ خارج کریں"], ["Dismisses status or error message banner.", "انتباہی پیغام کو بند کرتا ہے۔"]),
+  "ot_intraop.setup_link": g(["ot_intraop"], ["Facility Settings link", "سہولت کی ترتیبات"], ["Opens Facility settings when surgical service setup is required.", "جب سروس کی ترتیب درکار ہو تو سہولت کی ترتیبات کھولتا ہے۔"]),
+  "ot_intraop.refresh_btn": g(["ot_intraop"], ["Refresh theatre cases button", "کیسز تازہ کریں"], ["Refreshes the surgical cases queue from GET /ot/bookings.", "سرجری کیسز کی فہرست کو سرور سے دوبارہ حاصل کرتا ہے۔"]),
+  "ot_intraop.checklist_nav_btn": g(["ot_intraop"], ["Safety checklist link button", "سیفٹی چیک لسٹ"], ["Navigates to the surgical safety checklist admin overview.", "سرجیکل سیفٹی چیک لسٹ کا جائزہ کھولتا ہے۔"]),
+  "ot_intraop.status_board_btn": g(["ot_intraop"], ["OT status board button", "او ٹی اسٹیٹس بورڈ"], ["Navigates to the live operating theatre status board.", "لائیو آپریشن تھیٹر اسٹیٹس بورڈ کھولتا ہے۔"]),
+  "ot_intraop.filter_status": g(["ot_intraop"], ["Booking lifecycle filter", "اسٹیٹس فلٹر"], ["Filters theatre cases by operative stage (Scheduled, InProgress, Cleaning, Completed).", "کیسز کو سرجری کے مراحل کے لحاظ سے فلٹر کرتا ہے۔"]),
+  "ot_intraop.search_input": g(["ot_intraop"], ["Search cases input", "کیسز تلاش"], ["Searches cases by patient name, MRN, procedure, or OT room.", "مریض کے نام، ایم آر این یا پروسیجر کے ذریعے تلاش کرتا ہے۔"]),
+  "ot_intraop.start_surgery_btn": g(["ot_intraop"], ["Start surgery button", "سرجری شروع کریں"], ["Transitions patient state to In-Surgery (InProgress) via POST /ot/bookings/{id}/start.", "سرجری کے آغاز کا اندراج کرتا ہے اور مریض کو ان پروگریس کرتا ہے۔"]),
+  "ot_intraop.complete_surgery_btn": g(["ot_intraop"], ["Complete surgery button", "سرجری مکمل کریں"], ["Transitions theatre state to Cleaning-Prep via POST /ot/bookings/{id}/complete-surgery.", "سرجری کی تکمیل کا اندراج کرتا ہے اور تھیٹر کو صفائی کے مرحلے میں منتقل کرتا ہے۔"]),
+  "ot_intraop.complete_cleaning_btn": g(["ot_intraop"], ["Complete cleaning button", "صفائی مکمل کریں"], ["Marks theatre decontamination complete and restores Available status via POST /ot/bookings/{id}/complete-cleaning.", "تھیٹر کی صفائی کی تکمیل کا اندراج کرتا ہے اور روم دستیاب کرتا ہے۔"]),
+  "ot_intraop.scan_mode_barcode": g(["ot_intraop"], ["Barcode scan mode button", "بارکوڈ موڈ"], ["Switches scanner mode to pharmacy barcode scanning (FEFO).", "فارمیسی اسٹاک بارکوڈ اسکیننگ موڈ منتخب کرتا ہے۔"]),
+  "ot_intraop.scan_mode_custom": g(["ot_intraop"], ["Vendor implant mode button", "امپلانٹ موڈ"], ["Switches mode to custom vendor implant or non-stock consumable entry.", "امپلانٹ یا نان اسٹاک اشیاء کے اندراج کا موڈ منتخب کرتا ہے۔"]),
+  "ot_intraop.barcode_input": g(["ot_intraop"], ["Consumable barcode input", "بارکوڈ اندراج"], ["Scans or enters the item barcode for automatic pharmacy lot deduction (FEFO).", "سامان کا بارکوڈ درج یا اسکین کرتا ہے۔"]),
+  "ot_intraop.qty_input": g(["ot_intraop"], ["Item quantity input", "تعداد"], ["Quantity of consumables or implants used in the surgical procedure.", "سرجری میں استعمال شدہ سامان کی تعداد۔"]),
+  "ot_intraop.description_input": g(["ot_intraop"], ["Implant description input", "تفصیل اندراج"], ["Description, specification, or model of the non-stock implant.", "امپلانٹ یا سامان کی تفصیل اور ماڈل۔"]),
+  "ot_intraop.unit_cost_input": g(["ot_intraop"], ["Unit cost input", "لاگت قیمت"], ["Hospital acquisition unit cost of the implant in PKR.", "امپلانٹ کی لاگت قیمت پاکستانی روپوں میں۔"]),
+  "ot_intraop.unit_retail_input": g(["ot_intraop"], ["Unit retail input", "فروخت قیمت"], ["Billing unit price charged to patient account in PKR.", "مریض کے کھاتے میں چارج کی جانے والی قیمت۔"]),
+  "ot_intraop.clear_form_btn": g(["ot_intraop"], ["Clear form button", "فارم صاف کریں"], ["Clears all scan form inputs without saving.", "تمام اندراجات کو بغیر محفوظ کیے صاف کرتا ہے۔"]),
+  "ot_intraop.scan_submit_btn": g(["ot_intraop"], ["Record scan button", "اسکین محفوظ کریں"], ["Submits scanned item into surgery booking via POST /ot/bookings/{id}/consumables.", "اسکین شدہ سامان کو سرجری ریکارڈ میں شامل کرتا ہے۔"]),
+  "ot_intraop.reverse_btn": g(["ot_intraop"], ["Reverse scan button", "اسکین منسوخ کریں"], ["Opens the statutory reversal dialog to undo a mistaken scan (Rule f228c617bd).", "غلطی سے اسکین شدہ آئٹم کو منسوخ کرنے کا ڈائیلاگ کھولتا ہے۔"]),
+  "ot_intraop.reverse_cancel_btn": g(["ot_intraop"], ["Cancel reversal button", "منسوخی چھوڑیں"], ["Dismisses the reversal dialog without making changes.", "منسوخی کے عمل کو بغیر تبدیلی کے بند کرتا ہے۔"]),
+  "ot_intraop.reverse_reason_input": g(["ot_intraop"], ["Reversal reason textarea", "منسوخی کی وجہ"], ["Mandatory explanatory reason for reversing the consumable scan (Rule f228c617bd).", "اسکین منسوخ کرنے کی لازمی وضاحتی وجہ۔"]),
+  "ot_intraop.reverse_confirm_btn": g(["ot_intraop"], ["Confirm reversal button", "منسوخی تصدیق کریں"], ["Submits mirrored reversal record with reason via POST /ot/consumables/{id}/reverse (Rule f228c617bd).", "وضاحتی وجہ کے ساتھ منسوخی کا ریکارڈ سرور پر بھیجتا ہے۔"]),
   // Screen 121: ot_consumables_nurse (OT consumables & implants)
   "ot_consumables.dismiss_alert": g(["ot_consumables_nurse"], ["Dismiss alert banner", "انتباہ خارج کریں"], ["Dismisses status or error message banner.", "انتباہی پیغام کو بند کرتا ہے۔"]),
   "ot_consumables.setup_link": g(["ot_consumables_nurse"], ["Facility Settings link", "سہولت کی ترتیبات"], ["Opens Facility settings when surgical service setup is required.", "جب سروس کی ترتیب درکار ہو تو سہولت کی ترتیبات کھولتا ہے۔"]),

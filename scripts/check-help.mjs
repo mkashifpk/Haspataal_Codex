@@ -269,6 +269,7 @@ export function checkHelp({
       "ConsentsAnaesthesia",
       "SafetyChecklist",
       "OTConsumablesNurse",
+      "OTIntraop",
     ].map((n) => `src/screens/${n}.tsx`),
   ];
   const used = new Set(),

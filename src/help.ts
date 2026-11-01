@@ -8014,6 +8014,86 @@ consents_doctor: {
       ]
     ]
   },
+  ot_intraop: {
+    title: "Intra-op consumables",
+    titleUr: "انٹرا آپریٹو سامان (او ٹی ایڈمن)",
+    purpose: "Theatre lifecycle and consumables management in the OT Admin workspace: Starting surgery (POST /ot/bookings/{id}/start), intra-operative barcode scanning (POST /ot/bookings/{id}/consumables), statutory mistake reversals with mandatory reason (POST /ot/consumables/{id}/reverse under Rule f228c617bd), completing surgery with surgical checklist Sign Out prerequisite verification (POST /ot/bookings/{id}/complete-surgery), and completing theatre cleaning / returning suite to Available status (POST /ot/bookings/{id}/complete-cleaning) under Rule 23588c8fc8 (runtime service capability gating from GET /establishment views for screen_id ot_intraop).",
+    purposeUr: "او ٹی ایڈمن ورک اسپیس میں تھیٹر کے لائف سائیکل اور سامان کا انتظام: سرجری کا آغاز، انٹرا آپریٹو بارکوڈ اسکیننگ، قاعدہ f228c617bd کے تحت غلطی سے اسکین شدہ اشیاء کی لازمی وضاحتی وجہ کے ساتھ منسوخی (ریکارڈ کبھی حذف نہیں کیا جاتا)، سرجیکل چیک لسٹ کی تکمیل کی تصدیق کے ساتھ سرجری کا اختتام، اور تھیٹر کی صفائی کے بعد کمرے کو دوبارہ دستیاب کیفیت میں بحال کرنا اور قاعدہ 23588c8fc8 کے تحت سروس کی تصدیق۔",
+    steps: [
+      "Select the surgical case from the left-hand queue or use the filter tabs (Scheduled, InProgress, Cleaning, Completed, EmergencyHold, All) or search by patient name, MRN, or procedure.",
+      "Review the patient identity banner showing Name, MRN, Gender/Age, Theatre Room, Primary Surgeon, Anaesthetist, and current Lifecycle State.",
+      "When the surgical team is assembled in theatre, click 'Start Surgery' to transition booking to InProgress and mark the theatre room In-Surgery via POST /ot/bookings/{id}/start.",
+      "For standard pharmacy stock and sutures, select Barcode Scan mode and scan the lot barcode with the handheld scanner (automated FEFO deduction).",
+      "For non-stock vendor implants (e.g. titanium plates, mesh, prosthetics), switch to Vendor Implant mode and enter description, positive quantity, unit cost, and retail price.",
+      "Click Record Consumable to submit to the operative booking via POST /ot/bookings/{id}/consumables with idempotent protection.",
+      "If an item was scanned mistakenly, click Reverse Scan and enter a mandatory clinical explanation (min 3 characters) to record a statutory reversal under Rule f228c617bd.",
+      "When the surgical procedure is finished and the WHO Safety Checklist Sign Out pause is verified, click Complete Surgery to transition booking to Cleaning via POST /ot/bookings/{id}/complete-surgery.",
+      "Once the housekeeping team finishes terminal disinfection, click Complete Cleaning to mark theatre room Available (🟢) and booking Completed via POST /ot/bookings/{id}/complete-cleaning."
+    ],
+    stepsUr: [
+      "بائیں جانب موجود ورک لسٹ سے سرجری کیس منتخب کریں یا اسٹیٹس فلٹرز (شیڈول، جاری، صفائی، مکمل، ہنگامی روک، تمام) اور تلاش کی سہولت استعمال کریں۔",
+      "مریض کے شناختی بینر کی تصدیق کریں جس میں نام، ایم آر این، جنس/عمر، آپریشن تھیٹر روم، سرجن، اینستھیٹسٹ اور موجودہ اسٹیٹس ظاہر ہوتا ہے۔",
+      "جب جراحی ٹیم تھیٹر میں تیار ہو تو 'سرجری شروع کریں' پر کلک کریں تاکہ کیس InProgress ہو جائے اور تھیٹر کمرہ In-Surgery مارک ہو جائے۔",
+      "فارمیسی اسٹاک کی ادویات یا دھاگوں کے لیے بارکوڈ اسکین موڈ منتخب کریں اور ہینڈ ہیلڈ اسکینر سے بارکوڈ اسکین کریں (خودکار FEFO کٹوتی)۔",
+      "نان اسٹاک وینڈر امپلانٹس (مثلاً پلیٹس، میش، یا جوڑوں کے امپلانٹ) کے لیے وینڈر امپلانٹ موڈ منتخب کریں اور تفصیل، تعداد، لاگت اور قیمت درج کریں۔",
+      "سامان ریکارڈ کریں کے بٹن پر کلک کریں تاکہ سامان محفوظ ہو جائے اور فارمیسی اسٹاک سے کٹوتی ہو جائے۔",
+      "اگر غلطی سے کوئی آئٹم اسکین ہو گیا ہو تو 'اسکین منسوخ کریں' پر کلک کریں، لازمی وضاحتی وجہ درج کریں اور قاعدہ f228c617bd کے تحت منسوخی کا اندراج کریں۔",
+      "سرجری مکمل ہونے اور سرجیکل سیفٹی چیک لسٹ کے سائن آؤٹ کے بعد 'سرجری مکمل کریں' پر کلک کریں تاکہ کیس کی حالت Cleaning میں تبدیل ہو جائے۔",
+      "تھیٹر کی صفائی اور جراثیم کشی مکمل ہونے پر 'صفائی مکمل کریں' پر کلک کریں تاکہ کمرہ دوبارہ Available (دستیاب) ہو جائے اور کیس مکمل ہو جائے۔"
+    ],
+    faq: [
+      [
+        "How does the operative lifecycle state machine progress in ot_intraop?",
+        "A booking starts as Scheduled or EmergencyHold. Clicking 'Start Surgery' moves it to InProgress (In-Surgery). When surgery completes, clicking 'Complete Surgery' moves it to Cleaning (Cleaning-Prep). Finally, clicking 'Complete Cleaning' marks the theatre Available (🟢) and completes the booking."
+      ],
+      [
+        "Can mistaken consumable scans be deleted from the theatre record?",
+        "No. Under statutory Rule f228c617bd, mistaken scans must never be deleted. They must be reversed via POST /ot/consumables/{id}/reverse with a mandatory explanatory clinical reason (min 3 characters), creating an immutable reversal row in the ledger."
+      ],
+      [
+        "Why does 'Complete Surgery' return OT_CHECKLIST_INCOMPLETE?",
+        "Under WHO surgical safety rules and clinical theatre policy, surgery completion requires the surgical team to have completed and signed the post-procedure Sign Out pause on the Surgical Safety Checklist before surgery finalization is accepted."
+      ],
+      [
+        "What happens when theatre cleaning is completed?",
+        "Calling POST /ot/bookings/{id}/complete-cleaning finalizes the booking status to Completed, updates the theatre room state back to Available (🟢) on the live OT Board, and unlocks the room for subsequent scheduled cases."
+      ],
+      [
+        "How do realtime events update the intra-operative screen?",
+        "Subscribing to ot.booking.updated WebSocket events automatically refreshes the booking list and active surgical case details in real time without polling, ensuring accurate status visibility across all theatre workstations."
+      ],
+      [
+        "How does runtime service capability gating apply under Rule 23588c8fc8?",
+        "The screen checks GET /establishment views for screen_id ot_intraop (full, open_work, records, setup, hidden). When the surgery service is retiring (open_work) or retired (records), actions starting new surgeries are restricted while allowing open cases to be completed and cleaned."
+      ]
+    ],
+    faqUr: [
+      [
+        "او ٹی انٹرا آپریٹو اسکرین میں سرجری کے لائف سائیکل کا تسلسل کیسے چلتا ہے؟",
+        "کیس کا آغاز Scheduled یا EmergencyHold سے ہوتا ہے۔ سرجری شروع کریں دبانے سے حالت InProgress ہو جاتی ہے۔ سرجری ختم ہونے پر سرجری مکمل کریں دبانے سے Cleaning موڈ فعال ہوتا ہے، اور صفائی کے بعد صفائی مکمل کریں سے کمرہ دستیاب ہو جاتا ہے۔"
+      ],
+      [
+        "کیا تھیٹر کے ریکارڈ سے غلط اسکین شدہ اشیاء کو حذف کیا جا سکتا ہے؟",
+        "ہرگز نہیں۔ قانونی قاعدہ f228c617bd کے تحت غلط اسکین کو حذف کرنا ممنوع ہے۔ اس کے بجائے کم از کم 3 حروف کی وضاحتی وجہ کے ساتھ منسوخی درج کی جاتی ہے اور مستقل ریکارڈ برقرار رہتا ہے۔"
+      ],
+      [
+        "سرجری مکمل کرنے پر OT_CHECKLIST_INCOMPLETE کی خرابی کیوں آتی ہے؟",
+        "عالمی ادارہ صحت کے حفاظتی اصولوں کے تحت سرجری اس وقت تک مکمل نہیں کی جا سکتی جب تک جراحی ٹیم نے سرجیکل سیفٹی چیک لسٹ کا آخری مرحلہ (Sign Out) مکمل کر کے دستخط نہ کیا ہو۔"
+      ],
+      [
+        "تھیٹر کی صفائی مکمل ہونے پر سسٹم میں کیا تبدیلیاں آتی ہیں؟",
+        "صفائی کی تکمیل درج کرنے سے بکنگ کی حالت Completed ہو جاتی ہے اور لائیو او ٹی بورڈ پر تھیٹر روم کا اسٹیٹس واپس Available (سبز) ہو جاتا ہے تاکہ اگلی سرجری شروع ہو سکے۔"
+      ],
+      [
+        "ریئل ٹائم ایونٹس اسکرین کو کیسے اپڈیٹ کرتے ہیں؟",
+        "ot.booking.updated کا ایونٹ موصول ہونے پر اسکرین بغیر کسی وقفے کے بکنگ لسٹ اور منتخب سرجری کے کوائف کو خودکار طور پر تازہ کر دیتی ہے۔"
+      ],
+      [
+        "قاعدہ 23588c8fc8 کے تحت سروس کی اہلیت کی جانچ کیسے کی جاتی ہے؟",
+        "اسکرین GET /establishment کے ذریعے سرجری سروس کی کیفیت جانچتی ہے۔ اگر سروس ریٹائر ہو رہی ہو تو نیا کیس شروع کرنے کی ممانعت ہوتی ہے لیکن جاری کیسز کی تکمیل اور صفائی کی اجازت رہتی ہے۔"
+      ]
+    ]
+  },
   maternity_policy: {
     title: "High-risk pregnancy: our policy",
     titleUr: "ہائی رسک حمل: ہسپتال کی پالیسی",
