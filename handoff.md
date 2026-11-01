@@ -1,98 +1,98 @@
 # Haspataal checkpoint
 Last updated: 01 November 2026, Antigravity (Codex pair), Asia/Karachi.
 
-## Active request: Phase 5 Screen 108 `transfusion_bedside_er` (Bedside transfusion observation - ER)
-Building screens in Phase 5 Roadmap (Emergency, deaths and medico-legal cases) along with all tests, reporting backend issues if found:
-- Screen 104: **`death_record`** ("Death record & certificate", Position 104, 90 points) — **COMPLETED** (commit `2d501bf`, Proposal **257** awaiting human review on `/docs -> My progress`).
-- Screen 105: **`body_release_ward`** ("Bodies awaiting handover - Ward", Position 105, 54 points) — **COMPLETED** (commit `65a9ab8`, Proposal **258** awaiting human review on `/docs -> My progress`).
-- Screen 106: **`body_release_er`** ("Bodies awaiting handover - ER", Position 106, 54 points) — **COMPLETED** (commit `7e89cdd`, Proposal **259** awaiting human review on `/docs -> My progress`).
-- Screen 107: **`patient_programmes_triage`** ("Preventive programmes of a patient - Triage", Position 107, 63 points) — **COMPLETED** (commit `40efb78`, Proposal **260** awaiting human review on `/docs -> My progress`).
-- Screen 108: **`transfusion_bedside_er`** ("Bedside transfusion observation - ER", Position 108, 74 points) — **NEXT / IN PROGRESS** (Final screen of Phase 5!).
+## Active request: Phase 6 Screen 110 `theatre_checklist_setup` (Surgical safety checklist setup & configuration)
+Executing the Phase 6 Roadmap ("Theatre and sterile supply") in dependency order along with all tests and MCP progress reporting:
+- Screen 108: **`transfusion_bedside_er`** ("Bedside transfusion observation - ER", Position 108, 74 points) — **COMPLETED** (commit `2803cf0`, Proposal **261** awaiting human review on `/docs -> My progress`). Marks Phase 5 100% complete!
+- Screen 109: **`clinical_privileges`** ("Clinical privileges", Position 109, 55 points) — **COMPLETED** (commit `5ddbd89`, Proposal **262** awaiting human review on `/docs -> My progress`). First screen of Phase 6!
+- Screen 110: **`theatre_checklist_setup`** ("Surgical safety checklist configuration", Position 110, 52 points) — **NEXT / IN PROGRESS**.
 
 ---
 
-### Completed Screen 106 (`body_release_er`) Checkpoint
-- **Workflow & Standards**: Deceased patient handover from Emergency Department (`emergency_department` capability); Position 106 (54 points), Workspace `triage`.
+### Completed Screen 108 (`transfusion_bedside_er`) Checkpoint
+- **Workflow & Standards**: Bedside blood transfusion observation, 2-person bedside identity and unit verification, 30-minute cold chain expiry countdown, vital signs monitoring, acute reaction alerting with Section 13 dispatch, and safe unit return in the Emergency Department; Position 108 (74 points), Workspace `triage`.
 - **Contracts**:
-  - `contracts/body_release_er.json`: Real MCP screen bundle covering 5 endpoints (`GET /deaths`, `GET /deaths/{death_id}`, `POST /deaths/{death_id}/body-release`, `GET /deaths/{death_id}/print-payload`, `GET /deaths/{death_id}/pdf`), realtime event `death.recorded`, and domain rules (`rule:cd68894ad3`, `rule:60aea191e4`, `rule:15e617c197`, `rule:d0ca07a547`).
-  - `src/generated/body_release_er.ts`: Re-exported from `./body_release_ward`.
-- **Domain Policies & Statutory Rules (`src/body-release-policy.ts`)**:
-  - Service view capability evaluation (`rule:d0ca07a547`): `emergency_department` service (`full`, `open_work` with banner, `records`, `hidden`).
-  - Role permissions gating: `death.body.release` authorized for `triage_nurse`, `doctor`, `clinical_specialist`; `death.register.view` authorized for clinical and administrative roles.
-  - Doctor certification prerequisite (`rule:cd68894ad3`): body release strictly refused (`DEATH_RECORD_NOT_CERTIFIED`) if `status === "Draft"`. Draft records displayed greyed out with disabled handover button and warning tooltip.
-  - Recipient identity verification (`rule:60aea191e4`): family handover mandates full name, relationship, CNIC/ID, phone; medico-legal casualties require roznamcha daily diary / police letter reference under prominent red MEDICO-LEGAL banner.
-  - Printable certificate with handover audit (`rule:15e617c197`): fetches print payload (`GET /deaths/{id}/print-payload`) and PDF link (`GET /deaths/{id}/pdf`) carrying dual signature lines for recipient and ER nurse.
-- **UI Architecture (`src/screens/BodyReleaseER.tsx`)**:
-  - Reused clinical component architecture (`src/screens/BodyRelease.tsx`) wrapped by `src/screens/BodyReleaseER.tsx` with `screenId="body_release_er"` (`same_component_as: ["body_release_ward"]`).
-  - Pending body handover queue with filters, KPI tiles, handover modal, detail drawer, and A4 print preview.
+  - `contracts/transfusion_bedside_er.json`: Real MCP screen bundle covering 9 endpoints (`GET /blood/requests`, `GET /blood/requests/{request_id}`, `GET /blood/transfusions/{transfusion_id}`, `POST /blood/transfusions/{transfusion_id}/observations`, `POST /blood/transfusions/{transfusion_id}/start`, `POST /blood/transfusions/{transfusion_id}/end`, `POST /blood/transfusions/{transfusion_id}/reaction`, `POST /blood/transfusions/{transfusion_id}/return`, `GET /wristbands/verify`), 2 realtime events (`blood.unit.issued`, `blood.consent.withdrawn`), and domain rules (`rule:e1211e09ae`, `rule:8e16f20b4a`, `rule:0a07d57ff8`, `rule:efcdf1e299`, `rule:a2f80c80d7`, `rule:877e58cf09`, `rule:78e01b2ba4`).
+  - `src/generated/transfusion_bedside_er.ts`: Re-exported from `./transfusion_bedside`.
+- **Domain Policies & Statutory Rules (`src/transfusion-bedside-policy.ts`)**:
+  - Parameterized `getTransfusionBedsideScreenView(establishment, "transfusion_bedside_er")` supporting runtime service view evaluation (`rule:78e01b2ba4`, `rule:877e58cf09`).
+  - 30-minute cold chain threshold (`rule:8e16f20b4a`): countdown to `start_by`. Beyond 30 minutes, server enforces `BLOOD_UNIT_OUT_TOO_LONG` and mandatory return as Not Given with `OutOfStorageTooLong`.
+  - Bedside dual independent verification (`rule:0a07d57ff8`): wristband scan or two-identifier confirmation, 5 mandatory checkboxes (none pre-ticked), step-up credential verification for second qualified clinician (blocks `DUAL_CONTROL_SAME_PERSON`).
+  - Observations & 4-hour limit (`rule:efcdf1e299`): baseline before start, periodic observations, end vitals; flags `ended_late` if exceeding 4 hours.
+  - Adverse reaction & Section 13 alerting (`rule:a2f80c80d7`): automatic Section 13 hospital incident dispatch, sentinel event on wrong blood, detailed capture of delayed haemolytic / bacterial reactions.
+  - Consent withdrawal (`rule:e1211e09ae`): immediate halt on `blood.consent.withdrawn`, blocking unstarted units (`BLOOD_CONSENT_REQUIRED`).
+- **UI Architecture (`src/screens/TransfusionBedsideER.tsx`)**:
+  - Dedicated ER wrapper passing `screenId="transfusion_bedside_er"` to `src/screens/TransfusionBedside.tsx`.
+  - Active blood transfusion queue, unit verification modal, dual step-up co-signature dialog, bedside vitals recorder, reaction reporting dialog, and bag return workflow.
 - **Help, Handbook & Navigation**:
-  - Wired into `src/App.tsx`, `src/foundation-catalogue.json` (5 task calls), `src/foundation-task-map.json` (5 control mappings).
-  - Contextual F1 help (`src/foundation-help.ts`): added `body_release_er` to `deliveredHelpScreens` and all 23 `body_release.*` controls mapped.
-  - Authored comprehensive handbook entry (`src/help.ts`) with bilingual title, clinical purpose, 8 operational steps, and 8 role FAQs for ER triage nurse.
-  - Bundled screenshots: `public/handbook/body_release_er-en.png` and `public/handbook/body_release_er-ur.png`.
+  - Wired into `src/App.tsx`, `src/foundation-catalogue.json` (9 tasks), `src/foundation-task-map.json` (9 controls), `src/foundation-help.ts` (62 controls mapped).
+  - Authored comprehensive handbook entry (`src/help.ts`) with bilingual title, clinical purpose, 8 operational steps, and 11 role FAQs for ER triage nurse.
+  - Bundled screenshots: `public/handbook/transfusion_bedside_er-en.png` and `public/handbook/transfusion_bedside_er-ur.png`.
 - **Verification**:
-  - Automated unit tests: `tests/body-release-er.test.mjs` (6/6 passing).
-  - Help check: `npm run check:help` passed (105 screens).
+  - Automated unit tests: `tests/transfusion-bedside-er.test.mjs` (6/6 passing).
+  - Full test suite: `npm test` passed (460/460 passing across all suites).
+  - Help check: `npm run check:help` passed (107 screens).
   - TypeScript compiler: `npx tsc --noEmit` passed with 0 errors.
-  - Full test suite: `npm test` passed (449/449 passing).
-  - Production build: `npm run build` succeeded (`dist/assets/index-Bj7mlWgG.js`).
+  - Production build: `npm run build` succeeded (`dist/assets/index-BMBMpaQo.js`).
 - **Commit & Proposal**:
-  - Implementation commit: `7e89cdd`.
-  - Proposal ID: **259** (status: `pending` on `/docs -> My progress`).
+  - Implementation commit: `2803cf0`.
+  - Proposal ID: **261** (status: `pending` on `/docs -> My progress`).
 
 ---
 
-### Completed Screen 107 (`patient_programmes_triage`) Checkpoint
-- **Workflow & Standards**: Enrol ER walk-in and acute trauma patients in offered preventive programmes (tetanus, rabies, hepatitis prophylaxis, EPI immunization, family planning), record services given from physical card, follow up due patients, and close enrolments; Position 107 (63 points), Workspace `triage`.
+### Completed Screen 109 (`clinical_privileges`) Checkpoint
+- **Workflow & Standards**: Clinical privileges catalog & staff credentialing register under Punjab MSDS COP 32, 39, and 45. Regulates who may operate in theatre, administer anaesthesia, conduct pre-anaesthesia assessments, and authorize recovery discharges; Position 109 (55 points), Workspace `owner_dashboard`.
 - **Contracts**:
-  - `contracts/patient_programmes_triage.json`: Real MCP screen bundle covering 6 endpoints (`GET /patients/{id}/programmes`, `POST /patients/{id}/programmes`, `POST /programme-enrolments/{id}/entries`, `POST /programme-enrolments/{id}/close`, `GET /preventive-programmes`, `GET /preventive-programmes/due`) and domain rules (`rule:288e88802f`, `rule:aeeeb885d1`, `rule:d4a008a82a`, `rule:692d8bf9d7`, `rule:4740c21f9f`, `rule:f28dbf9fa4`, `rule:79051b4dae`, `rule:595bd3d226`).
-  - `src/generated/patient_programmes_triage.ts`: Re-exported from `./patient_programmes`.
-- **Domain Policies & Statutory Rules (`src/programme-rules.ts`)**:
-  - Service capability evaluation (`rule:288e88802f`, `rule:79051b4dae`, `rule:595bd3d226`): `preventive_programmes` service. When Active, new enrolments are permitted. When Retiring, new enrolments are blocked with 'No new enrolment from now on', while ongoing dose administration and closure remain enabled for patients enrolled before retirement.
-  - Enrolment input validation (`rule:aeeeb885d1`): mandates physical card/register number; duplicate enrolments trigger `PROGRAMME_ENROLLED` with dedicated 'Read and open existing enrolment' action rather than guessing IDs.
-  - Service entry validation (`rule:d4a008a82a`): requires selecting an offered service, hospital administration time (no future times), batch number, and next appointment date as stated on physical card. Prevents automated schedule computation or date pre-filling.
-  - Closure validation (`rule:692d8bf9d7`): Completed, TransferredOut (destination facility required), and Discontinued (clinical explanation required). Closed enrolments reject further writes with `PROGRAMME_ENROLMENT_CLOSED`.
-  - Due list query (`rule:4740c21f9f`): defaults to hospital today with audited patient record access and telephone contact display.
-  - Runtime screen view modes (`rule:f28dbf9fa4`): `full`, `open_work` with banner, `records`, `hidden` derived from `GET /establishment`.
-- **UI Architecture (`src/screens/PatientProgrammesTriage.tsx`)**:
-  - Wrapper component delegating to `src/screens/PatientProgrammes.tsx` with `screenId="patient_programmes_triage"` (`same_component_as: ["patient_programmes"]`).
-  - Active programme catalogue, enrolment form with card number input, active enrolments list with status badges, administered service entries list with author stamps, service recording modal, close enrolment dialog, and due list worklist.
+  - `contracts/clinical_privileges.json`: Real MCP screen bundle covering 6 endpoints (`GET /ot/privileges`, `POST /ot/privileges`, `PATCH /ot/privileges/{privilege_id}`, `POST /ot/privileges/{privilege_id}/revoke`, `GET /hr/employees`, `GET /ot/theatre-policy/pdf`) and domain rules (`rule:fe3c4d2fab`, `rule:aedb3bf41a`, `rule:fa7737b903`, `rule:caf82033b4`).
+  - `src/generated/clinical_privileges.ts`: Typed endpoint call functions and data models.
+- **Domain Policies & Statutory Rules (`src/clinical-privileges-policy.ts`)**:
+  - Service view capability evaluation (`rule:caf82033b4`): `surgery` service (`full`, `open_work` with banner, `records`, `setup`, `hidden`).
+  - One live grant constraint (`rule:fe3c4d2fab`): duplicate grants rejected (`OT_PRIVILEGE_EXISTS`) with clear instructions to extend or revoke prior grant.
+  - Revocation audit trail (`rule:aedb3bf41a`): permanent immutable revocation with mandatory reason; signatures requiring the privilege rejected from then on; visible via `include_revoked`.
+  - Annual review & 30-day warning (`rule:fa7737b903`): automatically computes and flags grants expiring within 30 days in amber to prompt annual review and committee renewals before surgical signatures are blocked (`OT_PRIVILEGE_REQUIRED`).
+  - Dual permission gating: `ot.privilege.manage` for write/update/revoke actions; `ot.status.view` for read-only register viewing.
+- **UI Architecture (`src/screens/ClinicalPrivileges.tsx`)**:
+  - Privileges register table with KPI metrics (Active, Expiring Soon, Expired, Revoked).
+  - Search by clinician name, license number, or scope; filter by category; toggle revoked history.
+  - Grant Privilege modal with real-time HR employee search (`GET /hr/employees`) and autocomplete.
+  - Edit / Renew modal with `expected_version` concurrency protection.
+  - Revoke modal with statutory impact warning and required reason.
+  - Detail drawer and Theatre Policy PDF preview/download modal.
 - **Help, Handbook & Navigation**:
-  - Wired into `src/App.tsx`, `src/foundation-catalogue.json` (6 task calls), `src/foundation-task-map.json` (6 control mappings).
-  - Contextual F1 help (`src/foundation-help.ts`): added `patient_programmes_triage` to `deliveredHelpScreens` and all 7 `programme.*` controls mapped.
-  - Authored comprehensive handbook entry (`src/help.ts`) with bilingual title, clinical purpose, 8 operational steps, and 8 role FAQs for ER triage nurse (including error seeds `triage:error:PROGRAMME_ENROLLED`, `triage:error:PROGRAMME_ENROLMENT_CLOSED`, and state seed `triage:state:programme_enrolment`).
-  - Bundled screenshots: `public/handbook/patient_programmes_triage-en.png` and `public/handbook/patient_programmes_triage-ur.png`.
+  - Wired into `src/App.tsx`, `src/foundation-catalogue.json` (6 tasks), `src/foundation-task-map.json` (6 controls).
+  - Contextual F1 help (`src/foundation-help.ts`): added `clinical_privileges` to `deliveredHelpScreens` and all 35 controls mapped.
+  - Authored comprehensive handbook entry (`src/help.ts`) with bilingual title, clinical purpose, 11 operational steps, and 6 role FAQs.
+  - Bundled screenshots: `public/handbook/clinical_privileges-en.png` and `public/handbook/clinical_privileges-ur.png`.
 - **Verification**:
-  - Automated unit tests: `tests/patient-programmes-triage.test.mjs` (5/5 passing).
-  - Help check: `npm run check:help` passed (106 screens).
-  - Help coverage test: `tests/help-coverage.test.mjs` passed (28/28 tests).
+  - Automated unit tests: `tests/clinical-privileges.test.mjs` (7/7 passing).
+  - Full test suite: `npm test` passed (467/467 passing across all suites).
+  - Help check: `npm run check:help` passed (108 screens, 2447 controls, 1532 groups, 69 FAQ seeds, 30 workspace guides).
   - TypeScript compiler: `npx tsc --noEmit` passed with 0 errors.
-  - Full test suite: `npm test` passed (454/454 passing across all suites).
-  - Production build: `npm run build` produced `dist/assets/index-DdVxxGUY.js`.
+  - Production build: `npm run build` succeeded (`dist/assets/index-BV6tcdKb.js`).
 - **Commit & Proposal**:
-  - Implementation commit: `40efb78`.
-  - Proposal ID: **260** (status: `pending` on `/docs -> My progress`).
+  - Implementation commit: `5ddbd89`.
+  - Proposal ID: **262** (status: `pending` on `/docs -> My progress`).
 
 ---
 
-## Plan for Screen 108 (`transfusion_bedside_er`)
-- **Workflow & Standards**: Bedside blood transfusion observation, verification and administration in ER; Position 108 (74 points), Workspace `triage` / `er_nurse`. Final screen of Phase 5!
+## Plan for Screen 110 (`theatre_checklist_setup`)
+- **Workflow & Standards**: Surgical safety checklist setup & configuration (Sign In, Time Out, Sign Out items under WHO surgical safety checklist and MSDS COP standards); Position 110 (52 points), Workspace `owner_dashboard` / `theatre_admin`.
 - **Bundle & Contracts**:
-  - Fetch contract bundle via `get_screen_bundle("transfusion_bedside_er")`.
-  - Inspect `same_component_as` (likely `transfusion_bedside_ward` or `transfusion_bedside`).
-  - Check endpoints: blood requests, transfusions, bedside observations, start/end/reaction/return, wristband verification.
-  - Generate TypeScript contracts (`src/generated/transfusion_bedside_er.ts`).
+  - Fetch contract bundle via `get_screen_bundle("theatre_checklist_setup")`.
+  - Fetch quality brief via `get_ui_quality_brief(screen_id="theatre_checklist_setup")`.
+  - Generate TypeScript contracts (`src/generated/theatre_checklist_setup.ts`).
+  - Save contract bundle to `contracts/theatre_checklist_setup.json`.
 - **Domain Policies & Statutory Rules**:
-  - Pre-transfusion dual bedside check (two clinicians, patient identity, blood unit label, ABO/Rh compatibility, expiry, integrity).
-  - Transfusion vitals monitoring (baseline, 15-minute, periodic, completion vitals).
-  - Acute transfusion reaction handling (immediate stop, reaction report, bag return to blood bank).
+  - WHO surgical safety checklist phases: Sign In (before anaesthesia), Time Out (before skin incision), Sign Out (before leaving operating room).
+  - Custom checklist item configuration, mandatory vs optional flags, specialty overrides.
 - **UI Architecture & Help**:
+  - Create `src/screens/TheatreChecklistSetup.tsx`.
   - Wire into `src/App.tsx`, `src/foundation-catalogue.json`, `src/foundation-task-map.json`.
   - Contextual F1 help and handbook entry in `src/help.ts` with role FAQs.
-  - Screenshots in `public/handbook/`.
-  - Automated unit tests in `tests/transfusion-bedside-er.test.mjs`.
+  - Screenshots in `public/handbook/theatre_checklist_setup-en.png` and `theatre_checklist_setup-ur.png`.
+  - Automated unit tests in `tests/theatre-checklist-setup.test.mjs`.
   - Verify via `check:help`, `tsc`, `npm test`, `npm run build`.
-  - Commit Screen 108 and submit `propose_progress`.
+  - Commit Screen 110 and submit `propose_progress`.
 
 ---
 
@@ -121,5 +121,7 @@ Building screens in Phase 5 Roadmap (Emergency, deaths and medico-legal cases) a
 - Screen 105: **`body_release_ward`** (commit `65a9ab8`, Proposal **258** awaiting human review on `/docs -> My progress`).
 - Screen 106: **`body_release_er`** (commit `7e89cdd`, Proposal **259** awaiting human review on `/docs -> My progress`).
 - Screen 107: **`patient_programmes_triage`** (commit `40efb78`, Proposal **260** awaiting human review on `/docs -> My progress`).
+- Screen 108: **`transfusion_bedside_er`** (commit `2803cf0`, Proposal **261** awaiting human review on `/docs -> My progress`).
+- Screen 109: **`clinical_privileges`** (commit `5ddbd89`, Proposal **262** awaiting human review on `/docs -> My progress`).
 - Proposals **231**, **232**, **233**, **234**, **235**, and **236** are accepted.
-- Proposals **237**, **238**, **239**, **240**, **241**, **242**, **243**, **244**, **245**, **246**, **247**, **248**, **249**, **250**, **251**, **252**, **253**, **254**, **255**, **256**, **257**, **258**, **259**, and **260** are awaiting human review on `/docs -> My progress`.
+- Proposals **237** through **262** are awaiting human review on `/docs -> My progress`.
