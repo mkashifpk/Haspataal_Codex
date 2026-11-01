@@ -8254,6 +8254,76 @@ consents_doctor: {
       ]
     ]
   },
+  recovery_board: {
+    title: "Live PACU recovery board",
+    titleUr: "لائیو پی اے سی یو ریکوری بورڈ",
+    purpose: "Live post-anaesthesia care unit (PACU) recovery board in ot_nurse workspace (MSDS COP 38, 39, 41, 46): Real-time occupancy tracking with cards sorted longest-in-recovery first, last observation display, and alert flags for overdue observations and long stays (Rule f995066a59), mandatory physiological vitals flowsheet charting covering pulse, BP, respiration, SpO2, airway patency, AVPU consciousness, and pain (Rule 08ba1ce134, MSDS 38), PACU discharge prerequisite gates enforcing signed operative notes (OT_OPERATIVE_NOTE_REQUIRED) and signed anaesthesia records, modified Aldrete scoring evaluation against minimum discharge threshold with clinical override rationale (Rule 99dea44a26), recovery clinical privileges verification (Rule 1653612103), opening recovery for local anaesthesia arrivals (POST /ot/bookings/{id}/recovery), read-only finality and retrospective correction addenda (Rule 9e9cb593cb), in-theatre adverse incident reporting (POST /incidents, Rule fe0c435dc9), and runtime service capability gating from GET /establishment views for screen_id recovery_board under Rule ba79b41973.",
+    purposeUr: "او ٹی نرس ورک اسپیس میں لائیو پوسٹ اینستھیزیا کیئر یونٹ (پی اے سی یو) ریکوری بورڈ (ایم ایس ڈی ایس 38، 39، 41، 46): سب سے طویل قیام والے مریضوں کی ترجیحی ترتیب، آخری معائنے کی تفصیلات اور وائٹلز میں تاخیر یا طویل قیام کے انتباہی بیجز (قاعدہ f995066a59)، لازمی وائٹلز فلو شیٹ جس میں نبض، بلڈ پریشر، سانس، آکسیجن، ایئر وے، ہوش کی سطح اور درد کا باقاعدہ اندراج شامل ہے (قاعدہ 08ba1ce134، ایم ایس ڈی ایس 38)، ڈسچارج کے لیے سرجن کے آپریٹو نوٹ اور اینستھیزیا ریکارڈ کے دستخط کی لازمی شرائط، ماڈیفائیڈ ایلڈریٹ اسکورنگ اور کم اسکور پر کلینیکل استثنا کی ضرورت (قاعدہ 99dea44a26)، ریکوری اختیارات کی تصدیق (قاعدہ 1653612103)، لوکل اینستھیزیا کے بعد ریکوری کا آغاز (قاعدہ 1653612103)، آڈٹ تصحیحی اندراجات (قاعدہ 9e9cb593cb)، ناخوشگوار واقعات کی رپورٹنگ (قاعدہ fe0c435dc9) اور سروس صلاحیت کے تحت اسکرین کے اختیارات (قاعدہ ba79b41973)۔",
+    steps: [
+      "Inspect the live PACU recovery board displaying all active recovery patients sorted longest-in-recovery first (Rule f995066a59).",
+      "Review patient badges: check for red NoObservation / ObservationOverdue flags, amber LongStay warnings, and prerequisite holds (OperativeNoteUnsigned, AnaesthesiaRecordOpen).",
+      "If a patient arrives following local or regional anaesthesia, click '+ Open Recovery Stay', enter the Booking ID, and confirm arrival (Rule 1653612103).",
+      "Select a patient card to load their recovery timeline, discharge prerequisite checklist, and physiological observation history.",
+      "Click '+ Record Vitals' to open the observation modal: enter heart rate, BP systolic/diastolic, respiratory rate, SpO2, airway patency (Patent, Supported, Obstructed), AVPU, and pain score (Rule 08ba1ce134, MSDS 38).",
+      "Save the observation: the readings are charted to the chronological flowsheet and update the patient card's last observation timestamp.",
+      "When the patient is ready for transfer, click '✓ Discharge Patient' to open the discharge modal: select destination (Ward, ICU, HDU, Home, ReturnedToTheatre, Died) and score the five modified Aldrete criteria (0-2 each).",
+      "If the total Aldrete score is below the minimum threshold (≥9) or pain exceeds threshold, enter a mandatory clinical override rationale, complete the shifting handover note (MSDS 39), and click 'Execute Discharge' (Rule 99dea44a26)."
+    ],
+    stepsUr: [
+      "پی اے سی یو ریکوری بورڈ کا معائنہ کریں جہاں تمام زیر نگہداشت مریض طویل ترین قیام کے مطابق ترتیب وار موجود ہیں (قاعدہ f995066a59)۔",
+      "مریض کے انتباہی بیجز دیکھیں: سرخ رنگ میں معائنے کی تاخیر، پیلے رنگ میں طویل قیام اور آپریٹو نوٹ یا اینستھیزیا ریکارڈ کے دستخط کا انتظار۔",
+      "اگر مریض لوکل اینستھیزیا کے بعد ریکوری میں آئے تو '+ اوپن ریکوری اسٹے' پر کلک کریں اور بکنگ نمبر درج کر کے آمد کی تصدیق کریں (قاعدہ 1653612103)۔",
+      "مریض کا کارڈ منتخب کریں تاکہ اس کے وائٹلز کی فلو شیٹ، ڈسچارج شرائط اور آپریشن کی تفصیلات ظاہر ہو سکیں۔",
+      "وائٹلز درج کرنے کے لیے '+ ریکارڈ وائٹلز' پر کلک کریں: دل کی دھڑکن، بلڈ پریشر، سانس، آکسیجن، ایئر وے کی حالت، ہوش اور درد کا اسکور درج کریں (قاعدہ 08ba1ce134)۔",
+      "مشاہدہ محفوظ کریں: یہ ریڈنگز فوری طور پر فلو شیٹ کا حصہ بن جاتی ہیں اور بورڈ پر مریض کے آخری معائنے کا وقت اپ ڈیٹ ہو جاتا ہے۔",
+      "جب مریض منتقلی کے لیے تیار ہو تو '✓ ڈسچارج مریض' پر کلک کریں: منتقلی کا مقام منتخب کریں اور ایلڈریٹ کے پانچ معیارات کا 0 سے 2 تک اسکور متعین کریں۔",
+      "اگر مجموعی ایلڈریٹ اسکور مطلوبہ حد (≥9) سے کم ہو تو کلینیکل استثنا کی وجہ درج کریں، وارڈ نرس کے لیے ہینڈ اوور نوٹ لکھیں اور ڈسچارج مکمل کریں (قاعدہ 99dea44a26)۔"
+    ],
+    faq: [
+      [
+        "Why are patients on the PACU board sorted longest-in-recovery first?",
+        "Under Rule f995066a59 and MSDS COP 46, prioritizing patients with the longest PACU stay ensures recovery nurses immediately spot patients exceeding standard recovery duration (LongStay amber badge) and prevents delayed transfers to inpatient wards."
+      ],
+      [
+        "Why are pulse, BP, respiration, SpO2, airway, AVPU, and pain all required in observations?",
+        "Under Rule 08ba1ce134 and MSDS COP 38, immediate post-anaesthesia recovery requires multi-system physiological monitoring to detect airway obstruction, hypoventilation, cardiovascular collapse, emergence agitation, or untreated pain early."
+      ],
+      [
+        "What prerequisites block discharging a patient from PACU to the ward?",
+        "Under Rule 2b25651d1e and Rule 2fc0c843dc, PACU recovery discharge is blocked (OT_OPERATIVE_NOTE_REQUIRED) until the primary surgeon has signed the operative note and post-op care orders, and the anaesthetist has finalized the anaesthesia record."
+      ],
+      [
+        "How does the modified Aldrete scoring system govern patient discharge?",
+        "Under Rule 99dea44a26, five recovery domains (motor activity, respiration, circulation, consciousness, SpO2) are scored 0 to 2 each. Discharge to a ward or home requires meeting the hospital target (typically ≥9/10). If clinical circumstances warrant early discharge below target, an explicit override reason is mandatory."
+      ],
+      [
+        "How is a local anaesthesia patient admitted to PACU recovery?",
+        "Under Rule 1653612103, for local or regional procedures where theatre transfer is direct, clicking '+ Open Recovery Stay' and providing the surgical booking ID admits the case directly into the active PACU queue."
+      ]
+    ],
+    faqUr: [
+      [
+        "پی اے سی یو بورڈ پر مریضوں کو طویل ترین قیام کے مطابق کیوں ترتیب دیا جاتا ہے؟",
+        "قاعدہ f995066a59 اور ایم ایس ڈی ایس کے تحت طویل قیام والے مریضوں کو اوپر رکھنے سے نرسنگ اسٹاف فوری طور پر طویل قیام والے مریضوں پر توجہ دے سکتا ہے تاکہ وارڈ میں بروقت منتقلی ممکن ہو۔"
+      ],
+      [
+        "پی اے سی یو مشاہدے میں نبض، بلڈ پریشر، سانس، آکسیجن، ایئر وے، ہوش اور درد سب کا اندراج کیوں لازمی ہے؟",
+        "قاعدہ 08ba1ce134 اور ایم ایس ڈی ایس 38 کے تحت بے ہوشی کے بعد سانس کی رکاوٹ، بلڈ پریشر میں کمی، آکسیجن کی کمی یا شدید درد کو فوری پکڑنے کے لیے تمام اعضا کی باقاعدہ جانچ ضروری ہے۔"
+      ],
+      [
+        "پی اے سی یو سے وارڈ میں مریض کی منتقلی کو کون سی شرائط روکتی ہیں؟",
+        "قاعدہ 2b25651d1e کے تحت سرجن کا دستخط شدہ آپریٹو نوٹ اور آپریشن کے بعد کی ہدایات لازمی ہیں (OT_OPERATIVE_NOTE_REQUIRED) جبکہ اینستھیزیا ریکارڈ کا حتمی ہونا بھی لازمی ہے۔"
+      ],
+      [
+        "ایلڈریٹ اسکورنگ سسٹم مریض کے ڈسچارج پر کیسے لاگو ہوتا ہے؟",
+        "قاعدہ 99dea44a26 کے تحت پانچ شعبوں (حرکت، سانس، بلڈ پریشر، ہوش اور آکسیجن) کا 0 سے 2 تک اسکور کیا جاتا ہے۔ وارڈ منتقلی کے لیے کم از کم 9 اسکور درکار ہے۔ کم اسکور پر ڈاکٹر کا باضابطہ استثنا لازمی ہے۔"
+      ],
+      [
+        "لوکل اینستھیزیا کے مریض کو ریکوری میں کیسے داخل کیا جاتا ہے؟",
+        "قاعدہ 1653612103 کے تحت لوکل سرجری کے مریضوں کے لیے '+ اوپن ریکوری اسٹے' کا بٹن دبا کر بکنگ نمبر درج کرنے سے مریض کا ریکوری قیام شروع ہو جاتا ہے۔"
+      ]
+    ]
+  },
   surgical_record_surgeon: {
     title: "Surgical record: pre-operative and operative notes",
     titleUr: "سرجیکل ریکارڈ: قبل از آپریشن اور آپریشن کے نوٹس",
