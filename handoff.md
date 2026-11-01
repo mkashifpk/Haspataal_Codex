@@ -1,7 +1,7 @@
 # Haspataal checkpoint
 Last updated: 01 November 2026, Antigravity (Codex pair), Asia/Karachi.
 
-## Active request: Phase 6 Screen 125 `sterile_packs_ward` (Sterile packs: scan when opened - Ward Nurse workspace)
+## Active request: Phase 6 Screen 126 `anaesthesia_record` (Anaesthesia record - Anaesthesia workspace)
 Executing the Phase 6 Roadmap ("Theatre and sterile supply") in dependency order along with all tests and MCP progress reporting:
 - Screen 108: **`transfusion_bedside_er`** ("Bedside transfusion observation - ER", Position 108, 74 points) — **COMPLETED** (commit `2803cf0`, Proposal **261** awaiting human review on `/docs -> My progress`). Marks Phase 5 100% complete!
 - Screen 109: **`clinical_privileges`** ("Clinical privileges", Position 109, 55 points) — **COMPLETED** (commit `5ddbd89`, Proposal **262** awaiting human review on `/docs -> My progress`). First screen of Phase 6!
@@ -20,23 +20,65 @@ Executing the Phase 6 Roadmap ("Theatre and sterile supply") in dependency order
 - Screen 122: **`ot_intraop`** ("Intra-op consumables", Position 122, 53 points, workspace `ot_admin`) — **COMPLETED** (commit `efb8527`, Proposal **275** awaiting human review on `/docs -> My progress`).
 - Screen 123: **`sterile_packs_ot`** ("Sterile packs: scan when opened", Position 123, 48 points, workspace `ot_nurse`) — **COMPLETED** (commit `ab7a6d9`, Proposal **276** awaiting human review on `/docs -> My progress`).
 - Screen 124: **`sterile_packs_ot_admin`** ("Sterile packs: scan when opened - OT Admin", Position 124, 48 points, workspace `ot_admin`) — **COMPLETED** (commit `d076dbf`, Proposal **277** awaiting human review on `/docs -> My progress`).
-- Screen 125: **`sterile_packs_ward`** ("Sterile packs: scan when opened - Ward", Position 125, 48 points, workspace `ward_nurse`) — **READY TO IMPLEMENT**.
+- Screen 125: **`sterile_packs_ward`** ("Sterile packs: scan when opened - Ward", Position 125, 48 points, workspace `ward_nurse`) — **COMPLETED** (commit `994aeb4`, Proposal **278** awaiting human review on `/docs -> My progress`).
+- Screen 126: **`anaesthesia_record`** ("Anaesthesia record", Position 126, 69 points, workspace `anaesthesia`) — **ACTIVE IMPLEMENTATION**.
 
 ---
 
-### Current Implementation: Screen 125 (`sterile_packs_ward`)
-- **Workflow & Standards**: Sterile packs barcode scanning when opened for inpatient procedures on the ward (MSDS IPC 92): Point-of-use scan (`POST /cssd/packs/use` with `admission_id`), pack detail lookups (`GET /cssd/packs/{pack_code}`), pack list filtering (`GET /cssd/packs`), expired/recalled pack rejection (`CSSD_PACK_UNUSABLE`, Rule 5eabbbecca), realtime recall alert integration on `cssd.cycle.updated` (Rule 4357be8acb: fetch affected packs with `GET /cssd/packs?status=Recalled&ward_id=…`), and runtime service capability gating from `GET /establishment` views for `screen_id: "sterile_packs_ward"`; Position 125 (48 points), Workspace `ward_nurse`.
-- **Planned Files**:
-  - `contracts/sterile_packs_ward.json`: Saved MCP screen bundle.
-  - Reuses `src/generated/sterile_packs_ot.ts` and `src/sterile-packs-policy.ts`.
-  - Component in `src/screens/SterilePacksWard.tsx` or parameterized `SterilePacksOT.tsx` adapted for ward admissions context (`admission_id`).
-  - Unit tests in `tests/sterile-packs-ward.test.mjs`.
-  - Wire into `src/App.tsx`, `src/foundation-catalogue.json`, `src/foundation-task-map.json`, `src/foundation-help.ts`, and `src/help.ts`.
-- **Next Concrete Step**: Save contract bundle to `contracts/sterile_packs_ward.json`, check rule objects and endpoints, and implement ward-adapted UI component and tests.
+### Current Implementation: Screen 126 (`anaesthesia_record`)
+- **Workflow & Standards**: Intra-operative anaesthesia record, monitoring flowsheet, and drug administration in `anaesthesia` workspace (MSDS COP 34, 36, 37, 40):
+  - Pre-induction panel first (`rule:eda7089766`): baseline vital signs, what changed since PAC assessment, whether the plan changed.
+  - Induction and Incision timestamp buttons: requires Sign In and Time Out pauses (`OT_CHECKLIST_INCOMPLETE`).
+  - Monitoring flowsheet chart grid (`rule:c7bd8c2650`, MSDS 36): periodic vitals charting (HR, rhythm, BP systolic/diastolic, RR, SpO2, EtCO2, Temp, airway patency). Highlights chart gaps (`ChartGapOut`) when readings exceed hospital intervals.
+  - Intra-operative events, drugs, fluids, blood products (`POST /ot/bookings/{id}/anaesthesia-record/events`).
+  - Adverse events tracking and incident reporting (`rule:fe0c435dc9`): charts adverse events and files incident (`POST /incidents` with `booking_id`, `ot_phase: "Anaesthesia"`, and type from `GET /incident-types?area=Anaesthesia`).
+  - Record signing and finality (`rule:2fc0c843dc`, `rule:9e9cb593cb`): signing finalizes the record (`OT_RECORD_FINAL`). Signed parts are read-only; mistakes corrected via addenda (`POST /ot/bookings/{id}/corrections`).
+  - Clinical privilege gate (`rule:db3a19e806`): requires active PMDC clinical privilege (`OT_PRIVILEGE_REQUIRED`).
+  - Runtime service capability gating (`rule:2285735141`): evaluates `GET /establishment` views for `anaesthesia_record` (`full`, `open_work`, `records`, `setup`, `hidden`).
+- **Files Involved**:
+  - Contract: `contracts/anaesthesia_record.json` (saved).
+  - Generated client: `src/generated/anaesthesia_record.ts` (saved).
+  - Domain Policy: `src/anaesthesia-record-policy.ts` (new).
+  - Automated Tests: `tests/anaesthesia-record.test.mjs` (new).
+  - Component: `src/screens/AnaesthesiaRecord.tsx` (new).
+  - Mappings & Wiring: `src/App.tsx`, `scripts/check-help.mjs`, `src/foundation-catalogue.json`, `src/foundation-task-map.json`, `src/foundation-help.ts`, `src/help.ts`.
+  - Screenshots: `public/handbook/anaesthesia_record-en.png` and `anaesthesia_record-ur.png`.
+- **Next Concrete Step**: Implement domain policy `src/anaesthesia-record-policy.ts` and automated unit tests `tests/anaesthesia-record.test.mjs`.
 
 ---
 
-### Completed Screen 124 (`sterile_packs_ot_admin`) Checkpoint
+### Completed Screen 125 (`sterile_packs_ward`) Checkpoint
+- **Workflow & Standards**: Sterile packs barcode scanning when opened for inpatient procedures on the ward (MSDS IPC 92): Point-of-use scan (`POST /cssd/packs/use` with `admission_id`), pack detail lookups (`GET /cssd/packs/{pack_code}`), pack list filtering (`GET /cssd/packs`), expired/recalled pack rejection (`CSSD_PACK_UNUSABLE`, Rule 5eabbbecca), realtime recall alert integration on `cssd.cycle.updated` (Rule 4357be8acb: fetch affected packs with `GET /cssd/packs?status=Recalled&ward_id=...`), and runtime service capability gating from `GET /establishment` views for `screen_id: "sterile_packs_ward"` under Rule b531dda372; Position 125 (48 points), Workspace `ward_nurse`.
+- **Contracts**:
+  - `contracts/sterile_packs_ward.json`: Saved real MCP screen bundle (3 endpoints, 1 realtime event, 4 statutory rules, 18 rubric items).
+- **Domain Policies & Statutory Rules (`src/sterile-packs-policy.ts`)**:
+  - Runtime service capability gating (`rule:b531dda372`): evaluates `GET /establishment` views for `sterile_packs_ward` (`full`, `open_work`, `records`, `setup`, `hidden`).
+  - Role permissions: `canUsePack` permits `ward_nurse`, `head_nurse`, `triage_nurse`, `ot_nurse`, `ot_admin`, and `cssd.pack.use`.
+  - Pack usability validation (`isPackUsable`, `rule:5eabbbecca`): enforces that expired, failed, or recalled packs can never be opened (`CSSD_PACK_UNUSABLE`).
+  - Point-of-use linkage validation (`validatePackUseInput`, `rule:d8f4d7af47`): requires pack code and at least one of `booking_id` or `admission_id`.
+  - Expiry warning check (`isPackExpiringSoon`): displays red warning styling when approaching expiration.
+  - Critical recall event detection (`isCssdRecallEvent`, `rule:4357be8acb`): catches `Recalled` cycle updates.
+  - Bilingual error explanations (`explainSterilePackError`): covers `CSSD_PACK_UNUSABLE`, `REFERENCE_NOT_FOUND`, and `VALIDATION_ERROR`.
+- **UI Architecture (`src/screens/SterilePacksWard.tsx`)**:
+  - Inpatient admissions queue (`listAdmissions`) with ward/patient search filter and admission selection.
+  - Inpatient Context & Identity Banner: Preserves patient name, MRN, admission number, ward, bed number, and admission status.
+  - Point-of-Use Pack Scanner (`POST /cssd/packs/use`): Inspects pack sterilization cycle and expiry, displays clear usability status, and blocks unusable packs.
+  - Critical Recall Alert Banner: Displays high-priority warning on cycle recall with one-click filter to isolate affected packs.
+  - Sterile Packs Stock & Usage Ledger: Filterable by status (Available, Issued, Used, Recalled, Expired, Failed) and search.
+- **Help, Handbook & Navigation**:
+  - Wired into `src/App.tsx`, `src/foundation-catalogue.json` (3 tasks), `src/foundation-task-map.json` (3 controls).
+  - Contextual F1 help (`src/foundation-help.ts`): added `sterile_packs_ward` to `deliveredHelpScreens` and all 11 controls mapped.
+  - Authored comprehensive handbook entry (`src/help.ts`) with bilingual title, purpose, 9 operational steps, and 6 role FAQs for `ward_nurse`.
+  - Bundled screenshots: `public/handbook/sterile_packs_ward-en.png` and `sterile_packs_ward-ur.png`.
+- **Verification**:
+  - Automated unit tests: `tests/sterile-packs-ward.test.mjs` (6/6 passing).
+  - Full test suite: `npm test` passed (579/579 passing across all suites).
+  - Help check: `npm run check:help` passed (124 screens, 2868 controls, 1897 groups, 69 FAQ seeds, 30 workspace guides).
+  - TypeScript compiler: `npx tsc --noEmit` passed with 0 errors.
+  - Production build: `npm run build` succeeded (`dist/assets/index-DldrbmRG.js`).
+- **Commit & Proposal**:
+  - Implementation commit: `994aeb4`.
+  - Proposal ID: **278** (status: `pending` on `/docs -> My progress`).
 - **Workflow & Standards**: Sterile packs barcode scanning and theatre administrative audit in `ot_admin` (MSDS IPC 92): Point-of-use scan (`POST /cssd/packs/use` with `booking_id`), pack detail lookups (`GET /cssd/packs/{pack_code}`), pack list filtering (`GET /cssd/packs`), expired/recalled pack rejection (`CSSD_PACK_UNUSABLE`, Rule 5eabbbecca), realtime recall alert integration on `cssd.cycle.updated` (Rule 4357be8acb: fetch affected packs with `GET /cssd/packs?status=Recalled`), and runtime service capability gating from `GET /establishment` views for `screen_id: "sterile_packs_ot_admin"` under Rule d897ee980e; Position 124 (48 points), Workspace `ot_admin`.
 - **Contracts**:
   - `contracts/sterile_packs_ot_admin.json`: Saved real MCP screen bundle (3 endpoints, 1 realtime event, 4 statutory rules, 18 rubric items).
