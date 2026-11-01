@@ -1,7 +1,7 @@
 # Haspataal checkpoint
 Last updated: 01 November 2026, Antigravity (Codex pair), Asia/Karachi.
 
-## Active request: Phase 6 Screen 117 `consents_anaesthesia` (Anaesthesia consent)
+## Active request: Phase 6 Screen 118 `safety_checklist` (Surgical safety checklist - Sign In / Time Out / Sign Out)
 Executing the Phase 6 Roadmap ("Theatre and sterile supply") in dependency order along with all tests and MCP progress reporting:
 - Screen 108: **`transfusion_bedside_er`** ("Bedside transfusion observation - ER", Position 108, 74 points) — **COMPLETED** (commit `2803cf0`, Proposal **261** awaiting human review on `/docs -> My progress`). Marks Phase 5 100% complete!
 - Screen 109: **`clinical_privileges`** ("Clinical privileges", Position 109, 55 points) — **COMPLETED** (commit `5ddbd89`, Proposal **262** awaiting human review on `/docs -> My progress`). First screen of Phase 6!
@@ -12,7 +12,109 @@ Executing the Phase 6 Roadmap ("Theatre and sterile supply") in dependency order
 - Screen 114: **`ot_scheduling`** ("OT request queue & calendar", Position 114, 63 points) — **COMPLETED** (commit `2671989`, Proposal **267** awaiting human review on `/docs -> My progress`).
 - Screen 115: **`ot_board`** ("Live OT status board", Position 115, 36 points) — **COMPLETED** (commit `c559db6`, Proposal **268** awaiting human review on `/docs -> My progress`).
 - Screen 116: **`pre_anaesthesia_clinic`** ("Pre-anaesthesia clinic", Position 116, 104 points, workspace `anaesthesia` / `doctor`) — **COMPLETED** (commit `c6167d3`, Proposal **269** awaiting human review on `/docs -> My progress`).
-- Screen 117: **`consents_anaesthesia`** ("Anaesthesia consent", Position 117, 92 points, workspace `anaesthesia` / `doctor`) — **NEXT**.
+- Screen 117: **`consents_anaesthesia`** ("Anaesthesia consent", Position 117, 92 points, workspace `anaesthesia` / `doctor`) — **COMPLETED** (commit `e85395b`, Proposal **270** awaiting human review on `/docs -> My progress`).
+- Screen 118: **`safety_checklist`** ("Surgical safety checklist - Sign In / Time Out / Sign Out", Position 118, 79 points, workspace `ot_nurse` / `theatre`) — **NEXT**.
+
+---
+
+### Completed Screen 117 (`consents_anaesthesia`) Checkpoint
+- **Workflow & Standards**: Pre-operative and surgical informed consent management, statutory risk-benefit counseling in patient's vernacular, legal decision-maker verification against server's `who_decides` policy (minors prohibited from self-consent, priority-ranked decision-maker relationships), questions-and-answers clinical dialogue audit, signature/thumb-impression capture with mandatory staff witness, verbal refusal documentation, emergency notes with concurring second PMDC-registered doctor, bilingual A4 printable consent document (RTL Nastaliq Urdu layout), and signed paper scan attachment under Rule e9d9f576df, Rule d84307d9b2, Rule fea5622fc5, Rule b7bacc1ffb, Rule cb2f327ee7, Rule 8b7301ca0f, Rule f811c03843, Rule a52becc623, and MSDS COP 31, 32; Position 117 (92 points), Workspace `anaesthesia` / `doctor`.
+- **Contracts**:
+  - `contracts/consents_anaesthesia.json`: Saved real MCP screen bundle (15 endpoints, 1 realtime event, 8 statutory rules).
+  - `src/generated/consents_anaesthesia.ts`: Generated TypeScript contracts for all 15 operations and data models.
+- **Domain Policies & Statutory Rules (`src/consents-anaesthesia-policy.ts`)**:
+  - Runtime service capability gating (`rule:a52becc623`): `surgery` capability view evaluation (`full`, `open_work`, `records`, `setup`, `hidden`).
+  - Active surgery check (`isSurgeryActive`).
+  - Role permissions (`canManageConsents`: `consent.record`, `consent.configure`, `consent.view`, `ot.clinical.anaesthesia`, `doctor.view`).
+  - Clinical credential verification (`isAuthorizedConsentTaker`, `rule:f811c03843`): anaesthesia consent requires a registered doctor of the anaesthesia team (`CONSENT_TAKER_NOT_AUTHORIZED`).
+  - Draft validation (`validateConsentDraft`, `rule:d84307d9b2`): verifies form code, language, procedure name.
+  - Decision & signature validation (`validateConsentSign`, `rule:b7bacc1ffb`, `rule:cb2f327ee7`): enforces server `who_decides` rules, prohibits minor self-signing, validates relationship against authorized priority list, mandates CNIC, phone, incapacity reason, questions/answers, understanding confirmation, witness for thumb impression, and second doctor for emergency note.
+  - Refusal validation (`validateConsentRefuse`, `rule:b7bacc1ffb`): mandates clinical reason in patient's words, witness for verbal refusal.
+  - Bilingual error explanations (`explainConsentError`): translates `CONSENT_TAKER_NOT_AUTHORIZED`, `CONSENT_SIGNER_INVALID`, `CONSENT_TEXT_MISSING`, `CONSENT_INCOMPLETE`, `CONSENT_DECIDED_FINAL`, etc.
+- **UI Architecture (`src/screens/ConsentsAnaesthesia.tsx`)**:
+  - Tab 1: Consent Worklist (`GET /consent-worklist`) with timeframe filter (1, 3, 7, 14 days), `mine` filter, type filter, search, and red overdue indicators (`rule:e9d9f576df`). Quick routing to open existing drafts or prepare fresh consent.
+  - Tab 2: Consent Register (`GET /consents`) with status filter and search.
+  - Detail / Preparation Panel: Form template select, language select, procedure name, performer name, risks, benefits, alternatives, 'Read aloud to patient' toggle, and interpreter name (`rule:fea5622fc5`).
+  - Missing field warnings (`consent.missing`).
+  - Formal Sign Modal: supports Signed and EmergencyNote modes; Patient vs DecisionMaker; legal relationship dropdown strictly populated from `who_decides.decision_makers`; signature or thumb impression with witness; questions & answers text; understanding confirmed checkbox; emergency second doctor select (`rule:cb2f327ee7`).
+  - Formal Refusal Modal: Signed vs VerbalRefusal with witness and refusal reason.
+  - Withdrawal Modal: formal withdrawal reason for finalized consents (`rule:8b7301ca0f`).
+  - Scan Attachment Modal: file upload to patient documents (`POST /patients/{id}/documents`) and attachment to consent (`POST /consents/{id}/scan`).
+  - Print Preview Modal: A4 formatted print payload preview with hospital header, PHC number, issue line, and RTL Nastaliq Urdu styling (`rule:fea5622fc5`).
+  - Realtime synchronization: auto-refreshes on `consent.updated` events.
+- **Help, Handbook & Navigation**:
+  - Wired into `src/App.tsx`, `src/foundation-catalogue.json` (15 tasks), `src/foundation-task-map.json` (15 controls).
+  - Contextual F1 help (`src/foundation-help.ts`): added `consents_anaesthesia` to `deliveredHelpScreens` and all 59 controls mapped.
+  - Authored comprehensive handbook entry (`src/help.ts`) with bilingual title, purpose, 10 operational steps, and 6 role FAQs.
+  - Bundled screenshots: `public/handbook/consents_anaesthesia-en.png` and `public/handbook/consents_anaesthesia-ur.png`.
+- **Verification**:
+  - Automated unit tests: `tests/consents-anaesthesia.test.mjs` (8/8 passing).
+  - Full test suite: `npm test` passed (525/525 passing across all suites).
+  - Help check: `npm run check:help` passed (116 screens, 2760 controls, 1803 groups, 69 FAQ seeds, 30 workspace guides).
+  - TypeScript compiler: `npx tsc --noEmit` passed with 0 errors.
+  - Production build: `npm run build` succeeded (`dist/assets/index-GTMq9y85.js`).
+- **Commit & Proposal**:
+  - Implementation commit: `e85395b`.
+  - Proposal ID: **270** (status: `pending` on `/docs -> My progress`).
+
+---
+
+### Completed Screen 116 (`pre_anaesthesia_clinic`) Checkpoint
+- **Workflow & Standards**: Pre-anaesthesia clinic (PAC) evaluation, pre-operative worklist with days filter and `mine` toggle, multi-parameter clinical assessment (vital signs bounds, organ systems, Mallampati airway classification I-IV, ASA physical status score I-VI with emergency 'E' modifier), multi-tier fitness clearance decision (Fit, FitWithConditions, Deferred, NotFit) with mandatory clinical rationale notes for non-standard clearances, optimistic concurrency draft saves, clinical privileges verification for assessment signing, and integrated informed anaesthesia consent generation under Rule 2e64c4a389, Rule a91aa7215a, Rule d4ca3b3bcc, Rule d5b2105887, Rule 9e9cb593cb, Rule db3a19e806, Rule be026bcee1, and MSDS COP 31, 32, 39; Position 116 (104 points), Workspace `anaesthesia` / `doctor`.
+- **Contracts**:
+  - `contracts/pre_anaesthesia_clinic.json`: Saved real MCP screen bundle (19 endpoints, 2 realtime events, 7 statutory rules).
+  - `src/generated/pre_anaesthesia_clinic.ts`: Generated TypeScript contracts for all 19 operations and domain types.
+- **Verification**: `tests/pre-anaesthesia-clinic.test.mjs` (8/8 passing). Full test suite: 517/517 passing. Proposal ID: **269** (status: `pending`). Commit: `c6167d3`.
+
+---
+
+## Plan for Screen 118 (`safety_checklist`)
+- **Workflow & Standards**: Surgical Safety Checklist (WHO / MSDS COP 39, 41) spanning three critical operative phases:
+  1. **Sign In**: Before anaesthesia induction (patient identity confirmed, site marked, consent verified, anaesthesia safety check, pulse oximeter on, allergy check, difficult airway/aspiration risk, blood loss risk >= 500ml).
+  2. **Time Out**: Before skin incision (introduction of all team members by name and role, verbal confirmation of patient name, procedure, and incision site, surgeon review of critical steps and blood loss, anaesthetist review of specific patient concerns, nursing review of sterility and equipment, antibiotic prophylaxis administered within 60 minutes, essential imaging displayed).
+  3. **Sign Out**: Before patient leaves operating theatre (nurse verbally confirms procedure name, instrument, sponge and needle counts correct, specimen labelled with patient name, whether any equipment problems, surgeon, anaesthetist and nurse review key recovery and management concerns).
+- **Position & Workspace**: Position 118 (79 points), Workspace `ot_nurse` / `theatre`.
+- **Bundle & Contracts**:
+  - Retrieve real screen bundle via `get_screen_bundle("safety_checklist", max_chars=200000)`.
+  - Quality brief via `get_ui_quality_brief(screen_id="safety_checklist")`.
+  - Generate TypeScript contracts (`src/generated/safety_checklist.ts`).
+  - Examine endpoints, rules, and rubric items.
+- **Domain Policies & Statutory Rules (`src/safety-checklist-policy.ts`)**:
+  - Surgical phase lifecycle enforcement (Sign In -> Time Out -> Sign Out).
+  - Mandatory checks per phase per WHO / PHC MSDS standards.
+  - Team verification & practitioner authorization checks.
+  - Bilingual error explanations.
+- **UI Architecture (`src/screens/SafetyChecklist.tsx`)**:
+  - Active surgical cases worklist and room selector.
+  - Phase-by-phase interactive checklist forms with visual completion status badges.
+  - Verbal pause confirmation modal.
+  - Team attendance and practitioner roles display.
+  - Immediate incident / discrepancy reporting (e.g. incorrect sponge count).
+- **Help, Handbook & Navigation**:
+  - Contextual F1 help with all controls mapped in `src/foundation-help.ts`.
+  - Task mapping in `src/foundation-catalogue.json` and `src/foundation-task-map.json`.
+  - Handbook entry in `src/help.ts` with role FAQs for OT Nurse / Surgeon / Anaesthetist.
+  - Bundled screenshots: `public/handbook/safety_checklist-en.png` and `safety_checklist-ur.png`.
+- **Automated Verification**:
+  - `tests/safety-checklist.test.mjs`.
+  - `npm test`, `npm run check:help`, `npx tsc --noEmit`, `npm run build`.
+  - Commit and submit `propose_progress` (Proposal 271).
+
+---
+
+## Completed Screens Checkpoint
+- Proposals **231**, **232**, **233**, **234**, **235**, and **236** are accepted.
+- Proposals **237** through **270** are awaiting human review on `/docs -> My progress`.
+- Completed screens in Phase 6 so far:
+  - Screen 109: `clinical_privileges` (Proposal 262)
+  - Screen 110: `theatre_checklist_setup` (Proposal 263)
+  - Screen 111: `cssd_setup` (Proposal 264)
+  - Screen 112: `cssd_board` (Proposal 265)
+  - Screen 113: `cssd_stock` (Proposal 266)
+  - Screen 114: `ot_scheduling` (Proposal 267)
+  - Screen 115: `ot_board` (Proposal 268)
+  - Screen 116: `pre_anaesthesia_clinic` (Proposal 269)
+  - Screen 117: `consents_anaesthesia` (Proposal 270)
 
 ---
 
