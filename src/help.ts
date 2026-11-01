@@ -7690,6 +7690,88 @@ consents_doctor: {
       ]
     ]
   },
+  safety_checklist: {
+    title: "Surgical safety checklist",
+    titleUr: "جراحی سیفٹی چیک لسٹ (سائن ان، ٹائم آؤٹ، سائن آؤٹ)",
+    purpose: "WHO surgical safety checklist compliance across three critical operative pauses (Sign In before anaesthesia induction, Time Out before skin incision, and Sign Out before patient leaves the operating theatre), team attendance verification with PMDC clinical privileges, verbal team confirmation, and post-finality addendum corrections under Rule cafa8b3761, Rule b410c48dc4, Rule a90b6173b4, Rule c4919df195, Rule 45c2bd9ac6, Rule 9e9cb593cb, and MSDS COP 39, 41, 44.",
+    purposeUr: "ڈبلیو ایچ او اور ایم ایس ڈی ایس سی او پی 39، 41 کے تحت تین لازمی حفاظتی مراحل (بے ہوشی سے قبل سائن ان، کٹ لگانے سے قبل ٹائم آؤٹ، اور تھیٹر سے منتقلی سے قبل سائن آؤٹ) کا نفاذ، کلینیکل اختیارات کے مطابق ٹیم کی حاضری، اونچی آواز میں زبانی توثیق اور مستقل ریکارڈ میں ضمیمہ جاتی تصحیحات۔",
+    steps: [
+      "Open Surgical safety checklist from the OT Nurse or Theatre workspace to view active cases.",
+      "Filter the worklist by timeframe or search by patient name, MRN, or surgical procedure.",
+      "Select an operative case and click 'Checklist' to open the surgical pause execution interface.",
+      "Review the prerequisite gate for Sign In (Rule a90b6173b4): verify surgeon's pre-operative note, signed PAC fitness assessment, and given operation and anaesthesia consents.",
+      "Select Phase 1 'Sign In' and read every active checklist item aloud to the anaesthesia team before induction (Rule cafa8b3761).",
+      "Positively verify patient identity, surgical site marking, anaesthesia machine safety, pulse oximeter, allergies, difficult airway, and blood loss risk (Rule b410c48dc4).",
+      "For Phase 2 'Time Out', verify the team in attendance: select primary operating surgeon and anaesthetist from active PMDC privileges (Rule c4919df195).",
+      "Conduct the verbal pause: read checklist items aloud, verify patient name, procedure, incision site, antibiotic prophylaxis timing, and display of imaging.",
+      "For Phase 3 'Sign Out', verbally confirm procedure completed, sponge/needle/instrument counts correct, specimen labelling, and recovery concerns before the patient leaves the suite (Rule 45c2bd9ac6).",
+      "Check the 'Verbal Pause Executed' certification box and click 'Complete & Sign Pause'; report any near-miss incidents or add corrections as needed (Rule 9e9cb593cb)."
+    ],
+    stepsUr: [
+      "او ٹی نرس یا تھیٹر ورک اسپیس سے 'جراحی سیفٹی چیک لسٹ' کھولیں اور شیڈول شدہ سرجریز دیکھیں۔",
+      "ایام کے مطابق فلٹر کریں یا مریض کے نام، ایم آر این یا آپریشن سے تلاش کریں۔",
+      "مطلوبہ سرجری منتخب کر کے 'چیک لسٹ' پر کلک کریں تاکہ حفاظتی توقف کا انٹرفیس کھل جائے۔",
+      "سائن ان کی پیشگی شرائط کا جائزہ لیں: سرجن کا پری آپریٹو نوٹ، اینستھیزیا فٹنس سرٹیفکیٹ، اور جراحی و اینستھیزیا رضامندی (قاعدہ a90b6173b4)۔",
+      "مرحلہ 1 'سائن ان' منتخب کریں اور اینستھیزیا دینے سے قبل تمام سوالات اونچی آواز میں پڑھ کر سنائیں (قاعدہ cafa8b3761)۔",
+      "مریض کی شناخت، سرجیکل سائٹ کی نشان دہی، مشین کی جانچ، الرجی، اور خون کے ضیاع کے خطرے کی مثبت تصدیق کریں (قاعدہ b410c48dc4)۔",
+      "مرحلہ 2 'ٹائم آؤٹ' کے لیے ٹیم کی حاضری منتخب کریں: ہسپتال کے استحقاق یافتہ پرائمری سرجن اور اینستھیٹسٹ کا انتخاب کریں (قاعدہ c4919df195)۔",
+      "زبانی توقف کریں: مریض کا نام، آپریشن، کٹ کی جگہ، اینٹی بائیوٹک کا وقت اور ایکسرے/ایم آر آئی کی اسکرین پر موجودگی کی تصدیق کریں۔",
+      "مرحلہ 3 'سائن آؤٹ' کے دوران مریض کو تھیٹر سے باہر لے جانے سے قبل سوئیاں، پٹیاں، اوزار اور نمونہ جات کی درستگی کی تصدیق کریں (قاعدہ 45c2bd9ac6)۔",
+      "زبانی توثیق کے خانے پر نشان لگائیں اور 'دستخط کریں' پر کلک کریں؛ کسی بھی غیر متوقع واقعے کی صورت میں رپورٹ درج کریں (قاعدہ 9e9cb593cb)۔"
+    ],
+    faq: [
+      [
+        "Why does Sign In block if the pre-operative note or consent is missing?",
+        "Under Rule a90b6173b4 and MSDS COP 39, anaesthesia induction cannot begin without documented surgical indication (PreOpNote), verified medical fitness clearance, and signed informed consent. Performing induction without these is a critical safety violation."
+      ],
+      [
+        "Can Time Out be conducted without the primary operating surgeon?",
+        "No. Under Rule c4919df195, the primary operating surgeon and primary anaesthetist holding active PMDC clinical privileges must be physically present in the theatre before skin incision can be authorized."
+      ],
+      [
+        "What happens if an instrument or sponge count is incorrect during Sign Out?",
+        "Under Rule b410c48dc4 and MSDS COP 41, the scrub and circulating nurses must recount immediately, perform cavity re-exploration, or order an intra-operative X-ray. The discrepancy must be reported as a safety incident using the 'Report Incident' tool."
+      ],
+      [
+        "Can the surgical checklist phases be performed out of order?",
+        "No. Under Rule cafa8b3761, checklist pauses strictly follow chronological clinical milestones: Sign In (before induction) -> Time Out (before incision) -> Sign Out (before theatre departure). Earlier phases cannot be bypassed."
+      ],
+      [
+        "Can a completed safety checklist pause be amended directly?",
+        "No. Under Rule 9e9cb593cb, completed pauses become permanent medical records (OT_RECORD_FINAL). Clinicians use 'Add Correction Addendum' to attach factual corrections with a stated clinical justification."
+      ],
+      [
+        "Can an operation be concluded before completing Sign Out?",
+        "No. Under Rule 45c2bd9ac6, completing surgery on the server (complete-surgery) returns OT_CHECKLIST_INCOMPLETE if Sign Out has not been formally recorded and signed."
+      ]
+    ],
+    faqUr: [
+      [
+        "پری آپریٹو نوٹ یا رضامندی کے بغیر سائن ان کیوں بلاک ہوتا ہے؟",
+        "قاعدہ a90b6173b4 اور ایم ایس ڈی ایس کے تحت بے ہوشی شروع کرنے سے قبل سرجن کا تفصیلی نوٹ، اینستھیزیا کی فٹنس کلیئرنس اور باضابطہ رضامندی لازمی ہے۔ ان کے بغیر مریض کو بے ہوش کرنا ممنوع ہے۔"
+      ],
+      [
+        "کیا پرائمری سرجن کی غیر موجودگی میں ٹائم آؤٹ ہو سکتا ہے؟",
+        "نہیں۔ قاعدہ c4919df195 کے مطابق پرائمری سرجن اور اینستھیٹسٹ دونوں کا آپریشن تھیٹر میں جسمانی طور پر موجود ہونا قانونی طور پر لازمی ہے۔"
+      ],
+      [
+        "اگر سائن آؤٹ کے وقت پٹیوں یا سوئیوں کی گنتی غلط نکلے تو کیا ہوگا؟",
+        "قاعدہ b410c48dc4 کے تحت فوری طور پر دوبارہ گنتی، دوبارہ معائنہ یا ایکسرے کروایا جاتا ہے اور 'واقعہ رپورٹ' ٹول کے ذریعے کوالٹی کمیٹی کو مطلع کیا جاتا ہے۔"
+      ],
+      [
+        "کیا چیک لسٹ کے مراحل کو آگے پیچھے کیا جا سکتا ہے؟",
+        "نہیں۔ قاعدہ cafa8b3761 کے تحت سائن ان (بے ہوشی سے قبل)، ٹائم آؤٹ (کٹ سے قبل) اور سائن آؤٹ (تھیٹر سے نکلنے سے قبل) کی مخصوص طبی ترتیب پر عمل کرنا لازمی ہے۔"
+      ],
+      [
+        "کیا مکمل شدہ چیک لسٹ میں براہ راست تبدیلی ہو سکتی ہے؟",
+        "نہیں۔ قاعدہ 9e9cb593cb کے تحت ریکارڈ حتمی بن جاتا ہے۔ کسی بھی تبدیلی کے لیے 'تصحیح درج کریں' کے ذریعے باضابطہ ضمیمہ شامل کیا جاتا ہے۔"
+      ],
+      [
+        "کیا سائن آؤٹ کے بغیر آپریشن مکمل کیا جا سکتا ہے؟",
+        "نہیں۔ قاعدہ 45c2bd9ac6 کے مطابق سرور سائن آؤٹ مکمل کیے بغیر سرجری ختم کرنے کی اجازت نہیں دیتا (OT_CHECKLIST_INCOMPLETE)۔"
+      ]
+    ]
+  },
   maternity_policy: {
     title: "High-risk pregnancy: our policy",
     titleUr: "ہائی رسک حمل: ہسپتال کی پالیسی",
