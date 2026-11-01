@@ -10,6 +10,92 @@ export type HelpPage = {
   faqUr: [string, string][];
 };
 export const help: Record<string, HelpPage> = {
+  cssd_board: {
+    title: "Sterilization board",
+    titleUr: "سٹرلائزیشن بورڈ",
+    purpose: "Manage daily autoclave readiness tests including mandatory morning Bowie-Dick cycles, create sterilization loads with method-compatible instrument sets, immediately print 50mm pack identification labels, record physical parameters (temperature, pressure, exposure hold time), verify mechanical, chemical, and biological indicator spore results, quarantine implant loads until incubator clearance, and download official sterilization audit log PDFs under MSDS IPC 90-92.",
+    purposeUr: "روزانہ آٹوکلیو کی تیاری کے ٹیسٹس بشمول صبح کے لازمی بووی-ڈک ٹیسٹ کا انتظام، سٹرلائزر کے طریقہ کار سے مطابقت رکھنے والے سیٹس کے ساتھ لوڈز کی تیاری، 50 ملی میٹر کے شناختی بارکوڈ لیبلز کی فوری پرنٹنگ، جسمانی پیرامیٹرز (درجہ حرارت، دباؤ، ہولڈ ٹائم) کا اندراج، مکینیکل، کیمیائی اور حیاتیاتی انڈیکیٹرز کی تصدیق، امپلانٹ والی لوڈز کو بائیولوجیکل ٹیسٹ پاس ہونے تک قرنطینہ کرنا، اور ایم ایس ڈی ایس قواعد کے تحت نس بندی کا سرکاری آڈٹ لاگ پی ڈی ایف حاصل کرنا (ایم ایس ڈی ایس 90-92)۔",
+    steps: [
+      "Open CSSD → Sterilization board (cssd_board) to view real-time chamber status, morning air-removal tests, and all active and completed sterilization cycles.",
+      "Inspect sterilizer chamber readiness overview: check whether each steam autoclave has completed and passed its mandatory morning Bowie-Dick air-removal test (Rule 2e3fcc57c7).",
+      "Run daily Bowie-Dick cycle: if a steam sterilizer indicates 'Bowie-Dick Test Required Today', click 'Run Bowie-Dick' or '+ Start Cycle' with cycle type 'BowieDick' (empty chamber test, no packs allowed per Rule 9a5570e2a6).",
+      "Start a new clinical sterilization load: click '+ Start Cycle' (requires cssd.operate permission and active CSSD service per Rule 0bdd7f9ba6), select the target sterilizer chamber and choose cycle type 'Load'.",
+      "Select method-compatible instrument sets: choose sets from the dropdown; the system strictly filters only sets compatible with the selected sterilizer's method (e.g. Steam sets for autoclave, Plasma sets for hydrogen peroxide plasma per Rule 9a5570e2a6).",
+      "Add packs and set counts: enter the pack count for each set and click 'Add' to build the load manifest. Check implant flags to prepare biological indicator spore ampoules.",
+      "Confirm load start and print pack labels: click 'Confirm & Start Cycle' to submit POST /cssd/cycles. On success, the 50mm label preview dialog opens immediately (Rule 9a5570e2a6); print one label for each pack using the thermal label printer.",
+      "Inspect active cycles: running cycles (status 'Running') and quarantined loads (status 'Quarantined') are permanently pinned at the top of the board table for continuous visual monitoring (Rule b48c7fa7a8).",
+      "Record physical cycle parameters and indicators: when the cycle completes, click 'Record Results' on the running cycle to open POST /cssd/cycles/{id}/results; enter temperature (°C), chamber pressure (kPa), and exposure hold minutes.",
+      "Verify mechanical and chemical indicators: verify digital graph/chart printout (mechanical pass) and chemical indicator strip or Bowie-Dick test sheet color change (chemical Pass/Fail per Rule 4d7517d090).",
+      "Handle biological spore indicators and quarantine: for loads with surgical implants, select 'Pending' biological result to keep the load Quarantined until the 24-48 hour incubator readout. When reading the incubator vial, select Pass (releases load) or Fail (triggers supervisor alert, returns packs for reprocessing, and lists recall candidates under Rule b48c7fa7a8).",
+      "Export sterilization audit log: switch to the 'Audit Log & PDF' tab, specify the reporting date range, and click 'Download Sterilization Log (PDF)' for IPC committee review and PHC regulatory inspections."
+    ],
+    stepsUr: [
+      "سی ایس ایس ڈی سے 'سٹرلائزیشن بورڈ' (cssd_board) کھولیں تاکہ چیمبرز کی تیاری، صبح کے ایئر ریموول ٹیسٹس اور تمام سائیکلز کا حقیقی وقت میں جائزہ لیا جا سکے۔",
+      "سٹرلائزر چیمبرز کی تیاری کا جائزہ لیں: جانچیں کہ کیا ہر بھاپ والے آٹوکلیو نے اپنا صبح کا لازمی بووی-ڈک ٹیسٹ پاس کر لیا ہے یا نہیں (قاعدہ 2e3fcc57c7)۔",
+      "روزانہ کا بووی-ڈک ٹیسٹ چلائیں: اگر کسی آٹوکلیو پر ٹیسٹ درکار ہو تو 'رن بووی-ڈک' یا '+ سائیکل شروع کریں' پر کلک کر کے بووی-ڈک منتخب کریں (خالی چیمبر ٹیسٹ، کوئی پیک نہیں رکھا جاتا قاعدہ 9a5570e2a6)۔",
+      "کلینیکل سٹرلائزیشن لوڈ شروع کریں: '+ سائیکل شروع کریں' پر کلک کریں (cssd.operate اجازت درکار ہے قاعدہ 0bdd7f9ba6)، سٹرلائزر منتخب کریں اور قسم میں 'لوڈ' کا انتخاب کریں۔",
+      "ہم آہنگ سٹرلائزیشن طریقہ کے سیٹس منتخب کریں: سسٹم صرف وہی سیٹس دکھاتا ہے جو منتخب سٹرلائزر کے طریقہ کار سے مطابقت رکھتے ہوں (جیسے آٹوکلیو کے لیے بھاپ والے سیٹس، پلازما کے لیے پلازما سیٹس قاعدہ 9a5570e2a6)۔",
+      "سیٹس کی تعداد شامل کریں: ہر سیٹ کے پیکس کی تعداد درج کریں اور لوڈ مینی فیسٹ میں شامل کرنے کے لیے 'شامل کریں' پر کلک کریں۔ امپلانٹ والے سیٹس کی نشاندہی پر بائیولوجیکل انڈیکیٹر تیار کریں۔",
+      "سائیکل کی تصدیق اور لیبلز کی فوری پرنٹنگ: سائیکل شروع کرنے کے بعد 50 ملی میٹر کے لیبلز کا ڈائیلاگ فوری طور پر کھلتا ہے (قاعدہ 9a5570e2a6)؛ تھرمل پرنٹر سے ہر پیک پر چسپاں کرنے کے لیے لیبل پرنٹ کریں۔",
+      "فعال لوڈز کی بورڈ پر مسلسل نگرانی: جاری سائیکلز (Running) اور قرنطینہ شدہ لوڈز (Quarantined) بورڈ پر ہمیشہ سب سے اوپر پن رہتے ہیں تاکہ ان پر فوری توجہ رہے (قاعدہ b48c7fa7a8)۔",
+      "جسمانی پیرامیٹرز اور اشاریہ جات کا اندراج: سائیکل مکمل ہونے پر 'نتائج درج کریں' پر کلک کریں اور درجہ حرارت (°C)، چیمبر کا دباؤ (kPa) اور ہولڈ ٹائم (منٹ) درج کریں۔",
+      "مکینیکل اور کیمیائی اشاریہ جات کی جانچ: ڈیجیٹل گراف (مکینیکل پاس) اور کیمیکل انڈیکیٹر سٹرپ کے رنگ کی مکمل تبدیلی (پاس/فیل) کی تصدیق درج کریں (قاعدہ 4d7517d090)۔",
+      "بائیولوجیکل اسپور ٹیسٹ اور قرنطینہ کا طریقہ کار: امپلانٹ والی لوڈ کے لیے بائیولوجیکل نتیجہ 'زیر التواء' (Pending) رکھیں تاکہ لوڈ قرنطینہ رہے۔ انکیوبیٹر کے حتمی معائنے پر پاس (لوڈ جاری) یا فیل (لوڈ مسترد، دوبارہ نس بندی اور ریکال امیدواروں کی فہرست قاعدہ b48c7fa7a8) درج کریں۔",
+      "نس بندی کا آڈٹ لاگ برآمد کریں: 'آڈٹ لاگ اور پی ڈی ایف' ٹیب پر جائیں، مطلوبہ تاریخیں منتخب کریں اور انفیکشن کنٹرول کمیٹی اور معائنہ کاروں کے لیے سرکاری لاگ پی ڈی ایف ڈاؤن لوڈ کریں۔"
+    ],
+    faq: [
+      [
+        "Why is the morning Bowie-Dick cycle mandatory for steam autoclaves before any steam load is released (Rule 2e3fcc57c7)?",
+        "Under MSDS IPC 90 and hospital quality standards, pre-vacuum steam autoclaves rely on complete air evacuation to achieve rapid, uniform saturated steam penetration throughout wrapped surgical sets. If air pockets remain in the chamber, the temperature inside instrument packs may fail to reach the required 134°C sterilization threshold. Running a morning Bowie-Dick chemical sheet test with an empty chamber verifies vacuum pump efficiency and air-removal completeness. The server enforces CSSD_DAILY_TEST_REQUIRED and refuses to release any clinical steam loads until that day's Bowie-Dick cycle is recorded as Passed."
+      ],
+      [
+        "How does the system prevent loading sets into sterilizers using incompatible sterilization methods (Rule 9a5570e2a6)?",
+        "Different surgical instruments require distinct sterilization mechanisms: heat-tolerant stainless steel sets are sterilized via high-pressure saturated Steam (134°C), while heat-sensitive endoscopy optics, cameras, and electrical micro-drills require low-temperature Hydrogen Peroxide Plasma (55°C) or Ethylene Oxide. In the Start Cycle modal, the system cross-references the selected sterilizer's method against the catalog. Only matching set types appear in the add-pack dropdown, and the policy rejects method mismatches with CSSD_METHOD_MISMATCH, preventing catastrophic thermal damage to delicate instruments."
+      ],
+      [
+        "When must a sterilization load be Quarantined with a biological indicator, and what happens if the indicator fails (Rule 4d7517d090)?",
+        "Whenever a load contains surgical implants (e.g. orthopedic plates, screws, prosthetic mesh) or is designated as the weekly biological challenge load, CSSD technicians place a biological indicator (containing 10^6 Geobacillus stearothermophilus bacterial spores) in the most challenging chamber location. When the cycle ends, selecting biological_result 'Pending' automatically places the entire load in 'Quarantined' status. No packs can be issued to operating rooms. If the spore incubator subsequently detects microbial growth (Fail), the entire load fails, all packs are returned for complete repackaging and re-sterilization, and hospital supervisors are immediately alerted."
+      ],
+      [
+        "Why are Running and Quarantined cycles permanently pinned at the top of the Sterilization Board (Rule b48c7fa7a8)?",
+        "In a busy surgical hospital, CSSD technicians continuously manage multiple concurrent autoclave chambers while operating rooms request urgently needed instrument trays. Pinning 'Running' and 'Quarantined' cycles at the top of the board ensures that active loads requiring timely parameter recording, chamber unloading, and biological incubator reads are immediately visible without scrolling through hundreds of historical released cycles. Furthermore, a failed biological cycle immediately highlights potential recall candidates from that chamber."
+      ],
+      [
+        "What information is printed on the CSSD pack labels and why must they be printed immediately at cycle start (Rule 9a5570e2a6)?",
+        "Under Rule 9a5570e2a6 and MSDS IPC 91, each pack in a load must bear a standardized 50mm thermal adhesive label containing: the unique pack barcode and code (e.g. SP-2026-000001), instrument set clinical name, cycle number (e.g. STC-2026-00001), sterilization date, and exact expiration date based on packaging barrier rules. Printing labels immediately upon starting the cycle ensures every pack is labeled before entering the sterile storage room, preventing unlabeled or mixed-up trays from ever reaching operating theatres."
+      ],
+      [
+        "How does the system handle service capability transitions when CSSD is Retiring or in Records mode (Rule dfad4a25d2)?",
+        "Following Rule dfad4a25d2 and Rule 0bdd7f9ba6, the screen dynamically inspects GET /establishment capabilities. If CSSD is 'Retiring' (open_work view), an amber notice banner informs staff that no new cycles may be started (+ Start Cycle button is disabled), but staff may view, complete, and record results for in-flight running loads. If CSSD is 'Retired' (records view), a blue banner indicates historical records mode: cycle details and period PDF logs can be reviewed and printed, but all write operations are disabled."
+      ]
+    ],
+    faqUr: [
+      [
+        "بھاپ والے آٹوکلیوز کے لیے صبح کا بووی-ڈک ٹیسٹ کیوں لازمی ہے اور اس کے بغیر لوڈ کیوں جاری نہیں ہو سکتا (قاعدہ 2e3fcc57c7)؟",
+        "ایم ایس ڈی ایس آئی پی سی 90 کے تحت ویکیوم آٹوکلیوز کا انحصار چیمبر سے ہوا کے مکمل اخراج پر ہوتا ہے تاکہ 134 ڈگری سینٹی گریڈ کی بھاپ آلات کے تمام حصوں تک یکساں پہنچ سکے۔ اگر چیمبر میں ہوا رہ جائے تو سٹرلائزیشن کا درجہ حرارت کم رہ جاتا ہے۔ صبح خالی چیمبر میں بووی-ڈک ٹیسٹ چلانا ویکیوم پمپ کے درست ہونے کی تصدیق کرتا ہے۔ سرور CSSD_DAILY_TEST_REQUIRED کا نفاذ کرتا ہے اور جب تک اس دن کا بووی-ڈک ٹیسٹ پاس نہ ہو، کلینیکل لوڈز جاری کرنے کی اجازت نہیں دیتا۔"
+      ],
+      [
+        "سسٹم سٹرلائزر میں غیر مطابقت رکھنے والے سیٹس لوڈ ہونے سے کیسے روکتا ہے (قاعدہ 9a5570e2a6)؟",
+        "مختلف آلات کے لیے مختلف طریقے درکار ہوتے ہیں: اسٹیل کے آلات 134 ڈگری بھاپ پر سٹرلائز ہوتے ہیں جبکہ نازک اینڈوسکوپی کیمرے اور تاریں 55 ڈگری پر ہائیڈروجن پیرو آکسائیڈ پلازما پر نس بندی مانگتے ہیں۔ سائیکل شروع کرتے وقت سسٹم سٹرلائزر کے طریقہ کار سے میل کھانے والے سیٹس ہی دکھاتا ہے اور غیر مطابق طریقہ کار کے سیٹس کو مسترد کر کے نازک آلات کو جلنے سے بچاتا ہے۔"
+      ],
+      [
+        "لوڈ کو بائیولوجیکل اشاریہ کے ساتھ کب قرنطینہ کیا جاتا ہے اور ٹیسٹ فیل ہونے پر کیا ہوتا ہے (قاعدہ 4d7517d090)؟",
+        "جب لوڈ میں جراحی امپلانٹس ہوں یا ہفتہ وار بائیولوجیکل چیلنج لوڈ ہو تو چیمبر میں بیکٹیریا کے اسپورز والی شیشی رکھی جاتی ہے۔ سائیکل ختم ہونے پر 'زیر التواء' (Pending) منتخب کرنے سے پورا لوڈ 'قرنطینہ' میں چلا جاتا ہے اور تھیٹر کو جاری نہیں ہو سکتا۔ اگر انکیوبیٹر میں بیکٹیریا کی نشوونما (Fail) ہو جائے تو پورا لوڈ مسترد ہو جاتا ہے، تمام پیکس دوبارہ پیکنگ اور نس بندی کے لیے بھیجے جاتے ہیں اور سپروائزرز کو فوری الرٹ جاری ہوتا ہے۔"
+      ],
+      [
+        "جاری (Running) اور قرنطینہ شدہ (Quarantined) سائیکلز بورڈ پر ہمیشہ اوپر کیوں پن رہتے ہیں (قاعدہ b48c7fa7a8)؟",
+        "ہسپتال میں سٹرلائزیشن ٹیکنیشن ایک ہی وقت میں کئی آٹوکلیوز چلا رہے ہوتے ہیں۔ فعال اور قرنطینہ شدہ لوڈز کو سب سے اوپر پن رکھنے سے فوری توجہ طلب سائیکلز، نتائج کا اندراج اور انکیوبیٹر کے نتائج سب سے اوپر نظر آتے ہیں اور عملے کو سینکڑوں پرانے سائیکلز میں تلاش نہیں کرنا پڑتا۔"
+      ],
+      [
+        "سی ایس ایس ڈی پیک لیبلز پر کیا معلومات ہوتی ہیں اور سائیکل شروع ہوتے ہی پرنٹ کرنا کیوں ضروری ہے (قاعدہ 9a5570e2a6)؟",
+        "قاعدہ 9a5570e2a6 کے تحت 50 ملی میٹر کے تھرمل لیبل پر بارکوڈ، پیک کوڈ، سیٹ کا کلینیکل نام، سائیکل نمبر، سٹرلائزیشن تاریخ اور میعاد ختم ہونے کی حتمی تاریخ درج ہوتی ہے۔ سائیکل شروع ہوتے ہی لیبل پرنٹ کر کے پیکس پر لگانا اس بات کو یقینی بناتا ہے کہ کوئی بھی بغیر لیبل یا نامعلوم پیک سٹرائل سٹور یا آپریشن تھیٹر نہ پہنچے۔"
+      ],
+      [
+        "سروس ریٹائر یا ریکارڈز موڈ میں جانے پر سسٹم سروس کی صلاحیت کو کیسے سنبھالتا ہے (قاعدہ dfad4a25d2)؟",
+        "قاعدہ dfad4a25d2 کے مطابق اگر سی ایس ایس ڈی ریٹائر ہو رہا ہو تو امبر بینر ظاہر ہوتا ہے اور نیا سائیکل شروع کرنے کا بٹن غیر فعال ہو جاتا ہے جبکہ جاری لوڈز کو مکمل اور جاری کیا جا سکتا ہے۔ اگر سروس ریٹائر ہو چکی ہو تو نیلے بینر کے ساتھ صرف پرانے ریکارڈز اور پی ڈی ایف لاگز دیکھنے اور پرنٹ کرنے کی اجازت ہوتی ہے۔"
+      ]
+    ]
+  },
   cssd_setup: {
     title: "Sterile supply: sets, sterilizers, recalls",
     titleUr: "سٹرائل سپلائی: سیٹس، سٹرلائزرز اور ریکالز",

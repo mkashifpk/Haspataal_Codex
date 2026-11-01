@@ -261,6 +261,7 @@ export function checkHelp({
       "ClinicalPrivileges",
       "TheatreChecklistSetup",
       "CSSDSetup",
+      "CSSDBoard",
     ].map((n) => `src/screens/${n}.tsx`),
   ];
   const used = new Set(),
