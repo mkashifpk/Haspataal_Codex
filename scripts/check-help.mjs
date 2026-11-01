@@ -258,6 +258,7 @@ export function checkHelp({
       "MLCCases",
       "DeathRecord",
       "BodyRelease",
+      "ClinicalPrivileges",
     ].map((n) => `src/screens/${n}.tsx`),
   ];
   const used = new Set(),

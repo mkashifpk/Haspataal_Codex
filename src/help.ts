@@ -10,6 +10,90 @@ export type HelpPage = {
   faqUr: [string, string][];
 };
 export const help: Record<string, HelpPage> = {
+  clinical_privileges: {
+    title: "Clinical privileges",
+    titleUr: "کلینیکل اختیارات",
+    purpose: "Clinical privileges catalog and staff credentialing register under Punjab MSDS COP 32, 39, and 45. Regulates which clinicians, surgeons, and anaesthetists may perform surgical procedures, administer anaesthesia, conduct pre-anaesthesia assessments, and authorize recovery discharges. Features annual review tracking with 30-day expiry highlighting (Rule fa7737b903), immutable revocation audit trail (Rule aedb3bf41a), one active grant per person and privilege constraint (Rule fe3c4d2fab), and runtime surgery service view capability gating (Rule caf82033b4).",
+    purposeUr: "پنجاب ہیلتھ کیئر کمیشن کے ایم ایس ڈی ایس انڈیکیٹرز 32، 39 اور 45 کے تحت سرجنز، ڈاکٹرز اور اینستھیٹسٹس کے کلینیکل اور جراحی اختیارات کا باضابطہ رجسٹر۔ کون سا ڈاکٹر سرجری کر سکتا ہے، اینستھیزیا دے سکتا ہے، معائنہ کر سکتا ہے اور ریکوری سے مریض فارغ کر سکتا ہے۔ 30 دنوں میں ختم ہونے والے اختیارات کی پیشگی تنبیہ (قاعدہ fa7737b903)، منسوخی کا مکمل آڈٹ ٹریل (قاعدہ aedb3bf41a)، ڈپلیکیٹ اختیارات کی روک تھام (قاعدہ fe3c4d2fab)، اور سرجری سروس کی حالت کے مطابق خودکار کنٹرول (قاعدہ caf82033b4) فراہم کرتا ہے۔",
+    steps: [
+      "Open Admin / Owner Dashboard → Clinical Privileges (clinical_privileges) to inspect the registered credentials and surgical authorizations of hospital clinicians.",
+      "Filter the register: search by clinician name, license number, or surgical scope, or filter by category (Surgery, Anaesthesia, PreAnaesthesiaAssessment, RecoveryDischarge). Check 'Include revoked privileges' to inspect historical revocations.",
+      "Inspect KPI metric summary tiles: track active clinical privileges, grants expiring within 30 days requiring annual committee renewal (Rule fa7737b903), expired authorizations, and revoked records.",
+      "Grant clinical privileges: click 'Grant Privilege' to open the credentialing modal for an active medical practitioner (requires ot.privilege.manage permission).",
+      "Search active HR employees (GET /hr/employees): type clinician name to auto-suggest and select the employee, then choose the appropriate privilege category.",
+      "Document authorized scope and basis: enter specific surgical or clinical procedures permitted (e.g. Laparoscopic cholecystectomy, open appendectomy) and the official credentials / committee reference (e.g. FCPS General Surgery, Credentials Committee 2026 approval).",
+      "Set validity dates: specify the Valid from date and optional Valid until date for mandatory yearly review (Rule fe3c4d2fab). Leave blank for indefinite authorization until revoked.",
+      "Submit and confirm grant: click 'Confirm & Grant' to execute the idempotent POST /ot/privileges call. If the clinician already holds this privilege, the server refuses with OT_PRIVILEGE_EXISTS.",
+      "Edit or renew existing privileges: click 'Edit / Renew' on an active register row to update the clinical scope or extend the Valid until date via PATCH /ot/privileges/{id} with expected version concurrency protection.",
+      "Revoke privileges permanently: click 'Revoke' and enter a mandatory clinical or administrative reason. Once revoked via POST /ot/privileges/{id}/revoke, the clinician's signatures requiring this privilege will be immediately refused (Rule aedb3bf41a).",
+      "Inspect Theatre Policy: click 'Theatre Policy (PDF)' to access and download the hospital's official Operating Theatre credentialing and safety policy document."
+    ],
+    stepsUr: [
+      "ایڈمن یا اونر ڈیش بورڈ سے کلینیکل اختیارات (clinical_privileges) کھولیں تاکہ ہسپتال کے ڈاکٹروں اور سرجنز کے منظور شدہ جراحی اختیارات اور اسناد کا جائزہ لیا جا سکے۔",
+      "رجسٹر کو فلٹر کریں: ڈاکٹر کے نام، میڈیکل لائسنس نمبر یا طریقہ کار سے تلاش کریں یا زمرے (سرجری، اینستھیزیا، ریکوری ڈسچارج) کے مطابق فلٹر کریں۔ منسوخ شدہ اختیارات دیکھنے کے لیے چیک باکس آن کریں۔",
+      "کارکردگی کے اشاریے دیکھیں: تمام فعال اختیارات، 30 دنوں میں ختم ہونے والے جن کا سالانہ جائزہ درکار ہے (قاعدہ fa7737b903)، زائد المیعاد اور منسوخ شدہ ریکارڈز کا جائزہ لیں۔",
+      "نیا کلینیکل اختیار جاری کریں: فعال معالج کے لیے اختیار جاری کرنے کے لیے 'نیا اختیار جاری کریں' پر کلک کریں (اس کے لیے ot.privilege.manage کی اجازت ضروری ہے)۔",
+      "ایچ آر سے فعال ڈاکٹر تلاش کریں (GET /hr/employees): ڈاکٹر کا نام لکھ کر تلاش کریں اور فہرست سے منتخب کریں، پھر مطلوبہ اختیار کا زمرہ چنیں۔",
+      "مجاز دائرہ کار اور بنیاد درج کریں: مجاز طریقہ کار کی واضح تفصیل (مثلاً لیپروسکوپک پتے کا آپریشن، اپینڈکس) اور کمیٹی کی منظوری کا حوالہ (مثلاً ایف سی پی ایس، کریڈینشلز کمیٹی فیصلہ) درج کریں۔",
+      "نافذ العمل تاریخیں منتخب کریں: آغاز کی تاریخ اور سالانہ جائزے کی آخری تاریخ درج کریں (قاعدہ fe3c4d2fab)۔ تاحیات یا مستقل اختیار کے لیے آخری تاریخ خالی چھوڑیں۔",
+      "توثیق و اجراء مکمل کریں: 'اختیار جاری کریں' پر کلک کر کے محفوظ اندراج کریں (POST /ot/privileges)۔ اگر اختیار پہلے سے موجود ہو تو سرور OT_PRIVILEGE_EXISTS کے ساتھ مسترد کر دے گا۔",
+      "اختیار کی سالانہ تجدید و ترمیم کریں: کسی بھی فعال ریکارڈ کے سامنے 'تجدید و ترمیم' پر کلک کر کے طریقہ کار تبدیل کریں یا تاریخ میں توسیع کریں (PATCH /ot/privileges/{id})۔",
+      "اختیار مستقل منسوخ کریں: 'منسوخ کریں' پر کلک کر کے لازمی وجہ درج کریں۔ منسوخی کے بعد سرور اس معالج کے سرجیکل یا اینستھیزیا دستخط فوری مسترد کر دے گا (قاعدہ aedb3bf41a)۔",
+      "تھیٹر پالیسی ملاحظہ کریں: سرکاری آپریشن تھیٹر پالیسی اور کریڈینشلنگ دستاویز ڈاؤن لوڈ یا دیکھنے کے لیے 'تھیٹر پالیسی (پی ڈی ایف)' پر کلک کریں۔"
+    ],
+    faq: [
+      [
+        "Why does the screen report 'This person already holds this privilege: extend it or revoke it first' (OT_PRIVILEGE_EXISTS)?",
+        "Under Rule fe3c4d2fab, each clinician may hold at most one active grant per privilege category (Surgery, Anaesthesia, etc.). Creating a duplicate grant is rejected. To alter an existing practitioner's procedure authorization or extend their review date, click 'Edit / Renew' on their existing row in the register. If the prior grant was erroneous or void, revoke it first before issuing a new grant."
+      ],
+      [
+        "Why does the screen report 'This privilege was revoked: grant it again instead' (OT_PRIVILEGE_REVOKED)?",
+        "Under Rule aedb3bf41a, clinical privilege revocation is permanent and immutable for legal audit. Once revoked, a grant cannot be extended, edited, or reactivated. If the clinician is cleared to practice again, issue a fresh grant via 'Grant Privilege' documenting the new Credentials Committee resolution."
+      ],
+      [
+        "Why does the Operating Theatre record refuse a doctor's signature with 'The hospital has not authorized this person for this (clinical privileges)' (OT_PRIVILEGE_REQUIRED)?",
+        "Healthcare statutory standards (MSDS COP 32, 39, 45) mandate that clinicians signing surgical charts, pre-anaesthesia assessments, anaesthesia logs, or recovery discharge orders hold active clinical privileges for that domain. If their privilege expired past its valid_until date or was revoked, signatures are refused. Open Clinical Privileges to grant or renew the practitioner's credentials."
+      ],
+      [
+        "How do I resolve 'This privilege record was updated by another user or terminal' (VERSION_CONFLICT)?",
+        "Another administrator updated or renewed this practitioner's record concurrently. The screen reloads the latest server state to prevent accidental overwrite. Inspect the fresh scope and dates, then re-apply your update if necessary."
+      ],
+      [
+        "Why are the Grant Privilege, Edit, and Revoke buttons disabled or hidden (FORBIDDEN)?",
+        "Modifying clinical privileges requires the 'ot.privilege.manage' permission (held by Hospital Owner, Hospital Director, Hospital Admin, and Clinic Director). Users with 'ot.status.view' have read-only access. In addition, when the Surgery service is Retiring (open_work view) or Retired (records view), new privilege creation is barred by Rule caf82033b4."
+      ],
+      [
+        "What does 'The referenced employee or department record does not exist' (REFERENCE_NOT_FOUND) mean?",
+        "The selected staff member is no longer present or active in the hospital HR employee master list. Verify that the clinician is registered with Active employment status in HR records before issuing privileges."
+      ]
+    ],
+    faqUr: [
+      [
+        "سکرین پر 'اس اہلکار کے پاس یہ اختیار پہلے سے موجود ہے: اس کی تجدید کریں یا منسوخ کریں' (OT_PRIVILEGE_EXISTS) کیوں آتا ہے؟",
+        "قاعدہ fe3c4d2fab کے تحت ہر معالج کے پاس ہر زمرے کے لیے بیک وقت صرف ایک ہی فعال اختیار ہو سکتا ہے۔ ڈپلیکیٹ اختیار مسترد کر دیا جاتا ہے۔ ان کے طریقہ کار تبدیل کرنے یا تاریخ بڑھانے کے لیے 'تجدید و ترمیم' کا بٹن دبائیں۔ اگر پرانا اختیار ختم کرنا ہو تو پہلے اسے منسوخ کریں پھر نیا جاری کریں۔"
+      ],
+      [
+        "سکرین پر 'یہ اختیار منسوخ کیا جا چکا ہے: اس کی جگہ نیا اختیار جاری کریں' (OT_PRIVILEGE_REVOKED) کیوں آتا ہے؟",
+        "قاعدہ aedb3bf41a کے تحت کلینیکل اختیار کی منسوخی قانونی طور پر حتمی اور ناقابل واپسی ہوتی ہے۔ منسوخ شدہ اختیار میں ترمیم یا توسیع نہیں ہو سکتی۔ اگر ڈاکٹر کو دوبارہ اجازت دینی ہو تو 'نیا اختیار جاری کریں' کے ذریعے نئی اسناد کے ساتھ نیا اندراج کریں۔"
+      ],
+      [
+        "آپریشن تھیٹر میں 'ہسپتال نے اس اہلکار کو اس طریقہ کار کے لیے مجاز نہیں کیا ہے' (OT_PRIVILEGE_REQUIRED) کے تحت دستخط کیوں مسترد ہوتے ہیں؟",
+        "طبی قواعد (ایم ایس ڈی ایس 32، 39، 45) کے مطابق آپریشن، اینستھیزیا اور ریکوری ڈسچارج کے لیے ڈاکٹر کے پاس فعال کلینیکل اختیار ہونا قانونی تقاضا ہے۔ اگر تاریخ گزر چکی ہو یا اختیار منسوخ ہو تو تھیٹر میں دستخط نہیں ہو سکتے۔ کلینیکل اختیارات میں جا کر ڈاکٹر کا ریکارڈ چیک اور تجدید کریں۔"
+      ],
+      [
+        "سکرین پر 'اس ریکارڈ کو کسی اور نے تبدیل کر دیا ہے' (VERSION_CONFLICT) آنے پر کیا کریں؟",
+        "کسی دوسرے ایڈمن نے آپ کے دیکھتے ہوئے اس ریکارڈ میں ترمیم کر دی ہے۔ سسٹم خودکار طور پر سرور سے تازہ ترین معلومات حاصل کرتا ہے۔ نئی تفصیلات دیکھیں اور اگر ضرورت ہو تو دوبارہ ترمیم درج کریں۔"
+      ],
+      [
+        "نیا اختیار جاری کرنے یا ترمیم و منسوخی کے بٹن غیر فعال یا غائب (FORBIDDEN) کیوں ہیں؟",
+        "اختیارات کے انتظام کے لیے 'ot.privilege.manage' کی اجازت درکار ہے جو ہسپتال مالک، ڈائریکٹر یا ایڈمن کے پاس ہوتی ہے۔ صرف دیکھنے کی اجازت والے صارفین کے لیے ریکارڈ ریڈ اونلی ہوتا ہے۔ نیز اگر سرجری سروس ریٹائر ہو رہی ہو تو نئے اختیارات بند ہو جاتے ہیں (قاعدہ caf82033b4)۔"
+      ],
+      [
+        "سکرین پر 'متعلقہ ملازم یا شعبے کا ریکارڈ نہیں ملا' (REFERENCE_NOT_FOUND) کا کیا مطلب ہے؟",
+        "منتخب کردہ ڈاکٹر ہسپتال کے ایچ آر ایمپلائی ڈیٹا بیس میں فعال حالت میں نہیں ہے۔ اختیار دینے سے پہلے ایچ آر میں ڈاکٹر کے ایکٹو ہونے کی تصدیق کریں۔"
+      ]
+    ]
+  },
   mlc_cases: {
     title: "Medico-legal cases",
     titleUr: "میڈیکو لیگل کیسز رجسٹر",
