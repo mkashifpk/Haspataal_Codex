@@ -273,6 +273,7 @@ export function checkHelp({
       "SterilePacksOT",
       "SterilePacksWard",
       "AnaesthesiaRecord",
+      "SurgicalRecordSurgeon",
     ].map((n) => `src/screens/${n}.tsx`),
   ];
   const used = new Set(),

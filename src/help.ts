@@ -8254,6 +8254,88 @@ consents_doctor: {
       ]
     ]
   },
+  surgical_record_surgeon: {
+    title: "Surgical record: pre-operative and operative notes",
+    titleUr: "سرجیکل ریکارڈ: قبل از آپریشن اور آپریشن کے نوٹس",
+    purpose: "Intra-operative surgical record, pre-operative clinical evaluation, informed operation consent, and operative note in surgeon workspace (MSDS COP 32, 33, 35, 38): Pre-operative note with ICD-10 provisional diagnosis and laterality marking (Rule 8bbdbdc51d), informed operation consent verification (form OPERATION, Rule 451c4b4945), operative note and post-operative care orders (Rule 2b25651d1e), primary surgeon signing as prerequisite for PACU discharge (OT_OPERATIVE_NOTE_REQUIRED, Rule 2b25651d1e), official A4 printable surgical record (Rule 40d4b7c1c0), post-finality retrospective correction addenda (Rule 9e9cb593cb), in-theatre adverse incident reporting (POST /incidents, Rule fe0c435dc9), active clinical privileges authorization check (Rule db3a19e806), and runtime service capability gating from GET /establishment views for screen_id surgical_record_surgeon under Rule 7bb3ca4e1d.",
+    purposeUr: "سرجن کے ورک اسپیس میں مکمل سرجیکل ریکارڈ، پری آپریٹو جائزہ، باخبر آپریشن رضامندی اور آپریٹو نوٹ (ایم ایس ڈی ایس 32، 33، 35، 38): آئی سی ڈی 10 عارضی تشخیص اور سائیڈ مارکنگ کے ساتھ پری آپریٹو نوٹ (قاعدہ 8bbdbdc51d)، آپریشن کی باخبر رضامندی کی تصدیق (فارم OPERATION، قاعدہ 451c4b4945)، آپریٹو نوٹ اور آپریشن کے بعد نگہداشت کے احکامات (قاعدہ 2b25651d1e)، پی اے سی یو ریکوری سے ڈسچارج کے لیے سرجن کے دستخط کی لازمی شرط (OT_OPERATIVE_NOTE_REQUIRED، قاعدہ 2b25651d1e)، سرکاری اے فور پرنٹ دستاویز (قاعدہ 40d4b7c1c0)، دستخط کے بعد آڈٹ تصحیحی اندراج (قاعدہ 9e9cb593cb)، تھیٹر میں پیش آنے والے ناخوشگوار واقعات کی رپورٹنگ (POST /incidents، قاعدہ fe0c435dc9)، کلینیکل مراعات کی تصدیق (قاعدہ db3a19e806) اور سروس صلاحیت کے تحت اسکرین کے اختیارات (قاعدہ 7bb3ca4e1d)۔",
+    steps: [
+      "Select the surgical case from the active clinical worklist or search by patient name, MRN, or procedure.",
+      "Verify the patient identity banner: Name, MRN, Age, Gender, Scheduled Procedure, Theatre Room, and Primary Surgeon.",
+      "On the Pre-Op Note tab, enter clinical history, provisional diagnosis, search ICD-10 terms, select laterality (Left, Right, Bilateral, NotApplicable), and enter the planned procedure.",
+      "Click 'Save Pre-Op Note' to commit the pre-operative evaluation before the WHO Surgical Safety Checklist Sign In pause (Rule 8bbdbdc51d).",
+      "On the Operation Consent tab, confirm proposed procedure, performing surgeon, risks, benefits, and alternatives discussed with the patient in their language (Rule 451c4b4945).",
+      "Execute consent by clicking 'Sign Consent', recording signer CNIC, relationship if surrogate decision-maker, and witness CNIC, marking consent as Given.",
+      "On the Operative Note tab, document procedures performed, post-op diagnosis, intra-operative findings, technique narrative, incision, and CDC wound classification (Rule 2b25651d1e).",
+      "Record estimated blood loss (EBL), fluid balance, blood transfusion, implants left in situ, surgical drains, tissue specimens sent to histopathology, and end condition.",
+      "Establish the post-operative plan: select ward monitoring interval (15, 30, 60, 120 min), and enter monitoring, analgesia/antibiotics, wound care, and nutrition instructions.",
+      "Click 'Sign Operative Note' to finalize and lock the record; this clears the PACU discharge prerequisite (Rule 2b25651d1e) and allows printing the complete A4 record (Rule 40d4b7c1c0)."
+    ],
+    stepsUr: [
+      "ایکٹو کلینیکل ورک لسٹ میں سے سرجیکل کیس منتخب کریں یا مریض کے نام، ایم آر این یا طریقہ کار کے ذریعے تلاش کریں۔",
+      "مریض کی شناخت کے بینر کی تصدیق کریں: نام، ایم آر این، عمر، جنس، مجوزہ طریقہ کار، تھیٹر روم اور پرائمری سرجن۔",
+      "پری آپ نوٹ ٹیب پر طبی تاریخ اور عارضی تشخیص درج کریں، آئی سی ڈی کوڈ تلاش کریں، سائیڈ (بایاں، دایاں، دونوں، لاگو نہیں) منتخب کریں اور تجویز کردہ طریقہ کار درج کریں۔",
+      "ڈبلیو ایچ او چیک لسٹ کے سائن ان وقفے سے قبل پری آپریٹو جائزہ محفوظ کرنے کے لیے 'پری آپ نوٹ محفوظ کریں' پر کلک کریں (قاعدہ 8bbdbdc51d)۔",
+      "آپریشن رضامندی ٹیب پر مریض کے ساتھ اس کی زبان میں زیر بحث لائے گئے طریقہ کار، سرجن، فوائد، خطرات اور متبادل کی تصدیق کریں (قاعدہ 451c4b4945)۔",
+      "رضامندی کی ونڈو میں سائنر کا شناختی کارڈ، سرپرست کا رشتہ اور گواہ کا شناختی کارڈ درج کر کے باخبر رضامندی مکمل کریں۔",
+      "آپریٹو نوٹ ٹیب پر انجام دیے گئے طریقہ کار، پوسٹ آپ تشخیص، فائنڈنگز، سرجیکل تکنیک، چیرے کی تفصیل اور زخم کی درجہ بندی درج کریں (قاعدہ 2b25651d1e)۔",
+      "خون کے ضیاع کا تخمینہ، فلوئڈ بیلنس، خون کی منتقلی، لگائے گئے امپلانٹس، ڈرینز، پیتھالوجی کے نمونے اور مریض کی اختتامی حالت درج کریں۔",
+      "آپریشن کے بعد کی نگہداشت کا پلان مرتب کریں: وارڈ معائنے کا وقفہ (15، 30، 60 یا 120 منٹ) منتخب کریں اور دوائیں، پٹی اور خوراک کی ہدایات درج کریں۔",
+      "آپریٹو نوٹ پر حتمی دستخط کرنے کے لیے 'آپریٹو نوٹ پر دستخط کریں' پر کلک کریں تاکہ ریکوری سے منتقلی ممکن ہو سکے اور سرکاری اے فور پرنٹ تیار کیا جا سکے (قاعدہ 2b25651d1e)۔"
+    ],
+    faq: [
+      [
+        "Why does the pre-operative note lock upon the WHO Surgical Safety Checklist Sign In pause?",
+        "Under Rule 8bbdbdc51d and MSDS COP 32, pre-operative clinical evaluation and surgical laterality/site marking must be established and committed prior to induction and checklist Sign In. Once Sign In is executed, the pre-op note becomes read-only to ensure theatre teams proceed based on immutable pre-operative findings."
+      ],
+      [
+        "Why is operation informed consent mandatory before surgical incision?",
+        "Under Rule 451c4b4945 and statutory medical law, informed surgical operation consent (form_code: 'OPERATION') must be in 'Given' status before Sign In and induction. Performing surgery without valid consent returns CONSENT_REQUIRED to protect patient bodily autonomy."
+      ],
+      [
+        "Why is a signed operative note required before PACU recovery discharge?",
+        "Under Rule 2b25651d1e, patients cannot be transferred from PACU recovery to an inpatient ward without a finalized operative note (OT_OPERATIVE_NOTE_REQUIRED). The surgeon's post-operative orders establish the mandatory vital signs monitoring interval and post-op care directions for the ward nurses."
+      ],
+      [
+        "What post-operative care sections are required to finalize the operative note?",
+        "Rule 2b25651d1e mandates five post-operative care components: monitoring interval and orders, analgesia and medications, wound/drain care, nutrition advancement, and referral/follow-up instructions. For negative findings, surgeons can toggle one-click 'None / Not needed' options."
+      ],
+      [
+        "How are retrospective corrections added to a finalized operative note?",
+        "Under Rule 9e9cb593cb, once an operative note is signed, direct edits are prohibited. The surgeon must submit a formal correction addendum via POST /ot/bookings/{id}/corrections specifying the section (PreOpNote or OperativeNote), the correction narrative, and an audit reason. The correction is appended to the permanent audit record."
+      ],
+      [
+        "How are in-theatre surgical complications and adverse incidents reported?",
+        "Under Rule fe0c435dc9, critical procedural complications (e.g. unanticipated blood loss, bowel perforation, foreign body retention) must be reported to the hospital safety committee via POST /incidents with area 'Surgery' or 'Theatre' and an immediate severity classification."
+      ]
+    ],
+    faqUr: [
+      [
+        "ڈبلیو ایچ او سیفٹی چیک لسٹ کے سائن ان پر پری آپ نوٹ کیوں لاک ہو جاتا ہے؟",
+        "قاعدہ 8bbdbdc51d اور ایم ایس ڈی ایس کے تحت قبل از آپریشن طبی جائزہ اور سائیڈ مارکنگ انڈکشن اور سائن ان سے قبل مکمل ہونا لازمی ہے۔ سائن ان کے بعد پری آپ نوٹ لاک ہو جاتا ہے تاکہ سرجیکل ٹیم مصدقہ معلومات پر ہی عمل کرے۔"
+      ],
+      [
+        "سرجیکل چیرے سے قبل آپریشن کی باخبر رضامندی کیوں لازمی ہے؟",
+        "قاعدہ 451c4b4945 اور طبی قوانین کے تحت آپریشن کی باخبر رضامندی (فارم OPERATION) انڈکشن اور سرجری سے قبل دی جا چکی ہونی چاہیے۔ رضامندی کے بغیر سرجری شروع کرنے پر سسٹم CONSENT_REQUIRED کا الرٹ دیتا ہے۔"
+      ],
+      [
+        "ریکوری سے ڈسچارج کے لیے آپریٹو نوٹ پر دستخط کیوں ضروری ہیں؟",
+        "قاعدہ 2b25651d1e کے تحت مریض کو آپریٹو نوٹ کے بغیر ریکوری سے وارڈ منتقل نہیں کیا جا سکتا (OT_OPERATIVE_NOTE_REQUIRED)۔ سرجن کی ہدایات سے ہی وارڈ نرسز کے لیے معائنے کا وقفہ اور نگہداشت کے احکامات طے پاتے ہیں۔"
+      ],
+      [
+        "آپریٹو نوٹ پر دستخط کے لیے نگہداشت کے کن شعبوں کی تکمیل لازمی ہے؟",
+        "قاعدہ 2b25651d1e کے تحت پانچ شعبے لازمی ہیں: معائنے کا وقفہ و ہدایات، درد کش ادویات، زخم و ڈرین کی دیکھ بھال، خوراک اور ریفرل ہدایات۔ غیر متعلقہ شعبوں کے لیے ون کلک آپشن موجود ہے۔"
+      ],
+      [
+        "دستخط شدہ آپریٹو نوٹ میں بعد ازاں درستی یا ترمیم کیسے شامل کی جاتی ہے؟",
+        "قاعدہ 9e9cb593cb کے تحت دستخط کے بعد براہ راست تبدیلی ممکن نہیں۔ سرجن POST /ot/bookings/{id}/corrections کے ذریعے تصحیحی نوٹ اور اس کی وجہ درج کر کے مستقل ریکارڈ کا حصہ بناتا ہے۔"
+      ],
+      [
+        "آپریشن تھیٹر میں پیش آنے والی پیچیدگیوں اور واقعات کی رپورٹنگ کیسے ہوتی ہے؟",
+        "قاعدہ fe0c435dc9 کے تحت سرجری کے دوران کسی غیر متوقع پیچیدگی یا حادثے کو ہسپتال کی سیفٹی کمیٹی کو POST /incidents کے ذریعے سرجری کے شعبے کے تحت رپورٹ کیا جاتا ہے۔"
+      ]
+    ]
+  },
       anaesthesia_record: {
     title: "Anaesthesia record and flowsheet",
     titleUr: "اینستھیزیا ریکارڈ اور فلو شیٹ",
