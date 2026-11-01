@@ -7300,6 +7300,88 @@ consents_doctor: {
       ],
     ],
   },
+  cssd_stock: {
+    title: "Sterile stock and issue",
+    titleUr: "سٹرائل سٹاک اور اجراء",
+    purpose: "Manage sterile instrument pack inventory with FIFO issuing prioritizing soonest expiry dates, barcode scanning into an issue dispatch basket, destination assignment to inpatient wards or operating theatres without patient names, single pack lifecycle history lookup, and hourly expired pack reprocessing under MSDS IPC 91 & 92.",
+    purposeUr: "ایم ایس ڈی ایس 91 اور 92 کے تحت سٹرائل آلات کے پیکس کی انوینٹری کا انتظام، پہلے ختم ہونے والی میعاد کے مطابق ترجیحی اجراء (FIFO)، بارکوڈ سکیننگ کے ذریعے اجراء کی ٹوکری میں پیکس کا اندراج، مریض کے نام کے بغیر وارڈز یا آپریشن تھیٹرز کو ترسیل، پیک کی تفصیلی تاریخ کی جانچ، اور ہر گھنٹے بعد میعاد ختم شدہ پیکس کو دوبارہ سٹرلائزیشن کے لیے جمع کرنا۔",
+    steps: [
+      "Open CSSD → Sterile stock and issue (cssd_stock) to view real-time sterile pack inventory, expiring-soon alerts, and issue dispatch controls.",
+      "Review available sterile packs: packs with status 'Available' are displayed sorted strictly by soonest expiry date first (Rule 613c123950).",
+      "Identify expiring-soon packs: items highlighted with an amber 'Expiring Soon' badge must be issued first to prevent expired instrument waste (Rule 613c123950).",
+      "Toggle expiring-only filter: click 'Show Expiring Soon Only' to isolate packs requiring urgent clinical dispatch before expiration.",
+      "Add packs to the issue basket: click '+ Basket' on any available pack row in the inventory table, or use the barcode scanner input.",
+      "Scan barcodes into basket: switch to the 'Issue Basket' tab or use the 'Scan pack barcode' field to scan 50mm pack labels directly into the basket using a handheld barcode reader (Rule 3834d11044).",
+      "Inspect pack lifecycle history: enter a pack code or click 'View' to inspect full sterilization cycle ID, sterilizer chamber, packaging date, and load operator via GET /cssd/packs/{pack_code}.",
+      "Select dispatch destination: choose destination type ('Inpatient Ward' or 'Operating Theatre'). Select specific ward from GET /beds/matrix (CSSD staff see ward names only, no patient names per Rule 5298373f7d) or operating theatre from GET /ot/theaters. Never type a freehand destination.",
+      "Confirm batch issue: verify scanned packs and selected destination, then click 'Confirm Issue' to submit POST /cssd/packs/issue. All packs are issued atomically; if any pack is unusable, expired, or missing, the server rejects the batch naming the offending pack code (Rule 3834d11044).",
+      "Collect expired packs for reprocessing: switch to the 'Expired Packs' tab to monitor packs flagged by the hourly background worker; remove them from stock and return to decontamination for repackaging and reprocessing (Rule 30768e8506)."
+    ],
+    stepsUr: [
+      "سی ایس ایس ڈی سے 'سٹرائل سٹاک اور اجراء' (cssd_stock) کھولیں تاکہ دستیاب سٹرائل پیکس، قریب المیعاد انتباہات اور اجراء کے کنٹرولز کا حقیقی وقت میں جائزہ لیا جا سکے۔",
+      "دستیاب سٹرائل پیکس کا جائزہ لیں: 'Available' حالت والے پیکس کو ہمیشہ پہلے ختم ہونے والی تاریخ کے مطابق ترتیب سے دکھایا جاتا ہے (قاعدہ 613c123950)۔",
+      "قریب المیعاد پیکس کی نشاندہی کریں: زرد رنگ کے 'قریب المیعاد' بیج والے پیکس کو ترجیحی بنیادوں پر جاری کریں تاکہ میعاد ختم ہونے کی وجہ سے سٹرائل آلات ضائع نہ ہوں (قاعدہ 613c123950)۔",
+      "صرف قریب المیعاد فلٹر کا استعمال کریں: 'صرف قریب المیعاد دکھائیں' چیک باکس پر کلک کریں تاکہ وہ پیکس فوری سامنے آ جائیں جن کی میعاد ختم ہونے والی ہے۔",
+      "پیکس کو اجراء کی ٹوکری میں شامل کریں: انوینٹری ٹیبل میں کسی بھی دستیاب پیک پر '+ ٹوکری' پر کلک کریں، یا بارکوڈ سکینر کا استعمال کریں۔",
+      "ٹوکری میں بارکوڈ سکین کریں: 'اجراء ٹوکری' ٹیب پر جائیں یا سکینر ان پٹ فیلڈ میں بارکوڈ ریڈر سے 50 ملی میٹر لیبل کا کوڈ سکین کریں (قاعدہ 3834d11044)۔",
+      "پیک کی مکمل تاریخ کا معائنہ کریں: پیک کوڈ درج کریں یا 'دیکھیں' پر کلک کریں تاکہ سٹرلائزیشن سائیکل، چیمبر، پیکنگ کی تاریخ اور آپریٹر کی تفصیلات حاصل کی جا سکیں (GET /cssd/packs/{pack_code})۔",
+      "ترسیل کی منزل کا انتخاب کریں: منزل کی قسم منتخب کریں ('وارڈ' یا 'آپریشن تھیٹر')۔ سرور لسٹ سے متعلقہ وارڈ یا تھیٹر منتخب کریں (سی ایس ایس ڈی عملے کو مریض کا نام نظر نہیں آتا قاعدہ 5298373f7d)۔ کبھی بھی دستی طور پر شناختی کوڈ نہ لکھیں۔",
+      "بیچ اجراء کی تصدیق کریں: سکین شدہ پیکس اور منتخب منزل کی تصدیق کریں اور POST /cssd/packs/issue کے ذریعے ترسیل مکمل کریں۔ اگر کوئی ایک پیک بھی ناقابل استعمال ہو تو سرور نام بتا کر بیچ مسترد کر دیتا ہے (قاعدہ 3834d11044)۔",
+      "میعاد ختم شدہ پیکس کو جمع کریں: 'میعاد ختم شدہ پیکس' ٹیب پر جا کر دیکھیں کہ کون سے پیکس کی میعاد ختم ہو چکی ہے؛ انہیں سٹاک سے ہٹا کر ڈی کنٹامینیشن کو دوبارہ پروسیسنگ کے لیے بھیجیں (قاعدہ 30768e8506)۔"
+    ],
+    faq: [
+      [
+        "Why are packs sorted by soonest expiry date first?",
+        "Rule 613c123950 enforces strict FIFO (First-In, First-Out) sterile stock management under MSDS IPC 91. Issuing older sterilization batches first prevents shelf-life expiration on sterile storage racks and avoids unnecessary reprocessing costs."
+      ],
+      [
+        "Can I issue packs directly to a specific patient?",
+        "No. Under Rule 5298373f7d, sterile packs are issued to inpatient wards (from GET /beds/matrix) or operating theatres (from GET /ot/theaters) as departments. CSSD personnel have no clinical access to patient MRNs or identities; patient allocation occurs at the bedside or operating table."
+      ],
+      [
+        "What happens if one pack in my basket is expired or in quarantine?",
+        "POST /cssd/packs/issue operates atomically under Rule 3834d11044. If even a single pack in the basket is not in 'Available' state, the server returns 409 CSSD_PACK_UNUSABLE naming the specific pack code so you can remove it and re-verify."
+      ],
+      [
+        "How do I add packs to the dispatch basket using a barcode scanner?",
+        "Connect any standard USB or Bluetooth 1D/2D barcode reader. Focus the 'Scan pack barcode' input field and scan the 50mm thermal adhesive label. The pack is instantly validated and added to the basket with a single scan."
+      ],
+      [
+        "What should I do with expired packs listed in the Expired tab?",
+        "Under Rule 30768e8506, an automated background worker checks pack shelf life every hour. Any pack whose expiry timestamp has passed is moved to 'Expired' status. CSSD technicians must retrieve physical packs from racks and send them to decontamination for complete reprocessing."
+      ],
+      [
+        "Can I issue packs when the CSSD service is inactive?",
+        "No. Rule 56077b4ba3 gates sterile supply operations on establishment active capabilities. When CSSD is inactive or in records-only view mode, the issue basket is disabled and dispatch buttons are hidden."
+      ]
+    ],
+    faqUr: [
+      [
+        "پیکس کو پہلے ختم ہونے والی میعاد کے لحاظ سے کیوں دکھایا جاتا ہے؟",
+        "ایم ایس ڈی ایس 91 کے تحت قاعدہ 613c123950 سخت فائیفو (پہلے تیار شدہ، پہلے جاری) اصول نافذ کرتا ہے۔ پرانے بیجز کو پہلے جاری کرنے سے سٹرائل سٹوریج میں میعاد ختم ہونے سے بچایا جاتا ہے اور اضافی اخراجات نہیں ہوتے۔"
+      ],
+      [
+        "کیا میں پیکس کو براہ راست کسی مخصوص مریض کے نام جاری کر سکتا ہوں؟",
+        "نہیں۔ قاعدہ 5298373f7d کے تحت سٹرائل پیکس صرف وارڈز یا آپریشن تھیٹرز کو جاری کیے جاتے ہیں۔ سی ایس ایس ڈی کے عملے کو مریضوں کے ریکارڈ یا ایم آر این تک رسائی نہیں ہوتی؛ مریض کو پیک کی تخصیص وارڈ یا تھیٹر میں کی جاتی ہے۔"
+      ],
+      [
+        "اگر ٹوکری میں موجود کوئی ایک پیک بھی میعاد ختم شدہ یا قرنطینہ میں ہو تو کیا ہوتا ہے؟",
+        "قاعدہ 3834d11044 کے تحت اجراء کا عمل مکمل طور پر اکٹھا ہوتا ہے۔ اگر ٹوکری میں ایک بھی پیک دستیاب نہ ہو تو سرور 409 CSSD_PACK_UNUSABLE کے ذریعے اس پیک کا نام ظاہر کر کے پورے عمل کو روک دیتا ہے۔"
+      ],
+      [
+        "بارکوڈ سکینر کے ذریعے ٹوکری میں پیکس کیسے شامل کیے جاتے ہیں؟",
+        "کوئی بھی معیاری بارکوڈ ریڈر لگائیں، 'بارکوڈ سکین کریں' کے خانے کو منتخب کریں اور 50 ملی میٹر لیبل کو سکین کریں۔ پیک خود بخود تصدیق ہو کر اجراء کی ٹوکری میں شامل ہو جاتا ہے۔"
+      ],
+      [
+        "میعاد ختم شدہ ٹیب میں موجود پیکس کا کیا کرنا چاہیے؟",
+        "قاعدہ 30768e8506 کے تحت ہر گھنٹے بعد خودکار سسٹم پیکس کی میعاد جانچتا ہے۔ میعاد ختم ہونے پر پیک 'Expired' ہو جاتا ہے۔ عملہ شیلف سے یہ پیکس نکال کر دوبارہ دھلائی اور نس بندی کے لیے بھیجتا ہے۔"
+      ],
+      [
+        "اگر سی ایس ایس ڈی سروس غیر فعال ہو تو کیا پیکس جاری کیے جا سکتے ہیں؟",
+        "نہیں۔ قاعدہ 56077b4ba3 کے مطابق ہسپتال کی فعال صلاحیتوں پر آپریشنز منحصر ہیں۔ غیر فعال حالت میں اجراء کی ٹوکری اور ترسیل کے بٹن معطل کر دیے جاتے ہیں۔"
+      ]
+    ]
+  },
   maternity_policy: {
     title: "High-risk pregnancy: our policy",
     titleUr: "ہائی رسک حمل: ہسپتال کی پالیسی",

@@ -20,6 +20,7 @@ export const phase1Screens = [
 const approvalScreens = ["approval_queue", "charity_approvals"];
 // Coverage grows screen by screen; Phase 1 acceptance remains separate.
 export const deliveredHelpScreens = [
+  "cssd_stock",
   "cssd_board",
   "cssd_setup",
   "theatre_checklist_setup",
@@ -122,6 +123,28 @@ const g = (
 // IDs are also attached to the actual controls. The build rejects missing
 // mappings and empty translations instead of treating a page as coverage.
 export const controlGuides: Record<string, ControlGuide> = {
+  // Screen 113: cssd_stock (Sterile stock and issue)
+  "cssd_stock.dismiss_alert_button": g(["cssd_stock"], ["Dismiss alert button", "انتباہ خارج کریں بٹن"], ["Dismisses the current error or warning banner.", "موجودہ انتباہ یا خرابی کے بینر کو بند کرتا ہے۔"]),
+  "cssd_stock.back_button": g(["cssd_stock"], ["Back button", "واپسی کا بٹن"], ["Navigates back to the CSSD dashboard.", "سٹرائل سپلائی کے مرکزی ڈیش بورڈ پر واپس جاتا ہے۔"]),
+  "cssd_stock.tab_stock": g(["cssd_stock"], ["Available stock tab", "دستیاب سٹاک ٹیب"], ["Switches to the sterile available packs inventory view.", "دستیاب سٹرائل پیکس کی فہرست اور تلاش پر منتقل ہوتا ہے۔"]),
+  "cssd_stock.tab_basket": g(["cssd_stock"], ["Issue basket tab", "اجراء ٹوکری ٹیب"], ["Switches to the pack issue basket and destination dispatch view.", "پیکس کے اجراء اور منزل کے انتخاب پر منتقل ہوتا ہے۔"]),
+  "cssd_stock.tab_expired": g(["cssd_stock"], ["Expired packs tab", "میعاد ختم شدہ پیکس ٹیب"], ["Switches to the expired packs list requiring collection for reprocessing.", "میعاد ختم شدہ پیکس کی دوبارہ پروسیسنگ کے لیے فہرست پر منتقل ہوتا ہے۔"]),
+  "cssd_stock.refresh_button": g(["cssd_stock"], ["Refresh stock button", "سٹاک ریفریش بٹن"], ["Reloads sterile stock, bed matrix, and theatre rooms from server.", "دستیاب سٹرائل سٹاک اور وارڈز و تھیٹرز کی فہرست دوبارہ لوڈ کرتا ہے۔"]),
+  "cssd_stock.search_stock_input": g(["cssd_stock"], ["Search stock input", "سٹاک تلاش ان پٹ"], ["Filters available stock packs by pack code or set name.", "پیک کوڈ یا سیٹ کے نام سے سٹرائل سٹاک کو تلاش کرتا ہے۔"]),
+  "cssd_stock.toggle_expiring_only": g(["cssd_stock"], ["Expiring soon toggle", "قریب المیعاد فلٹر چیک باکس"], ["Filters inventory to show only packs expiring soon (rule:613c123950).", "صرف وہ پیکس دکھاتا ہے جن کی میعاد ختم ہونے کے قریب ہے تاکہ انہیں پہلے جاری کیا جا سکے۔"]),
+  "cssd_stock.lookup_pack_input": g(["cssd_stock"], ["Pack lookup code input", "پیک کوڈ درج کریں"], ["Input field for entering pack code to view comprehensive pack lifecycle details.", "مکمل تفصیلات دیکھنے کے لیے پیک کا کوڈ درج کرنے کا خانہ۔"]),
+  "cssd_stock.lookup_pack_button": g(["cssd_stock"], ["Lookup pack button", "پیک تلاش بٹن"], ["Fetches pack lifecycle and history from GET /cssd/packs/{pack_code}.", "سرور سے مخصوص پیک کی تاریخ اور حیثیت حاصل کرتا ہے۔"]),
+  "cssd_stock.view_pack_button": g(["cssd_stock"], ["View pack button", "پیک دیکھیں بٹن"], ["Opens pack details modal for the selected sterile pack.", "منتخب سٹرائل پیک کی تفصیلات کا ماڈل کھولتا ہے۔"]),
+  "cssd_stock.add_to_basket_button": g(["cssd_stock"], ["Add to basket button", "ٹوکری میں شامل کریں بٹن"], ["Adds the available sterile pack into the issue basket for dispatch.", "سٹرائل پیک کو اجراء کی ٹوکری میں شامل کرتا ہے۔"]),
+  "cssd_stock.scan_barcode_input": g(["cssd_stock"], ["Scan barcode input", "بارکوڈ سکین ان پٹ"], ["Barcode scanner input for scanning pack label barcodes directly into the basket (rule:3834d11044).", "بارکوڈ سکینر سے پیک لیبل سکین کر کے ٹوکری میں شامل کرنے کا خانہ۔"]),
+  "cssd_stock.scan_add_button": g(["cssd_stock"], ["Scan and add button", "سکین کر کے شامل کریں بٹن"], ["Validates scanned barcode and appends pack to issue basket.", "سکین شدہ بارکوڈ کی تصدیق کر کے ٹوکری میں شامل کرتا ہے۔"]),
+  "cssd_stock.clear_basket_button": g(["cssd_stock"], ["Clear basket button", "ٹوکری خالی کریں بٹن"], ["Removes all scanned packs from the issue basket.", "اجراء کی ٹوکری سے تمام پیکس کو ہٹا دیتا ہے۔"]),
+  "cssd_stock.remove_from_basket_button": g(["cssd_stock"], ["Remove pack from basket button", "ٹوکری سے ہٹائیں بٹن"], ["Removes a single pack from the issue basket.", "اجراء کی ٹوکری سے مخصوص پیک کو خارج کرتا ہے۔"]),
+  "cssd_stock.destination_type_select": g(["cssd_stock"], ["Destination type select", "منزل کی قسم ڈراپ ڈاؤن"], ["Selects whether packs are issued to an inpatient ward or operating theatre (rule:5298373f7d).", "انتخاب کرتا ہے کہ پیکس وارڈ کو جاری کیے جا رہے ہیں یا آپریشن تھیٹر کو۔"]),
+  "cssd_stock.ward_select": g(["cssd_stock"], ["Destination ward select", "وارڈ منتخب کریں ڈراپ ڈاؤن"], ["Selects destination ward from GET /beds/matrix without patient names (rule:5298373f7d).", "سرور کے بستروں کی لسٹ سے بغیر مریض کے نام کے مطلوبہ وارڈ کا انتخاب کرتا ہے۔"]),
+  "cssd_stock.ot_select": g(["cssd_stock"], ["Destination theatre select", "آپریشن تھیٹر منتخب کریں ڈراپ ڈاؤن"], ["Selects destination operating theatre from GET /ot/theaters (rule:5298373f7d).", "سرور سے حاصل کردہ آپریشن تھیٹرز میں سے مطلوبہ تھیٹر کا انتخاب کرتا ہے۔"]),
+  "cssd_stock.confirm_issue_button": g(["cssd_stock"], ["Confirm issue button", "اجراء کی تصدیق کریں بٹن"], ["Submits batch pack dispatch via POST /cssd/packs/issue (rule:3834d11044).", "تمام پیکس کو منتخب وارڈ یا تھیٹر کو باضابطہ جاری کرتا ہے۔"]),
+  "cssd_stock.close_pack_modal_button": g(["cssd_stock"], ["Close pack modal button", "پیک ماڈل بند کریں بٹن"], ["Closes the pack detail inspection modal dialog.", "پیک کی تفصیلات کا ماڈل ڈائیلاگ بند کرتا ہے۔"]),
   "cssd_board.dismiss_alert_button": g(["cssd_board"], ["Dismiss alert notice button", "نوٹس بند کریں بٹن"], ["Dismisses the error or notification alert banner.", "اطلاع یا انتباہ کا بینر بند کرتا ہے۔"]),
   "cssd_board.back_button": g(["cssd_board"], ["Back to setup button", "واپس سیٹ اپ بٹن"], ["Navigates back to the CSSD setup and recalls management screen.", "سی ایس ایس ڈی سیٹ اپ اور ریکالز سکرین پر واپس جاتا ہے۔"]),
   "cssd_board.tab_board": g(["cssd_board"], ["Active board tab", "ایکٹو بورڈ ٹیب"], ["Switches to the active sterilization board and running cycles view.", "فعال نس بندی بورڈ اور جاری سائیکلز کے منظر پر منتقل ہوتا ہے۔"]),

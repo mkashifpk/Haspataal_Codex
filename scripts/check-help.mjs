@@ -262,6 +262,7 @@ export function checkHelp({
       "TheatreChecklistSetup",
       "CSSDSetup",
       "CSSDBoard",
+      "CSSDStock",
     ].map((n) => `src/screens/${n}.tsx`),
   ];
   const used = new Set(),
