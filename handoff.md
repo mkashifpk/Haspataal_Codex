@@ -1,7 +1,7 @@
 # Haspataal checkpoint
 Last updated: 01 November 2026, Antigravity (Codex pair), Asia/Karachi.
 
-## Active request: Phase 6 Screen 115 `ot_board` (Operating theatre operations board)
+## Active request: Phase 6 Screen 116 `pre_anaesthesia_clinic` (Pre-anaesthesia clinic)
 Executing the Phase 6 Roadmap ("Theatre and sterile supply") in dependency order along with all tests and MCP progress reporting:
 - Screen 108: **`transfusion_bedside_er`** ("Bedside transfusion observation - ER", Position 108, 74 points) — **COMPLETED** (commit `2803cf0`, Proposal **261** awaiting human review on `/docs -> My progress`). Marks Phase 5 100% complete!
 - Screen 109: **`clinical_privileges`** ("Clinical privileges", Position 109, 55 points) — **COMPLETED** (commit `5ddbd89`, Proposal **262** awaiting human review on `/docs -> My progress`). First screen of Phase 6!
@@ -10,50 +10,57 @@ Executing the Phase 6 Roadmap ("Theatre and sterile supply") in dependency order
 - Screen 112: **`cssd_board`** ("Sterilization board", Position 112, 67 points) — **COMPLETED** (commit `348ec1e`, Proposal **265** awaiting human review on `/docs -> My progress`).
 - Screen 113: **`cssd_stock`** ("Sterile stock and issue", Position 113, 56 points) — **COMPLETED** (commit `1fb7878`, Proposal **266** awaiting human review on `/docs -> My progress`). Completes the entire `cssd` workspace!
 - Screen 114: **`ot_scheduling`** ("OT request queue & calendar", Position 114, 63 points) — **COMPLETED** (commit `2671989`, Proposal **267** awaiting human review on `/docs -> My progress`).
-- Screen 115: **`ot_board`** ("Operating theatre operations board", Position 115, 36 points, workspace `theatre` / `ot_admin`) — **NEXT**.
+- Screen 115: **`ot_board`** ("Live OT status board", Position 115, 36 points) — **COMPLETED** (commit `c559db6`, Proposal **268** awaiting human review on `/docs -> My progress`).
+- Screen 116: **`pre_anaesthesia_clinic`** ("Pre-anaesthesia clinic", Position 116, 104 points, workspace `anaesthesia` / `doctor`) — **NEXT**.
+
+---
+
+### Completed Screen 115 (`ot_board`) Checkpoint
+- **Workflow & Standards**: Airport-style live operating theatre status board visible from any terminal; displays room readiness (🟢 Available / 🔴 In-Surgery / 🟡 Cleaning-Prep / ⚠️ Emergency Hold / ⚪ Out of Service), active surgical procedure and surgeon, timeline (actual start, expected end, elapsed duration), next scheduled procedure, with strictly zero patient names displayed under Rule 01511e9050 and MSDS COP 31-33; Position 115 (36 points), Workspace `*`.
+- **Contracts**:
+  - `contracts/ot_board.json`: Real MCP screen bundle covering 1 endpoint (`GET /ot/status-board`), 1 realtime event (`ot.status.updated`), and 2 statutory rules (`rule:01511e9050`, `rule:cc0fcec2de`).
+  - `src/generated/ot_board.ts`: Generated TypeScript contract for `TheaterBoardOut` and `statusBoard()`.
+- **Domain Policies & Statutory Rules (`src/ot-board-policy.ts`)**:
+  - Runtime service capability evaluation (`rule:cc0fcec2de`): `surgery` capability (`full`, `open_work`, `records`, `setup`, `hidden`).
+  - Status display indicators and icons (`rule:01511e9050`): Available (🟢), InSurgery (🔴), CleaningPrep (🟡), EmergencyHold (⚠️), OutOfService (⚪).
+  - Patient privacy enforcement (`rule:01511e9050`): guarantees no patient names appear on this public/terminal status board.
+  - Role permissions: `canViewOtStatus` (`ot.status.view`, `ot.booking.view`, `ot.booking.manage`, etc.).
+  - Bilingual error explanations for `FORBIDDEN`, `CAPABILITY_INACTIVE`, etc.
+- **UI Architecture (`src/screens/OTBoard.tsx`)**:
+  - Dual layout options: Grid card view and compact Airport Departure Table view.
+  - Room cards with live status badges, active case details (`<procedure> - <surgeon>`), timing indicators, and next scheduled case.
+  - Search by room name, suite code, or procedure.
+  - Status filter dropdown and room specialty type filter.
+  - Room inspection modal with detailed suite timeline and turnover status.
+  - Realtime synchronization via `ot.status.updated`.
+- **Help, Handbook & Navigation**:
+  - Wired into `src/App.tsx`, `src/foundation-catalogue.json` (1 task), `src/foundation-task-map.json` (1 control).
+  - Contextual F1 help (`src/foundation-help.ts`): added `ot_board` to `deliveredHelpScreens` and all 9 controls mapped.
+  - Authored comprehensive handbook entry (`src/help.ts`) with bilingual title, purpose, 8 operational steps, and 4 role FAQs.
+  - Bundled screenshots: `public/handbook/ot_board-en.png` and `public/handbook/ot_board-ur.png`.
+- **Verification**:
+  - Automated unit tests: `tests/ot-board.test.mjs` (7/7 passing).
+  - Full test suite: `npm test` passed (509/509 passing across all suites).
+  - Help check: `npm run check:help` passed (114 screens, 2654 controls, 1706 groups, 69 FAQ seeds, 30 workspace guides).
+  - TypeScript compiler: `npx tsc --noEmit` passed with 0 errors.
+  - Production build: `npm run build` succeeded (`dist/assets/index-bbPE-QGt.js`).
+- **Commit & Proposal**:
+  - Implementation commit: `c559db6`.
+  - Proposal ID: **268** (status: `pending` on `/docs -> My progress`).
 
 ---
 
 ### Completed Screen 114 (`ot_scheduling`) Checkpoint
 - **Workflow & Standards**: Operating theatre elective & emergency booking and scheduling, surgeon privileges verification, anaesthesia readiness, and room slot allocation with double-booking prevention and 20-minute turnover buffers under MSDS COP 31-33; Position 114 (63 points), Workspace `ot_admin`.
-- **Contracts**:
-  - `contracts/ot_scheduling.json`: Real MCP screen bundle covering 8 endpoints (`POST /ot/bookings/{booking_id}/cancel`, `POST /ot/theaters/{ot_id}/state`, `POST /ot/bookings`, `GET /ot/queue`, `GET /ot/calendar`, `POST /ot/bookings/{booking_id}/schedule`, `GET /ot/theaters`, `GET /ot/bookings`), 2 realtime events (`ot.booking.updated`, `ot.emergency_hold`), and 3 statutory rules (`rule:992db951e1`, `rule:b5f0fd9a68`, `rule:ae87186675`).
-  - `src/generated/ot_scheduling.ts`: Generated TypeScript contracts for all 8 operations and data models.
-- **Domain Policies & Statutory Rules (`src/ot-scheduling-policy.ts`)**:
-  - Runtime service capability evaluation (`rule:b5f0fd9a68`): `surgery` capability (`full`, `open_work` with banner, `records`, `setup`, `hidden`).
-  - Service Active requirement (`rule:ae87186675`): `POST /ot/bookings` offered only while surgery is in `establishment.active`.
-  - Double-booking prevention and automatic turnover buffer (`rule:992db951e1`): detects slot overlaps with existing bookings and mandatory 20-minute post-op room cleaning buffers; dynamically calculates and suggests the next free slot from the calendar.
-  - Role permissions: `canManageOt`, `canRequestOt`, `canViewOt`, and `canProvisionTheater`.
-  - Bilingual error explanations for `OT_DOUBLE_BOOKING`, `OT_PRIVILEGE_REQUIRED`, `CAPABILITY_INACTIVE`, `FORBIDDEN`, etc.
-- **UI Architecture (`src/screens/OTScheduling.tsx`)**:
-  - Schedule Calendar & Grid: displays active surgical cases across operating theatre suites by date with surgeon and anaesthesia details.
-  - Unscheduled Queue: priority-ranked queue of surgical requests awaiting theatre room and slot allocation (Rule 992db951e1).
-  - New Booking Request Modal: allows surgeons to submit elective, emergency, or code red procedure requests (POST /ot/bookings) with emergency justification requirement (Rule ae87186675).
-  - Slot Assignment & Double-Booking Safety Modal: schedules procedures into specific theatre suites; automatically enforces a mandatory 20-minute room cleaning turnover buffer and dynamically suggests the next non-conflicting free slot if an overlap is detected (Rule 992db951e1).
-  - Booking Cancellation Modal: cancels scheduled or requested bookings (POST /ot/bookings/{id}/cancel); returns scanned consumables automatically to stock.
-  - Theatre Readiness Management Modal: takes operating rooms out of service for fumigation/maintenance or restores them to active service (POST /ot/theaters/{id}/state).
-  - Real-Time Synchronization: reacts to `ot.booking.updated` and `ot.emergency_hold` real-time events to refresh calendar blocks and waiting queue.
-- **Help, Handbook & Navigation**:
-  - Wired into `src/App.tsx`, `src/foundation-catalogue.json` (8 tasks), `src/foundation-task-map.json` (8 controls).
-  - Contextual F1 help (`src/foundation-help.ts`): added `ot_scheduling` to `deliveredHelpScreens` and all 32 controls mapped.
-  - Authored comprehensive handbook entry (`src/help.ts`) with bilingual title, purpose, 10 operational steps, and 6 role FAQs for Theatre Coordinator / Surgeon.
-  - Bundled screenshots: `public/handbook/ot_scheduling-en.png` and `public/handbook/ot_scheduling-ur.png`.
-- **Verification**:
-  - Automated unit tests: `tests/ot-scheduling.test.mjs` (8/8 passing).
-  - Full test suite: `npm test` passed (502/502 passing across all suites).
-  - Help check: `npm run check:help` passed (113 screens, 2643 controls, 1697 groups, 69 FAQ seeds, 30 workspace guides).
-  - TypeScript compiler: `npx tsc --noEmit` passed with 0 errors.
-  - Production build: `npm run build` succeeded (`dist/assets/index-DkUqEpM3.js`).
-- **Commit & Proposal**:
-  - Implementation commit: `2671989`.
-  - Proposal ID: **267** (status: `pending` on `/docs -> My progress`).
+- **Contracts**: `contracts/ot_scheduling.json` (8 endpoints, 2 events, 3 rules); `src/generated/ot_scheduling.ts`.
+- **Verification**: `tests/ot-scheduling.test.mjs` (8/8 passing). Proposal ID: **267** (status: `pending` on `/docs -> My progress`).
 
 ---
 
 ### Completed Screen 113 (`cssd_stock`) Checkpoint
 - **Workflow & Standards**: Sterile instrument pack inventory management, FIFO stock issuing with soonest expiry prioritization, handheld barcode scanning into an issue dispatch basket, destination assignment to inpatient wards or operating theatres without patient names, single pack lifecycle history lookup, and hourly expired pack reprocessing under MSDS IPC 91 & 92; Position 113 (56 points), Workspace `cssd`.
 - **Contracts**: `contracts/cssd_stock.json` (5 endpoints, 1 event, 5 rules); `src/generated/cssd_stock.ts`.
-- **Verification**: `tests/cssd-stock.test.mjs` (7/7 passing). Proposal ID: **266** (status: `pending`).
+- **Verification**: `tests/cssd-stock.test.mjs` (7/7 passing). Proposal ID: **266** (status: `pending` on `/docs -> My progress`).
 
 ---
 
@@ -78,36 +85,39 @@ Executing the Phase 6 Roadmap ("Theatre and sterile supply") in dependency order
 
 ---
 
-## Plan for Screen 115 (`ot_board`)
-- **Workflow & Standards**: Operating theatre real-time board, room readiness tracking, active surgery stages (Sign In, Time Out, Sign Out), emergency hold overrides, and cleaning/prep monitoring under MSDS COP 31-33; Position 115 (36 points), Workspace `theatre` / `ot_admin`.
+## Plan for Screen 116 (`pre_anaesthesia_clinic`)
+- **Workflow & Standards**: Pre-anaesthesia evaluation (PAC), ASA physical status classification (I-VI, E for emergency), airway assessment (Mallampati I-IV, thyromental distance, neck mobility), fasting status verification (NPO guidelines), medical history and cardiac/pulmonary clearance, anaesthesia risk consent readiness under MSDS COP 31, 32, 39; Position 116 (104 points), Workspace `anaesthesia` / `doctor`.
 - **Bundle & Contracts**:
-  - Retrieve real screen bundle via `get_screen_bundle("ot_board")`.
-  - Quality brief via `get_ui_quality_brief(screen_id="ot_board")`.
-  - Generate TypeScript contracts (`src/generated/ot_board.ts`).
+  - Retrieve real screen bundle via `get_screen_bundle("pre_anaesthesia_clinic")`.
+  - Quality brief via `get_ui_quality_brief(screen_id="pre_anaesthesia_clinic")`.
+  - Generate TypeScript contracts (`src/generated/pre_anaesthesia_clinic.ts`).
   - Examine endpoints, rules, and rubric items.
-- **Domain Policies & Statutory Rules (`src/ot-board-policy.ts`)**:
-  - Theatre capability view evaluation (`surgery` service).
-  - Room occupancy and surgical lifecycle transitions.
-  - Emergency hold and cleaning prep monitoring.
+- **Domain Policies & Statutory Rules (`src/pre-anaesthesia-clinic-policy.ts`)**:
+  - Anaesthesia / surgery capability view evaluation.
+  - ASA physical status score classification rules.
+  - Mallampati airway scoring and difficult intubation risk flags.
+  - Fasting status bounds (solids vs clear liquids hours).
+  - Fitness for surgery clearance decision (Fit, Fit with High Risk, Unfit / Postpone).
   - Bilingual error explanations.
-- **UI Architecture (`src/screens/OTBoard.tsx`)**:
-  - Real-time operating room cards showing current case, surgical stage, surgeon, scrub team, and elapsed duration.
-  - Quick action controls for room turnover, emergency holds, and case transitions.
+- **UI Architecture (`src/screens/PreAnaesthesiaClinic.tsx`)**:
+  - PAC patient assessment worklist and pre-op booking queue.
+  - Comprehensive clinical assessment form: ASA score, Airway exam, Organ system review, NPO compliance, Investigations review.
+  - Fitness certification & anaesthesia plan selection (General, Spinal, Epidural, Regional, MAC, Local).
 - **Help, Handbook & Navigation**:
   - Contextual F1 help with all controls mapped in `src/foundation-help.ts`.
   - Task mapping in `src/foundation-catalogue.json` and `src/foundation-task-map.json`.
-  - Handbook entry in `src/help.ts` with role FAQs for OT Nurse / Board Coordinator.
-  - Bundled screenshots: `public/handbook/ot_board-en.png` and `ot_board-ur.png`.
+  - Handbook entry in `src/help.ts` with role FAQs for Anaesthetist / PAC Nurse.
+  - Bundled screenshots: `public/handbook/pre_anaesthesia_clinic-en.png` and `pre_anaesthesia_clinic-ur.png`.
 - **Automated Verification**:
-  - `tests/ot-board.test.mjs`.
+  - `tests/pre-anaesthesia-clinic.test.mjs`.
   - `npm test`, `npm run check:help`, `npx tsc --noEmit`, `npm run build`.
-  - Commit and submit `propose_progress` (Proposal 268).
+  - Commit and submit `propose_progress` (Proposal 269).
 
 ---
 
 ## Completed Screens Checkpoint
 - Proposals **231**, **232**, **233**, **234**, **235**, and **236** are accepted.
-- Proposals **237** through **267** are awaiting human review on `/docs -> My progress`.
+- Proposals **237** through **268** are awaiting human review on `/docs -> My progress`.
 - Completed screens in Phase 6 so far:
   - Screen 109: `clinical_privileges` (Proposal 262)
   - Screen 110: `theatre_checklist_setup` (Proposal 263)
@@ -115,3 +125,4 @@ Executing the Phase 6 Roadmap ("Theatre and sterile supply") in dependency order
   - Screen 112: `cssd_board` (Proposal 265)
   - Screen 113: `cssd_stock` (Proposal 266)
   - Screen 114: `ot_scheduling` (Proposal 267)
+  - Screen 115: `ot_board` (Proposal 268)
