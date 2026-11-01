@@ -7608,6 +7608,88 @@ consents_doctor: {
       ]
     ]
   },
+  consents_anaesthesia: {
+    title: "Consents to anaesthesia",
+    titleUr: "اینستھیزیا اور جراحی کی باضابطہ رضامندی",
+    purpose: "Statutory informed consent for anaesthetic techniques and surgical procedures, risk-benefit counseling in the patient's vernacular, legal decision-maker verification (who_decides), signature or thumb-print capture with witness, verbal refusal documentation, and scanned paperwork attachment under Rule e9d9f576df, Rule d84307d9b2, Rule fea5622fc5, Rule b7bacc1ffb, Rule cb2f327ee7, Rule 8b7301ca0f, Rule f811c03843, and MSDS COP 31, 32.",
+    purposeUr: "ایم ایس ڈی ایس سی او پی 31، 32 اور قواعد e9d9f576df، d84307d9b2، fea5622fc5، b7bacc1ffb، cb2f327ee7 کے تحت اینستھیزیا اور جراحی کی باضابطہ رضامندی، مریض کی مادری زبان میں خطرات اور متبادل کی کونسلنگ، قانونی سرپرست کی تصدیق، دستخط یا انگوٹھے کے نشان کا باضابطہ اندراج، زبانی انکار کی دستاویز اور دستخط شدہ کاغذ کی اسکیننگ۔",
+    steps: [
+      "Open Consents to anaesthesia from the Anaesthesia or Doctor workspace to review the pre-operative consent worklist.",
+      "Filter the worklist by timeframe (1, 3, 7, or 14 days) or check 'My patients only' to focus on your assigned surgical cases (Rule e9d9f576df).",
+      "Identify overdue consents highlighted with red alert badges; select a patient row and click 'Prepare' or 'Open Draft'.",
+      "Select the appropriate consent template (e.g. ANAESTHESIA) and the primary language understood by the patient (Rule d84307d9b2).",
+      "Complete mandatory clinical fields including proposed surgical procedure, performer, identified perioperative risks, expected benefits, and alternatives.",
+      "Review the declaration rendered in Nastaliq font (RTL for Urdu); verify understanding and toggle 'Read aloud to patient' if illiterate (Rule fea5622fc5).",
+      "Click 'Print Form' to generate the official bilingual bedside consent document with hospital header and legal signature lines.",
+      "Click 'Record Signature' and review server-determined signer authority (Rule cb2f327ee7): select Patient or legal DecisionMaker in priority order with CNIC and phone.",
+      "Record patient questions and answers, verify 'Understanding confirmed' checkbox, capture signature or thumb impression with witness, or record Emergency Note with concurring second doctor.",
+      "Following bedside signing, click 'Attach Signed Scan' to upload the signed paper document to patient records (Rule 8b7301ca0f)."
+    ],
+    stepsUr: [
+      "آپریشن سے قبل رضامندی کا جائزہ لینے کے لیے اینستھیزیا یا ڈاکٹر ورک اسپیس سے 'اینستھیزیا رضامندی' کھولیں۔",
+      "مطلوبہ ایام (1، 3، 7 یا 14 دن) کے مطابق فہرست فلٹر کریں یا اپنے مریض دیکھنے کے لیے 'میرے مریض' منتخب کریں (قاعدہ e9d9f576df)۔",
+      "سرخ انتباہ والے التواء شدہ کیسز کا جائزہ لیں اور فارم کھولنے کے لیے 'تیار کریں' یا 'ڈرافٹ کھولیں' پر کلک کریں۔",
+      "منظور شدہ رضامندی فارم اور مریض کی مادری زبان کا انتخاب کریں جس میں وہ باآسانی سمجھ سکے (قاعدہ d84307d9b2)۔",
+      "لازمی طبی خانے پر کریں: سرجری کا نام، معالج، متوقع طبی خطرات، فوائد اور متبادل طریقوں کی تفصیل۔",
+      "اردو نستعلیق میں فارم کا متن دیکھیں؛ ناخواندہ مریضوں کے لیے 'پڑھ کر سنایا گیا' کا انتخاب کریں (قاعدہ fea5622fc5)۔",
+      "ہسپتال کے باضابطہ دستخطی فارم کا پرنٹ نکالنے کے لیے 'پرنٹ فارم' پر کلک کریں۔",
+      "دستخط ریکارڈ کرنے کے لیے 'دستخط درج کریں' کھولیں اور سرور کی پالیسی کے مطابق مریض یا قانونی سرپرست کا ترجیحی انتخاب کریں (قاعدہ cb2f327ee7)۔",
+      "مریض کے سوالات اور جوابات درج کریں، فہم کی تصدیق پر نشان لگائیں، دستخط یا انگوٹھے کا نشان بمعہ گواہ محفوظ کریں، یا ہنگامی نوٹ درج کریں۔",
+      "دستخط شدہ کاغذ کی تصویر یا پی ڈی ایف اپ لوڈ کرنے کے لیے 'اسکین منسلک کریں' پر کلک کریں (قاعدہ 8b7301ca0f)۔"
+    ],
+    faq: [
+      [
+        "Who is authorized to take and explain an anaesthesia consent?",
+        "Under Rule f811c03843 and MSDS COP 31, anaesthesia consents must be explained and taken by a qualified doctor of the anaesthesia team (CONSENT_TAKER_NOT_AUTHORIZED). Other staff cannot sign off on anaesthetic risk explanations."
+      ],
+      [
+        "Can a minor patient sign their own anaesthesia consent?",
+        "No. Under Rule cb2f327ee7, the server determines legal consent age via who_decides. If patient_may_sign is false, the terminal strictly requires an authorized DecisionMaker (e.g. Parent or Guardian) in the statutory priority order."
+      ],
+      [
+        "What is required when a patient consents via thumb impression?",
+        "Under Rule b7bacc1ffb, when signer mark is set to ThumbImpression, a complete witness name and staff role are strictly mandatory to ensure legal validity and prevent identity disputes."
+      ],
+      [
+        "How is emergency surgery handled when no family or guardian is present?",
+        "Under Rule b7bacc1ffb, clinicians select mode EmergencyNote, documenting the urgent clinical rationale why treatment could not wait, and require concurrence from a second PMDC-registered doctor when mandated by hospital policy."
+      ],
+      [
+        "What happens if a patient refuses the proposed anaesthetic technique?",
+        "Under Rule b7bacc1ffb, clinicians record an informed refusal (POST /consents/{id}/refuse) documenting the patient's own words. Verbal refusals strictly require a staff witness. A refused consent prevents surgical sign-in."
+      ],
+      [
+        "Can a finalized or signed consent be edited directly?",
+        "No. Under Rule 8b7301ca0f, once a consent is marked Given or Refused, it is permanent. To alter the consent decision, it must be formally withdrawn (with a recorded reason) and a fresh consent prepared and signed."
+      ]
+    ],
+    faqUr: [
+      [
+        "اینستھیزیا رضامندی لینے اور کونسلنگ کرنے کا مجاز کون ہے؟",
+        "قاعدہ f811c03843 اور ایم ایس ڈی ایس کے تحت اینستھیزیا رضامندی اینستھیزیا ٹیم کے مستند ڈاکٹر کے ذریعے ہی لی جا سکتی ہے۔ دیگر عملہ یہ کونسلنگ نہیں کر سکتا۔"
+      ],
+      [
+        "کیا نابالغ مریض اپنے اینستھیزیا فارم پر خود دستخط کر سکتا ہے؟",
+        "نہیں۔ قاعدہ cb2f327ee7 کے مطابق عمر کا تعین سرور کرتا ہے۔ نابالغ مریض کے لیے لازمی قانونی سرپرست (والدین/گارڈین) کے دستخط ترجیحی ترتیب میں درکار ہوتے ہیں۔"
+      ],
+      [
+        "انگوٹھے کے نشان سے رضامندی کی صورت میں کیا تقاضے ہیں؟",
+        "قاعدہ b7bacc1ffb کے تحت انگوٹھے کے نشان کی تصدیق کے لیے آزاد گواہ کا مکمل نام اور عہدہ درج کرنا قانونی طور پر لازمی ہے۔"
+      ],
+      [
+        "اگر ایمرجنسی میں کوئی سرپرست موجود نہ ہو تو کیا طریقہ کار ہے؟",
+        "قاعدہ b7bacc1ffb کے تحت ایمرجنسی نوٹ درج کیا جاتا ہے کہ جان بچانے کے لیے تاخیر ممکن نہ تھی، اور پالیسی کے مطابق دوسرے مستند ڈاکٹر کی توثیق شامل کی جاتی ہے۔"
+      ],
+      [
+        "اگر مریض اینستھیزیا سے انکار کر دے تو کیا ہوتا ہے؟",
+        "قاعدہ b7bacc1ffb کے تحت مریض کے اپنے الفاظ میں انکار کا اندراج کیا جاتا ہے جس پر گواہ کے دستخط ہوتے ہیں۔ انکار کی صورت میں مریض کو آپریشن تھیٹر نہیں بھیجا جا سکتا۔"
+      ],
+      [
+        "کیا دستخط شدہ رضامندی میں براہ راست ترمیم ہو سکتی ہے؟",
+        "نہیں۔ قاعدہ 8b7301ca0f کے تحت حتمی فارم مستقل بن جاتا ہے۔ کسی بھی تبدیلی کے لیے پرانا فارم باضابطہ منسوخ کر کے نیا فارم تیار کرنا پڑتا ہے۔"
+      ]
+    ]
+  },
   maternity_policy: {
     title: "High-risk pregnancy: our policy",
     titleUr: "ہائی رسک حمل: ہسپتال کی پالیسی",

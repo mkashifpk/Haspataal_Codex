@@ -266,6 +266,7 @@ export function checkHelp({
       "OTScheduling",
       "OTBoard",
       "PreAnaesthesiaClinic",
+      "ConsentsAnaesthesia",
     ].map((n) => `src/screens/${n}.tsx`),
   ];
   const used = new Set(),
