@@ -1,7 +1,7 @@
 # Haspataal checkpoint
 Last updated: 01 November 2026, Antigravity (Codex pair), Asia/Karachi.
 
-## Active request: Phase 6 Screen 130 `recovery_board_anaesthesia` (Live PACU recovery board - Anaesthesia workspace)
+## Active request: Phase 6 Screen 131 `transfusion_bedside_ot` (Bedside transfusion observation - OT workspace)
 Executing the Phase 6 Roadmap ("Theatre and sterile supply") in dependency order along with all tests and MCP progress reporting:
 - Screen 108: **`transfusion_bedside_er`** ("Bedside transfusion observation - ER", Position 108, 74 points) — **COMPLETED** (commit `2803cf0`, Proposal **261** awaiting human review on `/docs -> My progress`). Marks Phase 5 100% complete!
 - Screen 109: **`clinical_privileges`** ("Clinical privileges", Position 109, 55 points) — **COMPLETED** (commit `5ddbd89`, Proposal **262** awaiting human review on `/docs -> My progress`). First screen of Phase 6!
@@ -25,7 +25,40 @@ Executing the Phase 6 Roadmap ("Theatre and sterile supply") in dependency order
 - Screen 127: **`surgical_record_surgeon`** ("Surgical record: operative note & closure", Position 127, 123 points, workspace `doctor` / `surgeon`) — **COMPLETED** (commit `6178963`, Proposal **280** awaiting human review on `/docs -> My progress`).
 - Screen 128: **`recovery_board`** ("Live PACU recovery board", Position 128, 65 points, workspace `ot_nurse`) — **COMPLETED** (commit `4e8f4db`, Proposal **281** awaiting human review on `/docs -> My progress`).
 - Screen 129: **`recovery_board_admin`** ("Live PACU recovery board - OT Admin", Position 129, 65 points, workspace `ot_admin`) — **COMPLETED** (commit `7cf0069`, Proposal **282** awaiting human review on `/docs -> My progress`).
-- Screen 130: **`recovery_board_anaesthesia`** ("Live PACU recovery board - Anaesthesia", Position 130, 65 points, workspace `anaesthesia`) — **READY TO IMPLEMENT**.
+- Screen 130: **`recovery_board_anaesthesia`** ("Live PACU recovery board - Anaesthesia", Position 130, 65 points, workspace `anaesthesia`) — **COMPLETED** (commit `6c9c9da`, Proposal **283** awaiting human review on `/docs -> My progress`). All 3 recovery board workspaces completed!
+- Screen 131: **`transfusion_bedside_ot`** ("Bedside transfusion observation - OT", Position 131, 74 points, workspace `ot_nurse`) — **READY TO IMPLEMENT**.
+
+---
+
+### Completed Screen 130 (`recovery_board_anaesthesia`) Checkpoint
+- **Workflow & Standards**: Live PACU recovery board in `anaesthesia` workspace (MSDS COP 38, 39, 41, 46):
+  - PACU Clinical Recovery Worklist & Queue (`rule:f995066a59`, MSDS COP 38): Patient cards sorted longest-in-recovery first (`minutes_in_recovery` descending) for close anaesthetic emergence monitoring.
+  - Status & Warning Badges: Alerts anaesthetists with prominent badges (`NoObservation` and `ObservationOverdue` in bold red, `LongStay` in amber, `OperativeNoteUnsigned` and `AnaesthesiaRecordOpen`).
+  - PACU Discharge Prerequisite Alert Banner: Identifies holds (unsigned operative note or open anaesthesia record) preventing patient transfer to inpatient wards.
+  - Physiological Observation Flowsheet Modal (`rule:08ba1ce134`, MSDS COP 38): Multi-system vital signs charting (pulse, BP systolic/diastolic, respiratory rate, SpO2, airway patency, AVPU consciousness, pain score 0–10 NRS, temperature, nausea/PONV) via `POST /ot/bookings/{id}/recovery/observations`.
+  - Modified Aldrete Discharge Scoring & Transfer Out Modal (`rule:99dea44a26`, MSDS COP 39, 41): Destination selector (Ward, ICU, HDU, Home, ReturnedToTheatre, Died), 5 Modified Aldrete signs scored 0–2 against `targets.min_score` (target ≥9), and clinical override rationale field for premature transfers (`OT_RECOVERY_CRITERIA_NOT_MET`).
+  - Local Anaesthesia Direct Intake (`rule:1653612103`): Opens PACU recovery stay via `POST /ot/bookings/{id}/recovery`.
+  - Post-Finality Corrections & Incident Reporting: Retrospective audit correction addenda via `POST /ot/bookings/{id}/corrections` (`rule:9e9cb593cb`) and adverse event reporting directly to hospital QA via `POST /incidents` (`rule:fe0c435dc9`).
+  - Realtime Synchronization: Subscribes to `ot.clinical.updated` WebSocket events to refresh the live board automatically.
+  - Runtime service capability gating from `GET /establishment` views for `screen_id: "recovery_board_anaesthesia"` under Rule b919e98af8; Position 130 (65 points), Workspace `anaesthesia`.
+- **Contracts**: `contracts/recovery_board_anaesthesia.json` (saved with `max_chars: 200000`, 8 endpoints, 1 realtime event, 5 statutory rules, 25 rubric items).
+- **Domain Policies & Statutory Rules (`src/recovery-board-policy.ts`)**:
+  - Gated under `rule:b919e98af8` for `recovery_board_anaesthesia`.
+  - Permissions and roles verified for `anaesthetist`.
+- **UI Architecture (`src/screens/RecoveryBoard.tsx`)**:
+  - Reused `RecoveryBoard` component with `screenId="recovery_board_anaesthesia"`.
+  - Wired into `src/App.tsx`, `src/foundation-catalogue.json` (8 tasks), `src/foundation-task-map.json` (8 controls), and `src/foundation-help.ts` (all 43 controls mapped).
+  - Authored comprehensive handbook entry (`src/help.ts`) with bilingual title, purpose, 8 operational steps, and 5 role FAQs for `anaesthetist`. Bundled screenshots in `public/handbook/recovery_board_anaesthesia-en.png` and `recovery_board_anaesthesia-ur.png`.
+- **Verification**:
+  - Automated unit tests: `tests/recovery-board-anaesthesia.test.mjs` (7/7 passing).
+  - Help check: `npm run check:help` passed (129 screens, 3047 controls, 2064 groups, 69 FAQ seeds, 30 workspace guides).
+  - Help coverage test: `tests/help-coverage.test.mjs` (28/28 passing).
+  - Full test suite: `npm test` passed (615/615 passing across all suites).
+  - TypeScript compiler: `npx tsc --noEmit` passed with 0 errors.
+  - Production build: `npm run build` succeeded (`dist/assets/index-DEyuFJZh.js`).
+- **Commit & Proposal**:
+  - Implementation commit: `6c9c9da`.
+  - Proposal ID: **283** (status: `pending` on `/docs -> My progress`).
 
 ---
 
