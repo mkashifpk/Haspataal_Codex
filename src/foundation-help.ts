@@ -20,6 +20,7 @@ export const phase1Screens = [
 const approvalScreens = ["approval_queue", "charity_approvals"];
 // Coverage grows screen by screen; Phase 1 acceptance remains separate.
 export const deliveredHelpScreens = [
+  "sterile_packs_ot_admin",
   "sterile_packs_ot",
   "ot_intraop",
   "ot_consumables_nurse",
@@ -133,18 +134,18 @@ const g = (
 // IDs are also attached to the actual controls. The build rejects missing
 // mappings and empty translations instead of treating a page as coverage.
 export const controlGuides: Record<string, ControlGuide> = {
-  // Screen 123: sterile_packs_ot (Sterile packs: scan when opened - OT Nurse)
-  "sterile_packs.refresh_button": g(["sterile_packs_ot"], ["Refresh sterile packs button", "تازہ کاری بٹن"], ["Refreshes the sterile packs inventory and active cases.", "سٹرائل پیکس اور سرجیکل کیسز کی فہرست کو تازہ کرتا ہے۔"]),
-  "sterile_packs.recall_filter": g(["sterile_packs_ot"], ["Filter recalled packs button", "منسوخ شدہ فلٹر"], ["Filters the packs ledger to display recalled items immediately.", "واپس منگوائے گئے پیکس کو فوری فلٹر کرتا ہے۔"]),
-  "sterile_packs.dismiss_alert": g(["sterile_packs_ot"], ["Dismiss alert banner", "اطلاع ختم کریں"], ["Dismisses status or recall alert message banner.", "پیغام یا اطلاع کے بینر کو بند کرتا ہے۔"]),
-  "sterile_packs.case_search": g(["sterile_packs_ot"], ["Search surgical cases input", "کیس تلاش کریں"], ["Filters surgical cases by patient name, MRN, procedure, or OT room.", "مریض کے نام، ایم آر این یا تھیٹر سے سرجیکل کیس تلاش کرتا ہے۔"]),
-  "sterile_packs.case_select": g(["sterile_packs_ot"], ["Select surgical case button", "کیس منتخب کریں"], ["Selects the active surgical case to link scanned sterile packs (Rule d8f4d7af47).", "سرجری منتخب کرتا ہے تاکہ سٹرائل پیک اس سے منسلک ہو سکے (قاعدہ d8f4d7af47)۔"]),
-  "sterile_packs.barcode_input": g(["sterile_packs_ot"], ["Pack barcode scanner input", "بارکوڈ ان پٹ"], ["Scans or enters the sterile pack barcode label as it is opened (MSDS IPC 92).", "کھولے جانے والے سٹرائل پیک کا بارکوڈ اسکین یا درج کرتا ہے۔"]),
-  "sterile_packs.lookup_button": g(["sterile_packs_ot"], ["Inspect sterile pack button", "پیک کی جانچ"], ["Looks up pack sterilization and expiry details from GET /cssd/packs/{code}.", "پیک کی سٹرلائزیشن اور ایکسپائری کی تفصیلات جانچتا ہے۔"]),
-  "sterile_packs.clear_pack": g(["sterile_packs_ot"], ["Clear scanned pack button", "پیک صاف کریں"], ["Clears the inspected pack card without recording use.", "جانچے گئے پیک کا کارڈ ہٹاتا ہے۔"]),
-  "sterile_packs.use_button": g(["sterile_packs_ot"], ["Record pack opened button", "پیک کا اندراج کریں"], ["Records pack opened for surgery via POST /cssd/packs/use (Rule d8f4d7af47).", "سرجری کے دوران سٹرائل پیک کے استعمال کا اندراج کرتا ہے۔"]),
-  "sterile_packs.search_input": g(["sterile_packs_ot"], ["Filter packs ledger input", "پیکس تلاش کریں"], ["Filters the sterile packs ledger by code, set name, or patient.", "سٹرائل پیکس کے رجسٹر کو نام یا کوڈ سے فلٹر کرتا ہے۔"]),
-  "sterile_packs.status_filter": g(["sterile_packs_ot"], ["Pack status filter dropdown", "اسٹیٹس فلٹر"], ["Filters packs ledger by lifecycle status (Available, Issued, Used, Recalled).", "پیکس کو کیفیت کی بنیاد پر فلٹر کرتا ہے۔"]),
+  // Screen 123: sterile_packs_ot, Screen 124: sterile_packs_ot_admin
+  "sterile_packs.refresh_button": g(["sterile_packs_ot", "sterile_packs_ot_admin"], ["Refresh sterile packs button", "تازہ کاری بٹن"], ["Refreshes the sterile packs inventory and active cases.", "سٹرائل پیکس اور سرجیکل کیسز کی فہرست کو تازہ کرتا ہے۔"]),
+  "sterile_packs.recall_filter": g(["sterile_packs_ot", "sterile_packs_ot_admin"], ["Filter recalled packs button", "منسوخ شدہ فلٹر"], ["Filters the packs ledger to display recalled items immediately.", "واپس منگوائے گئے پیکس کو فوری فلٹر کرتا ہے۔"]),
+  "sterile_packs.dismiss_alert": g(["sterile_packs_ot", "sterile_packs_ot_admin"], ["Dismiss alert banner", "اطلاع ختم کریں"], ["Dismisses status or recall alert message banner.", "پیغام یا اطلاع کے بینر کو بند کرتا ہے۔"]),
+  "sterile_packs.case_search": g(["sterile_packs_ot", "sterile_packs_ot_admin"], ["Search surgical cases input", "کیس تلاش کریں"], ["Filters surgical cases by patient name, MRN, procedure, or OT room.", "مریض کے نام، ایم آر این یا تھیٹر سے سرجیکل کیس تلاش کرتا ہے۔"]),
+  "sterile_packs.case_select": g(["sterile_packs_ot", "sterile_packs_ot_admin"], ["Select surgical case button", "کیس منتخب کریں"], ["Selects the active surgical case to link scanned sterile packs (Rule d8f4d7af47).", "سرجری منتخب کرتا ہے تاکہ سٹرائل پیک اس سے منسلک ہو سکے (قاعدہ d8f4d7af47)۔"]),
+  "sterile_packs.barcode_input": g(["sterile_packs_ot", "sterile_packs_ot_admin"], ["Pack barcode scanner input", "بارکوڈ ان پٹ"], ["Scans or enters the sterile pack barcode label as it is opened (MSDS IPC 92).", "کھولے جانے والے سٹرائل پیک کا بارکوڈ اسکین یا درج کرتا ہے۔"]),
+  "sterile_packs.lookup_button": g(["sterile_packs_ot", "sterile_packs_ot_admin"], ["Inspect sterile pack button", "پیک کی جانچ"], ["Looks up pack sterilization and expiry details from GET /cssd/packs/{code}.", "پیک کی سٹرلائزیشن اور ایکسپائری کی تفصیلات جانچتا ہے۔"]),
+  "sterile_packs.clear_pack": g(["sterile_packs_ot", "sterile_packs_ot_admin"], ["Clear scanned pack button", "پیک صاف کریں"], ["Clears the inspected pack card without recording use.", "جانچے گئے پیک کا کارڈ ہٹاتا ہے۔"]),
+  "sterile_packs.use_button": g(["sterile_packs_ot", "sterile_packs_ot_admin"], ["Record pack opened button", "پیک کا اندراج کریں"], ["Records pack opened for surgery via POST /cssd/packs/use (Rule d8f4d7af47).", "سرجری کے دوران سٹرائل پیک کے استعمال کا اندراج کرتا ہے۔"]),
+  "sterile_packs.search_input": g(["sterile_packs_ot", "sterile_packs_ot_admin"], ["Filter packs ledger input", "پیکس تلاش کریں"], ["Filters the sterile packs ledger by code, set name, or patient.", "سٹرائل پیکس کے رجسٹر کو نام یا کوڈ سے فلٹر کرتا ہے۔"]),
+  "sterile_packs.status_filter": g(["sterile_packs_ot", "sterile_packs_ot_admin"], ["Pack status filter dropdown", "اسٹیٹس فلٹر"], ["Filters packs ledger by lifecycle status (Available, Issued, Used, Recalled).", "پیکس کو کیفیت کی بنیاد پر فلٹر کرتا ہے۔"]),
   // Screen 122: ot_intraop (Intra-op consumables - OT Admin)
   "ot_intraop.dismiss_alert": g(["ot_intraop"], ["Dismiss alert banner", "انتباہ خارج کریں"], ["Dismisses status or error message banner.", "انتباہی پیغام کو بند کرتا ہے۔"]),
   "ot_intraop.setup_link": g(["ot_intraop"], ["Facility Settings link", "سہولت کی ترتیبات"], ["Opens Facility settings when surgical service setup is required.", "جب سروس کی ترتیب درکار ہو تو سہولت کی ترتیبات کھولتا ہے۔"]),

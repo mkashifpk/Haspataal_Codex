@@ -21,6 +21,7 @@ import {
 } from "../sterile-packs-policy";
 
 interface SterilePacksOTProps {
+  screenId?: string;
   establishment?: EstablishmentOut | null;
   currentUser?: ClinicalUser | null;
   connected?: boolean;
@@ -31,6 +32,7 @@ interface SterilePacksOTProps {
 }
 
 export const SterilePacksOT: React.FC<SterilePacksOTProps> = ({
+  screenId = "sterile_packs_ot",
   establishment,
   currentUser,
   connected = true,
@@ -41,10 +43,10 @@ export const SterilePacksOT: React.FC<SterilePacksOTProps> = ({
 }) => {
   const navigate = onNavigate || onNavigateScreen;
 
-  // Screen capability view mode (Rule 26e45f89a1)
+  // Screen capability view mode (Rule 26e45f89a1 / Rule d897ee980e)
   const viewMode = useMemo(
-    () => getSterilePacksScreenView(establishment, "sterile_packs_ot"),
-    [establishment]
+    () => getSterilePacksScreenView(establishment, screenId),
+    [establishment, screenId]
   );
 
   const canUse = useMemo(() => canUsePack(currentUser), [currentUser]);

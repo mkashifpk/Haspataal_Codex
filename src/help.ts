@@ -8174,6 +8174,86 @@ consents_doctor: {
       ]
     ]
   },
+  sterile_packs_ot_admin: {
+    title: "Sterile packs audit",
+    titleUr: "جراثیم سے پاک پیکس کا آڈٹ (او ٹی ایڈمن)",
+    purpose: "Point-of-use scanning, administrative oversight, and sterility audit of sterile instrument packs in the OT Admin workspace (POST /cssd/packs/use) linked to surgical bookings for statutory MSDS IPC 91 & 92 infection prevention traceability, verification of pack sterility and expiration bounds with expiring-soon warnings (Rule 5eabbbecca), critical CSSD recall response and quarantine procedures (Rule 4357be8acb), and runtime service capability gating from GET /establishment views for screen_id sterile_packs_ot_admin under Rule d897ee980e.",
+    purposeUr: "او ٹی ایڈمن ورک اسپیس میں سٹرائل پیکس کی اسکیننگ، انتظامی نگرانی اور جراثیم سے پاک ہونے کا آڈٹ (قاعدہ d8f4d7af47، ایم ایس ڈی ایس آئی پی سی 91 و 92)، زائد المیعاد یا فیل شدہ پیکس کی سخت ممانعت (قاعدہ 5eabbbecca)، سٹرلائزیشن سائیکل کی واپسی کی ہنگامی صورتحال میں فوری قرنطینہ (قاعدہ 4357be8acb) اور قاعدہ d897ee980e کے تحت سی ایس ایس ڈی سروس کی تصدیق۔",
+    steps: [
+      "Select the target surgical case from the theatre cases queue or search by patient name, MRN, or procedure.",
+      "Inspect the patient context identity banner verifying Patient Name, MRN, Theatre Suite, Primary Surgeon, and Operative Status.",
+      "Scan the sterile pack barcode label into the scanner input or enter the pack code manually and click 'Inspect Pack'.",
+      "Inspect the pack details card: Set name & code, sterilization cycle number, cycle status, pack status, and expiry date.",
+      "Check expiration status: If the pack is expiring soon, its expiry date is highlighted in bold red warning text to enforce First-Expired, First-Out (FEFO) consumption.",
+      "If the pack is expired, failed, or recalled, the system raises a critical CSSD_PACK_UNUSABLE alert under Rule 5eabbbecca; do NOT use it, set it aside, and send it back to CSSD.",
+      "When verified usable, click 'Record Pack Opened for Surgery' to call POST /cssd/packs/use and link the pack code to the surgical booking.",
+      "Review the Sterile Packs Ledger below to verify that the pack status transitioned to 'Used' and is associated with the patient's MRN.",
+      "If a critical recall alert banner appears (Rule 4357be8acb), click 'Filter Recalled Packs', identify any affected packs across theatre suites, and quarantine them immediately."
+    ],
+    stepsUr: [
+      "سرجری کیسز کی فہرست سے متعلقہ کیس منتخب کریں یا مریض کے نام، ایم آر این یا پروسیجر سے تلاش کریں۔",
+      "مریض کے شناختی بینر کی تصدیق کریں جس میں نام، ایم آر این، آپریشن تھیٹر، سرجن اور کیس کا اسٹیٹس ظاہر ہوتا ہے۔",
+      "سٹرائل پیک کے لیبل پر موجود بارکوڈ اسکین کریں یا کوڈ درج کر کے 'پیک کی جانچ' پر کلک کریں۔",
+      "پیک کارڈ کی تفصیلات چیک کریں: سیٹ کا نام اور کوڈ، سٹرلائزیشن سائیکل نمبر، سائیکل کا اسٹیٹس اور ایکسپائری تاریخ۔",
+      "میعاد کی جانچ کریں: اگر پیک کی میعاد ختم ہونے کے قریب ہو تو تاریخ سرخ رنگ میں نمایاں ہو گی، اسے FEFO اصول کے تحت ترجیح دیں۔",
+      "اگر پیک زائد المیعاد، فیل یا منسوخ شدہ ہو تو قاعدہ 5eabbbecca کے تحت CSSD_PACK_UNUSABLE کی وارننگ ظاہر ہو گی، اسے ہرگز استعمال نہ کریں۔",
+      "پیک کے درست ہونے پر 'پیک کا اندراج کریں' پر کلک کریں تاکہ POST /cssd/packs/use کے ذریعے سرجری کیس کے ساتھ پیک کا اندراج ہو جائے۔",
+      "نیچے دی گئی جدول میں تصدیق کریں کہ پیک کی کیفیت 'Used' میں تبدیل ہو گئی ہے اور مریض کے کوائف منسلک ہو چکے ہیں۔",
+      "اگر سٹرلائزیشن لاٹ کی واپسی (Recalled) کا ہنگامی بینر ظاہر ہو تو 'منسوخ شدہ فلٹر' پر کلک کریں اور تھیٹر میں موجود پیکس کو فوری قرنطینہ کریں۔"
+    ],
+    faq: [
+      [
+        "How does sterile pack tracking link to infection control audits in OT Admin?",
+        "Under MSDS IPC 91 & 92 and Rule d8f4d7af47, every sterile pack opened in theatre is permanently linked to the patient MRN and surgical booking. In the event of surgical site infections (SSI) or autoclave batch recalls, OT administrators can immediately identify every patient exposed to that sterilization cycle."
+      ],
+      [
+        "What administrative action is required when CSSD_PACK_UNUSABLE occurs?",
+        "Under Rule 5eabbbecca, the system strictly refuses to record use of expired, failed, or recalled packs. Theatre administrators must ensure the pack is physically segregated from the sterile field, tagged as rejected, and returned to CSSD for reprocessing."
+      ],
+      [
+        "How does the OT Admin workspace handle multi-theatre CSSD recall alerts (Rule 4357be8acb)?",
+        "When a cssd.cycle.updated WebSocket event signals a recalled cycle, a high-priority alert is broadcast. Theatre administrators click 'Filter Recalled Packs' to inspect stock across all suites, coordinate immediate quarantine, and notify infection control officers."
+      ],
+      [
+        "Can an OT administrator record pack usage without an active surgical case?",
+        "No. Schema validation and Rule d8f4d7af47 strictly require either a booking_id or admission_id. The UI prevents submission until a surgical booking is selected, ensuring zero unlinked sterile pack usage."
+      ],
+      [
+        "How does FEFO management work for theatre sterile packs?",
+        "Packs approaching their expiration date trigger an expiring_soon flag with bold red date warnings. Administrators and charge nurses use this visual signal to ensure older packs are consumed before newer sterilization loads."
+      ],
+      [
+        "How does runtime service capability gating apply to sterile_packs_ot_admin under Rule d897ee980e?",
+        "The screen checks GET /establishment views for screen_id sterile_packs_ot_admin (full, open_work, records, setup, hidden) based on CSSD service readiness, allowing open case pack usage during retiring mode while restricting new setups when retired."
+      ]
+    ],
+    faqUr: [
+      [
+        "او ٹی ایڈمن میں سٹرائل پیکس کی ٹریکنگ انفیکشن کنٹرول آڈٹ سے کیسے منسلک ہے؟",
+        "ایم ایس ڈی ایس آئی پی سی 91 و 92 اور قاعدہ d8f4d7af47 کے تحت تھیٹر میں کھلنے والا ہر سٹرائل پیک مریض کے ایم آر این اور سرجیکل بکنگ سے منسلک ہوتا ہے۔ انفیکشن یا سٹرلائزیشن فیل ہونے پر ایڈمن فوری طور پر متاثرہ مریضوں کی نشاندہی کر سکتے ہیں۔"
+      ],
+      [
+        "قاعدہ 5eabbbecca کے تحت CSSD_PACK_UNUSABLE پر ایڈمن کو کیا کارروائی کرنی چاہیے؟",
+        "سرور زائد المیعاد یا فیل شدہ پیکس کے استعمال سے مکمل انکار کرتا ہے۔ تھیٹر ایڈمنسٹریٹر اس بات کو یقینی بناتے ہیں کہ ایسا پیک فوری طور پر الگ کر کے ری پروسیسنگ کے لیے سی ایس ایس ڈی واپس بھیجا جائے۔"
+      ],
+      [
+        "او ٹی ایڈمن ورک اسپیس میں سٹرلائزیشن ریکال (قاعدہ 4357be8acb) کیسے ہینڈل ہوتا ہے؟",
+        "ریئل ٹائم میں ریکال ایونٹ موصول ہونے پر اسکرین فوری الرٹ دیتی ہے اور ایڈمن ایک کلک سے تمام تھیٹرز میں موجود اس بیچ کے پیکس کو فلٹر کر کے قرنطینہ کر سکتے ہیں۔"
+      ],
+      [
+        "کیا او ٹی ایڈمن سرجری کے انتخاب کے بغیر پیک استعمال درج کر سکتا ہے؟",
+        "ہرگز نہیں۔ قاعدہ d8f4d7af47 کے تحت بغیر تصدیق شدہ سرجیکل بکنگ یا داخلہ کے پیک ریکارڈ نہیں کیا جا سکتا تاکہ ہر استعمال کا مکمل آڈٹ ٹریل موجود ہو۔"
+      ],
+      [
+        "تھیٹر کے سٹرائل پیکس کے لیے FEFO اصول کیسے لاگو ہوتا ہے؟",
+        "جلد ختم ہونے والی میعاد کے پیکس پر سرخ انتباہ ظاہر ہوتا ہے تاکہ عملہ اور ایڈمن پرانے سٹرائل پیکس کو ترجیحی بنیادوں پر پہلے استعمال کروائیں۔"
+      ],
+      [
+        "قاعدہ d897ee980e کے تحت سروس کی اہلیت کیسے لاگو ہوتی ہے؟",
+        "اسکرین GET /establishment کے ذریعے سی ایس ایس ڈی سروس کی حالت چیک کرتی ہے تاکہ سروس کی کیفیت (مکمل، اوپن ورک، ریکارڈز، سیٹ اپ، پوشیدہ) کے مطابق ہی اختیارات میسر آئیں۔"
+      ]
+    ]
+  },
   maternity_policy: {
     title: "High-risk pregnancy: our policy",
     titleUr: "ہائی رسک حمل: ہسپتال کی پالیسی",
