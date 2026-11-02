@@ -1,12 +1,62 @@
 # Haspataal checkpoint
 Last updated: 02 November 2026, Antigravity (Codex pair), Asia/Karachi.
 
-## Active request: Phase 7 Screen 134 `billing_admin` (Billing & Contract Admin - Billing workspace)
+## Active request: Phase 7 Screen 135 `pharmacy_admin` (Pharmacy inventory, formulary & procurement)
 Executing the Haspataal HMS Roadmap in dependency order along with all tests and MCP progress reporting:
 - **Phase 6 ("Theatre and sterile supply")**: 100% COMPLETE (Screens 109–132, Proposals 262–285).
-- **Phase 7 ("Pharmacy and Billing")**:
-  - Screen 133: **`accountant_cockpit`** ("Accountant 3-pane cockpit", Position 133, 83 points, workspace `finance_accountant`) — **COMPLETED** (Proposal **286** awaiting human review on `/docs -> My progress`).
-  - Screen 134: **`billing_admin`** ("Billing and contract admin", Position 134, workspace `billing_admin`) — **READY TO IMPLEMENT**.
+- **Phase 7 ("Finance, billing and back offices")**:
+  - Screen 133: **`accountant_cockpit`** ("Accountant 3-pane cockpit", Position 133, 83 points, workspace `finance_accountant`) — **COMPLETED** (commit `3f85c2d`, Proposal **286** awaiting human review on `/docs -> My progress`).
+  - Screen 134: **`billing_admin`** ("Price & policy management", Position 134, 70 points, workspace `billing_admin`) — **COMPLETED** (Proposal **287** awaiting human review on `/docs -> My progress`).
+  - Screen 135: **`pharmacy_admin`** ("Pharmacy inventory, formulary & procurement", Position 135, workspace `pharmacy_admin`) — **NEXT**.
+    - Scope: Pharmacy administration, hospital formulary management, supplier management, purchase orders, goods receipt notes (GRN), inventory stock batches, and supplier returns.
+    - Next Concrete Actions:
+      1. Inspect `get_screen_bundle("pharmacy_admin")` and save to `contracts/pharmacy_admin.json`.
+      2. Generate TypeScript contracts via `generate_typescript`.
+      3. Create domain policies in `src/pharmacy-admin-policy.ts`.
+      4. Implement UI `src/screens/PharmacyAdmin.tsx`.
+      5. Wire into `src/App.tsx`, catalogue, task map, foundation help, authored handbook entry, and unit test suite.
+      6. Run full verification suite (`npm run check:help`, `npm test`, `npx tsc --noEmit`, `npm run build`).
+      7. Propose progress via `propose_progress`.
+
+---
+
+### Completed Screen 134 (`billing_admin`) Checkpoint
+- **Workflow & Standards**: Comprehensive price and policy management workspace (`billing_admin`):
+  - **Tab 1: Service Catalogue & Prices:**
+    - Live service listing with category filter (`OPD`, `IPD`, `OT`, `Imaging`, `RoomCharge`, `Procedure`, `Other`) and text search via `GET /finance/service-catalog` (`listServices`).
+    - Add priced service modal via `POST /finance/service-catalog` (`createService`) with code, category, name, and default price in PKR.
+    - Edit service price and active status modal via `PATCH /finance/service-catalog/{service_id}` (`patchService`) enforcing statutory Rule `rule:55973e6dbd`: Price changes update the catalogue for future visits; previously issued tickets permanently preserve their snapshotted prices.
+  - **Tab 2: Panels & Welfare Discounts:**
+    - Panel registry view via `GET /finance/panels` (`listPanels`) detailing panel code, type (`SehatSahulat`, `Zakat`, `GovernmentEmployee`, `Corporate`, `Other`), baseline discount percentage, and credit/receivables permissions (`is_credit_panel`).
+    - Register new panel modal via `POST /finance/panels` (`createPanel`).
+    - Configure effective-dated discount rule modal via `POST /finance/panel-discounts` (`createPanelDiscount`) supporting specific service or hospital-wide discount percentage, start/end dates, and preventing temporal overlap (`TEMPORAL_OVERLAP`).
+  - **Tab 3: Discount Ceilings:**
+    - Concession ceiling policies view via `GET /finance/discount-policies` (`getDiscountPolicies`).
+    - Set ceiling modal via `PUT /finance/discount-policies` (`setDiscountPolicy`) assigning role-based (`doctor`, `cashier`, `billing_admin`) or user-specific discretionary discount caps and maximum rupee limits.
+  - **Tab 4: Consultant Commission Contracts:**
+    - Consultant commission contracts worklist via `GET /finance/consultant-contracts` (`listContracts`) filterable by staff employee ID.
+    - Add consultant contract modal via `POST /finance/consultant-contracts` (`createContract`) with live staff search via `GET /staff/lookup` (`lookupStaff`).
+    - Supports all three commission structures: `FixedFee` (fixed PKR amount per procedure), `PercentGross` (percentage of gross procedure fee), and `PercentNet` (percentage of profit after consumables deduction).
+- **Contracts**: `contracts/billing_admin.json` (11 endpoints, 1 statutory rule `rule:55973e6dbd`, 23 rubric items).
+- **Domain Policies & Statutory Rules (`src/billing-admin-policy.ts`)**:
+  - Runtime service capability gating via `getBillingAdminCapabilityView` (`full`, `open_work`, `records`, `setup`, `hidden`).
+  - Strict input validation under Rule `rule:55973e6dbd` (`validateServiceInput`, `validateServicePatch`).
+  - Panel input validation (`validatePanelInput`) and temporal range validation (`validatePanelDiscountInput`).
+  - Discount ceiling validation (`validateDiscountPolicyInput`).
+  - Consultant contract validation (`validateContractInput`).
+  - Comprehensive bilingual error dictionary (`BILLING_ADMIN_ERROR_MESSAGES`) covering `NOT_FOUND`, `REFERENCE_NOT_FOUND`, `TEMPORAL_OVERLAP`, `UNAUTHENTICATED`, `VALIDATION_ERROR`, and `VERSION_CONFLICT`.
+- **UI Architecture (`src/screens/BillingAdmin.tsx`)**:
+  - Live 4-tab price and policy management component wired into `src/App.tsx`, `src/foundation-catalogue.json` (11 tasks), `src/foundation-task-map.json` (11 controls), `src/foundation-help.ts` (65 controls mapped).
+  - Authored comprehensive handbook entry (`src/help.ts`) with bilingual title, purpose, 8 operational steps, and 5 role FAQs for `billing_admin`. Bundled screenshots in `public/handbook/billing_admin-en.png` and `billing_admin-ur.png`.
+- **Verification**:
+  - Automated unit tests: `tests/billing-admin.test.mjs` (13/13 passing).
+  - Help check: `npm run check:help` passed (133 screens, 3203 controls, 2214 groups, 69 FAQ seeds, 30 workspace guides).
+  - Help coverage test: `tests/help-coverage.test.mjs` (28/28 passing across 133 screens).
+  - Full test suite: `npm test` passed (649/649 passing across all suites).
+  - TypeScript compiler: `npx tsc --noEmit` passed with 0 errors.
+  - Production build: `npm run build` succeeded (`dist/assets/index-wHu2EI5q.js`).
+- **Proposal**:
+  - Proposal ID: **287** (status: `pending` on `/docs -> My progress`, build `index-wHu2EI5q.js`, 22 rubric items claimed, `q:fresh_data` left pending human review).
 
 ---
 

@@ -278,6 +278,7 @@ export function checkHelp({
       "RecoveryBoard",
       "OtSettlement",
       "AccountantCockpit",
+      "BillingAdmin",
     ].map((n) => `src/screens/${n}.tsx`),
   ];
   const used = new Set(),

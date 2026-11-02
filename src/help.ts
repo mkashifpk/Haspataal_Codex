@@ -8998,6 +8998,76 @@ sterile_packs_ward: {
       ]
     ]
   },
+  billing_admin: {
+    title: "Price & policy management",
+    titleUr: "قیمتیں اور پالیسی انتظام",
+    purpose: "Billing administration workspace for hospital price and policy governance: (1) Service catalogue and price maintenance (GET /finance/service-catalog, POST /finance/service-catalog, PATCH /finance/service-catalog/{service_id}) under Rule 55973e6dbd, ensuring price updates apply strictly to future encounters while historical tickets and invoices retain snapshotted pricing; (2) Panels and welfare fund setup (GET /finance/panels, POST /finance/panels) with baseline discounts and credit/receivables permissions; (3) Temporal panel discount rules (POST /finance/panel-discounts) rejecting overlapping date ranges; (4) Discount ceiling policy governance (GET /finance/discount-policies, PUT /finance/discount-policies) establishing discretionary concession percentages and caps by role or user; and (5) Consultant commission contracts (GET /finance/consultant-contracts, POST /finance/consultant-contracts) with staff registry lookup (GET /staff/lookup) supporting FixedFee, PercentGross, and PercentNet models for surgical and clinical fee splits.",
+    purposeUr: "بلنگ ایڈمنسٹریشن ورک اسپیس میں ہسپتال کی قیمتوں اور پالیسیوں کا انتظام: (1) سروس کیٹلاگ اور فیسوں کا تعین (GET /finance/service-catalog, POST /finance/service-catalog, PATCH /finance/service-catalog/{service_id}) قاعدہ 55973e6dbd کے تحت جس میں فیسوں کی تبدیلی آئندہ بلز پر لاگو ہوتی ہے جبکہ سابقہ بلز پرانی قیمت برقرار رکھتے ہیں؛ (2) پینلز اور فلاحی فنڈز کی رجسٹریشن مع بنیادی رعایت اور ادھار سہولت (GET /finance/panels, POST /finance/panels)؛ (3) تاریخ کے مطابق پینل رعایت کے قوانین مع تاریخی تصادم کی روک تھام (POST /finance/panel-discounts)؛ (4) کردار اور صارف کے لیے رعایت کی حد بندی کا تعین (GET /finance/discount-policies, PUT /finance/discount-policies)؛ اور (5) کنسلٹنٹ کمیشن معاہدات مع عملہ تلاش (GET /finance/consultant-contracts, POST /finance/consultant-contracts, GET /staff/lookup) بشمول فکسڈ فیس، مجموعی آمدنی یا خالص منافع کے فیصد ماڈلز۔",
+    steps: [
+      "Select the Service Catalogue tab to query hospital services across OPD, IPD, OT, Imaging, and Bed charges.",
+      "Click '+ Add Priced Service' to register a new procedure with code, category, name, and default price in PKR.",
+      "Click 'Edit Price' on any service to update fee or active status; note that issued tickets preserve snapshotted rates per Rule 55973e6dbd.",
+      "Switch to the Panels tab to review configured health programs, welfare funds, and corporate sponsors.",
+      "Click '+ Add Panel' to define code, name, category, baseline discount percentage, and credit billing eligibility.",
+      "Click '+ Effective Discount Rule' to establish dated panel concessions on specific services or hospital-wide.",
+      "Navigate to the Discount Ceilings tab to set role-based or user-specific maximum authorized concession percentages.",
+      "Open Consultant Contracts tab, search medical staff via registry lookup, and record commission agreement terms.",
+    ],
+    stepsUr: [
+      "او پی ڈی، ان ڈور، آپریشن تھیٹر، لیب اور بیڈ چارجز کی سروسز دیکھنے کے لیے سروس کیٹلاگ ٹیب منتخب کریں۔",
+      "کوڈ، شعبہ، نام اور سرکاری فیس کے اندراج کے ساتھ نیا طریقہ کار شامل کرنے کے لیے '+ Add Priced Service' پر کلک کریں۔",
+      "فیس یا فعال حیثیت بدلنے کے لیے 'Edit Price' پر کلک کریں؛ قاعدہ 55973e6dbd کے تحت جاری شدہ بلز پرانی فیس پر برقرار رہیں گے۔",
+      "صحت پروگرامز، فلاحی فنڈز اور کارپوریٹ سپانسرز کا جائزہ لینے کے لیے پینلز ٹیب پر جائیں۔",
+      "کوڈ، نام، قسم، بنیادی رعایت اور ادھار بلنگ کی اجازت کے ساتھ نیا پینل درج کرنے کے لیے '+ Add Panel' منتخب کریں۔",
+      "مخصوص سروسز یا پورے ہسپتال کے لیے تاریخ کے مطابق پینل رعایت کا قانون درج کرنے کے لیے '+ Effective Discount Rule' دبائیں۔",
+      "مختلف کرداروں یا صارفین کے لیے زیادہ سے زیادہ رعایتی اختیارات مقرر کرنے کے لیے ڈسکاؤنٹ سیلنگز ٹیب پر جائیں۔",
+      "کنسلٹنٹ معاہدات کا ٹیب کھولیں، عملہ تلاش کے ذریعے ڈاکٹر منتخب کریں اور کمیشن کی شرائط درج کریں۔",
+    ],
+    faq: [
+      [
+        "What happens to existing patient bills when a service price is updated in the catalogue?",
+        "Under statutory Rule 55973e6dbd, price updates never alter issued tickets or finalized invoices; all historical financial records permanently retain their snapshotted prices."
+      ],
+      [
+        "Can a panel discount rule overlap with an existing effective date range?",
+        "No, the backend contract strictly prevents temporal overlaps (TEMPORAL_OVERLAP); new dated concessions must specify non-conflicting effective dates."
+      ],
+      [
+        "What commission structures are supported for visiting consultants and surgeons?",
+        "The system supports FixedFee (fixed PKR fee per procedure), PercentGross (percentage of gross procedure fee), and PercentNet (percentage of profit after consumable deductions)."
+      ],
+      [
+        "How are staff discount privileges controlled in the billing system?",
+        "The Discount Ceilings policy assigns a maximum discount percentage and optional rupee cap by role or user, preventing unauthorized concessions."
+      ],
+      [
+        "Can a panel allow patients to be treated on credit without immediate payment?",
+        "Yes, enabling 'is_credit_panel' permits receivables and credit invoice generation for approved sponsor organizations."
+      ]
+    ],
+    faqUr: [
+      [
+        "جب کیٹلاگ میں کسی سروس کی قیمت تبدیل ہوتی ہے تو مریضوں کے پرانے بلز کا کیا بنتا ہے؟",
+        "قاعدہ 55973e6dbd کے تحت قیمتوں کی تبدیلی جاری شدہ ٹکٹس یا انوائسز پر اثر انداز نہیں ہوتی؛ تمام پرانے ریکارڈز اپنی جاری شدہ قیمت برقرار رکھتے ہیں۔"
+      ],
+      [
+        "کیا پینل رعایت کا نیا قانون پہلے سے موجود فعال تاریخوں کے ساتھ ٹکرا سکتا ہے؟",
+        "جی نہیں، بیک اینڈ قوانین تاریخی تصادم (TEMPORAL_OVERLAP) کی سختی سے ممانعت کرتے ہیں اور تاریخیں غیر متصادم ہونا ضروری ہیں۔"
+      ],
+      [
+        "کنسلٹنٹ ڈاکٹروں اور سرجنوں کے لیے کون سے کمیشن ماڈلز دستیاب ہیں؟",
+        "سسٹم فکسڈ فیس (مقررہ رقم فی سرجری)، پرسنٹ گراس (مجموعی فیس کا فیصد)، اور پرسنٹ نیٹ (اخراجات منہا کرنے کے بعد خالص منافع کا فیصد) کی سہولت دیتا ہے۔"
+      ],
+      [
+        "بلنگ سسٹم میں عملے کے رعایت دینے کے اختیارات کیسے کنٹرول ہوتے ہیں؟",
+        "ڈسکاؤنٹ سیلنگ پالیسی کردار یا مخصوص صارف کے لیے زیادہ سے زیادہ رعایت فیصد اور رقم کی حد مقرر کرتی ہے تاکہ غیر مجاز رعایت روکی جا سکے۔"
+      ],
+      [
+        "کیا کوئی پینل مریضوں کو فوری ادائیگی کے بغیر ادھار علاج کی اجازت دے سکتا ہے؟",
+        "جی ہاں، پینل کی رجسٹریشن میں 'is_credit_panel' کو فعال کرنے سے منظور شدہ اداروں کے لیے ادھار بلنگ ممکن ہوتی ہے۔"
+      ]
+    ],
+  },
   accountant_cockpit: {
     title: "Accountant 3-pane cockpit",
     titleUr: "اکاؤنٹنٹ 3 پین کاک پٹ",
