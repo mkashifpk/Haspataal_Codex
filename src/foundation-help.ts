@@ -20,6 +20,7 @@ export const phase1Screens = [
 const approvalScreens = ["approval_queue", "charity_approvals"];
 // Coverage grows screen by screen; Phase 1 acceptance remains separate.
 export const deliveredHelpScreens = [
+  "drug_recalls",
   "medication_safety_setup",
   "pharmacy_admin",
   "billing_admin",
@@ -146,7 +147,49 @@ const g = (
 // IDs are also attached to the actual controls. The build rejects missing
 // mappings and empty translations instead of treating a page as coverage.
 export const controlGuides: Record<string, ControlGuide> = {
-    // Screen 136: medication_safety_setup (High-alert drugs & look-alike/sound-alike rules)
+    // Screen 137: drug_recalls (Batch recalls & quarantine management)
+  "drug_recalls.open_recall_btn": g(["drug_recalls"], ["Open recall campaign", "نئی واپسی مہم"], ["Opens modal to initiate drug recall and quarantine batches across hospital (rule:fe2af7a43c).", "دوا کی واپسی اور قرنطینہ مہم شروع کرنے کی ونڈو کھولتا ہے۔"]),
+  "drug_recalls.refresh_btn": g(["drug_recalls"], ["Refresh recalls register", "واپسی ریکارڈ ریفریش"], ["Reloads recall campaigns list and status metrics.", "واپسی مہمات کی فہرست اور تازہ ترین اعدادوشمار دوبارہ لوڈ کرتا ہے۔"]),
+  "drug_recalls.dismiss_error_btn": g(["drug_recalls"], ["Dismiss error alert", "خرابی کا نوٹس بند کریں"], ["Dismisses the current error notification banner.", "موجودہ خرابی کے نوٹس کو بند کرتا ہے۔"]),
+  "drug_recalls.dismiss_success_btn": g(["drug_recalls"], ["Dismiss success alert", "کامیابی کا نوٹس بند کریں"], ["Dismisses the current success notification banner.", "موجودہ کامیابی کے نوٹس کو بند کرتا ہے۔"]),
+  "drug_recalls.tab_list_btn": g(["drug_recalls"], ["Recalls register tab", "رجسٹر ٹیب"], ["Switches to all recall campaigns list view (GET /drug-recalls).", "تمام واپسی مہمات کی فہرست کے ٹیب پر منتقل کرتا ہے۔"]),
+  "drug_recalls.tab_detail_btn": g(["drug_recalls"], ["Recall campaign detail tab", "مہم کی تفاصیل ٹیب"], ["Switches to selected recall campaign detail, batches and patient contacts view (GET /drug-recalls/{id}).", "منتخب مہم کی تفاصیل، بیجز اور مریضوں کے رابطوں کے ٹیب پر منتقل کرتا ہے۔"]),
+  "drug_recalls.filter_all_btn": g(["drug_recalls"], ["Filter all recalls", "تمام مہمات"], ["Shows all recall campaigns regardless of status.", "تمام واپسی مہمات کو ظاہر کرتا ہے۔"]),
+  "drug_recalls.filter_open_btn": g(["drug_recalls"], ["Filter open recalls", "اوپن مہمات"], ["Shows only active open recall campaigns with quarantined stock.", "صرف فعال اور جاری قرنطینہ مہمات ظاہر کرتا ہے۔"]),
+  "drug_recalls.filter_closed_btn": g(["drug_recalls"], ["Filter closed recalls", "بند مہمات"], ["Shows finalized and closed recall campaigns.", "مکمل اور بند شدہ واپسی مہمات ظاہر کرتا ہے۔"]),
+  "drug_recalls.filter_cancelled_btn": g(["drug_recalls"], ["Filter cancelled recalls", "منسوخ مہمات"], ["Shows recalls cancelled due to mistaken opening.", "غلطی سے کھول کر منسوخ کی گئی مہمات ظاہر کرتا ہے۔"]),
+  "drug_recalls.view_detail_btn": g(["drug_recalls"], ["View recall details", "تفاصیل دیکھیں"], ["Opens detailed investigation view for selected recall campaign (GET /drug-recalls/{id}).", "منتخب مہم کی مکمل جانچ پڑتال کا صفحہ کھولتا ہے۔"]),
+  "drug_recalls.remove_stock_btn": g(["drug_recalls"], ["Remove quarantined stock", "اسٹاک خارج کریں"], ["Opens modal to write off and remove all remaining units in pharmacy and wards (POST /drug-recalls/{id}/remove-stock per rule:6e16f97bd1).", "فارمیسی اور وارڈز میں موجود تمام بقایا یونٹس کو خارج یا ضائع کرنے کا فارم کھولتا ہے۔"]),
+  "drug_recalls.close_recall_btn": g(["drug_recalls"], ["Close recall campaign", "مہم بند کریں"], ["Opens modal to finalize and close recall campaign when all stock is removed and contacts completed (POST /drug-recalls/{id}/close per rule:2b020bd53b).", "اسٹاک اور مریضوں سے رابطے مکمل ہونے پر مہم بند کرنے کا فارم کھولتا ہے۔"]),
+  "drug_recalls.cancel_recall_btn": g(["drug_recalls"], ["Cancel recall campaign", "مہم منسوخ کریں"], ["Opens modal to cancel recall opened by mistake and release batches everywhere (POST /drug-recalls/{id}/cancel per rule:2b020bd53b).", "غلطی سے کھولی گئی مہم کو منسوخ کر کے بیجز کو بحال کرنے کا فارم کھولتا ہے۔"]),
+  "drug_recalls.record_contact_btn": g(["drug_recalls"], ["Record patient contact", "مریض کا رابطہ درج کریں"], ["Opens modal to record audit outcome and clinical notes for patient who received recalled batch (PATCH /drug-recalls/{id}/patients/{patient_id} per rule:6e16f97bd1).", "متاثرہ بیج حاصل کرنے والے مریض سے رابطہ اور طبی ہدایات درج کرنے کا فارم کھولتا ہے۔"]),
+  "drug_recalls.close_open_modal_btn": g(["drug_recalls"], ["Close open recall modal", "ونڈو بند کریں"], ["Dismisses the open recall modal without submitting.", "نئی مہم کی ونڈو بند کرتا ہے۔"]),
+  "drug_recalls.lookup_drug_id_input": g(["drug_recalls"], ["Drug ID lookup", "دوا کا شناختی نمبر"], ["Identifier of the formulary medicine to inspect stock and recall.", "اسٹاک چیک کرنے اور واپس بلانے کے لیے دوا کا شناختی نمبر۔"]),
+  "drug_recalls.inspect_stock_btn": g(["drug_recalls"], ["Inspect drug stock", "اسٹاک معائنہ"], ["Fetches live stock and batches in FEFO order for the selected drug (GET /drugs/{id}/stock-status).", "دوا کا لائیو اسٹاک اور میعاد کی ترتیب سے بیجز کی تفصیل حاصل کرتا ہے۔"]),
+  "drug_recalls.all_batches_checkbox": g(["drug_recalls"], ["Recall all batches checkbox", "تمام بیجز منتخب کریں"], ["Toggles recalling every active batch of the medicine versus specific batches.", "دوا کے تمام فعال بیجز کو بیک وقت واپس بلانے کا آپشن۔"]),
+  "drug_recalls.batch_select_checkbox": g(["drug_recalls"], ["Batch selection checkbox", "بیج منتخب کریں"], ["Selects an individual batch to include in the recall quarantine.", "واپسی مہم میں مخصوص بیج کو شامل کرنے کا چیک باکس۔"]),
+  "drug_recalls.source_select": g(["drug_recalls"], ["Alert source selection", "الرٹ کا ذریعہ"], ["Selects statutory authority or vendor source: DRAP, Manufacturer, Supplier, or Internal.", "واپسی کے حکم کا ذریعہ منتخب کرتا ہے: ڈریپ، کمپنی، سپلائر یا اندرونی۔"]),
+  "drug_recalls.class_select": g(["drug_recalls"], ["Recall class selection", "واپسی کا درجہ"], ["Selects regulatory recall classification: Class I (critical), Class II, or Class III.", "قانونی درجہ منتخب کرتا ہے: کلاس اول، دوم، یا سوم۔"]),
+  "drug_recalls.reference_input": g(["drug_recalls"], ["Alert reference number", "الرٹ کا ریفرنس نمبر"], ["Statutory notification letter or DRAP alert reference string.", "ڈریپ لیٹر یا کمپنی کا حوالہ نمبر درج کرتا ہے۔"]),
+  "drug_recalls.reason_input": g(["drug_recalls"], ["Recall defect reason", "واپسی کی وجہ"], ["Clinical and pharmaceutical explanation of defect necessitating recall.", "دوا میں پائے جانے والے نقص اور واپسی کی تفصیلی وجہ۔"]),
+  "drug_recalls.contact_patients_checkbox": g(["drug_recalls"], ["Contact patients checkbox", "مریضوں سے رابطہ آپشن"], ["Toggles building patient contact roster for anyone who received the batch.", "بیج حاصل کرنے والے مریضوں سے رابطے کی فہرست تیار کرنے کا انتخاب۔"]),
+  "drug_recalls.cancel_open_modal_btn": g(["drug_recalls"], ["Cancel open recall", "منسوخ کریں"], ["Aborts opening recall campaign.", "نئی مہم کھولنا منسوخ کرتا ہے۔"]),
+  "drug_recalls.submit_open_modal_btn": g(["drug_recalls"], ["Confirm and open recall", "مہم شروع کریں"], ["Submits recall campaign to backend and immediately blocks batches everywhere (POST /drug-recalls per rule:fe2af7a43c).", "مہم شروع کرتا ہے اور فوری طور پر بیجز کو تمام وارڈز میں بلاک کرتا ہے۔"]),
+  "drug_recalls.remove_stock_note_input": g(["drug_recalls"], ["Stock disposal note", "اسٹاک ضائع کرنے کا نوٹ"], ["Mandatory note explaining whether stock was returned to vendor or destroyed as biohazard (rule:6e16f97bd1).", "اسٹاک تلف کرنے یا سپلائر کو واپس بھیجنے کی لازمی وضاحت۔"]),
+  "drug_recalls.dismiss_remove_stock_modal_btn": g(["drug_recalls"], ["Dismiss remove stock modal", "منسوخ کریں"], ["Closes stock removal modal without writing off stock.", "اسٹاک اخراج فارم منسوخ کرتا ہے۔"]),
+  "drug_recalls.submit_remove_stock_btn": g(["drug_recalls"], ["Write off and remove stock", "اسٹاک خارج و تلف کریں"], ["Submits stock write-off to zero out remaining units in pharmacy and wards (POST /drug-recalls/{id}/remove-stock).", "فارمیسی اور وارڈز میں موجود بقایا بیجز کو مکمل خارج کرتا ہے۔"]),
+  "drug_recalls.contact_outcome_select": g(["drug_recalls"], ["Contact outcome selection", "رابطہ کا نتیجہ"], ["Selects audit outcome: Contacted, Unreachable, or Not Needed.", "مریض سے رابطے کا نتیجہ منتخب کرتا ہے: رابطہ مکمل، نمبر بند یا غیر ضروری۔"]),
+  "drug_recalls.contact_note_input": g(["drug_recalls"], ["Contact discussion note", "گفتگو کی تفصیل"], ["Records clinical counsel provided to patient regarding recalled medicine.", "مریض کو دی جانے والی طبی رہنمائی یا رابطہ نہ ہونے کی تفصیل۔"]),
+  "drug_recalls.dismiss_contact_modal_btn": g(["drug_recalls"], ["Dismiss contact modal", "منسوخ کریں"], ["Closes patient contact modal.", "رابطہ فارم منسوخ کرتا ہے۔"]),
+  "drug_recalls.submit_contact_btn": g(["drug_recalls"], ["Save contact outcome", "رابطہ محفوظ کریں"], ["Saves contact outcome and discussion note to recall audit log (PATCH /drug-recalls/{id}/patients/{patient_id}).", "مریض کے ساتھ رابطے کی رپورٹ اور نوٹس کو محفوظ کرتا ہے۔"]),
+  "drug_recalls.closing_note_input": g(["drug_recalls"], ["Closing audit summary", "مہم بند کرنے کا خلاصہ"], ["Detailed closing note certifying all stock was cleared and patients advised (rule:2b020bd53b).", "مہم مکمل اور تمام حفاظتی اقدامات پورے ہونے کی تصدیق۔"]),
+  "drug_recalls.dismiss_close_modal_btn": g(["drug_recalls"], ["Dismiss close modal", "منسوخ کریں"], ["Closes recall closing modal.", "مہم بندش ونڈو بند کرتا ہے۔"]),
+  "drug_recalls.submit_close_btn": g(["drug_recalls"], ["Confirm recall closure", "مہم بند کرنے کی تصدیق"], ["Finalizes recall campaign and locks audit records (POST /drug-recalls/{id}/close per rule:2b020bd53b).", "مہم کو حتمی طور پر بند اور محفوظ کرتا ہے۔"]),
+  "drug_recalls.cancel_reason_input": g(["drug_recalls"], ["Recall cancellation reason", "منسوخی کی وجہ"], ["Mandatory explanation why recall was opened by mistake.", "غلطی سے مہم کھولنے کی تفصیلی وضاحت۔"]),
+  "drug_recalls.dismiss_cancel_modal_btn": g(["drug_recalls"], ["Dismiss cancel modal", "واپس جائیں"], ["Closes cancellation modal without cancelling.", "منسوخی ونڈو بند کرتا ہے۔"]),
+  "drug_recalls.submit_cancel_btn": g(["drug_recalls"], ["Confirm recall cancellation", "منسوخی کی تصدیق"], ["Cancels recall campaign and immediately releases quarantined batches (POST /drug-recalls/{id}/cancel per rule:2b020bd53b).", "مہم منسوخ کرتا ہے اور بیجز کو فوری بحال کرتا ہے۔"]),
+
+  // Screen 136: medication_safety_setup (High-alert drugs & look-alike/sound-alike rules)
   "medication_safety_setup.download_high_alert_pdf_btn": g(["medication_safety_setup"], ["Download High-Alert PDF", "ہائی الرٹ لسٹ پی ڈی ایف"], ["Downloads printable high-alert list for ward nursing stations and pharmacy (GET /medication-safety/high-alert-list/pdf per rule:6da5fd1c68).", "وارڈ نرسنگ اسٹیشنز کے لیے پرنٹ ایبل لسٹ ڈاؤن لوڈ کرتا ہے۔"]),
   "medication_safety_setup.download_policy_pdf_btn": g(["medication_safety_setup"], ["Download Policy PDF", "سیفٹی پالیسی پی ڈی ایف"], ["Downloads written hospital medication safety policy document (GET /medication-safety/policy/pdf).", "ہسپتال کی تحریری ادویات سیفٹی پالیسی ڈاؤن لوڈ کرتا ہے۔"]),
   "medication_safety_setup.refresh_btn": g(["medication_safety_setup"], ["Refresh safety registry", "سیفٹی لسٹ ریفریش کریں"], ["Reloads high-alert categories, restricted medicines, and LASA pairs (GET /medication-safety/high-alert-list).", "ہائی الرٹ اور مشابہ ادویات کی فہرست دوبارہ لوڈ کرتا ہے۔"]),

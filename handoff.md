@@ -1,24 +1,69 @@
 # Haspataal checkpoint
 Last updated: 02 November 2026, Antigravity (Codex pair), Asia/Karachi.
 
-## Active request: Phase 7 Screen 137 `drug_recalls` (Drug recall campaigns & quarantine management)
+## Active request: Phase 7 Screen 138 `pharmacy_storage_log` (Medicine storage log & temperature monitoring)
 Executing the Haspataal HMS Roadmap in dependency order along with all tests and MCP progress reporting:
 - **Phase 6 ("Theatre and sterile supply")**: 100% COMPLETE (Screens 109–132, Proposals 262–285).
 - **Phase 7 ("Finance, billing and back offices")**:
   - Screen 133: **`accountant_cockpit`** ("Accountant 3-pane cockpit", Position 133, 83 points, workspace `finance_accountant`) — **COMPLETED** (commit `3f85c2d`, Proposal **286** awaiting human review on `/docs -> My progress`).
   - Screen 134: **`billing_admin`** ("Price & policy management", Position 134, 70 points, workspace `billing_admin`) — **COMPLETED** (commit `d3c8ab8`, Proposal **287** awaiting human review on `/docs -> My progress`).
   - Screen 135: **`pharmacy_admin`** ("Pharmacy inventory, formulary & procurement", Position 135, 76 points, workspace `pharmacy_admin`) — **COMPLETED** (commit `1b7d0e5`, Proposal **288** awaiting human review on `/docs -> My progress`).
-  - Screen 136: **`medication_safety_setup`** ("High-alert drugs & look-alike/sound-alike rules", Position 136, 54 points, workspace `pharmacy_admin`) — **COMPLETED** (Proposal **289** awaiting human review on `/docs -> My progress`).
-  - Screen 137: **`drug_recalls`** ("Drug recall campaigns & quarantine management", Position 137, workspace `pharmacy_admin`) — **NEXT**.
-    - Scope: Drug recall campaigns (DRAP and manufacturer alerts), affected batch identification, automatic stock quarantine, recall notifications to clinical wards, and supplier return linking.
+  - Screen 136: **`medication_safety_setup`** ("High-alert drugs & look-alike/sound-alike rules", Position 136, 54 points, workspace `pharmacy_admin`) — **COMPLETED** (commit `c7f683b`, Proposal **289** awaiting human review on `/docs -> My progress`).
+  - Screen 137: **`drug_recalls`** ("Drug recall campaigns & quarantine management", Position 137, 63 points, workspace `pharmacy_admin`) — **COMPLETED** (Proposal **290** awaiting human review on `/docs -> My progress`).
+  - Screen 138: **`pharmacy_storage_log`** ("Medicine storage log & temperature monitoring", Position 138, 51 points, workspace `pharmacy_admin`) — **NEXT**.
+    - Scope: Cold-chain and ambient storage temperature/humidity monitoring, refrigerator logging, out-of-range action recording (`STORAGE_CHECK_ACTION_REQUIRED`), and statutory compliance logs.
     - Next Concrete Actions:
-      1. Inspect `get_screen_bundle("drug_recalls")` and save to `contracts/drug_recalls.json`.
+      1. Inspect `get_screen_bundle("pharmacy_storage_log")` and save to `contracts/pharmacy_storage_log.json`.
       2. Generate TypeScript contracts via `generate_typescript`.
-      3. Create domain policies in `src/drug-recalls-policy.ts`.
-      4. Implement UI `src/screens/DrugRecalls.tsx`.
+      3. Create domain policies in `src/pharmacy-storage-log-policy.ts`.
+      4. Implement UI `src/screens/PharmacyStorageLog.tsx`.
       5. Wire into `src/App.tsx`, catalogue, task map, foundation help, authored handbook entry, and unit test suite.
       6. Run full verification suite (`npm run check:help`, `npm test`, `npx tsc --noEmit`, `npm run build`).
       7. Propose progress via `propose_progress`.
+
+---
+
+### Completed Screen 137 (`drug_recalls`) Checkpoint
+- **Workflow & Standards**: Comprehensive regulatory drug recall campaign and batch quarantine workspace (`drug_recalls`, MSDS MOM 59):
+  - **Recalls Register Worklist:**
+    - Live register table via `GET /drug-recalls` (`listRecalls`) with status filter (`All`, `Open`, `Closed`, `Cancelled`).
+    - Recalls display recall number, medicine name & code, statutory class badges (`ClassI` critical red, `ClassII` warning amber, `ClassIII` info blue), alert source & reference letters, status, quarantined stock left in pharmacy & wards, and uncontacted patients.
+  - **Open Recall Campaign Modal (`POST /drug-recalls`):**
+    - Enforces statutory Rule `rule:fe2af7a43c`: takes drug ID and checks live active batches in FEFO order via `GET /drugs/{drug_id}/stock-status` (`stockStatus`).
+    - Batch selection allows either "Recall all batches" (`all_batches: true`) or specific batch multiselection (`batch_ids: number[]`).
+    - Requires valid alert source (`DRAP`, `Manufacturer`, `Supplier`, `Internal`), official letter reference, statutory classification (`ClassI`, `ClassII`, `ClassIII`), non-empty defect explanation, and `contact_patients` boolean.
+    - Submits with idempotency key; immediately alerts wards holding stock and blocks dispensing across all counters.
+  - **Recall Campaign Details & Holding Wards (`GET /drug-recalls/{recall_id}`):**
+    - Comprehensive breakdown under Rule `rule:6e16f97bd1`:
+      - Recalled Batches audit: received qty, left in pharmacy, left on wards, dispensed, administered, and theatre consumable usage.
+      - Wards Holding Recalled Stock table: displays specific ward names and quantities sitting in ward drug cabinets for immediate quarantine and recovery.
+  - **Stock Removal & Disposal Action (`POST /drug-recalls/{recall_id}/remove-stock`):**
+    - Enforces Rule `rule:6e16f97bd1`: writes off every remaining unit across pharmacy and hospital wards, recording mandatory disposal / return note (e.g. incinerated per biohazard protocol or returned to vendor under credit note).
+  - **Patient Contact Auditing (`PATCH /drug-recalls/{recall_id}/patients/{recall_patient_id}`):**
+    - Patient outreach roster with MRN, contact telephone, dispensation source encounter (Dispensed, Administered, Theatre), and contact outcome status (`ToContact`, `Contacted`, `Unreachable`, `NotNeeded`).
+    - Enforces Rule `rule:6e16f97bd1`: opens modal to record clinical counsel notes given to patient or explanation of unreachable contact.
+  - **Campaign Closure & Mistake Cancellation:**
+    - Close recall via `POST /drug-recalls/{recall_id}/close` enforcing Rule `rule:2b020bd53b`: allowed only when `can_close` is true (all stock removed and contacts resolved). Attempts to close prematurely return `RECALL_NOT_COMPLETE`.
+    - Cancel recall via `POST /drug-recalls/{recall_id}/cancel` enforcing Rule `rule:2b020bd53b`: cancels recall opened by mistake and immediately releases quarantined batches hospital-wide.
+  - **Realtime Updates:**
+    - Subscribes to `pharmacy.recall.updated` event to auto-refresh the register list and active detail view without polling.
+- **Contracts**: `contracts/drug_recalls.json` (8 endpoints, 1 realtime event, 4 statutory rules `rule:fe2af7a43c`, `rule:6e16f97bd1`, `rule:2b020bd53b`, `rule:0bdb1f574d`, 24 rubric items).
+- **Domain Policies & Statutory Rules (`src/drug-recalls-policy.ts`)**:
+  - Runtime service capability gating via `getDrugRecallsCapabilityView` (`full`, `open_work`, `records`, `setup`, `hidden`) derived from `GET /establishment views.screens`.
+  - Input validation: `validateOpenRecallInput` (Rule `rule:fe2af7a43c`), `validateRemoveStockInput` (Rule `rule:6e16f97bd1`), `validateRecordContactInput` (Rule `rule:6e16f97bd1`), `validateCloseRecallInput` (Rule `rule:2b020bd53b`), `validateCancelRecallInput` (Rule `rule:2b020bd53b`).
+  - Bilingual error dictionary (`DRUG_RECALL_ERROR_MESSAGES`) covering `BATCH_RECALLED`, `FORBIDDEN`, `NOT_FOUND`, `RECALL_NOT_COMPLETE`, `RECALL_STATE_INVALID`, `REFERENCE_NOT_FOUND`, `STOCK_BATCH_MISMATCH`, and `VALIDATION_ERROR`.
+- **UI Architecture (`src/screens/DrugRecalls.tsx`)**:
+  - Live 2-tab batch recall governance component wired into `src/App.tsx`, `src/foundation-catalogue.json` (8 tasks), `src/foundation-task-map.json` (8 controls), `src/foundation-help.ts` (40 controls mapped).
+  - Authored comprehensive handbook entry (`src/help.ts`) with bilingual title, purpose, 9 operational steps, and 5 role FAQs answering all 5 seed errors (`BATCH_RECALLED`, `STOCK_BATCH_MISMATCH`, `RECALL_STATE_INVALID`, recall state machine, `RECALL_NOT_COMPLETE`). Bundled screenshots in `public/handbook/drug_recalls-en.png` and `drug_recalls-ur.png`.
+- **Verification**:
+  - Automated unit tests: `tests/drug-recalls.test.mjs` (7/7 passing).
+  - Help check: `npm run check:help` passed (136 screens, 3357 controls, 2367 groups, 69 FAQ seeds, 30 workspace guides).
+  - Help coverage test: `tests/help-coverage.test.mjs` (28/28 passing across 136 screens).
+  - Full test suite: `npm test` passed (684/684 passing across all 19 test suites).
+  - TypeScript compiler: `npx tsc --noEmit` passed with 0 errors.
+  - Production build: `npm run build` succeeded (`dist/assets/index-CJgDavry.js`).
+- **Proposal**:
+  - Proposal ID: **290** (status: `pending` on `/docs -> My progress`, build `index-CJgDavry.js`, 23 rubric items claimed, `q:fresh_data` left pending human review).
 
 ---
 

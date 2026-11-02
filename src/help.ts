@@ -8998,6 +8998,78 @@ sterile_packs_ward: {
       ]
     ]
   },
+  drug_recalls: {
+    title: "Batch recalls",
+    titleUr: "ادویات کی تنسیخ و واپسی",
+    purpose: "Statutory drug recall campaigns and hospital-wide batch quarantine management per MSDS MOM 59: (1) Opening recall campaigns (POST /drug-recalls) triggered by DRAP alerts, manufacturer defect notices, supplier recalls, or internal hospital safety committee findings under Rule fe2af7a43c; (2) Immediate quarantine and automated blocking of recalled batches across all pharmacy dispensing counters, wards, OT suites, and emergency rooms; (3) Live formulary batch stock inspection in FEFO order (GET /drugs/{drug_id}/stock-status); (4) Recall campaign audit and distribution tracking (GET /drug-recalls, GET /drug-recalls/{recall_id}) detailing units remaining in pharmacy and ward stock versus quantities dispensed to outpatients, administered to inpatients, or consumed in theatre; (5) Mandatory stock removal / write-off (POST /drug-recalls/{recall_id}/remove-stock) under Rule 6e16f97bd1 recording disposal or supplier return credit notes; (6) Active patient contact auditing (PATCH /drug-recalls/{recall_id}/patients/{recall_patient_id}) with clinical outcomes (Contacted, Unreachable, NotNeeded); and (7) Campaign closure enforcement under Rule 2b020bd53b (POST /drug-recalls/{recall_id}/close), preventing closure via RECALL_NOT_COMPLETE if stock remains or patients are uncontacted, with mistaken opening cancellation (POST /drug-recalls/{recall_id}/cancel) releasing batches everywhere, refreshed in real-time via pharmacy.recall.updated.",
+    purposeUr: "قومی اور ہسپتال کے ضوابط کے تحت ادویات کی تنسیخ اور قرنطینہ مہم برائے MSDS MOM 59: (1) ڈریپ (DRAP) کے ہنگامی احکامات، مینوفیکچرر کے خط، سپلائر نوٹس یا اندرونی معائنہ پر تنسیخ و واپسی مہم کا اجراء (POST /drug-recalls) قاعدہ fe2af7a43c کے تحت؛ (2) متاثرہ بیجز کا فارمیسی، وارڈز، آپریشن تھیٹر اور ایمرجنسی میں فوری اور خودکار بلاک و قرنطینہ؛ (3) فارمولری اسٹاک اور میعاد کی ترتیب (FEFO) سے بیجز کا لائیو معائنہ (GET /drugs/{drug_id}/stock-status)؛ (4) مہم کی تفاصیل اور تقسیم کاری کا تفصیلی آڈٹ (GET /drug-recalls, GET /drug-recalls/{recall_id}) جس میں فارمیسی و وارڈز میں بچ جانے والے یونٹس بمقابلہ مریضوں کو جاری شدہ، وارڈ میں لگائی گئی یا تھیٹر میں استعمال شدہ ادویات کی مکمل فہرست شامل ہے؛ (5) فارمیسی اور وارڈز کے بقایا اسٹاک کا لازمی اخراج یا رائٹ آف (POST /drug-recalls/{recall_id}/remove-stock) قاعدہ 6e16f97bd1 کے تحت جس میں تلفی یا سپلائر واپسی کریڈٹ نوٹ کا اندراج ہوتا ہے؛ (6) دوا حاصل کرنے والے مریضوں سے ٹیلی فونک رابطہ اور طبی مشاورت کا لاگ (PATCH /drug-recalls/{recall_id}/patients/{recall_patient_id})؛ اور (7) مہم کی حتمی بندش (POST /drug-recalls/{recall_id}/close) قاعدہ 2b020bd53b کے تحت جس میں بقایا اسٹاک یا نامکمل رابطوں کی صورت میں RECALL_NOT_COMPLETE کے ذریعے بندش روکی جاتی ہے، مع غلطی سے کھولی گئی مہم کی منسوخی (POST /drug-recalls/{recall_id}/cancel) جس سے بیجز فوری بحال ہوتے ہیں، جو pharmacy.recall.updated کے ذریعے خودکار ریفریش ہوتی ہے۔",
+    steps: [
+      "Open the Batch Recalls screen from the Pharmacy Admin menu to review all active, closed, and cancelled recall campaigns.",
+      "Click '+ Open Recall Campaign' to initiate a new regulatory recall upon receiving a DRAP alert or defect notice.",
+      "Enter the Drug ID and click 'Inspect Stock' to view formulary specifications and active batches in FEFO order (GET /drugs/{drug_id}/stock-status).",
+      "Select 'Recall All Batches' or select specific defective batch numbers to place them under immediate hospital-wide quarantine per Rule fe2af7a43c.",
+      "Choose the alert source (DRAP, Manufacturer, Supplier, Internal), enter the official letter reference, assign statutory Class I, II, or III, record defect details, and ensure 'Contact Patients' is checked.",
+      "Click 'Confirm & Open Recall' to create the campaign; the backend immediately blocks all dispensing and alerts wards holding the stock.",
+      "From the Campaign Details view, review the holding wards and click 'Remove Stock' (POST /drug-recalls/{recall_id}/remove-stock) to write off units returned to supplier or incinerated per Rule 6e16f97bd1.",
+      "Audit the patient contact list and click 'Record Contact' on each recipient to log outreach outcomes (Contacted, Unreachable, NotNeeded) with clinical discussion notes.",
+      "Once stock_left is 0 and all patient contacts are finalized (can_close true), click 'Close Recall' to submit the closing audit note under Rule 2b020bd53b.",
+    ],
+    stepsUr: [
+      "فارمیسی ایڈمن مینو سے ادویات کی تنسیخ و واپسی اسکرین کھول کر تمام فعال، بند اور منسوخ شدہ مہمات کا جائزہ لیں۔",
+      "ڈریپ کا الرٹ یا خرابی کا نوٹس ملنے پر نئی واپسی مہم شروع کرنے کے لیے '+ Open Recall Campaign' پر کلک کریں۔",
+      "دوا کا شناختی نمبر درج کر کے 'Inspect Stock' دبائیں تاکہ فارمولری کی تفصیلات اور میعاد کی ترتیب سے لائیو بیجز دیکھ سکیں (GET /drugs/{drug_id}/stock-status)۔",
+      "قاعدہ fe2af7a43c کے تحت تمام بیجز یا مخصوص متاثرہ بیجز منتخب کریں تاکہ ہسپتال بھر میں ان کا استعمال فوری بند ہو سکے۔",
+      "الرٹ کا ذریعہ (ڈریپ، کمپنی، سپلائر، اندرونی) منتخب کریں، خط کا ریفرنس نمبر، قانونی کلاس (کلاس اول، دوم، سوم)، نقص کی تفصیل درج کریں اور مریضوں سے رابطہ کا خانہ چیک رکھیں۔",
+      "مہم کا باقاعدہ آغاز کرنے کے لیے 'Confirm & Open Recall' دبائیں؛ سسٹم فوری طور پر کاؤنٹرز پر بیج بلاک کر دے گا اور متعلقہ وارڈز کو مطلع کرے گا۔",
+      "مہم کی تفاصیل میں وارڈز کا اسٹاک دیکھیں اور قاعدہ 6e16f97bd1 کے تحت سپلائر کو واپسی یا تلفی کا نوٹ لکھ کر 'Remove Stock' پر کلک کریں۔",
+      "متاثرہ مریضوں کی فہرست میں جا کر ہر مریض کے نام کے آگے 'Record Contact' دبائیں اور گفتگو کا نتیجہ (رابطہ مکمل، نمبر بند، یا غیر ضروری) درج کریں۔",
+      "جب تمام اسٹاک خارج اور مریضوں سے رابطے مکمل ہو جائیں (can_close درست ہو) تو قاعدہ 2b020bd53b کے تحت 'Close Recall' پر کلک کر کے مہم مکمل کریں۔",
+    ],
+    faq: [
+      [
+        "The Batch recalls screen says 'This batch is recalled: it cannot be dispensed, sent to a ward, used in theatre or given.' (BATCH_RECALLED). Why, and what do I do?",
+        "An active batch recall campaign has quarantined this batch. Dispensing, ward transfers, and administration are completely blocked to protect patients. Check the batch number against the active recalls register on this screen. If your ward or department holds units of this batch, quarantine them in a designated red storage bin and surrender them to the pharmacy for removal under Rule 6e16f97bd1."
+      ],
+      [
+        "The Batch recalls screen says 'The batch does not belong to this item.' (STOCK_BATCH_MISMATCH). Why, and what do I do?",
+        "This validation error occurs if a batch ID submitted during recall opening or quarantine adjustment does not belong to the selected formulary drug ID. Always use the 'Inspect Stock' button to load the verified batches for that exact medicine before selecting batches."
+      ],
+      [
+        "The Batch recalls screen says 'The recall cannot change that way.' (RECALL_STATE_INVALID). Why, and what do I do?",
+        "Recall campaigns follow a strict statutory state machine: Open -> Closed or Cancelled. You cannot remove stock, record contacts, close, or cancel a recall that is already Closed or Cancelled. Refresh the screen to inspect the current state updated by other terminals."
+      ],
+      [
+        "What do the states of a drug recall mean (Open, Closed, Cancelled), and what moves it from one to the next?",
+        "An Open recall is actively blocking batches while staff quarantine stock and contact recipients. Closed indicates that every remaining unit was written off / removed and all affected patients were reached or resolved per Rule 2b020bd53b. Cancelled means the recall was opened by mistake and cancelled via POST /drug-recalls/{recall_id}/cancel, releasing the batches back into available stock."
+      ],
+      [
+        "The Batch recalls screen says 'The recall cannot close yet: stock of the batches is left, or patients are still to be contacted.' (RECALL_NOT_COMPLETE). Why, and what do I do?",
+        "Statutory Rule 2b020bd53b forbids closing a recall campaign while stock_left is greater than 0 or patients_to_contact remains unresolved. First use 'Remove stock' to write off all remaining units in pharmacy and ward stock, then record contact outcomes for all patients on the roster until can_close displays as Yes."
+      ]
+    ],
+    faqUr: [
+      [
+        "اسکرین پر پیغام آتا ہے کہ 'یہ بیج واپس بلایا جا چکا ہے: اسے جاری، وارڈ کو منتقل یا استعمال نہیں کیا جا سکتا' (BATCH_RECALLED)۔ اس کی کیا وجہ ہے اور مجھے کیا کرنا چاہیے؟",
+        "اس بیج کی تنسیخ و واپسی مہم جاری ہے جس کی وجہ سے مریضوں کے تحفظ کے لیے اسے ہسپتال بھر میں بلاک کر دیا گیا ہے۔ اپنے کاؤنٹر یا وارڈ پر موجود اس بیج کے ڈبے الگ کر کے سرخ قرنطینہ ڈبے میں رکھیں اور فارمیسی کو جمع کرائیں تاکہ قاعدہ 6e16f97bd1 کے تحت اسے ضائع یا واپس کیا جا سکے۔"
+      ],
+      [
+        "اسکرین کہتی ہے کہ 'بیج اس آئٹم سے مطابقت نہیں رکھتا' (STOCK_BATCH_MISMATCH)۔ اس کی کیا وجہ ہے؟",
+        "یہ غلطی اس وقت آتی ہے جب منتخب کردہ بیج نمبر اس دوا کا نہ ہو۔ اس سے بچنے کے لیے ہمیشہ پہلے 'Inspect Stock' دبائیں تاکہ سسٹم خودکار طور پر اسی دوا کے تصدیق شدہ بیجز لوڈ کرے۔"
+      ],
+      [
+        "اسکرین پر پیغام آتا ہے کہ 'دوا کی واپسی کی مہم اس طرح تبدیل نہیں ہو سکتی' (RECALL_STATE_INVALID)۔ اس کی کیا وجہ ہے؟",
+        "واپسی مہم کی کیفیات سخت ضوابط کے تحت چلتی ہیں: اوپن (Open) سے بند (Closed) یا منسوخ (Cancelled)۔ اگر مہم پہلے ہی بند یا منسوخ ہو چکی ہو تو اس میں مزید تبدیلی نہیں ہو سکتی۔ اسکرین ریفریش کر کے تازہ ترین کیفیت دیکھیں۔"
+      ],
+      [
+        "دوا کی واپسی کی کیفیات (Open, Closed, Cancelled) کا کیا مطلب ہے اور یہ کیسے تبدیل ہوتی ہیں؟",
+        "اوپن (Open) کا مطلب ہے کہ بیج بلاک ہے اور اسٹاک جمع کرنے اور مریضوں سے رابطے کا کام جاری ہے۔ بند (Closed) کا مطلب ہے کہ تمام اسٹاک تلف/واپس ہو چکا ہے اور تمام مریضوں سے رابطہ مکمل ہو چکا ہے۔ منسوخ (Cancelled) کا مطلب ہے کہ مہم غلطی سے کھلی تھی اور منسوخ کر کے بیجز بحال کر دیے گئے ہیں۔"
+      ],
+      [
+        "اسکرین کہتی ہے کہ 'واپسی ابھی بند نہیں ہو سکتی: اسٹاک بچا ہے یا مریضوں سے رابطہ باقی ہے' (RECALL_NOT_COMPLETE)۔ اس کی کیا وجہ ہے؟",
+        "قاعدہ 2b020bd53b کے تحت جب تک تمام بقایا یونٹس تلف نہ کر دیے جائیں ('Remove stock') اور فہرست میں موجود تمام مریضوں سے رابطہ لاگ مکمل نہ ہو جائے، مہم کو بند نہیں کیا جا سکتا۔ پہلے یہ دونوں تقاضے پورے کریں پھر 'Close Recall' دبائیں۔"
+      ]
+    ],
+  },
   medication_safety_setup: {
     title: "High-alert and look-alike medicines",
     titleUr: "ہائی الرٹ اور مشابہ ادویات",
