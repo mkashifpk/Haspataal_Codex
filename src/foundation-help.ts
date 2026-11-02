@@ -20,6 +20,7 @@ export const phase1Screens = [
 const approvalScreens = ["approval_queue", "charity_approvals"];
 // Coverage grows screen by screen; Phase 1 acceptance remains separate.
 export const deliveredHelpScreens = [
+  "medication_safety_setup",
   "pharmacy_admin",
   "billing_admin",
   "accountant_cockpit",
@@ -145,7 +146,42 @@ const g = (
 // IDs are also attached to the actual controls. The build rejects missing
 // mappings and empty translations instead of treating a page as coverage.
 export const controlGuides: Record<string, ControlGuide> = {
-    // Screen 135: pharmacy_admin (Pharmacy inventory, formulary & procurement)
+    // Screen 136: medication_safety_setup (High-alert drugs & look-alike/sound-alike rules)
+  "medication_safety_setup.download_high_alert_pdf_btn": g(["medication_safety_setup"], ["Download High-Alert PDF", "ہائی الرٹ لسٹ پی ڈی ایف"], ["Downloads printable high-alert list for ward nursing stations and pharmacy (GET /medication-safety/high-alert-list/pdf per rule:6da5fd1c68).", "وارڈ نرسنگ اسٹیشنز کے لیے پرنٹ ایبل لسٹ ڈاؤن لوڈ کرتا ہے۔"]),
+  "medication_safety_setup.download_policy_pdf_btn": g(["medication_safety_setup"], ["Download Policy PDF", "سیفٹی پالیسی پی ڈی ایف"], ["Downloads written hospital medication safety policy document (GET /medication-safety/policy/pdf).", "ہسپتال کی تحریری ادویات سیفٹی پالیسی ڈاؤن لوڈ کرتا ہے۔"]),
+  "medication_safety_setup.refresh_btn": g(["medication_safety_setup"], ["Refresh safety registry", "سیفٹی لسٹ ریفریش کریں"], ["Reloads high-alert categories, restricted medicines, and LASA pairs (GET /medication-safety/high-alert-list).", "ہائی الرٹ اور مشابہ ادویات کی فہرست دوبارہ لوڈ کرتا ہے۔"]),
+  "medication_safety_setup.dismiss_error_btn": g(["medication_safety_setup"], ["Dismiss error alert", "خرابی کا نوٹس بند کریں"], ["Dismisses the current error notification banner.", "موجودہ خرابی کے نوٹس کو بند کرتا ہے۔"]),
+  "medication_safety_setup.dismiss_success_btn": g(["medication_safety_setup"], ["Dismiss success alert", "کامیابی کا نوٹس بند کریں"], ["Dismisses the current success notification banner.", "موجودہ کامیابی کے نوٹس کو بند کرتا ہے۔"]),
+  "medication_safety_setup.high_alert_tab": g(["medication_safety_setup"], ["High-alert registry tab", "ہائی الرٹ ٹیب"], ["Switches to high-alert categories and restricted prescribing medicines view.", "ہائی الرٹ کیٹگریز اور مخصوص نسخہ ادویات کے ٹیب پر منتقل کرتا ہے۔"]),
+  "medication_safety_setup.lasa_tab": g(["medication_safety_setup"], ["LASA pairs tab", "مشابہ ادویات ٹیب"], ["Switches to Look-Alike / Sound-Alike pairs and differentiation notes view.", "مشابہ نام یا پیکنگ والی ادویات کے جوڑوں کے ٹیب پر منتقل کرتا ہے۔"]),
+  "medication_safety_setup.search_tab": g(["medication_safety_setup"], ["Formulary safety search tab", "فارمولری تلاش ٹیب"], ["Switches to formulary search with live stock colours and safety flag editor.", "لائیو اسٹاک اور حفاظتی فلیگز کے ساتھ فارمولری تلاش پر منتقل کرتا ہے۔"]),
+  "medication_safety_setup.banner_print_btn": g(["medication_safety_setup"], ["Print current version", "موجودہ لسٹ پرنٹ کریں"], ["Initiates PDF download to replace physical lists at nursing stations (rule:6da5fd1c68).", "نرسنگ اسٹیشنز پر چسپاں کرنے کے لیے پی ڈی ایف لسٹ نکالتا ہے۔"]),
+  "medication_safety_setup.edit_drug_flag_btn": g(["medication_safety_setup"], ["Edit drug safety flags", "حفاظتی فلیگ تبدیل کریں"], ["Opens modal to change high-alert category or restricted prescribing flag.", "دوا کا ہائی الرٹ درجہ یا مخصوص نسخہ حیثیت بدلنے کی ونڈو کھولتا ہے۔"]),
+  "medication_safety_setup.edit_restricted_flag_btn": g(["medication_safety_setup"], ["Configure restriction", "پابندی ترتیب دیں"], ["Opens modal to adjust restricted prescribing status (MSDS 52).", "مخصوص نسخہ شرط کی ترتیبات تبدیل کرنے کا فارم کھولتا ہے۔"]),
+  "medication_safety_setup.open_add_pair_btn": g(["medication_safety_setup"], ["Open pair look-alikes dialog", "نیا مشابہ جوڑا بنائیں"], ["Opens modal to link two look-alike or sound-alike medicines with distinction guidance (rule:a8dc0017ab).", "مشابہ ادویات کو باہم جوڑنے کا فارم کھولتا ہے۔"]),
+  "medication_safety_setup.open_edit_pair_btn": g(["medication_safety_setup"], ["Open edit pair dialog", "جوڑا ترمیم کریں"], ["Opens modal to modify differentiation note or retirement status.", "مشابہ ادویات کے وضاحتی نوٹ میں ترمیم کی ونڈو کھولتا ہے۔"]),
+  "medication_safety_setup.toggle_pair_active_btn": g(["medication_safety_setup"], ["Retire or reactivate pair", "ریٹائر یا فعال کریں"], ["Toggles active status of a LASA pair (rule:a8dc0017ab).", "مشابہ جوڑے کو ریٹائر یا دوبارہ فعال کرتا ہے۔"]),
+  "medication_safety_setup.search_input": g(["medication_safety_setup"], ["Search medicine query", "دوا تلاش"], ["Search query for brand name, generic molecule, or drug code (GET /drugs/search).", "دوا کے نام یا کوڈ سے تلاش کے الفاظ درج کرتا ہے۔"]),
+  "medication_safety_setup.search_btn": g(["medication_safety_setup"], ["Execute formulary search", "تلاش کریں"], ["Queries formulary drugs with live stock colour and safety indicators (GET /drugs/search).", "فارمولری ادویات کی تلاش انجام دیتا ہے۔"]),
+  "medication_safety_setup.open_flag_modal_btn": g(["medication_safety_setup"], ["Open configure safety modal", "سیفٹی سیٹ اپ کھولیں"], ["Opens modal to configure high-alert category and restricted prescribing per rule:a8dc0017ab.", "دوا کے لیے ہائی الرٹ اور پابندی ترتیب دینے کا فارم کھولتا ہے۔"]),
+  "medication_safety_setup.close_pair_modal_btn": g(["medication_safety_setup"], ["Close pair modal", "جوڑا فارم بند کریں"], ["Dismisses the add LASA pair modal.", "مشابہ جوڑا ونڈو بند کرتا ہے۔"]),
+  "medication_safety_setup.pair_drug_id_input": g(["medication_safety_setup"], ["Primary drug ID", "پہلی دوا شناختی نمبر"], ["Identifier of the first medicine in the look-alike pair.", "جوڑے کی پہلی دوا کا شناختی نمبر درج کرتا ہے۔"]),
+  "medication_safety_setup.pair_other_drug_id_input": g(["medication_safety_setup"], ["Look-alike drug ID", "مشابہ دوا شناختی نمبر"], ["Identifier of the partner look-alike medicine.", "جوڑے کی دوسری مشابہ دوا کا شناختی نمبر درج کرتا ہے۔"]),
+  "medication_safety_setup.pair_note_input": g(["medication_safety_setup"], ["Differentiation note", "فرق کی وضاحت"], ["Mandatory note explaining visual differences, Tall Man lettering, or dosage safeguards (rule:a8dc0017ab).", "ادویات کے درمیان فرق اور احتیاطی تدابیر کی لازمی وضاحت۔"]),
+  "medication_safety_setup.cancel_pair_modal_btn": g(["medication_safety_setup"], ["Cancel add pair", "جوڑا منسوخ کریں"], ["Cancels LASA pair creation.", "مشابہ جوڑا فارم منسوخ کرتا ہے۔"]),
+  "medication_safety_setup.save_pair_btn": g(["medication_safety_setup"], ["Save LASA pair", "جوڑا محفوظ کریں"], ["Submits look-alike pair to safety registry (POST /medication-safety/lasa-pairs).", "مشابہ جوڑے کو محفوظ کرتا ہے۔"]),
+  "medication_safety_setup.close_edit_pair_modal_btn": g(["medication_safety_setup"], ["Close edit pair modal", "ترمیم بند کریں"], ["Dismisses edit pair modal.", "جوڑا ترمیم ونڈو بند کرتا ہے۔"]),
+  "medication_safety_setup.edit_pair_note_input": g(["medication_safety_setup"], ["Updated differentiation note", "تبدیل شدہ وضاحتی نوٹ"], ["Modifies the differentiation guidance note.", "فرق کی وضاحت کا نیا متن درج کرتا ہے۔"]),
+  "medication_safety_setup.edit_pair_active_checkbox": g(["medication_safety_setup"], ["Pair active checkbox", "فعال حیثیت"], ["Unchecking retires the pair from active dispensing warnings (rule:a8dc0017ab).", "چیک ہٹانے سے جوڑا ریٹائر ہو جاتا ہے۔"]),
+  "medication_safety_setup.cancel_edit_pair_modal_btn": g(["medication_safety_setup"], ["Cancel edit pair", "ترمیم منسوخ"], ["Cancels pair modifications.", "جوڑے کی ترمیم منسوخ کرتا ہے۔"]),
+  "medication_safety_setup.save_edit_pair_btn": g(["medication_safety_setup"], ["Update LASA pair", "جوڑا اپڈیٹ کریں"], ["Saves modifications or retirement to the pair (PATCH /medication-safety/lasa-pairs/{id}).", "جوڑے کی تبدیلیوں کو محفوظ کرتا ہے۔"]),
+  "medication_safety_setup.close_flag_modal_btn": g(["medication_safety_setup"], ["Close safety flags modal", "سیفٹی فارم بند کریں"], ["Dismisses safety flags modal.", "سیفٹی فلیگ ونڈو بند کرتا ہے۔"]),
+  "medication_safety_setup.flag_category_select": g(["medication_safety_setup"], ["High-alert category selection", "ہائی الرٹ کیٹگری"], ["Assigns high-alert category or clears it with None; strictly forbidden on OTC (rule:a8dc0017ab).", "ہائی الرٹ درجہ منتخب کرتا ہے؛ بغیر نسخہ ادویات پر ممنوع ہے۔"]),
+  "medication_safety_setup.flag_restricted_checkbox": g(["medication_safety_setup"], ["Restricted prescribing checkbox", "مخصوص نسخہ شرط"], ["Toggles requirement for RestrictedPrescribing clinical privilege (MSDS 52).", "مخصوص نسخہ استحقاق کی شرط فعال یا غیر فعال کرتا ہے۔"]),
+  "medication_safety_setup.cancel_flag_modal_btn": g(["medication_safety_setup"], ["Cancel safety flags", "فلیگ منسوخ"], ["Cancels safety flag modifications.", "سیفٹی ترتیبات منسوخ کرتا ہے۔"]),
+  "medication_safety_setup.save_flag_btn": g(["medication_safety_setup"], ["Save safety flags", "سیفٹی فلیگز محفوظ کریں"], ["Applies high-alert and restricted flags to the medicine (PATCH /medication-safety/drugs/{id}).", "دوا کے لیے حفاظتی فلیگز کو محفوظ کرتا ہے۔"]),
+
+  // Screen 135: pharmacy_admin (Pharmacy inventory, formulary & procurement)
   "pharmacy_admin.refresh_btn": g(["pharmacy_admin"], ["Refresh pharmacy records", "فارمیسی ریکارڈ ریفریش کریں"], ["Reloads low stock, near expiry, invoices, supplier returns, and profit analytics.", "اسٹاک، بلز اور منافع کی معلومات دوبارہ لوڈ کرتا ہے۔"]),
   "pharmacy_admin.dismiss_error_btn": g(["pharmacy_admin"], ["Dismiss error alert", "خرابی کا نوٹس بند کریں"], ["Dismisses the current error notification banner.", "موجودہ خرابی کے نوٹس کو بند کرتا ہے۔"]),
   "pharmacy_admin.dismiss_success_btn": g(["pharmacy_admin"], ["Dismiss success alert", "کامیابی کا نوٹس بند کریں"], ["Dismisses the current success notification banner.", "موجودہ کامیابی کے نوٹس کو بند کرتا ہے۔"]),

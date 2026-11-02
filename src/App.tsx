@@ -56,6 +56,7 @@ import { OtSettlement } from './screens/OtSettlement';
 import { AccountantCockpit } from './screens/AccountantCockpit';
 import { BillingAdmin } from './screens/BillingAdmin';
 import { PharmacyAdmin } from './screens/PharmacyAdmin';
+import { MedicationSafetySetup } from './screens/MedicationSafetySetup';
 import { ClinicalPrivileges } from './screens/ClinicalPrivileges';
 import { TheatreChecklistSetup } from './screens/TheatreChecklistSetup';
 import { CSSDSetup } from './screens/CSSDSetup';
@@ -1101,6 +1102,7 @@ export function App() {
       (id !== "recovery_board_admin" || ["full","open_work","records","setup"].includes(est?.views.screens.find(v=>v.screen_id===id)?.view || "")) &&
       (id !== "recovery_board_anaesthesia" || ["full","open_work","records","setup"].includes(est?.views.screens.find(v=>v.screen_id===id)?.view || "")) &&
       (id !== "transfusion_bedside_ot" || ["full","open_work","records","setup"].includes(est?.views.screens.find(v=>v.screen_id===id)?.view || "")) &&
+      (id !== "medication_safety_setup" || ["full","open_work","records","setup"].includes(est?.views.screens.find(v=>v.screen_id===id)?.view || "")) &&
       (id !== "pharmacy_admin" || ["full","open_work","records","setup"].includes(est?.views.screens.find(v=>v.screen_id===id)?.view || "")) &&
       (id !== "billing_admin" || ["full","open_work","records","setup"].includes(est?.views.screens.find(v=>v.screen_id===id)?.view || "")) &&
       (id !== "accountant_cockpit" || ["full","open_work","records","setup"].includes(est?.views.screens.find(v=>v.screen_id===id)?.view || "")) &&
@@ -1493,6 +1495,7 @@ export function App() {
               {screen === 'transfusion_bedside' && est && <TransfusionBedside key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} />}
               {screen === 'transfusion_bedside_er' && est && <TransfusionBedsideER key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} />}
               {screen === 'transfusion_bedside_ot' && est && <TransfusionBedsideOT key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} />}
+              {screen === 'medication_safety_setup' && <MedicationSafetySetup key={user.user_id} user={user} establishment={est} connected={connected} timeZone={meta?.hospital_timezone} onNavigateScreen={(s) => navigate(s)} />}
               {screen === 'pharmacy_admin' && <PharmacyAdmin key={user.user_id} user={user} establishment={est} connected={connected} timeZone={meta?.hospital_timezone} onNavigateScreen={(s) => navigate(s)} />}
               {screen === 'billing_admin' && <BillingAdmin key={user.user_id} user={user} establishment={est} connected={connected} timeZone={meta?.hospital_timezone} onNavigateScreen={(s) => navigate(s)} />}
               {screen === 'accountant_cockpit' && <AccountantCockpit key={user.user_id} user={user} establishment={est} connected={connected} timeZone={meta?.hospital_timezone} onNavigateScreen={(s) => navigate(s)} />}

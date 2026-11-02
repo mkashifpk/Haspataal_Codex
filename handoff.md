@@ -1,23 +1,60 @@
 # Haspataal checkpoint
 Last updated: 02 November 2026, Antigravity (Codex pair), Asia/Karachi.
 
-## Active request: Phase 7 Screen 136 `medication_safety_setup` (High-alert drugs & look-alike/sound-alike rules)
+## Active request: Phase 7 Screen 137 `drug_recalls` (Drug recall campaigns & quarantine management)
 Executing the Haspataal HMS Roadmap in dependency order along with all tests and MCP progress reporting:
 - **Phase 6 ("Theatre and sterile supply")**: 100% COMPLETE (Screens 109–132, Proposals 262–285).
 - **Phase 7 ("Finance, billing and back offices")**:
   - Screen 133: **`accountant_cockpit`** ("Accountant 3-pane cockpit", Position 133, 83 points, workspace `finance_accountant`) — **COMPLETED** (commit `3f85c2d`, Proposal **286** awaiting human review on `/docs -> My progress`).
   - Screen 134: **`billing_admin`** ("Price & policy management", Position 134, 70 points, workspace `billing_admin`) — **COMPLETED** (commit `d3c8ab8`, Proposal **287** awaiting human review on `/docs -> My progress`).
-  - Screen 135: **`pharmacy_admin`** ("Pharmacy inventory, formulary & procurement", Position 135, 76 points, workspace `pharmacy_admin`) — **COMPLETED** (Proposal **288** awaiting human review on `/docs -> My progress`).
-  - Screen 136: **`medication_safety_setup`** ("High-alert drugs & look-alike/sound-alike rules", Position 136, workspace `pharmacy_admin`) — **NEXT**.
-    - Scope: Look-Alike / Sound-Alike (LASA) safety pairs, Tall Man lettering, high-alert medication category management, maximum single/daily dose safety bounds, and double-check protocol configuration.
+  - Screen 135: **`pharmacy_admin`** ("Pharmacy inventory, formulary & procurement", Position 135, 76 points, workspace `pharmacy_admin`) — **COMPLETED** (commit `1b7d0e5`, Proposal **288** awaiting human review on `/docs -> My progress`).
+  - Screen 136: **`medication_safety_setup`** ("High-alert drugs & look-alike/sound-alike rules", Position 136, 54 points, workspace `pharmacy_admin`) — **COMPLETED** (Proposal **289** awaiting human review on `/docs -> My progress`).
+  - Screen 137: **`drug_recalls`** ("Drug recall campaigns & quarantine management", Position 137, workspace `pharmacy_admin`) — **NEXT**.
+    - Scope: Drug recall campaigns (DRAP and manufacturer alerts), affected batch identification, automatic stock quarantine, recall notifications to clinical wards, and supplier return linking.
     - Next Concrete Actions:
-      1. Inspect `get_screen_bundle("medication_safety_setup")` and save to `contracts/medication_safety_setup.json`.
+      1. Inspect `get_screen_bundle("drug_recalls")` and save to `contracts/drug_recalls.json`.
       2. Generate TypeScript contracts via `generate_typescript`.
-      3. Create domain policies in `src/medication-safety-setup-policy.ts`.
-      4. Implement UI `src/screens/MedicationSafetySetup.tsx`.
+      3. Create domain policies in `src/drug-recalls-policy.ts`.
+      4. Implement UI `src/screens/DrugRecalls.tsx`.
       5. Wire into `src/App.tsx`, catalogue, task map, foundation help, authored handbook entry, and unit test suite.
       6. Run full verification suite (`npm run check:help`, `npm test`, `npx tsc --noEmit`, `npm run build`).
       7. Propose progress via `propose_progress`.
+
+---
+
+### Completed Screen 136 (`medication_safety_setup`) Checkpoint
+- **Workflow & Standards**: Comprehensive medication safety governance workspace (`medication_safety_setup`):
+  - **Tab 1: High-Alert & Restricted Registry:**
+    - High-Alert medication categories worklist via `GET /medication-safety/high-alert-list` (`highAlertList`) grouped by clinical class (`ConcentratedElectrolyte`, `Chemotherapy`, `Anticoagulant`, `Insulin`, `Opioid`, `Sedative`, `NeuromuscularBlocker`, `Inotrope`, `Thrombolytic`, `Psychotropic`, `HighCost`, `Other`) with drug count badges and individual edit modal actions.
+    - Restricted Prescribing section (MSDS 52) displaying agents that require the clinician `RestrictedPrescribing` clinical privilege.
+    - Printable PDF generation via `GET /medication-safety/high-alert-list/pdf` (`highAlertPdf`) enforcing statutory Rule `rule:6da5fd1c68` (replacing physical station printouts across all nursing stations, OT suites, and pharmacy counters whenever classifications are updated).
+    - Hospital Medication Safety Policy document download via `GET /medication-safety/policy/pdf` (`policyPdfMedicationSafety`).
+  - **Tab 2: Look-Alike / Sound-Alike (LASA) Pairs:**
+    - LASA pairs registry table with distinction and differentiation notes.
+    - Add Look-Alike Pair modal via `POST /medication-safety/lasa-pairs` (`addPair`) enforcing statutory Rule `rule:a8dc0017ab` with mandatory staff distinction guidance and duplicate pair prevention (`LASA_PAIR_EXISTS`).
+    - Edit LASA Pair modal & quick-retire action via `PATCH /medication-safety/lasa-pairs/{pair_id}` (`updatePair`) supporting pair retirement (`is_active: false`) when packaging or names no longer conflict.
+  - **Tab 3: Formulary Safety Search & Flagging:**
+    - Live formulary drug search via `GET /drugs/search` (`searchDrugs`) displaying live stock status color codes, schedule, current high-alert category, and existing look-alike relationships.
+    - Configure Safety Flags modal via `PATCH /medication-safety/drugs/{drug_id}` (`setDrugFlags`) under Rule `rule:a8dc0017ab`: allows selecting a high-alert category or clearing it with `null`, strictly forbidding high-alert designation on OTC medicines, and toggling restricted prescribing status.
+- **Contracts**: `contracts/medication_safety_setup.json` (7 endpoints, 2 statutory rules `rule:a8dc0017ab`, `rule:6da5fd1c68`, 20 rubric items).
+- **Domain Policies & Statutory Rules (`src/medication-safety-setup-policy.ts`)**:
+  - Runtime service capability gating via `getMedicationSafetySetupCapabilityView` (`full`, `open_work`, `records`, `setup`, `hidden`).
+  - Strict input validation under Rule `rule:a8dc0017ab`: `validateDrugSafetyPatch` (OTC guard and clearing high-alert with null).
+  - LASA pair input validation (`validateLasaPairInput`) checking distinct IDs, non-empty distinction notes, and duplicate active pair prevention.
+  - LASA pair update validation (`validateLasaPairUpdate`) handling retirement.
+  - Comprehensive bilingual error dictionary (`MEDICATION_SAFETY_ERROR_MESSAGES`) covering `FORBIDDEN`, `VALIDATION_ERROR`, `LASA_PAIR_EXISTS`, `NOT_FOUND`, and `VERSION_CONFLICT`.
+- **UI Architecture (`src/screens/MedicationSafetySetup.tsx`)**:
+  - Live 3-tab medication safety governance component wired into `src/App.tsx`, `src/foundation-catalogue.json` (7 tasks), `src/foundation-task-map.json` (7 controls), `src/foundation-help.ts` (33 controls mapped).
+  - Authored comprehensive handbook entry (`src/help.ts`) with bilingual title, purpose, 8 operational steps, and 5 role FAQs for `pharmacy_admin`. Bundled screenshots in `public/handbook/medication_safety_setup-en.png` and `medication_safety_setup-ur.png`.
+- **Verification**:
+  - Automated unit tests: `tests/medication-safety-setup.test.mjs` (12/12 passing).
+  - Help check: `npm run check:help` passed (135 screens, 3317 controls, 2327 groups, 69 FAQ seeds, 30 workspace guides).
+  - Help coverage test: `tests/help-coverage.test.mjs` (28/28 passing across 135 screens).
+  - Full test suite: `npm test` passed (677/677 passing across all 19 test suites).
+  - TypeScript compiler: `npx tsc --noEmit` passed with 0 errors.
+  - Production build: `npm run build` succeeded (`dist/assets/index-2j2cVa5a.js`).
+- **Proposal**:
+  - Proposal ID: **289** (status: `pending` on `/docs -> My progress`, build `index-2j2cVa5a.js`, 19 rubric items claimed, `q:fresh_data` left pending human review).
 
 ---
 

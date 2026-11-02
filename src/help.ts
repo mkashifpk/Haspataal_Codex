@@ -8998,6 +8998,76 @@ sterile_packs_ward: {
       ]
     ]
   },
+  medication_safety_setup: {
+    title: "High-alert and look-alike medicines",
+    titleUr: "ہائی الرٹ اور مشابہ ادویات",
+    purpose: "Medication safety governance workspace for clinical risk reduction per MSDS 56 & 52: (1) High-Alert medication categorization (GET /medication-safety/high-alert-list) covering concentrated electrolytes, chemotherapy, anticoagulants, insulins, opioids, sedatives, and neuromuscular blockers; (2) Safety flag configuration (PATCH /medication-safety/drugs/{drug_id}) under Rule a8dc0017ab, ensuring high-alert status is never assigned to OTC medicines, and null clears it; (3) Restricted prescribing designation requiring the clinician RestrictedPrescribing privilege (MSDS 52); (4) Look-Alike / Sound-Alike (LASA) safety pairs (POST /medication-safety/lasa-pairs, PATCH /medication-safety/lasa-pairs/{pair_id}) requiring a mandatory distinction note on how to tell them apart, with pair retirement via is_active false; (5) Formulary safety search with live stock colours (GET /drugs/search); and (6) High-Alert and Policy PDF generation (GET /medication-safety/high-alert-list/pdf, GET /medication-safety/policy/pdf) enforcing statutory Rule 6da5fd1c68 to print and replace physical lists at nursing stations and the pharmacy after every change.",
+    purposeUr: "ادویات کے حفاظتی ضوابط کی ورک اسپیس برائے کلینیکل رسک مینجمنٹ تحت MSDS 56 و 52: (1) ہائی الرٹ ادویات کی درجہ بندی (GET /medication-safety/high-alert-list) بشمول مرکوز الیکٹرولائٹس، کیموتھراپی، خون پتلا کرنے والی ادویات، انسولین، اوپیئڈز اور نشہ آور مسکن ادویات؛ (2) حفاظتی فلیگز کا تعین (PATCH /medication-safety/drugs/{drug_id}) قاعدہ a8dc0017ab کے تحت جس میں ہائی الرٹ کا درجہ او ٹی سی ادویات پر سختی سے ممنوع ہے جبکہ خالی کرنے سے یہ ختم ہو جاتا ہے؛ (3) مخصوص نسخہ استحقاق (RestrictedPrescribing) کی شرط (MSDS 52)؛ (4) مشابہ ادویات (LASA) کے جوڑوں کا اندراج اور فرق کی لازمی وضاحت مع ریٹائرمنٹ سہولت (POST /medication-safety/lasa-pairs, PATCH /medication-safety/lasa-pairs/{pair_id})؛ (5) لائیو اسٹاک رنگوں کے ساتھ فارمولری تلاش (GET /drugs/search)؛ اور (6) ہائی الرٹ لسٹ اور پالیسی پی ڈی ایف دستاویزات کا اجراء (GET /medication-safety/high-alert-list/pdf, GET /medication-safety/policy/pdf) قاعدہ 6da5fd1c68 کے تحت ہر تبدیلی کے بعد نرسنگ اسٹیشنز اور کاؤنٹرز پر نئی پرنٹ شدہ لسٹ چسپاں کرنا لازمی ہے۔",
+    steps: [
+      "Open High-Alert Registry tab to review categorized medications and restricted prescribing items.",
+      "Click 'Print High-Alert List PDF' whenever any safety classification changes to update station printouts per Rule 6da5fd1c68.",
+      "Switch to LASA Pairs tab to review Look-Alike / Sound-Alike pairs and their staff distinction guidance notes.",
+      "Click '+ Pair Look-Alike Medicines' to define a new safety pair with primary drug, partner drug, and mandatory differentiation instructions.",
+      "Click 'Retire' on any active LASA pair to set is_active false when packaging or brand names no longer conflict.",
+      "Switch to Formulary Safety Search tab and search by brand name, generic molecule, or drug code.",
+      "Click 'Configure Safety' on any search result to assign a High-Alert category or Restricted Prescribing flag under Rule a8dc0017ab.",
+      "Select 'None' in the high-alert category selector to clear high-alert status, noting that OTC medicines are strictly barred from high-alert classification.",
+    ],
+    stepsUr: [
+      "ہائی الرٹ اور مخصوص نسخہ ادویات کا جائزہ لینے کے لیے ہائی الرٹ رجسٹری ٹیب کھولیں۔",
+      "کسی بھی تبدیلی کے بعد قاعدہ 6da5fd1c68 کے تحت نرسنگ اسٹیشنز پر نئی لسٹ چسپاں کرنے کے لیے 'Print High-Alert List PDF' پر کلک کریں۔",
+      "مشابہ نام یا پیکنگ والی ادویات کے جوڑے اور ان کے فرق کی ہدایات دیکھنے کے لیے ایل اے ایس اے ٹیب پر جائیں۔",
+      "پہلی دوا، مشابہ دوا اور فرق کی لازمی وضاحت درج کرنے کے لیے '+ Pair Look-Alike Medicines' دبائیں۔",
+      "جب ادویات کی پیکنگ یا نام کا تصادم ختم ہو جائے تو جوڑے کو غیر فعال کرنے کے لیے 'Retire' پر کلک کریں۔",
+      "فارمولری سیفٹی سرچ ٹیب پر جائیں اور دوا کے نام یا جینرک نام سے تلاش کریں۔",
+      "قاعدہ a8dc0017ab کے تحت ہائی الرٹ یا مخصوص نسخہ فلیگ لگانے کے لیے نتائج میں 'Configure Safety' منتخب کریں۔",
+      "ہائی الرٹ درجہ ختم کرنے کے لیے 'None' منتخب کریں؛ یاد رہے کہ بغیر نسخہ (OTC) ادویات کو ہائی الرٹ قرار نہیں دیا جا سکتا۔",
+    ],
+    faq: [
+      [
+        "Why must the High-Alert List PDF be reprinted whenever safety classifications change?",
+        "Under statutory Rule 6da5fd1c68 and MSDS 56 ii, an updated, legible high-alert list must be physically posted at every nursing station, OT suite, and pharmacy dispensing counter to prevent administration errors."
+      ],
+      [
+        "Can an Over-The-Counter (OTC) medicine be designated as High-Alert?",
+        "No, under Rule a8dc0017ab, high-alert classification is strictly forbidden for OTC medicines because high-alert drugs require independent dual verification and controlled clinical handling."
+      ],
+      [
+        "What happens when two medicines are identified as Look-Alike / Sound-Alike (LASA)?",
+        "Clinical staff pair them in the LASA registry with a mandatory distinction note highlighting visual differences or Tall Man lettering; the system warns dispensers and prescribers whenever either medicine is selected."
+      ],
+      [
+        "How is an existing LASA pair retired when packaging is updated by the manufacturer?",
+        "Editing the pair and setting is_active to false (or clicking Retire) archives the pair per Rule a8dc0017ab while retaining historical audit records."
+      ],
+      [
+        "Who can prescribe medicines marked as Restricted Prescribing?",
+        "Only clinicians granted the RestrictedPrescribing privilege (MSDS 52) can author electronic prescriptions for restricted agents."
+      ]
+    ],
+    faqUr: [
+      [
+        "حفاظتی درجہ بندی بدلنے پر ہائی الرٹ لسٹ کا دوبارہ پرنٹ لینا کیوں ضروری ہے؟",
+        "قاعدہ 6da5fd1c68 اور MSDS 56 ii کے تحت غلطی سے بچاؤ کے لیے تمام نرسنگ اسٹیشنز، آپریشن تھیٹر اور فارمیسی کاؤنٹرز پر تازہ ترین پرنٹ شدہ لسٹ چسپاں ہونا لازمی ہے۔"
+      ],
+      [
+        "کیا بغیر نسخہ (OTC) ملنے والی دوا کو ہائی الرٹ قرار دیا جا سکتا ہے؟",
+        "جی نہیں، قاعدہ a8dc0017ab کے تحت او ٹی سی دوا کو ہائی الرٹ نہیں بنایا جا سکتا کیونکہ ہائی الرٹ دوا کے لیے دوہری چیکنگ اور سخت طبی نگرانی درکار ہوتی ہے۔"
+      ],
+      [
+        "جب دو ادویات مشابہ (LASA) پائی جائیں تو کیا عمل ہوتا ہے؟",
+        "عملہ فرق کی لازمی وضاحت کے ساتھ انہیں جوڑے کے طور پر رجسٹر کرتا ہے تاکہ نسخہ لکھتے یا دوا دیتے وقت سسٹم عملے کو الرٹ کر سکے۔"
+      ],
+      [
+        "اگر کمپنی پیکنگ بدل دے تو پرانا مشابہ جوڑا کیسے ختم کیا جاتا ہے؟",
+        "قاعدہ a8dc0017ab کے تحت جوڑے کو ریٹائر (is_active: false) کر دیا جاتا ہے جس سے وارننگ ختم ہو جاتی ہے مگر آڈٹ ریکارڈ محفوظ رہتا ہے۔"
+      ],
+      [
+        "مخصوص نسخہ (Restricted Prescribing) والی ادویات کون لکھ سکتا ہے؟",
+        "صرف وہی ڈاکٹر جن کے پاس ہسپتال کی جانب سے RestrictedPrescribing کا باقاعدہ کلینیکل استحقاق موجود ہو (MSDS 52)۔"
+      ]
+    ],
+  },
   pharmacy_admin: {
     title: "Pharmacy back office",
     titleUr: "فارمیسی بیک آفس",
