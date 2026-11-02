@@ -53,6 +53,7 @@ import { TransfusionBedside } from './screens/TransfusionBedside';
 import { TransfusionBedsideER } from './screens/TransfusionBedsideER';
 import { TransfusionBedsideOT } from './screens/TransfusionBedsideOT';
 import { OtSettlement } from './screens/OtSettlement';
+import { AccountantCockpit } from './screens/AccountantCockpit';
 import { ClinicalPrivileges } from './screens/ClinicalPrivileges';
 import { TheatreChecklistSetup } from './screens/TheatreChecklistSetup';
 import { CSSDSetup } from './screens/CSSDSetup';
@@ -1098,6 +1099,7 @@ export function App() {
       (id !== "recovery_board_admin" || ["full","open_work","records","setup"].includes(est?.views.screens.find(v=>v.screen_id===id)?.view || "")) &&
       (id !== "recovery_board_anaesthesia" || ["full","open_work","records","setup"].includes(est?.views.screens.find(v=>v.screen_id===id)?.view || "")) &&
       (id !== "transfusion_bedside_ot" || ["full","open_work","records","setup"].includes(est?.views.screens.find(v=>v.screen_id===id)?.view || "")) &&
+      (id !== "accountant_cockpit" || ["full","open_work","records","setup"].includes(est?.views.screens.find(v=>v.screen_id===id)?.view || "")) &&
       (id !== "ot_settlement" || ["full","open_work","records","setup"].includes(est?.views.screens.find(v=>v.screen_id===id)?.view || "")) &&
       (!["mar","verbal_orders_ward","verbal_orders_er","vitals_tracker","patient_education_ward","nursing_assessment","my_beds","doctor_inpatients","cost_estimates_admissions","consents_admissions","wristbands_admissions","wristbands_ward","own_medicines_ward","own_medicines_pharmacy","bed_matrix","pending_admissions","imaging_repeats","imaging_outsourced","critical_results_radiology","radiology_worklist","rx_queue","dispense","order_queries","otc","charity_override","lab_only_walkin","lab_bench","lab_send_outs","lab_verification","critical_results_bench","critical_results_verifier","critical_results_doctor","critical_results_ward","critical_results_er","consents_ward","consents_triage","er_board_doctor","er_visit_doctor","mlc_cases","mlc_cases_doctor","death_record","body_release_ward","body_release_er","patient_programmes_triage","transfusion_bedside_er"].includes(id) || ["full", "open_work", "records"].includes(est?.views.screens.find(v => v.screen_id === id)?.view || "")),
   );
@@ -1487,6 +1489,8 @@ export function App() {
               {screen === 'transfusion_bedside' && est && <TransfusionBedside key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} />}
               {screen === 'transfusion_bedside_er' && est && <TransfusionBedsideER key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} />}
               {screen === 'transfusion_bedside_ot' && est && <TransfusionBedsideOT key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} />}
+              {screen === 'accountant_cockpit' && <AccountantCockpit key={user.user_id} user={user} establishment={est} connected={connected} timeZone={meta?.hospital_timezone} onNavigateScreen={(s) => navigate(s)} />}
+              {screen === 'ot_settlement' && <OtSettlement key={user.user_id} currentUser={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone} onNavigateScreen={(s) => navigate(s)} />}
               {screen === 'clinical_privileges' && <ClinicalPrivileges key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone} onNavigateScreen={(s) => navigate(s)} />}
               {screen === 'theatre_checklist_setup' && <TheatreChecklistSetup key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} timeZone={meta?.hospital_timezone} onNavigateScreen={(s) => navigate(s)} />}
               {screen === 'cssd_setup' && <CSSDSetup key={user.user_id} currentUser={user} establishment={est} onNavigate={(s) => navigate(s)} />}

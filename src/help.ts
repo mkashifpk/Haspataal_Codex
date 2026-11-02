@@ -8998,6 +8998,80 @@ sterile_packs_ward: {
       ]
     ]
   },
+  accountant_cockpit: {
+    title: "Accountant 3-pane cockpit",
+    titleUr: "اکاؤنٹنٹ 3 پین کاک پٹ",
+    purpose: "Accountant 3-pane cockpit for financial management, cash reconciliation, approvals, accounts payable, and supplier returns in the finance_accountant workspace: (1) General Ledger and Chart of Accounts query with account code and date filters (GET /finance/gl/accounts, GET /finance/gl/ledger), alongside vendor registry creation (POST /finance/vendors); (2) Cash counter shift reconciliation, shift breakdown review (GET /finance/cash-shifts, GET /finance/cash-shifts/{id}), and cash drop verification (POST /finance/cash-shifts/{id}/cash-drop) under Rule 7cc7842e8a (counting whole drawer including float into vault), Rule 1109b23ad9 (automatic review audit on variance), and Rule 8c0db74e85 (dual-control co-signature when drop reaches large_cash_settlement_threshold); (3) Accounts Payable queue settlement (GET /finance/ap/queue, POST /finance/ap/{id}/settle) with cash/bank/cheque/supplier credit, dual control for large payables (Rule 8c0db74e85), and supplier returns processing (GET /pharmacy-admin/supplier-returns, GET /pharmacy-admin/supplier-returns/{id}, GET /pharmacy-admin/supplier-returns/{id}/pdf) confirming credit notes (POST /finance/supplier-returns/{id}/credit) or recording write-off refusals (POST /finance/supplier-returns/{id}/refuse) under Rule 465292d1b4; (4) Approvals queue inspection (GET /approvals); and real-time refresh synchronization on approval.requested and ot.settlement.finalized WebSocket events.",
+    purposeUr: "فنانس اکاؤنٹنٹ ورک اسپیس میں مالیاتی انتظام، کیش مصالحت، منظوریوں، واجب الادا رقوم اور سپلائر واپسی کے لیے اکاؤنٹنٹ کاک پٹ: (1) چارٹ آف اکاؤنٹس اور جنرل لیجر انکوائری مع تاریخ اور اکاؤنٹ فلٹرز (GET /finance/gl/accounts, GET /finance/gl/ledger) اور نیا سپلائر شامل کرنا (POST /finance/vendors)؛ (2) کیش کاؤنٹر شفٹ مصالحت، شفٹ خلاصہ (GET /finance/cash-shifts, GET /finance/cash-shifts/{id}) اور کیش ڈراپ کی تصدیق (POST /finance/cash-shifts/{id}/cash-drop) قاعدہ 7cc7842e8a (فلوٹ سمیت دراز کی کل رقم والٹ میں جمع کرنا)، قاعدہ 1109b23ad9 (فرق پر خودکار آڈٹ آئٹم)، اور قاعدہ 8c0db74e85 (بڑی رقم پر مشترکہ دستخط) کے تحت؛ (3) اکاؤنٹس پے ایبل کی ادائیگی (GET /finance/ap/queue, POST /finance/ap/{id}/settle)، سپلائر واپسی نوٹس کا جائزہ اور کریڈٹ نوٹ کی تصدیق یا انکار کا اندراج (قاعدہ 465292d1b4)؛ (4) منظوریوں کی کیو (GET /approvals) اور ریئل ٹائم ایونٹس پر خودکار تجدید۔",
+    steps: [
+      "Select the General Ledger tab to query account movements, view debits and credits, or register a new hospital vendor.",
+      "Filter the ledger by account code, start date, and end date to review reconciled transaction journals.",
+      "Switch to the Cash Shifts tab to monitor active, closed, and verified cashier counters across the hospital.",
+      "Click 'View Breakdown' on any shift to inspect opening float, transaction category subtotals, and non-cash collections.",
+      "Open 'Verify Cash Drop' on pending collection shifts, count the drawer balance, and verify any variance against expected cash.",
+      "Provide second approver co-signature credentials if the cash drop amount meets or exceeds the large cash settlement threshold.",
+      "Navigate to the Accounts Payable tab to inspect approved vendor invoices, work orders, and consultant commissions.",
+      "Click 'Settle Bill' to record cash, bank, cheque, or supplier credit settlement against open payable balances.",
+      "Review Supplier Returns to confirm received supplier credit notes or record formal write-off refusals with documented reasons.",
+      "Open the Approvals tab to review pending financial and operational change requests requiring authorized decision.",
+    ],
+    stepsUr: [
+      "اکاؤنٹ کی تفصیلات دیکھنے، ڈیبٹ اور کریڈٹ جانچنے یا نیا سپلائر رجسٹر کرنے کے لیے جنرل لیجر ٹیب منتخب کریں۔",
+      "کھاتہ جات کے مصالحتی اندراجات دیکھنے کے لیے اکاؤنٹ کوڈ، شروع کی تاریخ اور اختتامی تاریخ سے فلٹر کریں۔",
+      "ہسپتال کے تمام کیش کاؤنٹرز کی صورتحال جانچنے کے لیے کیش شفٹس ٹیب پر جائیں۔",
+      "ابتدائی فلوٹ، کیش کی اقسام اور نان کیش وصولیوں کا جائزہ لینے کے لیے کسی بھی شفٹ پر 'View Breakdown' پر کلک کریں۔",
+      "ڈراپ کی منتظر شفٹ پر 'Verify Cash Drop' کھولیں، دراز کی نقد رقم گنیں اور متوقع رقم سے فرق کی تصدیق کریں۔",
+      "اگر کیش ڈراپ کی رقم مقررہ حد سے زیادہ ہو تو دوسرے مجاز افسر کے توثیقی کوائف درج کریں۔",
+      "منظور شدہ سپلائر انوائسز اور کنسلٹنٹ کمیشن کی ادائیگی کے لیے اکاؤنٹس پے ایبل ٹیب منتخب کریں۔",
+      "نقد، بینک، چیک یا سپلائر کریڈٹ کے ذریعے واجب الادا رقم ادا کرنے کے لیے 'Settle Bill' پر کلک کریں۔",
+      "موصولہ کریڈٹ نوٹ کی تصدیق یا وجوہات کے ساتھ انکار کا اندراج کرنے کے لیے سپلائر ریٹرنز کا جائزہ لیں۔",
+      "مجاز فیصلے کی منتظر مالیاتی اور انتظامی درخواستوں کی جانچ کے لیے منظوریوں کا ٹیب کھولیں۔",
+    ],
+    faq: [
+      [
+        "Why does a cash drop require co-signature by a second person?",
+        "Under Rule 8c0db74e85, cash drops at or above large_cash_settlement_threshold require independent dual authorization to protect hospital vaults."
+      ],
+      [
+        "What happens if there is a difference between counted cash and expected cash?",
+        "Under Rule 1109b23ad9, any drawer variance is recorded and automatically triggers an internal audit review item."
+      ],
+      [
+        "Can I settle an invoice using a return note from a different supplier?",
+        "No, Rule 465292d1b4 restricts SupplierCredit settlement to confirmed credit notes belonging to the same vendor."
+      ],
+      [
+        "Can the staff member who returned pharmacy stock confirm the supplier credit note?",
+        "No, Rule 465292d1b4 enforces dual control (DUAL_CONTROL_SAME_PERSON) preventing self-confirmation or self-refusal of return claims."
+      ],
+      [
+        "Does a cash drop take only the shift profit or the opening float as well?",
+        "Under Rule 7cc7842e8a, the cash drop collects the entire drawer balance, including the opening float, transferring all cash to the main vault."
+      ]
+    ],
+    faqUr: [
+      [
+        "کیش ڈراپ پر دوسرے فرد کے مشترکہ دستخط کیوں ضروری ہیں؟",
+        "قاعدہ 8c0db74e85 کے تحت بڑی رقم کے ڈراپ پر ہسپتال کے خزانے کے تحفظ کے لیے ڈوئل کنٹرول لازمی ہے۔"
+      ],
+      [
+        "اگر گنتی شدہ نقد اور متوقع رقم میں فرق ہو تو کیا ہوتا ہے؟",
+        "قاعدہ 1109b23ad9 کے تحت دراز کا کوئی بھی فرق خودکار طور پر آڈٹ ریویو آئٹم تشکیل دیتا ہے۔"
+      ],
+      [
+        "کیا دوسرے سپلائر کے ریٹرن نوٹ سے کسی اور سپلائر کا بل ادا ہو سکتا ہے؟",
+        "جی نہیں، قاعدہ 465292d1b4 کے مطابق صرف اسی سپلائر کے تصدیق شدہ کریڈٹ نوٹ سے بل ادا کیا جا سکتا ہے۔"
+      ],
+      [
+        "کیا ادویات واپس کرنے والا عملہ خود کریڈٹ نوٹ کی تصدیق کر سکتا ہے؟",
+        "جی نہیں، قاعدہ 465292d1b4 کے تحت ڈوئل کنٹرول کی خلاف ورزی کی اجازت نہیں ہے؛ تصدیق دوسرے فرد سے ہونا ضروری ہے۔"
+      ],
+      [
+        "کیا کیش ڈراپ میں صرف منافع جاتا ہے یا ابتدائی فلوٹ بھی؟",
+        "قاعدہ 7cc7842e8a کے مطابق ڈراپ دراز کی تمام رقم بشمول ابتدائی فلوٹ مین والٹ میں منتقل کرتا ہے۔"
+      ]
+    ],
+  },
   ot_settlement: {
     title: "Post-op settlement",
     titleUr: "پوسٹ آپریٹو سیٹلمنٹ",
