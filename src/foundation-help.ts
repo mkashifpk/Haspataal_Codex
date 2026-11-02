@@ -20,6 +20,7 @@ export const phase1Screens = [
 const approvalScreens = ["approval_queue", "charity_approvals"];
 // Coverage grows screen by screen; Phase 1 acceptance remains separate.
 export const deliveredHelpScreens = [
+  "staff_directory",
   "it_console",
   "onboarding_wizard",
   "risk_dashboard",
@@ -154,6 +155,41 @@ const g = (
 // IDs are also attached to the actual controls. The build rejects missing
 // mappings and empty translations instead of treating a page as coverage.
 export const controlGuides: Record<string, ControlGuide> = {
+  // Screen 145: staff_directory (Staff directory & records)
+  "staff_directory.search": g(["staff_directory"], ["Search employees input", "ملازمین تلاش کریں"], ["Filters staff directory by name, CNIC, employee number, or mobile (GET /hr/employees).", "نام، شناختی کارڈ، ملازم نمبر، یا موبائل نمبر سے عملہ تلاش کرتا ہے۔"]),
+  "staff_directory.view_profile": g(["staff_directory"], ["View employee profile button", "ملازم کی تفصیلات"], ["Retrieves full personnel file including credentials, IT login, schedule and document vault (GET /hr/employees/{employee_id}).", "ملازم کی مکمل پروفائل، اسناد، آئی ٹی لاگ ان، شیڈول اور دستاویزات والٹ حاصل کرتا ہے۔"]),
+  "staff_directory.org_chart": g(["staff_directory"], ["Organizational hierarchy tree button", "تنظیمی چارٹ"], ["Loads full hospital reporting tree and supervisor lines (GET /hr/org-chart).", "ہسپتال کی تنظیمی درجہ بندی اور نگرانوں کا شجرہ دکھاتا ہے۔"]),
+  "staff_directory.document_download": g(["staff_directory"], ["Download document button", "دستاویز ڈاؤن لوڈ کریں"], ["Downloads personnel verification file or certificate from employee document vault (GET /hr/employee-documents/{document_id}/download).", "ملازم کے والٹ سے تصدیقی دستاویز یا سند ڈاؤن لوڈ کرتا ہے۔"]),
+  "staff_directory.status_action": g(["staff_directory"], ["Change employment status button", "حیثیت تبدیل کریں"], ["Changes employment status to Suspend, Resign, Terminate, Reinstate, or Re-join with mandatory justification (POST /hr/employees/{employee_id}/status).", "معطلی، استعفیٰ، برخاستگی، بحالی یا دوبارہ شمولیت کی کارروائی لازمی وجہ کے ساتھ انجام دیتا ہے۔"]),
+  "staff_directory.leave_balances": g(["staff_directory"], ["Employee leave balances button", "رخصتوں کا ریکارڈ"], ["Views annual opening, accrued, carried forward, used and available allowances (GET /hr/employees/{employee_id}/leave-balances).", "سالانہ ابتدائی، جمع شدہ، آگے لائی گئی، استعمال شدہ اور دستیاب رخصتوں کا بیلنس دکھاتا ہے۔"]),
+  "staff_directory.set_balance": g(["staff_directory"], ["Set leave balance allowance button", "رخصت کا بیلنس محفوظ کریں"], ["Updates opening, accrued, and carried-forward leave allowances for an employee and calendar year (PUT /hr/leave-balances).", "ملازم کے لیے سالانہ رخصتوں کے ابتدائی، جمع شدہ اور آگے لائے گئے بیلنس کا تعین کرتا ہے۔"]),
+  "staff_directory.tab.directory": g(["staff_directory"], ["Directory worklist tab button", "ڈائریکٹری فہرست ٹیب"], ["Switches to staff directory worklist and credential summary.", "عملے کی ڈائریکٹری اور اسناد کے خلاصے کی فہرست پر لے جاتا ہے۔"]),
+  "staff_directory.refresh": g(["staff_directory"], ["Refresh staff directory button", "ڈائریکٹری تازہ کریں"], ["Reloads staff member list or organizational reporting tree.", "عملے کی فہرست یا تنظیمی شجرہ دوبارہ حاصل کرتا ہے۔"]),
+  "staff_directory.filter.status": g(["staff_directory"], ["Employment status filter", "ملازمت کی حالت کا فلٹر"], ["Filters staff directory by Active, Awaiting IT Provisioning, Draft, Suspended, Resigned, or Terminated.", "ڈائریکٹری کو ملازمت کی حالت کے مطابق فلٹر کرتا ہے۔"]),
+  "staff_directory.filter.limit": g(["staff_directory"], ["Rows limit selector", "قطاروں کی حد"], ["Selects number of employees displayed per page.", "فی صفحہ دکھائے جانے والے ملازمین کی تعداد کا انتخاب کرتا ہے۔"]),
+  "staff_directory.search_button": g(["staff_directory"], ["Filter directory button", "ڈائریکٹری فلٹر کریں"], ["Executes query search and status filtering on staff directory.", "تلاش اور فلٹرز کے مطابق عملہ تلاش کرتا ہے۔"]),
+  "staff_directory.clear_search": g(["staff_directory"], ["Clear search button", "تلاش صاف کریں"], ["Clears search query input and resets directory filters.", "تلاش کا خانہ صاف کر کے تمام ملازمین دکھاتا ہے۔"]),
+  "staff_directory.org_chart.search": g(["staff_directory"], ["Filter org chart input", "تنظیمی چارٹ فلٹر"], ["Searches employee name, designation or department within hierarchy tree.", "تنظیمی شجرے میں ملازم کا نام، عہدہ یا محکمہ تلاش کرتا ہے۔"]),
+  "staff_directory.org_chart.expand_all": g(["staff_directory"], ["Expand all org branches button", "تمام شاخیں کھولیں"], ["Expands all reporting hierarchy nodes in tree.", "تنظیمی شجرے کی تمام شاخیں کھول دیتا ہے۔"]),
+  "staff_directory.org_chart.collapse_all": g(["staff_directory"], ["Collapse all org branches button", "تمام شاخیں سمیٹیں"], ["Collapses all expanded nodes in hierarchy tree.", "تنظیمی شجرے کی تمام کھلی شاخیں بند کرتا ہے۔"]),
+  "staff_directory.org_chart.expand_toggle": g(["staff_directory"], ["Toggle branch expand button", "شاخ کھولیں یا بند کریں"], ["Toggles visibility of direct reports under supervisor.", "نگران کے ماتحت عملے کی فہرست کھولتا یا بند کرتا ہے۔"]),
+  "staff_directory.profile_modal.close": g(["staff_directory"], ["Close profile modal button", "پروفائل بند کریں"], ["Dismisses employee profile drawer dialog.", "ملازم کی پروفائل کا ڈائیلاگ بند کرتا ہے۔"]),
+  "staff_directory.profile_modal.close_btn": g(["staff_directory"], ["Close profile footer button", "پروفائل بند کریں بٹن"], ["Closes employee profile modal window.", "پروفائل کی کھڑکی بند کرتا ہے۔"]),
+  "staff_directory.download_dismiss": g(["staff_directory"], ["Dismiss download alert button", "ڈاؤن لوڈ الرٹ ہٹائیں"], ["Dismisses document download success message banner.", "دستاویز ڈاؤن لوڈ کا پیغام ہٹاتا ہے۔"]),
+  "staff_directory.open_wizard": g(["staff_directory"], ["Open onboarding wizard button", "آن بورڈنگ وزرڈ کھولیں"], ["Navigates to Onboarding Wizard to resume editing draft employee profile.", "ڈرافٹ ملازم کی تفصیلات مکمل کرنے کے لیے وزرڈ کھولتا ہے۔"]),
+  "staff_directory.status_modal.close": g(["staff_directory"], ["Close status modal button", "اسٹیٹس فارم بند کریں"], ["Dismisses employment status transition dialog.", "اسٹیٹس تبدیلی کا فارم بند کرتا ہے۔"]),
+  "staff_directory.status_target_radio": g(["staff_directory"], ["Target status radio selector", "مطلوبہ اسٹیٹس ریڈیو"], ["Selects target status strictly filtered by allowed statutory rules.", "قانونی قواعد کے تحت اجازت یافتہ نیا اسٹیٹس منتخب کرتا ہے۔"]),
+  "staff_directory.status_reason": g(["staff_directory"], ["Status change reason input", "وجہ کا اندراج"], ["Mandatory operational reason for suspending, resigning, terminating, or reinstating staff.", "معطلی، استعفیٰ، برخاستگی یا بحالی کے لیے لازمی آپریشنل وجہ۔"]),
+  "staff_directory.status_left_on": g(["staff_directory"], ["Effective left date input", "علیحدگی کی تاریخ"], ["Date when resigned or terminated employee officially ceased duties.", "مستعفی یا برخاست ملازم کی ملازمت کے خاتمے کی تاریخ۔"]),
+  "staff_directory.status_modal.cancel": g(["staff_directory"], ["Cancel status modal button", "منسوخ کریں"], ["Cancels status transition without modifying employee record.", "اسٹیٹس تبدیلی بغیر محفوظ کیے منسوخ کرتا ہے۔"]),
+  "staff_directory.status_modal.submit": g(["staff_directory"], ["Confirm status change button", "اسٹیٹس تبدیلی کی تصدیق کریں"], ["Submits employment status update with login/badge revocation enforcement.", "لاگ ان اور بیجز منسوخی کی توثیق کے ساتھ نیا اسٹیٹس محفوظ کرتا ہے۔"]),
+  "staff_directory.leave_modal.close": g(["staff_directory"], ["Close leave modal button", "رخصتیں بند کریں"], ["Dismisses annual leave balances dialog.", "رخصتوں کا ڈائیلاگ بند کرتا ہے۔"]),
+  "staff_directory.leave_modal.close_btn": g(["staff_directory"], ["Close leave footer button", "رخصتیں بند کریں بٹن"], ["Closes leave allowances modal.", "رخصتوں کی کھڑکی بند کرتا ہے۔"]),
+  "staff_directory.leave_year_select": g(["staff_directory"], ["Calendar year selector", "کیلنڈر سال منتخب کریں"], ["Selects calendar year for leave balance display and configuration.", "رخصتوں کا ریکارڈ دیکھنے کے لیے سال کا انتخاب کرتا ہے۔"]),
+  "staff_directory.balance_leave_type": g(["staff_directory"], ["Leave type selector", "رخصت کی قسم"], ["Selects Annual, Casual, Sick, Maternity, Unpaid, or Other leave category.", "سالانہ، اتفاقیہ، بیماری، زچگی یا دیگر رخصت کا انتخاب کرتا ہے۔"]),
+  "staff_directory.balance_opening": g(["staff_directory"], ["Opening leave days input", "ابتدائی رخصتیں"], ["Starting leave balance allowance for the year.", "سال کے آغاز پر ابتدائی رخصتوں کی تعداد۔"]),
+  "staff_directory.balance_accrued": g(["staff_directory"], ["Accrued leave days input", "جمع شدہ رخصتیں"], ["Earned leave days accrued during the year.", "سال کے دوران حاصل کردہ اضافی رخصتیں درج کرتا ہے۔"]),
+  "staff_directory.balance_carried": g(["staff_directory"], ["Carried forward leave days input", "آگے لائی گئی رخصتیں"], ["Unused leave balance carried over from previous calendar year.", "پچھلے سال سے آگے لائی گئی غیر استعمال شدہ رخصتیں درج کرتا ہے۔"]),
   // Screen 143: onboarding_wizard (Staff onboarding & credentials wizard)
   "onboarding_wizard.load_emp_id": g(["onboarding_wizard"], ["Employee ID input", "ملازم کی شناختی ان پٹ"], ["Specifies existing employee identifier to load and resume drafting.", "جاری ڈرافٹ لوڈ کرنے کے لیے موجودہ ملازم کا شناختی نمبر درج کریں۔"]),
   "onboarding_wizard.btn_load_emp": g(["onboarding_wizard"], ["Load profile button", "پروفائل لوڈ کریں"], ["Fetches full employee record, qualifications, documents and checklist (GET /hr/employees/{employee_id}).", "ملازم کی مکمل پروفائل، اسناد، دستاویزات اور چیک لسٹ حاصل کرتا ہے۔"]),

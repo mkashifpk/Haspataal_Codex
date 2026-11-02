@@ -1,15 +1,69 @@
 # Haspataal checkpoint
 Last updated: 02 November 2026, Antigravity (Codex pair), Asia/Karachi.
 
-## Active request: Phase 8 Screen 145 `staff_directory` (Staff directory)
+## Active request: Phase 8 Screen 146 `badges` (Security & staff badges)
 Executing the Haspataal HMS Roadmap in dependency order along with all tests and MCP progress reporting:
 - **Phase 7 ("Finance, billing and back offices")**: 100% COMPLETE (Screens 133–142, Proposals 286–295).
 - **Phase 8 ("People, facility and IT")**:
   - Screen 143: **`onboarding_wizard`** ("Staff onboarding & credentials wizard", Position 143, 63 points, workspace `hr`) — **COMPLETED** (Proposal **296** awaiting human review on `/docs -> My progress`).
   - Screen 144: **`it_console`** ("IT administration console", Position 144, 179 points, workspace `super_admin`) — **COMPLETED** (Proposal **297** awaiting human review on `/docs -> My progress`).
-  - Screen 145: **`staff_directory`** ("Staff directory", Position 145, 56 points, workspace `hr`) — **NEXT TO BUILD**.
-    - Scope: Hospital-wide staff directory, credential status tracking, leaver/returner status transitions, and department search.
-    - Next Concrete Step: Fetch `get_screen_bundle("staff_directory")` and `get_ui_quality_brief("staff_directory")`.
+  - Screen 145: **`staff_directory`** ("Staff directory & records", Position 145, 56 points, workspace `hr`) — **COMPLETED** (Proposal **298** awaiting human review on `/docs -> My progress`).
+  - Screen 146: **`badges`** ("Security & staff badges", Position 146, 47 points, workspace `hr`) — **NEXT**.
+    - Scope: Staff and support contractor badge lifecycle, issuance, revocation, and terminal scanner integration.
+    - Next Concrete Step: Retrieve `get_screen_bundle("badges")`, save contract, generate typescript client, and begin implementation.
+
+---
+
+### Completed Screen 145 (`staff_directory`) Checkpoint
+- **Workflow & Standards**: Hospital-wide staff directory, credential tracking, lifecycle status management, and reporting hierarchy (`staff_directory`, Workspace `hr`, Position 145, 56 points):
+  - **Directory Search & Worklist (`GET /hr/employees`):**
+    - Multi-criteria staff search by query `q` (name, CNIC, employee number, mobile), status filter (Active, Awaiting_IT_Provisioning, Draft, Suspended, Resigned, Terminated), department filter, and configurable page limits.
+    - Formatted employee cards and table view with status badges, department, designation, staff category, contract type, mobile, and supervisor.
+  - **Full Employee Profile Drawer (`GET /hr/employees/{employee_id}`):**
+    - Demographics (CNIC, father/husband name, DOB, gender, blood group, address, mobile, email).
+    - Job taxonomy (department, designation, specialty, supervisor line, base salary in PKR, joined and left dates).
+    - Practice licences (PMDC/PNC) and academic/professional qualifications directory with MSDS HRM 142 primary source verification badges (Verified, Pending, Failed, NotRequired).
+    - IT user login status (`user` active/inactive/none) and active security badges (RFID, Barcode, Biometric) with holder types.
+    - Shift schedule and onboarding submission checklist (`checklist.ready`, `missing` list).
+    - Embedded deep-link button to `onboarding_wizard` when employee profile is in Draft status.
+  - **Document Vault & Binary File Downloads (`GET /hr/employee-documents/{document_id}/download`):**
+    - Secure binary file downloads for personnel credential files (PDF, JPEG, PNG).
+  - **Statutory Status Action Transitions (`POST /hr/employees/{employee_id}/status`, `rule:2cc308be05`, `rule:f57cfa01c4`):**
+    - Actions offered strictly based on current `employment_status` per Rule `rule:2cc308be05`:
+      - Draft: none (guided to finish the onboarding wizard).
+      - Awaiting_IT_Provisioning: suspend, resign, terminate, never 'Activate' (IT Console login provisions and activates).
+      - Active: suspend, resign, terminate.
+      - Suspended: reinstate (`Active`), resign, terminate.
+      - Resigned or Terminated: re-join (`Active`).
+    - Suspending, resigning, or terminating alerts that system login and all active security badges are immediately revoked per Rule `rule:f57cfa01c4`.
+    - Mandatory operational justification reason (minimum 3 characters) and effective departure date.
+    - Reinstatement notice reminds that IT Console re-enables the user login and security badges are issued anew. Re-joining staff who never had an IT login return to `Awaiting_IT_Provisioning`.
+    - Refusal handling: `EMPLOYEE_STATUS_INVALID` displays returned `details.status` and refreshes profile data; `EMPLOYEE_DOCUMENT_REQUIRED` or `CLINICAL_LICENSE_REQUIRED` instructs uploading missing documents in vault.
+  - **Annual Leave Balances & Adjustments (`GET /hr/employees/{employee_id}/leave-balances`, `PUT /hr/leave-balances`, `rule:83e8fefdaf`):**
+    - Annual leave balance table for each leave category (Annual, Casual, Sick, Maternity, Unpaid, Other) with calendar year selector.
+    - Set/adjust opening, accrued, and carried-forward days via `PUT /hr/leave-balances` per Rule `rule:83e8fefdaf`, against which subsequent leave requests are validated.
+  - **Organizational Reporting Hierarchy Tree (`GET /hr/org-chart`):**
+    - Tree view of hospital reporting structure with collapsible supervisor nodes, direct report count badges, search filtering, and one-click profile inspection.
+  - **Service Capability Gating:**
+    - Resolves `full`, `open_work` (operational status changes permitted, leave balance adjustments restricted), `records` (read-only directory review), `setup` (annual leave balance configuration only), and `hidden` derived from server `GET /establishment views.screens`.
+- **Contracts**: `contracts/staff_directory.json` (7 endpoints, 3 statutory rules, 20 rubric items).
+- **Domain Policies & Statutory Rules (`src/staff-directory-policy.ts`)**:
+  - `getStaffDirectoryCapabilityView`, `getAllowedStatusActions`, `validateStatusChangeInput`, `validateLeaveBalanceInput`, and `STAFF_DIRECTORY_ERROR_MESSAGES`.
+- **UI Architecture (`src/screens/StaffDirectory.tsx`)**:
+  - Tabbed interface supporting Directory Worklist and Organizational Hierarchy.
+  - Wired into `src/App.tsx`, `scripts/check-help.mjs`, `src/foundation-catalogue.json` (7 tasks), `src/foundation-task-map.json` (7 controls mapped), and `src/foundation-help.ts` (34 interactive controls mapped).
+  - Authored comprehensive handbook entry and 5 role FAQs in `src/help.ts`; bundled screenshots in `public/handbook/staff_directory-en.png` and `staff_directory-ur.png`.
+- **Verification**:
+  - Automated unit tests: `tests/staff-directory.test.mjs` passed (6/6 tests).
+  - Help check: `npm run check:help` passed (144 screens, 3,632 controls, 2,614 groups, 69 FAQ seeds, 30 workspace guides).
+  - Help coverage test: `tests/help-coverage.test.mjs` passed (28/28 tests across 144 screens).
+  - Full test suite: `npm test` passed (738/738 tests across all 19 test suites).
+  - TypeScript compiler: `npx.cmd tsc --noEmit` passed with 0 errors.
+  - Production build: `npm.cmd run build` succeeded (`dist/assets/index-Dsm8V3Dx.js`).
+- **Proposal**:
+  - Proposal ID: **298** (status: `pending` on `/docs -> My progress`, build `index-Dsm8V3Dx.js`, 20 rubric items claimed, `q:fresh_data` left pending human review).
+
+---
 
 ---
 

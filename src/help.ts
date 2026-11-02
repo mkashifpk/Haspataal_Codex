@@ -10,6 +10,75 @@ export type HelpPage = {
   faqUr: [string, string][];
 };
 export const help: Record<string, HelpPage> = {
+  staff_directory: {
+    title: "Staff directory & records",
+    titleUr: "عملے کی ڈائریکٹری اور ریکارڈ",
+    purpose: "Comprehensive hospital-wide human resources directory, personnel credentials vault, reporting hierarchy tree, leaver/returner lifecycle transitions, and annual leave allowances management: (1) Staff search and multi-criteria worklist filtering by name, CNIC, employee number, department, and employment status (GET /hr/employees); (2) Full employee credentials detail, academic/clinical qualifications verified per MSDS HRM 142, work schedule, IT login state, active security badges, and document vault downloads (GET /hr/employees/{employee_id}, GET /hr/employee-documents/{document_id}/download); (3) Organization-wide supervisor reporting tree with branch exploration and direct reports summaries (GET /hr/org-chart); (4) Controlled employment lifecycle status changes adhering to statutory Rule rule:2cc308be05 and immediate login/badge revocation under Rule rule:f57cfa01c4 (POST /hr/employees/{employee_id}/status); and (5) Annual leave balance allowances configuration and adjustments per leave category and calendar year under Rule rule:83e8fefdaf (GET /hr/employees/{employee_id}/leave-balances, PUT /hr/leave-balances).",
+    purposeUr: "ہسپتال کے عملے کی جامع ڈائریکٹری، اسناد کا والٹ، تنظیمی شجرہ، ملازمت کی حالت کی تبدیلیاں اور سالانہ رخصتوں کے الاؤنسز کا انتظام: (1) نام، شناختی کارڈ، ملازم نمبر، محکمہ اور اسٹیٹس کے مطابق عملے کی تلاش اور فلٹرنگ (GET /hr/employees)؛ (2) مکمل پروفائل، ایم ایس ڈی ایس ایچ آر ایم 142 کے مطابق تصدیق شدہ اسناد، ڈیوٹی شیڈول، آئی ٹی لاگ ان، سیکیورٹی بیجز اور والٹ سے فائل ڈاؤن لوڈ (GET /hr/employees/{employee_id}، GET /hr/employee-documents/{document_id}/download)؛ (3) نگرانوں اور ماتحت عملے کا تنظیمی شجرہ (GET /hr/org-chart)؛ (4) قانونی قاعدہ rule:2cc308be05 کے مطابق اسٹیٹس کی تبدیلی اور rule:f57cfa01c4 کے تحت لاگ ان و بیجز کی فوری منسوخی (POST /hr/employees/{employee_id}/status)؛ اور (5) قانونی قاعدہ rule:83e8fefdaf کے تحت ہر سال اور کیٹیگری کے لیے سالانہ رخصتوں کا تعین (GET /hr/employees/{employee_id}/leave-balances، PUT /hr/leave-balances)۔",
+    steps: [
+      "Search & Worklist Navigation: Filter employees by search keyword (name, CNIC, employee number, mobile), employment status (Active, Awaiting IT Provisioning, Draft, Suspended, Resigned, Terminated), and row limits. Click 'Filter Directory' or 'Refresh' to retrieve real-time personnel records.",
+      "Profile & Credentials Review: Click 'Profile' on any staff record to view full demographics, job taxonomy, supervisor line, base compensation in PKR, practice licences (PMDC/PNC), primary source verified qualifications, shift roster, IT user status, and issued security badges (RFID/Barcode/Biometric).",
+      "Document Vault Inspection & Downloads: Inside the employee profile, review verified credential files (CNIC, photo, degrees, contracts). Click 'Download' on any document row to securely retrieve binary PDF or image files (GET /hr/employee-documents/{document_id}/download).",
+      "Draft Handover & Wizard Continuation: For profiles in 'Draft' status, notice the current onboarding step. Click 'Open Onboarding Wizard' to resume and finalize mandatory checklist requirements in the wizard workspace.",
+      "Statutory Status Actions: Click 'Status' to initiate employment transitions. The dialog offers actions strictly permissible under Rule rule:2cc308be05 (Active: suspend, resign, terminate; Suspended: reinstate, resign, terminate; Resigned/Terminated: re-join; Draft: finish wizard). Suspending, resigning, or terminating alerts staff of immediate login and security badge revocation under Rule rule:f57cfa01c4. Enter the mandatory justification reason (minimum 3 characters) and left date, then confirm.",
+      "Annual Leave Allowances: Click 'Leaves' to inspect annual leave balances (Annual, Casual, Sick, Maternity, Unpaid). Select calendar year and enter Opening, Accrued, and Carried Forward days (PUT /hr/leave-balances) per Rule rule:83e8fefdaf.",
+      "Organizational Reporting Hierarchy: Switch to the 'Org Chart' tab to view hospital supervisor trees. Use search to locate staff, click expand/collapse toggles, inspect direct report counts, and open employee profiles directly from hierarchy nodes.",
+    ],
+    stepsUr: [
+      "ڈائریکٹری تلاش اور فلٹرنگ: نام، شناختی کارڈ، ملازم نمبر، موبائل یا اسٹیٹس (فعال، آئی ٹی منتظر، ڈرافٹ، معطل، مستعفی، برخاست) کے ذریعے عملہ تلاش کریں۔ 'ڈائریکٹری فلٹر کریں' یا 'تازہ کریں' دبائیں۔",
+      "پروفائل اور اسناد کا معائنہ: کسی بھی ملازم کے ساتھ 'پروفائل' بٹن دبائیں تاکہ ان کی مکمل تفصیلات، محکمہ، نگران، تنخواہ، پی ایم ڈی سی / پی این سی لائسنس، تصدیق شدہ ڈگریاں، ڈیوٹی شیڈول، آئی ٹی لاگ ان اور سیکیورٹی بیجز دیکھے جا سکیں۔",
+      "دستاویزات والٹ اور ڈاؤن لوڈ: ملازم کی پروفائل میں شناختی کارڈ، تصویر، تعلیمی ڈگریوں اور معاہدوں کی تصدیق جانچیں۔ کسی بھی فائل کے سامنے 'ڈاؤن لوڈ' دبائیں تاکہ محفوظ طریقے سے فائل حاصل کی جا سکے۔",
+      "ڈرافٹ کی تکمیل: اگر ملازم ڈرافٹ حالت میں ہو تو موجودہ مرحلہ دیکھیں۔ 'آن بورڈنگ وزرڈ کھولیں' دبائیں تاکہ آن بورڈنگ وزرڈ میں جا کر لازمی چیک لسٹ مکمل کی جا سکے۔",
+      "قانونی اسٹیٹس کی تبدیلیاں: اسٹیٹس تبدیل کرنے کے لیے 'اسٹیٹس' بٹن دبائیں۔ قانونی قاعدہ rule:2cc308be05 کے مطابق صرف مجاز کارروائیاں ظاہر ہوں گی۔ معطلی، استعفیٰ یا برخاستگی پر rule:f57cfa01c4 کے تحت فوری لاگ ان اور بیجز منسوخی کا انتباہ دیا جاتا ہے۔ لازمی وجہ اور تاریخ درج کر کے تصدیق کریں۔",
+      "سالانہ رخصتوں کے الاؤنسز: ملازم کے رخصتوں کا بیلنس دیکھنے کے لیے 'رخصتیں' بٹن دبائیں۔ کیلنڈر سال منتخب کریں اور rule:83e8fefdaf کے تحت ابتدائی، جمع شدہ اور آگے لائی گئی رخصتیں درج کر کے محفوظ کریں۔",
+      "تنظیمی درجہ بندی کا شجرہ: 'تنظیمی چارٹ' ٹیب منتخب کریں تاکہ ہسپتال کا نگران شجرہ دیکھا جا سکے۔ ملازم تلاش کریں، شاخیں کھولیں یا سمیٹیں، اور چارٹ سے براہ راست ملازم کی پروفائل کھولیں۔",
+    ],
+    faq: [
+      [
+        "What happens when an employee is suspended, resigned, or terminated?",
+        "Under statutory Rule rule:f57cfa01c4, changing an employee's status to Suspended, Resigned, or Terminated automatically revokes their active system login and cancels every issued security badge (RFID, barcode, biometric) immediately. Confirmation requires a mandatory operational justification reason (minimum 3 characters) and the effective departure date.",
+      ],
+      [
+        "Why is there no 'Activate' button for employees with status Awaiting_IT_Provisioning?",
+        "Under statutory Rule rule:2cc308be05 and Rule rule:adc6619db9, HR administration never creates system logins or activates staff directly. When HR finalizes an onboarding profile, it enters Awaiting_IT_Provisioning. The IT department creates user login credentials in the IT Console (/admin/users), which automatically transitions the employee to Active status.",
+      ],
+      [
+        "How are annual leave allowances configured and checked against leave requests?",
+        "Under statutory Rule rule:83e8fefdaf, HR sets annual leave allowances using PUT /hr/leave-balances by specifying opening, accrued, and carried-forward days for each leave category (Annual, Casual, Sick, Maternity, Unpaid) and calendar year. All subsequent staff leave requests and duty rosters are strictly checked against available balances.",
+      ],
+      [
+        "What steps are required after an employee is reinstated or re-joins?",
+        "Under Rule rule:2cc308be05, when a suspended employee is reinstated to Active, HR must notify IT Administration because IT Console must re-enable their system account, and revoked security badges must be issued anew. If a resigned or terminated leaver re-joins who was never previously provisioned with an IT account, the server automatically returns status Awaiting_IT_Provisioning for IT setup.",
+      ],
+      [
+        "What causes an EMPLOYEE_STATUS_INVALID or EMPLOYEE_DOCUMENT_REQUIRED refusal?",
+        "An EMPLOYEE_STATUS_INVALID error occurs if another HR administrator changed the employee's status concurrently; the interface immediately displays details.status and reloads the profile. An EMPLOYEE_DOCUMENT_REQUIRED or CLINICAL_LICENSE_REQUIRED refusal occurs if statutory identity documents (CNIC scan) or clinical practice licences (PMDC/PNC) are missing from the vault and must be uploaded before status activation.",
+      ],
+    ],
+    faqUr: [
+      [
+        "جب کسی ملازم کو معطل، مستعفی یا برخاست کیا جائے تو کیا اثرات ہوتے ہیں؟",
+        "قانونی قاعدہ rule:f57cfa01c4 کے تحت، ملازم کی حیثیت معطل، مستعفی یا برخاست کرنے پر ان کا سسٹم لاگ ان اور تمام سیکیورٹی بیجز فوری طور پر منسوخ ہو جاتے ہیں۔ اس کارروائی کے لیے کم از کم 3 حروف پر مشتمل آپریشنل وجہ اور علیحدگی کی تاریخ درج کرنا لازمی ہے۔",
+      ],
+      [
+        "آئی ٹی فراہمی کی منتظر (Awaiting_IT_Provisioning) حالت والے ملازمین کے لیے 'فعال کریں' کا بٹن کیوں نہیں ہے؟",
+        "قانونی قواعد rule:2cc308be05 اور rule:adc6619db9 کے تحت، ایچ آر ایڈمنسٹریشن کبھی بھی براہ راست لاگ ان نہیں بناتی۔ ایچ آر کی حتمی منظوری کے بعد ملازم اس حالت میں جاتا ہے۔ آئی ٹی کنسول سے لاگ ان بننے کے بعد ملازم خود بخود فعال ہو جاتا ہے۔",
+      ],
+      [
+        "سالانہ رخصتوں کے الاؤنسز کیسے ترتیب دیے جاتے ہیں اور رخصت کی درخواستوں سے کیسے جانچے جاتے ہیں؟",
+        "قانونی قاعدہ rule:83e8fefdaf کے تحت، ایچ آر ہر قسم (سالانہ، اتفاقیہ، بیماری، زچگی وغیرہ) اور سال کے لیے ابتدائی، جمع شدہ اور آگے لائی گئی رخصتیں PUT /hr/leave-balances کے ذریعے درج کرتا ہے۔ رخصت کی تمام درخواستیں انہی بیلنسز کے مطابق چیک ہوتی ہیں۔",
+      ],
+      [
+        "جب کوئی ملازم بحال ہو یا دوبارہ ملازمت میں شامل ہو تو کیا کرنا ضروری ہے؟",
+        "قاعدہ rule:2cc308be05 کے مطابق، معطل ملازم کی بحالی پر آئی ٹی لاگ ان دوبارہ فعال کرے گا اور نئے سیکیورٹی بیجز جاری کیے جائیں گے۔ اگر ایسا سابقہ ملازم دوبارہ شامل ہو جسے پہلے لاگ ان نہیں ملا تھا، تو سرور خود بخود اسٹیٹس Awaiting_IT_Provisioning پر واپس لاتا ہے۔",
+      ],
+      [
+        "EMPLOYEE_STATUS_INVALID یا EMPLOYEE_DOCUMENT_REQUIRED کی غلطی کیوں آتی ہے؟",
+        "اگر کسی دوسرے صارف نے ملازم کی حالت بیک وقت تبدیل کر دی ہو تو EMPLOYEE_STATUS_INVALID آتا ہے اور اسکرین نیا اسٹیٹس دکھا کر ڈیٹا تازہ کرتی ہے۔ اگر والٹ میں شناختی کارڈ یا طبی پریکٹس لائسنس نہ ہو تو EMPLOYEE_DOCUMENT_REQUIRED یا CLINICAL_LICENSE_REQUIRED کی خرابی آتی ہے جس کے لیے پہلے مطلوبہ دستاویز والٹ میں اپ لوڈ کرنا ضروری ہے۔",
+      ],
+    ],
+  },
+
   it_console: {
     title: "IT administration console",
     titleUr: "آئی ٹی ایڈمنسٹریشن کنسول",
