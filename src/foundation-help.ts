@@ -20,6 +20,7 @@ export const phase1Screens = [
 const approvalScreens = ["approval_queue", "charity_approvals"];
 // Coverage grows screen by screen; Phase 1 acceptance remains separate.
 export const deliveredHelpScreens = [
+  "pharmacy_storage_log",
   "drug_recalls",
   "medication_safety_setup",
   "pharmacy_admin",
@@ -147,7 +148,32 @@ const g = (
 // IDs are also attached to the actual controls. The build rejects missing
 // mappings and empty translations instead of treating a page as coverage.
 export const controlGuides: Record<string, ControlGuide> = {
-    // Screen 137: drug_recalls (Batch recalls & quarantine management)
+    // Screen 138: pharmacy_storage_log (Medicine storage log & temperature monitoring)
+  "pharmacy_storage_log.open_record_modal_btn": g(["pharmacy_storage_log"], ["Record storage check", "درجہ حرارت کا نیا اندراج"], ["Opens modal to record temperature and humidity reading for a medicine store or refrigerator (rule:09925ecb70).", "اسٹور یا ریفریجریٹر کے درجہ حرارت اور نمی کے اندراج کا فارم کھولتا ہے۔"]),
+  "pharmacy_storage_log.download_register_pdf_btn": g(["pharmacy_storage_log"], ["Download surveyor register PDF", "سرویئر رجسٹر پی ڈی ایف"], ["Downloads printable storage register PDF for the selected period per MSDS MOM 58 (GET /pharmacy/storage-checks/register/pdf).", "سرویئر معائنہ کے لیے منتخب مدت کا پرنٹ ایبل پی ڈی ایف رجسٹر ڈاؤن لوڈ کرتا ہے۔"]),
+  "pharmacy_storage_log.refresh_btn": g(["pharmacy_storage_log"], ["Refresh storage logs", "ریکارڈ ریفریش"], ["Reloads storage check readings and compliance summary metrics.", "درجہ حرارت کے تمام ریکارڈز اور سرویئر خلاصہ دوبارہ لوڈ کرتا ہے۔"]),
+  "pharmacy_storage_log.dismiss_error_btn": g(["pharmacy_storage_log"], ["Dismiss error alert", "خرابی کا نوٹس بند کریں"], ["Dismisses the current error notification banner.", "موجودہ خرابی کے نوٹس کو بند کرتا ہے۔"]),
+  "pharmacy_storage_log.dismiss_success_btn": g(["pharmacy_storage_log"], ["Dismiss success alert", "کامیابی کا نوٹس بند کریں"], ["Dismisses the current success notification banner.", "موجودہ کامیابی کے نوٹس کو بند کرتا ہے۔"]),
+  "pharmacy_storage_log.tab_log_table_btn": g(["pharmacy_storage_log"], ["Storage checks log tab", "درجہ حرارت لاگ ٹیب"], ["Switches to chronologically ordered storage checks table view (GET /pharmacy/storage-checks).", "وقت کی ترتیب سے تمام درجہ حرارت کے لاگ ٹیبل کے ٹیب پر منتقل کرتا ہے۔"]),
+  "pharmacy_storage_log.tab_surveyor_summary_btn": g(["pharmacy_storage_log"], ["Surveyor summary tab", "سرویئر خلاصہ ٹیب"], ["Switches to storage area routine compliance and deviation summary cards (GET /pharmacy/storage-checks/summary per rule:ac70d74fb1).", "ہر اسٹوریج جگہ کی معمول کی جانچ اور انحراف کے سرویئر خلاصہ پر منتقل کرتا ہے۔"]),
+  "pharmacy_storage_log.filter_date_from_input": g(["pharmacy_storage_log"], ["Filter start date", "ابتدائی تاریخ"], ["Filters storage check records starting from this date.", "اس تاریخ سے شروع ہونے والے ریکارڈز فلٹر کرتا ہے۔"]),
+  "pharmacy_storage_log.filter_date_to_input": g(["pharmacy_storage_log"], ["Filter end date", "آخری تاریخ"], ["Filters storage check records up to this date.", "اس تاریخ تک کے ریکارڈز فلٹر کرتا ہے۔"]),
+  "pharmacy_storage_log.filter_area_input": g(["pharmacy_storage_log"], ["Filter storage area name", "اسٹوریج کا نام فلٹر"], ["Filters readings matching specific medicine store or refrigerator name.", "مخصوص فریج یا اسٹور کے نام سے ریکارڈز تلاش کرتا ہے۔"]),
+  "pharmacy_storage_log.filter_out_of_range_checkbox": g(["pharmacy_storage_log"], ["Out of range only checkbox", "صرف انحراف شدہ ریکارڈز"], ["Restricts list to display only readings that violated permitted temperature limits (rule:e66d8b92db).", "صرف وہی ریکارڈز دکھاتا ہے جن کا درجہ حرارت مقررہ حد سے باہر تھا۔"]),
+  "pharmacy_storage_log.close_record_modal_btn": g(["pharmacy_storage_log"], ["Close record modal", "ونڈو بند کریں"], ["Dismisses the storage check recording modal.", "درجہ حرارت اندراج ونڈو بند کرتا ہے۔"]),
+  "pharmacy_storage_log.storage_area_input": g(["pharmacy_storage_log"], ["Storage area name input", "اسٹوریج کی جگہ کا نام"], ["Consistent name of medicine store, refrigerator, freezer or box per rule:09925ecb70.", "ریفریجریٹر یا اسٹور کا نام؛ ہمیشہ ایک ہی ہجے استعمال کریں۔"]),
+  "pharmacy_storage_log.storage_kind_select": g(["pharmacy_storage_log"], ["Storage kind selector", "اسٹوریج کی قسم"], ["Selects Room, Refrigerator, Freezer, or ColdChainBox to apply standard limits.", "اسٹوریج کی قسم منتخب کرتا ہے: کمرہ، فریج، فریزر یا کولڈ چین باکس۔"]),
+  "pharmacy_storage_log.ward_id_input": g(["pharmacy_storage_log"], ["Ward ID input", "وارڈ کا شناختی نمبر"], ["Ward identifier for ward drug cupboards/refrigerators; leave blank for pharmacy (rule:1b0e847e97).", "وارڈ فریج یا الماری کے لیے وارڈ نمبر درج کریں، فارمیسی کے لیے خالی رکھیں۔"]),
+  "pharmacy_storage_log.temperature_input": g(["pharmacy_storage_log"], ["Temperature reading input", "درجہ حرارت درج کریں"], ["Observed temperature in degrees Celsius with one decimal place (rule:09925ecb70).", "ڈگری سینٹی گریڈ میں درجہ حرارت کی ریڈنگ درج کریں۔"]),
+  "pharmacy_storage_log.humidity_input": g(["pharmacy_storage_log"], ["Humidity percentage input", "نمی کا تناسب"], ["Optional relative humidity percentage reading between 0 and 100%.", "ہوا میں نمی کا فیصد تناسب (اختیاری)۔"]),
+  "pharmacy_storage_log.custom_limits_checkbox": g(["pharmacy_storage_log"], ["Custom limits checkbox", "مخصوص حدود کا انتخاب"], ["Toggles entering custom temperature boundaries for places with own ranges like vaccine boxes (rule:09925ecb70).", "ویکسین باکس جیسی جگہوں کے لیے مخصوص درجہ حرارت کی حدود درج کرنے کا آپشن۔"]),
+  "pharmacy_storage_log.custom_min_input": g(["pharmacy_storage_log"], ["Custom minimum temperature", "کم سے کم درجہ حرارت"], ["Custom lower temperature limit in degrees Celsius.", "مخصوص نچلی حد برائے درجہ حرارت۔"]),
+  "pharmacy_storage_log.custom_max_input": g(["pharmacy_storage_log"], ["Custom maximum temperature", "زیادہ سے زیادہ درجہ حرارت"], ["Custom upper temperature limit in degrees Celsius.", "مخصوص بالائی حد برائے درجہ حرارت۔"]),
+  "pharmacy_storage_log.action_taken_input": g(["pharmacy_storage_log"], ["Remedial action taken input", "حفاظتی اقدام کی وضاحت"], ["Mandatory remedial explanation when temperature is out of range per rule:e66d8b92db (STORAGE_CHECK_ACTION_REQUIRED).", "درجہ حرارت غیر معمولی ہونے پر کیا گیا فوری حفاظتی اقدام؛ لازمی خانہ۔"]),
+  "pharmacy_storage_log.cancel_record_btn": g(["pharmacy_storage_log"], ["Cancel record check", "منسوخ کریں"], ["Aborts recording storage check.", "اندراج منسوخ کرتا ہے۔"]),
+  "pharmacy_storage_log.submit_record_btn": g(["pharmacy_storage_log"], ["Save storage reading", "ریڈنگ محفوظ کریں"], ["Submits temperature check reading to storage audit log (POST /pharmacy/storage-checks per rule:09925ecb70).", "درجہ حرارت کی ریڈنگ کو سرکاری آڈٹ لاگ میں محفوظ کرتا ہے۔"]),
+
+  // Screen 137: drug_recalls (Batch recalls & quarantine management)
   "drug_recalls.open_recall_btn": g(["drug_recalls"], ["Open recall campaign", "نئی واپسی مہم"], ["Opens modal to initiate drug recall and quarantine batches across hospital (rule:fe2af7a43c).", "دوا کی واپسی اور قرنطینہ مہم شروع کرنے کی ونڈو کھولتا ہے۔"]),
   "drug_recalls.refresh_btn": g(["drug_recalls"], ["Refresh recalls register", "واپسی ریکارڈ ریفریش"], ["Reloads recall campaigns list and status metrics.", "واپسی مہمات کی فہرست اور تازہ ترین اعدادوشمار دوبارہ لوڈ کرتا ہے۔"]),
   "drug_recalls.dismiss_error_btn": g(["drug_recalls"], ["Dismiss error alert", "خرابی کا نوٹس بند کریں"], ["Dismisses the current error notification banner.", "موجودہ خرابی کے نوٹس کو بند کرتا ہے۔"]),

@@ -55,6 +55,7 @@ import { TransfusionBedsideOT } from './screens/TransfusionBedsideOT';
 import { OtSettlement } from './screens/OtSettlement';
 import { AccountantCockpit } from './screens/AccountantCockpit';
 import { BillingAdmin } from './screens/BillingAdmin';
+import { PharmacyStorageLog } from './screens/PharmacyStorageLog';
 import { PharmacyAdmin } from './screens/PharmacyAdmin';
 import { DrugRecalls } from './screens/DrugRecalls';
 import { MedicationSafetySetup } from './screens/MedicationSafetySetup';
@@ -1104,6 +1105,7 @@ export function App() {
       (id !== "recovery_board_anaesthesia" || ["full","open_work","records","setup"].includes(est?.views.screens.find(v=>v.screen_id===id)?.view || "")) &&
       (id !== "transfusion_bedside_ot" || ["full","open_work","records","setup"].includes(est?.views.screens.find(v=>v.screen_id===id)?.view || "")) &&
       (id !== "drug_recalls" || ["full","open_work","records","setup"].includes(est?.views.screens.find(v=>v.screen_id===id)?.view || "")) &&
+      (id !== "pharmacy_storage_log" || ["full","open_work","records","setup"].includes(est?.views.screens.find(v=>v.screen_id===id)?.view || "")) &&
       (id !== "medication_safety_setup" || ["full","open_work","records","setup"].includes(est?.views.screens.find(v=>v.screen_id===id)?.view || "")) &&
       (id !== "pharmacy_admin" || ["full","open_work","records","setup"].includes(est?.views.screens.find(v=>v.screen_id===id)?.view || "")) &&
       (id !== "billing_admin" || ["full","open_work","records","setup"].includes(est?.views.screens.find(v=>v.screen_id===id)?.view || "")) &&
@@ -1498,6 +1500,7 @@ export function App() {
               {screen === 'transfusion_bedside_er' && est && <TransfusionBedsideER key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} />}
               {screen === 'transfusion_bedside_ot' && est && <TransfusionBedsideOT key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} />}
               {screen === 'drug_recalls' && <DrugRecalls key={user.user_id} user={user} establishment={est} connected={connected} timeZone={meta?.hospital_timezone} onNavigateScreen={(s) => navigate(s)} />}
+              {screen === 'pharmacy_storage_log' && <PharmacyStorageLog key={user.user_id} user={user} establishment={est} connected={connected} timeZone={meta?.hospital_timezone} onNavigateScreen={(s) => navigate(s)} />}
               {screen === 'medication_safety_setup' && <MedicationSafetySetup key={user.user_id} user={user} establishment={est} connected={connected} timeZone={meta?.hospital_timezone} onNavigateScreen={(s) => navigate(s)} />}
               {screen === 'pharmacy_admin' && <PharmacyAdmin key={user.user_id} user={user} establishment={est} connected={connected} timeZone={meta?.hospital_timezone} onNavigateScreen={(s) => navigate(s)} />}
               {screen === 'billing_admin' && <BillingAdmin key={user.user_id} user={user} establishment={est} connected={connected} timeZone={meta?.hospital_timezone} onNavigateScreen={(s) => navigate(s)} />}

@@ -282,6 +282,7 @@ export function checkHelp({
       "PharmacyAdmin",
       "MedicationSafetySetup",
       "DrugRecalls",
+      "PharmacyStorageLog",
     ].map((n) => `src/screens/${n}.tsx`),
   ];
   const used = new Set(),

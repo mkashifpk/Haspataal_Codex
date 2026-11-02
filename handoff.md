@@ -1,7 +1,7 @@
 # Haspataal checkpoint
 Last updated: 02 November 2026, Antigravity (Codex pair), Asia/Karachi.
 
-## Active request: Phase 7 Screen 138 `pharmacy_storage_log` (Medicine storage log & temperature monitoring)
+## Active request: Phase 7 Screen 139 `lab_admin` (Lab catalogue, panels, instruments & reagent inventory)
 Executing the Haspataal HMS Roadmap in dependency order along with all tests and MCP progress reporting:
 - **Phase 6 ("Theatre and sterile supply")**: 100% COMPLETE (Screens 109–132, Proposals 262–285).
 - **Phase 7 ("Finance, billing and back offices")**:
@@ -9,17 +9,59 @@ Executing the Haspataal HMS Roadmap in dependency order along with all tests and
   - Screen 134: **`billing_admin`** ("Price & policy management", Position 134, 70 points, workspace `billing_admin`) — **COMPLETED** (commit `d3c8ab8`, Proposal **287** awaiting human review on `/docs -> My progress`).
   - Screen 135: **`pharmacy_admin`** ("Pharmacy inventory, formulary & procurement", Position 135, 76 points, workspace `pharmacy_admin`) — **COMPLETED** (commit `1b7d0e5`, Proposal **288** awaiting human review on `/docs -> My progress`).
   - Screen 136: **`medication_safety_setup`** ("High-alert drugs & look-alike/sound-alike rules", Position 136, 54 points, workspace `pharmacy_admin`) — **COMPLETED** (commit `c7f683b`, Proposal **289** awaiting human review on `/docs -> My progress`).
-  - Screen 137: **`drug_recalls`** ("Drug recall campaigns & quarantine management", Position 137, 63 points, workspace `pharmacy_admin`) — **COMPLETED** (Proposal **290** awaiting human review on `/docs -> My progress`).
-  - Screen 138: **`pharmacy_storage_log`** ("Medicine storage log & temperature monitoring", Position 138, 51 points, workspace `pharmacy_admin`) — **NEXT**.
-    - Scope: Cold-chain and ambient storage temperature/humidity monitoring, refrigerator logging, out-of-range action recording (`STORAGE_CHECK_ACTION_REQUIRED`), and statutory compliance logs.
+  - Screen 137: **`drug_recalls`** ("Drug recall campaigns & quarantine management", Position 137, 63 points, workspace `pharmacy_admin`) — **COMPLETED** (commit `ba0b999`, Proposal **290** awaiting human review on `/docs -> My progress`).
+  - Screen 138: **`pharmacy_storage_log`** ("Medicine storage log & temperature monitoring", Position 138, 51 points, workspace `pharmacy_admin`) — **COMPLETED** (Proposal **291** awaiting human review on `/docs -> My progress`).
+  - Screen 139: **`lab_admin`** ("Lab catalogue, panels, instruments & reagent inventory", Position 139, 76 points, workspace `lab_admin`) — **NEXT**.
+    - Scope: Lab test master catalog, profile/panel definitions, analyzers/instruments configuration, reagent stock management, and quality control rules.
     - Next Concrete Actions:
-      1. Inspect `get_screen_bundle("pharmacy_storage_log")` and save to `contracts/pharmacy_storage_log.json`.
+      1. Inspect `get_screen_bundle("lab_admin")` and save to `contracts/lab_admin.json`.
       2. Generate TypeScript contracts via `generate_typescript`.
-      3. Create domain policies in `src/pharmacy-storage-log-policy.ts`.
-      4. Implement UI `src/screens/PharmacyStorageLog.tsx`.
+      3. Create domain policies in `src/lab-admin-policy.ts`.
+      4. Implement UI `src/screens/LabAdmin.tsx`.
       5. Wire into `src/App.tsx`, catalogue, task map, foundation help, authored handbook entry, and unit test suite.
       6. Run full verification suite (`npm run check:help`, `npm test`, `npx tsc --noEmit`, `npm run build`).
       7. Propose progress via `propose_progress`.
+
+---
+
+### Completed Screen 138 (`pharmacy_storage_log`) Checkpoint
+- **Workflow & Standards**: Comprehensive medicine storage temperature & humidity monitoring workspace (`pharmacy_storage_log`, MSDS MOM 58):
+  - **Storage Checks Log Table (`GET /pharmacy/storage-checks`):**
+    - Chronologically ordered storage check readings with date range filter (`date_from`, `date_to`), storage area filter, and out-of-range deviations toggle (`out_of_range_only`).
+    - Rows display timestamp, storage area, kind (Room, Refrigerator, Freezer, ColdChainBox), ward or central pharmacy location, observed temperature, target limits, humidity %, within_range status badge, and recorded remedial action taken.
+    - Out-of-range deviations are highlighted in bold red with animated pulse per Rule `rule:e66d8b92db`.
+  - **Record Storage Reading Modal (`POST /pharmacy/storage-checks`):**
+    - Enforces Rule `rule:09925ecb70`: requires consistent storage area spelling (supported by auto-suggest datalist), storage kind selection, optional ward ID (for ward drug cupboards / refrigerators), observed temperature in °C, and optional humidity percentage (0-100%).
+    - Custom limits checkbox allows entering dedicated min and max temperatures for specialized vaccine transport carriers.
+    - Live threshold evaluation: if temperature is outside safe storage boundaries (e.g. <2°C or >8°C in a refrigerator), the form highlights the red warning and strictly demands non-empty remedial action taken (`action_taken`) before submission under Rule `rule:e66d8b92db` (`STORAGE_CHECK_ACTION_REQUIRED`).
+    - Submits with idempotency key; updates logs and summary immediately.
+  - **Surveyor Compliance Summary Cards (`GET /pharmacy/storage-checks/summary`):**
+    - Implements Rule `rule:ac70d74fb1`: computes total checks performed against the expected 2x daily routine (`checks_per_day = 2`).
+    - Area cards display lowest and highest temperature extremes observed, total out-of-range deviations, and full routine compliance (`days_complete` / `days`). Days with 0 or 1 check are flagged as surveyor compliance audit gaps.
+    - Displays standard system target thresholds in force (Room: 15-25°C, Refrigerator: 2-8°C, Freezer: -20 to -10°C).
+  - **Surveyor Register PDF Export (`GET /pharmacy/storage-checks/register/pdf`):**
+    - Enforces Rule `rule:1b0e847e97`: generates official printable storage register PDF covering the audit date range with timestamps, nurse/pharmacist signatures, out-of-range flags, and remedial actions.
+    - Multi-role access: ward nurses and head nurses can record storage checks for their ward refrigerators and emergency cupboards using their ward ID.
+  - **Realtime Notifications:**
+    - Subscribes to `pharmacy.storage.out_of_range` event to notify pharmacists immediately and auto-refresh without polling.
+- **Contracts**: `contracts/pharmacy_storage_log.json` (4 endpoints, 1 realtime event, 4 statutory rules `rule:09925ecb70`, `rule:e66d8b92db`, `rule:ac70d74fb1`, `rule:1b0e847e97`, 20 rubric items).
+- **Domain Policies & Statutory Rules (`src/pharmacy-storage-log-policy.ts`)**:
+  - Runtime service capability gating via `getPharmacyStorageLogCapabilityView` (`full`, `open_work`, `records`, `setup`, `hidden`) derived from `GET /establishment views.screens`.
+  - Storage limit resolution and out-of-range math: `resolveStorageLimits`, `isTemperatureOutOfRange`.
+  - Strict input validation: `validateStorageCheckInput` checking non-empty area name, valid kind, numeric temperature, humidity bounds, custom limit pairing, and mandatory remedial action taken for out-of-range temperatures (`STORAGE_CHECK_ACTION_REQUIRED`).
+  - Bilingual error dictionary (`STORAGE_LOG_ERROR_MESSAGES`) covering `STORAGE_CHECK_ACTION_REQUIRED`, `FORBIDDEN`, `REFERENCE_NOT_FOUND`, and `VALIDATION_ERROR`.
+- **UI Architecture (`src/screens/PharmacyStorageLog.tsx`)**:
+  - Live 2-tab storage log component wired into `src/App.tsx`, `src/foundation-catalogue.json` (4 tasks), `src/foundation-task-map.json` (4 controls), `src/foundation-help.ts` (23 controls mapped).
+  - Authored comprehensive handbook entry (`src/help.ts`) with bilingual title, purpose, 9 operational steps, and 5 role FAQs answering seed error `STORAGE_CHECK_ACTION_REQUIRED`. Bundled screenshots in `public/handbook/pharmacy_storage_log-en.png` and `pharmacy_storage_log-ur.png`.
+- **Verification**:
+  - Automated unit tests: `tests/pharmacy-storage-log.test.mjs` (6/6 passing).
+  - Help check: `npm run check:help` passed (137 screens, 3380 controls, 2390 groups, 69 FAQ seeds, 30 workspace guides).
+  - Help coverage test: `tests/help-coverage.test.mjs` (28/28 passing across 137 screens).
+  - Full test suite: `npm test` passed (690/690 passing across all 19 test suites).
+  - TypeScript compiler: `npx tsc --noEmit` passed with 0 errors.
+  - Production build: `npm run build` succeeded (`dist/assets/index-uTXGzHfR.js`).
+- **Proposal**:
+  - Proposal ID: **291** (status: `pending` on `/docs -> My progress`, build `index-uTXGzHfR.js`, 19 rubric items claimed, `q:fresh_data` left pending human review).
 
 ---
 

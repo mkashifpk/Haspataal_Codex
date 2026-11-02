@@ -8998,6 +8998,78 @@ sterile_packs_ward: {
       ]
     ]
   },
+  pharmacy_storage_log: {
+    title: "Medicine storage log",
+    titleUr: "ادویات کے اسٹوریج اور درجہ حرارت کا لاگ",
+    purpose: "Twice-daily environmental temperature and humidity monitoring of all hospital medicine stores, refrigerators, freezers, and cold-chain boxes per MSDS MOM 58: (1) Logging routine checks (POST /pharmacy/storage-checks) under Rule 09925ecb70 recording storage area name, kind (Room 15-25°C, Refrigerator 2-8°C, Freezer -20 to -10°C, ColdChainBox), ward ID for ward cupboards, observed temperature, optional humidity, and custom limits for specialized vaccine carriers; (2) Immediate out-of-range action enforcement under Rule e66d8b92db requiring documented remedial actions (STORAGE_CHECK_ACTION_REQUIRED) and highlighting the check in red while broadcasting pharmacy.storage.out_of_range events to alert pharmacists; (3) Chronological log register view with out-of-range filters (GET /pharmacy/storage-checks); (4) Surveyor compliance summary tiles (GET /pharmacy/storage-checks/summary) under Rule ac70d74fb1 tracking checks performed against expected 2x daily routine, lowest/highest temperatures observed, and identifying survey compliance gaps; and (5) Printable surveyor storage register PDF generation (GET /pharmacy/storage-checks/register/pdf) covering statutory surveyor inspection intervals under Rule 1b0e847e97.",
+    purposeUr: "ہسپتال کے تمام ادویات اسٹورز، ریفریجریٹرز، فریزرز اور کولڈ چین بکسوں کے ماحولیاتی درجہ حرارت اور نمی کی روزانہ دو بار باقاعدہ جانچ برائے MSDS MOM 58: (1) معمول کی ریڈنگ کا اندراج (POST /pharmacy/storage-checks) قاعدہ 09925ecb70 کے تحت جس میں جگہ کا مستقل نام، اسٹوریج کی قسم (کمرہ 15 تا 25 ڈگری، فریج 2 تا 8 ڈگری، فریزر -20 تا -10 ڈگری، کولڈ چین باکس)، وارڈ کا شناختی نمبر، درجہ حرارت، نمی کا تناسب اور مخصوص ویکسین کیریئرز کے لیے علیحدہ حدود درج کی جاتی ہیں؛ (2) مقررہ حد سے باہر ہونے پر فوری تدارکی اقدام کا لازمی اندراج (STORAGE_CHECK_ACTION_REQUIRED) قاعدہ e66d8b92db کے تحت، ریڈنگ کو سرخ نمایاں کرنا اور ایونٹ pharmacy.storage.out_of_range کے ذریعے فارماسسٹس کو الرٹ کرنا؛ (3) وقت کی ترتیب سے ریکارڈز کی فہرست مع انحراف فلٹر (GET /pharmacy/storage-checks)؛ (4) سرویئر معائنہ کے لیے ہر اسٹوریج کا خلاصہ (GET /pharmacy/storage-checks/summary) قاعدہ ac70d74fb1 کے تحت جس میں روزانہ 2 بار جانچ کے تقاضے بمقابلہ اصل حاضری، کم سے کم اور زیادہ سے زیادہ درجہ حرارت، اور ناغہ ہونے والے دنوں کا آڈٹ شامل ہے؛ اور (5) سرویئر معائنہ کے لیے پرنٹ ایبل پی ڈی ایف رجسٹر کا اجراء (GET /pharmacy/storage-checks/register/pdf) قاعدہ 1b0e847e97 کے تحت۔",
+    steps: [
+      "Open the Medicine Storage Log screen from the Pharmacy Admin or Ward menu to inspect recent temperature readings and area summaries.",
+      "Click '+ Record Check' to log the morning or evening temperature check for any medicine refrigerator, freezer, or ambient room.",
+      "Enter or select the Storage Area Name (maintaining consistent spelling per Rule 09925ecb70) and choose the Storage Kind (Room, Refrigerator, Freezer, or ColdChainBox).",
+      "If logging a ward drug cupboard or ward refrigerator, enter the Ward ID to link the reading to that specific ward location (Rule 1b0e847e97).",
+      "Enter the observed thermometer reading in degrees Celsius; optionally enter the hygrometer relative humidity percentage.",
+      "If the storage location has dedicated limits (e.g. specialized vaccine box), check 'Place has own custom limits' and specify both Min and Max limits.",
+      "If the reading is out of range, review the red warning prompt and record the mandatory remedial action taken under Rule e66d8b92db (STORAGE_CHECK_ACTION_REQUIRED).",
+      "Click 'Save Reading' to submit the record; if out of range, the system alerts pharmacists at once via realtime WebSocket broadcast.",
+      "Switch to the 'Surveyor Compliance Summary' tab to verify that both checks per day are completed for every area without survey gaps (Rule ac70d74fb1), and click 'Print Register PDF' to generate the official MSDS MOM 58 report.",
+    ],
+    stepsUr: [
+      "فارمیسی ایڈمن یا وارڈ مینو سے میڈیسن اسٹوریج لاگ اسکرین کھول کر درجہ حرارت کی ریڈنگز اور سرویئر خلاصہ دیکھیں۔",
+      "کسی بھی ریفریجریٹر، فریزر یا ادویات کے اسٹور کا صبح یا شام کا باقاعدہ درجہ حرارت درج کرنے کے لیے '+ Record Check' پر کلک کریں۔",
+      "قاعدہ 09925ecb70 کے تحت اسٹوریج کا نام لکھیں یا منتخب کریں (ہمیشہ ایک ہی ہجے رکھیں) اور اسٹوریج کی قسم (کمرہ، فریج، فریزر یا کولڈ چین باکس) منتخب کریں۔",
+      "اگر وارڈ کے فریج یا الماری کی ریڈنگ ہے تو وارڈ نمبر درج کریں تاکہ ریڈنگ متعلقہ وارڈ سے منسلک ہو سکے (قاعدہ 1b0e847e97)۔",
+      "تھرمامیٹر سے دیکھ کر ڈگری سینٹی گریڈ میں درجہ حرارت درج کریں؛ ہائیگرو میٹر سے دیکھ کر ہوا میں نمی کا تناسب اختیاری طور پر درج کریں۔",
+      "اگر مخصوص ویکسین باکس ہے جس کی درجہ حرارت کی حدود مختلف ہیں تو کسٹم لمٹس پر چیک لگا کر کم سے کم اور زیادہ سے زیادہ حد درج کریں۔",
+      "اگر درجہ حرارت مقررہ حد سے باہر ہو تو سرخ انتباہ دیکھ کر قاعدہ e66d8b92db کے تحت فوری حفاظتی اقدام لازماً درج کریں (STORAGE_CHECK_ACTION_REQUIRED)۔",
+      "ریڈنگ محفوظ کرنے کے لیے 'Save Reading' پر کلک کریں؛ اگر ریڈنگ حد سے باہر ہو تو سسٹم فوری طور پر فارماسسٹس کو ریئل ٹائم الرٹ بھیجتا ہے۔",
+      "سرویئر خلاصہ ٹیب پر جا کر تصدیق کریں کہ تمام جگہوں پر روزانہ دو بار کا معمول مکمل ہے (قاعدہ ac70d74fb1) اور سرکاری معائنہ رپورٹ کے لیے 'Print Register PDF' دبائیں۔",
+    ],
+    faq: [
+      [
+        "The Medicine storage log screen says 'The reading is out of range: record the action taken.' (STORAGE_CHECK_ACTION_REQUIRED). Why, and what do I do?",
+        "Statutory Rule e66d8b92db and MSDS MOM 58 require that any temperature reading outside permitted safe storage boundaries (e.g. above 8°C or below 2°C for a refrigerator) must be accompanied by an immediate remedial action note. You cannot submit an out-of-range check without documenting what was done (e.g. adjusted thermostat, verified refrigerator door seal, moved heat-sensitive biologics to backup cold room, or called maintenance). Enter the corrective action into the 'Action Taken' field before saving."
+      ],
+      [
+        "What are the standard permitted temperature ranges for medicine storage?",
+        "Under hospital standards and default system configuration: (1) Medicine Refrigerators must remain between +2.0°C and +8.0°C; (2) Medicine Freezers must remain between -20.0°C and -10.0°C; and (3) Ambient / Room Temperature Medicine Stores must remain between +15.0°C and +25.0°C. Specialized vaccine carriers can have custom boundaries configured."
+      ],
+      [
+        "How often must storage checks be logged to satisfy MSDS MOM 58 inspection standards?",
+        "MSDS MOM 58 mandates a twice-daily routine (checks_per_day = 2): once in the morning and once in the late afternoon/evening, 7 days a week. The Surveyor Compliance Summary calculates 'days_complete' against total days in the period; any day with zero or only one check is flagged as a compliance gap that must be explained during quality surveys."
+      ],
+      [
+        "Can ward nurses record temperature readings for their ward medicine refrigerators?",
+        "Yes, ward nurses and head nurses holding the pharmacy.storage.record permission can record daily storage checks for their ward refrigerators and emergency cupboards using the same form, simply by entering their ward ID per Rule 1b0e847e97."
+      ],
+      [
+        "How do I generate the official temperature log register for visiting health care commission surveyors?",
+        "Select the audit date range using the 'From Date' and 'To Date' selectors, then click 'Print Register PDF' (GET /pharmacy/storage-checks/register/pdf). The system renders a surveyor-ready PDF document containing all recorded checks, timestamps, staff signatures, out-of-range flags, and remedial action notes."
+      ]
+    ],
+    faqUr: [
+      [
+        "اسکرین کہتی ہے کہ 'ریڈنگ حد سے باہر ہے: کیا گیا اقدام درج کریں' (STORAGE_CHECK_ACTION_REQUIRED)۔ اس کی کیا وجہ ہے اور مجھے کیا کرنا چاہیے؟",
+        "قاعدہ e66d8b92db اور MSDS MOM 58 کے تحت جب بھی درجہ حرارت محفوظ حد سے باہر ہو (جیسے ریفریجریٹر کا 8 ڈگری سے زیادہ یا 2 ڈگری سے کم ہونا) تو فوری تدارکی اقدام درج کرنا قانونی طور پر لازمی ہے۔ آپ تدارکی نوٹ کے بغیر ریڈنگ محفوظ نہیں کر سکتے۔ 'Action Taken' کے خانے میں لکھیں کہ آپ نے کیا کیا (مثلاً تھرموسٹیٹ درست کیا، دروازے کی سیل چیک کی، ادویات متبادل فریج میں منتقل کیں یا الیکٹریشن کو مطلع کیا) اور پھر محفوظ کریں۔"
+      ],
+      [
+        "ادویات کے لیے درجہ حرارت کی معیاری اور قانونی حدود کیا ہیں؟",
+        "ہسپتال کے ضوابط کے مطابق: (1) میڈیسن ریفریجریٹر کا درجہ حرارت +2.0 سے +8.0 ڈگری سینٹی گریڈ؛ (2) فریزر کا درجہ حرارت -20.0 سے -10.0 ڈگری سینٹی گریڈ؛ اور (3) عام کمرے یا اسٹور کا درجہ حرارت +15.0 سے +25.0 ڈگری سینٹی گریڈ ہونا لازمی ہے۔ مخصوص ویکسین باکس کے لیے علیحدہ حدود رکھی جا سکتی ہیں۔"
+      ],
+      [
+        "سرکاری معائنہ (MSDS MOM 58) کے معیار پر پورا اترنے کے لیے دن میں کتنی بار چیکنگ ضروری ہے؟",
+        "ایم ایس ڈی ایس 58 کے تحت ہفتے کے ساتوں دن، روزانہ دو بار (صبح اور شام) درجہ حرارت چیک کرنا لازمی ہے۔ سرویئر خلاصہ ٹیب چیک کرتا ہے کہ دونوں ریڈنگز موجود ہیں یا نہیں۔ اگر کسی دن صرف ایک یا کوئی ریڈنگ نہ ہو تو سسٹم اسے آڈٹ میں کمی (Gap) کے طور پر ظاہر کرتا ہے۔"
+      ],
+      [
+        "کیا وارڈ نرسز اپنے وارڈ کے فریج کا درجہ حرارت اس اسکرین سے درج کر سکتی ہیں؟",
+        "جی ہاں، وارڈ نرس اور ہیڈ نرس جن کے پاس اجازت ہو، وہ اپنے وارڈ کا نمبر درج کر کے وارڈ کی الماری یا ریفریجریٹر کا درجہ حرارت درج کر سکتی ہیں (قاعدہ 1b0e847e97)۔"
+      ],
+      [
+        "ہیلتھ کیئر کمیشن کے سرویئرز کے لیے سرکاری درجہ حرارت لاگ رجسٹر کیسے پرنٹ کیا جاتا ہے؟",
+        "ابتدائی اور آخری تاریخ منتخب کریں اور پھر 'Print Register PDF' بٹن پر کلک کریں۔ سسٹم تمام ریڈنگز، اوقات، نرس کے دستخط، انحراف اور تدارکی اقدامات پر مشتمل قانونی معائنہ رجسٹر پی ڈی ایف تیار کر دیتا ہے۔"
+      ]
+    ],
+  },
   drug_recalls: {
     title: "Batch recalls",
     titleUr: "ادویات کی تنسیخ و واپسی",
