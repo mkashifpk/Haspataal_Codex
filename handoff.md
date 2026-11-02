@@ -1,31 +1,62 @@
 # Haspataal checkpoint
 Last updated: 02 November 2026, Antigravity (Codex pair), Asia/Karachi.
 
-## Active request: Phase 8 Screen 143 `onboarding_wizard` (Staff onboarding & credentials wizard)
+## Active request: Phase 8 Screen 144 `it_console` (IT administration console)
 Executing the Haspataal HMS Roadmap in dependency order along with all tests and MCP progress reporting:
-- **Phase 6 ("Theatre and sterile supply")**: 100% COMPLETE (Screens 109–132, Proposals 262–285).
 - **Phase 7 ("Finance, billing and back offices")**: 100% COMPLETE (Screens 133–142, Proposals 286–295).
-  - Screen 133: **`accountant_cockpit`** ("Accountant 3-pane cockpit", Position 133, 83 points, workspace `finance_accountant`) — **COMPLETED** (commit `3f85c2d`, Proposal **286** awaiting human review on `/docs -> My progress`).
-  - Screen 134: **`billing_admin`** ("Price & policy management", Position 134, 70 points, workspace `billing_admin`) — **COMPLETED** (commit `d3c8ab8`, Proposal **287** awaiting human review on `/docs -> My progress`).
-  - Screen 135: **`pharmacy_admin`** ("Pharmacy inventory, formulary & procurement", Position 135, 76 points, workspace `pharmacy_admin`) — **COMPLETED** (commit `1b7d0e5`, Proposal **288** awaiting human review on `/docs -> My progress`).
-  - Screen 136: **`medication_safety_setup`** ("High-alert drugs & look-alike/sound-alike rules", Position 136, 54 points, workspace `pharmacy_admin`) — **COMPLETED** (commit `c7f683b`, Proposal **289** awaiting human review on `/docs -> My progress`).
-  - Screen 137: **`drug_recalls`** ("Drug recall campaigns & quarantine management", Position 137, 63 points, workspace `pharmacy_admin`) — **COMPLETED** (commit `ba0b999`, Proposal **290** awaiting human review on `/docs -> My progress`).
-  - Screen 138: **`pharmacy_storage_log`** ("Medicine storage log & temperature monitoring", Position 138, 51 points, workspace `pharmacy_admin`) — **COMPLETED** (commit `580e15a`, Proposal **291** awaiting human review on `/docs -> My progress`).
-  - Screen 139: **`lab_admin`** ("Lab catalogue, panels, instruments & reagent inventory", Position 139, 76 points, workspace `lab_admin`) — **COMPLETED** (commit `7491e82`, Proposal **292** awaiting human review on `/docs -> My progress`).
-  - Screen 140: **`diagnostic_partners`** ("Partner laboratories and imaging centres", Position 140, 44 points, workspace `lab_admin`) — **COMPLETED** (commit `95561ed`, Proposal **293** awaiting human review on `/docs -> My progress`).
-  - Screen 141: **`owner_dashboard`** ("Hospital owner dashboard", Position 141, 41 points, workspace `owner_dashboard`) — **COMPLETED** (commit `90ff16e`, Proposal **294** awaiting human review on `/docs -> My progress`).
-  - Screen 142: **`risk_dashboard`** ("Risk & compliance dashboard", Position 142, 48 points, workspace `owner_dashboard`) — **COMPLETED** (Proposal **295** awaiting human review on `/docs -> My progress`).
 - **Phase 8 ("People, facility and IT")**:
-  - Screen 143: **`onboarding_wizard`** ("Staff onboarding & credentials wizard", Position 143, 63 points, workspace `hr`) — **NEXT**.
-    - Scope: Multi-step employee onboarding, CNIC/identity validation, PMC/PNC registration verification, credentials vault, department assignment, and initial contract generation per MSDS HRM.
+  - Screen 143: **`onboarding_wizard`** ("Staff onboarding & credentials wizard", Position 143, 63 points, workspace `hr`) — **COMPLETED** (Proposal **296** awaiting human review on `/docs -> My progress`).
+  - Screen 144: **`it_console`** ("IT administration console", Position 144, 179 points, workspace `it_admin`) — **NEXT**.
+    - Scope: System user provisioning, credential administration, role & permission assignments, department directory management, and session monitoring.
     - Next Concrete Actions:
-      1. Inspect `get_screen_bundle("onboarding_wizard")` and save to `contracts/onboarding_wizard.json`.
-      2. Generate TypeScript contracts via `generate_typescript`.
-      3. Create domain policies in `src/onboarding-wizard-policy.ts`.
-      4. Implement UI `src/screens/OnboardingWizard.tsx`.
-      5. Wire into `src/App.tsx`, catalogue, task map, foundation help, authored handbook entry, and unit test suite.
-      6. Run full verification suite (`npm run check:help`, `npm test`, `npx tsc --noEmit`, `npm run build`).
-      7. Propose progress via `propose_progress`.
+      1. Inspect `get_screen_bundle("it_console")` and save to `contracts/it_console.json`.
+      2. Review generated contracts and statutory rules for IT console.
+      3. Implement domain policy and UI extensions.
+      4. Wire into help, tasks, routing, and unit tests.
+      5. Run full verification suite (`npm run check:help`, `npm test`, `npx tsc --noEmit`, `npm run build`).
+      6. Propose progress via `propose_progress`.
+
+---
+
+### Completed Screen 143 (`onboarding_wizard`) Checkpoint
+- **Workflow & Standards**: 6-step staff onboarding and professional credential verification wizard (`onboarding_wizard`, Workspace `hr`, Position 143, 63 points):
+  - **Step 1 (Demographics) (`POST /hr/employees`, `PATCH /hr/employees/{id}/steps/1`):**
+    - Strictly mandatory 13-digit CNIC verification with auto-hyphenation formatting (`XXXXX-XXXXXXX-X`) per MSDS HRM 142.
+    - Full name, father/husband name, Pakistan mobile phone number validation (`03XX-XXXXXXX`), date of birth, gender, blood group, and residential address.
+    - Generates and displays official hospital employee number (e.g. `EMP-00042`).
+  - **Step 2 (Job & Finance Taxonomy) (`PATCH /hr/employees/{id}/steps/2`):**
+    - Administrative department assignment, designation/title, clinical/operational specialty.
+    - Reporting hierarchy supervisor selection preventing cyclic graph loops (`CYCLE_DETECTED`).
+    - Base monthly salary in PKR, contract type (Permanent, Contract, Visiting), staff category, and clinical staff flag.
+  - **Step 3 (Licences & Qualifications) (`PATCH /hr/employees/{id}/steps/3`, `POST /hr/employees/{id}/qualifications`):**
+    - Mandatory PMDC/PNC practice licence registration for clinical medical and nursing personnel.
+    - Qualifications directory (Education, Experience, License, Certification) with MSDS HRM 142 primary source verification status badges (Pending, Verified, Failed, NotRequired).
+  - **Step 4 (Financial Config & Visiting Split Notice) (`rule:cd04ca0d57`):**
+    - Strict adherence to Rule `rule:cd04ca0d57`: Visiting consultant OT split and commission contracts are configured exclusively by Billing Admin on Price & policy management (`billing_admin`). The wizard displays a clear explanatory notice and never submits commission percentages.
+  - **Step 5 (Document Vault) (`POST /hr/employees/{id}/documents`, `rule:44d2ead844`, `rule:511519d15c`):**
+    - Multipart document uploads (CNIC scan, degrees, contracts, experience certificates).
+    - Strict image format enforcement: Staff ID card Photo is JPEG or PNG only, up to 16 megapixels (PDF is rejected with `UNSUPPORTED_MEDIA_TYPE`).
+  - **Step 6 (Finalize & IT Handover) (`POST /hr/employees/{id}/submit`, `rule:adc6619db9`, `rule:c1f853fceb`):**
+    - Submit button is greyed out / disabled until `GET /hr/employees/{id}.checklist.ready` is `true`. Displays missing requirements if blocked.
+    - Finalizing transitions profile status to `Awaiting_IT_Provisioning` and hands over to IT Console; HR never creates user logins (`rule:adc6619db9`).
+  - **Service Capability Gating:**
+    - Resolves `full`, `open_work` (Restricted Mode: finalizing in-progress drafts without creating new employees), `records` (viewing only), `setup`, and `hidden` derived from server `GET /establishment views.screens`.
+- **Contracts**: `contracts/onboarding_wizard.json` (8 endpoints, 5 statutory rules, 24 rubric items).
+- **Domain Policies & Statutory Rules (`src/onboarding-wizard-policy.ts`)**:
+  - `getOnboardingWizardCapabilityView`, `formatCnic`, `isValidCnic`, `validateStep1Input`, `validateStep2Input`, `validateStep3Input`, `validateQualificationInput`, `validateDocumentFile`, `canSubmitEmployeeProfile`.
+  - Bilingual error dictionary (`ONBOARDING_WIZARD_ERROR_MESSAGES`) covering `CNIC_ALREADY_EXISTS`, `EMPLOYEE_DOCUMENT_REQUIRED`, `CLINICAL_LICENSE_REQUIRED`, `CYCLE_DETECTED`, `EMPLOYEE_STATUS_INVALID`, `UNSUPPORTED_MEDIA_TYPE`, `FORBIDDEN`, `VALIDATION_ERROR`, and `NOT_FOUND`.
+- **UI Architecture (`src/screens/OnboardingWizard.tsx`)**:
+  - 6-step interactive stepper wired into `src/App.tsx`, `scripts/check-help.mjs`, `src/foundation-catalogue.json` (8 tasks), `src/foundation-task-map.json` (8 controls), and `src/foundation-help.ts` (52 interactive controls mapped).
+  - Authored comprehensive handbook entry and 5 role FAQs in `src/help.ts` explaining CNIC requirement, checklist gates, visiting doctor OT splits, IT handover, photo format rules, and cycle detection. Bundled screenshots in `public/handbook/onboarding_wizard-en.png` and `onboarding_wizard-ur.png`.
+- **Verification**:
+  - Automated unit tests: `tests/onboarding-wizard.test.mjs` passed (8/8 tests).
+  - Help check: `npm run check:help` passed (142 screens, 3,578 controls, 2,580 groups, 69 FAQ seeds, 30 workspace guides).
+  - Help coverage test: `tests/help-coverage.test.mjs` passed (28/28 tests across 142 screens).
+  - Full test suite: `npm test` passed (723/723 tests across all 19 test suites).
+  - TypeScript compiler: `npx tsc --noEmit` passed with 0 errors.
+  - Production build: `npm run build` succeeded (`dist/assets/index-CfA-iLNQ.js`).
+- **Proposal**:
+  - Proposal ID: **296** (status: `pending` on `/docs -> My progress`, build `index-CfA-iLNQ.js`, 23 rubric items claimed, `q:fresh_data` left pending human review).
 
 ---
 

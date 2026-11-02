@@ -287,6 +287,7 @@ export function checkHelp({
       "DiagnosticPartners",
       "OwnerDashboard",
       "RiskDashboard",
+      "OnboardingWizard",
     ].map((n) => `src/screens/${n}.tsx`),
   ];
   const used = new Set(),

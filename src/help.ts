@@ -10,6 +10,76 @@ export type HelpPage = {
   faqUr: [string, string][];
 };
 export const help: Record<string, HelpPage> = {
+  onboarding_wizard: {
+    title: "Staff onboarding & credentials wizard",
+    titleUr: "عملہ آن بورڈنگ اور اسناد وزرڈ",
+    purpose: "Comprehensive 6-step onboarding wizard for hospital human resources administration per MSDS HRM 142: (1) Demographics entry and strictly mandatory 13-digit CNIC verification (POST /hr/employees, PATCH /hr/employees/{id}/steps/1); (2) Job taxonomy, department assignment, non-cyclic reporting supervisor hierarchy, and salary structure (PATCH /hr/employees/{id}/steps/2); (3) Professional PMDC/PNC practice licence registration and primary source verified qualifications directory (PATCH /hr/employees/{id}/steps/3, POST /hr/employees/{id}/qualifications); (4) Statutory financial configuration with strict enforcement of Rule cd04ca0d57 (visiting consultant OT split contracts are configured exclusively by the Billing Admin under Price & policy management, never within onboarding); (5) Document vault multipart uploads (Rule 44d2ead844) enforcing JPEG/PNG format and 16MP maximum for staff ID card photos (Rule 511519d15c); and (6) Finalize checklist gate (Rule c1f853fceb) disabling submission until all requirements are complete, handing over profile to IT Console as Awaiting_IT_Provisioning without creating logins (Rule adc6619db9).",
+    purposeUr: "ایم ایس ڈی ایس ایچ آر ایم 142 کے مطابق ہسپتال کے ہیومن ریسورس ایڈمنسٹریشن کے لیے جامع 6 مراحل پر مشتمل آن بورڈنگ وزرڈ: (1) ڈیموگرافکس اندراج اور سختی سے لازمی 13 ہندسوں کا شناختی کارڈ کی تصدیق؛ (2) ملازمت کی درجہ بندی، محکمہ کی تفویض، غیر دائرہ دار رپورٹنگ نگران درجہ بندی اور تنخواہ کا ڈھانچہ؛ (3) پیشہ ورانہ پی ایم ڈی سی / پی این سی پریکٹس لائسنس رجسٹریشن اور بنیادی ذرائع سے تصدیق شدہ اسناد ڈائریکٹری؛ (4) قاعدہ cd04ca0d57 کا سخت نفاذ (وزیٹنگ کنسلٹنٹ او ٹی اسپلٹ کے معاہدے خصوصی طور پر بلنگ ایڈمن کے ذریعے تشکیل پاتے ہیں)؛ (5) دستاویزات والٹ ملٹی پارٹ اپ لوڈز برائے شناختی کارڈ کی تصاویر جے پی ای جی یا پی این جی فارمیٹ میں (قاعدہ 511519d15c)؛ اور (6) حتمی چیک لسٹ گیٹ (قاعدہ c1f853fceb) جو تمام ضروریات مکمل ہونے تک جمع کرانے کو غیر فعال رکھتا ہے اور لاگ ان بنائے بغیر پروفائل کو آئی ٹی کنسول کے حوالے کرتا ہے (قاعدہ adc6619db9)۔",
+    steps: [
+      "Open Demographics or enter an existing Employee ID to resume an in-progress onboarding profile.",
+      "Enter full name, father/husband name, and strictly mandatory 13-digit CNIC number along with contact details.",
+      "Configure Step 2 job taxonomy: select department, designation, specialty, reporting supervisor, and base salary.",
+      "Record professional practice licence (PMDC/PNC) for clinical staff and add academic qualifications with MSDS HRM 142 verification.",
+      "Review Step 4 financial configuration: note that visiting consultant OT splits are managed solely by Billing Admin on billing_admin (Rule cd04ca0d57).",
+      "Upload mandatory verification documents to the vault: CNIC scan, degrees, and staff ID photo (JPEG/PNG only, max 16MP per Rule 511519d15c).",
+      "Inspect the Step 6 onboarding checklist to verify all mandatory prerequisites are satisfied (Rule c1f853fceb).",
+      "Submit the profile to hand over to IT Console as Awaiting_IT_Provisioning without creating logins (Rule adc6619db9).",
+    ],
+    stepsUr: [
+      "ڈیموگرافکس کھولیں یا جاری آن بورڈنگ پروفائل کو دوبارہ شروع کرنے کے لیے موجودہ ملازم کی شناخت درج کریں۔",
+      "پورا نام، والد/شوہر کا نام، اور سختی سے لازمی 13 ہندسوں کا شناختی کارڈ مع رابطہ نمبر درج کریں۔",
+      "مرحلہ 2 میں ملازمت کی تفصیلات منتخب کریں: محکمہ، عہدہ، نگران اور بنیادی تنخواہ۔",
+      "طبی عملے کے لیے پریکٹس لائسنس (پی ایم ڈی سی/پی این سی) اور تصدیق شدہ تعلیمی اسناد درج کریں۔",
+      "مرحلہ 4 میں مالیاتی ڈھانچہ دیکھیں: وزیٹنگ ڈاکٹرز کے او ٹی اسپلٹس بلنگ ایڈمن کے ذریعے کنٹرول ہوتے ہیں (قاعدہ cd04ca0d57)۔",
+      "والٹ میں دستاویزات اور تصویر اپ لوڈ کریں: شناختی کارڈ کی تصویر صرف جے پی ای جی یا پی این جی ہونی چاہیے (قاعدہ 511519d15c)۔",
+      "مرحلہ 6 پر چیک لسٹ کا معائنہ کریں تاکہ یقینی ہو سکے کہ تمام شرائط پوری ہیں (قاعدہ c1f853fceb)۔",
+      "پروفائل جمع کرائیں تاکہ یہ لاگ ان بنائے بغیر Awaiting_IT_Provisioning حالت میں آئی ٹی کو منتقل ہو جائے (قاعدہ adc6619db9)۔",
+    ],
+    faq: [
+      [
+        "Why is the Submit button greyed out on Step 6?",
+        "Under Rule c1f853fceb, the Submit button is strictly disabled until GET /hr/employees/{id}.checklist.ready evaluates to true. Check the missing items list on Step 6 (e.g. missing CNIC document, missing employee photo, or clinical licence) and provide them in the corresponding wizard steps to enable submission.",
+      ],
+      [
+        "Why does the onboarding wizard not allow configuring visiting doctor OT commission percentages?",
+        "Under Rule cd04ca0d57 and executive decisions 56, financial commission splits and OT revenue share rules for visiting consultants are governed exclusively by the Billing Admin on Price & policy management (billing_admin). HR defines personnel taxonomy, but financial tariffs and commission rules are segregated to enforce financial control.",
+      ],
+      [
+        "Why can HR not create the user login credentials upon completing onboarding?",
+        "Under Rule adc6619db9, Step 6 never creates a system login. Instead, it transitions the profile to Awaiting_IT_Provisioning and routes the employee to IT Console. Separation of duties requires that hospital IT administration configures terminal accounts, security credentials, and role-based permissions.",
+      ],
+      [
+        "Why was my uploaded PDF file rejected when uploading the employee photo?",
+        "Under Rule 511519d15c, the employee Photo is printed on physical ID badges and cards, which requires raw raster image encoding. The server accepts only JPEG or PNG image formats up to 16 megapixels for photos. PDF documents are permitted for certificates and contracts, but not for ID photos (UNSUPPORTED_MEDIA_TYPE).",
+      ],
+      [
+        "What causes a CYCLE_DETECTED refusal when assigning a supervisor in Step 2?",
+        "The backend organizational hierarchy strictly enforces non-cyclic acyclic graph integrity. An employee cannot be selected as their own supervisor, nor can they report to a subordinate who ultimately reports up to them. Select an independent superior or leave the field empty for top-level executives.",
+      ],
+    ],
+    faqUr: [
+      [
+        "مرحلہ 6 پر جمع کرانے کا بٹن کیوں غیر فعال ہے؟",
+        "قاعدہ c1f853fceb کے تحت چیک لسٹ مکمل ہونے تک جمع کرانے کا بٹن غیر فعال رہتا ہے۔ مرحلہ 6 پر غیر حاضر اشیاء (شناختی کارڈ کی کاپی، تصویر یا لائسنس) دیکھیں اور متعلقہ مراحل میں مکمل کریں۔",
+      ],
+      [
+        "آن بورڈنگ وزرڈ میں وزیٹنگ ڈاکٹر کے او ٹی کمیشن کی فیصد کیوں نہیں رکھی جا سکتی؟",
+        "قاعدہ cd04ca0d57 کے تحت وزیٹنگ ڈاکٹرز کے او ٹی اسپلٹ کے مالیاتی معاہدے صرف بلنگ ایڈمن کے دائرہ اختیار میں ہیں۔ مالیاتی کنٹرول برقرار رکھنے کے لیے ایچ آر وزرڈ میں کمیشن کی فیصد نہیں رکھی جاتی۔",
+      ],
+      [
+        "آن بورڈنگ مکمل ہونے پر ایچ آر ملازم کا لاگ ان کیوں نہیں بنا سکتا؟",
+        "قاعدہ adc6619db9 کے تحت ایچ آر لاگ ان تیار نہیں کرتا بلکہ پروفائل کو Awaiting_IT_Provisioning حالت میں آئی ٹی کنسول کے سپرد کرتا ہے تاکہ آئی ٹی سیکیورٹی اسناد تفویض کرے۔",
+      ],
+      [
+        "ملازم کی تصویر اپ لوڈ کرتے وقت پی ڈی ایف کیوں مسترد ہوئی؟",
+        "قاعدہ 511519d15c کے تحت شناختی کارڈ کی تصویر کے لیے صرف جے پی ای جی یا پی این جی فارمیٹ کی اجازت ہے۔ پی ڈی ایف صرف دیگر اسناد اور معاہدوں کے لیے قابل قبول ہے۔",
+      ],
+      [
+        "مرحلہ 2 میں نگران تفویض کرتے وقت CYCLE_DETECTED کی وجہ کیا ہے؟",
+        "تنظیمی درجہ بندی میں دائرہ دار رپورٹنگ ممنوع ہے۔ ملازم خود اپنا نگران نہیں ہو سکتا اور نہ ہی اپنے ماتحت کو نگران بنا سکتا ہے۔ آزاد اعلیٰ نگران منتخب کریں یا خالی چھوڑیں۔",
+      ],
+    ],
+  },
   risk_dashboard: {
     title: "Risk & compliance",
     titleUr: "رسک اور کمپلائنس ڈیش بورڈ",
