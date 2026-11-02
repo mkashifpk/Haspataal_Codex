@@ -18,6 +18,7 @@ import {
 } from "../write-attempt";
 import bundle from "../it-system-contract.json";
 import { ITWards } from './ITWards';
+import { getItConsoleCapabilityView } from "../it-console-policy";
 
 const contract = bundle as any;
 const operation = (endpoint: string) =>
@@ -44,7 +45,9 @@ type Action = {
 type Attempt = WriteAttempt<Action>;
 const shape = (endpoint: string) => {
   const request = operation(endpoint)?.request_body;
-  const ref = request?.content?.["application/json"]?.schema?.$ref;
+  const ref =
+    request?.content?.["application/json"]?.schema?.$ref ||
+    request?.content?.["multipart/form-data"]?.schema?.$ref;
   return ref
     ? contract.schemas[ref.split("/").at(-1)!]
     : { properties: {}, required: [] };
@@ -72,6 +75,19 @@ const sectionReads: Record<string, string[]> = {
     "/admin/badge-stations",
     "/admin/departments",
   ],
+  wards: [
+    "/admin/wards",
+  ],
+  departments: [
+    "/admin/departments",
+  ],
+  settings: [
+    "/admin/settings",
+    "/admin/change-requests",
+  ],
+  icd_releases: [
+    "/icd/releases",
+  ],
   server_health: ["/admin/server-health"],
   maintenance: ["/admin/server-health"],
   kill_switch: [],
@@ -84,30 +100,44 @@ const names: Record<string, string> = {
   "/admin/terminals": "Terminals",
   "/admin/printers": "Printers",
   "/admin/badge-stations": "Badge stations",
-  "/admin/server-health": "Server health",
+  "/admin/departments": "Departments",
+  "/admin/wards": "Wards",
+  "/admin/settings": "System settings",
   "/admin/change-requests": "Access change requests",
+  "/icd/releases": "ICD releases",
+  "/admin/server-health": "Server health",
 };
 
-// These are Settings' server-selected system sections. The complete IT workspace
-// also has independent ward/department/ICD journeys; it is not claimed here.
-export function ITConsole({
-  section,
-  permissions,
-  userId,
-  revision,
-}: {
-  section: string;
-  permissions: string[];
-  userId: number;
-  revision: number;
-}) {
+export interface ITConsoleProps {
+  section?: string;
+  permissions?: string[];
+  userId?: number;
+  revision?: number;
+  user?: any;
+  establishment?: any;
+  connected?: boolean;
+  timeZone?: string;
+  onNavigateScreen?: (s: string) => void;
+}
+
+export function ITConsole(props: ITConsoleProps) {
+  const permissions = props.permissions || props.user?.permissions || [];
+  const userId = props.userId ?? props.user?.user_id ?? 0;
+  const revision = props.revision ?? 0;
+  const isStandalone = props.section === undefined;
+  const [activeSection, setActiveSection] = useState<string>(
+    props.section || "users_and_access",
+  );
+  const section = props.section || activeSection;
+  const capability = getItConsoleCapabilityView(props.establishment);
+
   const allowed = (endpoint: string) => permits(endpoint, permissions);
   const [searchDraft, setSearchDraft] = useState(""),
     [userSearch, setUserSearch] = useState(""),
     [activeFilter, setActiveFilter] = useState(""),
     [failuresOnly, setFailuresOnly] = useState(false);
   const r = useLoad(async () => {
-    const paths = sectionReads[section].filter((path) =>
+    const paths = (sectionReads[section] || []).filter((path) =>
       allowed("GET " + path),
     );
     const reads = await Promise.allSettled(
@@ -237,6 +267,14 @@ export function ITConsole({
       if (generation === detailGeneration.current) setError(cause);
     }
   }
+  async function detailChangeRequest(id: number) {
+    try {
+      const cr = await api("GET", `/admin/change-requests/${id}`);
+      setResult(cr);
+    } catch (cause) {
+      setError(cause);
+    }
+  }
   const edit = (
     endpoint: string,
     row: any,
@@ -275,14 +313,77 @@ export function ITConsole({
       </button>
     );
   const firstOwner = data("/admin/first-owner");
+  if (capability.mode === "hidden") {
+    return (
+      <section className="notice">
+        <h3>{tr("IT administration console is hidden in current facility configuration.")}</h3>
+      </section>
+    );
+  }
+
   return (
     <div data-write-pending={busy || !!pending || !!secret}>
-      <h2>{tr("System (IT)")}</h2>
+      <h2>{tr("Super Admin (IT)")}</h2>
       <p className="muted">
         {tr(
           "Changes affect hospital access and devices. Review the selected person or device before confirming.",
         )}
       </p>
+      {capability.noticeEn && (
+        <section
+          className="notice"
+          role="alert"
+          style={{
+            marginBottom: "1rem",
+            backgroundColor: "#fff3cd",
+            border: "1px solid #ffeeba",
+            padding: "0.75rem",
+            borderRadius: "4px",
+          }}
+        >
+          <p>
+            <strong>{tr("Capability Notice / نوٹس")}:</strong> {tr(capability.noticeEn)}
+          </p>
+        </section>
+      )}
+      {isStandalone && (
+        <nav
+          className="tab-nav"
+          style={{
+            display: "flex",
+            flexWrap: "wrap",
+            gap: "0.5rem",
+            marginBottom: "1rem",
+            borderBottom: "2px solid #e0e0e0",
+            paddingBottom: "0.5rem",
+          }}
+        >
+          {[
+            { id: "users_and_access", label: "Users & Provisioning" },
+            { id: "hardware", label: "Hardware & Terminals" },
+            { id: "wards", label: "Wards & Beds" },
+            { id: "departments", label: "Departments & Theaters" },
+            { id: "settings", label: "Settings & Changes" },
+            { id: "icd_releases", label: "ICD Classifications" },
+            { id: "server_health", label: "Server Telemetry" },
+            { id: "maintenance", label: "Maintenance Mode" },
+            { id: "kill_switch", label: "Emergency Controls" },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              data-help="settings.it.read"
+              className={section === tab.id ? "primary active" : "secondary"}
+              onClick={() => {
+                setActiveSection(tab.id);
+                setError(undefined);
+                setResult(undefined);
+              }}
+            >
+              {tr(tab.label)}
+            </button>
+          ))}
+        </nav>
+      )}
       <LoadState {...r} retry={r.reload} />
       <button
         data-help="settings.it.recovery"
@@ -292,7 +393,7 @@ export function ITConsole({
         {tr("Reload system records")}
       </button>
       <ErrorBox error={error} />
-      {section === 'hardware' && <ITWards permissions={permissions} userId={userId} revision={revision}/>}
+      {(section === 'hardware' || section === 'wards') && <ITWards permissions={permissions} userId={userId} revision={revision}/>}
       {r.data
         ?.filter((x) => x.error)
         .map((x) => (
@@ -588,6 +689,232 @@ export function ITConsole({
             ))}
           </section>
         ))}
+      {section === "departments" && (
+        <section>
+          <h3>{tr("Hospital departments")}</h3>
+          <p className="muted">
+            {tr(
+              "Manage administrative and clinical departments, and provision operating theaters.",
+            )}
+          </p>
+          <div
+            className="actions"
+            style={{ display: "flex", gap: "0.5rem", marginBottom: "1rem" }}
+          >
+            {button("POST /admin/departments", "Add department", () =>
+              open({
+                endpoint: "POST /admin/departments",
+                path: "/admin/departments",
+                label: "Add department",
+              }),
+            )}
+            {button("POST /ot/theaters", "Provision operating theater", () =>
+              open({
+                endpoint: "POST /ot/theaters",
+                path: "/ot/theaters",
+                label: "Provision operating theater",
+              }),
+            )}
+          </div>
+          {data("/admin/departments")?.length === 0 && (
+            <Empty>{tr("No departments registered.")}</Empty>
+          )}
+          {data("/admin/departments")?.map((dept: any) => (
+            <article className="card" key={dept.department_id}>
+              <h4>
+                {dept.name} · {dept.code}
+              </h4>
+              <p>
+                {dept.is_clinical
+                  ? tr("Clinical department")
+                  : tr("Administrative department")}{" "}
+                · {tr(dept.is_active ? "Active" : "Inactive")}
+              </p>
+              <div className="actions">
+                {button(
+                  "PUT /admin/departments/{department_id}",
+                  "Edit department",
+                  () =>
+                    edit(
+                      "PUT /admin/departments/{department_id}",
+                      dept,
+                      "/admin/departments",
+                      "department_id",
+                      "Edit department",
+                    ),
+                )}
+              </div>
+            </article>
+          ))}
+        </section>
+      )}
+      {section === "settings" && (
+        <section>
+          <h3>{tr("Hospital policy settings")}</h3>
+          <p className="muted">
+            {tr(
+              "Control settings require Owner approval via change-requests (Rule rule:b9dbd0ab25); operational settings apply immediately.",
+            )}
+          </p>
+          {data("/admin/settings")?.length === 0 && (
+            <Empty>{tr("No settings returned.")}</Empty>
+          )}
+          {data("/admin/settings")?.map((s: any) => (
+            <article className="card" key={s.key}>
+              <h4>
+                {s.key}{" "}
+                {s.is_control
+                  ? `[${tr("Control Setting / Owner Approval")}]`
+                  : ""}
+              </h4>
+              <p>{s.description || tr("No description available")}</p>
+              <p>
+                <strong>{tr("Category")}:</strong> {s.category || "General"} ·{" "}
+                <strong>{tr("Current Value")}:</strong>{" "}
+                <code>{JSON.stringify(s.value)}</code>
+              </p>
+              <div className="actions">
+                {s.is_control
+                  ? button(
+                      "POST /admin/change-requests",
+                      "Request setting change",
+                      () =>
+                        open({
+                          endpoint: "POST /admin/change-requests",
+                          path: "/admin/change-requests",
+                          label: "Request policy change: " + s.key,
+                          body: {
+                            kind: "Setting",
+                            setting_key: s.key,
+                            requested_value: s.value,
+                          },
+                        }),
+                    )
+                  : button(
+                      "PUT /admin/settings/{key}",
+                      "Edit setting",
+                      () =>
+                        open({
+                          endpoint: "PUT /admin/settings/{key}",
+                          path: `/admin/settings/${encodeURIComponent(s.key)}`,
+                          label: "Edit setting: " + s.key,
+                          body: { value: s.value },
+                          target: s.key,
+                        }),
+                    )}
+              </div>
+            </article>
+          ))}
+
+          <h3 style={{ marginTop: "1.5rem" }}>
+            {tr("Access & Policy Change Requests")}
+          </h3>
+          <p className="muted">
+            {tr(
+              "Audit queue of submitted and decided configuration change requests.",
+            )}
+          </p>
+          {data("/admin/change-requests")?.length === 0 && (
+            <Empty>{tr("No change requests on file.")}</Empty>
+          )}
+          {data("/admin/change-requests")?.map((cr: any) => (
+            <article className="card" key={cr.change_request_id}>
+              <h4>
+                #{cr.change_request_id} · {cr.kind} ·{" "}
+                <span className={`badge ${cr.status?.toLowerCase()}`}>
+                  {cr.status}
+                </span>
+              </h4>
+              <p>
+                <strong>{tr("Reason")}:</strong> {cr.reason}
+              </p>
+              {cr.target_user_id && (
+                <p>
+                  <strong>{tr("Target User ID")}:</strong> {cr.target_user_id}
+                </p>
+              )}
+              {cr.setting_key && (
+                <p>
+                  <strong>{tr("Setting Key")}:</strong> {cr.setting_key}
+                </p>
+              )}
+              <div className="actions">
+                {button(
+                  "GET /admin/change-requests/{change_request_id}",
+                  "Inspect request",
+                  () => void detailChangeRequest(cr.change_request_id),
+                )}
+              </div>
+            </article>
+          ))}
+        </section>
+      )}
+      {section === "icd_releases" && (
+        <section>
+          <h3>{tr("ICD classifications")}</h3>
+          <p className="muted">
+            {tr(
+              "Manage hospital WHO ICD-10 and ICD-11 classification tables (Rule rule:e9ca3f6b5f).",
+            )}
+          </p>
+          <div className="actions" style={{ marginBottom: "1rem" }}>
+            {button("POST /icd/releases", "Upload WHO ICD-10 release", () =>
+              open({
+                endpoint: "POST /icd/releases",
+                path: "/icd/releases",
+                label: "Upload WHO ICD-10 release",
+                body: {
+                  code_system: "ICD-10",
+                  release_label: "2024-01-WHO",
+                  language: "en",
+                  licence_note:
+                    "WHO ICD-10 Hospital Master Licence Agreement",
+                  activate: true,
+                  file: "ICD-10-WHO-Release-2024.txt",
+                },
+              }),
+            )}
+          </div>
+          {data("/icd/releases")?.length === 0 && (
+            <Empty>{tr("No ICD releases loaded.")}</Empty>
+          )}
+          {data("/icd/releases")?.map((rel: any) => (
+            <article className="card" key={rel.release_id}>
+              <h4>
+                {rel.code_system} · {rel.release_label} ·{" "}
+                <span
+                  className={`badge ${rel.is_active ? "active" : "inactive"}`}
+                >
+                  {rel.is_active ? tr("Active") : tr("Inactive")}
+                </span>
+              </h4>
+              <p>
+                <strong>{tr("Language")}:</strong> {rel.language} ·{" "}
+                <strong>{tr("Loaded")}:</strong> {rel.created_at || "Built-in"}
+              </p>
+              {rel.licence_note && (
+                <p className="muted">
+                  <strong>{tr("Licence")}:</strong> {rel.licence_note}
+                </p>
+              )}
+              <div className="actions">
+                {!rel.is_active &&
+                  button(
+                    "POST /icd/releases/{release_id}/activate",
+                    "Activate release",
+                    () =>
+                      open({
+                        endpoint:
+                          "POST /icd/releases/{release_id}/activate",
+                        path: `/icd/releases/${rel.release_id}/activate`,
+                        label: "Activate release: " + rel.release_label,
+                      }),
+                  )}
+              </div>
+            </article>
+          ))}
+        </section>
+      )}
       {data("/admin/server-health") && (
         <section>
           <h3>{tr("Server health")}</h3>

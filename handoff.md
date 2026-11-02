@@ -1,20 +1,69 @@
 # Haspataal checkpoint
 Last updated: 02 November 2026, Antigravity (Codex pair), Asia/Karachi.
 
-## Active request: Phase 8 Screen 144 `it_console` (IT administration console)
+## Active request: Phase 8 Screen 145 `staff_directory` (Staff directory)
 Executing the Haspataal HMS Roadmap in dependency order along with all tests and MCP progress reporting:
 - **Phase 7 ("Finance, billing and back offices")**: 100% COMPLETE (Screens 133–142, Proposals 286–295).
 - **Phase 8 ("People, facility and IT")**:
   - Screen 143: **`onboarding_wizard`** ("Staff onboarding & credentials wizard", Position 143, 63 points, workspace `hr`) — **COMPLETED** (Proposal **296** awaiting human review on `/docs -> My progress`).
-  - Screen 144: **`it_console`** ("IT administration console", Position 144, 179 points, workspace `it_admin`) — **NEXT**.
-    - Scope: System user provisioning, credential administration, role & permission assignments, department directory management, and session monitoring.
-    - Next Concrete Actions:
-      1. Inspect `get_screen_bundle("it_console")` and save to `contracts/it_console.json`.
-      2. Review generated contracts and statutory rules for IT console.
-      3. Implement domain policy and UI extensions.
-      4. Wire into help, tasks, routing, and unit tests.
-      5. Run full verification suite (`npm run check:help`, `npm test`, `npx tsc --noEmit`, `npm run build`).
-      6. Propose progress via `propose_progress`.
+  - Screen 144: **`it_console`** ("IT administration console", Position 144, 179 points, workspace `super_admin`) — **COMPLETED** (Proposal **297** awaiting human review on `/docs -> My progress`).
+  - Screen 145: **`staff_directory`** ("Staff directory", Position 145, 56 points, workspace `hr`) — **NEXT TO BUILD**.
+    - Scope: Hospital-wide staff directory, credential status tracking, leaver/returner status transitions, and department search.
+    - Next Concrete Step: Fetch `get_screen_bundle("staff_directory")` and `get_ui_quality_brief("staff_directory")`.
+
+---
+
+### Completed Screen 144 (`it_console`) Checkpoint
+- **Workflow & Standards**: Super Admin IT infrastructure administration workspace (`it_console`, Workspace `super_admin`, Position 144, 179 points):
+  - **Users & Provisioning (`GET /admin/provisioning-queue`, `POST /admin/users`, `GET /admin/users`, `GET /admin/users/{id}`, `POST /admin/users/{id}/reset-password`, `POST /admin/users/{id}/active`, `POST /admin/users/{id}/revoke-sessions`, `GET /admin/login-events`):**
+    - Staff awaiting login queue populated by HR finalization, reloaded on realtime event `ev:hr.provisioning.requested`.
+    - Provisioning creates user accounts with initial roles. Temporary passwords and station keys displayed once in secure dialog with copy/print actions and never saved to browser storage (Rule `rule:b184a46f61`).
+    - Account deactivation/reactivation requires reason; session revocation terminates all user sessions immediately.
+    - Sign-in audit log with failures-only filtering (latest 200 events).
+  - **Roles & Permissions Governance (`GET /meta/roles`, `GET /meta/permissions`, `GET /admin/role-matrix`, `PUT /admin/roles/{role_code}/permissions`, `POST /admin/change-requests`, `rule:b9dbd0ab25`):**
+    - Interactive matrix of roles and granted system permissions.
+    - Dual-control governance: control settings (`is_control`) and privileged administrative roles (`owner`, `hospital_admin`, `billing_admin`, `accountant`, `medical_director`, `nursing_director`) require Owner approval via change requests (`PolicyChange`, `PrivilegedAccess`).
+    - Strictly forbids self-role modifications (`SELF_ROLE_CHANGE_FORBIDDEN`) and protects the last active Owner (`LAST_OWNER`).
+  - **Hardware Terminals & Devices (`GET /admin/terminals`, `POST /admin/terminals`, `PUT /admin/terminals/{terminal_id}`, `GET /admin/printers`, `POST /admin/printers`, `PUT /admin/printers/{printer_id}`, `GET /admin/badge-stations`, `PUT /admin/badge-stations/{station_id}`, `POST /admin/badge-stations/{station_id}/rotate-key`, `rule:05369643ae`, `rule:b6c546385e`):**
+    - Terminal hardware registration with cash_node mapping isolating pharmacy dispensing and OTC payments into `PharmacyCounter` drawer (Rule `rule:b6c546385e`).
+    - Barcode scanner station registration without RFID hardware (Rule `rule:05369643ae`), station key rotation dialog with once-only credential slip.
+  - **Inpatient Wards & Beds (`GET /admin/wards`, `POST /admin/wards`, `PUT /admin/wards/{ward_id}`, `POST /admin/wards/{ward_id}/beds`, `GET /admin/wards/{ward_id}/bed-labels`, `rule:d0dc21da29`, `rule:05369643ae`):**
+    - Wards directory listing open and closed wards with occupancy and waitlist indicators.
+    - Add Ward modal (`POST /admin/wards`), bulk Add Beds modal (`POST /admin/wards/{ward_id}/beds`), and Bed QR stickers modal (`GET /admin/wards/{ward_id}/bed-labels`) rendering printable SVG QR codes for cleaning kiosks (Rule `rule:05369643ae`).
+    - Guarded ward deactivation requiring 0 beds in use and 0 waitlisted patients, returning clear details on `WARD_IN_USE` refusal (Rule `rule:d0dc21da29`).
+  - **Departments & Operating Theaters (`GET /admin/departments`, `POST /admin/departments`, `PUT /admin/departments/{department_id}`, `POST /ot/theaters`):**
+    - Clinical and administrative departments directory with Add and Edit operations.
+    - Operating theater provisioning with surgical suite classification.
+  - **Hospital Policy Settings & Change Requests (`GET /admin/settings`, `PUT /admin/settings/{key}`, `POST /admin/change-requests`, `GET /admin/change-requests`, `GET /admin/change-requests/{change_request_id}`):**
+    - Policy settings directory distinguishing immediate operational keys from Owner-governed control settings.
+    - Audit queue of submitted and decided change requests with detailed snapshot inspector.
+  - **ICD Classification Tables (`GET /icd/releases`, `POST /icd/releases`, `POST /icd/releases/{release_id}/activate`, `rule:e9ca3f6b5f`):**
+    - WHO ICD-10 file upload modal with license note verification and immediate activation option.
+    - ICD-11 built-in release directory and one-click activation.
+  - **Server Telemetry & Emergency Controls (`GET /admin/first-owner`, `POST /admin/first-owner`, `GET /admin/server-health`, `PUT /admin/maintenance`, `POST /admin/kill-switch`, `rule:67877c44f8`, `rule:616f98fff0`):**
+    - Go-live First Owner creation card with 13-digit CNIC, mobile, and initial roles; disappears once completed (`FIRST_OWNER_EXISTS`, Rule `rule:67877c44f8`).
+    - Server telemetry display (Postgres, Redis/valkey, workers, disk, websockets).
+    - Maintenance mode toggle with staff coordination warnings.
+    - Catastrophic emergency kill switch with red emergency styling, mandatory incident justification, and exact typed confirmation string `'FORCE GLOBAL LOGOUT'` (Rule `rule:616f98fff0`).
+  - **Service Capability Gating:**
+    - Resolves `full`, `open_work` (provisioning and terminal maintenance only), `records` (read-only telemetry), `setup`, and `hidden` derived from server `GET /establishment views.screens`.
+- **Contracts**: `contracts/it_console.json` (44 endpoints, 1 realtime event `ev:hr.provisioning.requested`, 8 statutory rules, 64 rubric items).
+- **Domain Policies & Statutory Rules (`src/it-console-policy.ts`)**:
+  - `getItConsoleCapabilityView`, `formatCnic`, `isValidCnic`, `isValidPakMobile`, `validateFirstOwnerInput`, `validateKillSwitchInput`, `PRIVILEGED_ROLES`, `isPrivilegedRole`, `validateUserRolesChange`, `canCloseWard`, `validateTerminalInput`.
+  - Bilingual error dictionary (`IT_CONSOLE_ERROR_MESSAGES`) covering `FIRST_OWNER_EXISTS`, `SELF_ROLE_CHANGE_FORBIDDEN`, `LAST_OWNER`, `WARD_IN_USE`, `MAINTENANCE`, `KILL_SWITCH_CONFIRMATION_INVALID`, `FORBIDDEN`, `VALIDATION_ERROR`, and `NOT_FOUND`.
+- **UI Architecture (`src/screens/ITConsole.tsx`, `src/screens/ITWards.tsx`)**:
+  - Dual-mode architecture supporting standalone 9-tab navigation and embedded Settings sections.
+  - Wired into `src/App.tsx`, `scripts/check-help.mjs`, `src/foundation-catalogue.json` (44 tasks), `src/foundation-task-map.json` (44 controls mapped), and `src/foundation-help.ts` (all 7 `settings.it.*` guides mapped).
+  - Authored comprehensive handbook entry and 5 role FAQs in `src/help.ts`; bundled screenshots in `public/handbook/it_console-en.png` and `it_console-ur.png`.
+- **Verification**:
+  - Automated unit tests: `tests/it-console.test.mjs` passed (9/9 tests).
+  - Help check: `npm run check:help` passed (143 screens, 3,595 controls, 2,580 groups, 69 FAQ seeds, 30 workspace guides).
+  - Help coverage test: `tests/help-coverage.test.mjs` passed (28/28 tests across 143 screens).
+  - Full test suite: `npm test` passed (732/732 tests across all 19 test suites).
+  - TypeScript compiler: `npx tsc --noEmit` passed with 0 errors.
+  - Production build: `npm run build` succeeded (`dist/assets/index-DOl-Qnbd.js`).
+- **Proposal**:
+  - Proposal ID: **297** (status: `pending` on `/docs -> My progress`, build `index-DOl-Qnbd.js`, 63 rubric items claimed, `q:fresh_data` left pending human review).
 
 ---
 

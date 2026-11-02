@@ -10,6 +10,76 @@ export type HelpPage = {
   faqUr: [string, string][];
 };
 export const help: Record<string, HelpPage> = {
+  it_console: {
+    title: "IT administration console",
+    titleUr: "آئی ٹی ایڈمنسٹریشن کنسول",
+    purpose: "Super Admin IT infrastructure administration console covering 44 statutory endpoints across 9 system sections: (1) Staff provisioning queue and user account administration (GET /admin/provisioning-queue, POST /admin/users, POST /admin/users/{id}/reset-password, POST /admin/users/{id}/active, POST /admin/users/{id}/revoke-sessions); (2) Role matrix and privileged permission governance under Rule rule:b9dbd0ab25 preventing self-role changes and routing privileged roles to Owner change requests; (3) Initial hospital go-live First Owner creation under Rule rule:67877c44f8 with single-view temporary password slip generation (Rule rule:b184a46f61); (4) Hardware terminals, label printers, and barcode scanner stations under Rule rule:05369643ae with terminal cash_node pharmacy counter mapping (Rule rule:b6c546385e); (5) Inpatient wards and bed matrix management under Rule rule:d0dc21da29 preventing ward deactivation while beds are in use or waitlisted (WARD_IN_USE), with bulk bed additions and bed QR stickers; (6) Department taxonomy and operating theater provisioning (POST /ot/theaters); (7) System policy settings and dual-control change request audit trail; (8) WHO ICD-10 file loading and ICD-11 release activation under Rule rule:e9ca3f6b5f; and (9) Server health telemetry, maintenance mode, and emergency global kill switch under Rule rule:616f98fff0 requiring typed confirmation 'FORCE GLOBAL LOGOUT'.",
+    purposeUr: "سپر ایڈمن آئی ٹی انفراسٹرکچر ایڈمنسٹریشن کنسول جو 9 نظام کے حصوں پر مشتمل 44 قانونی اینڈ پوائنٹس کا احاطہ کرتا ہے: (1) عملے کی لاگ ان فراہمی کی قطار اور صارف اکاؤنٹ کا انتظام؛ (2) رول میٹرکس اور مراعات یافتہ اختیارات کی نگرانی قاعدہ b9dbd0ab25 کے تحت جو ذاتی کردار کی تبدیلی روکتا ہے اور مالک کی منظوری کا پابند بناتا ہے؛ (3) ہسپتال کے ابتدائی آغاز پر پہلے مالک کی تخلیق (قاعدہ 67877c44f8) اور ایک بار نظر آنے والی عارضی پاس ورڈ سلپ (قاعدہ b184a46f61)؛ (4) ہارڈویئر ٹرمینلز، لیبل پرنٹرز اور بارکوڈ اسکینر اسٹیشنز مع فارمیسی کیش نوڈ میپنگ (قاعدہ 05369643ae و b6c546385e)؛ (5) وارڈز اور بیڈز کا انتظام مع WARD_IN_USE کی توثیق (قاعدہ d0dc21da29) اور بیڈ کیو آر اسٹیکرز؛ (6) شعبہ جات اور آپریشن تھیٹرز کی فراہمی؛ (7) ہسپتال کی پالیسی ترتیبات اور تبدیلی کی درخواستوں کا آڈٹ ٹریل؛ (8) ڈبلیو ایچ او آئی سی ڈی 10 لوڈنگ اور آئی سی ڈی 11 ایکٹیویشن (قاعدہ e9ca3f6b5f)؛ اور (9) سرور صحت، مینٹیننس اور ہنگامی گلوبل لاگ آؤٹ سوئچ (قاعدہ 616f98fff0)۔",
+    steps: [
+      "Open Users & Provisioning to inspect the staff awaiting login queue submitted by HR, and provision accounts with permitted roles.",
+      "During initial hospital go-live, complete the First Owner creation card to establish the primary hospital Owner and print their temporary password slip (Rule rule:67877c44f8).",
+      "Deliver temporary passwords and station keys immediately; secure the slip as credentials are shown only once and never persisted (Rule rule:b184a46f61).",
+      "Configure hardware terminals, label printers, and barcode scanner stations, mapping pharmacy cashier terminals to PharmacyCounter cash nodes (Rule rule:05369643ae, rule:b6c546385e).",
+      "Manage inpatient wards and beds: add new wards, bulk add bed labels, print bed QR stickers for cleaning kiosks, and verify zero active beds before closing a ward (Rule rule:d0dc21da29).",
+      "Manage clinical and administrative departments, and provision operating theaters with designated surgical types (POST /ot/theaters).",
+      "Inspect system policy settings and submit change requests for control settings or privileged roles awaiting Owner approval (Rule rule:b9dbd0ab25).",
+      "Load WHO ICD-10 classification tables, activate ICD-11 releases (Rule rule:e9ca3f6b5f), monitor server telemetry, and invoke the emergency kill switch only when forced global logout is required (Rule rule:616f98fff0).",
+    ],
+    stepsUr: [
+      "صارفین اور رسائی کھولیں تاکہ ایچ آر کی طرف سے جمع کروائی گئی قطار کا معائنہ کیا جا سکے اور مجاز کرداروں کے ساتھ اکاؤنٹ تیار کیا جا سکے۔",
+      "ہسپتال کے ابتدائی آغاز پر پہلا مالک بنائیں کارڈ مکمل کریں اور عارضی پاس ورڈ پرچی پرنٹ کریں (قاعدہ 67877c44f8)۔",
+      "عارضی پاس ورڈ اور اسٹیشن کیز فوری طور پر متعلقہ شخص کے حوالے کریں کیونکہ یہ صرف ایک بار نظر آتی ہیں (قاعدہ b184a46f61)۔",
+      "ہارڈویئر ٹرمینلز، لیبل پرنٹرز اور بارکوڈ اسکینر اسٹیشنز ترتیب دیں، اور فارمیسی کیشیر پی سیز کو PharmacyCounter پر میپ کریں (قاعدہ 05369643ae و b6c546385e)۔",
+      "وارڈز اور بیڈز کا انتظام کریں: نئے وارڈز بنائیں، بیڈ لیبلز شامل کریں، کیو آر اسٹیکرز پرنٹ کریں، اور وارڈ بند کرنے سے پہلے بستروں کا خالی ہونا یقینی بنائیں (قاعدہ d0dc21da29)۔",
+      "طبی اور انتظامی شعبہ جات کا انتظام کریں، اور آپریشن تھیٹرز کے سرجیکل یونٹس نامزد کریں (POST /ot/theaters)۔",
+      "پالیسی ترتیبات کا معائنہ کریں اور کنٹرول ترتیبات یا مراعات یافتہ کرداروں کے لیے تبدیلی کی درخواستیں جمع کرائیں (قاعدہ b9dbd0ab25)۔",
+      "ڈبلیو ایچ او آئی سی ڈی 10 ٹیبلز لوڈ کریں، آئی سی ڈی 11 کو فعال کریں (قاعدہ e9ca3f6b5f)، اور ہنگامی صورت میں عالمی لاگ آؤٹ کل سوئچ استعمال کریں (قاعدہ 616f98fff0)۔",
+    ],
+    faq: [
+      [
+        "How are new user accounts provisioned from HR onboarding?",
+        "Staff submitted and finalized by HR appear in the Staff awaiting login queue (GET /admin/provisioning-queue). IT clicks 'Provision login' (POST /admin/users), enters an authorized username and assigns ordinary operational roles. A temporary password slip is generated once. Privileged roles (such as owner or director) must be requested through change requests.",
+      ],
+      [
+        "Why do role changes and control settings require an Owner change request?",
+        "Under Rule rule:b9dbd0ab25, control settings (is_control) and privileged administrative roles (Owner, Hospital Admin, Billing Admin, Accountant, Medical/Nursing Directors) require Owner authorization. Self-role modifications are strictly forbidden (SELF_ROLE_CHANGE_FORBIDDEN), and removing the last active Owner is blocked (LAST_OWNER). Changes requested by IT remain pending until approved on the Owner approval queue.",
+      ],
+      [
+        "Why was my attempt to deactivate or close a ward refused with WARD_IN_USE?",
+        "Under Rule rule:d0dc21da29, a ward cannot be deactivated while any of its beds are in use (Occupied, Reserved, Dirty, or Cleaning) or while patients remain on the admission waitlist (details.beds_in_use and details.waitlisted). All inpatients must be transferred or discharged, and beds sanitized, before the ward can be closed.",
+      ],
+      [
+        "When should the emergency kill switch be used and what are its operational effects?",
+        "Under Rule rule:616f98fff0, the kill switch (POST /admin/kill-switch) is a catastrophic emergency measure for active security breaches or severe system compromises. It invalidates every active session across all terminals, immediately forcing global logout. To prevent accidental triggers, it requires entering a mandatory incident reason and typing the exact uppercase confirmation string 'FORCE GLOBAL LOGOUT'.",
+      ],
+      [
+        "How should pharmacy dispensing PCs be mapped in the terminal hardware directory?",
+        "Under Rule rule:b6c546385e, every PC where pharmacy staff collects cash (for dispensing or OTC sales) must have its terminal record's cash_node mapped to PharmacyCounter. This ensures pharmacy revenue is strictly isolated into the pharmacy counter cash drawer and not commingled with general reception cash.",
+      ],
+    ],
+    faqUr: [
+      [
+        "ایچ آر آن بورڈنگ سے نئے صارف کے اکاؤنٹس کیسے تیار کیے جاتے ہیں؟",
+        "ایچ آر کے ذریعے حتمی شکل دیے گئے ملازمین لاگ ان کے منتظر عملے کی قطار میں ظاہر ہوتے ہیں۔ آئی ٹی ایڈمن 'Provision login' پر کلک کر کے مجاز یوزرنیم اور عام آپریشنل کردار تفویض کرتا ہے۔ عارضی پاس ورڈ سلپ صرف ایک بار بنتی ہے۔ مراعات یافتہ کرداروں کے لیے تبدیلی کی درخواست درکار ہوتی ہے۔",
+      ],
+      [
+        "کردار کی تبدیلیوں اور کنٹرول ترتیبات کے لیے مالک کی منظوری کی درخواست کیوں درکار ہے؟",
+        "قاعدہ b9dbd0ab25 کے تحت کنٹرول ترتیبات اور مراعات یافتہ انتظامی کرداروں (مالک، ہسپتال ایڈمن، بلنگ ایڈمن، اکاؤنٹنٹ، میڈیکل/نرسنگ ڈائریکٹرز) کے لیے مالک کی منظوری لازمی ہے۔ اپنی ذات کے کردار میں تبدیلی سختی سے منع ہے اور آخری مالک کو ہٹانا ناممکن ہے۔",
+      ],
+      [
+        "وارڈ کو غیر فعال یا بند کرنے کی کوشش WARD_IN_USE کے تحت کیوں مسترد ہوئی؟",
+        "قاعدہ d0dc21da29 کے تحت کوئی بھی وارڈ اس وقت تک بند نہیں کیا جا سکتا جب تک اس کا کوئی بھی بستر استعمال میں ہو یا مریض انتظار کی فہرست میں ہوں۔ تمام مریضوں کو دوسرے وارڈ منتقل یا ڈسچارج کرنا لازمی ہے۔",
+      ],
+      [
+        "ہنگامی گلوبل سوئچ کب استعمال کرنا چاہیے اور اس کے کیا اثرات ہوتے ہیں؟",
+        "قاعدہ 616f98fff0 کے تحت گلوبل کل سوئچ ہنگامی سیکیورٹی خطرات کی صورت میں تمام ٹرمینلز سے تمام فعال سیشنز کو فوری طور پر لاگ آؤٹ کر دیتا ہے۔ حادثاتی کلک سے بچنے کے لیے ایمرجنسی وجہ اور 'FORCE GLOBAL LOGOUT' کا درست اندراج لازمی ہے۔",
+      ],
+      [
+        "فارمیسی کاؤنٹر کے کمپیوٹرز کو ٹرمینل ہارڈویئر ڈائریکٹری میں کیسے میپ کیا جانا چاہیے؟",
+        "قاعدہ b6c546385e کے تحت ہر وہ کمپیوٹر جہاں ادویات کی فراہمی یا او ٹی سی فروخت کے لیے نقد رقم وصول کی جاتی ہے، اس کا کیش نوڈ لازمی طور پر PharmacyCounter پر میپ ہونا چاہیے تاکہ فارمیسی کی نقد رقم الگ محفوظ رہے۔",
+      ],
+    ],
+  },
   onboarding_wizard: {
     title: "Staff onboarding & credentials wizard",
     titleUr: "عملہ آن بورڈنگ اور اسناد وزرڈ",

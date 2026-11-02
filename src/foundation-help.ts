@@ -20,6 +20,7 @@ export const phase1Screens = [
 const approvalScreens = ["approval_queue", "charity_approvals"];
 // Coverage grows screen by screen; Phase 1 acceptance remains separate.
 export const deliveredHelpScreens = [
+  "it_console",
   "onboarding_wizard",
   "risk_dashboard",
   "owner_dashboard",
@@ -2870,7 +2871,7 @@ export const controlGuides: Record<string, ControlGuide> = {
     ],
   ),
   "settings.it.read": g(
-    ["settings"],
+    ["settings", "it_console"],
     ["System sections, user search and audit", "نظام، صارف تلاش اور لاگ"],
     [
       "Open Settings > System (IT). Your server permissions decide the available sections. Users, roles and access reads HR's submitted provisioning queue, users, role matrix and sign-in audit. Find user searches the server by name/username; Account state limits to active/inactive; up to 100 matches are shown, so refine a full list. Sign-in failures only filters the latest 200 audit events. Empty HR queue means no submitted employee needs a login; it never authorizes inventing an employee ID. Open user rereads the selected real account. Hardware reads terminal, printer and badge-station mappings; Server health reads actual database/worker/disk/realtime diagnostics. Reload system records checks the server again without discarding the open draft or repeating a change. After a stale edit, Cancel the draft, reload the records and reopen the device before editing again. Errors stay visible and do not turn into empty-success data.",
@@ -2878,7 +2879,7 @@ export const controlGuides: Record<string, ControlGuide> = {
     ],
   ),
   "settings.it.fields": g(
-    ["settings"],
+    ["settings", "it_console"],
     ["System change fields", "نظام کی تبدیلی کے خانے"],
     [
       "Select the actual HR employee before Provision login; use the server's role checklist and a unique username. New installation: Create the first Owner is offered only while the server says it is needed; enter their real authorized personnel details and extra roles. Nobody may provision SupportZeroInterface staff: they use badge stations. For devices enter the actual terminal MAC, location and printer names; choose only real department/printer mappings. Badge stations without RFID may use BarcodeScanner; station identity, location/action type and any ward/bed references must describe the actual installation. Review inactive/deactivation choices carefully. Yes/No fields with a server default always show an explicit choice; there is no blank choice that silently restores a default. The form preserves value types and server enumerations; a refused reference is an error, never a guessed replacement. Required fields and the exact emergency phrase must be complete before review.",
@@ -2886,7 +2887,7 @@ export const controlGuides: Record<string, ControlGuide> = {
     ],
   ),
   "settings.it.access": g(
-    ["settings"],
+    ["settings", "it_console"],
     [
       "Roles, permission requests and Owner handover",
       "کردار، اجازت کی درخواست اور مالک",
@@ -2896,9 +2897,9 @@ export const controlGuides: Record<string, ControlGuide> = {
       "رسائی بدلنے سے پہلے صارف کے کردار یا میٹرکس میں کردار کھولیں۔ کردار کی درخواست دوسرے صارف کی مکمل مجوزہ فہرست اور وجہ مالک کو بھیجتی ہے۔ اجازت کی درخواست بھی کردار کی مکمل فہرست بھیجتی ہے۔ منتظر یا لاگو سرور طے کرتا ہے؛ منتظر کا مطلب مالک کا انتظار ہے، مکمل رسائی نہیں۔ اپنے کردار بدلنے، آخری مالک ہٹانے یا سرور کی پابندی سے بچنے کی کوشش نہ کریں۔ مالک کے فیصلے پر اصل صارف، میٹرکس اور درخواست تازہ پڑھیں۔ استحقاقی کردار کی فراہمی منع ہو تو پہلے مجاز عام کردار دیں، پھر مالک کو درخواست کریں؛ مقامی کامیابی نہ بنائیں۔",
     ],
   ),
-  "settings.it.wards": g(["settings"],["Open and closed wards","کھلے اور بند وارڈ"],["Settings → Hardware lists all wards from GET /admin/wards. Edit the selected row or review Close/Reopen; every ward field is sent. Close is offered only with no Reserved, Occupied, Dirty or Cleaning beds and nobody waiting. WARD_IN_USE names the blocking beds and waitlist count; nothing changed. Keep the draft, reread, and arrange the real patient/cleaning workflow. Reopen returns its beds to the matrix. Unknown outcomes are inspected, never automatically replayed.","ترتیب کے ہارڈویئر حصے میں تمام کھلے اور بند وارڈ ہیں۔ منتخب وارڈ میں ترمیم یا بند/دوبارہ کھولنے کا جائزہ؛ تمام خانے ارسال ہوتے ہیں۔ بندش تب جب کوئی محفوظ، زیر استعمال یا صفائی والا بستر اور منتظر مریض نہ ہو۔ WARD_IN_USE اصل رکاوٹ و تعداد بتاتا ہے؛ تبدیلی نہیں ہوئی۔ مسودہ رکھ کر تازہ پڑھیں اور اصل مریض یا صفائی کا عمل کریں۔ دوبارہ کھولنے سے بستر واپس؛ غیر واضح نتیجہ خودکار نہ دہرائیں۔"]),
+  "settings.it.wards": g(["settings", "it_console"],["Open and closed wards","کھلے اور بند وارڈ"],["Settings → Hardware lists all wards from GET /admin/wards. Edit the selected row or review Close/Reopen; every ward field is sent. Close is offered only with no Reserved, Occupied, Dirty or Cleaning beds and nobody waiting. WARD_IN_USE names the blocking beds and waitlist count; nothing changed. Keep the draft, reread, and arrange the real patient/cleaning workflow. Reopen returns its beds to the matrix. Unknown outcomes are inspected, never automatically replayed.","ترتیب کے ہارڈویئر حصے میں تمام کھلے اور بند وارڈ ہیں۔ منتخب وارڈ میں ترمیم یا بند/دوبارہ کھولنے کا جائزہ؛ تمام خانے ارسال ہوتے ہیں۔ بندش تب جب کوئی محفوظ، زیر استعمال یا صفائی والا بستر اور منتظر مریض نہ ہو۔ WARD_IN_USE اصل رکاوٹ و تعداد بتاتا ہے؛ تبدیلی نہیں ہوئی۔ مسودہ رکھ کر تازہ پڑھیں اور اصل مریض یا صفائی کا عمل کریں۔ دوبارہ کھولنے سے بستر واپس؛ غیر واضح نتیجہ خودکار نہ دہرائیں۔"]),
   "settings.it.actions": g(
-    ["settings"],
+    ["settings", "it_console"],
     ["Review and confirm system changes", "نظام کی تبدیلی کا جائزہ اور تصدیق"],
     [
       "Opening another system action asks before discarding the current draft; Cancel keeps it, and accepting opens the other action without saving. Review system change opens a confirmation showing the exact selected target and submitted values. Go back returns to the draft; Confirm system change sends once and stays disabled while pending. Device edits reread their current mapping before replacement; a detected change requires reloading, and no atomic server-version guarantee is invented. Deactivate/reactivate requires a reason. Issue temporary password ends that user's sessions; End user's sessions also affects sessions opened since any prior attempt, so neither action is auto-repeated. Maintenance blocks non-admin work: coordinate with hospital staff first. The large red emergency-only Force global logout button opens the form; confirming the completed form ends every hospital session and requires the exact typed FORCE GLOBAL LOGOUT phrase plus a reason and confirmation. No global action is performed by merely opening or reading these panels.",
@@ -2906,7 +2907,7 @@ export const controlGuides: Record<string, ControlGuide> = {
     ],
   ),
   "settings.it.recovery": g(
-    ["settings"],
+    ["settings", "it_console"],
     ["Unknown system change outcome", "نظام کی تبدیلی کا نامعلوم نتیجہ"],
     [
       "Keep this window open after an uncertain reply. The original action/body/key is held in memory and navigation/new changes are blocked. Reload system records and open the exact user/device/request; reconcile with the responsible administrator. Only operations whose contract supplies an idempotency key offer Retry original request with the same body/key inside 24 hours. An unversioned replacement, provisioning, password reset, session revocation or station-key rotation is never blindly retried. A lost credential result cannot be recovered by repeating provisioning: inspect the account/station and require a deliberate new reset/rotation only if necessary after review. Close reviewed attempt clears the hold after supervisor reconciliation; it does not claim success or undo a change. Closing the app loses this in-memory hold.",
@@ -2914,7 +2915,7 @@ export const controlGuides: Record<string, ControlGuide> = {
     ],
   ),
   "settings.it.secret": g(
-    ["settings"],
+    ["settings", "it_console"],
     ["Once-only credential slip", "صرف ایک بار دکھنے والے خفیہ کوائف"],
     [
       "Provisioning, password reset and station-key rotation may return a credential once. Copy credential is an explicit copy to this computer's clipboard; protect and clear it after private delivery. Print credential slip opens the native print dialog for this already-confirmed result. A failed print never issues a second password/key or repeats the write: reprint the same open slip. Closing the dialog or I have secured the credential clears its in-memory display; it is never saved to browser storage, preferences or a journal. The new user must change a temporary password on first sign-in; the Owner's personnel file still needs its CNIC copy. If the first response was lost, reconcile the record with IT before a deliberate new reset, never pretend the missing password was retrieved.",

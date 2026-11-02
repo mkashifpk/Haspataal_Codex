@@ -28,17 +28,44 @@ export function ITWards({
   );
   const [draft, setDraft] = useState<it.WardListItemOut>(),
     [review, setReview] = useState<it.WardIn>(),
-    [error, setError] = useState<unknown>();
+    [error, setError] = useState<unknown>(),
+    [newWardDraft, setNewWardDraft] = useState<it.WardIn>(),
+    [addBedsModal, setAddBedsModal] = useState<{
+      ward_id: number;
+      name: string;
+      labelsText: string;
+      overflow: boolean;
+    }>(),
+    [bedLabelsModal, setBedLabelsModal] = useState<{
+      ward_id: number;
+      name: string;
+      loading: boolean;
+      data?: it.BedLabelsOut;
+      error?: unknown;
+    }>();
   const write = useClinicalWrite(
     { user_id: userId, permissions },
     "it-wards",
     async () => {
       setDraft(undefined);
       setReview(undefined);
+      setNewWardDraft(undefined);
+      setAddBedsModal(undefined);
       await list.reload();
     },
   );
   if (!allowed) return null;
+
+  async function loadBedLabels(wardId: number, name: string) {
+    setBedLabelsModal({ ward_id: wardId, name, loading: true });
+    try {
+      const data = await it.bedLabels(wardId);
+      setBedLabelsModal({ ward_id: wardId, name, loading: false, data });
+    } catch (e) {
+      setBedLabelsModal({ ward_id: wardId, name, loading: false, error: e });
+    }
+  }
+
   function confirm() {
     if (!draft) return;
     try {
@@ -70,13 +97,30 @@ export function ITWards({
           "تب بند کریں جب کوئی بستر محفوظ، زیر استعمال یا صفائی میں نہ ہو اور کوئی مریض منتظر نہ ہو۔ دوبارہ کھولنے سے وارڈ اور بستر فہرست میں لوٹتے ہیں۔",
         )}
       </p>
-      <button
-        data-help="settings.it.wards"
-        disabled={write.blocked || !!draft}
-        onClick={list.reload}
-      >
-        {t("Refresh wards", "وارڈ تازہ کریں")}
-      </button>
+      <div className="actions" style={{ display: "flex", gap: "0.5rem", marginBottom: "0.75rem" }}>
+        <button
+          data-help="settings.it.wards"
+          disabled={write.blocked || !!draft}
+          onClick={list.reload}
+        >
+          {t("Refresh wards", "وارڈ تازہ کریں")}
+        </button>
+        <button
+          data-help="settings.it.wards"
+          disabled={write.blocked || !!draft || !!newWardDraft}
+          onClick={() =>
+            setNewWardDraft({
+              code: "",
+              name: "",
+              ward_type: "General",
+              gender_restriction: "any",
+              is_active: true,
+            })
+          }
+        >
+          {t("Add new ward", "نیا وارڈ شامل کریں")}
+        </button>
+      </div>
       <LoadState {...list} retry={list.reload} />
       <ClinicalWriteFeedback write={write} />
       {!list.loading && !list.error && !list.data?.length && (
@@ -98,32 +142,63 @@ export function ITWards({
                 {w.beds_in_use.join(", ")}
               </p>
             )}
-            <button
-              data-help="settings.it.wards"
-              disabled={write.blocked || !!draft}
-              onClick={() => {
-                setDraft(structuredClone(w));
-                setError(undefined);
-                write.clearError();
-              }}
-            >
-              {t("Edit ward", "وارڈ میں ترمیم")}
-            </button>
-            <button
-              data-help="settings.it.wards"
-              disabled={
-                write.blocked || !!draft || (w.is_active && !canCloseWard(w))
-              }
-              onClick={() => {
-                setDraft({ ...w, is_active: !w.is_active });
-                setError(undefined);
-                write.clearError();
-              }}
-            >
-              {w.is_active
-                ? t("Close ward", "وارڈ بند کریں")
-                : t("Reopen ward", "وارڈ دوبارہ کھولیں")}
-            </button>
+            {w.is_active && !canCloseWard(w) && (
+              <p className="notice" style={{ color: "#d9534f", fontSize: "0.85rem", marginTop: "0.25rem" }}>
+                {t(
+                  `Cannot close ward (WARD_IN_USE): ${w.beds_in_use.length} bed(s) in use (${w.beds_in_use.join(", ")}), ${w.waitlisted} waiting.`,
+                  `وارڈ بند نہیں ہو سکتا (WARD_IN_USE): ${w.beds_in_use.length} بستر زیر استعمال (${w.beds_in_use.join("، ")}), ${w.waitlisted} منتظر۔`
+                )}
+              </p>
+            )}
+            <div className="actions" style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", marginTop: "0.5rem" }}>
+              <button
+                data-help="settings.it.wards"
+                disabled={write.blocked || !!draft}
+                onClick={() => {
+                  setDraft(structuredClone(w));
+                  setError(undefined);
+                  write.clearError();
+                }}
+              >
+                {t("Edit ward", "وارڈ میں ترمیم")}
+              </button>
+              <button
+                data-help="settings.it.wards"
+                disabled={
+                  write.blocked || !!draft || (w.is_active && !canCloseWard(w))
+                }
+                onClick={() => {
+                  setDraft({ ...w, is_active: !w.is_active });
+                  setError(undefined);
+                  write.clearError();
+                }}
+              >
+                {w.is_active
+                  ? t("Close ward", "وارڈ بند کریں")
+                  : t("Reopen ward", "وارڈ دوبارہ کھولیں")}
+              </button>
+              <button
+                data-help="settings.it.wards"
+                disabled={write.blocked || !!draft}
+                onClick={() =>
+                  setAddBedsModal({
+                    ward_id: w.ward_id,
+                    name: w.name,
+                    labelsText: "",
+                    overflow: false,
+                  })
+                }
+              >
+                {t("Add beds", "بستر شامل کریں")}
+              </button>
+              <button
+                data-help="settings.it.wards"
+                disabled={write.blocked || !!draft}
+                onClick={() => void loadBedLabels(w.ward_id, w.name)}
+              >
+                {t("Bed QR labels", "بیڈ کیو آر لیبلز")}
+              </button>
+            </div>
           </article>
         ))}
       {draft && (
@@ -274,6 +349,304 @@ export function ITWards({
                 {t("Confirm ward change", "وارڈ تبدیلی کی تصدیق")}
               </button>
             </>
+          )}
+        </Modal>
+      )}
+      {newWardDraft && (
+        <Modal
+          title={t("Add new ward", "نیا وارڈ شامل کریں")}
+          onClose={() => {
+            if (!write.blocked) setNewWardDraft(undefined);
+          }}
+        >
+          <ErrorBox error={error} />
+          <ClinicalWriteFeedback write={write} />
+          <fieldset disabled={write.blocked} data-unsaved="true">
+            <Field label={t("Ward code", "وارڈ کوڈ")}>
+              <input
+                data-help="settings.it.wards"
+                value={newWardDraft.code}
+                maxLength={20}
+                placeholder="e.g. ICU-A"
+                onChange={(e) =>
+                  setNewWardDraft({ ...newWardDraft, code: e.target.value })
+                }
+              />
+            </Field>
+            <Field label={t("Ward name", "وارڈ کا نام")}>
+              <input
+                data-help="settings.it.wards"
+                value={newWardDraft.name}
+                maxLength={100}
+                placeholder="e.g. Intensive Care Unit A"
+                onChange={(e) =>
+                  setNewWardDraft({ ...newWardDraft, name: e.target.value })
+                }
+              />
+            </Field>
+            <Field label={t("Ward type", "وارڈ کی قسم")}>
+              <select
+                data-help="settings.it.wards"
+                value={newWardDraft.ward_type}
+                onChange={(e) =>
+                  setNewWardDraft({
+                    ...newWardDraft,
+                    ward_type: e.target.value as any,
+                  })
+                }
+              >
+                {[
+                  "General",
+                  "Private",
+                  "SemiPrivate",
+                  "ICU",
+                  "CCU",
+                  "NICU",
+                  "Surgical",
+                  "Pediatric",
+                  "Maternity",
+                  "Emergency",
+                  "Isolation",
+                  "Other",
+                ].map((x) => (
+                  <option key={x}>{x}</option>
+                ))}
+              </select>
+            </Field>
+            <Field label={t("Gender restriction", "صنف کی پابندی")}>
+              <select
+                data-help="settings.it.wards"
+                value={newWardDraft.gender_restriction}
+                onChange={(e) =>
+                  setNewWardDraft({
+                    ...newWardDraft,
+                    gender_restriction: e.target.value as any,
+                  })
+                }
+              >
+                {["any", "male", "female"].map((x) => (
+                  <option key={x}>{x}</option>
+                ))}
+              </select>
+            </Field>
+            <label style={{ display: "block", margin: "0.75rem 0" }}>
+              <input
+                data-help="settings.it.wards"
+                type="checkbox"
+                checked={newWardDraft.is_active}
+                onChange={(e) =>
+                  setNewWardDraft({
+                    ...newWardDraft,
+                    is_active: e.target.checked,
+                  })
+                }
+              />
+              {" "}{t("Ward active on creation", "تشکیل پر وارڈ فعال ہے")}
+            </label>
+            <div className="actions" style={{ display: "flex", gap: "0.5rem" }}>
+              <button
+                data-help="settings.it.wards"
+                onClick={() => setNewWardDraft(undefined)}
+              >
+                {t("Cancel", "منسوخ")}
+              </button>
+              <button
+                data-help="settings.it.wards"
+                className="primary"
+                disabled={
+                  write.blocked ||
+                  newWardDraft.code.trim().length < 2 ||
+                  newWardDraft.name.trim().length < 2
+                }
+                onClick={() =>
+                  write.start(
+                    {
+                      method: "POST",
+                      path: "/admin/wards",
+                      body: newWardDraft,
+                      permission: "admin.ward.manage",
+                      protection: "reconcile",
+                      reconcilePath: "/admin/wards",
+                      label: "Add ward",
+                    },
+                    async () => {
+                      setNewWardDraft(undefined);
+                      await list.reload();
+                    },
+                  )
+                }
+              >
+                {t("Create ward", "وارڈ بنائیں")}
+              </button>
+            </div>
+          </fieldset>
+        </Modal>
+      )}
+      {addBedsModal && (
+        <Modal
+          title={t(
+            `Add beds to ${addBedsModal.name}`,
+            `${addBedsModal.name} میں بیڈز شامل کریں`,
+          )}
+          onClose={() => {
+            if (!write.blocked) setAddBedsModal(undefined);
+          }}
+        >
+          <ErrorBox error={error} />
+          <ClinicalWriteFeedback write={write} />
+          <fieldset disabled={write.blocked} data-unsaved="true">
+            <Field
+              label={t(
+                "Bed labels (comma or line separated)",
+                "بیڈ لیبلز (کوما یا نئی لائن سے الگ)",
+              )}
+            >
+              <textarea
+                data-help="settings.it.wards"
+                rows={4}
+                value={addBedsModal.labelsText}
+                placeholder="e.g. B-01, B-02, B-03"
+                onChange={(e) =>
+                  setAddBedsModal({
+                    ...addBedsModal,
+                    labelsText: e.target.value,
+                  })
+                }
+              />
+            </Field>
+            <label style={{ display: "block", margin: "0.75rem 0" }}>
+              <input
+                data-help="settings.it.wards"
+                type="checkbox"
+                checked={addBedsModal.overflow}
+                onChange={(e) =>
+                  setAddBedsModal({
+                    ...addBedsModal,
+                    overflow: e.target.checked,
+                  })
+                }
+              />
+              {" "}{t("Allow overflow placement", "اضافی گنجائش کی اجازت دیں")}
+            </label>
+            <div className="actions" style={{ display: "flex", gap: "0.5rem" }}>
+              <button
+                data-help="settings.it.wards"
+                onClick={() => setAddBedsModal(undefined)}
+              >
+                {t("Cancel", "منسوخ")}
+              </button>
+              <button
+                data-help="settings.it.wards"
+                className="primary"
+                disabled={
+                  write.blocked ||
+                  addBedsModal.labelsText
+                    .split(/[\n,]+/)
+                    .map((s) => s.trim())
+                    .filter(Boolean).length === 0
+                }
+                onClick={() => {
+                  const labels = addBedsModal.labelsText
+                    .split(/[\n,]+/)
+                    .map((s) => s.trim())
+                    .filter(Boolean);
+                  write.start(
+                    {
+                      method: "POST",
+                      path: `/admin/wards/${addBedsModal.ward_id}/beds`,
+                      body: {
+                        labels,
+                        is_overflow_allowed: addBedsModal.overflow,
+                      },
+                      permission: "admin.ward.manage",
+                      protection: "reconcile",
+                      reconcilePath: "/admin/wards",
+                      label: "Add beds",
+                    },
+                    async () => {
+                      setAddBedsModal(undefined);
+                      await list.reload();
+                    },
+                  );
+                }}
+              >
+                {t("Add beds", "بیڈز شامل کریں")}
+              </button>
+            </div>
+          </fieldset>
+        </Modal>
+      )}
+      {bedLabelsModal && (
+        <Modal
+          title={t(
+            `Bed QR Stickers — ${bedLabelsModal.name}`,
+            `بیڈ کیو آر اسٹیکرز — ${bedLabelsModal.name}`,
+          )}
+          onClose={() => setBedLabelsModal(undefined)}
+        >
+          <p>
+            {t(
+              "Print bed QR stickers for cleaning kiosks and bedside scanning (Rule rule:05369643ae).",
+              "صفائی کیوسک اور بستر کے قریب اسکیننگ کے لیے بیڈ کیو آر اسٹیکرز پرنٹ کریں (قاعدہ rule:05369643ae)۔",
+            )}
+          </p>
+          {bedLabelsModal.loading && (
+            <p>{t("Loading bed labels...", "بیڈ لیبلز لوڈ ہو رہے ہیں...")}</p>
+          )}
+          {Boolean(bedLabelsModal.error) && <ErrorBox error={bedLabelsModal.error} />}
+          {bedLabelsModal.data && (
+            <div>
+              <div
+                className="actions"
+                style={{
+                  display: "flex",
+                  gap: "0.5rem",
+                  marginBottom: "1rem",
+                }}
+              >
+                <button
+                  data-help="settings.it.wards"
+                  className="primary"
+                  onClick={() => window.print()}
+                >
+                  {t("Print bed stickers", "بیڈ اسٹیکرز پرنٹ کریں")}
+                </button>
+                <button
+                  data-help="settings.it.wards"
+                  onClick={() => setBedLabelsModal(undefined)}
+                >
+                  {t("Close", "بند کریں")}
+                </button>
+              </div>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))",
+                  gap: "1rem",
+                  maxHeight: "60vh",
+                  overflowY: "auto",
+                }}
+              >
+                {bedLabelsModal.data.labels.map((lbl) => (
+                  <div
+                    key={lbl.bed_id}
+                    className="card"
+                    style={{ textAlign: "center", padding: "0.5rem" }}
+                  >
+                    <strong>{lbl.label}</strong>
+                    <div
+                      style={{
+                        width: "120px",
+                        height: "120px",
+                        margin: "0.5rem auto",
+                      }}
+                      dangerouslySetInnerHTML={{ __html: lbl.qr_svg }}
+                    />
+                    <code style={{ fontSize: "0.75rem" }}>{lbl.code}</code>
+                  </div>
+                ))}
+              </div>
+            </div>
           )}
         </Modal>
       )}

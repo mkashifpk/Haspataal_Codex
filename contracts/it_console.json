@@ -1,7 +1,7 @@
 {
   "screen_id": "it_console",
-  "contract_fingerprint": "5f8bd8feecd1d68f7841",
-  "knowledge_revision": "893766fb0e066973",
+  "contract_fingerprint": "f253171154eef6044fa2",
+  "knowledge_revision": "bbf3ad4e2e48dc00",
   "delivery_gate": {
     "required": true,
     "status": "required",
@@ -39,8 +39,8 @@
       }
     ],
     "zoom": {
-      "min_pct": 100,
-      "max_pct": 250,
+      "min_pct": 100.0,
+      "max_pct": 250.0,
       "reset_pct": 100,
       "keys": [
         "Ctrl + or Ctrl = (zoom in)",
@@ -55,7 +55,7 @@
   },
   "ui_quality": {
     "source": "frontend-docs/guides/16-ui-quality.md",
-    "standard_revision": "5980e5c3b1817f4e",
+    "standard_revision": "7795bdfe5246755d",
     "context": {
       "workspace": "super_admin",
       "purpose": "Provisioning queue | role matrix | terminals/printers/badge stations | server health | kill switch.",
@@ -382,7 +382,7 @@
     "title": "Super Admin (IT)",
     "workspace": "super_admin",
     "phase": "P8",
-    "position": 143,
+    "position": 144,
     "points": 179,
     "capabilities": [
       "realtime",
@@ -399,6 +399,14 @@
         "kind": "data",
         "evidence": "it receives hr.provisioning.requested, which onboarding_wizard's calls emitted in the tests",
         "ordering": true,
+        "forward": false
+      },
+      {
+        "from": "it_console",
+        "to": "staff_directory",
+        "kind": "data",
+        "evidence": "it receives hr.provisioning.requested, which staff_directory's calls emitted in the tests",
+        "ordering": false,
         "forward": false
       }
     ],
@@ -422,6 +430,13 @@
         "to": "it_console",
         "kind": "data_candidate",
         "evidence": "it reads icd/releases, which POST /icd/releases on it_console creates",
+        "ordering": false
+      },
+      {
+        "from": "cssd_stock",
+        "to": "it_console",
+        "kind": "data_candidate",
+        "evidence": "it reads ot/theaters, which POST /ot/theaters on it_console creates",
         "ordering": false
       },
       {
@@ -1609,8 +1624,8 @@
             "type": "integer",
             "required": false,
             "nullable": true,
-            "minimum": 30,
-            "maximum": 400
+            "minimum": 30.0,
+            "maximum": 400.0
           },
           {
             "pointer": "/driver",
@@ -1931,6 +1946,19 @@
       "service_gates": [],
       "idempotency_key": false,
       "errors": [
+        {
+          "code": "CLINICAL_LICENSE_REQUIRED",
+          "http_status": 409,
+          "message": "Clinical staff need a PMDC/PNC licence number and document.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "POST /api/v1/hr/employees/{employee_id}/submit"
+        },
         {
           "code": "EMPLOYEE_ALREADY_HAS_ACCOUNT",
           "http_status": 409,
@@ -3225,8 +3253,8 @@
             "type": "integer",
             "required": false,
             "nullable": true,
-            "minimum": 30,
-            "maximum": 400
+            "minimum": 30.0,
+            "maximum": 400.0
           },
           {
             "pointer": "/driver",
@@ -5282,6 +5310,20 @@
           "details_from": "POST /api/v1/admin/departments"
         },
         {
+          "code": "ICD_SYSTEM_NOT_LOADED",
+          "http_status": 409,
+          "message": "No code list of this classification is loaded (ICD-10: load the hospital's licensed WHO file first).",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "code_system"
+          ],
+          "details_from": "GET /api/v1/icd/codes"
+        },
+        {
           "code": "LAST_OWNER",
           "http_status": 409,
           "message": "The last active Owner keeps the Owner role.",
@@ -5680,6 +5722,7 @@
         "priority": "normal",
         "presentation": null,
         "emitted_by_operations": [
+          "POST /hr/employees/{employee_id}/status",
           "POST /hr/employees/{employee_id}/submit"
         ],
         "refresh": [
@@ -6255,6 +6298,7 @@
       "ur": "سپر ایڈمن"
     },
     "error_messages": {
+      "CLINICAL_LICENSE_REQUIRED": "Clinical staff need a PMDC/PNC licence number and document.",
       "DEMO_ACCOUNT_PROTECTED": "DEV servers only: a demo account is shared by every developer, so its password, roles and active state stay as seeded. Use a user of your own.",
       "EMPLOYEE_ALREADY_HAS_ACCOUNT": "The employee already has an active login.",
       "EMPLOYEE_NOT_READY_FOR_PROVISIONING": "HR must submit the employee profile first.",
@@ -6297,6 +6341,1684 @@
       "super_admin"
     ],
     "note": "page_for: the roles whose GET /meta/handbook lists this screen (its menu entry and F1 page; for a user with that one role, every service Active). A partial role outside page_for only makes some of these calls from screens of its own: never offer it this screen. Build the menu from the logged-in user's GET /meta/handbook."
+  },
+  "test_plan": {
+    "screen": "it_console",
+    "title": "Super Admin (IT)",
+    "cases": [
+      {
+        "id": "case:GET /admin/users/{user_id}",
+        "call": "GET /api/v1/admin/users/{user_id}",
+        "summary": "User with roles, lockout and session info",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "VALIDATION_ERROR"
+        ],
+        "as_one_of": [
+          "super_admin"
+        ]
+      },
+      {
+        "id": "case:POST /admin/users/{user_id}/revoke-sessions",
+        "call": "POST /api/v1/admin/users/{user_id}/revoke-sessions",
+        "summary": "Log a user out everywhere",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "VALIDATION_ERROR"
+        ],
+        "as_one_of": [
+          "super_admin"
+        ]
+      },
+      {
+        "id": "case:GET /admin/login-events",
+        "call": "GET /api/v1/admin/login-events",
+        "summary": "Login successes / failures (security review)",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "VALIDATION_ERROR"
+        ],
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "super_admin"
+        ]
+      },
+      {
+        "id": "case:GET /admin/departments",
+        "call": "GET /api/v1/admin/departments",
+        "summary": "Departments",
+        "denied": {
+          "as_one_of": [],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [],
+        "as_one_of": [
+          "any logged-in user"
+        ]
+      },
+      {
+        "id": "case:PUT /admin/departments/{department_id}",
+        "call": "PUT /api/v1/admin/departments/{department_id}",
+        "summary": "Update a department",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "VALIDATION_ERROR"
+        ],
+        "as_one_of": [
+          "super_admin"
+        ]
+      },
+      {
+        "id": "case:PUT /admin/wards/{ward_id}",
+        "call": "PUT /api/v1/admin/wards/{ward_id}",
+        "summary": "Update a ward",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "NOT_FOUND",
+          "VALIDATION_ERROR",
+          "WARD_IN_USE"
+        ],
+        "as_one_of": [
+          "super_admin"
+        ]
+      },
+      {
+        "id": "case:PUT /admin/printers/{printer_id}",
+        "call": "PUT /api/v1/admin/printers/{printer_id}",
+        "summary": "Update a printer",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "NOT_FOUND",
+          "VALIDATION_ERROR"
+        ],
+        "as_one_of": [
+          "super_admin"
+        ]
+      },
+      {
+        "id": "case:PUT /admin/terminals/{terminal_id}",
+        "call": "PUT /api/v1/admin/terminals/{terminal_id}",
+        "summary": "Update a terminal mapping",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "VALIDATION_ERROR"
+        ],
+        "as_one_of": [
+          "super_admin"
+        ]
+      },
+      {
+        "id": "case:GET /meta/roles",
+        "call": "GET /api/v1/meta/roles",
+        "summary": "Roles with their default workspace and permissions",
+        "denied": {
+          "as_one_of": [],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [],
+        "as_one_of": [
+          "any logged-in user"
+        ]
+      },
+      {
+        "id": "case:GET /meta/permissions",
+        "call": "GET /api/v1/meta/permissions",
+        "summary": "Permission catalogue",
+        "denied": {
+          "as_one_of": [],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [],
+        "as_one_of": [
+          "any logged-in user"
+        ]
+      },
+      {
+        "id": "case:GET /admin/provisioning-queue",
+        "call": "GET /api/v1/admin/provisioning-queue",
+        "summary": "Employees HR submitted, awaiting a login (pane 1)",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [],
+        "as_one_of": [
+          "super_admin"
+        ]
+      },
+      {
+        "id": "case:POST /admin/users",
+        "call": "POST /api/v1/admin/users",
+        "summary": "Provision a login (temporary password shown ONCE)",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "CLINICAL_LICENSE_REQUIRED",
+          "EMPLOYEE_ALREADY_HAS_ACCOUNT",
+          "EMPLOYEE_NOT_READY_FOR_PROVISIONING",
+          "FORBIDDEN",
+          "PRIVILEGED_ACCESS_APPROVAL_REQUIRED",
+          "REFERENCE_NOT_FOUND",
+          "VALIDATION_ERROR",
+          "ZERO_INTERFACE_STAFF_NO_LOGIN"
+        ],
+        "as_one_of": [
+          "super_admin"
+        ]
+      },
+      {
+        "id": "case:GET /admin/users",
+        "call": "GET /api/v1/admin/users",
+        "summary": "Search users",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "VALIDATION_ERROR"
+        ],
+        "as_one_of": [
+          "super_admin"
+        ]
+      },
+      {
+        "id": "case:PUT /admin/users/{user_id}/roles",
+        "call": "PUT /api/v1/admin/users/{user_id}/roles",
+        "summary": "Replace a user's roles (effective on the next request)",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "DEMO_ACCOUNT_PROTECTED",
+          "FORBIDDEN",
+          "LAST_OWNER",
+          "NOT_FOUND",
+          "PRIVILEGED_ACCESS_APPROVAL_REQUIRED",
+          "SELF_ROLE_CHANGE_FORBIDDEN",
+          "VALIDATION_ERROR"
+        ],
+        "as_one_of": [
+          "super_admin"
+        ]
+      },
+      {
+        "id": "case:POST /admin/users/{user_id}/reset-password",
+        "call": "POST /api/v1/admin/users/{user_id}/reset-password",
+        "summary": "Issue a new temporary password (all sessions end)",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "DEMO_ACCOUNT_PROTECTED",
+          "NOT_FOUND",
+          "VALIDATION_ERROR"
+        ],
+        "as_one_of": [
+          "super_admin"
+        ]
+      },
+      {
+        "id": "case:POST /admin/users/{user_id}/active",
+        "call": "POST /api/v1/admin/users/{user_id}/active",
+        "summary": "Deactivate (sessions revoked) / reactivate + unlock",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "DEMO_ACCOUNT_PROTECTED",
+          "NOT_FOUND",
+          "VALIDATION_ERROR"
+        ],
+        "as_one_of": [
+          "super_admin"
+        ]
+      },
+      {
+        "id": "case:GET /admin/role-matrix",
+        "call": "GET /api/v1/admin/role-matrix",
+        "summary": "Roles × permissions (pane 2)",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [],
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "super_admin"
+        ]
+      },
+      {
+        "id": "case:PUT /admin/roles/{role_code}/permissions",
+        "call": "PUT /api/v1/admin/roles/{role_code}/permissions",
+        "summary": "Replace a role's permissions (pushed live to all sessions)",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "NOT_FOUND",
+          "PRIVILEGED_ACCESS_APPROVAL_REQUIRED",
+          "VALIDATION_ERROR"
+        ],
+        "as_one_of": [
+          "super_admin"
+        ]
+      },
+      {
+        "id": "case:GET /admin/terminals",
+        "call": "GET /api/v1/admin/terminals",
+        "summary": "Terminal → location / printers / cash node mapping",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [],
+        "as_one_of": [
+          "super_admin"
+        ]
+      },
+      {
+        "id": "case:POST /admin/terminals",
+        "call": "POST /api/v1/admin/terminals",
+        "summary": "Map a terminal (by MAC) to a location and its printers",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "VALIDATION_ERROR"
+        ],
+        "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)",
+        "as_one_of": [
+          "super_admin"
+        ]
+      },
+      {
+        "id": "case:GET /admin/printers",
+        "call": "GET /api/v1/admin/printers",
+        "summary": "Printers",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [],
+        "as_one_of": [
+          "super_admin"
+        ]
+      },
+      {
+        "id": "case:POST /admin/printers",
+        "call": "POST /api/v1/admin/printers",
+        "summary": "Add a printer",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "VALIDATION_ERROR"
+        ],
+        "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)",
+        "as_one_of": [
+          "super_admin"
+        ]
+      },
+      {
+        "id": "case:GET /admin/badge-stations",
+        "call": "GET /api/v1/admin/badge-stations",
+        "summary": "Badge stations: RFID readers, barcode-scanner kiosks, biometric terminals (last seen)",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [],
+        "as_one_of": [
+          "super_admin"
+        ]
+      },
+      {
+        "id": "case:PUT /admin/badge-stations/{station_id}",
+        "call": "PUT /api/v1/admin/badge-stations/{station_id}",
+        "summary": "Register / update a badge station",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "VALIDATION_ERROR"
+        ],
+        "as_one_of": [
+          "super_admin"
+        ]
+      },
+      {
+        "id": "case:POST /admin/badge-stations/{station_id}/rotate-key",
+        "call": "POST /api/v1/admin/badge-stations/{station_id}/rotate-key",
+        "summary": "Issue a new station key (shown ONCE)",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "VALIDATION_ERROR"
+        ],
+        "as_one_of": [
+          "super_admin"
+        ]
+      },
+      {
+        "id": "case:GET /admin/wards/{ward_id}/bed-labels",
+        "call": "GET /api/v1/admin/wards/{ward_id}/bed-labels",
+        "summary": "Bed QR stickers for ward-level bed-cleaning stations (label printer)",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "VALIDATION_ERROR"
+        ],
+        "as_one_of": [
+          "super_admin"
+        ]
+      },
+      {
+        "id": "case:GET /admin/server-health",
+        "call": "GET /api/v1/admin/server-health",
+        "summary": "CPU/RAM, DB pool, last backup, worker heartbeat (pane 4, read-only)",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [],
+        "as_one_of": [
+          "super_admin"
+        ]
+      },
+      {
+        "id": "case:GET /admin/settings",
+        "call": "GET /api/v1/admin/settings",
+        "summary": "Hospital policy settings",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [],
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "super_admin"
+        ]
+      },
+      {
+        "id": "case:PUT /admin/settings/{key}",
+        "call": "PUT /api/v1/admin/settings/{key}",
+        "summary": "Change a policy setting (type-checked, audited)",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "FORBIDDEN",
+          "ICD_SYSTEM_NOT_LOADED",
+          "NOT_FOUND",
+          "POLICY_CHANGE_APPROVAL_REQUIRED",
+          "VALIDATION_ERROR"
+        ],
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "super_admin"
+        ]
+      },
+      {
+        "id": "case:PUT /admin/maintenance",
+        "call": "PUT /api/v1/admin/maintenance",
+        "summary": "Maintenance mode on/off (non-admins get 503 MAINTENANCE)",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "FORBIDDEN",
+          "VALIDATION_ERROR"
+        ],
+        "as_one_of": [
+          "super_admin"
+        ]
+      },
+      {
+        "id": "case:POST /admin/kill-switch",
+        "call": "POST /api/v1/admin/kill-switch",
+        "summary": "FORCE GLOBAL TOKEN EXPIRY — every session in the hospital ends (emergency)",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "FORBIDDEN",
+          "VALIDATION_ERROR"
+        ],
+        "as_one_of": [
+          "super_admin"
+        ]
+      },
+      {
+        "id": "case:POST /admin/departments",
+        "call": "POST /api/v1/admin/departments",
+        "summary": "Add a department",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "FORBIDDEN",
+          "VALIDATION_ERROR"
+        ],
+        "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)",
+        "as_one_of": [
+          "super_admin"
+        ]
+      },
+      {
+        "id": "case:POST /admin/wards",
+        "call": "POST /api/v1/admin/wards",
+        "summary": "Add a ward",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "VALIDATION_ERROR"
+        ],
+        "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)",
+        "as_one_of": [
+          "super_admin"
+        ]
+      },
+      {
+        "id": "case:POST /admin/wards/{ward_id}/beds",
+        "call": "POST /api/v1/admin/wards/{ward_id}/beds",
+        "summary": "Add beds to a ward (bulk)",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "NOT_FOUND",
+          "VALIDATION_ERROR"
+        ],
+        "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)",
+        "as_one_of": [
+          "super_admin"
+        ]
+      },
+      {
+        "id": "case:GET /admin/wards",
+        "call": "GET /api/v1/admin/wards",
+        "summary": "Wards, open and closed",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [],
+        "as_one_of": [
+          "super_admin"
+        ]
+      },
+      {
+        "id": "case:POST /ot/theaters",
+        "call": "POST /api/v1/ot/theaters",
+        "summary": "Provision an operating theater (Super Admin)",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "VALIDATION_ERROR"
+        ],
+        "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)",
+        "as_one_of": [
+          "super_admin"
+        ]
+      },
+      {
+        "id": "case:GET /icd/releases",
+        "call": "GET /api/v1/icd/releases",
+        "summary": "The ICD code lists loaded",
+        "denied": {
+          "as_one_of": [],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [],
+        "as_one_of": [
+          "any logged-in user"
+        ]
+      },
+      {
+        "id": "case:POST /icd/releases",
+        "call": "POST /api/v1/icd/releases",
+        "summary": "Load an ICD code list (the hospital's licensed ICD-10, or a newer WHO ICD-11 release)",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "FORBIDDEN",
+          "ICD_IMPORT_INVALID",
+          "ICD_RELEASE_EXISTS",
+          "VALIDATION_ERROR"
+        ],
+        "as_one_of": [
+          "quality_officer",
+          "super_admin"
+        ]
+      },
+      {
+        "id": "case:POST /icd/releases/{release_id}/activate",
+        "call": "POST /api/v1/icd/releases/{release_id}/activate",
+        "summary": "Make a release the active list of its classification",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "VALIDATION_ERROR"
+        ],
+        "as_one_of": [
+          "quality_officer",
+          "super_admin"
+        ]
+      },
+      {
+        "id": "case:GET /admin/first-owner",
+        "call": "GET /api/v1/admin/first-owner",
+        "summary": "Whether this installation still needs its first Owner",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [],
+        "as_one_of": [
+          "super_admin"
+        ]
+      },
+      {
+        "id": "case:POST /admin/first-owner",
+        "call": "POST /api/v1/admin/first-owner",
+        "summary": "Create the installation's first Owner (once; temporary password shown ONCE)",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "FIRST_OWNER_EXISTS",
+          "FORBIDDEN",
+          "VALIDATION_ERROR"
+        ],
+        "as_one_of": [
+          "super_admin"
+        ]
+      },
+      {
+        "id": "case:POST /admin/change-requests",
+        "call": "POST /api/v1/admin/change-requests",
+        "summary": "Request a control-setting or privileged-access change (applied at once for an Owner)",
+        "denied": {
+          "as_one_of": [],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "DEMO_ACCOUNT_PROTECTED",
+          "FORBIDDEN",
+          "ICD_SYSTEM_NOT_LOADED",
+          "LAST_OWNER",
+          "REFERENCE_NOT_FOUND",
+          "SELF_ROLE_CHANGE_FORBIDDEN",
+          "VALIDATION_ERROR"
+        ],
+        "double_submit": "send the same Idempotency-Key twice: one effect, the same answer (idempotent-replay header)",
+        "as_one_of": [
+          "any logged-in user"
+        ]
+      },
+      {
+        "id": "case:GET /admin/change-requests",
+        "call": "GET /api/v1/admin/change-requests",
+        "summary": "Control-setting and privileged-access change requests",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "VALIDATION_ERROR"
+        ],
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "super_admin"
+        ]
+      },
+      {
+        "id": "case:GET /admin/change-requests/{change_request_id}",
+        "call": "GET /api/v1/admin/change-requests/{change_request_id}",
+        "summary": "One control-setting or privileged-access change request",
+        "denied": {
+          "as_one_of": [
+            "accountant",
+            "admissions_officer",
+            "anaesthetist",
+            "billing_admin",
+            "cashier"
+          ],
+          "expect": "403 FORBIDDEN"
+        },
+        "errors_to_handle": [
+          "NOT_FOUND",
+          "VALIDATION_ERROR"
+        ],
+        "as_one_of": [
+          "clinic_director",
+          "hospital_admin",
+          "hospital_director",
+          "owner",
+          "super_admin"
+        ]
+      }
+    ],
+    "service_cases": [],
+    "delivery_gate": {
+      "required": true,
+      "status": "required",
+      "progress_reporting": {
+        "required": true,
+        "submit": "propose_progress",
+        "verify": "progress_proposals",
+        "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+      },
+      "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+      "compulsory": [
+        {
+          "id": "q:f1_help",
+          "label": "F1 contextual help",
+          "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+          "points": 2
+        },
+        {
+          "id": "q:role_faq",
+          "label": "Complete role-specific FAQs",
+          "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+          "points": 3
+        },
+        {
+          "id": "q:zoom",
+          "label": "Keyboard zoom: 100-250% only",
+          "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+          "points": 2
+        },
+        {
+          "id": "q:fresh_data",
+          "label": "Human review with newly created data",
+          "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+          "points": 4
+        }
+      ],
+      "zoom": {
+        "min_pct": 100.0,
+        "max_pct": 250.0,
+        "reset_pct": 100,
+        "keys": [
+          "Ctrl + or Ctrl = (zoom in)",
+          "Ctrl - (zoom out)",
+          "Ctrl 0 (reset to 100 %)",
+          "Command on macOS"
+        ],
+        "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+      },
+      "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+      "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+    },
+    "handbook_page": "screens/it_console",
+    "workspace_guide": "get_handbook_outline('super_admin')",
+    "realtime": [
+      {
+        "event": "hr.provisioning.requested",
+        "check": "the screen refreshes without polling"
+      }
+    ],
+    "acceptance_rules": [
+      "Go-live: while GET /admin/first-owner says needed, the console opens on 'Create the first Owner' (POST /admin/first-owner: name, CNIC, mobile, and the roles besides owner, usually hr_admin; in a small clinic also the owner's clinical role). It is offered once: FIRST_OWNER_EXISTS afterwards, and the step disappears. Print the temporary password slip for the Owner; tell them their personnel file still needs the CNIC copy.",
+      "Temporary passwords and station keys are shown ONCE — offer print/copy, never store them client-side.",
+      "No RFID hardware: register BarcodeScanner stations (a PC or tablet with a USB scanner or camera running the badge-station kiosk page); for ward cleaning kiosks print the bed QR stickers (bed-labels).",
+      "Kill switch: big red button, typed confirmation 'FORCE GLOBAL LOGOUT', clearly marked emergency-only.",
+      "ICD code lists: load the hospital's licensed WHO ICD-10 file here or in the Quality workspace (icd_code_lists); the WHO ICD-11 list ships with the server and updates with it.",
+      "Control settings (is_control) and privileged roles (owner, hospital admin, billing admin, accountant, the directors) are an Owner's: an Owner's own change applies at once; IT's goes to POST /admin/change-requests and waits for an Owner in the approvals queue (PolicyChange, PrivilegedAccess); show the request as pending, never as done. Nobody changes their own roles (SELF_ROLE_CHANGE_FORBIDDEN); the last Owner keeps the role (LAST_OWNER). Maintenance mode is IT's (admin.maintenance.manage).",
+      "Terminal cash_node: map every PC where the pharmacy takes cash (dispensing, OTC) to PharmacyCounter; the pharmacy's cash goes into no other counter's drawer. A PC shared by the reception and the pharmacy is mapped PharmacyCounter: the reception's cash may go into that drawer too.",
+      "Wards: list them with GET /admin/wards (open and closed) and edit with PUT /admin/wards/{ward_id}, every field sent. Closing a ward (is_active false) takes its beds off the bed matrix until it is reopened; offer it only when beds_in_use is empty and waitlisted is 0, and on WARD_IN_USE show details.beds_in_use and details.waitlisted (decisions 55)."
+    ],
+    "demo_accounts": "demo_accounts() lists a login per role; sandbox_call runs each case on the DEV server"
+  },
+  "handbook": {
+    "page": "screens/it_console",
+    "screen_id": "it_console",
+    "title": "Super Admin (IT)",
+    "purpose": "Provisioning queue | role matrix | terminals/printers/badge stations | server health | kill switch.",
+    "tasks": [
+      {
+        "id": "it_console::GET /admin/users/{user_id}",
+        "task": "User with roles, lockout and session info",
+        "call": "GET /admin/users/{user_id}",
+        "is_action": false,
+        "permissions": [
+          "admin.user.manage",
+          "admin.user.provision"
+        ],
+        "permissions_mode": "any",
+        "access": null
+      },
+      {
+        "id": "it_console::POST /admin/users/{user_id}/revoke-sessions",
+        "task": "Log a user out everywhere",
+        "call": "POST /admin/users/{user_id}/revoke-sessions",
+        "is_action": true,
+        "permissions": [
+          "admin.user.manage"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "it_console::GET /admin/login-events",
+        "task": "Login successes / failures (security review)",
+        "call": "GET /admin/login-events",
+        "is_action": false,
+        "permissions": [
+          "admin.audit.view",
+          "admin.user.manage"
+        ],
+        "permissions_mode": "any",
+        "access": null
+      },
+      {
+        "id": "it_console::GET /admin/departments",
+        "task": "Departments",
+        "call": "GET /admin/departments",
+        "is_action": false,
+        "permissions": [],
+        "permissions_mode": "all",
+        "access": "any logged-in user"
+      },
+      {
+        "id": "it_console::PUT /admin/departments/{department_id}",
+        "task": "Update a department",
+        "call": "PUT /admin/departments/{department_id}",
+        "is_action": true,
+        "permissions": [
+          "admin.department.manage"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "it_console::PUT /admin/wards/{ward_id}",
+        "task": "Update a ward",
+        "call": "PUT /admin/wards/{ward_id}",
+        "is_action": true,
+        "permissions": [
+          "admin.ward.manage"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "it_console::PUT /admin/printers/{printer_id}",
+        "task": "Update a printer",
+        "call": "PUT /admin/printers/{printer_id}",
+        "is_action": true,
+        "permissions": [
+          "admin.printer.manage"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "it_console::PUT /admin/terminals/{terminal_id}",
+        "task": "Update a terminal mapping",
+        "call": "PUT /admin/terminals/{terminal_id}",
+        "is_action": true,
+        "permissions": [
+          "admin.terminal.manage"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "it_console::GET /meta/roles",
+        "task": "Roles with their default workspace and permissions",
+        "call": "GET /meta/roles",
+        "is_action": false,
+        "permissions": [],
+        "permissions_mode": "all",
+        "access": "any logged-in user"
+      },
+      {
+        "id": "it_console::GET /meta/permissions",
+        "task": "Permission catalogue",
+        "call": "GET /meta/permissions",
+        "is_action": false,
+        "permissions": [],
+        "permissions_mode": "all",
+        "access": "any logged-in user"
+      },
+      {
+        "id": "it_console::GET /admin/provisioning-queue",
+        "task": "Employees HR submitted, awaiting a login (pane 1)",
+        "call": "GET /admin/provisioning-queue",
+        "is_action": false,
+        "permissions": [
+          "admin.user.provision"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "it_console::POST /admin/users",
+        "task": "Provision a login (temporary password shown ONCE)",
+        "call": "POST /admin/users",
+        "is_action": true,
+        "permissions": [
+          "admin.user.provision"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "it_console::GET /admin/users",
+        "task": "Search users",
+        "call": "GET /admin/users",
+        "is_action": false,
+        "permissions": [
+          "admin.user.manage",
+          "admin.user.provision"
+        ],
+        "permissions_mode": "any",
+        "access": null
+      },
+      {
+        "id": "it_console::PUT /admin/users/{user_id}/roles",
+        "task": "Replace a user's roles (effective on the next request)",
+        "call": "PUT /admin/users/{user_id}/roles",
+        "is_action": true,
+        "permissions": [
+          "admin.user.manage"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "it_console::POST /admin/users/{user_id}/reset-password",
+        "task": "Issue a new temporary password (all sessions end)",
+        "call": "POST /admin/users/{user_id}/reset-password",
+        "is_action": true,
+        "permissions": [
+          "admin.user.manage"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "it_console::POST /admin/users/{user_id}/active",
+        "task": "Deactivate (sessions revoked) / reactivate + unlock",
+        "call": "POST /admin/users/{user_id}/active",
+        "is_action": true,
+        "permissions": [
+          "admin.user.manage"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "it_console::GET /admin/role-matrix",
+        "task": "Roles × permissions (pane 2)",
+        "call": "GET /admin/role-matrix",
+        "is_action": false,
+        "permissions": [
+          "admin.roles.view",
+          "admin.role_matrix.update"
+        ],
+        "permissions_mode": "any",
+        "access": null
+      },
+      {
+        "id": "it_console::PUT /admin/roles/{role_code}/permissions",
+        "task": "Replace a role's permissions (pushed live to all sessions)",
+        "call": "PUT /admin/roles/{role_code}/permissions",
+        "is_action": true,
+        "permissions": [
+          "admin.role_matrix.update"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "it_console::GET /admin/terminals",
+        "task": "Terminal → location / printers / cash node mapping",
+        "call": "GET /admin/terminals",
+        "is_action": false,
+        "permissions": [
+          "admin.terminal.manage"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "it_console::POST /admin/terminals",
+        "task": "Map a terminal (by MAC) to a location and its printers",
+        "call": "POST /admin/terminals",
+        "is_action": true,
+        "permissions": [
+          "admin.terminal.manage"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "it_console::GET /admin/printers",
+        "task": "Printers",
+        "call": "GET /admin/printers",
+        "is_action": false,
+        "permissions": [
+          "admin.printer.manage",
+          "admin.terminal.manage"
+        ],
+        "permissions_mode": "any",
+        "access": null
+      },
+      {
+        "id": "it_console::POST /admin/printers",
+        "task": "Add a printer",
+        "call": "POST /admin/printers",
+        "is_action": true,
+        "permissions": [
+          "admin.printer.manage"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "it_console::GET /admin/badge-stations",
+        "task": "Badge stations: RFID readers, barcode-scanner kiosks, biometric terminals (last seen)",
+        "call": "GET /admin/badge-stations",
+        "is_action": false,
+        "permissions": [
+          "admin.badge_station.manage"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "it_console::PUT /admin/badge-stations/{station_id}",
+        "task": "Register / update a badge station",
+        "call": "PUT /admin/badge-stations/{station_id}",
+        "is_action": true,
+        "permissions": [
+          "admin.badge_station.manage"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "it_console::POST /admin/badge-stations/{station_id}/rotate-key",
+        "task": "Issue a new station key (shown ONCE)",
+        "call": "POST /admin/badge-stations/{station_id}/rotate-key",
+        "is_action": true,
+        "permissions": [
+          "admin.badge_station.manage"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "it_console::GET /admin/wards/{ward_id}/bed-labels",
+        "task": "Bed QR stickers for ward-level bed-cleaning stations (label printer)",
+        "call": "GET /admin/wards/{ward_id}/bed-labels",
+        "is_action": false,
+        "permissions": [
+          "admin.badge_station.manage",
+          "admin.ward.manage"
+        ],
+        "permissions_mode": "any",
+        "access": null
+      },
+      {
+        "id": "it_console::GET /admin/server-health",
+        "task": "CPU/RAM, DB pool, last backup, worker heartbeat (pane 4, read-only)",
+        "call": "GET /admin/server-health",
+        "is_action": false,
+        "permissions": [
+          "admin.server_health.view"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "it_console::GET /admin/settings",
+        "task": "Hospital policy settings",
+        "call": "GET /admin/settings",
+        "is_action": false,
+        "permissions": [
+          "admin.settings.manage"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "it_console::PUT /admin/settings/{key}",
+        "task": "Change a policy setting (type-checked, audited)",
+        "call": "PUT /admin/settings/{key}",
+        "is_action": true,
+        "permissions": [
+          "admin.settings.manage"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "it_console::PUT /admin/maintenance",
+        "task": "Maintenance mode on/off (non-admins get 503 MAINTENANCE)",
+        "call": "PUT /admin/maintenance",
+        "is_action": true,
+        "permissions": [
+          "admin.maintenance.manage"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "it_console::POST /admin/kill-switch",
+        "task": "FORCE GLOBAL TOKEN EXPIRY — every session in the hospital ends (emergency)",
+        "call": "POST /admin/kill-switch",
+        "is_action": true,
+        "permissions": [
+          "admin.kill_switch"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "it_console::POST /admin/departments",
+        "task": "Add a department",
+        "call": "POST /admin/departments",
+        "is_action": true,
+        "permissions": [
+          "admin.department.manage"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "it_console::POST /admin/wards",
+        "task": "Add a ward",
+        "call": "POST /admin/wards",
+        "is_action": true,
+        "permissions": [
+          "admin.ward.manage"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "it_console::POST /admin/wards/{ward_id}/beds",
+        "task": "Add beds to a ward (bulk)",
+        "call": "POST /admin/wards/{ward_id}/beds",
+        "is_action": true,
+        "permissions": [
+          "admin.ward.manage"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "it_console::GET /admin/wards",
+        "task": "Wards, open and closed",
+        "call": "GET /admin/wards",
+        "is_action": false,
+        "permissions": [
+          "admin.ward.manage"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "it_console::POST /ot/theaters",
+        "task": "Provision an operating theater (Super Admin)",
+        "call": "POST /ot/theaters",
+        "is_action": true,
+        "permissions": [
+          "ot.theater.provision"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "it_console::GET /icd/releases",
+        "task": "The ICD code lists loaded",
+        "call": "GET /icd/releases",
+        "is_action": false,
+        "permissions": [],
+        "permissions_mode": "all",
+        "access": "any logged-in user"
+      },
+      {
+        "id": "it_console::POST /icd/releases",
+        "task": "Load an ICD code list (the hospital's licensed ICD-10, or a newer WHO ICD-11 release)",
+        "call": "POST /icd/releases",
+        "is_action": true,
+        "permissions": [
+          "icd.release.manage"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "it_console::POST /icd/releases/{release_id}/activate",
+        "task": "Make a release the active list of its classification",
+        "call": "POST /icd/releases/{release_id}/activate",
+        "is_action": true,
+        "permissions": [
+          "icd.release.manage"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "it_console::GET /admin/first-owner",
+        "task": "Whether this installation still needs its first Owner",
+        "call": "GET /admin/first-owner",
+        "is_action": false,
+        "permissions": [
+          "admin.user.provision"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "it_console::POST /admin/first-owner",
+        "task": "Create the installation's first Owner (once; temporary password shown ONCE)",
+        "call": "POST /admin/first-owner",
+        "is_action": true,
+        "permissions": [
+          "admin.user.provision"
+        ],
+        "permissions_mode": "all",
+        "access": null
+      },
+      {
+        "id": "it_console::POST /admin/change-requests",
+        "task": "Request a control-setting or privileged-access change (applied at once for an Owner)",
+        "call": "POST /admin/change-requests",
+        "is_action": true,
+        "permissions": [],
+        "permissions_mode": "all",
+        "access": "admin.settings.manage for a setting, admin.user.manage for a user's roles, admin.role_matrix.update for a role's permissions (the service checks)"
+      },
+      {
+        "id": "it_console::GET /admin/change-requests",
+        "task": "Control-setting and privileged-access change requests",
+        "call": "GET /admin/change-requests",
+        "is_action": false,
+        "permissions": [
+          "admin.settings.manage",
+          "admin.user.manage",
+          "admin.role_matrix.update",
+          "approval.policy_change.approve",
+          "approval.privileged_access.approve"
+        ],
+        "permissions_mode": "any",
+        "access": null
+      },
+      {
+        "id": "it_console::GET /admin/change-requests/{change_request_id}",
+        "task": "One control-setting or privileged-access change request",
+        "call": "GET /admin/change-requests/{change_request_id}",
+        "is_action": false,
+        "permissions": [
+          "admin.settings.manage",
+          "admin.user.manage",
+          "admin.role_matrix.update",
+          "approval.policy_change.approve",
+          "approval.privileged_access.approve"
+        ],
+        "permissions_mode": "any",
+        "access": null
+      }
+    ],
+    "rules_to_explain": [
+      "Go-live: while GET /admin/first-owner says needed, the console opens on 'Create the first Owner' (POST /admin/first-owner: name, CNIC, mobile, and the roles besides owner, usually hr_admin; in a small clinic also the owner's clinical role). It is offered once: FIRST_OWNER_EXISTS afterwards, and the step disappears. Print the temporary password slip for the Owner; tell them their personnel file still needs the CNIC copy.",
+      "Temporary passwords and station keys are shown ONCE — offer print/copy, never store them client-side.",
+      "No RFID hardware: register BarcodeScanner stations (a PC or tablet with a USB scanner or camera running the badge-station kiosk page); for ward cleaning kiosks print the bed QR stickers (bed-labels).",
+      "Kill switch: big red button, typed confirmation 'FORCE GLOBAL LOGOUT', clearly marked emergency-only.",
+      "ICD code lists: load the hospital's licensed WHO ICD-10 file here or in the Quality workspace (icd_code_lists); the WHO ICD-11 list ships with the server and updates with it.",
+      "Control settings (is_control) and privileged roles (owner, hospital admin, billing admin, accountant, the directors) are an Owner's: an Owner's own change applies at once; IT's goes to POST /admin/change-requests and waits for an Owner in the approvals queue (PolicyChange, PrivilegedAccess); show the request as pending, never as done. Nobody changes their own roles (SELF_ROLE_CHANGE_FORBIDDEN); the last Owner keeps the role (LAST_OWNER). Maintenance mode is IT's (admin.maintenance.manage).",
+      "Terminal cash_node: map every PC where the pharmacy takes cash (dispensing, OTC) to PharmacyCounter; the pharmacy's cash goes into no other counter's drawer. A PC shared by the reception and the pharmacy is mapped PharmacyCounter: the reception's cash may go into that drawer too.",
+      "Wards: list them with GET /admin/wards (open and closed) and edit with PUT /admin/wards/{ward_id}, every field sent. Closing a ward (is_active false) takes its beds off the bed matrix until it is reopened; offer it only when beds_in_use is empty and waitlisted is 0, and on WARD_IN_USE show details.beds_in_use and details.waitlisted (decisions 55)."
+    ],
+    "updates_by_itself_on": [
+      "hr.provisioning.requested"
+    ],
+    "errors_the_user_can_meet": [
+      {
+        "code": "CLINICAL_LICENSE_REQUIRED",
+        "message": "Clinical staff need a PMDC/PNC licence number and document.",
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      },
+      {
+        "code": "DEMO_ACCOUNT_PROTECTED",
+        "message": "DEV servers only: a demo account is shared by every developer, so its password, roles and active state stay as seeded. Use a user of your own.",
+        "ui_action": "Explain and hide the action (check x-permissions)."
+      },
+      {
+        "code": "EMPLOYEE_ALREADY_HAS_ACCOUNT",
+        "message": "The employee already has an active login.",
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      },
+      {
+        "code": "EMPLOYEE_NOT_READY_FOR_PROVISIONING",
+        "message": "HR must submit the employee profile first.",
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      },
+      {
+        "code": "FIRST_OWNER_EXISTS",
+        "message": "The first Owner exists already: new owners come through HR and IT.",
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      },
+      {
+        "code": "FORBIDDEN",
+        "message": "You do not have permission to do this.",
+        "ui_action": "Explain and hide the action (check x-permissions)."
+      },
+      {
+        "code": "ICD_IMPORT_INVALID",
+        "message": "The file is not a code list of this classification.",
+        "ui_action": "Show field errors from details.fields / the message."
+      },
+      {
+        "code": "ICD_RELEASE_EXISTS",
+        "message": "This release of the classification is already loaded.",
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      },
+      {
+        "code": "ICD_SYSTEM_NOT_LOADED",
+        "message": "No code list of this classification is loaded (ICD-10: load the hospital's licensed WHO file first).",
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      },
+      {
+        "code": "LAST_OWNER",
+        "message": "The last active Owner keeps the Owner role.",
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      },
+      {
+        "code": "NOT_FOUND",
+        "message": "The requested resource was not found.",
+        "ui_action": "Say 'not found'; refresh the list."
+      },
+      {
+        "code": "POLICY_CHANGE_APPROVAL_REQUIRED",
+        "message": "This is a control setting: an Owner changes it or approves the change (POST /admin/change-requests).",
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      },
+      {
+        "code": "PRIVILEGED_ACCESS_APPROVAL_REQUIRED",
+        "message": "Privileged access is granted by an Owner or with an Owner's approval (POST /admin/change-requests).",
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      },
+      {
+        "code": "REFERENCE_NOT_FOUND",
+        "message": "A referenced record does not exist.",
+        "ui_action": "Show field errors from details.fields / the message."
+      },
+      {
+        "code": "SELF_ROLE_CHANGE_FORBIDDEN",
+        "message": "Nobody changes their own roles.",
+        "ui_action": "Explain and hide the action (check x-permissions)."
+      },
+      {
+        "code": "VALIDATION_ERROR",
+        "message": "The request is invalid.",
+        "ui_action": "Show field errors from details.fields / the message."
+      },
+      {
+        "code": "WARD_IN_USE",
+        "message": "The ward still has patients in its beds or on its waitlist: move or discharge them first.",
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      },
+      {
+        "code": "ZERO_INTERFACE_STAFF_NO_LOGIN",
+        "message": "Support staff use a badge at badge stations and never receive logins.",
+        "ui_action": "Show the message and refresh the affected data (another terminal changed it)."
+      }
+    ],
+    "sections": [
+      "Purpose and audience",
+      "Step by step (one per task, where to click)",
+      "Every control and its effects",
+      "States and feedback",
+      "Messages, mistakes and recovery",
+      "Language and visual examples",
+      "Related help and delivery"
+    ],
+    "requirement_ids": [
+      "S1",
+      "S2",
+      "S3",
+      "S4",
+      "S5",
+      "S6",
+      "S7"
+    ],
+    "delivery": "F1 and contextual screen Help",
+    "requirements": [
+      {
+        "id": "S1",
+        "title": "Purpose and audience",
+        "instruction": "Explain what this screen accomplishes, when to use it, who uses it and how to open it. State the patient, visit,\nshift or other context the user must verify. Name the expected result in staff language."
+      },
+      {
+        "id": "S2",
+        "title": "Step by step (one per task, where to click)",
+        "instruction": "For every supported task give prerequisites, permissions or approvals, exact navigation and control labels,\nwhat to enter or select, validation, the ordered steps and how to recognize completion. Include demo screenshots,\nprinted output and the next task or handover. Link to the corresponding workspace FAQ answer."
+      },
+      {
+        "id": "S3",
+        "title": "Every control and its effects",
+        "instruction": "Maintain a control inventory covering buttons, fields, selectors, tabs, menus, filters, sorting, scanners, shortcuts,\ndialogs and navigation. For each user-facing control explain its label and purpose, when it is available, required\ninput, immediate effect, whether it saves or only changes the view, any confirmation, and what cancellation does.\nDescribe resulting data/state changes, notifications, printed output and consequences for other staff where relevant.\nInclude controls without API calls. Group repeated controls only when their behaviour is genuinely identical."
+      },
+      {
+        "id": "S4",
+        "title": "States and feedback",
+        "instruction": "Explain loading, no results, pending approval, success, stale data, denied actions and unavailable services. Describe\nautomatic realtime updates and how staff recognize that displayed information has changed. Explain disabled controls\nand how to meet their prerequisites. Document only states and effects the implemented UI and backend support."
+      },
+      {
+        "id": "S5",
+        "title": "Messages, mistakes and recovery",
+        "instruction": "Explain the messages staff can encounter, why an action is refused and the permitted next step. Cover corrections,\nduplicate clicks, a lost reply, concurrent changes, leaving unsaved work, session expiry, lost connection and printer\nor scanner problems where applicable. Say what may have been saved, what to check before retrying and whom to contact.\nNever promise unsupported undo or automatic offline submission. Use staff wording, not API paths or JSON."
+      },
+      {
+        "id": "S6",
+        "title": "Language and visual examples",
+        "instruction": "Supply English and Urdu pages matching the app's labels and reading direction, with legible demo-data screenshots\nfor each task and no real patient information. Keep terminology consistent across UI, FAQs and screenshots. Record\ntranslation review status; a draft must not be represented as approved clinical wording."
+      },
+      {
+        "id": "S7",
+        "title": "Related help and delivery",
+        "instruction": "Link to the role's workspace guide, related tasks and handovers. F1 and contextual Help must open this screen's page.\nVerify offline access, search, deep links, print-friendly output and the server's permission filtering. Update the\npage, control inventory and FAQ links in the same release as the UI; retain the review evidence required by Q6."
+      }
+    ],
+    "workspace_guide": "get_handbook_outline('super_admin')"
   },
   "workflows": [
     {
@@ -6346,164 +8068,15 @@
     }
   ],
   "scenarios": [],
-  "decisions": [
-    {
-      "id": "H02",
-      "question": "Digits in the Urdu UI and printouts: Latin 0-9 or Extended Arabic-Indic ۰-۹.",
-      "owner": [
-        "vendor"
-      ],
-      "affects": [
-        "every screen in Urdu"
-      ],
-      "meanwhile": "Latin digits; identifiers, doses and money stay left to right."
-    },
-    {
-      "id": "H03",
-      "question": "How dates and times are shown on screen, and a 12- or 24-hour clock.",
-      "owner": [
-        "vendor",
-        "clinical_lead"
-      ],
-      "affects": [
-        "every screen"
-      ],
-      "meanwhile": "The server's print format (e.g. 27-Sep-2026) and the hospital time zone."
-    },
-    {
-      "id": "H04",
-      "question": "Money on screen: decimals shown, and digit grouping (1,234,567 or 12,34,567).",
-      "owner": [
-        "vendor"
-      ],
-      "affects": [
-        "every screen with money"
-      ],
-      "meanwhile": "The amounts as the API sends them, with the currency setting."
-    },
-    {
-      "id": "H08",
-      "question": "Who writes and signs off the Urdu text of the UI, above all clinical and consent wording.",
-      "owner": [
-        "vendor",
-        "translator",
-        "clinical_lead"
-      ],
-      "affects": [
-        "every screen in Urdu"
-      ],
-      "meanwhile": "Urdu you add is a draft: mark it so (the interview bank's pattern: a draft until a native speaker reviews it)."
-    },
-    {
-      "id": "H09",
-      "question": "One design system shared by every frontend team (who authors and approves it), or each team's own.",
-      "owner": [
-        "vendor",
-        "frontend_lead"
-      ],
-      "affects": [
-        "every screen"
-      ],
-      "meanwhile": "Each team designs within the backend's constraints: themes Light and DarkHighContrast, zoom 100-250 %, Noto Nastaliq Urdu, status shown as text and icon, never colour alone. Follow the vendor's design principles (frontend guide 18, get_design_principles)."
-    },
-    {
-      "id": "H10",
-      "question": "How each realtime event is shown (interrupt, attention, inform, silent), alert sounds and which terminals play them. Only Code Red (interrupt), the licence and maintenance banners and the logout on session.revoked are prescribed (the event catalogue's `presentation`).",
-      "owner": [
-        "clinical_lead",
-        "vendor"
-      ],
-      "affects": [
-        "every screen with realtime events"
-      ],
-      "meanwhile": "Code Red interrupts; every other event updates the screen and, at most, a dismissible notice. `priority` is the delivery urgency, not a presentation rule."
-    },
-    {
-      "id": "H12",
-      "question": "Which workspaces run on web, Android and iOS, which cannot read a MAC address, discover the server by UDP or print silently; or are cash and printing Windows-only.",
-      "owner": [
-        "vendor",
-        "backend"
-      ],
-      "affects": [
-        "my_cash_shift",
-        "registration",
-        "every screen that prints"
-      ],
-      "meanwhile": "The guides describe the Windows (Electron) terminal; tell your developer when a screen needs a capability your platform lacks."
-    },
-    {
-      "id": "H18",
-      "question": "Noto Nastaliq Urdu everywhere, or the more compact Naskh in dense tables.",
-      "owner": [
-        "vendor",
-        "frontend_lead"
-      ],
-      "affects": [
-        "every table in Urdu"
-      ],
-      "meanwhile": "Noto Nastaliq Urdu, as the guides require."
-    },
-    {
-      "id": "H19",
-      "question": "Allergies: the patient record keeps free text, so it cannot tell \"no known allergies\" (asserted by a clinician) from \"not recorded\". Should it?",
-      "owner": [
-        "clinical_lead",
-        "backend"
-      ],
-      "affects": [
-        "every screen with a patient banner"
-      ],
-      "meanwhile": "Show the recorded text as recorded; an empty value is \"not recorded\", never \"none\"."
-    },
-    {
-      "id": "H20",
-      "question": "May unsaved form input be kept on the terminal (which fields, encrypted, for how long)?",
-      "owner": [
-        "vendor",
-        "hospital"
-      ],
-      "affects": [
-        "every form"
-      ],
-      "meanwhile": "In memory only; never a second checker's password."
-    },
-    {
-      "id": "H22",
-      "question": "Which documents may print on an unregistered terminal's default printer (sensitive A4 documents).",
-      "owner": [
-        "hospital",
-        "vendor"
-      ],
-      "affects": [
-        "every screen that prints"
-      ],
-      "meanwhile": "As the printing guide says: the hint, then the default printer."
-    },
-    {
-      "id": "H24",
-      "question": "Who approves frontend performance targets, alert thresholds and escalation timers.",
-      "owner": [
-        "vendor",
-        "clinical_lead"
-      ],
-      "affects": [
-        "every screen"
-      ],
-      "meanwhile": "The server's own settings (e.g. critical_result_communicate_minutes)."
-    }
-  ],
   "unknowns": [
     {
       "what": "decision H02",
       "owner": [
         "vendor"
       ],
-      "question": "Digits in the Urdu UI and printouts: Latin 0-9 or Extended Arabic-Indic ۰-۹.",
       "affects": [
         "every screen in Urdu"
-      ],
-      "meanwhile": "Latin digits; identifiers, doses and money stay left to right."
+      ]
     },
     {
       "what": "decision H03",
@@ -6511,22 +8084,18 @@
         "vendor",
         "clinical_lead"
       ],
-      "question": "How dates and times are shown on screen, and a 12- or 24-hour clock.",
       "affects": [
         "every screen"
-      ],
-      "meanwhile": "The server's print format (e.g. 27-Sep-2026) and the hospital time zone."
+      ]
     },
     {
       "what": "decision H04",
       "owner": [
         "vendor"
       ],
-      "question": "Money on screen: decimals shown, and digit grouping (1,234,567 or 12,34,567).",
       "affects": [
         "every screen with money"
-      ],
-      "meanwhile": "The amounts as the API sends them, with the currency setting."
+      ]
     },
     {
       "what": "decision H08",
@@ -6535,11 +8104,9 @@
         "translator",
         "clinical_lead"
       ],
-      "question": "Who writes and signs off the Urdu text of the UI, above all clinical and consent wording.",
       "affects": [
         "every screen in Urdu"
-      ],
-      "meanwhile": "Urdu you add is a draft: mark it so (the interview bank's pattern: a draft until a native speaker reviews it)."
+      ]
     },
     {
       "what": "decision H09",
@@ -6547,11 +8114,9 @@
         "vendor",
         "frontend_lead"
       ],
-      "question": "One design system shared by every frontend team (who authors and approves it), or each team's own.",
       "affects": [
         "every screen"
-      ],
-      "meanwhile": "Each team designs within the backend's constraints: themes Light and DarkHighContrast, zoom 100-250 %, Noto Nastaliq Urdu, status shown as text and icon, never colour alone. Follow the vendor's design principles (frontend guide 18, get_design_principles)."
+      ]
     },
     {
       "what": "decision H10",
@@ -6559,11 +8124,9 @@
         "clinical_lead",
         "vendor"
       ],
-      "question": "How each realtime event is shown (interrupt, attention, inform, silent), alert sounds and which terminals play them. Only Code Red (interrupt), the licence and maintenance banners and the logout on session.revoked are prescribed (the event catalogue's `presentation`).",
       "affects": [
         "every screen with realtime events"
-      ],
-      "meanwhile": "Code Red interrupts; every other event updates the screen and, at most, a dismissible notice. `priority` is the delivery urgency, not a presentation rule."
+      ]
     },
     {
       "what": "decision H12",
@@ -6571,13 +8134,11 @@
         "vendor",
         "backend"
       ],
-      "question": "Which workspaces run on web, Android and iOS, which cannot read a MAC address, discover the server by UDP or print silently; or are cash and printing Windows-only.",
       "affects": [
         "my_cash_shift",
         "registration",
         "every screen that prints"
-      ],
-      "meanwhile": "The guides describe the Windows (Electron) terminal; tell your developer when a screen needs a capability your platform lacks."
+      ]
     },
     {
       "what": "decision H18",
@@ -6585,11 +8146,9 @@
         "vendor",
         "frontend_lead"
       ],
-      "question": "Noto Nastaliq Urdu everywhere, or the more compact Naskh in dense tables.",
       "affects": [
         "every table in Urdu"
-      ],
-      "meanwhile": "Noto Nastaliq Urdu, as the guides require."
+      ]
     },
     {
       "what": "decision H19",
@@ -6597,11 +8156,9 @@
         "clinical_lead",
         "backend"
       ],
-      "question": "Allergies: the patient record keeps free text, so it cannot tell \"no known allergies\" (asserted by a clinician) from \"not recorded\". Should it?",
       "affects": [
         "every screen with a patient banner"
-      ],
-      "meanwhile": "Show the recorded text as recorded; an empty value is \"not recorded\", never \"none\"."
+      ]
     },
     {
       "what": "decision H20",
@@ -6609,11 +8166,9 @@
         "vendor",
         "hospital"
       ],
-      "question": "May unsaved form input be kept on the terminal (which fields, encrypted, for how long)?",
       "affects": [
         "every form"
-      ],
-      "meanwhile": "In memory only; never a second checker's password."
+      ]
     },
     {
       "what": "decision H22",
@@ -6621,11 +8176,9 @@
         "hospital",
         "vendor"
       ],
-      "question": "Which documents may print on an unregistered terminal's default printer (sensitive A4 documents).",
       "affects": [
         "every screen that prints"
-      ],
-      "meanwhile": "As the printing guide says: the hint, then the default printer."
+      ]
     },
     {
       "what": "decision H24",
@@ -6633,16 +8186,13 @@
         "vendor",
         "clinical_lead"
       ],
-      "question": "Who approves frontend performance targets, alert thresholds and escalation timers.",
       "affects": [
         "every screen"
-      ],
-      "meanwhile": "The server's own settings (e.g. critical_result_communicate_minutes)."
+      ]
     }
   ],
   "omitted_sections": [
-    "test_plan",
-    "handbook",
+    "decisions",
     "examples",
     "schemas"
   ],
