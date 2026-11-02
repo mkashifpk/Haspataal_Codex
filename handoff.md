@@ -1,7 +1,7 @@
 # Haspataal checkpoint
 Last updated: 02 November 2026, Antigravity (Codex pair), Asia/Karachi.
 
-## Active request: Phase 7 Screen 140 `diagnostic_partners` (Partner laboratories and imaging centres)
+## Active request: Phase 7 Screen 141 `owner_dashboard` (Hospital owner dashboard)
 Executing the Haspataal HMS Roadmap in dependency order along with all tests and MCP progress reporting:
 - **Phase 6 ("Theatre and sterile supply")**: 100% COMPLETE (Screens 109–132, Proposals 262–285).
 - **Phase 7 ("Finance, billing and back offices")**:
@@ -11,17 +11,57 @@ Executing the Haspataal HMS Roadmap in dependency order along with all tests and
   - Screen 136: **`medication_safety_setup`** ("High-alert drugs & look-alike/sound-alike rules", Position 136, 54 points, workspace `pharmacy_admin`) — **COMPLETED** (commit `c7f683b`, Proposal **289** awaiting human review on `/docs -> My progress`).
   - Screen 137: **`drug_recalls`** ("Drug recall campaigns & quarantine management", Position 137, 63 points, workspace `pharmacy_admin`) — **COMPLETED** (commit `ba0b999`, Proposal **290** awaiting human review on `/docs -> My progress`).
   - Screen 138: **`pharmacy_storage_log`** ("Medicine storage log & temperature monitoring", Position 138, 51 points, workspace `pharmacy_admin`) — **COMPLETED** (commit `580e15a`, Proposal **291** awaiting human review on `/docs -> My progress`).
-  - Screen 139: **`lab_admin`** ("Lab catalogue, panels, instruments & reagent inventory", Position 139, 76 points, workspace `lab_admin`) — **COMPLETED** (Proposal **292** awaiting human review on `/docs -> My progress`).
-  - Screen 140: **`diagnostic_partners`** ("Partner laboratories and imaging centres", Position 140, 44 points, workspace `lab_admin`) — **NEXT**.
-    - Scope: Partner laboratories & imaging centers register under MOU (MSDS AAC 6, 14), PHC registration, accreditation (PNAC) / PNRA licence, agreed turnarounds, 30-day renewal warnings, and active dispatch controls.
+  - Screen 139: **`lab_admin`** ("Lab catalogue, panels, instruments & reagent inventory", Position 139, 76 points, workspace `lab_admin`) — **COMPLETED** (commit `7491e82`, Proposal **292** awaiting human review on `/docs -> My progress`).
+  - Screen 140: **`diagnostic_partners`** ("Partner laboratories and imaging centres", Position 140, 44 points, workspace `lab_admin`) — **COMPLETED** (Proposal **293** awaiting human review on `/docs -> My progress`).
+  - Screen 141: **`owner_dashboard`** ("Hospital owner dashboard", Position 141, 41 points, workspace `owner`) — **NEXT**.
+    - Scope: Executive revenue & collection metrics, occupancy rates, department performance, statutory clinical indicators, and hospital leadership overview.
     - Next Concrete Actions:
-      1. Inspect `get_screen_bundle("diagnostic_partners")` and save to `contracts/diagnostic_partners.json`.
+      1. Inspect `get_screen_bundle("owner_dashboard")` and save to `contracts/owner_dashboard.json`.
       2. Generate TypeScript contracts via `generate_typescript`.
-      3. Create domain policies in `src/diagnostic-partners-policy.ts`.
-      4. Implement UI `src/screens/DiagnosticPartners.tsx`.
+      3. Create domain policies in `src/owner-dashboard-policy.ts`.
+      4. Implement UI `src/screens/OwnerDashboard.tsx`.
       5. Wire into `src/App.tsx`, catalogue, task map, foundation help, authored handbook entry, and unit test suite.
       6. Run full verification suite (`npm run check:help`, `npm test`, `npx tsc --noEmit`, `npm run build`).
       7. Propose progress via `propose_progress`.
+
+---
+
+### Completed Screen 140 (`diagnostic_partners`) Checkpoint
+- **Workflow & Standards**: Statutory referral partner directory and contract governance workspace (`diagnostic_partners`, MSDS AAC 6, 14):
+  - **Directory Worklist (`GET /diagnostic-partners`):**
+    - External diagnostic referral partners list with filters for services (All, Lab, Imaging) and Active Only toggle.
+    - Real-time search by partner facility title, PHC registration code, or MOU reference letter.
+    - Worklist tracks services offered (Lab, Imaging, Both), accreditations (PHC, PNAC ISO 15189, PNRA), agreed turnaround hours, and active tests sent out.
+  - **MOU Lifecycle & Expiration Monitoring (`rule:317f71af91`):**
+    - Enforces `getMouExpiryStatus`: evaluates contractual timelines against `mou_valid_until`.
+    - Proactive warning: highlights partners within 30 days of contract expiration with animated amber badges and warning text ("MOU Expiring Soon: X day(s) remaining. Renew agreement before expiration").
+    - Strict dispatch halting: once expired (or `mou_expired: true`), highlights in bold red and backend stops dispatches (`DIAGNOSTIC_PARTNER_INVALID`), ensuring no unauthorised sample referrals.
+  - **Partner Onboarding (`POST /diagnostic-partners`):**
+    - Modal registering new partner with legal name, services, PHC registration, ISO accreditation, PNRA licence (for imaging), MOU reference, validity period, SLA turnaround hours, contact, and quality note.
+    - Double-submit protection via idempotency key.
+  - **Contract Renewal & Maintenance (`PATCH /diagnostic-partners/{partner_id}`):**
+    - 'Edit / Renew MOU' modal allowing administrators to renew expiring contracts, update validity periods, and adjust agreed turnaround times.
+    - Optimistic concurrency control via `expected_version` preventing concurrent overwrites (`VERSION_CONFLICT`).
+  - **Lifecycle Retirement (`rule:91092686de`):**
+    - Soft retirement deactivating partners (`is_active: false`) while permanently safeguarding all historical requisition audits, patient records, and financial statements.
+  - **Service Capability Gating (`rule:5be909080d`):**
+    - Resolves `full`, `open_work` (warning banner "No new laboratory or outsourced diagnostics work from now on"), `records`, `setup`, and `hidden` derived from server `GET /establishment views.screens`.
+- **Contracts**: `contracts/diagnostic_partners.json` (3 endpoints, 3 statutory rules `rule:317f71af91`, `rule:91092686de`, `rule:5be909080d`, 17 rubric items).
+- **Domain Policies & Statutory Rules (`src/diagnostic-partners-policy.ts`)**:
+  - `getDiagnosticPartnersCapabilityView`, `getMouExpiryStatus`, `validatePartnerInput`, `validatePartnerUpdateInput`.
+  - Bilingual error dictionary (`DIAGNOSTIC_PARTNERS_ERROR_MESSAGES`) covering `FORBIDDEN`, `VALIDATION_ERROR`, `VERSION_CONFLICT`, and `NOT_FOUND`.
+- **UI Architecture (`src/screens/DiagnosticPartners.tsx`)**:
+  - Live referral partner governance component wired into `src/App.tsx`, `src/foundation-catalogue.json` (3 tasks), `src/foundation-task-map.json` (3 controls), `src/foundation-help.ts` (21 interactive controls mapped), and `scripts/check-help.mjs`.
+  - Authored comprehensive handbook entry (`src/help.ts`) with bilingual title, purpose, 8 operational steps, and 5 role FAQs answering seed questions, 30-day renewal warnings, and PNRA licensing. Bundled screenshots in `public/handbook/diagnostic_partners-en.png` and `diagnostic_partners-ur.png`.
+- **Verification**:
+  - Automated unit tests: `tests/diagnostic-partners.test.mjs` (5/5 passing).
+  - Help check: `npm run check:help` passed (139 screens, 3486 controls, 2488 groups, 69 FAQ seeds, 30 workspace guides).
+  - Help coverage test: `tests/help-coverage.test.mjs` (28/28 passing across 139 screens).
+  - Full test suite: `npm test` passed (702/702 passing across all 19 test suites).
+  - TypeScript compiler: `npx tsc --noEmit` passed with 0 errors.
+  - Production build: `npm run build` succeeded (`dist/assets/index-C9eRsK_W.js`).
+- **Proposal**:
+  - Proposal ID: **293** (status: `pending` on `/docs -> My progress`, build `index-C9eRsK_W.js`, 16 rubric items claimed, `q:fresh_data` left pending human review).
 
 ---
 

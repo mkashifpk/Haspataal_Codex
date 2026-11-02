@@ -10,6 +10,76 @@ export type HelpPage = {
   faqUr: [string, string][];
 };
 export const help: Record<string, HelpPage> = {
+  diagnostic_partners: {
+    title: "Partner laboratories and imaging centres",
+    titleUr: "تشخیصی شراکت دار لیبارٹریاں اور امیجنگ سینٹرز",
+    purpose: "Statutory registry and quality assurance governance for external referral laboratories and imaging centres under MSDS AAC 6 and 14: (1) Official directory of outsourced diagnostic partners (GET /diagnostic-partners) covering clinical pathology, molecular diagnostics, CT, MRI, and specialized radiology; (2) Compliance auditing under Rule 317f71af91 recording PHC registration, PNAC ISO 15189 accreditation, PNRA radiation licences, official MOU reference numbers, agreed SLA turnaround hours, and quality appraisal notes; (3) Proactive contract monitoring with 30-day early warnings prior to MOU expiration (mou_valid_until) to prevent dispatch disruption, and statutory automatic stoppage of patient sample send-outs upon MOU expiration (mou_expired); (4) Partner onboarding and contract creation (POST /diagnostic-partners) with double-submit idempotency protection; and (5) Lifecycle retirement under Rule 91092686de (PATCH /diagnostic-partners/{partner_id}) deactivating partners while preserving all historical audit, financial, and diagnostic records.",
+    purposeUr: "بیرونی تشخیصی لیبارٹریوں اور ریڈیالوجی سینٹرز کی باقاعدہ رجسٹریشن اور کوالٹی نگرانی برائے MSDS AAC 6 اور 14: (1) آؤٹ سورس تشخیصی شراکت داروں کا سرکاری رجسٹر (GET /diagnostic-partners) جس میں کلینیکل پیتھالوجی، مالیکیولر لیب، سی ٹی اسکین، ایم آر آئی اور دیگر خصوصی ٹیسٹ شامل ہیں؛ (2) قاعدہ 317f71af91 کے تحت قانونی تقاضوں کی جانچ جس میں پنجاب ہیلتھ کیئر کمیشن (PHC) رجسٹریشن، PNAC ISO 15189 اسناد، پی این آر اے ریڈی ایشن لائسنس، معاہدہ ریفرنس، طے شدہ ٹرن اراؤنڈ گھنٹے اور کوالٹی کا باقاعدہ آڈٹ نوٹ درج ہوتا ہے؛ (3) معاہدے کی میعاد ختم ہونے (mou_valid_until) سے 30 دن قبل الرٹ کا اجراء تاکہ کام میں تعطل نہ آئے، اور میعاد ختم ہونے پر نمونے اور ٹیسٹ بھیجنے کی خودکار قانونی بندش (mou_expired)؛ (4) نئے شراکت داروں کا باضابطہ اندراج (POST /diagnostic-partners) مع محفوظ اندراج؛ اور (5) قاعدہ 91092686de کے تحت پارٹنر کو ریٹائر کرنا (PATCH /diagnostic-partners/{partner_id}) جس میں ماضی کے تمام مالیاتی، تشخیصی اور آڈٹ ریکارڈز بدستور محفوظ رہتے ہیں۔",
+    steps: [
+      "Open the Diagnostic Partners screen from the Laboratory Administration, Radiology, or Facility Settings menu.",
+      "Review the registered referral centres, inspecting their services (Lab, Imaging, Both), accreditation badges, and MOU expiration timelines.",
+      "Use the service selector to filter partners by Laboratory or Imaging, or toggle 'Active Only' to exclude retired referral centres.",
+      "To onboard a new diagnostic partner, click '+ Add Diagnostic Partner' (Rule 317f71af91).",
+      "Enter the partner's legal title, select service domain, and input healthcare commission registration (PHC), accreditation (PNAC ISO 15189), and PNRA radiation licence (mandatory for imaging centres).",
+      "Enter the formal MOU contract reference code, effective start date, and expiration date (mou_valid_until), along with agreed turnaround hours and quality assurance notes.",
+      "To renew an expiring agreement or update accreditations, click 'Edit / Renew MOU' on the partner's row and submit updated dates and certification numbers.",
+      "If a partner is no longer used, click 'Retire' to deactivate further send-outs under Rule 91092686de while safely preserving all historical requisition audits and reports.",
+    ],
+    stepsUr: [
+      "لیب ایڈمنسٹریشن، ریڈیالوجی یا فیسلٹی سیٹنگز مینو سے ڈائیگنوسٹک پارٹنرز اسکرین کھولیں۔",
+      "رجسٹرڈ ریفرل اداروں کا جائزہ لیں، ان کی سروسز (لیب، امیجنگ یا دونوں)، کوالٹی اسناد اور معاہدے کی میعاد کی جانچ کریں۔",
+      "مطلوبہ شعبے (لیب یا امیجنگ) کے لحاظ سے فلٹر کریں یا صرف فعال پارٹنرز دیکھنے کے لیے 'Active Only' پر نشان لگائیں۔",
+      "نیا تشخیصی پارٹنر شامل کرنے کے لیے '+ Add Diagnostic Partner' پر کلک کریں (قاعدہ 317f71af91)۔",
+      "ادارے کا قانونی نام درج کریں، سروسز منتخب کریں اور پنجاب ہیلتھ کیئر کمیشن رجسٹریشن، ISO 15189 سرٹیفکیٹ اور امیجنگ کے لیے پی این آر اے ریڈی ایشن لائسنس درج کریں۔",
+      "باہمی یادداشت (MOU) کا ریفرنس کوڈ، شروعات کی تاریخ، اختتامی تاریخ، طے شدہ ٹرن اراؤنڈ گھنٹے اور کوالٹی نوٹ درج کریں۔",
+      "ختم ہونے والے معاہدے کی تجدید یا کوالٹی اسناد کو اپ ڈیٹ کرنے کے لیے متعلقہ لائن پر 'Edit / Renew MOU' دبائیں اور نئی تفصیلات محفوظ کریں۔",
+      "اگر کسی پارٹنر کے ساتھ کام ختم کرنا ہو تو 'Retire' پر کلک کریں تاکہ قاعدہ 91092686de کے تحت ماضی کا تمام ڈیٹا محفوظ رہتے ہوئے مزید نمونے جانا بند ہو جائیں۔",
+    ],
+    faq: [
+      [
+        "Why does the system warn 'MOU Expiring Soon' or display an expired status on a diagnostic partner?",
+        "Under statutory Rule 317f71af91, the system automatically tracks mou_valid_until. When a contract is within 30 days of expiration, an amber warning appears on the worklist to alert administrators to initiate contract renewal. Once the date passes (or mou_expired is true), the partner status turns red and the backend immediately halts all send-outs and specimen dispatches, returning DIAGNOSTIC_PARTNER_INVALID to prevent illegal referrals."
+      ],
+      [
+        "What happens when the Lab administration or send-out screen shows DIAGNOSTIC_PARTNER_INVALID?",
+        "The error DIAGNOSTIC_PARTNER_INVALID indicates that the partner laboratory selected for an outsourced test either has an expired memorandum of understanding (mou_expired: true) or has been marked inactive (is_active: false). To resolve, click 'Edit / Renew MOU' on this screen, input the renewed contract reference and valid expiration date, and confirm that the partner's PHC/PNAC accreditations are current."
+      ],
+      [
+        "What statutory licensing is required for imaging centres versus laboratory partners?",
+        "Per MSDS AAC 6 and 14, clinical laboratory partners require healthcare commission registration (PHC) and recognized laboratory accreditation (such as PNAC ISO 15189). Diagnostic imaging centres performing X-Ray, CT, fluoroscopy, or nuclear medicine must additionally hold a valid Pakistan Nuclear Regulatory Authority (PNRA) radiation licence to ensure radiological safety."
+      ],
+      [
+        "How does retiring a partner differ from deletion under Rule 91092686de?",
+        "Diagnostic partners are never hard-deleted from the database. When an administrator clicks 'Retire', the system updates is_active to false. This prevents the partner from appearing in active clinical send-out pickers while permanently retaining all historical patient requisitions, external test results, financial reconciliation records, and surveyor audit logs intact."
+      ],
+      [
+        "How does the system prevent concurrent edit conflicts during contract renewals?",
+        "When an administrator opens the 'Edit / Renew MOU' dialog, the system reads the partner's current row_version. When submitting changes, the client sends this value as expected_version. If another administrator has updated the partner's contract in the interim, the server rejects the write with VERSION_CONFLICT (409), ensuring no accidental overwriting of renewed legal terms."
+      ]
+    ],
+    faqUr: [
+      [
+        "سسٹم تشخیصی پارٹنر پر 'معاہدہ جلد ختم ہونے والا ہے' کا انتباہ یا ایکسپائرڈ کیوں دکھاتا ہے؟",
+        "قانونی قاعدہ 317f71af91 کے تحت سسٹم معاہدے کی اختتامی تاریخ (mou_valid_until) پر مسلسل نظر رکھتا ہے۔ جب معاہدہ ختم ہونے میں 30 دن رہ جائیں تو ورک لسٹ پر زرد رنگ کا الرٹ ظاہر ہوتا ہے تاکہ بروقت تجدید کی جا سکے۔ تاریخ گزرنے کے بعد اسٹیٹس سرخ ہو جاتا ہے اور سرور نمونے بھیجنا فوری بند کر دیتا ہے تاکہ غیر قانونی ریفرل نہ ہو۔"
+      ],
+      [
+        "جب لیب ایڈمنسٹریشن یا ٹیسٹ بھیجتے وقت DIAGNOSTIC_PARTNER_INVALID آئے تو کیا کریں؟",
+        "اس خرابی کا مطلب ہے کہ منتخب شدہ پارٹنر کا معاہدہ ختم ہو چکا ہے یا وہ غیر فعال ہو گیا ہے۔ اس کے حل کے لیے اس اسکرین پر جا کر متعلقہ ادارے کے سامنے 'Edit / Renew MOU' پر کلک کریں، نئے معاہدے کا ریفرنس اور آئندہ سال کی اختتامی تاریخ درج کر کے محفوظ کریں تاکہ سروس دوبارہ کھل سکے۔"
+      ],
+      [
+        "امیجنگ سینٹرز اور لیبارٹریز کے لیے کن قانونی لائسنسوں کی ضرورت ہوتی ہے؟",
+        "MSDS AAC 6 اور 14 کے تحت تمام تشخیصی اداروں کے لیے ہیلتھ کیئر کمیشن کی رجسٹریشن اور ISO 15189 اسناد لازمی ہیں۔ ایکسرے، سی ٹی اسکین اور دیگر ریڈی ایشن ٹیسٹس کرنے والے امیجنگ سینٹرز کے لیے پاکستان نیوکلیئر ریگولیٹری اتھارٹی (PNRA) کا فعال لائسنس ہونا قانوناً ضروری ہے۔"
+      ],
+      [
+        "قاعدہ 91092686de کے تحت پارٹنر کو ریٹائر کرنے اور ڈیلیٹ کرنے میں کیا فرق ہے؟",
+        "تشخیصی شراکت داروں کا ریکارڈ ڈیٹا بیس سے کبھی ختم نہیں کیا جاتا۔ ریٹائر کرنے سے پارٹنر صرف نئے ٹیسٹس کے لیے غیر فعال ہوتا ہے جبکہ مریضوں کی پچھلی رپورٹس، مالیاتی حساب کتاب اور سرویئر معائنہ کے ریکارڈز ہمیشہ محفوظ رہتے ہیں۔"
+      ],
+      [
+        "معاہدے کی تجدید کے دوران دو صارفین کی بیک وقت تبدیلیوں کو کیسے روکا جاتا ہے؟",
+        "جب ترمیم کا فارم کھلتا ہے تو موجودہ ورژن نمبر محفوظ ہوتا ہے جسے اپ ڈیٹ کرتے وقت 'expected_version' کے طور پر بھیجا جاتا ہے۔ اگر کسی دوسرے صارف نے درمیان میں ڈیٹا تبدیل کر دیا ہو تو سرور 409 VERSION_CONFLICT دیتا ہے تاکہ کوئی قانونی دستاویز غلطی سے اوور رائٹ نہ ہو۔"
+      ]
+    ],
+  },
   lab_admin: {
     title: "Lab administration",
     titleUr: "لیبارٹری ایڈمنسٹریشن",

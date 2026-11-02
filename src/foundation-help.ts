@@ -20,6 +20,7 @@ export const phase1Screens = [
 const approvalScreens = ["approval_queue", "charity_approvals"];
 // Coverage grows screen by screen; Phase 1 acceptance remains separate.
 export const deliveredHelpScreens = [
+  "diagnostic_partners",
   "lab_admin",
   "pharmacy_storage_log",
   "drug_recalls",
@@ -149,6 +150,29 @@ const g = (
 // IDs are also attached to the actual controls. The build rejects missing
 // mappings and empty translations instead of treating a page as coverage.
 export const controlGuides: Record<string, ControlGuide> = {
+  // Screen 140: diagnostic_partners (Partner laboratories and imaging centres)
+  "diagnostic_partners.btn_refresh": g(["diagnostic_partners"], ["Refresh partners list", "شراکت داروں کی فہرست تازہ کریں"], ["Reloads referral partners worklist and MOU validity statuses.", "شراکت دار لیبارٹریوں کی فہرست اور معاہدوں کی میعاد کا ڈیٹا تازہ کرتا ہے۔"]),
+  "diagnostic_partners.select_service_filter": g(["diagnostic_partners"], ["Filter by service type", "سروس کی قسم کے لحاظ سے فلٹر"], ["Filters diagnostic partners offering Lab, Imaging, or Both.", "لیب، امیجنگ یا دونوں خدمات فراہم کرنے والے شراکت داروں کو الگ کرتا ہے۔"]),
+  "diagnostic_partners.checkbox_active_only": g(["diagnostic_partners"], ["Active partners only checkbox", "صرف فعال شراکت دار"], ["Hides retired referral centres to show only active partners.", "ریٹائرڈ اداروں کو چھپا کر صرف فعال پارٹنرز دکھاتا ہے۔"]),
+  "diagnostic_partners.search_query": g(["diagnostic_partners"], ["Search partner name or PHC", "نام یا رجسٹریشن تلاش کریں"], ["Filters list by partner facility name, PHC licence, or MOU reference.", "ادارے کا نام، ہیلتھ کیئر کمیشن نمبر یا معاہدہ کوڈ تلاش کرتا ہے۔"]),
+  "diagnostic_partners.btn_open_add_partner": g(["diagnostic_partners"], ["Open register partner modal", "نیا پارٹنر فارم"], ["Opens modal to register new referral laboratory or imaging centre under Rule 317f71af91.", "قاعدہ 317f71af91 کے تحت نئی پارٹنر لیب یا امیجنگ سینٹر کا اندراج کرنے کا فارم کھولتا ہے۔"]),
+  "diagnostic_partners.btn_edit_partner": g(["diagnostic_partners"], ["Edit partner / renew MOU button", "معاہدے کی تجدید / ترمیم"], ["Opens modal to update partner accreditations or renew expiring MOU (PATCH /diagnostic-partners/{partner_id}).", "پارٹنر کی اسناد یا ختم ہونے والے معاہدے کی تجدید کا فارم کھولتا ہے۔"]),
+  "diagnostic_partners.btn_toggle_retire": g(["diagnostic_partners"], ["Retire or reactivate partner", "ریٹائر یا بحال کریں"], ["Toggles active status under Rule 91092686de while preserving complete audit history.", "قاعدہ 91092686de کے تحت تاریخ محفوظ رکھتے ہوئے پارٹنر کو غیر فعال یا فعال کرتا ہے۔"]),
+  "diagnostic_partners.btn_cancel_partner": g(["diagnostic_partners"], ["Cancel partner modal", "منسوخ کریں"], ["Aborts partner registration or renewal dialog.", "شراکت دار فارم بغیر تبدیلی کے بند کرتا ہے۔"]),
+  "diagnostic_partners.input_partner_name": g(["diagnostic_partners"], ["Partner facility name input", "پارٹنر ادارے کا نام"], ["Official commercial name of the referral laboratory or diagnostic centre.", "ریفرل لیبارٹری یا تشخیصی سینٹر کا سرکاری نام۔"]),
+  "diagnostic_partners.select_partner_services": g(["diagnostic_partners"], ["Diagnostic services selector", "خدمات کی قسم"], ["Selects diagnostic domain: Lab, Imaging, or Both.", "تشخیصی شعبے کا انتخاب: لیبارٹری، امیجنگ یا دونوں۔"]),
+  "diagnostic_partners.input_phc_reg": g(["diagnostic_partners"], ["PHC registration number input", "پنجاب ہیلتھ کیئر کمیشن رجسٹریشن"], ["Healthcare Commission statutory registration or licence number.", "ہیلتھ کیئر کمیشن کی جاری کردہ رجسٹریشن یا لائسنس نمبر۔"]),
+  "diagnostic_partners.input_accreditation": g(["diagnostic_partners"], ["Accreditation certificate input", "کوالٹی اسناد (ISO / PNAC)"], ["Quality certifications such as PNAC ISO 15189 or CAP accreditation.", "پاکستان نیشنل ایکریڈیشن کونسل ISO 15189 یا مساوی بین الاقوامی سرٹیفکیٹ۔"]),
+  "diagnostic_partners.input_pnra_licence": g(["diagnostic_partners"], ["PNRA licence number input", "پی این آر اے لائسنس نمبر"], ["Pakistan Nuclear Regulatory Authority radiation licence for imaging facilities.", "ریڈیالوجی اور امیجنگ کے لیے پاکستان نیوکلیئر ریگولیٹری اتھارٹی کا لائسنس۔"]),
+  "diagnostic_partners.input_mou_ref": g(["diagnostic_partners"], ["MOU reference number input", "معاہدہ ریفرنس نمبر"], ["Official contract or memorandum of understanding filing reference.", "باہمی یادداشت یا سرکاری معاہدے کا فائل کوڈ۔"]),
+  "diagnostic_partners.input_turnaround_hours": g(["diagnostic_partners"], ["Agreed SLA turnaround hours", "معاہدے کے تحت ٹرن اراؤنڈ گھنٹے"], ["Agreed turnaround SLA time in hours per Rule 317f71af91.", "معاہدے میں طے شدہ ٹرن اراؤنڈ کا وقت گھنٹوں میں۔"]),
+  "diagnostic_partners.input_mou_from": g(["diagnostic_partners"], ["MOU valid from date input", "معاہدے کا آغاز"], ["Effective starting date of the diagnostic partnership contract.", "معاہدے کی شروعات کی تاریخ۔"]),
+  "diagnostic_partners.input_mou_until": g(["diagnostic_partners"], ["MOU expiry date input", "معاہدے کی اختتامی تاریخ"], ["Contract termination date; dispatches are blocked once expired (Rule 317f71af91).", "معاہدہ ختم ہونے کی تاریخ؛ میعاد ختم ہونے پر نمونے بھیجنا رک جاتا ہے۔"]),
+  "diagnostic_partners.input_contact": g(["diagnostic_partners"], ["Partner contact details input", "رابطہ نمبر یا ای میل"], ["Phone numbers and communication channels for report inquiries.", "رپورٹس کی تصدیق اور استفسار کے لیے فون اور ای میل۔"]),
+  "diagnostic_partners.input_address": g(["diagnostic_partners"], ["Partner facility address input", "پتہ"], ["Physical hub location for sample handovers or patient visits.", "نمونے وصول کرنے یا مریض کے جانے کے لیے ادارے کا پتہ۔"]),
+  "diagnostic_partners.input_quality_note": g(["diagnostic_partners"], ["Quality assurance review note", "کوالٹی اور آڈٹ نوٹ"], ["Hospital internal quality appraisal and external EQAS participation notes.", "ہسپتال کے کوالٹی آڈٹ، ایکسٹرنل کوالٹی اسسمنٹ اور معائنہ کے نوٹس۔"]),
+  "diagnostic_partners.btn_submit_partner": g(["diagnostic_partners"], ["Save partner / MOU button", "پارٹنر محفوظ کریں"], ["Submits partner registration or renewed MOU (POST/PATCH /diagnostic-partners).", "پارٹنر کا اندراج یا تجدید شدہ معاہدہ محفوظ کرتا ہے۔"]),
+
   // Screen 139: lab_admin (Lab catalogue, panels, instruments & reagent inventory)
   "lab_admin.btn_refresh": g(["lab_admin"], ["Refresh catalogue & data", "کیٹلاگ اور ڈیٹا ریفریش کریں"], ["Reloads tests, reagents inventory and financial metrics without full page reload.", "صفحہ دوبارہ لوڈ کیے بغیر ٹیسٹ، ری ایجنٹس اور مالیاتی گوشوارے تازہ کرتا ہے۔"]),
   "lab_admin.tab_tests": g(["lab_admin"], ["Test catalogue tab", "ٹیسٹ کیٹلاگ ٹیب"], ["Switches to laboratory test master catalogue table (GET /lab/tests).", "لیبارٹری ٹیسٹ ماسٹر کیٹلاگ ٹیبل کے منظر پر منتقل ہوتا ہے۔"]),
