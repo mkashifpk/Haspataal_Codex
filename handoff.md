@@ -1,10 +1,10 @@
 # Haspataal checkpoint
 Last updated: 02 November 2026, Antigravity (Codex pair), Asia/Karachi.
 
-## Active request: Phase 7 Screen 142 `risk_dashboard` (Risk & compliance dashboard)
+## Active request: Phase 8 Screen 143 `onboarding_wizard` (Staff onboarding & credentials wizard)
 Executing the Haspataal HMS Roadmap in dependency order along with all tests and MCP progress reporting:
 - **Phase 6 ("Theatre and sterile supply")**: 100% COMPLETE (Screens 109–132, Proposals 262–285).
-- **Phase 7 ("Finance, billing and back offices")**:
+- **Phase 7 ("Finance, billing and back offices")**: 100% COMPLETE (Screens 133–142, Proposals 286–295).
   - Screen 133: **`accountant_cockpit`** ("Accountant 3-pane cockpit", Position 133, 83 points, workspace `finance_accountant`) — **COMPLETED** (commit `3f85c2d`, Proposal **286** awaiting human review on `/docs -> My progress`).
   - Screen 134: **`billing_admin`** ("Price & policy management", Position 134, 70 points, workspace `billing_admin`) — **COMPLETED** (commit `d3c8ab8`, Proposal **287** awaiting human review on `/docs -> My progress`).
   - Screen 135: **`pharmacy_admin`** ("Pharmacy inventory, formulary & procurement", Position 135, 76 points, workspace `pharmacy_admin`) — **COMPLETED** (commit `1b7d0e5`, Proposal **288** awaiting human review on `/docs -> My progress`).
@@ -13,19 +13,58 @@ Executing the Haspataal HMS Roadmap in dependency order along with all tests and
   - Screen 138: **`pharmacy_storage_log`** ("Medicine storage log & temperature monitoring", Position 138, 51 points, workspace `pharmacy_admin`) — **COMPLETED** (commit `580e15a`, Proposal **291** awaiting human review on `/docs -> My progress`).
   - Screen 139: **`lab_admin`** ("Lab catalogue, panels, instruments & reagent inventory", Position 139, 76 points, workspace `lab_admin`) — **COMPLETED** (commit `7491e82`, Proposal **292** awaiting human review on `/docs -> My progress`).
   - Screen 140: **`diagnostic_partners`** ("Partner laboratories and imaging centres", Position 140, 44 points, workspace `lab_admin`) — **COMPLETED** (commit `95561ed`, Proposal **293** awaiting human review on `/docs -> My progress`).
-  - Screen 141: **`owner_dashboard`** ("Hospital owner dashboard", Position 141, 41 points, workspace `owner_dashboard`) — **COMPLETED** (Proposal **294** awaiting human review on `/docs -> My progress`).
-  - Screen 142: **`risk_dashboard`** ("Risk & compliance dashboard", Position 142, 48 points, workspace `owner_dashboard`) — **NEXT** (Final screen of Phase 7!).
-    - Scope: Clinical risk assessment, statutory compliance indicators, sentinel events, risk heatmaps, incident mitigation, and executive compliance returns.
+  - Screen 141: **`owner_dashboard`** ("Hospital owner dashboard", Position 141, 41 points, workspace `owner_dashboard`) — **COMPLETED** (commit `90ff16e`, Proposal **294** awaiting human review on `/docs -> My progress`).
+  - Screen 142: **`risk_dashboard`** ("Risk & compliance dashboard", Position 142, 48 points, workspace `owner_dashboard`) — **COMPLETED** (Proposal **295** awaiting human review on `/docs -> My progress`).
+- **Phase 8 ("People, facility and IT")**:
+  - Screen 143: **`onboarding_wizard`** ("Staff onboarding & credentials wizard", Position 143, 63 points, workspace `hr`) — **NEXT**.
+    - Scope: Multi-step employee onboarding, CNIC/identity validation, PMC/PNC registration verification, credentials vault, department assignment, and initial contract generation per MSDS HRM.
     - Next Concrete Actions:
-      1. Inspect `get_screen_bundle("risk_dashboard")` and save to `contracts/risk_dashboard.json`.
+      1. Inspect `get_screen_bundle("onboarding_wizard")` and save to `contracts/onboarding_wizard.json`.
       2. Generate TypeScript contracts via `generate_typescript`.
-      3. Create domain policies in `src/risk-dashboard-policy.ts`.
-      4. Implement UI `src/screens/RiskDashboard.tsx`.
+      3. Create domain policies in `src/onboarding-wizard-policy.ts`.
+      4. Implement UI `src/screens/OnboardingWizard.tsx`.
       5. Wire into `src/App.tsx`, catalogue, task map, foundation help, authored handbook entry, and unit test suite.
       6. Run full verification suite (`npm run check:help`, `npm test`, `npx tsc --noEmit`, `npm run build`).
       7. Propose progress via `propose_progress`.
 
 ---
+
+### Completed Screen 142 (`risk_dashboard`) Checkpoint
+- **Workflow & Standards**: Operational risk surveillance, heuristic pattern detection, and administrative audit trail oversight workspace (`risk_dashboard`, Workspace `owner_dashboard`, Position 142, 48 points):
+  - **Flagged Findings for Review (`GET /risk/summary`, `GET /risk/findings`):**
+    - Summary tiles by severity (Critical, High, Medium, Low) and peak heuristic risk score (0-100).
+    - Status filtering (Open / Flagged for review, Under Review, Resolved, False Positive, Escalated) and severity filtering.
+    - Worklist table displaying finding ID, detected timestamp, severity badge, rule code, plain-language description, target entity, recorded subject staff member, and heuristic risk score.
+  - **Rule `rule:a50f18c5d4` & Realtime Notifications (`ev:risk.critical_event`):**
+    - Strict neutral framing: all algorithmic detections and heuristic anomalies are titled 'flagged for review' (not accusations of misconduct or guilt).
+    - Prominent animated red critical notification banner triggered on Critical signals (e.g. `VOIDED_BUT_EXAMINED`, `POST_DECEASED_CLINICAL_EDIT`) or when `risk.critical_event` arrives via realtime websocket.
+  - **Human Review Outcome Recording (`POST /risk/findings/{risk_event_id}/review`):**
+    - Modal dialog displaying full heuristic evidence context (JSON), rule objectives, and recorded staff.
+    - Dual-control integrity: strictly prevents self-approval when the reviewing operator is the recorded subject user (`SELF_APPROVAL_FORBIDDEN`).
+    - Enforces mandatory audit explanation notes (up to 2000 chars) when marking findings as Resolved, False Positive, or Escalated (`NOTE_REQUIRED`).
+  - **Risk Detection Rules Directory (`GET /risk/rules`):**
+    - Complete directory of registered heuristic rules, codes, descriptions, base risk scores, active statuses, and JSON configuration thresholds (managed via `/admin/settings` risk keys).
+  - **Administrative Audit Trail (`GET /admin/audit-log`):**
+    - Filterable system-wide operational event log by entity type, action, operator, and keyword.
+    - State Diff viewer modal displaying side-by-side JSON snapshots of `before_jsonb` and `after_jsonb` states.
+  - **Service Capability Gating:**
+    - Derives `full`, `open_work` (warning banner "Restricted Mode: Reviewing existing compliance findings and audit logs without initiating new risk sweeps"), `records`, `setup`, and `hidden` from server `GET /establishment views.screens`.
+- **Contracts**: `contracts/risk_dashboard.json` (5 endpoints, 1 realtime event `risk.critical_event`, 1 statutory rule `rule:a50f18c5d4`, 18 rubric items).
+- **Domain Policies & Statutory Rules (`src/risk-dashboard-policy.ts`)**:
+  - `getRiskDashboardCapabilityView`, `validateReviewInput`, `calculateRiskSummaryStats`, `getSeverityBadge`, `getReviewStatusBadge`.
+  - Bilingual error dictionary (`RISK_DASHBOARD_ERROR_MESSAGES`) covering `FORBIDDEN`, `SELF_APPROVAL_FORBIDDEN`, `NOT_FOUND`, `VALIDATION_ERROR`, `NOTE_REQUIRED`, and `NOTE_TOO_LONG`.
+- **UI Architecture (`src/screens/RiskDashboard.tsx`)**:
+  - Live 3-tab governance component wired into `src/App.tsx`, `src/foundation-catalogue.json` (5 tasks), `src/foundation-task-map.json` (5 controls), `src/foundation-help.ts` (18 interactive controls mapped), and `scripts/check-help.mjs`.
+  - Authored comprehensive handbook entry and 5 role FAQs in `src/help.ts` explaining neutral 'flagged for review' framing, critical signals, self-approval prevention, mandatory review notes, and audit diffs. Bundled screenshots in `public/handbook/risk_dashboard-en.png` and `risk_dashboard-ur.png`.
+- **Verification**:
+  - Automated unit tests: `tests/risk-dashboard.test.mjs` (5/5 passing).
+  - Help check: `npm run check:help` passed (141 screens, 3,520 controls, 2,522 groups, 69 FAQ seeds, 30 workspace guides).
+  - Help coverage test: `tests/help-coverage.test.mjs` (28/28 passing across 141 screens).
+  - Full test suite: `npm test` passed (715/715 passing across all 19 test suites).
+  - TypeScript compiler: `npx tsc --noEmit` passed with 0 errors.
+  - Production build: `npm run build` succeeded (`dist/assets/index-BK2FQKC2.js`).
+- **Proposal**:
+  - Proposal ID: **295** (status: `pending` on `/docs -> My progress`, build `index-BK2FQKC2.js`, 17 rubric items claimed, `q:fresh_data` left pending human review).
 
 ### Completed Screen 141 (`owner_dashboard`) Checkpoint
 - **Workflow & Standards**: Executive governance, real-time financial oversight, and clinical operational conversion monitoring (`owner_dashboard`, Workspace `owner_dashboard`, Position 141, 41 points):

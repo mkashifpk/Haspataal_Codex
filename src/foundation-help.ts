@@ -20,6 +20,7 @@ export const phase1Screens = [
 const approvalScreens = ["approval_queue", "charity_approvals"];
 // Coverage grows screen by screen; Phase 1 acceptance remains separate.
 export const deliveredHelpScreens = [
+  "risk_dashboard",
   "owner_dashboard",
   "diagnostic_partners",
   "lab_admin",
@@ -151,6 +152,25 @@ const g = (
 // IDs are also attached to the actual controls. The build rejects missing
 // mappings and empty translations instead of treating a page as coverage.
 export const controlGuides: Record<string, ControlGuide> = {
+  // Screen 142: risk_dashboard (Risk & compliance dashboard)
+  "risk_dashboard.btn_refresh": g(["risk_dashboard"], ["Refresh risk data", "رسک ڈیٹا تازہ کریں"], ["Reloads heuristic summaries, open findings, and audit trails (GET /risk/summary).", "ہیورسٹک سمری، کھلی آڈٹ فائنڈنگز اور لاگز تازہ کرتا ہے۔"]),
+  "risk_dashboard.tab_findings": g(["risk_dashboard"], ["Flagged findings tab button", "نشان زد فائنڈنگز ٹیب"], ["Switches to list of heuristic findings flagged for human review (GET /risk/findings).", "انسانی جائزے کے لیے نشان زد مشتبہ فائنڈنگز کی فہرست دکھاتا ہے۔"]),
+  "risk_dashboard.tab_rules": g(["risk_dashboard"], ["Risk detection rules tab button", "رسک رولز ٹیب"], ["Switches to risk detection rules directory and configured thresholds (GET /risk/rules).", "رسک رولز اور ان کی حد بندیوں کی تفصیلات دکھاتا ہے۔"]),
+  "risk_dashboard.tab_audit": g(["risk_dashboard"], ["Audit trail tab button", "آڈٹ ٹریل ٹیب"], ["Switches to administrative system-wide audit event trail (GET /admin/audit-log).", "ہسپتال کے تمام انتظامی اور مالیاتی واقعات کی آڈٹ لاگ دکھاتا ہے۔"]),
+  "risk_dashboard.select_status_filter": g(["risk_dashboard"], ["Review status filter", "اسٹیٹس فلٹر"], ["Filters findings by review status (Open, UnderReview, Resolved, FalsePositive, Escalated).", "فائنڈنگز کو ان کے جائزہ اسٹیٹس کے مطابق فلٹر کرتا ہے۔"]),
+  "risk_dashboard.select_severity_filter": g(["risk_dashboard"], ["Severity level filter", "شدت کا فلٹر"], ["Filters findings by severity: Critical, High, Medium, or Low.", "فائنڈنگز کو ان کی شدت کے لحاظ سے فلٹر کرتا ہے۔"]),
+  "risk_dashboard.input_search": g(["risk_dashboard"], ["Search risk findings input", "فائنڈنگز تلاش کریں"], ["Filters findings table by rule name, rule code, staff member, or summary.", "رول کے نام، کوڈ، عملے کے رکن یا خلاصے سے فائنڈنگ تلاش کرتا ہے۔"]),
+  "risk_dashboard.btn_open_review": g(["risk_dashboard"], ["Open review modal button", "جائزہ فارم کھولیں"], ["Opens modal to evaluate finding and record human review outcome.", "انسانی جائزے کا فیصلہ درج کرنے کے لیے فارم کھولتا ہے۔"]),
+  "risk_dashboard.select_review_status": g(["risk_dashboard"], ["Review outcome status selector", "فیصلے کی قسم"], ["Selects outcome: UnderReview, Resolved, FalsePositive, or Escalated.", "جائزے کا نتیجہ منتخب کرتا ہے: زیرِ غور، حل شدہ، غلط الارم، یا آگے بھیجا گیا۔"]),
+  "risk_dashboard.input_review_note": g(["risk_dashboard"], ["Audit review note input", "آڈٹ وضاحتی نوٹ"], ["Mandatory explanation note for resolved, escalated, or false positive outcomes.", "حل شدہ، غلط الارم یا آگے بھیجے گئے فیصلوں کے لیے لازمی وضاحتی نوٹ۔"]),
+  "risk_dashboard.btn_cancel_review": g(["risk_dashboard"], ["Cancel review modal", "منسوخ کریں"], ["Dismisses human review dialog without saving changes.", "جائزہ فارم بغیر کسی تبدیلی کے بند کرتا ہے۔"]),
+  "risk_dashboard.btn_submit_review": g(["risk_dashboard"], ["Submit review outcome button", "نتیجہ محفوظ کریں"], ["Records human review outcome and note (POST /risk/findings/{risk_event_id}/review).", "آڈٹ فائنڈنگ پر انسانی جائزے کا حتمی فیصلہ ریکارڈ کرتا ہے۔"]),
+  "risk_dashboard.input_audit_entity_type": g(["risk_dashboard"], ["Audit entity type filter", "آڈٹ اینٹیٹی قسم"], ["Filters audit entries by target entity (e.g. opd_ticket, admission, payment).", "آڈٹ لاگ کو اینٹیٹی کی قسم کے لحاظ سے فلٹر کرتا ہے۔"]),
+  "risk_dashboard.input_audit_action": g(["risk_dashboard"], ["Audit action filter", "آڈٹ ایکشن"], ["Filters audit entries by performed action (e.g. ticket.void, payment.refund).", "کیے گئے عمل کے نام سے آڈٹ لاگ فلٹر کرتا ہے۔"]),
+  "risk_dashboard.input_audit_search": g(["risk_dashboard"], ["Search audit log input", "آڈٹ لاگ تلاش کریں"], ["Filters audit entries by user name, entity ID, or reason.", "صارف کے نام، شناختی نمبر یا وجہ سے آڈٹ لاگ تلاش کرتا ہے۔"]),
+  "risk_dashboard.btn_filter_audit": g(["risk_dashboard"], ["Apply audit filter button", "آڈٹ فلٹر لاگو کریں"], ["Queries audit trail with specified filters (GET /admin/audit-log).", "مطلوبہ فلٹرز کے مطابق آڈٹ لاگ دوبارہ لوڈ کرتا ہے۔"]),
+  "risk_dashboard.btn_view_diff": g(["risk_dashboard"], ["View state diff button", "تبدیلی کا فرق دیکھیں"], ["Opens modal showing before and after JSON states for the audited action.", "ریکارڈ کی پرانی اور نئی حالت کا موازنہ دکھاتا ہے۔"]),
+  "risk_dashboard.btn_close_diff": g(["risk_dashboard"], ["Close diff modal button", "موازنہ بند کریں"], ["Dismisses state diff view dialog.", "موازنہ ونڈو بند کرتا ہے۔"]),
   // Screen 141: owner_dashboard (Hospital owner dashboard)
   "owner_dashboard.btn_refresh": g(["owner_dashboard"], ["Refresh dashboard data", "ڈیش بورڈ ڈیٹا تازہ کریں"], ["Refreshes live general ledger balances, revenue trends, and patient volumes (GET /reports/pnl-flash).", "جنرل لیجر، آمدنی کے رجحانات اور مریضوں کا ڈیٹا فوری تازہ کرتا ہے۔"]),
   "owner_dashboard.btn_filter_today": g(["owner_dashboard"], ["Filter today button", "آج کا فلٹر"], ["Sets date filter to current day.", "تاریخ کا فلٹر آج کے دن پر مقرر کرتا ہے۔"]),

@@ -10,6 +10,76 @@ export type HelpPage = {
   faqUr: [string, string][];
 };
 export const help: Record<string, HelpPage> = {
+  risk_dashboard: {
+    title: "Risk & compliance",
+    titleUr: "رسک اور کمپلائنس ڈیش بورڈ",
+    purpose: "Operational risk surveillance, heuristic pattern detection, and administrative audit trail oversight: (1) Heuristic findings flagged for human review (GET /risk/summary, GET /risk/findings) covering voided tickets with doctor consultations, clinical documentation after death, pharmacy inventory shrinkage, and outlier transaction voids; (2) Strict enforcement of Rule a50f18c5d4 wording all alerts neutrally as 'flagged for review' rather than accusations of misconduct, and triggering prominent notifications on critical signals; (3) Human review outcome recording (POST /risk/findings/{risk_event_id}/review) enforcing dual-control and forbidding self-approval by subject users; (4) Risk detection rules directory (GET /risk/rules) tracking active scoring thresholds; and (5) Comprehensive administrative system audit trail (GET /admin/audit-log) with state diff inspections.",
+    purposeUr: "ہسپتال کے آپریشنل خطرات، آڈٹ کی بے ضابطگیوں اور کمپلائنس کی خودکار نگرانی کا ڈیش بورڈ: (1) انسانی جائزے کے لیے نشان زد مشتبہ ہیورسٹک فائنڈنگز (GET /risk/summary, GET /risk/findings) جن میں منسوخ شدہ پرچیاں جن پر مریض کا معائنہ ہو چکا ہو، موت کے بعد کلینیکل اندراج، فارمیسی اسٹاک کا غیر متوقع ضیاع اور مالیاتی بے ضابطگیاں شامل ہیں؛ (2) قانونی قاعدہ a50f18c5d4 کا نفاذ جس کے تحت تمام انتباہات کو بغیر کسی الزام کے 'برائے جائزہ نشان زد' کے طور پر لکھا جاتا ہے اور انتہائی نازک واقعات پر فوری نوٹیفکیشن ظاہر ہوتا ہے؛ (3) آڈٹ فائنڈنگز پر انسانی جائزے کا حتمی فیصلہ محفوظ کرنا (POST /risk/findings/{risk_event_id}/review) جس میں اپنے خلاف فائنڈنگ کا خود فیصلہ کرنے کی ممانعت ہے؛ (4) رسک ڈیٹیکشن رولز کی ڈائریکٹری (GET /risk/rules) اور اسکورنگ کی حدود؛ اور (5) جامع انتظامی آڈٹ ٹریل (GET /admin/audit-log) مع پرانی اور نئی حالت کا موازنہ۔",
+    steps: [
+      "Open the Risk & Compliance Dashboard from the Owner / Hospital Admin workspace menu.",
+      "Review the summary tiles displaying open findings categorized by severity: Critical, High, Medium, and Low.",
+      "Inspect any urgent critical alert banner popping on screen under Rule a50f18c5d4 (such as VOIDED_BUT_EXAMINED).",
+      "Use status and severity filters or the search bar to locate specific flagged findings across hospital departments.",
+      "Click 'Review' on a flagged finding to inspect its heuristic context, evidence JSON data, and recorded subject staff member.",
+      "Select the appropriate review outcome status: Under Review, Resolved, False Positive, or Escalated.",
+      "Enter a mandatory detailed audit explanation note documenting the root cause, clinical explanation, or corrective action taken.",
+      "Switch to the 'Administrative Audit Trail' tab to search system-wide operational events and compare before and after JSON state diffs.",
+    ],
+    stepsUr: [
+      "مالک / ہسپتال ایڈمنسٹریٹر ورک اسپیس سے رسک اور کمپلائنس ڈیش بورڈ کھولیں۔",
+      "شدت کے اعتبار سے کھلی فائنڈنگز کے خلاصے کا جائزہ لیں: انتہائی نازک، زیادہ، درمیانہ اور معمولی۔",
+      "قاعدہ a50f18c5d4 کے تحت ظاہر ہونے والے کسی بھی ہنگامی نوٹیفکیشن (جیسے VOIDED_BUT_EXAMINED) کا فوری نوٹس لیں۔",
+      "ہسپتال کے مختلف شعبوں کی فائنڈنگز دیکھنے کے لیے اسٹیٹس، شدت اور سرچ باکس کے فلٹرز استعمال کریں۔",
+      "کسی بھی فائنڈنگ کی تفصیل، ایویڈینس ڈیٹا اور متعلقہ عملے کی معلومات دیکھنے کے لیے 'جائزہ' بٹن پر کلک کریں۔",
+      "مناسب نتیجہ منتخب کریں: زیرِ غور، حل شدہ، غلط الارم (سسٹم کی غلط نشاندہی)، یا آگے بھیجا گیا۔",
+      "اصلاحی اقدامات، کلینیکل حقائق یا انتظامی فیصلے کی وضاحت کے لیے لازمی آڈٹ نوٹ درج کریں اور محفوظ کریں۔",
+      "ہسپتال کے تمام ایونٹس کی ہسٹری جانچنے اور تبدیلیوں کا موازنہ دیکھنے کے لیے 'انتظامی آڈٹ ٹریل' ٹیب کا معائنہ کریں۔",
+    ],
+    faq: [
+      [
+        "Why are suspicious findings strictly worded as 'flagged for review' under Rule a50f18c5d4?",
+        "Statutory Rule a50f18c5d4 mandates that all algorithmic signals and heuristic detections be neutrally titled 'flagged for review' rather than framed as accusations of guilt or fraud. Because automated sweeps may detect edge cases (such as clinical emergencies, retrospective corrections, or network glitches), findings represent heuristic scores intended for objective human review before any administrative action is taken."
+      ],
+      [
+        "What constitutes a Critical risk finding and how does the system notify administrators?",
+        "Signals such as VOIDED_BUT_EXAMINED (a consultation ticket was voided or refunded after the physician finalized a clinical note) and POST_DECEASED_CLINICAL_EDIT (clinical charting entered after a confirmed time of death) are designated as Critical severity. Under Rule a50f18c5d4 and realtime topic risk.critical_event, the dashboard immediately triggers a prominent animated alert banner to prompt urgent human investigation."
+      ],
+      [
+        "Why does the review dialog refuse self-approval when a user attempts to resolve a finding against themselves?",
+        "To preserve internal audit integrity and prevent cover-ups, the backend and UI enforce strict dual-control separation. If the subject_user_id of the flagged finding matches the currently authenticated user's ID, the system returns SELF_APPROVAL_FORBIDDEN (403). The finding must be reviewed and resolved by an independent supervisor or compliance officer."
+      ],
+      [
+        "When is an audit review note mandatory when closing a flagged finding?",
+        "When changing a finding status to 'UnderReview', a note is optional. However, when rendering a definitive disposition—marking the finding as 'Resolved', 'FalsePositive', or 'Escalated'—an audit note of up to 2000 characters is strictly mandatory. Submissions without an explanation note are rejected with NOTE_REQUIRED."
+      ],
+      [
+        "How does the administrative audit trail maintain non-repudiation of hospital actions?",
+        "The audit log (GET /admin/audit-log) immutably records every critical hospital write, including user ID, staff name, entity type, entity ID, action name, IP address, workstation workspace, and timestamp. For modified entities, it stores both before_jsonb and after_jsonb states, enabling compliance surveyors to view visual state diffs across any historical transaction."
+      ]
+    ],
+    faqUr: [
+      [
+        "قاعدہ a50f18c5d4 کے تحت مشتبہ فائنڈنگز کو الزام کے بجائے 'برائے جائزہ نشان زد' کیوں لکھا جاتا ہے؟",
+        "قانونی قاعدہ a50f18c5d4 کا تقاضا ہے کہ خودکار سسٹم کے تمام سگنلز کو 'برائے جائزہ نشان زد' لکھا جائے نہ کہ کسی جرم کا الزام۔ چونکہ خودکار اسکینز ہنگامی صورتحال، جائز تصحیح یا تکنیکی مسائل کی وجہ سے بھی متحرک ہو سکتے ہیں، اس لیے یہ فائنڈنگز صرف انسانی جائزے کی رہنمائی کے لیے ہوتی ہیں تاکہ بغیر تحقیق کوئی غلط قدم نہ اٹھایا جائے۔"
+      ],
+      [
+        "انتہائی نازک (Critical) فائنڈنگ کیا ہوتی ہے اور سسٹم انتظامیہ کو کیسے مطلع کرتا ہے؟",
+        "سنگین واقعات جیسے VOIDED_BUT_EXAMINED (پرچی منسوخ کر دی گئی لیکن ڈاکٹر نے مریض کا معائنہ کر کے نوٹ فائنل کیا ہو) یا POST_DECEASED_CLINICAL_EDIT (موت کی تصدیق کے بعد کلینیکل ڈیٹا میں ردوبدل) کو انتہائی نازک قرار دیا جاتا ہے۔ قاعدہ a50f18c5d4 کے تحت سسٹم فوری طور پر اسکرین پر نمایاں سرخ الرٹ نوٹیفکیشن جاری کرتا ہے۔"
+      ],
+      [
+        "جب کوئی صارف اپنے ہی خلاف نشان زد فائنڈنگ کو حل کرنے کی کوشش کرے تو سسٹم کیوں روکتا ہے؟",
+        "آڈٹ کے شفاف اصولوں اور دھوکہ دہی کی روک تھام کے لیے خود اپنے جائزے کی سخت ممانعت ہے۔ اگر فائنڈنگ کے متعلقہ ملازم کا شناختی نمبر موجودہ صارف سے مماثل ہو تو سرور 403 SELF_APPROVAL_FORBIDDEN دیتا ہے۔ اس فائنڈنگ کی جانچ کسی دوسرے مجاز افسر یا مالک کو کرنی ہوتی ہے۔"
+      ],
+      [
+        "فائنڈنگ کو بند کرتے وقت وضاحتی آڈٹ نوٹ لکھنا کب لازمی ہوتا ہے؟",
+        "تحقیقات کے لیے 'UnderReview' کا انتخاب کرتے وقت نوٹ اختیاری ہے، لیکن جب فائنڈنگ پر حتمی فیصلہ دیا جائے یعنی 'Resolved' (حل شدہ)، 'FalsePositive' (غلط الارم) یا 'Escalated' (آگے بھیج دیا گیا)، تو 2000 حروف تک تفصیلی وضاحتی نوٹ لکھنا لازمی ہے ورنہ سسٹم درخواست مسترد کر دیتا ہے۔"
+      ],
+      [
+        "انتظامی آڈٹ ٹریل ہسپتال کے تمام ریکارڈز کی شفافیت کو کیسے برقرار رکھتی ہے؟",
+        "آڈٹ لاگ (GET /admin/audit-log) ہر اہم تبدیلی کا نا قابلِ تنسیخ ریکارڈ رکھتی ہے جس میں صارف کا نام، ایکشن، اینٹیٹی، تاریخ، آئی پی ایڈریس اور ورک اسپیس شامل ہے۔ کسی بھی تبدیلی کے لیے پرانی اور نئی حالت کا مکمل JSON ڈیٹا محفوظ رہتا ہے جس کا تقابلی جائزہ 'Diff' کے ذریعے با آسانی کیا جا سکتا ہے۔"
+      ]
+    ],
+  },
   owner_dashboard: {
     title: "Owner dashboard",
     titleUr: "مالک ڈیش بورڈ",
