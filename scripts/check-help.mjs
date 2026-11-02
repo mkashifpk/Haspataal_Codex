@@ -285,6 +285,7 @@ export function checkHelp({
       "PharmacyStorageLog",
       "LabAdmin",
       "DiagnosticPartners",
+      "OwnerDashboard",
     ].map((n) => `src/screens/${n}.tsx`),
   ];
   const used = new Set(),

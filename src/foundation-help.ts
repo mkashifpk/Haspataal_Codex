@@ -20,6 +20,7 @@ export const phase1Screens = [
 const approvalScreens = ["approval_queue", "charity_approvals"];
 // Coverage grows screen by screen; Phase 1 acceptance remains separate.
 export const deliveredHelpScreens = [
+  "owner_dashboard",
   "diagnostic_partners",
   "lab_admin",
   "pharmacy_storage_log",
@@ -150,6 +151,23 @@ const g = (
 // IDs are also attached to the actual controls. The build rejects missing
 // mappings and empty translations instead of treating a page as coverage.
 export const controlGuides: Record<string, ControlGuide> = {
+  // Screen 141: owner_dashboard (Hospital owner dashboard)
+  "owner_dashboard.btn_refresh": g(["owner_dashboard"], ["Refresh dashboard data", "ڈیش بورڈ ڈیٹا تازہ کریں"], ["Refreshes live general ledger balances, revenue trends, and patient volumes (GET /reports/pnl-flash).", "جنرل لیجر، آمدنی کے رجحانات اور مریضوں کا ڈیٹا فوری تازہ کرتا ہے۔"]),
+  "owner_dashboard.btn_filter_today": g(["owner_dashboard"], ["Filter today button", "آج کا فلٹر"], ["Sets date filter to current day.", "تاریخ کا فلٹر آج کے دن پر مقرر کرتا ہے۔"]),
+  "owner_dashboard.btn_filter_yesterday": g(["owner_dashboard"], ["Filter yesterday button", "کل کا فلٹر"], ["Sets date filter to previous day.", "تاریخ کا فلٹر گزرے ہوئے کل پر مقرر کرتا ہے۔"]),
+  "owner_dashboard.btn_filter_week": g(["owner_dashboard"], ["Filter last 7 days button", "پچھلے 7 دن کا فلٹر"], ["Sets date filter to past 7 days.", "پچھلے 7 دنوں کا دورانیہ منتخب کرتا ہے۔"]),
+  "owner_dashboard.btn_filter_month": g(["owner_dashboard"], ["Filter this month button", "رواں ماہ کا فلٹر"], ["Sets date filter to beginning of current calendar month.", "موجودہ مہینے کے آغاز سے اب تک کا ڈیٹا دکھاتا ہے۔"]),
+  "owner_dashboard.input_date_from": g(["owner_dashboard"], ["Report start date input", "شروعاتی تاریخ"], ["Filters report metrics from this date in YYYY-MM-DD format.", "رپورٹ کے آغاز کی تاریخ کا انتخاب۔"]),
+  "owner_dashboard.input_date_to": g(["owner_dashboard"], ["Report end date input", "اختتامی تاریخ"], ["Filters report metrics up to this date in YYYY-MM-DD format.", "رپورٹ کے اختتام کی تاریخ کا انتخاب۔"]),
+  "owner_dashboard.btn_apply_dates": g(["owner_dashboard"], ["Apply custom dates button", "تاریخ لاگو کریں"], ["Applies custom date range and reloads dashboard metrics.", "اپنی مرضی کی تاریخوں کا اطلاق کر کے ڈیٹا دوبارہ لوڈ کرتا ہے۔"]),
+  "owner_dashboard.tab_pnl_flash": g(["owner_dashboard"], ["P&L Flash tab button", "پی اینڈ ایل فلیش ٹیب"], ["Switches to live profit and loss summary, income streams, and overheads.", "براہ راست نفع و نقصان اور آمدنی و اخراجات کا تفصیلی منظر کھولتا ہے۔"]),
+  "owner_dashboard.tab_pnl_trend": g(["owner_dashboard"], ["Revenue trend tab button", "آمدنی کا رجحان ٹیب"], ["Switches to multi-day net income vs expenses trajectory (GET /reports/pnl-trend).", "متعدد دنوں کی آمدنی اور اخراجات کا رجحان دیکھنے کا ٹیب۔"]),
+  "owner_dashboard.tab_patient_volume": g(["owner_dashboard"], ["Patient volume tab button", "مریضوں کا حجم ٹیب"], ["Switches to visited vs examined consultation conversions (GET /reports/patient-volume).", "او پی ڈی ٹکٹس اور ڈاکٹر کے معائنے کی شرح کا تجزیہ کھولتا ہے۔"]),
+  "owner_dashboard.tab_trial_balance": g(["owner_dashboard"], ["GL trial balance tab button", "کھاتہ ٹرائل بیلنس ٹیب"], ["Switches to full general ledger chart of accounts trial balance (GET /finance/gl/trial-balance).", "جنرل لیجر کا مکمل ٹرائل بیلنس اور ڈیبٹ کریڈٹ برابری کی جانچ۔"]),
+  "owner_dashboard.select_trend_days": g(["owner_dashboard"], ["Trend horizon days selector", "رجحان کے دنوں کی تعداد"], ["Selects trend duration up to 92 days.", "آمدنی کے رجحان کے لیے 1 سے 92 دنوں کا انتخاب۔"]),
+  "owner_dashboard.input_doctor_search": g(["owner_dashboard"], ["Doctor volume search input", "ڈاکٹر یا شعبہ تلاش کریں"], ["Filters per-doctor performance table by doctor name or specialty.", "ڈاکٹر کے نام یا شعبے سے کارکردگی ٹیبل فلٹر کرتا ہے۔"]),
+  "owner_dashboard.select_tb_type": g(["owner_dashboard"], ["Trial balance type filter", "کھاتہ کی قسم کا فلٹر"], ["Filters trial balance by Asset, Liability, Equity, Income, Expense, or ContraIncome.", "اثاثہ، واجبات، آمدن، یا اخراجات کی قسم سے کھاتے فلٹر کرتا ہے۔"]),
+  "owner_dashboard.input_tb_search": g(["owner_dashboard"], ["Trial balance search input", "کھاتہ کوڈ یا نام تلاش کریں"], ["Filters trial balance rows by account code or ledger name.", "اکاؤنٹ کوڈ یا نام کے ذریعے کھاتہ تلاش کرتا ہے۔"]),
   // Screen 140: diagnostic_partners (Partner laboratories and imaging centres)
   "diagnostic_partners.btn_refresh": g(["diagnostic_partners"], ["Refresh partners list", "شراکت داروں کی فہرست تازہ کریں"], ["Reloads referral partners worklist and MOU validity statuses.", "شراکت دار لیبارٹریوں کی فہرست اور معاہدوں کی میعاد کا ڈیٹا تازہ کرتا ہے۔"]),
   "diagnostic_partners.select_service_filter": g(["diagnostic_partners"], ["Filter by service type", "سروس کی قسم کے لحاظ سے فلٹر"], ["Filters diagnostic partners offering Lab, Imaging, or Both.", "لیب، امیجنگ یا دونوں خدمات فراہم کرنے والے شراکت داروں کو الگ کرتا ہے۔"]),

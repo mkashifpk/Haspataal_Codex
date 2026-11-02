@@ -1,7 +1,7 @@
 # Haspataal checkpoint
 Last updated: 02 November 2026, Antigravity (Codex pair), Asia/Karachi.
 
-## Active request: Phase 7 Screen 141 `owner_dashboard` (Hospital owner dashboard)
+## Active request: Phase 7 Screen 142 `risk_dashboard` (Risk & compliance dashboard)
 Executing the Haspataal HMS Roadmap in dependency order along with all tests and MCP progress reporting:
 - **Phase 6 ("Theatre and sterile supply")**: 100% COMPLETE (Screens 109–132, Proposals 262–285).
 - **Phase 7 ("Finance, billing and back offices")**:
@@ -12,19 +12,63 @@ Executing the Haspataal HMS Roadmap in dependency order along with all tests and
   - Screen 137: **`drug_recalls`** ("Drug recall campaigns & quarantine management", Position 137, 63 points, workspace `pharmacy_admin`) — **COMPLETED** (commit `ba0b999`, Proposal **290** awaiting human review on `/docs -> My progress`).
   - Screen 138: **`pharmacy_storage_log`** ("Medicine storage log & temperature monitoring", Position 138, 51 points, workspace `pharmacy_admin`) — **COMPLETED** (commit `580e15a`, Proposal **291** awaiting human review on `/docs -> My progress`).
   - Screen 139: **`lab_admin`** ("Lab catalogue, panels, instruments & reagent inventory", Position 139, 76 points, workspace `lab_admin`) — **COMPLETED** (commit `7491e82`, Proposal **292** awaiting human review on `/docs -> My progress`).
-  - Screen 140: **`diagnostic_partners`** ("Partner laboratories and imaging centres", Position 140, 44 points, workspace `lab_admin`) — **COMPLETED** (Proposal **293** awaiting human review on `/docs -> My progress`).
-  - Screen 141: **`owner_dashboard`** ("Hospital owner dashboard", Position 141, 41 points, workspace `owner`) — **NEXT**.
-    - Scope: Executive revenue & collection metrics, occupancy rates, department performance, statutory clinical indicators, and hospital leadership overview.
+  - Screen 140: **`diagnostic_partners`** ("Partner laboratories and imaging centres", Position 140, 44 points, workspace `lab_admin`) — **COMPLETED** (commit `95561ed`, Proposal **293** awaiting human review on `/docs -> My progress`).
+  - Screen 141: **`owner_dashboard`** ("Hospital owner dashboard", Position 141, 41 points, workspace `owner_dashboard`) — **COMPLETED** (Proposal **294** awaiting human review on `/docs -> My progress`).
+  - Screen 142: **`risk_dashboard`** ("Risk & compliance dashboard", Position 142, 48 points, workspace `owner_dashboard`) — **NEXT** (Final screen of Phase 7!).
+    - Scope: Clinical risk assessment, statutory compliance indicators, sentinel events, risk heatmaps, incident mitigation, and executive compliance returns.
     - Next Concrete Actions:
-      1. Inspect `get_screen_bundle("owner_dashboard")` and save to `contracts/owner_dashboard.json`.
+      1. Inspect `get_screen_bundle("risk_dashboard")` and save to `contracts/risk_dashboard.json`.
       2. Generate TypeScript contracts via `generate_typescript`.
-      3. Create domain policies in `src/owner-dashboard-policy.ts`.
-      4. Implement UI `src/screens/OwnerDashboard.tsx`.
+      3. Create domain policies in `src/risk-dashboard-policy.ts`.
+      4. Implement UI `src/screens/RiskDashboard.tsx`.
       5. Wire into `src/App.tsx`, catalogue, task map, foundation help, authored handbook entry, and unit test suite.
       6. Run full verification suite (`npm run check:help`, `npm test`, `npx tsc --noEmit`, `npm run build`).
       7. Propose progress via `propose_progress`.
 
 ---
+
+### Completed Screen 141 (`owner_dashboard`) Checkpoint
+- **Workflow & Standards**: Executive governance, real-time financial oversight, and clinical operational conversion monitoring (`owner_dashboard`, Workspace `owner_dashboard`, Position 141, 41 points):
+  - **Live Ledger P&L Flash (`GET /reports/pnl-flash`):**
+    - High-level executive KPI tiles: Gross Income, Contra Income Deductions, Net Income, Operating Overheads, Daily Accrued Payroll Run-Rate (`payroll_run_rate`), and Net Profit / Loss with profit margin percentage calculation.
+    - Cash flow monitoring: Cash Collected at billing counters, refunds/waivers paid back, and net cash flow.
+    - Working capital exposure: Receivables outstanding (corporate & panel) and open vendor payables.
+    - Income stream breakdown table (stream, account_code, amount, and percentage share).
+    - Overheads and operating expenses breakdown table (category, account_code, amount, and share).
+  - **Revenue Trend & Trajectory (`GET /reports/pnl-trend`):**
+    - Multi-day trend trajectory with configurable horizons (7, 14, 30, 60, 90, up to 92 days max).
+    - Day-by-day table and indicators comparing Net Income vs Operating Expenses, computing operational daily margin and surplus/deficit badges.
+  - **Patient Volume & Conversion Funnel (`GET /reports/patient-volume`):**
+    - Consultation funnel: Visited (settled tickets), Examined (seen by doctor), and Attrition (purchased ticket but left unexamined without care).
+    - Conversion metrics: Examined Consultation Rate % and Patient Attrition Rate %.
+    - Unpaid tickets tracking (`issued_unpaid`), expired unpaid tickets, refunded/void tickets, and Inpatient Admissions count (`admissions`).
+    - Per-doctor performance table with real-time search by doctor name or specialty department.
+  - **General Ledger Trial Balance (`GET /finance/gl/trial-balance`):**
+    - Gated by `finance.gl.view` permission.
+    - Mathematical verification tile confirming ledger debit-credit equilibrium (`Total Debits === Total Credits`, variance = 0).
+    - Account type selector (All, Asset, Liability, Equity, Income, Expense, ContraIncome) and account search.
+    - Complete chart of accounts line table displaying account code, name, category, debits, credits, and net ending balances.
+  - **Statutory 60-Second Auto-Refresh (`rule:8e0811036c`):**
+    - Automatically synchronizes ledger figures every 60 seconds while visible without page reload; includes visible countdown indicator and immediate manual "Refresh Now" action.
+    - Subscribes to realtime event topics (`session.*`, `system.*`, `notification.created`).
+  - **Service Capability Gating:**
+    - Resolves `full`, `open_work` (warning banner "Restricted Mode: Hospital administrative services in restricted mode; reviewing live financial records without new operations"), `records`, `setup`, and `hidden` derived from server `GET /establishment views.screens`.
+- **Contracts**: `contracts/owner_dashboard.json` (4 endpoints, 1 statutory rule `rule:8e0811036c`, 15 rubric items).
+- **Domain Policies & Statutory Rules (`src/owner-dashboard-policy.ts`)**:
+  - `getOwnerDashboardCapabilityView`, `calculateOpdConversionMetrics`, `calculateDoctorMetrics`, `summarizePnlFlash`, `summarizeTrialBalance`, `validateDateRange`, `validateTrendDays`.
+  - Bilingual error dictionary (`OWNER_DASHBOARD_ERROR_MESSAGES`) covering `FORBIDDEN`, `VALIDATION_ERROR`, and `NETWORK_ERROR`.
+- **UI Architecture (`src/screens/OwnerDashboard.tsx`)**:
+  - Live 4-tab executive component wired into `src/App.tsx`, `src/foundation-catalogue.json` (4 tasks), `src/foundation-task-map.json` (4 controls), `src/foundation-help.ts` (16 interactive controls mapped), and `scripts/check-help.mjs`.
+  - Authored comprehensive handbook entry (`src/help.ts`) with bilingual title, purpose, 8 operational steps, and 5 role FAQs explaining live ledger P&L flash, daily payroll run-rate, 60-second auto-refresh, OPD attrition, and trial balance verification. Bundled screenshots in `public/handbook/owner_dashboard-en.png` and `owner_dashboard-ur.png`.
+- **Verification**:
+  - Automated unit tests: `tests/owner-dashboard.test.mjs` (8/8 passing).
+  - Help check: `npm run check:help` passed (140 screens, 3,502 controls, 2,504 groups, 69 FAQ seeds, 30 workspace guides).
+  - Help coverage test: `tests/help-coverage.test.mjs` (28/28 passing across 140 screens).
+  - Full test suite: `npm test` passed (710/710 passing across all 19 test suites).
+  - TypeScript compiler: `npx tsc --noEmit` passed with 0 errors.
+  - Production build: `npm run build` succeeded (`dist/assets/index-DplitTGb.js`).
+- **Proposal**:
+  - Proposal ID: **294** (status: `pending` on `/docs -> My progress`, build `index-DplitTGb.js`, 14 rubric items claimed, `q:fresh_data` left pending human review).
 
 ### Completed Screen 140 (`diagnostic_partners`) Checkpoint
 - **Workflow & Standards**: Statutory referral partner directory and contract governance workspace (`diagnostic_partners`, MSDS AAC 6, 14):

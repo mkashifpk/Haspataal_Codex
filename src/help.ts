@@ -10,6 +10,76 @@ export type HelpPage = {
   faqUr: [string, string][];
 };
 export const help: Record<string, HelpPage> = {
+  owner_dashboard: {
+    title: "Owner dashboard",
+    titleUr: "مالک ڈیش بورڈ",
+    purpose: "Executive governance, real-time financial oversight, and clinical operational conversion monitoring: (1) Live general ledger P&L flash (GET /reports/pnl-flash) displaying gross income, contra deductions, net income, operating expenses, daily payroll accrual run-rate, net profit/loss, cash flow collections, receivables, and payables; (2) Daily income and expense trajectory trends (GET /reports/pnl-trend) over configurable horizons up to 92 days; (3) Patient volume conversion analysis (GET /reports/patient-volume) tracking OPD visited tickets sold, doctor examined consultations, patient attrition rates, issued unpaid tickets, expirations, and inpatient admissions; (4) Per-doctor productivity and clinical conversion rates; (5) General ledger trial balance verification (GET /finance/gl/trial-balance) ensuring ledger debit-credit equality; and (6) Statutory 60-second periodic live ledger synchronization under Rule 8e0811036c.",
+    purposeUr: "ہسپتال مالکان اور انتظامیہ کے لیے اعلیٰ سطحی مالیاتی نگرانی، روزانہ نفع و نقصان اور کلینیکل کارکردگی کا ڈیش بورڈ: (1) جنرل لیجر سے براہ راست پی اینڈ ایل فلیش (GET /reports/pnl-flash) جس میں مجموعی آمدنی، کٹوتیاں، خالص آمدنی، اخراجات، روزانہ تنخواہوں کا تخمینہ، نفع و نقصان، کیش وصولی، واجب الوصول اور واجب الادا رقوم شامل ہیں؛ (2) 92 دن تک کی روزانہ آمدنی اور اخراجات کا رجحان (GET /reports/pnl-trend)؛ (3) مریضوں کے حجم کی جانچ (GET /reports/patient-volume) جس میں او پی ڈی ٹکٹس، ڈاکٹر کے معائنے، بغیر معائنہ واپس جانے والے مریضوں کی شرح، غیر ادا شدہ ٹکٹس اور داخلے شامل ہیں؛ (4) ڈاکٹروں کی کارکردگی اور معائنے کی شرح کا جائزہ؛ (5) جنرل لیجر ٹرائل بیلنس کی تصدیق (GET /finance/gl/trial-balance) تاکہ ڈیبٹ اور کریڈٹ کی برابری یقینی بنائی جا سکے؛ اور (6) قانونی قاعدہ 8e0811036c کے تحت ہر 60 سیکنڈ بعد لائیو لیجر بیلنس کا خودکار ریفریش۔",
+    steps: [
+      "Open the Owner Dashboard from the Owner / Hospital Admin workspace menu.",
+      "Review the top executive summary tiles: Gross Income, Net Income, Operating Expenses, Daily Payroll Run-Rate, and Net Profit/Loss.",
+      "Inspect Cash Flow metrics to verify net cash collected at billing counters versus pending receivables and open supplier payables.",
+      "Use the period filter buttons (Today, Yesterday, Last 7 Days, This Month) or custom date fields to focus on specific reporting periods.",
+      "Switch to the 'Revenue Trend' tab to examine multi-day income versus operating expense trajectory across 7 to 92 days.",
+      "Switch to the 'Visited vs Examined' tab to analyze OPD consultation conversions, attrition rates, and per-doctor examination volumes.",
+      "Switch to the 'GL Trial Balance' tab to verify general ledger balance equality (Total Debits = Total Credits) and inspect individual account lines.",
+      "Observe the 60-second auto-refresh timer under Rule 8e0811036c or click 'Refresh Now' for immediate live synchronization with the ledger.",
+    ],
+    stepsUr: [
+      "مالک / ہسپتال ایڈمنسٹریٹر ورک اسپیس سے اونر ڈیش بورڈ کھولیں۔",
+      "اعلیٰ سطحی مالیاتی کارڈز کا جائزہ لیں: مجموعی آمدنی، خالص آمدنی، آپریٹنگ اخراجات، تنخواہوں کا تخمینہ اور خالص منافع یا نقصان۔",
+      "کیش فلو میٹرکس کی جانچ کریں تاکہ کاؤنٹرز سے وصول شدہ کیش، پینل کے واجب الوصول اور سپلائرز کے واجب الادا بلوں کا تقابل کیا جا سکے۔",
+      "مطلوبہ رپورٹنگ دورانیے کے لیے پری سیٹ بٹن (آج، کل، پچھلے 7 دن، رواں ماہ) یا اپنی مرضی کی تاریخ کا فلٹر استعمال کریں۔",
+      "7 سے 92 دنوں کے دوران روزانہ آمدنی بمقابلہ اخراجات کا گراف اور مارجن دیکھنے کے لیے 'آمدنی کا رجحان' ٹیب منتخب کریں۔",
+      "او پی ڈی ٹکٹس کی فروخت، ڈاکٹر کے معائنے کی شرح اور بغیر معائنہ واپس جانے والے مریضوں کی شرح جانچنے کے لیے 'مریضوں کا حجم' ٹیب دیکھیں۔",
+      "کھاتہ جات کے ڈیبٹ اور کریڈٹ کی برابری جانچنے اور تمام کھاتوں کی تفصیل دیکھنے کے لیے 'کھاتہ ٹرائل بیلنس' ٹیب کھولیں۔",
+      "قاعدہ 8e0811036c کے تحت 60 سیکنڈ کے خودکار ریفریش پر نظر رکھیں یا فوری تازہ اعداد و شمار کے لیے 'تازہ دم کریں' پر کلک کریں۔",
+    ],
+    faq: [
+      [
+        "What does the Live P&L Flash show and how are staff salaries represented before monthly payroll?",
+        "The Live P&L Flash (GET /reports/pnl-flash) extracts real-time revenue and overheads directly from the hospital's general ledger. Because employee payroll is traditionally computed and posted at month-end, the backend calculates an accrued daily run-rate (payroll_run_rate) based on active employee contracts. This ensures the owner sees true daily operational profitability without waiting for monthly payroll journals."
+      ],
+      [
+        "How does the 60-second automatic refresh operate under statutory Rule 8e0811036c?",
+        "Under Rule 8e0811036c, figures on the owner dashboard are derived live from the double-entry accounting ledger. While the screen remains visible to the user, an automated 60-second background timer silently re-queries financial endpoints to reflect fresh cash collections and fee settlements without requiring manual page reloads."
+      ],
+      [
+        "How is OPD patient attrition defined and measured in the patient volume report?",
+        "In GET /reports/patient-volume, 'Visited' counts all consultation tickets sold where the fee was settled (via cash, credit, panel, or approved waiver). 'Examined' tracks patients who were successfully consulted by a physician. 'Attrition' represents patients who purchased a ticket but departed without being examined. The attrition rate percentage (attrition / visited * 100) highlights clinic wait-time bottlenecks."
+      ],
+      [
+        "What does the General Ledger Trial Balance verify on the owner dashboard?",
+        "The Trial Balance (GET /finance/gl/trial-balance) lists every active account across Assets, Liabilities, Equity, Income, Expenses, and Contra Income. It mathematically verifies that total debit balances equal total credit balances. If variance is zero, the ledger is in equilibrium; any non-zero variance triggers an amber audit alert."
+      ],
+      [
+        "What user roles and permissions are required to access this dashboard?",
+        "Executive P&L flash, trend analysis, and patient volume require the finance.dashboard.owner permission (held by owner, hospital_admin, hospital_director, and clinic_director). Viewing the full General Ledger Trial Balance requires finance.gl.view (held by accountants and executive leadership)."
+      ]
+    ],
+    faqUr: [
+      [
+        "پی اینڈ ایل فلیش کیا دکھاتا ہے اور ماہانہ تنخواہیں پوسٹ ہونے سے پہلے تنخواہوں کا خرچہ کیسے شامل ہوتا ہے؟",
+        "لائیو پی اینڈ ایل فلیش (GET /reports/pnl-flash) جنرل لیجر سے براہ راست آمدنی اور اخراجات لیتا ہے۔ چونکہ تنخواہیں مہینے کے آخر میں پوسٹ ہوتی ہیں، اس لیے سسٹم تمام فعال ملازمین کے معاہدوں کی بنیاد پر روزانہ تنخواہوں کا تخمینہ (payroll_run_rate) شامل کرتا ہے تاکہ مالک کو ہسپتال کا حقیقی روزانہ نفع و نقصان نظر آئے۔"
+      ],
+      [
+        "قانونی قاعدہ 8e0811036c کے تحت 60 سیکنڈ کا خودکار ریفریش کیسے کام کرتا ہے؟",
+        "قاعدہ 8e0811036c کے مطابق اونر ڈیش بورڈ کے تمام اعداد و شمار براہ راست مالیاتی کھاتوں سے جڑے ہوتے ہیں۔ جب تک اسکرین کھلی رہتی ہے، ایک خودکار 60 سیکنڈ کا ٹائمر ہر منٹ بعد بیک گراؤنڈ میں تازہ کیش اور آمدنی لوڈ کرتا ہے تاکہ صارف کو صفحہ ری لوڈ نہ کرنا پڑے۔"
+      ],
+      [
+        "مریضوں کے حجم میں 'بغیر معائنہ واپس جانے' (Attrition) کی تعریف اور پیمائش کیسے ہوتی ہے؟",
+        "رپورٹ میں 'Visited' سے مراد وہ تمام مریض ہیں جنہوں نے کاؤنٹر سے فیس ادا کر کے پرچی حاصل کی۔ 'Examined' وہ مریض ہیں جن کا ڈاکٹر نے معائنہ کیا۔ 'Attrition' ان مریضوں کو ظاہر کرتا ہے جو پرچی لینے کے بعد لمبی قطار یا تاخیر کی وجہ سے ڈاکٹر کو دکھائے بغیر چلے گئے۔ یہ شرح او پی ڈی سروس کے معیار کو پرکھنے میں مدد دیتی ہے۔"
+      ],
+      [
+        "ڈیش بورڈ پر جنرل لیجر ٹرائل بیلنس کیا ثابت کرتا ہے؟",
+        "ٹرائل بیلنس (GET /finance/gl/trial-balance) ہسپتال کے تمام اثاثوں، واجبات، آمدنی اور اخراجات کے کھاتوں کی فہرست دکھاتا ہے۔ یہ ریاضیاتی طور پر تصدیق کرتا ہے کہ تمام کھاتوں کے ڈیبٹ کا مجموعہ کریڈٹ کے برابر ہے۔ اگر فرق صفر ہو تو اکاؤنٹس درست اور متوازن ہیں۔"
+      ],
+      [
+        "اس ڈیش بورڈ اور ٹرائل بیلنس کو دیکھنے کے لیے کن کرداروں اور اجازت ناموں کی ضرورت ہے؟",
+        "مالیاتی پی اینڈ ایل فلیش، رجحانات اور مریضوں کے حجم کے لیے finance.dashboard.owner کی اجازت ضروری ہے جو مالک، ہسپتال ایڈمن اور ڈائریکٹر کے پاس ہوتی ہے۔ مکمل کھاتہ ٹرائل بیلنس دیکھنے کے لیے finance.gl.view درکار ہے جو اکاؤنٹنٹ اور انتظامی سربراہان کو حاصل ہوتی ہے۔"
+      ]
+    ],
+  },
   diagnostic_partners: {
     title: "Partner laboratories and imaging centres",
     titleUr: "تشخیصی شراکت دار لیبارٹریاں اور امیجنگ سینٹرز",

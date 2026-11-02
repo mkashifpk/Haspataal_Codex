@@ -56,6 +56,7 @@ import { OtSettlement } from './screens/OtSettlement';
 import { AccountantCockpit } from './screens/AccountantCockpit';
 import { BillingAdmin } from './screens/BillingAdmin';
 import { DiagnosticPartners } from './screens/DiagnosticPartners';
+import { OwnerDashboard } from './screens/OwnerDashboard';
 import { LabAdmin } from './screens/LabAdmin';
 import { PharmacyStorageLog } from './screens/PharmacyStorageLog';
 import { PharmacyAdmin } from './screens/PharmacyAdmin';
@@ -1504,6 +1505,7 @@ export function App() {
               {screen === 'transfusion_bedside_er' && est && <TransfusionBedsideER key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} />}
               {screen === 'transfusion_bedside_ot' && est && <TransfusionBedsideOT key={user.user_id} user={user} establishment={est} connected={connected} stream={stream} />}
               {screen === 'drug_recalls' && <DrugRecalls key={user.user_id} user={user} establishment={est} connected={connected} timeZone={meta?.hospital_timezone} onNavigateScreen={(s) => navigate(s)} />}
+              {screen === 'owner_dashboard' && <OwnerDashboard key={user.user_id} user={user} establishment={est} connected={connected} timeZone={meta?.hospital_timezone} onNavigateScreen={(s) => navigate(s)} />}
               {screen === 'diagnostic_partners' && <DiagnosticPartners key={user.user_id} user={user} establishment={est} connected={connected} timeZone={meta?.hospital_timezone} onNavigateScreen={(s) => navigate(s)} />}
               {screen === 'lab_admin' && <LabAdmin key={user.user_id} user={user} establishment={est} connected={connected} timeZone={meta?.hospital_timezone} onNavigateScreen={(s) => navigate(s)} />}
               {screen === 'pharmacy_storage_log' && <PharmacyStorageLog key={user.user_id} user={user} establishment={est} connected={connected} timeZone={meta?.hospital_timezone} onNavigateScreen={(s) => navigate(s)} />}
