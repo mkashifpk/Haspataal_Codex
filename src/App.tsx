@@ -62,6 +62,7 @@ import { OnboardingWizard } from './screens/OnboardingWizard';
 import { ITConsole } from './screens/ITConsole';
 import { StaffDirectory } from './screens/StaffDirectory';
 import { Badges } from './screens/Badges';
+import { IdCard } from './screens/IdCard';
 import { LabAdmin } from './screens/LabAdmin';
 import { PharmacyStorageLog } from './screens/PharmacyStorageLog';
 import { PharmacyAdmin } from './screens/PharmacyAdmin';
@@ -845,6 +846,7 @@ export function App() {
       queue_management: ["opd.queue.view", "opd.ticket.view"],
       refund_waiver_credit: ["opd.ticket.view", "opd.queue.doctor"],
       cash_back_prompts: ["opd.ticket.view", "opd.queue.doctor"],
+      id_card: ["hr.idcard.print"],
     };
     if (
       (frontDeskScreens.has(next) &&
@@ -1515,6 +1517,7 @@ export function App() {
               {screen === 'it_console' && <ITConsole key={user.user_id} user={user} establishment={est} connected={connected} timeZone={meta?.hospital_timezone} onNavigateScreen={(s) => navigate(s)} />}
               {screen === 'staff_directory' && <StaffDirectory key={user.user_id} user={user} establishment={est} connected={connected} timeZone={meta?.hospital_timezone} onNavigateScreen={(s) => navigate(s)} />}
               {screen === 'badges' && <Badges key={user.user_id} user={user} establishment={est} connected={connected} timeZone={meta?.hospital_timezone} onNavigateScreen={(s) => navigate(s)} />}
+              {screen === 'id_card' && <IdCard key={user.user_id} currentUser={user} establishment={est} permissions={user.permissions} onNavigateToStaff={(id) => navigate('staff_directory')} />}
               {screen === 'owner_dashboard' && <OwnerDashboard key={user.user_id} user={user} establishment={est} connected={connected} timeZone={meta?.hospital_timezone} onNavigateScreen={(s) => navigate(s)} />}
               {screen === 'diagnostic_partners' && <DiagnosticPartners key={user.user_id} user={user} establishment={est} connected={connected} timeZone={meta?.hospital_timezone} onNavigateScreen={(s) => navigate(s)} />}
               {screen === 'lab_admin' && <LabAdmin key={user.user_id} user={user} establishment={est} connected={connected} timeZone={meta?.hospital_timezone} onNavigateScreen={(s) => navigate(s)} />}

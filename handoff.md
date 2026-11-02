@@ -1,7 +1,7 @@
 # Haspataal checkpoint
 Last updated: 03 November 2026, Antigravity (Codex pair), Asia/Karachi.
 
-## Active request: Phase 8 Screen 147 `id_card` (Staff ID card designer & print)
+## Active request: Phase 8 Screen 148 `duty_roster_hr` (Duty rosters & shift patterns)
 Executing the Haspataal HMS Roadmap in dependency order along with all tests and MCP progress reporting:
 - **Phase 7 ("Finance, billing and back offices")**: 100% COMPLETE (Screens 133–142, Proposals 286–295).
 - **Phase 8 ("People, facility and IT")**:
@@ -9,9 +9,45 @@ Executing the Haspataal HMS Roadmap in dependency order along with all tests and
   - Screen 144: **`it_console`** ("IT administration console", Position 144, 179 points, workspace `super_admin`) — **COMPLETED** (Proposal **297** awaiting human review on `/docs -> My progress`).
   - Screen 145: **`staff_directory`** ("Staff directory & records", Position 145, 56 points, workspace `hr`) — **COMPLETED** (Proposal **298** awaiting human review on `/docs -> My progress`).
   - Screen 146: **`badges`** ("Security & staff badges", Position 146, 47 points, workspace `hr`) — **COMPLETED** (Proposal **299** awaiting human review on `/docs -> My progress`).
-  - Screen 147: **`id_card`** ("Staff ID card designer & print", Position 147, 33 points, workspace `hr`) — **NEXT**.
-    - Scope: Printable staff ID card designer, dual barcode/QR rendering, photo vault embedding, and thermal card printer output.
-    - Next Concrete Step: Retrieve `get_screen_bundle("id_card")`, save contract, generate typescript client, and begin implementation.
+  - Screen 147: **`id_card`** ("Staff ID card designer & print", Position 147, 33 points, workspace `hr`) — **COMPLETED** (Proposal **300** awaiting human review on `/docs -> My progress`).
+  - Screen 148: **`duty_roster_hr`** ("Duty rosters & shift patterns", Position 148, 94 points, workspace `hr`) — **NEXT**.
+    - Scope: Shift scheduling, duty rosters, department shifts, pattern templates, and roster publication.
+    - Next Concrete Step: Retrieve `get_screen_bundle("duty_roster_hr")`, save contract, generate typescript client, and begin implementation.
+
+---
+
+### Completed Screen 147 (`id_card`) Checkpoint
+- **Workflow & Standards**: Official staff credential ID card designer and PVC card printer integration (`id_card`, Workspace `hr`, Position 147, 33 points):
+  - **Staff Lookup & Designer Payload (`GET /hr/employees/{employee_id}/id-card`):**
+    - Retrieves complete CR80 card designer payload with standard dimensions (85.6mm x 54.0mm), employee demographics, medical licenses, blood group, dual inline barcode and QR SVGs, and access QR badge if issued (rule:1cc0496368). Gated to permission `hr.idcard.print`.
+  - **Terminal Hardware & Card Printer Discovery (`GET /terminals/whoami`):**
+    - Discovers workstation identity, client IP, location label, and mapped card printer (`card_printer`, `card_printer_address`).
+    - Informative fallback indicator when unmapped, routing to system default printer or browser print dialog without blocking the workflow.
+  - **High-Fidelity CR80 Card Preview & Print Output:**
+    - Standard CR80 layout preview with hospital branding, employee photo vault integration, full name, designation, department, employee number, blood group badge, medical license, and barcode/QR SVGs.
+    - Prominent access QR badge section rendered per Rule `rule:1cc0496368` for facilities using barcode scanner stations at doors without RFID hardware.
+    - Interactive options: Front side, back side hospital policies/emergency contacts, or dual-sided layout; 14mm lanyard slot and 2mm print bleed boundary toggle; color theme presets (Hospital Navy, Clinical Teal, Executive Slate).
+    - Isolated print stylesheet (`@media print` targeting `#cr80-card-print-target`) with zero margins for borderless thermal card printing.
+    - Idempotent reprint recovery: physical printing is separated from database writes; card reprint retries safely without record modification.
+  - **Service Capability Gating:**
+    - Resolves `full`, `open_work` (operational preview and print active), `records` (read-only layout inspection), `setup` (card printer routing setup), and `hidden` derived from server `GET /establishment views.screens`.
+- **Contracts**: `contracts/id_card.json` (2 endpoints, 12 rubric items).
+- **Domain Policies & Rules (`src/id-card-policy.ts`)**:
+  - `getIdCardCapabilityView`, `getCardPrinterStatus`, `validateEmployeeIdInput`, `formatCardSize`, and `ID_CARD_ERROR_MESSAGES`.
+- **UI Architecture (`src/screens/IdCard.tsx`)**:
+  - Wired into `src/App.tsx`, `scripts/check-help.mjs`, `src/foundation-catalogue.json` (2 tasks), `src/foundation-task-map.json` (2 controls mapped), and `src/foundation-help.ts` (15 interactive controls mapped).
+  - Authored comprehensive handbook entry and 5 role FAQs in `src/help.ts`; verified bundled screenshots in `public/handbook/id_card-en.png` and `id_card-ur.png`.
+- **Verification**:
+  - Automated unit tests: `tests/id-card.test.mjs` passed (6/6 tests).
+  - Help check: `npm run check:help` passed (146 screens, 3,674 controls, 2,656 groups, 69 FAQ seeds, 30 workspace guides).
+  - Help coverage test: `tests/help-coverage.test.mjs` passed (28/28 tests across 146 screens).
+  - Full test suite: `npm test` passed (750/750 tests across all 19 test suites).
+  - TypeScript compiler: `npx.cmd tsc --noEmit` passed with 0 errors.
+  - Production build: `npm.cmd run build` succeeded (`dist/assets/index-Ci0Xn3_C.js`).
+- **Proposal**:
+  - Proposal ID: **300** (status: `pending` on `/docs -> My progress`, build `index-Ci0Xn3_C.js`, 11 rubric items claimed, `q:fresh_data` left pending human review).
+
+---
 
 ---
 

@@ -20,6 +20,7 @@ export const phase1Screens = [
 const approvalScreens = ["approval_queue", "charity_approvals"];
 // Coverage grows screen by screen; Phase 1 acceptance remains separate.
 export const deliveredHelpScreens = [
+  "id_card",
   "badges",
   "staff_directory",
   "it_console",
@@ -156,6 +157,23 @@ const g = (
 // IDs are also attached to the actual controls. The build rejects missing
 // mappings and empty translations instead of treating a page as coverage.
 export const controlGuides: Record<string, ControlGuide> = {
+  // Screen 147: id_card (Staff ID card designer & print)
+  "id_card.btn_f1_help": g(["id_card"], ["F1 Help button", "مدد کا بٹن"], ["Opens comprehensive contextual handbook and role FAQs for Staff ID card designer.", "عملے کے شناختی کارڈ ڈیزائنر کے لیے جامع رہنمائی اور عمومی سوالات کھولتا ہے۔"]),
+  "id_card.btn_refresh": g(["id_card"], ["Refresh card button", "کارڈ تازہ کریں"], ["Reloads official staff ID card designer payload from server.", "سرور سے ملازم کے شناختی کارڈ کا لے آؤٹ دوبارہ حاصل کرتا ہے۔"]),
+  "id_card.btn_check_printer": g(["id_card"], ["Re-check printer button", "پرنٹر کی تصدیق"], ["Queries terminal identity to check mapped card printer hardware status (GET /terminals/whoami).", "منسلک کارڈ پرنٹر کی ہارڈ ویئر حیثیت معلوم کرنے کے لیے ٹرمینل کی شناخت حاصل کرتا ہے۔"]),
+  "id_card.input_employee_id": g(["id_card"], ["Staff Employee ID input", "ملازم کا شناختی نمبر"], ["Specifies staff member database ID to load official CR80 card designer payload.", "سرکاری شناختی کارڈ ڈیزائنر لوڈ کرنے کے لیے ملازم کا شناختی نمبر درج کریں۔"]),
+  "id_card.btn_load_card": g(["id_card"], ["Load card button", "کارڈ لوڈ کریں"], ["Fetches official CR80 card designer payload with barcodes and employee details (GET /hr/employees/{employee_id}/id-card).", "بارکوڈز اور ملازم کی تفصیلات کے ساتھ سرکاری شناختی کارڈ کا لے آؤٹ حاصل کرتا ہے۔"]),
+  "id_card.btn_quick_emp_4": g(["id_card"], ["Quick select Staff Nurse #4 button", "اسٹاف نرس 4 منتخب کریں"], ["Quickly selects demo staff nurse #4 for rapid card layout inspection.", "فوری معائنے کے لیے ڈیمو اسٹاف نرس #4 کا انتخاب کرتا ہے۔"]),
+  "id_card.btn_quick_emp_1": g(["id_card"], ["Quick select Employee #1 button", "ملازم 1 منتخب کریں"], ["Quickly selects demo employee #1 for card inspection.", "شناختی کارڈ کے معائنے کے لیے ملازم #1 کا انتخاب کرتا ہے۔"]),
+  "id_card.select_orientation": g(["id_card"], ["Display side selector", "رخ کا انتخاب"], ["Switches preview between Front Side, Back Side, or Dual Sided card layouts.", "کارڈ کا سامنے، پچھلا یا دونوں اطراف کا لے آؤٹ منتخب کرتا ہے۔"]),
+  "id_card.btn_toggle_guide": g(["id_card"], ["Toggle lanyard slot guide checkbox", "لینیارڈ گائیڈ ٹوگل"], ["Toggles visual 14mm lanyard punch and 2mm print bleed boundary guidelines.", "کارڈ پر لینیارڈ سلاٹ پنچ اور پرنٹنگ مارجن کی گائیڈ لائنز دکھاتا یا چھپاتا ہے۔"]),
+  "id_card.btn_toggle_theme": g(["id_card"], ["Standard theme preset button", "اسٹینڈرڈ تھیم بٹن"], ["Applies official hospital navy header style to CR80 card preview.", "کارڈ کے پیش نظارہ پر ہسپتال کا معیاری نیوی تھیم لاگو کرتا ہے۔"]),
+  "id_card.btn_theme_clinical": g(["id_card"], ["Clinical theme preset button", "طبی تھیم بٹن"], ["Applies clinical teal header style for medical and nursing personnel.", "طبی عملے کے لیے سبز کلینیکل تھیم لاگو کرتا ہے۔"]),
+  "id_card.btn_theme_executive": g(["id_card"], ["Executive theme preset button", "انتظامی تھیم بٹن"], ["Applies executive slate header style for administrative leadership.", "انتظامی عہدیداروں کے لیے ایگزیکٹو سلیٹ تھیم لاگو کرتا ہے۔"]),
+  "id_card.btn_print": g(["id_card"], ["Print to PVC card printer button", "کارڈ پرنٹر پر پرنٹ کریں"], ["Dispatches CR80 formatted ID card layout with barcodes to mapped card printer.", "بارکوڈز کے ساتھ تیار شدہ شناختی کارڈ منسلک کارڈ پرنٹر پر بھیجتا ہے۔"]),
+  "id_card.btn_export_json": g(["id_card"], ["Export designer JSON button", "ڈیزائنر ڈیٹا محفوظ کریں"], ["Downloads card designer payload JSON for technical audit and verification.", "تکنیکی آڈٹ اور تصدیق کے لیے کارڈ کا ڈیزائنر ڈیٹا محفوظ کرتا ہے۔"]),
+  "id_card.btn_reprint_recovery": g(["id_card"], ["Reprint card recovery button", "دوبارہ پرنٹ کریں"], ["Retries card print dispatch without modifying employee records.", "ملازم کے ریکارڈ میں تبدیلی کے بغیر کارڈ کو محفوظ طریقے سے دوبارہ پرنٹ کرتا ہے۔"]),
+
   // Screen 146: badges (Security & staff badges)
   "badges.emp_id_input": g(["badges"], ["Employee ID input", "ملازم کی شناختی ان پٹ"], ["Specifies staff member database ID to load active credentials.", "ملازم کا شناختی نمبر درج کر کے فعال اسناد حاصل کریں۔"]),
   "badges.load_employee": g(["badges"], ["Load employee credentials button", "ملازم لوڈ کریں"], ["Fetches employee profile, active access badges, and employment status (GET /hr/employees/{employee_id}).", "ملازم کی پروفائل، فعال سیکیورٹی بیجز اور اسٹیٹس حاصل کرتا ہے۔"]),

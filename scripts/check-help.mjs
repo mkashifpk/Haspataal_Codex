@@ -290,6 +290,7 @@ export function checkHelp({
       "OnboardingWizard",
       "StaffDirectory",
       "Badges",
+      "IdCard",
     ].map((n) => `src/screens/${n}.tsx`),
   ];
   const used = new Set(),

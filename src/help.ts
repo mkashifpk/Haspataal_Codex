@@ -10,6 +10,72 @@ export type HelpPage = {
   faqUr: [string, string][];
 };
 export const help: Record<string, HelpPage> = {
+  id_card: {
+    title: "Staff ID card designer & print",
+    titleUr: "عملے کے شناختی کارڈ کا ڈیزائنر اور پرنٹ",
+    purpose: "Comprehensive hospital staff ID card designer, CR80 standard card preview, dual barcode/QR rendering, photo verification, and thermal card printer output: (1) Staff ID card designer payload retrieval with official hospital branding, employee demographics, medical licenses, and blood group (GET /hr/employees/{employee_id}/id-card); (2) Real-time terminal identity and mapped card printer discovery (GET /terminals/whoami); (3) Standard CR80 PVC card rendering (85.6mm x 54.0mm) with inline barcode and QR SVGs, photo vault integration, and emergency contact reverse side; (4) Printed security badge QR integration per Rule rule:1cc0496368 for door kiosks without RFID hardware; and (5) Thermal PVC card printer dispatch with isolated print stylesheet and safe idempotent reprint recovery.",
+    purposeUr: "ہسپتال کے عملے کے شناختی کارڈ کا جامع ڈیزائنر، معیاری سی آر 80 پی وی سی لے آؤٹ، ڈوئل بارکوڈ اور کیو آر کوڈ، تصویر کی تصدیق اور تھرمل کارڈ پرنٹر پر ترسیل: (1) ہسپتال کی برانڈنگ، ملازم کی تفصیلات، پریکٹس لائسنس اور بلڈ گروپ کے ساتھ سرکاری شناختی کارڈ کا لے آؤٹ حاصل کرنا (GET /hr/employees/{employee_id}/id-card)؛ (2) ٹرمینل کی شناخت اور منسلک کارڈ پرنٹر کی تصدیق (GET /terminals/whoami)؛ (3) 85.6mm ضرب 54.0mm کے معیاری سائز، بارکوڈز، تصویر اور ہنگامی رابطوں کے ساتھ کارڈ کا پیش نظارہ؛ (4) قاعدہ rule:1cc0496368 کے تحت آر ایف آئی ڈی کے بغیر ڈور کیوسک کے لیے کیو آر بیج کا اندراج؛ اور (5) کارڈ پرنٹر پر محفوظ پرنٹنگ اور دوبارہ پرنٹ کرنے کی سہولت۔",
+    steps: [
+      "Staff Lookup: Enter the employee's database ID or use quick select buttons, then click 'Load Card' (GET /hr/employees/{employee_id}/id-card) to retrieve the official layout payload.",
+      "Verify Card Printer Routing: Inspect the terminal identity status bar (GET /terminals/whoami) to verify whether a dedicated card printer is mapped to this workstation.",
+      "Review CR80 Card Layout: Inspect front side preview (85.6mm x 54.0mm) displaying hospital branding, employee photo, full name, designation, department, employee number, blood group, medical license, barcode SVG, and QR code SVG.",
+      "Inspect Security Badge QR: If the employee holds an active Barcode credential, inspect the prominent 'Access QR Badge' section rendered per Rule rule:1cc0496368 for door scanner kiosks.",
+      "Customize Preview Options: Switch display side to inspect the reverse side policies and emergency contacts, toggle lanyard slot guidelines, or select thematic presets (Hospital Navy, Clinical Teal, Executive Slate).",
+      "Print to Card Printer: Click 'Print to PVC Card Printer' to dispatch the card to the mapped printer. If print jams or fails, click 'Reprint Card' to retry without repeating data writes.",
+    ],
+    stepsUr: [
+      "ملازم کی تلاش: ملازم کا شناختی نمبر درج کریں یا کوئیک سلیکٹ بٹن استعمال کریں، پھر 'کارڈ لوڈ کریں' دبائیں (GET /hr/employees/{employee_id}/id-card) تاکہ سرکاری کارڈ کا لے آؤٹ حاصل ہو۔",
+      "کارڈ پرنٹر روٹنگ کی جانچ: ٹرمینل اسٹیٹس بار (GET /terminals/whoami) میں دیکھیں کہ آیا اس کمپیوٹر سے مخصوص کارڈ پرنٹر منسلک ہے یا نہیں۔",
+      "سی آر 80 لے آؤٹ کا معائنہ: 85.6 ضرب 54.0 ملی میٹر کے معیاری سائز پر مشتمل فرنٹ سائیڈ دیکھیں جس میں ہسپتال کا نام، تصویر، ملازم کا نام، عہدہ، شعبہ، ملازم نمبر، بلڈ گروپ، لائسنس اور بارکوڈز شامل ہیں۔",
+      "سیکیورٹی بیج کیو آر کی جانچ: اگر ملازم کے پاس فعال بارکوڈ بیج ہے، تو قاعدہ rule:1cc0496368 کے تحت ڈور اسکینرز کے لیے ظاہر ہونے والا رسائی کیو آر کوڈ دیکھیں۔",
+      "پیش نظارہ کے اختیارات: پچھلے رخ کے ہسپتال قوانین اور ایمرجنسی رابطے دیکھنے کے لیے رخ تبدیل کریں، لینیارڈ پنچ گائیڈ دکھائیں یا مختلف رنگین تھیمز منتخب کریں۔",
+      "کارڈ پرنٹر پر پرنٹ کریں: 'کارڈ پرنٹر پر پرنٹ کریں' دبا کر کارڈ بھیجیں۔ پرنٹ فیل ہونے کی صورت میں بغیر ریکارڈ بدلے 'دوبارہ پرنٹ کریں' بٹن دبائیں۔",
+    ],
+    faq: [
+      [
+        "What physical card dimensions does the staff ID card conform to and which card stock is required?",
+        "The staff ID card designer strictly conforms to the international standard CR80 ISO/IEC 7810 ID-1 format (85.6mm × 54.0mm with 3.18mm rounded corner radii). Standard thermal or retransfer card printers use CR80 PVC or composite plastic card stock (thickness 30 mil / 0.76mm). The isolated print stylesheet enforces exact 85.6mm × 54.0mm bounds with zero margin to avoid clipping on edge-to-edge card printers.",
+      ],
+      [
+        "How does the workstation detect whether a physical card printer is available?",
+        "On screen load, the client queries GET /terminals/whoami to read this terminal's registered location, client IP, and hardware routing mapping. If 'card_printer' and 'card_printer_address' are configured in IT Administration Console, the screen displays a green status badge and dispatches jobs directly to that device. If unmapped, a clear warning explains that print output will route to the system default printer or browser print dialog.",
+      ],
+      [
+        "How does the printed access QR badge work for barcode scanner door kiosks?",
+        "Under statutory Rule rule:1cc0496368, when RFID reader hardware is not installed at the facility, administrators issue access badges with technology 'Barcode'. The server generates a unique credential code and QR SVG which is carried in the id-card payload's 'badge' field. The ID card designer renders this access QR prominently on the card, enabling wall-mounted 2D barcode scanner stations at doors, turnstiles, and attendance kiosks to grant access immediately.",
+      ],
+      [
+        "What happens if the card printer jams, runs out of ribbon, or printing fails?",
+        "Haspataal adheres to the strict separation of data writes and physical printing. Printing an ID card is an idempotent read-and-output operation: a paper jam, ribbon break, or network timeout never alters, reverts, or duplicates the employee's database record or issued badges. Operators can simply fix the hardware issue and click 'Reprint Card' to re-dispatch the job safely.",
+      ],
+      [
+        "Are staff photographs mandatory before an employee's ID card can be designed or printed?",
+        "No. In adherence to privacy, dignity, and cultural purdah considerations, staff photographs are optional. If an employee has uploaded a photo in their document vault (photo_document_id), the designer renders their verified picture inside the photo frame. If no photograph is uploaded, the card renders a clean, professional placeholder frame with employee name, designation, department, and blood group without blocking card generation.",
+      ],
+    ],
+    faqUr: [
+      [
+        "عملے کے شناختی کارڈ کے طبعی پیمائش اور کارڈ کا معیار کیا ہے؟",
+        "عملے کے شناختی کارڈ کا ڈیزائن بین الاقوامی معیار CR80 ISO/IEC 7810 ID-1 کے عین مطابق ہے (85.6mm ضرب 54.0mm اور 3.18mm گول کونے)۔ معیاری کارڈ پرنٹرز 30 mil (0.76mm) موٹائی والے CR80 PVC کارڈز استعمال کرتے ہیں۔ پرنٹنگ اسٹائل شیٹ کناروں تک مکمل پرنٹنگ کو یقینی بناتی ہے۔",
+      ],
+      [
+        "ورک اسٹیشن کو کیسے معلوم ہوتا ہے کہ فزیکل کارڈ پرنٹر دستیاب ہے؟",
+        "اسکرین اوپن ہوتے ہی کلائنٹ GET /terminals/whoami کال کر کے ٹرمینل کی تفصیلات، آئی پی اور ہارڈ ویئر روٹنگ پڑھتا ہے۔ اگر آئی ٹی کنسول میں 'card_printer' اور ایڈریس سیٹ ہوں، تو اسکرین سبز نشان دکھاتی ہے اور جاب پرنٹر کو بھیجتی ہے۔ اگر ان رجسٹرڈ ہو تو ڈیفالٹ پرنٹر کا وارننگ میسج آتا ہے۔",
+      ],
+      [
+        "بغیر آر ایف آئی ڈی ڈور کیوسک کے لیے کیو آر بیج کیسے کام کرتا ہے؟",
+        "قانونی قاعدہ rule:1cc0496368 کے تحت، اگر آر ایف آئی ڈی ریڈر نہ ہو تو 'بارکوڈ' ٹیکنالوجی سے بیج جاری کیا جاتا ہے۔ سرور ایک منفرد کیو آر بیج کوڈ تیار کر کے شناختی کارڈ کے پے لوڈ میں بھیجتا ہے۔ ڈیزائنر اس کیو آر کوڈ کو کارڈ پر پرنٹ کرتا ہے جس سے ڈور اور حاضری کیوسک کارڈ کو فوراً اسکین کر لیتے ہیں۔",
+      ],
+      [
+        "اگر پرنٹر کا ربن ختم ہو جائے یا پرنٹنگ فیل ہو جائے تو کیا ہوتا ہے؟",
+        "ہسپتال سسٹم میں ڈیٹا محفوظ کرنے اور پرنٹ کرنے کو مکمل الگ رکھا گیا ہے۔ شناختی کارڈ پرنٹ کرنے سے ملازم کے ڈیٹا یا بیج ریکارڈ پر کوئی اثر نہیں پڑتا۔ اگر پرنٹر جام ہو جائے تو ہارڈ ویئر درست کر کے بغیر کسی خطرے کے 'دوبارہ پرنٹ کریں' بٹن دبایا جا سکتا ہے۔",
+      ],
+      [
+        "کیا شناختی کارڈ پرنٹ کرنے سے پہلے ملازم کی تصویر کا ہونا لازمی ہے؟",
+        "نہیں، رازداری اور پردے کے اصولوں کے مطابق تصویر لازمی نہیں بلکہ اختیاری ہے۔ اگر والٹ میں تصویر موجود ہو تو وہ فریم میں پرنٹ ہو جاتی ہے، بصورت دیگر باوقار طریقے سے خالی فریم کے ساتھ ملازم کا نام، عہدہ اور بلڈ گروپ پرنٹ ہو جاتا ہے۔",
+      ],
+    ],
+  },
   badges: {
     title: "Security & staff badges",
     titleUr: "سیکیورٹی اور عملے کے بیجز",
