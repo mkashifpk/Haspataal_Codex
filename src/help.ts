@@ -10,6 +10,76 @@ export type HelpPage = {
   faqUr: [string, string][];
 };
 export const help: Record<string, HelpPage> = {
+  duty_roster_hr: {
+    title: "Duty rosters (all staff)",
+    titleUr: "عملے کا ڈیوٹی روسٹر اور شفٹ پلاننگ",
+    purpose: "Comprehensive hospital staff duty scheduling, shift pattern management, duty swaps, public holidays, and statutory rest day audits: (1) 7-day week planner grid with shift pattern rows and holiday markers (GET /rosters/staff, GET /rosters) per Rule rule:50af6ba770, Rule rule:7ee9e5cda4, and Rule rule:2e75984ff7; (2) Drag and drop assignment with all-or-nothing save (POST /rosters); (3) Optimistic concurrency duty edits and reason-based cancellations (PATCH /rosters/{roster_id}, POST /rosters/{roster_id}/cancel) per Rule rule:e255d6b71a; (4) Automated period repetition with rotating rest days (POST /rosters/copy) per Rule rule:f72ed8bfcb; (5) Staff duty swaps and covers with self-approval prevention and verbal record support (GET /rosters/swaps, POST /rosters/swaps, POST /rosters/swaps/{swap_id}/approve, POST /rosters/swaps/{swap_id}/reject) per Rule rule:83718fc56e; (6) Shift pattern catalogue and grace window configuration (GET /hr/shift-patterns, POST /hr/shift-patterns) per Rule rule:f0c97c644e; (7) Statutory rest day compliance and overtime audit (GET /rosters/week) per Rule rule:fb45bf026f; and (8) Real-time roster synchronization via roster.changed and roster.swap.updated events per Rule rule:6e21482f49.",
+    purposeUr: "ہسپتال کے عملے کی شفٹ پلاننگ، ڈیوٹی روسٹر، شفٹ پیٹرنز، باہمی تبادلوں اور قانونی آرام کے دنوں کا مکمل جائزہ: (1) قاعدہ rule:50af6ba770، rule:7ee9e5cda4 اور rule:2e75984ff7 کے تحت 7 روزہ گرڈ، شفٹ قطاریں اور سرکاری تعطیلات (GET /rosters/staff، GET /rosters)؛ (2) ڈیوٹی کی تفویض اور اجتماعی بچت (POST /rosters)؛ (3) قاعدہ rule:e255d6b71a کے تحت ڈیوٹی میں ترمیم اور وجہ کے ساتھ منسوخی (PATCH /rosters/{roster_id}، POST /rosters/{roster_id}/cancel)؛ (4) قاعدہ rule:f72ed8bfcb کے تحت پچھلے ہفتے کی گردش کے ساتھ نقل (POST /rosters/copy)؛ (5) قاعدہ rule:83718fc56e کے تحت ڈیوٹی کا تبادلہ، منظوری و زبانی اندراج (GET /rosters/swaps، POST /rosters/swaps، approve/reject)؛ (6) قاعدہ rule:f0c97c644e کے تحت شفٹ پیٹرنز کی تشکیل (GET /hr/shift-patterns، POST /hr/shift-patterns)؛ (7) قاعدہ rule:fb45bf026f کے تحت ہفتہ وار آرام اور اوور ٹائم کا آڈٹ (GET /rosters/week)؛ اور (8) قاعدہ rule:6e21482f49 کے تحت ریئل ٹائم ہم آہنگی۔",
+    steps: [
+      "Select Week & Filters: Use the week navigation buttons or date picker to select the 7-day planning horizon. Filter the staff list by category (Nursing, Clinical, Administrative, Technical, Support) or search by employee name or number.",
+      "Inspect Weekly Planner Grid: Review the 7-day grid (Rule rule:50af6ba770). Public holidays are marked with festive badges (Rule rule:2e75984ff7). Shift pattern rows display standard timing windows and overnight indicators.",
+      "Assign Staff Duties: Click '+ Assign Duty' or use quick '+ Assign' on any grid cell (POST /rosters). Select an eligible staff member, shift pattern, duty area (Ward, Emergency, OT, Facility), and optional on-call flag. Staff on approved leave are greyed out (Rule rule:7ee9e5cda4).",
+      "Edit or Cancel Duties: Click on any scheduled duty chip to open the management modal. Update instructions via PATCH /rosters/{roster_id} with optimistic row_version checks, or cancel with a mandatory operational reason (POST /rosters/{roster_id}/cancel) per Rule rule:e255d6b71a.",
+      "Repeat Last Week with Day Rotation: Click 'Repeat Last Week' to launch the period copy dialog (POST /rosters/copy, Rule rule:f72ed8bfcb). Choose exact duplication or 'Rotate days forward by 1' to rotate Sunday duty and weekly rest days fairly week by week.",
+      "Manage Duty Swaps & Covers: On the 'Duty Swaps & Covers' tab, review requested swaps (GET /rosters/swaps). Approve or reject swaps with audit notes. For staff without system logins, click '+ Record Verbal Swap' (POST /rosters/swaps) per Rule rule:83718fc56e.",
+      "Configure Shift Patterns: On the 'Shift Patterns Directory' tab (GET /hr/shift-patterns), inspect timing windows and click '+ Create Shift Pattern' (POST /hr/shift-patterns, Rule rule:f0c97c644e) to register new clinical shifts with grace minutes.",
+      "Audit Weekly Rest Compliance: On the 'Week Check & Rest Audit' tab (GET /rosters/week, Rule rule:fb45bf026f), audit rest day compliance. Staff with fewer rest days than due are highlighted with amber 'NoRestDay' warnings and extra duty overtime days are calculated.",
+    ],
+    stepsUr: [
+      "ہفتہ اور فلٹرز منتخب کریں: ہفتہ وار نیویگیشن بٹنوں کے ذریعے 7 روزہ دورانیہ منتخب کریں۔ عملے کو کیٹیگری (نرسنگ، ڈاکٹر، انتظامی، تکنیکی، سپورٹ) کے مطابق فلٹر کریں یا نام سے تلاش کریں۔",
+      "پلانر گرڈ کا معائنہ: قاعدہ rule:50af6ba770 کے تحت 7 روزہ گرڈ دیکھیں۔ سرکاری تعطیلات نمایاں کی گئی ہیں (قاعدہ rule:2e75984ff7) اور شفٹ پیٹرن کے اوقات درج ہیں۔",
+      "ڈیوٹیاں تفویض کریں: '+ ڈیوٹی تفویض کریں' یا خانے میں موجود بٹن دبائیں (POST /rosters)۔ ملازم، شفٹ پیٹرن، ڈیوٹی ایریا اور آن کال اسٹیٹس منتخب کریں۔ رخصت پر موجود عملہ غیر فعال نظر آتا ہے (قاعدہ rule:7ee9e5cda4)۔",
+      "ترمیم یا منسوخی: کسی بھی شیڈول ڈیوٹی پر کلک کریں۔ قاعدہ rule:e255d6b71a کے تحت PATCH کے ذریعے ہدایات اپ ڈیٹ کریں، یا باقاعدہ وجہ درج کر کے منسوخ کریں (POST /rosters/{roster_id}/cancel)۔",
+      "پچھلے ہفتے کی گردش کے ساتھ نقل: 'پچھلا ہفتہ دہرائیں' دبا کر کاپی ڈائیلاگ کھولیں (POST /rosters/copy، قاعدہ rule:f72ed8bfcb)۔ اتوار کی ڈیوٹی اور آرام کے دنوں کو گھمانے کے لیے '1 دن آگے گردش' منتخب کریں۔",
+      "ڈیوٹی تبادلوں کا انتظام: 'ڈیوٹی تبادلہ' ٹیب میں درخواستوں کا جائزہ لیں (GET /rosters/swaps)۔ تبادلہ منظور یا مسترد کریں۔ بغیر لاگ ان عملے کے لیے زبانی تبادلہ درج کریں (POST /rosters/swaps، قاعدہ rule:83718fc56e)۔",
+      "شفٹ پیٹرنز تشکیل دیں: 'شفٹ پیٹرنز' ٹیب میں اوقات دیکھیں اور '+ نیا شفٹ پیٹرن' دبا کر ہسپتال کی نئی شفٹ اور رعایت کے منٹ شامل کریں (POST /hr/shift-patterns، قاعدہ rule:f0c97c644e)۔",
+      "ہفتہ وار آرام کا آڈٹ: 'ہفتہ وار آڈٹ' ٹیب میں آرام کے قانونی دنوں کی جانچ کریں (GET /rosters/week، قاعدہ rule:fb45bf026f)۔ آرام سے محروم عملے پر 'NoRestDay' وارننگ اور اوور ٹائم ڈیوٹی کا حساب دیکھیں۔",
+    ],
+    faq: [
+      [
+        "How does the weekly duty planner handle 24/7 continuous hospital operations and Sunday staffing?",
+        "Under statutory Rule rule:4ea9d4f624, the hospital operates 365 days a year without closing. Sunday is treated as a regular operational planning column in the 7-day grid, typically staffed with essential clinical and emergency personnel. Rather than a universal weekend shutdown, each staff member receives their statutory weekly rest day on a staggered weekday (default_weekly_off_days). If a staff member is scheduled to work on their designated rest day, the day is rostered and treated as an active working day.",
+      ],
+      [
+        "How are staff approved leaves and schedule conflicts prevented on the planner grid?",
+        "Under statutory Rule rule:7ee9e5cda4, the client queries approved leave records from GET /rosters/staff. When a staff member has approved annual, casual, or medical leave for a date, that day is visually greyed out in selection menus with a clear leave badge, preventing assignment. If a concurrent assignment is submitted, the server rejects it with ROSTER_CONFLICT, ensuring that no employee is scheduled for overlapping duties or during night shifts extending into the subsequent morning.",
+      ],
+      [
+        "What is the difference between exact roster copy and day rotation when repeating last week?",
+        "Under statutory Rule rule:f72ed8bfcb, POST /rosters/copy allows administrators to duplicate an entire week's duty roster. An exact copy (rotate_days: 0) assigns the exact same staff to identical days and shifts. Selecting 'Repeat, moving everyone's days on' (rotate_days: 1) shifts each person's rostered days and rest days forward by one day, ensuring that weekend duties, night coverage, and Sunday shifts rotate fairly across the team week by week without manual re-entry.",
+      ],
+      [
+        "Can a supervisor or roster manager approve a duty swap that involves themselves?",
+        "No. Under statutory Rule rule:83718fc56e, dual-control integrity strictly prohibits self-approval (SWAP_SELF_APPROVAL). If an administrator or supervisor is named as either the requester or the covering colleague on a duty swap, the 'Approve' action is disabled for that user and the backend rejects self-decision. Another authorized HR or departmental administrator must review and decide the swap.",
+      ],
+      [
+        "How does the Week Check panel calculate rest day compliance and overtime extra duty?",
+        "Under statutory Rule rule:fb45bf026f, GET /rosters/week audits each staff member's total duty days against the hospital's statutory rest day policy (e.g. 1 or 2 mandatory rest days per 7-day week). If a staff member is assigned to duties with fewer rest days than due, their status is highlighted with an amber 'NoRestDay' badge. Working days exceeding the week's normal allowance are tracked as extra_duty_days for payroll overtime compensation.",
+      ],
+    ],
+    faqUr: [
+      [
+        "ہفتہ وار پلانر ہسپتال کی 24/7 مسلسل سروسز اور اتوار کے شیڈول کو کیسے چلاتا ہے؟",
+        "قانونی قاعدہ rule:4ea9d4f624 کے تحت ہسپتال سال کے تمام 365 دن کام کرتا ہے۔ 7 روزہ گرڈ میں اتوار ایک عام کالم کی طرح شامل ہے جہاں ضروری ایمرجنسی عملہ تعینات ہوتا ہے۔ اجتماعی چھٹی کے بجائے ہر ملازم کو ہفتے کے مختلف دن آرام کا دن (default_weekly_off_days) دیا جاتا ہے۔ اگر آرام کے دن ڈیوٹی لگائی جائے تو وہ کام کا دن شمار ہوتا ہے۔",
+      ],
+      [
+        "پلانر گرڈ پر منظور شدہ رخصت اور شفٹ تصادم کو کیسے روکا جاتا ہے؟",
+        "قانونی قاعدہ rule:7ee9e5cda4 کے تحت سرور سے عملے کی منظور شدہ رخصت کا ڈیٹا حاصل کیا جاتا ہے۔ اگر کسی ملازم کی اس دن سالانہ، بیماری یا اتفاقی رخصت منظور ہو، تو ان کا نام نمایاں کر کے غیر فعال کر دیا جاتا ہے۔ اگر کوئی متصادم شفٹ لگائی جائے تو سرور ROSTER_CONFLICT کے تحت اسے روک دیتا ہے۔",
+      ],
+      [
+        "پچھلے ہفتے کا روسٹر دہراتے وقت سیدھی کاپی اور دن کی گردش میں کیا فرق ہے؟",
+        "قاعدہ rule:f72ed8bfcb کے تحت POST /rosters/copy کے ذریعے پورا ہفتہ نقل کیا جاتا ہے۔ سیدھی کاپی (rotate_days: 0) ہو بہو وہی دن اور شفٹ دہراتی ہے۔ جبکہ '1 دن کی گردش' (rotate_days: 1) ہر ملازم کے آرام اور ڈیوٹی کے دن کو ایک دن آگے بڑھا دیتی ہے، جس سے اتوار اور رات کی ڈیوٹی ہر ہفتے منصفانہ طریقے سے گھومتی رہتی ہے۔",
+      ],
+      [
+        "کیا کوئی انچارج یا ایڈمنسٹریٹر اپنے ذاتی ڈیوٹی تبادلے کی منظوری خود دے سکتا ہے؟",
+        "ہرگز نہیں۔ قاعدہ rule:83718fc56e کے تحت مفادات کے تصادم سے بچنے کے لیے خود منظوری سختی سے ممنوع ہے (SWAP_SELF_APPROVAL)۔ اگر تبادلہ خود ایڈمنسٹریٹر کی ڈیوٹی سے متعلق ہو، تو وہ اسے منظور نہیں کر سکتا بلکہ کسی دوسرے مجاز ایچ آر آفیسر کو منظوری دینی ہوتی ہے۔",
+      ],
+      [
+        "ہفتہ وار آڈٹ پینل آرام کے دنوں کی خلاف ورزی اور اوور ٹائم کا حساب کیسے لگاتا ہے؟",
+        "قاعدہ rule:fb45bf026f کے تحت GET /rosters/week ہر ملازم کی ڈیوٹیوں کو قانونی آرام کے دنوں کے مطابق جانچتا ہے۔ اگر کسی ملازم کو مطلوبہ آرام کے دن نہ ملیں تو ان کا اسٹیٹس عنبر رنگ کے 'NoRestDay' سے نمایاں ہوتا ہے، اور اضافی ڈیوٹی کے دن اوور ٹائم ادائیگی کے لیے شمار کیے جاتے ہیں۔",
+      ],
+    ],
+  },
   id_card: {
     title: "Staff ID card designer & print",
     titleUr: "عملے کے شناختی کارڈ کا ڈیزائنر اور پرنٹ",

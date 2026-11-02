@@ -291,6 +291,7 @@ export function checkHelp({
       "StaffDirectory",
       "Badges",
       "IdCard",
+      "DutyRosterHr",
     ].map((n) => `src/screens/${n}.tsx`),
   ];
   const used = new Set(),

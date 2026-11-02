@@ -1,7 +1,7 @@
 # Haspataal checkpoint
 Last updated: 03 November 2026, Antigravity (Codex pair), Asia/Karachi.
 
-## Active request: Phase 8 Screen 148 `duty_roster_hr` (Duty rosters & shift patterns)
+## Active request: Phase 8 Screen 149 `support_roster` (Support-staff duty roster & roll call)
 Executing the Haspataal HMS Roadmap in dependency order along with all tests and MCP progress reporting:
 - **Phase 7 ("Finance, billing and back offices")**: 100% COMPLETE (Screens 133–142, Proposals 286–295).
 - **Phase 8 ("People, facility and IT")**:
@@ -10,9 +10,62 @@ Executing the Haspataal HMS Roadmap in dependency order along with all tests and
   - Screen 145: **`staff_directory`** ("Staff directory & records", Position 145, 56 points, workspace `hr`) — **COMPLETED** (Proposal **298** awaiting human review on `/docs -> My progress`).
   - Screen 146: **`badges`** ("Security & staff badges", Position 146, 47 points, workspace `hr`) — **COMPLETED** (Proposal **299** awaiting human review on `/docs -> My progress`).
   - Screen 147: **`id_card`** ("Staff ID card designer & print", Position 147, 33 points, workspace `hr`) — **COMPLETED** (Proposal **300** awaiting human review on `/docs -> My progress`).
-  - Screen 148: **`duty_roster_hr`** ("Duty rosters & shift patterns", Position 148, 94 points, workspace `hr`) — **NEXT**.
-    - Scope: Shift scheduling, duty rosters, department shifts, pattern templates, and roster publication.
-    - Next Concrete Step: Retrieve `get_screen_bundle("duty_roster_hr")`, save contract, generate typescript client, and begin implementation.
+  - Screen 148: **`duty_roster_hr`** ("Duty rosters (all staff)", Position 148, 94 points, workspace `hr`) — **COMPLETED** (Proposal **301** awaiting human review on `/docs -> My progress`).
+  - Screen 149: **`support_roster`** ("Support-staff duty roster & roll call", Position 149, 94 points, workspace `ops_admin`) — **NEXT**.
+    - Scope: Support staff roster planning (sweepers, janitors, guards) onto zones, wards, and gates, weekly job aid print, roll call, verbal shift swaps, and rest audit.
+    - Next Concrete Step: Build domain policies in `src/support-roster-policy.ts`, screen UI in `src/screens/SupportRoster.tsx`, wire into app and catalogue, write unit tests, and verify.
+
+---
+
+### Completed Screen 148 (`duty_roster_hr`) Checkpoint
+- **Workflow & Standards**: Hospital-wide duty rosters and shift pattern management (`duty_roster_hr`, Workspace `hr`, Position 148, 94 points):
+  - **Weekly Shift Planner Grid (`GET /rosters`, `GET /rosters/staff`, `POST /rosters`):**
+    - 7 consecutive day columns starting Monday (ISO weekday 1..7) through Sunday (`rule:4ea9d4f624`).
+    - Rows grouped by active shift pattern (`GET /hr/shift-patterns`, `rule:f0c97c644e`).
+    - Interactive duty cells with duty chips, quick "+ Assign" button, and inline staff selection.
+    - Statutory leave ranges greyed out with `rule:7ee9e5cda4` (`isStaffOnLeave`); flags `ROSTER_CONFLICT` for overlapping shifts.
+    - Gazetted public holidays (`rule:2e75984ff7`) highlighted with festive indicator; rostering is permitted and working as scheduled.
+    - All-or-nothing batch save with detailed server index mapping (`details.entry_index`, `rule:50af6ba770`).
+    - Daily staffing totals bar calculating total staff scheduled across patterns to prevent thin coverage.
+  - **Duty Modification & Cancellation (`PATCH /rosters/{roster_id}`, `POST /rosters/{roster_id}/cancel`):**
+    - Shift reassignment via PATCH with optimistic concurrency control (`expected_version`, `rule:e255d6b71a`).
+    - Deletion is prohibited: operational duty cancellation requires a documented justification reason (minimum 3 characters).
+    - Past dates locked to read-only mode unless user possesses HR administrative authority (`rule:cbd240746c`).
+  - **Period Duplication & Rotation (`POST /rosters/copy`):**
+    - Duplicate entire previous week schedule into active week with detailed skipped conflict feedback (`rule:f72ed8bfcb`).
+    - Rotation toggle (`rotate_days: 1`) allowing fair rotation of Sunday duties and rest days over consecutive weeks.
+  - **Duty Swaps & Verbal Covers (`GET /rosters/swaps`, `POST /rosters/swaps`, `approve`, `reject`):**
+    - Swaps directory showing `Requested`, `Accepted`, `Approved`, and `Rejected` statuses (`rule:83718fc56e`).
+    - Managerial approval and rejection with mandatory operational explanation.
+    - Record verbal swaps for employees without login credentials (`POST /rosters/swaps`).
+    - Enforces dual-control separation preventing self-approval (`SWAP_SELF_APPROVAL`).
+  - **Shift Patterns Directory (`GET /hr/shift-patterns`, `POST /hr/shift-patterns`):**
+    - Shift definition list with start/end timings, duration, and grace minutes.
+    - Modal dialog to create new shift patterns with immediate availability in planner grid (`rule:f0c97c644e`).
+  - **Week Check & Rest Audit (`GET /rosters/week`):**
+    - KPI audit summary identifying `NoRestDay` amber warnings, overtime extra duty days, and staffing counts per shift (`rule:fb45bf026f`).
+  - **Realtime Reactive Refresh (`ev:roster.changed`, `ev:roster.swap.updated`):**
+    - Automatically updates planner grid and swaps tab upon server events without manual polling (`rule:6e21482f49`).
+  - **Service Capability Gating:**
+    - Resolves `full`, `open_work`, `records`, `setup`, and `hidden` derived from server `GET /establishment views.screens`.
+- **Contracts**: `contracts/duty_roster_hr.json` (13 endpoints, 2 events, 11 statutory rules, 37 rubric items). Generated client: `src/generated/duty_roster_hr.ts`.
+- **Domain Policies & Rules (`src/duty-roster-policy.ts`)**:
+  - `getDutyRosterCapabilityView`, `getWeekDates`, `isStaffOnLeave`, `isStaffDefaultWeeklyOff`, `isPublicHoliday`, `validateCancelDuty`, `validateCopyPeriod`, `validateRecordSwap`, `canUserApproveSwap`, `validateShiftPattern`, and `DUTY_ROSTER_ERROR_MESSAGES`.
+- **UI Architecture (`src/screens/DutyRosterHr.tsx`)**:
+  - 4-tab interface: Weekly Planner Grid, Duty Swaps & Covers, Shift Patterns Directory, and Week Check & Rest Audit.
+  - Wired into `src/App.tsx`, `scripts/check-help.mjs`, `src/foundation-catalogue.json` (13 tasks), `src/foundation-task-map.json` (13 controls), and `src/foundation-help.ts` (50 interactive controls mapped with bilingual titles and guides).
+  - Authored comprehensive handbook entry and 5 role FAQs in `src/help.ts`; verified bundled screenshots in `public/handbook/duty_roster_hr-en.png` and `duty_roster_hr-ur.png`.
+- **Verification**:
+  - Automated unit tests: `tests/duty-roster-hr.test.mjs` passed (11/11 tests).
+  - Help check: `node scripts/check-help.mjs` passed (147 screens, 3,729 controls, 2,706 groups, 69 FAQ seeds, 30 workspace guides).
+  - Help coverage test: `node --test tests/help-coverage.test.mjs` passed (28/28 tests across 147 screens).
+  - Full test suite: `npm test` passed (761/761 tests across all 19 test suites).
+  - TypeScript compiler: `npx.cmd tsc --noEmit` passed with 0 errors.
+  - Production build: `npm.cmd run build` succeeded (`dist/assets/index-QB90iEyP.js`).
+- **Proposal**:
+  - Proposal ID: **301** (status: `pending` on `/docs -> My progress`, build `index-QB90iEyP.js`, 36 rubric items claimed, `q:fresh_data` left pending human review).
+
+---
 
 ---
 
