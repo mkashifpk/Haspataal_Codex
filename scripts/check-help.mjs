@@ -289,6 +289,7 @@ export function checkHelp({
       "RiskDashboard",
       "OnboardingWizard",
       "StaffDirectory",
+      "Badges",
     ].map((n) => `src/screens/${n}.tsx`),
   ];
   const used = new Set(),

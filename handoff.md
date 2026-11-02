@@ -1,16 +1,58 @@
 # Haspataal checkpoint
-Last updated: 02 November 2026, Antigravity (Codex pair), Asia/Karachi.
+Last updated: 03 November 2026, Antigravity (Codex pair), Asia/Karachi.
 
-## Active request: Phase 8 Screen 146 `badges` (Security & staff badges)
+## Active request: Phase 8 Screen 147 `id_card` (Staff ID card designer & print)
 Executing the Haspataal HMS Roadmap in dependency order along with all tests and MCP progress reporting:
 - **Phase 7 ("Finance, billing and back offices")**: 100% COMPLETE (Screens 133–142, Proposals 286–295).
 - **Phase 8 ("People, facility and IT")**:
   - Screen 143: **`onboarding_wizard`** ("Staff onboarding & credentials wizard", Position 143, 63 points, workspace `hr`) — **COMPLETED** (Proposal **296** awaiting human review on `/docs -> My progress`).
   - Screen 144: **`it_console`** ("IT administration console", Position 144, 179 points, workspace `super_admin`) — **COMPLETED** (Proposal **297** awaiting human review on `/docs -> My progress`).
   - Screen 145: **`staff_directory`** ("Staff directory & records", Position 145, 56 points, workspace `hr`) — **COMPLETED** (Proposal **298** awaiting human review on `/docs -> My progress`).
-  - Screen 146: **`badges`** ("Security & staff badges", Position 146, 47 points, workspace `hr`) — **NEXT**.
-    - Scope: Staff and support contractor badge lifecycle, issuance, revocation, and terminal scanner integration.
-    - Next Concrete Step: Retrieve `get_screen_bundle("badges")`, save contract, generate typescript client, and begin implementation.
+  - Screen 146: **`badges`** ("Security & staff badges", Position 146, 47 points, workspace `hr`) — **COMPLETED** (Proposal **299** awaiting human review on `/docs -> My progress`).
+  - Screen 147: **`id_card`** ("Staff ID card designer & print", Position 147, 33 points, workspace `hr`) — **NEXT**.
+    - Scope: Printable staff ID card designer, dual barcode/QR rendering, photo vault embedding, and thermal card printer output.
+    - Next Concrete Step: Retrieve `get_screen_bundle("id_card")`, save contract, generate typescript client, and begin implementation.
+
+---
+
+### Completed Screen 146 (`badges`) Checkpoint
+- **Workflow & Standards**: Staff and support contractor security badge management and card printer integration (`badges`, Workspace `hr`, Position 146, 47 points):
+  - **Employee Lookup & Credential Tracking (`GET /hr/employees/{employee_id}`):**
+    - Database identifier lookup retrieving staff profile, designation, department, and active access credentials.
+    - Status warning banners for Draft (blocked until wizard finalized) and Suspended profiles (blocked until reinstatement).
+  - **Multi-Technology Badge Issuance (`POST /hr/employees/{employee_id}/badges`, `rule:1cc0496368`, `rule:e361c806a1`):**
+    - Barcode QR Badge (Rule `rule:1cc0496368`): For facilities without RFID hardware; server generates badge code and printable QR SVG without requiring manual card reader input.
+    - Physical RFID Cards (Rule `rule:e361c806a1`): Read card UID directly via desktop USB reader and record as `badge_code`.
+    - Biometric Enrolments (Rule `rule:e361c806a1`): Enter hardware enrolment ID from fingerprint or facial recognition scanner.
+    - Holder Type Classification: Supports `Employee`, `SupportStaff`, `Sweeper`, `Janitor`, `Security`, and `Contractor` for granular physical zoning.
+    - Idempotent registration with inline QR SVG preview for newly issued barcode badges.
+  - **Controlled Lost Badge Revocation (`POST /hr/badges/{badge_code}/revoke`, `rule:2906081f38`):**
+    - Revoke lost, stolen, or defective badges with mandatory operational justification reason (minimum 3 characters).
+    - Quick-select reason chips ("Card lost in transit", "Damaged RFID chip", "Contract ceased").
+    - Rule `rule:2906081f38` replacement workflow: once revoked, a brand new badge can be issued immediately.
+  - **CR80 ID Card Print Preview (`GET /hr/employees/{employee_id}/id-card`):**
+    - Official CR80 standard card preview (85.6mm x 54mm) with hospital branding, photo frame, blood group, joined date, inline barcode SVG, and QR SVG.
+    - Displays access QR badge prominently when Barcode QR credentials are in force.
+    - Direct print dispatch button to thermal card printer.
+  - **Service Capability Gating:**
+    - Resolves `full`, `open_work` (operational badge issuance and revocation active), `records` (read-only credential audit), `setup` (scanner station hardware mapping), and `hidden` derived from server `GET /establishment views.screens`.
+- **Contracts**: `contracts/badges.json` (4 endpoints, 3 statutory rules, 17 rubric items).
+- **Domain Policies & Statutory Rules (`src/badges-policy.ts`)**:
+  - `getBadgesCapabilityView`, `validateBadgeIssueInput`, `validateBadgeRevocationInput`, and `BADGES_ERROR_MESSAGES`.
+- **UI Architecture (`src/screens/Badges.tsx`)**:
+  - Wired into `src/App.tsx`, `scripts/check-help.mjs`, `src/foundation-catalogue.json` (4 tasks), `src/foundation-task-map.json` (4 controls mapped), and `src/foundation-help.ts` (27 interactive controls mapped).
+  - Authored comprehensive handbook entry and 5 role FAQs in `src/help.ts`; verified bundled screenshots in `public/handbook/badges-en.png` and `badges-ur.png`.
+- **Verification**:
+  - Automated unit tests: `tests/badges.test.mjs` passed (6/6 tests).
+  - Help check: `npm run check:help` passed (145 screens, 3,659 controls, 2,641 groups, 69 FAQ seeds, 30 workspace guides).
+  - Help coverage test: `tests/help-coverage.test.mjs` passed (28/28 tests across 145 screens).
+  - Full test suite: `npm test` passed (744/744 tests across all 19 test suites).
+  - TypeScript compiler: `npx.cmd tsc --noEmit` passed with 0 errors.
+  - Production build: `npm.cmd run build` succeeded (`dist/assets/index-DQHC0VBJ.js`).
+- **Proposal**:
+  - Proposal ID: **299** (status: `pending` on `/docs -> My progress`, build `index-DQHC0VBJ.js`, 16 rubric items claimed, `q:fresh_data` left pending human review).
+
+---
 
 ---
 

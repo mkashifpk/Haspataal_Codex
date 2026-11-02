@@ -20,6 +20,7 @@ export const phase1Screens = [
 const approvalScreens = ["approval_queue", "charity_approvals"];
 // Coverage grows screen by screen; Phase 1 acceptance remains separate.
 export const deliveredHelpScreens = [
+  "badges",
   "staff_directory",
   "it_console",
   "onboarding_wizard",
@@ -155,6 +156,34 @@ const g = (
 // IDs are also attached to the actual controls. The build rejects missing
 // mappings and empty translations instead of treating a page as coverage.
 export const controlGuides: Record<string, ControlGuide> = {
+  // Screen 146: badges (Security & staff badges)
+  "badges.emp_id_input": g(["badges"], ["Employee ID input", "ملازم کی شناختی ان پٹ"], ["Specifies staff member database ID to load active credentials.", "ملازم کا شناختی نمبر درج کر کے فعال اسناد حاصل کریں۔"]),
+  "badges.load_employee": g(["badges"], ["Load employee credentials button", "ملازم لوڈ کریں"], ["Fetches employee profile, active access badges, and employment status (GET /hr/employees/{employee_id}).", "ملازم کی پروفائل، فعال سیکیورٹی بیجز اور اسٹیٹس حاصل کرتا ہے۔"]),
+  "badges.clear_employee": g(["badges"], ["Clear employee button", "ملازم صاف کریں"], ["Clears selected employee record and badge list.", "منتخب ملازم کا ریکارڈ صاف کرتا ہے۔"]),
+  "badges.btn_refresh": g(["badges"], ["Refresh badges button", "بیجز تازہ کریں"], ["Reloads employee security badges and status.", "ملازم کے سیکیورٹی بیجز اور حیثیت دوبارہ حاصل کرتا ہے۔"]),
+  "badges.dismiss_success": g(["badges"], ["Dismiss success banner button", "الرٹ ہٹائیں"], ["Dismisses badge issuance or revocation success notification.", "کامیابی کا نوٹیفکیشن ہٹاتا ہے۔"]),
+  "badges.btn_print_id_card": g(["badges"], ["View / Print ID card button", "شناختی کارڈ پرنٹ کریں"], ["Loads official ID card designer payload with barcode and access QR code (GET /hr/employees/{employee_id}/id-card).", "بارکوڈ اور رسائی کیو آر کوڈ کے ساتھ سرکاری شناختی کارڈ کا پیش نظارہ کھولتا ہے۔"]),
+  "badges.btn_open_issue_modal": g(["badges"], ["Issue new badge button", "نیا بیج جاری کریں"], ["Opens modal dialog to register RFID card, printed barcode QR, or biometric enrolment (POST /hr/employees/{employee_id}/badges).", "آر ایف آئی ڈی کارڈ، پرنٹ شدہ کیو آر بیج یا بائیو میٹرک اندراج کا فارم کھولتا ہے۔"]),
+  "badges.btn_revoke": g(["badges"], ["Revoke badge button", "بیج منسوخ کریں"], ["Opens revocation confirmation dialog for lost or defective badge (rule:2906081f38).", "گمشدہ یا خراب کارڈ کی منسوخی کا تصدیقی فارم کھولتا ہے۔"]),
+  "badges.issue_modal_close": g(["badges"], ["Close issue modal button", "بیج فارم بند کریں"], ["Dismisses badge issuance modal.", "بیج کے اجرا کا فارم بند کرتا ہے۔"]),
+  "badges.tech_barcode": g(["badges"], ["Barcode QR technology radio", "بارکوڈ کیو آر ریڈیو"], ["Selects server-generated barcode QR badge printed on staff ID card without RFID hardware (rule:1cc0496368).", "آر ایف آئی ڈی کے بغیر شناختی کارڈ پر پرنٹ ہونے والا کیو آر بیج منتخب کرتا ہے۔"]),
+  "badges.tech_rfid": g(["badges"], ["RFID card technology radio", "آر ایف آئی ڈی ریڈیو"], ["Selects physical RFID card access badge read via card reader UID (rule:e361c806a1).", "کارڈ ریڈر سے یو آئی ڈی پڑھنے کے لیے آر ایف آئی ڈی ٹیکنالوجی منتخب کرتا ہے۔"]),
+  "badges.tech_biometric": g(["badges"], ["Biometric enrolment technology radio", "بائیو میٹرک ریڈیو"], ["Selects biometric scanner device enrolment identifier (rule:e361c806a1).", "بائیو میٹرک اسکینر ڈیوائس کا اندراج منتخب کرتا ہے۔"]),
+  "badges.badge_code_input": g(["badges"], ["Badge code / UID input", "بیج کوڈ یا یو آئی ڈی"], ["Card UID from reader or biometric enrolment identifier.", "ریڈر سے پڑھا گیا کارڈ یو آئی ڈی یا بائیو میٹرک کوڈ۔"]),
+  "badges.holder_type_select": g(["badges"], ["Holder type selector", "حامل کی قسم"], ["Selects Employee, SupportStaff, Sweeper, Janitor, Security, or Contractor.", "ملازم، سیکیورٹی، صفائی کارکن یا ٹھیکیدار کا انتخاب کرتا ہے۔"]),
+  "badges.label_input": g(["badges"], ["Badge label input", "بیج کا عنوان"], ["Optional descriptive label for badge purpose or duty shift.", "ڈیوٹی یا شفٹ کے لحاظ سے بیج کا اختیاری وضاحتی لیبل۔"]),
+  "badges.issue_modal_cancel": g(["badges"], ["Cancel badge issue button", "منسوخ کریں"], ["Cancels badge issuance dialog.", "بیج کے اندراج کا فارم منسوخ کرتا ہے۔"]),
+  "badges.btn_issue": g(["badges"], ["Confirm badge issue button", "بیج کا اجرا کریں"], ["Submits badge registration payload and activates staff credential (POST /hr/employees/{employee_id}/badges).", "سیکیورٹی بیج کا اندراج محفوظ کرتا ہے اور کارڈ فعال کرتا ہے۔"]),
+  "badges.revoke_modal_close": g(["badges"], ["Close revoke modal button", "منسوخی فارم بند کریں"], ["Dismisses badge revocation dialog.", "بیج منسوخی کا فارم بند کرتا ہے۔"]),
+  "badges.quick_reason_lost": g(["badges"], ["Quick reason lost card button", "گمشدہ کارڈ"], ["Sets revocation reason to 'Card lost in transit'.", "منسوخی کی وجہ 'گمشدہ کارڈ' منتخب کرتا ہے۔"]),
+  "badges.quick_reason_damaged": g(["badges"], ["Quick reason damaged card button", "خراب کارڈ"], ["Sets revocation reason to 'Damaged RFID chip / unreadable'.", "منسوخی کی وجہ 'خراب کارڈ' منتخب کرتا ہے۔"]),
+  "badges.quick_reason_duty": g(["badges"], ["Quick reason duty ceased button", "ڈیوٹی ختم"], ["Sets revocation reason to 'Contract ceased or departed'.", "منسوخی کی وجہ 'معاہدہ ختم' منتخب کرتا ہے۔"]),
+  "badges.revoke_reason_input": g(["badges"], ["Revocation reason input", "منسوخی کی وجہ"], ["Mandatory operational reason for revoking lost or returned card (POST /hr/badges/{badge_code}/revoke).", "گمشدہ یا واپس کیے گئے بیج کی منسوخی کے لیے لازمی آپریشنل وجہ۔"]),
+  "badges.revoke_modal_cancel": g(["badges"], ["Cancel revocation button", "منسوخی منسوخ کریں"], ["Cancels revocation modal without altering badge state.", "بیج کی منسوخی کا عمل منسوخ کرتا ہے۔"]),
+  "badges.btn_revoke_confirm": g(["badges"], ["Confirm badge revocation button", "منسوخی کی تصدیق کریں"], ["Revokes staff security badge and logs operational justification.", "بیج کو مستقل طور پر منسوخ کرتا ہے اور وجہ لاگ کرتا ہے۔"]),
+  "badges.idcard_modal_close": g(["badges"], ["Close ID card modal button", "شناختی کارڈ بند کریں"], ["Dismisses ID card designer modal.", "شناختی کارڈ کا پیش نظارہ بند کرتا ہے۔"]),
+  "badges.idcard_modal_dismiss": g(["badges"], ["Dismiss ID card modal button", "بند کریں بٹن"], ["Closes ID card preview dialog.", "شناختی کارڈ کی کھڑکی بند کرتا ہے۔"]),
+  "badges.idcard_print_action": g(["badges"], ["Print to card printer button", "کارڈ پرنٹر پر پرنٹ کریں"], ["Dispatches formatted ID card layout with QR code to connected thermal card printer.", "کیو آر کوڈ کے ساتھ تیار شدہ شناختی کارڈ پرنٹر پر بھیجتا ہے۔"]),
   // Screen 145: staff_directory (Staff directory & records)
   "staff_directory.search": g(["staff_directory"], ["Search employees input", "ملازمین تلاش کریں"], ["Filters staff directory by name, CNIC, employee number, or mobile (GET /hr/employees).", "نام، شناختی کارڈ، ملازم نمبر، یا موبائل نمبر سے عملہ تلاش کرتا ہے۔"]),
   "staff_directory.view_profile": g(["staff_directory"], ["View employee profile button", "ملازم کی تفصیلات"], ["Retrieves full personnel file including credentials, IT login, schedule and document vault (GET /hr/employees/{employee_id}).", "ملازم کی مکمل پروفائل، اسناد، آئی ٹی لاگ ان، شیڈول اور دستاویزات والٹ حاصل کرتا ہے۔"]),

@@ -10,6 +10,73 @@ export type HelpPage = {
   faqUr: [string, string][];
 };
 export const help: Record<string, HelpPage> = {
+  badges: {
+    title: "Security & staff badges",
+    titleUr: "سیکیورٹی اور عملے کے بیجز",
+    purpose: "Comprehensive staff and support contractor security badge management, access credential registration, and ID card print preview: (1) Employee credential inspection and active badge tracking (GET /hr/employees/{employee_id}); (2) Multi-technology badge issuance supporting physical RFID cards, server-generated printed barcode QR badges, and biometric enrolment IDs (POST /hr/employees/{employee_id}/badges) per Rule rule:1cc0496368 and Rule rule:e361c806a1; (3) Controlled revocation of lost, stolen, or damaged credentials with mandatory operational justification (POST /hr/badges/{badge_code}/revoke) per Rule rule:2906081f38; and (4) Official CR80 staff ID card preview and card printer dispatch with inline barcodes and printed access QR badges (GET /hr/employees/{employee_id}/id-card).",
+    purposeUr: "ہسپتال کے عملے اور ٹھیکیداروں کے سیکیورٹی بیجز، رسائی کارڈز اور شناختی کارڈ پرنٹنگ کا مکمل انتظام: (1) ملازم کی اسناد اور فعال بیجز کی جانچ (GET /hr/employees/{employee_id})؛ (2) قانونی قواعد rule:1cc0496368 اور rule:e361c806a1 کے تحت آر ایف آئی ڈی، پرنٹ شدہ بارکوڈ کیو آر، اور بائیو میٹرک بیجز کا اجرا (POST /hr/employees/{employee_id}/badges)؛ (3) قانونی قاعدہ rule:2906081f38 کے تحت گمشدہ یا خراب کارڈز کی منسوخی (POST /hr/badges/{badge_code}/revoke)؛ اور (4) کیو آر کوڈ اور بارکوڈ کے ساتھ سرکاری شناختی کارڈ کا پیش نظارہ اور کارڈ پرنٹر پر ترسیل (GET /hr/employees/{employee_id}/id-card)۔",
+    steps: [
+      "Employee Lookup: Enter the employee's database ID and click 'Load Employee' (GET /hr/employees/{employee_id}) to view full personnel details, designation, department, and currently active badges.",
+      "Review Issued Badges: Inspect active badges in the table, noting badge codes, technology types (RFID, Barcode, Biometric), holder classifications, and issuance dates.",
+      "Issue New Badge: Click '+ Issue New Badge' to open the registration dialog. Select technology: Barcode for printed QR credentials without RFID hardware (Rule rule:1cc0496368); RFID for contactless smart cards with reader UID (Rule rule:e361c806a1); or Biometric for scanner enrolment IDs.",
+      "Select Holder Type & Label: Choose holder category (Employee, SupportStaff, Sweeper, Janitor, Security, Contractor) and enter an optional label (e.g. 'Primary Access Card'). Click 'Issue Badge' to register (POST /hr/employees/{employee_id}/badges).",
+      "Revoke Lost / Damaged Card: When a card is lost or defective, click 'Revoke Badge' on the row. Under Rule rule:2906081f38, select a quick reason chip or enter an operational justification (minimum 3 characters) and confirm (POST /hr/badges/{badge_code}/revoke). Then immediately issue a fresh badge to replace it.",
+      "ID Card Print Preview: Click 'View / Print ID Card' to load the CR80 card designer payload (GET /hr/employees/{employee_id}/id-card). The preview renders hospital branding, employee photo frame, blood group, joined date, barcode, and printed access QR code. Click 'Print to Card Printer' to dispatch.",
+    ],
+    stepsUr: [
+      "ملازم کی تلاش: ملازم کا شناختی نمبر درج کر کے 'ملازم لوڈ کریں' دبائیں (GET /hr/employees/{employee_id}) تاکہ ان کی مکمل تفصیلات، عہدہ، محکمہ اور فعال بیجز دیکھے جا سکیں۔",
+      "جاری کردہ بیجز کا معائنہ: جدول میں فعال بیجز کے کوڈ، ٹیکنالوجی (آر ایف آئی ڈی، بارکوڈ، بائیو میٹرک)، حامل کی قسم اور اجرا کی تاریخ جانچیں۔",
+      "نیا بیج جاری کریں: '+ نیا بیج جاری کریں' دبائیں۔ ٹیکنالوجی منتخب کریں: بغیر ہارڈ ویئر کیو آر بیج کے لیے بارکوڈ (قاعدہ rule:1cc0496368)؛ اسمارٹ کارڈ کے لیے آر ایف آئی ڈی (قاعدہ rule:e361c806a1)؛ یا بائیو میٹرک اندراج۔",
+      "حامل کی قسم اور لیبل: حامل کی درجہ بندی (ملازم، سیکیورٹی، صفائی کارکن یا ٹھیکیدار) منتخب کریں اور اختیاری لیبل درج کریں۔ 'بیج کا اجرا کریں' دبا کر اندراج مکمل کریں (POST /hr/employees/{employee_id}/badges)۔",
+      "گمشدہ یا خراب کارڈ کی منسوخی: اگر کارڈ گم یا خراب ہو جائے تو 'بیج منسوخ کریں' دبائیں۔ قاعدہ rule:2906081f38 کے تحت کم از کم 3 حروف کی وجہ درج کر کے منسوخی کی تصدیق کریں (POST /hr/badges/{badge_code}/revoke)۔ اس کے بعد فوری طور پر نیا بیج جاری کریں۔",
+      "شناختی کارڈ کا پرنٹ پیش نظارہ: 'شناختی کارڈ پرنٹ کریں' دبائیں تاکہ مکمل ڈیزائنر لے آؤٹ لوڈ ہو سکے (GET /hr/employees/{employee_id}/id-card)۔ پیش نظارے میں ہسپتال کا نام، تصویر، بلڈ گروپ، بارکوڈ اور رسائی کیو آر کوڈ ظاہر ہوتا ہے۔ کارڈ پرنٹر پر پرنٹ کرنے کے لیے بٹن دبائیں۔",
+    ],
+    faq: [
+      [
+        "How do we issue access badges when RFID card reader hardware is not installed?",
+        "Under statutory Rule rule:1cc0496368, select technology 'Barcode'. The server automatically generates a unique badge code and QR SVG without requiring card reader hardware. Once issued, click 'View / Print ID Card' to print the staff member's ID card: its payload carries the generated badge QR code, which terminal barcode scanner stations at doors, kiosks, and counters can scan immediately.",
+      ],
+      [
+        "How are physical RFID cards registered with the system?",
+        "Under statutory Rule rule:e361c806a1, plug the desktop USB RFID card reader into the terminal. Tap the physical contactless smart card against the reader, which automatically inputs the card's unique identifier (UID) into the badge_code field. Select the holder type, add an optional label, and click 'Issue Badge' to activate physical door access.",
+      ],
+      [
+        "What is the procedure when an employee reports a lost or stolen security card?",
+        "Under statutory Rule rule:2906081f38, locate the employee's profile and click 'Revoke Badge' on the lost card row. Enter an operational justification reason (minimum 3 characters, e.g. 'Card lost in transit') and confirm revocation (POST /hr/badges/{badge_code}/revoke). Once deactivated, click '+ Issue New Badge' to issue a replacement card immediately.",
+      ],
+      [
+        "How does biometric badge enrolment work compared to smart cards?",
+        "Under Rule rule:e361c806a1, when selecting 'Biometric' technology, enrol the staff member on the facility's biometric scanner (fingerprint or facial terminal) and obtain their hardware enrolment identifier. Enter this identifier in the badge_code field. Terminal access scanners verify punch events against this enrolment ID.",
+      ],
+      [
+        "Can security badges be issued to contractors, security guards, or support staff?",
+        "Yes. The badge issuance modal provides holder type classifications including Employee, SupportStaff, Sweeper, Janitor, Security, and Contractor. Selecting the appropriate holder type and entering an informative label ensures proper security auditing and physical access zoning across wards and surgical units.",
+      ],
+    ],
+    faqUr: [
+      [
+        "اگر آر ایف آئی ڈی ریڈر ہارڈ ویئر نہ ہو تو رسائی بیجز کیسے جاری کیے جاتے ہیں؟",
+        "قانونی قاعدہ rule:1cc0496368 کے تحت، 'بارکوڈ' ٹیکنالوجی منتخب کریں۔ سرور خود بخود بغیر کسی اضافی ہارڈ ویئر کے ایک منفرد کوڈ اور کیو آر ایس وی جی بنا دیتا ہے۔ بیج جاری ہونے کے بعد 'شناختی کارڈ پرنٹ کریں' دبائیں؛ کارڈ لے آؤٹ پر یہ کیو آر بیج پرنٹ ہو جاتا ہے جسے ڈور اور کاؤنٹر اسکینرز باآسانی اسکین کر سکتے ہیں۔",
+      ],
+      [
+        "آر ایف آئی ڈی اسمارٹ کارڈز سسٹم میں کیسے رجسٹر کیے جاتے ہیں؟",
+        "قانونی قاعدہ rule:e361c806a1 کے تحت، یو ایس بی کارڈ ریڈر پر اسمارٹ کارڈ کو چھوئیں (ٹیپ کریں)۔ ریڈر کارڈ کا منفرد یو آئی ڈی خود بخود بیج کوڈ خانے میں درج کر دے گا۔ حامل کی قسم منتخب کریں اور 'بیج کا اجرا کریں' دبا کر رسائی کارڈ فعال کریں۔",
+      ],
+      [
+        "اگر کسی ملازم کا سیکیورٹی کارڈ گم یا چوری ہو جائے تو کیا طریقہ کار ہے؟",
+        "قانونی قاعدہ rule:2906081f38 کے تحت، ملازم کی پروفائل کھول کر گمشدہ کارڈ کے سامنے 'بیج منسوخ کریں' دبائیں۔ کم از کم 3 حروف پر مشتمل عملی وجہ درج کر کے تصدیق کریں (POST /hr/badges/{badge_code}/revoke)۔ کارڈ منسوخ ہونے کے بعد فوری طور پر '+ نیا بیج جاری کریں' دبا کر متبادل کارڈ جاری کریں۔",
+      ],
+      [
+        "بائیو میٹرک بیج کا اندراج اسمارٹ کارڈ سے کس طرح مختلف ہے؟",
+        "قاعدہ rule:e361c806a1 کے تحت، 'بائیو میٹرک' ٹیکنالوجی کے انتخاب پر ملازم کو ہسپتال کی فنگر پرنٹ یا چہرہ شناسی ڈیوائس پر رجسٹر کریں اور ڈیوائس کا انرولمنٹ آئی ڈی حاصل کریں۔ اس آئی ڈی کو بیج کوڈ میں درج کریں تاکہ ڈیوائس اسکینز کی تصدیق ہو سکے۔",
+      ],
+      [
+        "کیا ٹھیکیداروں، سیکیورٹی گارڈز اور معاون عملے کو بیجز جاری کیے جا سکتے ہیں؟",
+        "جی ہاں۔ بیج فارم میں ملازم، معاون عملہ، صفائی کارکن، چوکیدار، سیکیورٹی اور ٹھیکیدار کی درجہ بندیاں شامل ہیں۔ مناسب قسم منتخب کر کے اور وضاحتی لیبل درج کر کے مخصوص وارڈز اور آپریشن تھیٹرز کے لیے سیکیورٹی کلیئرنس یقینی بنائی جاتی ہے۔",
+      ],
+    ],
+  },
+
   staff_directory: {
     title: "Staff directory & records",
     titleUr: "عملے کی ڈائریکٹری اور ریکارڈ",
