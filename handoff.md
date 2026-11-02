@@ -1,7 +1,7 @@
 # Haspataal checkpoint
 Last updated: 03 November 2026, Antigravity (Codex pair), Asia/Karachi.
 
-## Active request: Phase 8 Screen 149 `support_roster` (Support-staff duty roster & roll call)
+## Active request: Phase 8 Screen 150 `attendance` (Staff attendance, punches & timecards)
 Executing the Haspataal HMS Roadmap in dependency order along with all tests and MCP progress reporting:
 - **Phase 7 ("Finance, billing and back offices")**: 100% COMPLETE (Screens 133–142, Proposals 286–295).
 - **Phase 8 ("People, facility and IT")**:
@@ -11,9 +11,63 @@ Executing the Haspataal HMS Roadmap in dependency order along with all tests and
   - Screen 146: **`badges`** ("Security & staff badges", Position 146, 47 points, workspace `hr`) — **COMPLETED** (Proposal **299** awaiting human review on `/docs -> My progress`).
   - Screen 147: **`id_card`** ("Staff ID card designer & print", Position 147, 33 points, workspace `hr`) — **COMPLETED** (Proposal **300** awaiting human review on `/docs -> My progress`).
   - Screen 148: **`duty_roster_hr`** ("Duty rosters (all staff)", Position 148, 94 points, workspace `hr`) — **COMPLETED** (Proposal **301** awaiting human review on `/docs -> My progress`).
-  - Screen 149: **`support_roster`** ("Support-staff duty roster & roll call", Position 149, 94 points, workspace `ops_admin`) — **NEXT**.
-    - Scope: Support staff roster planning (sweepers, janitors, guards) onto zones, wards, and gates, weekly job aid print, roll call, verbal shift swaps, and rest audit.
-    - Next Concrete Step: Build domain policies in `src/support-roster-policy.ts`, screen UI in `src/screens/SupportRoster.tsx`, wire into app and catalogue, write unit tests, and verify.
+  - Screen 149: **`support_roster`** ("Support-staff duty roster & roll call", Position 149, 94 points, workspace `ops_admin`) — **COMPLETED** (Proposal **302** awaiting human review on `/docs -> My progress`).
+  - Screen 150: **`attendance`** ("Staff attendance, punches & timecards", Position 150, 63 points, workspace `hr`) — **NEXT**.
+    - Scope: Attendance logs, punch review, biometric integration, manual punch adjustment, and timecards.
+    - Next Concrete Step: Retrieve `get_screen_bundle("attendance")`, save contract, generate typescript client, and begin implementation.
+
+---
+
+### Completed Screen 149 (`support_roster`) Checkpoint
+- **Workflow & Standards**: Support-staff duty roster planning, offline schedule printing, and roll call attendance (`support_roster`, Workspace `ops_admin`, Position 149, 94 points):
+  - **Weekly Support Planner Grid (`GET /rosters`, `GET /rosters/staff`, `POST /rosters`):**
+    - 7 consecutive day columns starting Monday (ISO weekday 1..7) through Sunday (`rule:4ea9d4f624`).
+    - Rows grouped by active shift pattern (`rule:50af6ba770`).
+    - Interactive duty assignment assigning sweepers, janitors, and guards onto designated zones, gates, and wards.
+    - Statutory leave ranges greyed out (`rule:7ee9e5cda4`); flags `ROSTER_CONFLICT` for overlapping shifts.
+    - Gazetted public holidays (`rule:2e75984ff7`) highlighted with festive indicator; rostering permitted as scheduled.
+    - Daily staffing totals bar calculating total scheduled staff per day.
+  - **Duty Modification & Cancellation (`PATCH /rosters/{roster_id}`, `POST /rosters/{roster_id}/cancel`):**
+    - Duty edits via PATCH with optimistic concurrency (`expected_version`, `rule:e255d6b71a`).
+    - Deletion is prohibited: operational duty cancellation requires a documented justification reason (minimum 3 characters).
+    - Past dates locked to read-only mode unless user holds HR administrative authority (`rule:cbd240746c`).
+  - **Period Duplication & Rotation (`POST /rosters/copy`):**
+    - Duplicates entire previous week schedule into target week with detailed conflict feedback (`rule:f72ed8bfcb`).
+    - Forward rotation (`rotate_days: 1`) allowing fair rotation of Sunday duties and rest days over consecutive weeks.
+  - **Support Staff Offline Job Aid & Printable Schedule (`rule:28262cb3f6`):**
+    - Non-logged-in workers (sweepers, janitors, guards) cannot check online portals: dedicated "Print Weekly Duty Sheet" generates a clean, printable weekly duty matrix to post on facility notice boards and hand to shift supervisors.
+  - **Roll-Call Attendance Sheet (`GET /rosters/roll-call`, `POST /rosters/roll-call`):**
+    - Daily roll-call attendance sheet showing all staff scheduled for today.
+    - Real-time arrival punch tracking: automatically highlights staff who scanned an RFID badge at a security station (`first_in` + `first_source: Badge`).
+    - Supervisor batch roll-call attendance marking for stations without badge terminals (`POST /rosters/roll-call` with `Idempotency-Key`).
+    - Skips already punched-in staff without creating duplicate attendance logs.
+    - Printable physical roll call sheet for taking manual signatures at peripheral gates without computers.
+  - **Verbal Duty Swaps & Covers (`GET /rosters/swaps`, `POST /rosters/swaps`, `approve`, `reject`):**
+    - Record verbal shift swaps for workers without computer logins (`POST /rosters/swaps`, `rule:83718fc56e`).
+    - Managerial approval and rejection with mandatory operational explanation.
+    - Strict dual-control separation preventing self-approval (`SWAP_SELF_APPROVAL`).
+  - **Week Check & Rest Audit (`GET /rosters/week`):**
+    - KPI audit summary identifying `NoRestDay` amber warnings, overtime extra duty days, and staffing counts per shift (`rule:fb45bf026f`).
+  - **Realtime Reactive Refresh (`ev:roster.changed`, `ev:roster.swap.updated`):**
+    - Automatically updates planner grid, roll call sheet, and swaps directory upon server events without manual polling (`rule:6e21482f49`).
+  - **Service Capability Gating:**
+    - Resolves `full`, `open_work`, `records`, `setup`, and `hidden` derived from server `GET /establishment views.screens`.
+- **Contracts**: `contracts/support_roster.json` (13 endpoints, 2 events, 11 statutory rules, 37 rubric items). Generated client: `src/generated/support_roster.ts`.
+- **Domain Policies & Rules (`src/support-roster-policy.ts`)**:
+  - `getSupportRosterCapabilityView`, `getWeekDates`, `isStaffOnLeave`, `isStaffDefaultWeeklyOff`, `isPublicHoliday`, `validateCancelDuty`, `validateCopyPeriod`, `validateRecordSwap`, `canUserApproveSwap`, `validateRollCallSubmission`, `formatWeeklyPrintableSchedule`, `filterRollCallEntries`, and `SUPPORT_ROSTER_ERROR_MESSAGES`.
+- **UI Architecture (`src/screens/SupportRoster.tsx`)**:
+  - 4-tab interface: Weekly Planner Grid, Today's Roll Call, Duty Swaps & Covers, and Week Check & Rest Audit.
+  - Wired into `src/App.tsx`, `scripts/check-help.mjs`, `src/foundation-catalogue.json` (13 tasks), `src/foundation-task-map.json` (13 controls), and `src/foundation-help.ts` (60 interactive controls mapped with bilingual titles and guides).
+  - Authored comprehensive handbook entry and 5 role FAQs in `src/help.ts`; verified bundled screenshots in `public/handbook/support_roster-en.png` and `support_roster-ur.png`.
+- **Verification**:
+  - Automated unit tests: `tests/support-roster.test.mjs` passed (12/12 tests).
+  - Help check: `node scripts/check-help.mjs` passed (148 screens, 3,789 controls, 2,766 groups, 69 FAQ seeds, 30 workspace guides).
+  - Full help coverage test: `node --test tests/help-coverage.test.mjs` passed (28/28 tests across 148 screens).
+  - Full test suite: `npm test` passed (773/773 tests across all 19 test suites).
+  - TypeScript compiler: `npx.cmd tsc --noEmit` passed with 0 errors.
+  - Production build: `npm.cmd run build` succeeded (`dist/assets/index-DFp1irmd.js`).
+- **Proposal**:
+  - Proposal ID: **302** (status: `pending` on `/docs -> My progress`, build `index-DFp1irmd.js`, 36 rubric items claimed, `q:fresh_data` left pending human review).
 
 ---
 

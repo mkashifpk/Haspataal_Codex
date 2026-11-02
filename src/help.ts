@@ -10,6 +10,76 @@ export type HelpPage = {
   faqUr: [string, string][];
 };
 export const help: Record<string, HelpPage> = {
+  support_roster: {
+    title: "Support-staff duty roster & roll call",
+    titleUr: "معاون عملے کا ڈیوٹی روسٹر اور رول کال",
+    purpose: "Specialized shift planning and offline attendance workflow for hospital support staff (sweepers, janitors, security guards, and ward orderlies) onto zones, wards, and gates: (1) 7-day week planner grid with shift pattern rows and holiday markers (GET /rosters/staff, GET /rosters) per Rule rule:50af6ba770, Rule rule:7ee9e5cda4, and Rule rule:2e75984ff7; (2) Targeted zone, gate, and ward duty assignment (POST /rosters); (3) Optimistic concurrency duty edits and reason-based cancellations (PATCH /rosters/{roster_id}, POST /rosters/{roster_id}/cancel) per Rule rule:e255d6b71a; (4) Period repetition with fair forward day rotation (POST /rosters/copy) per Rule rule:f72ed8bfcb; (5) Supervisor recording of verbal shift swaps and dual-control approvals (GET /rosters/swaps, POST /rosters/swaps, approve, reject) per Rule rule:83718fc56e; (6) Offline support staff job aid via printable weekly duty schedule sheets and paper roll call sheets per Rule rule:28262cb3f6 because support staff do not have system logins; (7) Today's roll-call attendance sheet for marking rostered personnel present without badge stations (GET /rosters/roll-call, POST /rosters/roll-call); (8) Rest-day statutory compliance audit and overtime tracking (GET /rosters/week) per Rule rule:fb45bf026f; and (9) Real-time reactive updates via roster.changed and roster.swap.updated events per Rule rule:6e21482f49.",
+    purposeUr: "ہسپتال کے معاون عملے (صفائی کارکن، سیکیورٹی گارڈز، گیٹ اسٹاف اور وارڈ خادم) کے لیے مخصوص شفٹ پلاننگ اور بغیر کمپیوٹر حاضری کا جامع نظام: (1) قاعدہ rule:50af6ba770، rule:7ee9e5cda4 اور rule:2e75984ff7 کے تحت 7 روزہ پلانر گرڈ، شفٹ قطاریں اور سرکاری تعطیلات (GET /rosters/staff، GET /rosters)؛ (2) ہسپتال کے زونز، گیٹس اور وارڈز پر ڈیوٹی کی تفویض (POST /rosters)؛ (3) قاعدہ rule:e255d6b71a کے تحت ڈیوٹی میں ترمیم اور باضابطہ وجہ کے ساتھ منسوخی (PATCH /rosters/{roster_id}، POST /rosters/{roster_id}/cancel)؛ (4) قاعدہ rule:f72ed8bfcb کے تحت پچھلے ہفتے کی گردش کے ساتھ نقل (POST /rosters/copy)؛ (5) قاعدہ rule:83718fc56e کے تحت بغیر لاگ ان والے عملے کے زبانی تبادلوں کا اندراج اور دوہری منظوری (GET/POST /rosters/swaps)؛ (6) قاعدہ rule:28262cb3f6 کے تحت پرنٹ شدہ ہفتہ وار ڈیوٹی شیٹ اور حاضری فارم کیونکہ معاون عملہ سسٹم لاگ ان نہیں رکھتا؛ (7) بغیر بیج اسٹیشن کے ڈیوٹی پر موجود عملے کی رول کال حاضری شیٹ (GET/POST /rosters/roll-call)؛ (8) قاعدہ rule:fb45bf026f کے تحت قانونی آرام کے دنوں اور اوور ٹائم کا آڈٹ (GET /rosters/week)؛ اور (9) قاعدہ rule:6e21482f49 کے تحت ریئل ٹائم ہم آہنگی۔",
+    steps: [
+      "Select Weekly Horizon: Use the week navigation buttons or Monday date picker to navigate to the desired operational week. Filter the support staff directory by category (SupportZeroInterface, Technical, Administrative) or search by name or employee ID.",
+      "Review Support Planner Grid: Inspect the 7-day grid displaying shift pattern rows (Morning, Evening, Night) and public holiday indicators (Rule rule:2e75984ff7). Review existing zone and gate allocations to ensure balanced facility coverage.",
+      "Assign Duties onto Zones & Gates: Click '+ Assign Duty' or the '+ Add Staff' button on any grid cell (POST /rosters). Select the support worker, shift pattern, duty area (Facility, Ward, Emergency, Gate), zone label (e.g., 'Zone A - Main Entrance'), and optional on-call standby status.",
+      "Print Weekly Duty Job Aid: Under Rule rule:28262cb3f6, click 'Print Weekly Duty Sheet'. The printable layout formats the full week's duty matrix so it can be physically posted on the facility bulletin board or handed to shift supervisors, ensuring workers without logins know their assigned shifts and locations.",
+      "Conduct Daily Roll Call Attendance: On the 'Today's Roll Call' tab, review all support staff rostered for today (GET /rosters/roll-call). Filter by shift or zone, check the boxes for arrived personnel, and click 'Mark Present' (POST /rosters/roll-call) with Idempotency-Key protection. Workers who already tapped an RFID badge show their punch time automatically.",
+      "Print Physical Roll Call Sheet: When taking roll call outdoors at peripheral gates or wards without computer terminals, click 'Print Sheet' to print a physical roster roll call document for manual supervisor signatures.",
+      "Record Verbal Shift Swaps: On the 'Duty Swaps & Covers' tab, click '+ Record Verbal Swap' (POST /rosters/swaps, Rule rule:83718fc56e) when two support staff agree in person to cover for each other. Select the proposer, receiver, their respective shifts, and the mutual reason.",
+      "Audit Weekly Rest Compliance & Overtime: On the 'Week Check & Rest Audit' tab (GET /rosters/week, Rule rule:fb45bf026f), audit rest day compliance. Personnel working 7 consecutive days without a statutory rest day are flagged with amber 'NoRestDay' alerts, and extra duty overtime days are tracked.",
+    ],
+    stepsUr: [
+      "ہفتہ وار دورانیہ منتخب کریں: ہفتہ وار نیویگیشن بٹنوں یا پیر کی تاریخ کے ذریعے مطلوبہ آپریشنل ہفتہ منتخب کریں۔ معاون عملے کو کیٹیگری کے مطابق فلٹر کریں یا نام اور ملازم نمبر سے تلاش کریں۔",
+      "معاون پلانر گرڈ کا جائزہ: شفٹ پیٹرن قطاروں (صبح، شام، رات) اور تعطیلات کے نشانات کے ساتھ 7 روزہ گرڈ کا معائنہ کریں (قاعدہ rule:2e75984ff7)۔ مناسب کوریج کے لیے زون اور گیٹ کی تعیناتی چیک کریں۔",
+      "زونز اور گیٹس پر ڈیوٹی تفویض کریں: '+ ڈیوٹی لگائیں' یا خانے میں موجود بٹن دبائیں (POST /rosters)۔ معاون ملازم، شفٹ پیٹرن، ڈیوٹی ایریا (احاطہ، وارڈ، ایمرجنسی، گیٹ)، زون لیبل اور آن کال کیفیت منتخب کریں۔",
+      "ہفتہ وار ڈیوٹی شیٹ پرنٹ کریں: قاعدہ rule:28262cb3f6 کے تحت 'ہفتہ وار روسٹر پرنٹ کریں' دبائیں۔ یہ پرنٹ فارمیٹ پورے ہفتے کا شیڈول فراہم کرتا ہے تاکہ اسے نوٹس بورڈ پر آویزاں کیا جا سکے اور بغیر کمپیوٹر عملہ اپنی ڈیوٹی جان سکے۔",
+      "روزانہ کی رول کال حاضری درج کریں: 'آج کی رول کال' ٹیب میں آج کے روسٹرڈ عملے کا جائزہ لیں (GET /rosters/roll-call)۔ حاضر افراد کے خانے نشان زد کریں اور 'حاضری درج کریں' دبائیں (POST /rosters/roll-call)۔ کارڈ سے پنچ کرنے والوں کی آمد خودکار ظاہر ہوتی ہے۔",
+      "کاغذی رول کال فارم پرنٹ کریں: دور دراز گیٹس یا بغیر کمپیوٹر والے مقامات پر دستی حاضری کے لیے 'رول کال شیٹ پرنٹ کریں' دبا کر کاغذی حاضری فارم حاصل کریں۔",
+      "زبانی شفٹ تبادلے درج کریں: 'ڈیوٹی تبادلے' ٹیب میں جب دو ملازمین باہمی رضامندی سے ڈیوٹی بدلیں تو '+ زبانی تبادلہ درج کریں' دبائیں (POST /rosters/swaps، قاعدہ rule:83718fc56e) اور دونوں کی ڈیوٹیاں اور وجہ درج کریں۔",
+      "ہفتہ وار آرام اور اوور ٹائم کا آڈٹ: 'ہفتہ وار آڈٹ' ٹیب میں قانونی آرام کی جانچ کریں (GET /rosters/week، قاعدہ rule:fb45bf026f)۔ بغیر آرام مسلسل 7 دن کام کرنے والے ملازمین پر 'NoRestDay' تنبیہ اور اوور ٹائم الاؤنس دیکھیں۔",
+    ],
+    faq: [
+      [
+        "Why do support staff have a dedicated roll call tab and printable weekly sheets instead of logging in?",
+        "Under statutory Rule rule:28262cb3f6, support personnel (sweepers, janitors, groundskeepers, and gate guards) belong to staff category 'SupportZeroInterface' and do not have individual terminal login accounts or computer workstations. Operations supervisors manage their schedules by printing the weekly duty job aid (Print Weekly Duty Sheet) to post on facility notice boards, and taking daily morning and evening roll call attendance (GET/POST /rosters/roll-call) directly at their muster stations.",
+      ],
+      [
+        "How does the roll call sheet handle support staff who already punched in with a security badge at a gate station?",
+        "The roll-call sheet (GET /rosters/roll-call) retrieves real-time arrival punches from the server. If an employee scanned an RFID badge or printed barcode credential at a physical badge station, their record displays an 'Arrived' green badge with the punch timestamp and source 'Badge'. When taking roll call, the server automatically skips anyone who already punched in and records manual arrival only for un-punched personnel without creating duplicate attendance logs.",
+      ],
+      [
+        "How are support staff duties assigned to specific physical hospital zones and security gates?",
+        "When assigning duties via POST /rosters, the supervisor sets the duty_area to 'Facility' (or 'Ward' / 'Emergency' / 'OT') and enters a descriptive zone_label (e.g. 'Zone A - Main Entrance', 'Zone B - Trauma OPD Courtyard', 'Gate 3 - Ambulance Bay'). The weekly planner grid, printed duty sheets, and roll call sheets all clearly display this zone label so each supervisor and team lead knows exactly which perimeter or ward area is assigned.",
+      ],
+      [
+        "How do operations supervisors record verbal duty swaps for support personnel who do not have login access?",
+        "Under statutory Rule rule:83718fc56e, support workers who agree in person to swap shifts cannot submit self-service portal requests. Instead, the supervisor uses the '+ Record Verbal Swap' dialog (POST /rosters/swaps). The supervisor selects both employees, their respective scheduled shifts, and records the operational reason. Dual-control rules apply: the deciding supervisor cannot be one of the swapping employees (SWAP_SELF_APPROVAL prevention).",
+      ],
+      [
+        "How does the Week Check panel calculate rest day compliance and statutory overtime allowances for support workers?",
+        "Under statutory Rule rule:fb45bf026f, GET /rosters/week audits total scheduled working days against the hospital's mandatory rest day policy (e.g., at least 1 rest day in every 7-day period). Support personnel rostered for 7 consecutive days are flagged with amber 'NoRestDay' alerts. Working days exceeding the normal weekly threshold are tracked as overtime extra duty days, ensuring that operations and payroll managers accurately disburse statutory extra duty compensation.",
+      ],
+    ],
+    faqUr: [
+      [
+        "معاون عملے کے لیے لاگ ان کے بجائے مخصوص رول کال اور پرنٹ شدہ شیٹس کا انتظام کیوں ہے؟",
+        "قانونی قاعدہ rule:28262cb3f6 کے تحت صفائی عملہ، مالی اور گارڈز 'SupportZeroInterface' زمرے سے تعلق رکھتے ہیں اور ان کے پاس کمپیوٹر لاگ ان اکاؤنٹس نہیں ہوتے۔ آپریشنز سپروائزرز ہفتہ وار ڈیوٹی شیٹ پرنٹ کر کے نوٹس بورڈز پر لگاتے ہیں تاکہ وہ اپنی ڈیوٹی جان سکیں، اور حاضری کے لیے روزانہ رول کال شیٹ (GET/POST /rosters/roll-call) استعمال کرتے ہیں۔",
+      ],
+      [
+        "رول کال شیٹ ان ملازمین سے کیسے نمٹتی ہے جنہوں نے گیٹ پر پہلے ہی کارڈ سے پنچ کیا ہو؟",
+        "رول کال شیٹ (GET /rosters/roll-call) سرور سے حقیقی وقت کی پنچ معلومات لیتی ہے۔ اگر ملازم نے گیٹ پر آر ایف آئی ڈی کارڈ یا بارکوڈ اسکین کر کے حاضری لگائی ہو، تو اس کا اسٹیٹس 'حاضر (Badge)' ظاہر ہوتا ہے۔ سپروائزر جب رول کال جمع کراتا ہے تو سرور پہلے سے پنچ شدہ افراد کو چھوڑ کر صرف باقی افراد کی نئی حاضری لگاتا ہے۔",
+      ],
+      [
+        "معاون عملے کی ڈیوٹیاں ہسپتال کے مخصوص زونز اور سیکیورٹی گیٹس پر کیسے لگائی جاتی ہیں؟",
+        "ڈیوٹی لگاتے وقت سپروائزر شعبہ کو 'Facility' یا 'Ward' منتخب کرتا ہے اور مخصوص زون لیبل درج کرتا ہے (جیسے 'زون اے - مین گیٹ'، 'زون بی - ٹراما صحن')۔ ہفتہ وار پلانر گرڈ، پرنٹ شدہ شیٹ اور حاضری رجسٹر میں یہ زون لیبل واضح نظر آتا ہے تاکہ ہر کارکن اپنی متعین جگہ پر کام کرے۔",
+      ],
+      [
+        "بغیر لاگ ان والے معاون عملے کے باہمی زبانی ڈیوٹی تبادلے سپروائزر کیسے درج کرتا ہے؟",
+        "قاعدہ rule:83718fc56e کے تحت جب دو معاون کارکن باہمی رضامندی سے ڈیوٹی کا تبادلہ کریں، تو وہ سسٹم میں خود درخواست نہیں دے سکتے۔ سپروائزر '+ زبانی تبادلہ درج کریں' ڈائیلاگ استعمال کر کے دونوں ملازمین، ان کی شفٹیں اور وجہ درج کرتا ہے۔ دوہری منظوری کا قانون لاگو ہوتا ہے اور سپروائزر اپنے ذاتی تبادلے کا فیصلہ خود نہیں کر سکتا۔",
+      ],
+      [
+        "ہفتہ وار آڈٹ پینل معاون عملے کے آرام کے قانونی دنوں اور اوور ٹائم کا حساب کیسے لگاتا ہے؟",
+        "قاعدہ rule:fb45bf026f کے تحت GET /rosters/week ہر ملازم کے کام کے دنوں کا قانونی چھٹیوں کے حساب سے آڈٹ کرتا ہے۔ مسلسل 7 دن بغیر آرام کام کرنے والے عملے پر پیلے رنگ کی 'NoRestDay' وارننگ آتی ہے، اور قانونی حد سے زائد دنوں کو اوور ٹائم کے طور پر شمار کیا جاتا ہے تاکہ ان کے معاوضے کی ادائیگی یقینی بنائی جا سکے۔",
+      ],
+    ],
+  },
   duty_roster_hr: {
     title: "Duty rosters (all staff)",
     titleUr: "عملے کا ڈیوٹی روسٹر اور شفٹ پلاننگ",
