@@ -1,7 +1,7 @@
 # Haspataal checkpoint
 Last updated: 02 November 2026, Antigravity (Codex pair), Asia/Karachi.
 
-## Active request: Phase 7 Screen 139 `lab_admin` (Lab catalogue, panels, instruments & reagent inventory)
+## Active request: Phase 7 Screen 140 `diagnostic_partners` (Partner laboratories and imaging centres)
 Executing the Haspataal HMS Roadmap in dependency order along with all tests and MCP progress reporting:
 - **Phase 6 ("Theatre and sterile supply")**: 100% COMPLETE (Screens 109–132, Proposals 262–285).
 - **Phase 7 ("Finance, billing and back offices")**:
@@ -10,17 +10,65 @@ Executing the Haspataal HMS Roadmap in dependency order along with all tests and
   - Screen 135: **`pharmacy_admin`** ("Pharmacy inventory, formulary & procurement", Position 135, 76 points, workspace `pharmacy_admin`) — **COMPLETED** (commit `1b7d0e5`, Proposal **288** awaiting human review on `/docs -> My progress`).
   - Screen 136: **`medication_safety_setup`** ("High-alert drugs & look-alike/sound-alike rules", Position 136, 54 points, workspace `pharmacy_admin`) — **COMPLETED** (commit `c7f683b`, Proposal **289** awaiting human review on `/docs -> My progress`).
   - Screen 137: **`drug_recalls`** ("Drug recall campaigns & quarantine management", Position 137, 63 points, workspace `pharmacy_admin`) — **COMPLETED** (commit `ba0b999`, Proposal **290** awaiting human review on `/docs -> My progress`).
-  - Screen 138: **`pharmacy_storage_log`** ("Medicine storage log & temperature monitoring", Position 138, 51 points, workspace `pharmacy_admin`) — **COMPLETED** (Proposal **291** awaiting human review on `/docs -> My progress`).
-  - Screen 139: **`lab_admin`** ("Lab catalogue, panels, instruments & reagent inventory", Position 139, 76 points, workspace `lab_admin`) — **NEXT**.
-    - Scope: Lab test master catalog, profile/panel definitions, analyzers/instruments configuration, reagent stock management, and quality control rules.
+  - Screen 138: **`pharmacy_storage_log`** ("Medicine storage log & temperature monitoring", Position 138, 51 points, workspace `pharmacy_admin`) — **COMPLETED** (commit `580e15a`, Proposal **291** awaiting human review on `/docs -> My progress`).
+  - Screen 139: **`lab_admin`** ("Lab catalogue, panels, instruments & reagent inventory", Position 139, 76 points, workspace `lab_admin`) — **COMPLETED** (Proposal **292** awaiting human review on `/docs -> My progress`).
+  - Screen 140: **`diagnostic_partners`** ("Partner laboratories and imaging centres", Position 140, 44 points, workspace `lab_admin`) — **NEXT**.
+    - Scope: Partner laboratories & imaging centers register under MOU (MSDS AAC 6, 14), PHC registration, accreditation (PNAC) / PNRA licence, agreed turnarounds, 30-day renewal warnings, and active dispatch controls.
     - Next Concrete Actions:
-      1. Inspect `get_screen_bundle("lab_admin")` and save to `contracts/lab_admin.json`.
+      1. Inspect `get_screen_bundle("diagnostic_partners")` and save to `contracts/diagnostic_partners.json`.
       2. Generate TypeScript contracts via `generate_typescript`.
-      3. Create domain policies in `src/lab-admin-policy.ts`.
-      4. Implement UI `src/screens/LabAdmin.tsx`.
+      3. Create domain policies in `src/diagnostic-partners-policy.ts`.
+      4. Implement UI `src/screens/DiagnosticPartners.tsx`.
       5. Wire into `src/App.tsx`, catalogue, task map, foundation help, authored handbook entry, and unit test suite.
       6. Run full verification suite (`npm run check:help`, `npm test`, `npx tsc --noEmit`, `npm run build`).
       7. Propose progress via `propose_progress`.
+
+---
+
+### Completed Screen 139 (`lab_admin`) Checkpoint
+- **Workflow & Standards**: Comprehensive diagnostic laboratory master administration and inventory workspace (`lab_admin`, MSDS AAC 1-6):
+  - **Test Catalogue Table (`GET /lab/tests`):**
+    - Master diagnostic test catalog with real-time search filtering (`q` query parameter).
+    - Displays test code, full descriptive name, laboratory section, specimen type, routine and urgent STAT turnaround minutes, availability (InHouse vs SendOut with partner name), 24/7 basic emergency indicator (MSDS AAC 1 v), priority notifiable disease alerts, active status badge, and patient pricing.
+  - **Metric Schema Definition (`POST /lab/tests`, `PATCH /lab/tests/{test_id}`):**
+    - Enforces statutory Rule `rule:26ecdbf976`: interactive editor defining quantitative numeric and qualitative text parameters, reporting units, physiological reference intervals (default, male, female), and clinical critical panic limits (low/high, or qualitative findings like Positive/Reactive) triggering immediate urgent alerts.
+  - **Statutory Rules & Turnarounds (`rule:c8be844050`):**
+    - Routine turnaround minutes and urgent/STAT turnaround minutes per MSDS AAC 4.
+    - Test availability gating: InHouse (on-site execution) vs SendOut (external partner laboratory requiring active diagnostic partner from `GET /diagnostic-partners` with unexpired MOU).
+    - Basic emergency diagnostic tagging: round-the-clock availability (`available_24h`) per MSDS AAC 1 v.
+    - Statutory priority notifiable disease linkage reporting to health authority surveillance registers.
+  - **Tariff Price Management (`PUT /lab/tests/{test_id}/price`):**
+    - Laboratory price schedule updates tracking auditable administrative change justifications.
+  - **Reagent Bill of Materials (`GET/PUT /lab/tests/{test_id}/bom`):**
+    - Connects tests to registered chemical reagents with quantities per test run; automatically deducts inventory upon patient result submission and computes reagent Cost of Goods Sold (COGS).
+  - **Reagents & Batch Inventory (`GET/POST /lab/reagents`, `POST /lab/reagent-batches`, `POST /lab/reagent-adjustments`):**
+    - Reagents live inventory table tracking low stock thresholds, near-expiry alerts, and FEFO stock availability.
+    - Receive batch modal with lot numbers, expiration dates, unit/total costs, and vendor invoice links.
+    - Auditor stock adjustment / write-off modal enforcing reasons (Adjustment, Expiry, Damage) and mandatory audit notes.
+  - **Financial Performance & Contractor Share (`GET /lab/dashboard`, `PUT /lab/contractor`, `GET /staff/lookup`):**
+    - Date-filtered analytics displaying gross revenue, reagent COGS, net profit, test reruns, and hospital vs contractor splits.
+    - Revenue by test category table.
+    - Contractor revenue-sharing agreement panel with verified PMDC staff lookup (`GET /staff/lookup`).
+  - **Realtime Integration:**
+    - Subscribes to `lab.reagent.low_stock` event to auto-refresh tests, reagents, and financial dashboard without polling.
+  - **Service Capability Gating (`rule:0f8b607b2c`):**
+    - `getLabAdminCapabilityView` derives `full`, `open_work` (warning banner "No new laboratory or outsourced diagnostics work from now on"), `records`, `setup`, and `hidden` from server `GET /establishment views.screens`.
+- **Contracts**: `contracts/lab_admin.json` (13 endpoints, 1 realtime event, 3 statutory rules `rule:26ecdbf976`, `rule:c8be844050`, `rule:0f8b607b2c`, 28 rubric items).
+- **Domain Policies & Statutory Rules (`src/lab-admin-policy.ts`)**:
+  - `getLabAdminCapabilityView`, `validateMetricDef`, `validateMetricSchema`, `createDefaultMetric`, `validateLabTestInput`, `validateLabTestUpdate`, `validateBomInput`, `validateReagentInput`, `validateReagentBatchInput`, `validateReagentAdjustInput`, `validateContractorInput`.
+  - Bilingual error dictionary (`LAB_ADMIN_ERROR_MESSAGES`) covering `DIAGNOSTIC_PARTNER_INVALID`, `INSUFFICIENT_STOCK`, `NOT_FOUND`, `VERSION_CONFLICT`, `FORBIDDEN`, `REFERENCE_NOT_FOUND`, `UNAUTHENTICATED`, and `VALIDATION_ERROR`.
+- **UI Architecture (`src/screens/LabAdmin.tsx`)**:
+  - Live 3-tab laboratory administration component wired into `src/App.tsx`, `src/foundation-catalogue.json` (13 tasks), `src/foundation-task-map.json` (13 controls), `src/foundation-help.ts` (77 interactive controls mapped), and `scripts/check-help.mjs`.
+  - Authored comprehensive handbook entry (`src/help.ts`) with bilingual title, purpose, 10 operational steps, and 5 role FAQs answering seed errors `DIAGNOSTIC_PARTNER_INVALID` and `INSUFFICIENT_STOCK`. Bundled screenshots in `public/handbook/lab_admin-en.png` and `lab_admin-ur.png`.
+- **Verification**:
+  - Automated unit tests: `tests/lab-admin.test.mjs` (7/7 passing).
+  - Help check: `npm run check:help` passed (138 screens, 3464 controls, 2467 groups, 69 FAQ seeds, 30 workspace guides).
+  - Help coverage test: `tests/help-coverage.test.mjs` (28/28 passing across 138 screens).
+  - Full test suite: `npm test` passed (697/697 passing across all 19 test suites).
+  - TypeScript compiler: `npx tsc --noEmit` passed with 0 errors.
+  - Production build: `npm run build` succeeded (`dist/assets/index-BXP7FYVo.js`).
+- **Proposal**:
+  - Proposal ID: **292** (status: `pending` on `/docs -> My progress`, build `index-BXP7FYVo.js`, 27 rubric items claimed, `q:fresh_data` left pending human review).
 
 ---
 

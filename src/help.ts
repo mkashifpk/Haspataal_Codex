@@ -10,6 +10,80 @@ export type HelpPage = {
   faqUr: [string, string][];
 };
 export const help: Record<string, HelpPage> = {
+  lab_admin: {
+    title: "Lab administration",
+    titleUr: "لیبارٹری ایڈمنسٹریشن",
+    purpose: "Comprehensive test catalogue, pricing tariff, reagent inventory, Bill of Materials (BOM), and contractor profit-sharing governance for the diagnostic laboratory per MSDS AAC 1-6: (1) Active laboratory test master catalogue (GET /lab/tests) with section, specimen type, routine turnaround, and urgent STAT turnaround; (2) Interactive metric schema definition under Rule 26ecdbf976 (POST/PATCH /lab/tests) configuring quantitative numerical or qualitative text parameters, reference ranges (male/female/default), and critical panic limits requiring urgent clinical alerting; (3) Statutory compliance under Rule c8be844050 tracking 24/7 basic emergency tests (MSDS AAC 1 v), priority notifiable disease reporting, and SendOut delegation to accredited partner laboratories (GET /diagnostic-partners); (4) Auditable test price updates with mandatory administrative justifications (PUT /lab/tests/{test_id}/price); (5) Reagent Bill of Materials (BOM) linkage (GET/PUT /lab/tests/{test_id}/bom) enabling automatic inventory deduction upon result validation; (6) Reagent inventory management (GET/POST /lab/reagents, POST /lab/reagent-batches, POST /lab/reagent-adjustments) tracking FEFO-eligible stock, low stock thresholds, near-expiry alerts, and auditor write-offs; and (7) Financial performance analytics (GET /lab/dashboard) calculating gross revenue, reagent COGS, net profit, test reruns, and formal contractor revenue-sharing agreements (PUT /lab/contractor, GET /staff/lookup).",
+    purposeUr: "تشخیصی لیبارٹری کے لیے ٹیسٹ کیٹلاگ، نرخ نامہ، ری ایجنٹ انوینٹری، بل آف میٹیریل (BOM) اور کنٹریکٹر کے ساتھ منافع کی تقسیم کے انتظامی امور برائے MSDS AAC 1-6: (1) فعال لیب ٹیسٹس کا کیٹلاگ (GET /lab/tests) مع شعبہ، نمونہ، معمول کا ٹرن اراؤنڈ اور فوری ایمرجنسی ٹرن اراؤنڈ؛ (2) قاعدہ 26ecdbf976 کے تحت انٹرایکٹو میٹرک اسکیما ایڈیٹر (POST/PATCH /lab/tests) جس میں عددی یا وضاحتی نتائج، نارمل حدود (مرد/خواتین/عمومی) اور تشویشناک پینک لمیٹس کا تعین شامل ہے؛ (3) قاعدہ c8be844050 کے تحت 24 گھنٹے بنیادی ایمرجنسی ٹیسٹس کی فراہمی (MSDS AAC 1 v)، قابل اطلاع متعدی امراض کی نشاندہی، اور منظور شدہ بیرونی پارٹنر لیبارٹریز کو ٹیسٹ بھیجنے کا انتظام (GET /diagnostic-partners)؛ (4) آڈٹ شدہ قیمتوں کی تبدیلی مع لازمی انتظامی جواز (PUT /lab/tests/{test_id}/price)؛ (5) ٹیسٹ کے ساتھ ری ایجنٹ کھپت کا بل آف میٹیریل (GET/PUT /lab/tests/{test_id}/bom) تاکہ نتیجہ تصدیق ہونے پر اسٹاک خودکار کم ہو؛ (6) ری ایجنٹ انوینٹری کا مکمل انتظام (GET/POST /lab/reagents, POST /lab/reagent-batches, POST /lab/reagent-adjustments) مع FEFO بیچ وصولی، کم اسٹاک کے الرٹس اور نقصان یا ایکسپائری پر رائٹ آف؛ اور (7) مالیاتی کارکردگی کا جائزہ (GET /lab/dashboard) مع مجموعی آمدن، ری ایجنٹ لاگت، خالص منافع، دوبارہ کیے گئے ٹیسٹس، اور کنٹریکٹر کے ساتھ ریونیو شیئرنگ کا باضابطہ معاہدہ (PUT /lab/contractor, GET /staff/lookup)۔",
+    steps: [
+      "Open the Lab Administration workspace from the Hospital Administration or Laboratory menu.",
+      "Browse the active test catalogue or use the search field to filter tests by code or title.",
+      "To create a new diagnostic test, click '+ Add Lab Test' and enter mnemonic code, descriptive name, laboratory section, specimen type, and pricing.",
+      "In the Metric Schema section (Rule 26ecdbf976), define individual report parameters: set quantitative numeric or qualitative text types, reporting units, physiological reference intervals, and panic critical limits.",
+      "Configure statutory turnaround intervals: specify routine turnaround minutes and urgent/STAT turnaround minutes per MSDS AAC 4.",
+      "Set test availability: choose 'InHouse' for on-site execution or 'SendOut' with an active accredited diagnostic partner laboratory (Rule c8be844050). Check 'Available 24/7' for basic emergency diagnostics (MSDS AAC 1 v) or name priority notifiable diseases.",
+      "To update tariffs, click 'Price' on any test, enter the new price and mandatory auditable reason (PUT /lab/tests/{test_id}/price).",
+      "To configure reagent consumption, click 'BOM' and link registered reagents with consumption quantities per test run (PUT /lab/tests/{test_id}/bom).",
+      "Switch to the 'Reagents & Batches' tab to manage chemical inventory: add reagents, receive batch lots with vendor invoices (POST /lab/reagent-batches), or write off stock due to expiry or damage (POST /lab/reagent-adjustments).",
+      "Switch to the 'Profit & Contractor Share' tab to inspect gross revenue, reagent COGS, net profit, test reruns, and configure the contractor revenue-sharing agreement with PMDC staff lookup (PUT /lab/contractor).",
+    ],
+    stepsUr: [
+      "ہسپتال ایڈمنسٹریشن یا لیبارٹری مینو سے لیب ایڈمنسٹریشن اسکرین کھولیں۔",
+      "فعال ٹیسٹ کیٹلاگ کا جائزہ لیں یا سرچ باکس میں کوڈ یا نام لکھ کر مطلوبہ ٹیسٹ تلاش کریں۔",
+      "نیا تشخیصی ٹیسٹ شامل کرنے کے لیے '+ Add Lab Test' پر کلک کریں اور کوڈ، مکمل نام، شعبہ، نمونہ کی قسم اور قیمت درج کریں۔",
+      "میٹرک اسکیما سیکشن (قاعدہ 26ecdbf976) میں رپورٹ کے پیرامیٹرز کی وضاحت کریں: عددی یا وضاحتی قسم، پیمائشی اکائی، معمول کی حدود اور تشویشناک پینک لمیٹس درج کریں۔",
+      "قانونی ٹرن اراؤنڈ اوقات مقرر کریں: معمول کا ٹائم اور ایمرجنسی/ارجنٹ ٹائم منٹوں میں درج کریں برائے MSDS AAC 4۔",
+      "دستیابی کا تعین کریں: ہسپتال میں ٹیسٹ کرنے کے لیے 'InHouse' یا بیرونی منظور شدہ پارٹنر لیب کے لیے 'SendOut' منتخب کریں (قاعدہ c8be844050)۔ 24 گھنٹے ایمرجنسی دستیابی کا نشان لگائیں یا قابل اطلاع متعدی بیماری کا نام درج کریں۔",
+      "ٹیسٹ کے نرخ تبدیل کرنے کے لیے 'Price' پر کلک کریں، نئی قیمت اور تبدیلی کی تحریری وجہ درج کر کے محفوظ کریں (PUT /lab/tests/{test_id}/price)۔",
+      "ٹیسٹ کے لیے ری ایجنٹس کی کھپت مقرر کرنے کے لیے 'BOM' پر کلک کریں اور متعلقہ کیمیکلز مع مقدار فی ٹیسٹ منسلک کریں (PUT /lab/tests/{test_id}/bom)۔",
+      "ری ایجنٹس ٹیب پر جا کر کیمیکل انوینٹری سنبھالیں: نئے ری ایجنٹس درج کریں، بیچ وصول کریں (POST /lab/reagent-batches) یا ایکسپائری پر اسٹاک خارج کریں (POST /lab/reagent-adjustments)۔",
+      "منافع اور شیئرنگ ٹیب پر جا کر مجموعی آمدن، لاگت، خالص منافع کا جائزہ لیں اور ملازم سرچ کے ذریعے کنٹریکٹر کے ساتھ ریونیو شیئرنگ معاہدہ محفوظ کریں (PUT /lab/contractor)۔",
+    ],
+    faq: [
+      [
+        "The Lab administration screen says 'The partner is not active for this service, or its MOU has expired.' (DIAGNOSTIC_PARTNER_INVALID). Why, and what do I do?",
+        "This error occurs under Rule c8be844050 when attempting to configure a test as 'SendOut' using a partner laboratory whose MOU has expired or whose active status has been revoked. To resolve, open the Diagnostic Partners screen, renew the partner's memorandum of understanding (MOU) with updated validity dates and PNAC accreditation details, or select an alternative active laboratory partner with an unexpired MOU."
+      ],
+      [
+        "The Lab administration screen says 'Not enough stock available.' (INSUFFICIENT_STOCK). Why, and what do I do?",
+        "This error occurs when attempting to write off or adjust a greater quantity of reagent than currently exists in the selected batch lot (POST /lab/reagent-adjustments). Verify the actual remaining units recorded in the batch ledger, confirm you have selected the correct batch number, and adjust only the quantity physically on hand."
+      ],
+      [
+        "How does the Metric Schema Editor enforce Rule 26ecdbf976 for quantitative and qualitative test results?",
+        "Rule 26ecdbf976 requires each lab test to maintain a structured metric_schema defining every reported parameter. Quantitative tests (e.g. Hemoglobin, Blood Sugar) require measurement units (g/dL, mg/dL), normal physiological ranges (default, male, female), and panic critical thresholds (low/high) that trigger instant doctor alerts. Qualitative tests (e.g. Viral Serology, Urine Dipstick) define expected categorical findings and specify which results are critical (e.g. 'Positive', 'Reactive') to initiate immediate clinical and public health escalation."
+      ],
+      [
+        "What statutory requirements govern turnaround times and notifiable diseases under Rule c8be844050?",
+        "MSDS AAC 1, 4, 5 and 6 mandate that every catalogue test records expected turnaround minutes for routine orders and expedited minutes for urgent/STAT orders. Essential basic emergency diagnostics must be marked 'Available 24/7' to guarantee round-the-clock staffing and reagents. If a test identifies a statutory priority disease (such as Dengue, Cholera, or Polio), the notifiable disease field must be populated so positive findings automatically feed the mandatory health authority surveillance register."
+      ],
+      [
+        "How does the Reagent Bill of Materials (BOM) connect test reporting with hospital profit and contractor revenue share?",
+        "When a test has an active Bill of Materials (BOM), each validated patient result automatically deducts the specified reagent units in FEFO order from inventory and accrues the cost of goods sold (COGS). On the Lab Financial Dashboard, gross revenue minus reagent COGS yields the net lab profit. The configured contractor share percentage (PUT /lab/contractor) then automatically divides the net profit between the hospital and the designated laboratory contractor."
+      ]
+    ],
+    faqUr: [
+      [
+        "لیب ایڈمنسٹریشن اسکرین کہتی ہے کہ 'یہ شراکت دار اس سروس کے لیے فعال نہیں ہے یا اس کا معاہدہ ختم ہو چکا ہے' (DIAGNOSTIC_PARTNER_INVALID)۔ یہ کیوں ہے اور میں کیا کروں؟",
+        "یہ خرابی قاعدہ c8be844050 کے تحت اس وقت پیش آتی ہے جب کسی ٹیسٹ کو ایسی بیرونی لیبارٹری کے سپرد ('SendOut') کیا جائے جس کا معاہدہ (MOU) ختم ہو چکا ہو یا وہ غیر فعال ہو۔ اس کے حل کے لیے ڈائیگنوسٹک پارٹنرز اسکرین پر جا کر متعلقہ لیب کے معاہدے کی تجدید کریں یا کسی دوسری فعال اور تصدیق شدہ لیب کا انتخاب کریں۔"
+      ],
+      [
+        "لیب ایڈمنسٹریشن اسکرین کہتی ہے کہ 'مطلوبہ ری ایجنٹ کا اسٹاک کافی نہیں ہے' (INSUFFICIENT_STOCK)۔ یہ کیوں ہے اور میں کیا کروں؟",
+        "یہ خرابی اس وقت پیش آتی ہے جب ری ایجنٹ کے کسی بیچ سے اصل موجودہ اسٹاک سے زیادہ مقدار خارج کرنے یا ایڈجسٹ کرنے کی کوشش کی جائے (POST /lab/reagent-adjustments)۔ بیچ میں موجود اصل مقدار چیک کریں، درست بیچ نمبر کی تصدیق کریں اور صرف وہی مقدار خارج کریں جو فزیکل اسٹاک میں موجود ہے۔"
+      ],
+      [
+        "میٹرک اسکیما ایڈیٹر قاعدہ 26ecdbf976 کے تحت عددی اور وضاحتی ٹیسٹ نتائج کو کیسے لاگو کرتا ہے؟",
+        "قاعدہ 26ecdbf976 کے مطابق ہر ٹیسٹ کے ساتھ ایک منظم میٹرک اسکیما ہونا لازمی ہے۔ مقداری ٹیسٹس (جیسے ہیموگلوبن یا شوگر) کے لیے پیمائشی اکائیاں، نارمل حدود اور خطرناک پینک لمیٹس مقرر کی جاتی ہیں جن کے آنے پر ڈاکٹر کو فوری الرٹ ملتا ہے۔ معیاری یا وضاحتی ٹیسٹس (جیسے وائرل اسکریننگ) کے لیے ممکنہ نتائج اور تشویشناک علامات (جیسے پازیٹو یا ری ایکٹیو) متعین کی جاتی ہیں۔"
+      ],
+      [
+        "قاعدہ c8be844050 کے تحت ٹرن اراؤنڈ اوقات اور قابل اطلاع بیماریوں کے کیا قانونی تقاضے ہیں؟",
+        "MSDS AAC 1 اور 4 کے تحت ہر ٹیسٹ کا معمول اور ایمرجنسی ٹرن اراؤنڈ وقت منٹوں میں درج ہونا لازمی ہے۔ بنیادی ایمرجنسی ٹیسٹس کے لیے 'Available 24/7' کا نشان لگانا ضروری ہے تاکہ چوبیس گھنٹے عملہ اور کیمیکلز موجود رہیں۔ متعدی بیماریوں (جیسے ڈینگی، ہیضہ، پولیو) کا نام درج کیا جاتا ہے تاکہ مثبت نتیجہ آنے پر فوری سرکاری سرویلنس رجسٹر میں اندراج ہو سکے۔"
+      ],
+      [
+        "ری ایجنٹ بل آف میٹیریل (BOM) ٹیسٹ کے نتائج کو ہسپتال کے منافع اور کنٹریکٹر کے حصے سے کیسے جوڑتا ہے؟",
+        "جب ٹیسٹ کے ساتھ بل آف میٹیریل منسلک ہوتا ہے تو مریض کی رپورٹ منظور ہوتے ہی متعلقہ ری ایجنٹس اسٹاک سے خودکار طور پر کم ہو جاتے ہیں اور ان کی لاگت کا حساب لگ جاتا ہے۔ ڈیش بورڈ پر کل آمدن میں سے ری ایجنٹ کی لاگت منہا کر کے خالص منافع نکالا جاتا ہے، جسے کنٹریکٹر معاہدے (PUT /lab/contractor) کے مطابق ہسپتال اور کنٹریکٹر کے درمیان تقسیم کیا جاتا ہے۔"
+      ]
+    ],
+  },
   cssd_board: {
     title: "Sterilization board",
     titleUr: "سٹرلائزیشن بورڈ",
