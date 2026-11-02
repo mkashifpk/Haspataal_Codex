@@ -1,22 +1,68 @@
 # Haspataal checkpoint
 Last updated: 02 November 2026, Antigravity (Codex pair), Asia/Karachi.
 
-## Active request: Phase 7 Screen 135 `pharmacy_admin` (Pharmacy inventory, formulary & procurement)
+## Active request: Phase 7 Screen 136 `medication_safety_setup` (High-alert drugs & look-alike/sound-alike rules)
 Executing the Haspataal HMS Roadmap in dependency order along with all tests and MCP progress reporting:
 - **Phase 6 ("Theatre and sterile supply")**: 100% COMPLETE (Screens 109–132, Proposals 262–285).
 - **Phase 7 ("Finance, billing and back offices")**:
   - Screen 133: **`accountant_cockpit`** ("Accountant 3-pane cockpit", Position 133, 83 points, workspace `finance_accountant`) — **COMPLETED** (commit `3f85c2d`, Proposal **286** awaiting human review on `/docs -> My progress`).
-  - Screen 134: **`billing_admin`** ("Price & policy management", Position 134, 70 points, workspace `billing_admin`) — **COMPLETED** (Proposal **287** awaiting human review on `/docs -> My progress`).
-  - Screen 135: **`pharmacy_admin`** ("Pharmacy inventory, formulary & procurement", Position 135, workspace `pharmacy_admin`) — **NEXT**.
-    - Scope: Pharmacy administration, hospital formulary management, supplier management, purchase orders, goods receipt notes (GRN), inventory stock batches, and supplier returns.
+  - Screen 134: **`billing_admin`** ("Price & policy management", Position 134, 70 points, workspace `billing_admin`) — **COMPLETED** (commit `d3c8ab8`, Proposal **287** awaiting human review on `/docs -> My progress`).
+  - Screen 135: **`pharmacy_admin`** ("Pharmacy inventory, formulary & procurement", Position 135, 76 points, workspace `pharmacy_admin`) — **COMPLETED** (Proposal **288** awaiting human review on `/docs -> My progress`).
+  - Screen 136: **`medication_safety_setup`** ("High-alert drugs & look-alike/sound-alike rules", Position 136, workspace `pharmacy_admin`) — **NEXT**.
+    - Scope: Look-Alike / Sound-Alike (LASA) safety pairs, Tall Man lettering, high-alert medication category management, maximum single/daily dose safety bounds, and double-check protocol configuration.
     - Next Concrete Actions:
-      1. Inspect `get_screen_bundle("pharmacy_admin")` and save to `contracts/pharmacy_admin.json`.
+      1. Inspect `get_screen_bundle("medication_safety_setup")` and save to `contracts/medication_safety_setup.json`.
       2. Generate TypeScript contracts via `generate_typescript`.
-      3. Create domain policies in `src/pharmacy-admin-policy.ts`.
-      4. Implement UI `src/screens/PharmacyAdmin.tsx`.
+      3. Create domain policies in `src/medication-safety-setup-policy.ts`.
+      4. Implement UI `src/screens/MedicationSafetySetup.tsx`.
       5. Wire into `src/App.tsx`, catalogue, task map, foundation help, authored handbook entry, and unit test suite.
       6. Run full verification suite (`npm run check:help`, `npm test`, `npx tsc --noEmit`, `npm run build`).
       7. Propose progress via `propose_progress`.
+
+---
+
+### Completed Screen 135 (`pharmacy_admin`) Checkpoint
+- **Workflow & Standards**: Comprehensive pharmacy back-office workspace (`pharmacy_admin`):
+  - **Tab 1: Dashboards (Low Stock, Near Expiry, Live Profit):**
+    - Low-stock replenishment alert table via `GET /pharmacy-admin/low-stock` (`lowStock`) with stock status (`Critical`, `Low`) and quick-intake action.
+    - Near-expiry alert widget via `GET /pharmacy-admin/near-expiry` (`nearExpiry`) displaying days left, money at risk in PKR, and quick-return to supplier action.
+    - Live profit dashboard via `GET /pharmacy-admin/profit-dashboard` (`profit`) displaying total gross revenue, COGS, and net profit with date range filter, revenue by payment channel (Cash, Card, PanelCredit, IPDBill, etc.), and Top 10 profitable medicines.
+    - Subscribes to realtime WebSocket event `pharmacy.low_stock` via `window.terminal.subscribe` to auto-refresh stock and expiry reads without polling.
+  - **Tab 2: Formulary & Drugs:**
+    - Formulary drugs catalog with schedule and high-alert filters.
+    - Add Formulary Drug modal via `POST /pharmacy-admin/drugs` (`addDrug`) enforcing statutory Rule `rule:609bbe13b3`: A new drug may be high-alert or restricted from the start; strictly never both high-alert and OTC.
+  - **Tab 3: Batch Intake & Stock Adjustments:**
+    - Batch Intake modal via `POST /pharmacy-admin/batches` (`addBatch`) enforcing statutory Rule `rule:b828c195cc`: takes boxes × units per box and total invoice cost; live derived units and unit cost previewed in the UI, with backend ledger deriving and locking unit cost.
+    - Stock Adjustment / Write-off modal via `POST /pharmacy-admin/batches/{batch_id}/adjust` (`adjust`) with mandatory justification note and valid reason (`Adjustment`, `Expiry`, `Damage`).
+  - **Tab 4: Supplier Invoices & Accounts Payable:**
+    - Supplier invoices monitoring table via `GET /pharmacy-admin/vendor-invoices` (`listVendorInvoices`) with module (`Pharmacy`, `Lab`, `Ops`, `OT`, `Other`) and status (`Pending`, `PartiallyPaid`, `Paid`, `Cancelled`) filters.
+    - Record Supplier Invoice modal via `POST /pharmacy-admin/vendor-invoices` (`addVendorInvoice`) linked to suppliers via `GET /finance/vendors` (`vendors`), generating matched Accounts Payable in the finance module.
+  - **Tab 5: Supplier Returns Ledger & Credit Notes:**
+    - Returns ledger via `GET /pharmacy-admin/supplier-returns` (`listReturnsPharmacyAdminSupplier`) with status filter (`Returned`, `Credited`, `Refused`).
+    - Return to Supplier modal via `POST /pharmacy-admin/batches/{batch_id}/supplier-returns` (`recordReturn`) enforcing statutory Rule `rule:f65fc1a5a8` and cross-field validation: `recall_id` is required when reason is `Recall`, and forbidden otherwise.
+    - Single return detail modal via `GET /pharmacy-admin/supplier-returns/{return_id}` (`getReturn`) showing status transition lifecycle: `Returned` (awaiting credit note), `Credited` (confirmed: credit pays supplier bills), or `Refused` (written off).
+    - Return note printable PDF generation via `GET /pharmacy-admin/supplier-returns/{return_id}/pdf` (`returnNote`).
+- **Contracts**: `contracts/pharmacy_admin.json` (13 endpoints, 1 realtime event, 3 statutory rules `rule:b828c195cc`, `rule:f65fc1a5a8`, `rule:609bbe13b3`, 28 rubric items).
+- **Domain Policies & Statutory Rules (`src/pharmacy-admin-policy.ts`)**:
+  - Runtime service capability gating via `getPharmacyAdminCapabilityView` (`full`, `open_work`, `records`, `setup`, `hidden`).
+  - Formulary input validation with Rule `rule:609bbe13b3` checks (`validateDrugInput`).
+  - Batch intake validation and derived unit cost math under Rule `rule:b828c195cc` (`validateBatchInput`).
+  - Stock adjustment validation (`validateAdjustInput`).
+  - Vendor invoice validation (`validateVendorInvoiceInput`).
+  - Supplier return validation with Rule `rule:f65fc1a5a8` recall ID cross-field enforcement (`validateSupplierReturnInput`).
+  - Comprehensive bilingual error dictionary (`PHARMACY_ADMIN_ERROR_MESSAGES`) covering `FORBIDDEN`, `INSUFFICIENT_STOCK`, `NOT_FOUND`, `VALIDATION_ERROR`, and `DUPLICATE_RECORD`.
+- **UI Architecture (`src/screens/PharmacyAdmin.tsx`)**:
+  - Live 5-tab pharmacy back-office component wired into `src/App.tsx`, `src/foundation-catalogue.json` (13 tasks), `src/foundation-task-map.json` (13 controls), `src/foundation-help.ts` (80 controls mapped).
+  - Authored comprehensive handbook entry (`src/help.ts`) with bilingual title, purpose, 8 operational steps, and 5 role FAQs for `pharmacy_admin`. Bundled screenshots in `public/handbook/pharmacy_admin-en.png` and `pharmacy_admin-ur.png`.
+- **Verification**:
+  - Automated unit tests: `tests/pharmacy-admin.test.mjs` (16/16 passing).
+  - Help check: `npm run check:help` passed (134 screens, 3284 controls, 2294 groups, 69 FAQ seeds, 30 workspace guides).
+  - Help coverage test: `tests/help-coverage.test.mjs` (28/28 passing across 134 screens).
+  - Full test suite: `npm test` passed (665/665 passing across all 14 test suites).
+  - TypeScript compiler: `npx tsc --noEmit` passed with 0 errors.
+  - Production build: `npm run build` succeeded (`dist/assets/index-Diix-wW-.js`).
+- **Proposal**:
+  - Proposal ID: **288** (status: `pending` on `/docs -> My progress`, build `index-Diix-wW-.js`, 27 rubric items claimed, `q:fresh_data` left pending human review).
 
 ---
 

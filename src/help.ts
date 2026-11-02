@@ -8998,6 +8998,76 @@ sterile_packs_ward: {
       ]
     ]
   },
+  pharmacy_admin: {
+    title: "Pharmacy back office",
+    titleUr: "فارمیسی بیک آفس",
+    purpose: "Pharmacy back-office workspace for inventory procurement, formulary safety governance, and supplier accounts: (1) Formulary drug catalog maintenance (POST /pharmacy-admin/drugs) enforcing statutory Rule 609bbe13b3, ensuring high-alert medicines are never OTC-allowed; (2) Batch intake (POST /pharmacy-admin/batches) under Rule b828c195cc taking boxes × units per box and total invoice cost, with the server automatically deriving unit cost; (3) Inventory write-offs and damage adjustments (POST /pharmacy-admin/batches/{batch_id}/adjust); (4) Supplier invoice recording and accounts payable tracking (POST /pharmacy-admin/vendor-invoices, GET /pharmacy-admin/vendor-invoices); (5) Supplier returns management (POST /pharmacy-admin/batches/{batch_id}/supplier-returns, GET /pharmacy-admin/supplier-returns, GET /pharmacy-admin/supplier-returns/{return_id}, GET /pharmacy-admin/supplier-returns/{return_id}/pdf) under Rule f65fc1a5a8 with status lifecycle Returned -> Credited (confirmed by finance) or Refused; and (6) Realtime low-stock, near-expiry money-at-risk, and gross profit dashboards (GET /pharmacy-admin/low-stock, GET /pharmacy-admin/near-expiry, GET /pharmacy-admin/profit-dashboard) synchronizing with pharmacy.low_stock events.",
+    purposeUr: "فارمیسی بیک آفس ورک اسپیس برائے ادویات کی خریداری، فارمولری تحفظ اور سپلائر اکاؤنٹس: (1) ہسپتال فارمولری کیٹلاگ کا انتظام (POST /pharmacy-admin/drugs) قاعدہ 609bbe13b3 کے تحت جس میں ہائی الرٹ ادویات کو بغیر نسخہ فروخت کی اجازت نہیں دی جاتی؛ (2) بیچ وصولی (POST /pharmacy-admin/batches) قاعدہ b828c195cc کے تحت جس میں ڈبوں کی تعداد × فی ڈبہ یونٹس اور کل لاگت درج ہوتی ہے اور سسٹم خود فی یونٹ لاگت اخذ کرتا ہے؛ (3) خراب یا زائد المیعاد اسٹاک کا رائٹ آف (POST /pharmacy-admin/batches/{batch_id}/adjust)؛ (4) سپلائر انوائسز کا اندراج اور اکاؤنٹس پیئبل میں منتقلی (POST /pharmacy-admin/vendor-invoices, GET /pharmacy-admin/vendor-invoices)؛ (5) سپلائر کو اسٹاک کی واپسی مع پی ڈی ایف واؤچر (POST /pharmacy-admin/batches/{batch_id}/supplier-returns, GET /pharmacy-admin/supplier-returns, GET /pharmacy-admin/supplier-returns/{return_id}, GET /pharmacy-admin/supplier-returns/{return_id}/pdf) قاعدہ f65fc1a5a8 کے تحت جس کی حیثیت واپسی سے لے کر فنانس کی جانب سے کریڈٹ نوٹ یا مسترد ہونے تک دیکھی جا سکتی ہے؛ اور (6) کم اسٹاک، قریب المیعاد اور مجموعی منافع کا لائیو ڈیش بورڈ (GET /pharmacy-admin/low-stock, GET /pharmacy-admin/near-expiry, GET /pharmacy-admin/profit-dashboard) جو ایونٹ pharmacy.low_stock سے خودکار ریفریش ہوتا ہے۔",
+    steps: [
+      "Select Dashboards tab to monitor low-stock alerts, expiring batches with money-at-risk, and real-time revenue minus COGS net profit.",
+      "Click '+ Quick Intake' on any low-stock medicine or switch to the Batch Intake tab to receive arriving stock.",
+      "In the Batch Intake modal, input box quantity, units per box, total invoice cost, and retail price per unit; the server derives unit cost under Rule b828c195cc.",
+      "Switch to Formulary & Drugs tab and click '+ Add Formulary Drug' to register new pharmaceuticals; high-alert drugs cannot be marked OTC per Rule 609bbe13b3.",
+      "Open Supplier Invoices tab and click '+ Record Supplier Invoice' to document arrival bills and generate matching accounts payable.",
+      "On expiring or damaged batches, click '+ Return Batch to Supplier' to issue a supplier return note under Rule f65fc1a5a8.",
+      "Specify return reason (Expired, NearExpiry, Recall, Damaged, Excess); if reason is Recall, input the mandatory recall ID.",
+      "Click 'PDF Voucher' on any return in the returns ledger to print the official return note accompanying the dispatched goods.",
+    ],
+    stepsUr: [
+      "کم اسٹاک ادویات، قریب المیعاد بیجز اور لائیو منافع کی نگرانی کے لیے ڈیش بورڈز ٹیب منتخب کریں۔",
+      "کسی بھی کم اسٹاک دوا پر '+ Quick Intake' دبائیں یا نئے اسٹاک کے لیے بیچ وصولی ٹیب پر جائیں۔",
+      "بیچ وصولی فارم میں ڈبوں کی تعداد، فی ڈبہ یونٹس، کل لاگت اور ریٹیل قیمت درج کریں؛ قاعدہ b828c195cc کے تحت فی یونٹ لاگت خودکار اخذ ہو گی۔",
+      "فارمولری ادویات ٹیب پر جائیں اور '+ Add Formulary Drug' پر کلک کریں؛ قاعدہ 609bbe13b3 کے تحت ہائی الرٹ ادویات کو او ٹی سی نہیں رکھا جا سکتا۔",
+      "سپلائر انوائسز ٹیب کھولیں اور '+ Record Supplier Invoice' منتخب کریں تاکہ خریداری انوائس درج ہو اور فنانس میں ادھار بن جائے۔",
+      "زائد المیعاد یا خراب اسٹاک پر '+ Return Batch to Supplier' پر کلک کر کے قاعدہ f65fc1a5a8 کے تحت واپسی واؤچر جاری کریں۔",
+      "واپسی کی وجہ درج کریں؛ اگر وجہ ریکال ہو تو لازمی ریکال آئی ڈی درج کریں۔",
+      "سامان کے ساتھ بھیجنے کے لیے آفیشل واپسی واؤچر پرنٹ کرنے کے لیے لسٹ میں 'PDF Voucher' پر کلک کریں۔",
+    ],
+    faq: [
+      [
+        "How is unit cost calculated when receiving multi-pack pharmaceutical shipments?",
+        "Under statutory Rule b828c195cc, staff enter box quantity, units per box, and total invoice cost; the server automatically derives unit cost as total cost divided by total received units."
+      ],
+      [
+        "Can a high-alert or restricted clinical drug be sold over the counter without a prescription?",
+        "No, under Rule 609bbe13b3, a drug designated as high-alert (MSDS 56) or restricted (MSDS 52) can never have an OTC schedule or be marked as OTC allowed."
+      ],
+      [
+        "What is the lifecycle of a supplier return note?",
+        "A return note is issued with status 'Returned' while goods are in transit. Once the supplier issues a credit note, finance confirms it to 'Credited', allowing credit to pay bills; if rejected, it is marked 'Refused' (Rule f65fc1a5a8, decision 47)."
+      ],
+      [
+        "When is a recall ID mandatory on supplier returns?",
+        "Under Rule f65fc1a5a8 and cross-field validation, a valid recall ID is strictly required when the return reason is 'Recall', and prohibited for all other reasons."
+      ],
+      [
+        "How does the pharmacy back office update when medicines are dispensed across wards or counters?",
+        "The screen subscribes to the realtime WebSocket event 'pharmacy.low_stock', refreshing low-stock and near-expiry indicators automatically without manual polling."
+      ]
+    ],
+    faqUr: [
+      [
+        "ہسپتال میں ادویات کی وصولی کے وقت فی گولی یا یونٹ لاگت کیسے نکالی جاتی ہے؟",
+        "قاعدہ b828c195cc کے تحت عملہ ڈبوں کی تعداد، فی ڈبہ گولیاں اور کل انوائس لاگت درج کرتا ہے؛ سسٹم کل رقم کو کل تعداد پر تقسیم کر کے خود فی یونٹ لاگت نکالتا ہے۔"
+      ],
+      [
+        "کیا ہائی الرٹ یا مخصوص ادویات کو بغیر نسخہ او ٹی سی فروخت کیا جا سکتا ہے؟",
+        "جی نہیں، قاعدہ 609bbe13b3 کے تحت ہائی الرٹ ادویات کو او ٹی سی شیڈول میں رکھنا یا بغیر نسخہ فروخت کرنا سختی سے ممنوع ہے۔"
+      ],
+      [
+        "سپلائر واپسی کے واؤچر کے مراحل کیا ہیں؟",
+        "واؤچر ابتدائی طور پر 'Returned' ہوتا ہے۔ جب سپلائر کریڈٹ نوٹ دیتا ہے تو فنانس اسے 'Credited' کر دیتا ہے جس سے بلز ادا ہو سکتے ہیں؛ اگر سپلائر مکر جائے تو اسے 'Refused' کر دیا جاتا ہے۔"
+      ],
+      [
+        "سپلائر واپسی میں ریکال آئی ڈی کا اندراج کب لازمی ہوتا ہے؟",
+        "قاعدہ f65fc1a5a8 کے تحت جب واپسی کی وجہ 'Recall' ہو تو متعلقہ ریکال آئی ڈی لازمی ہے، جبکہ دیگر وجوہات پر ریکال آئی ڈی درج نہیں کی جا سکتی۔"
+      ],
+      [
+        "جب کاؤنٹرز یا وارڈز میں دوائیں دی جاتی ہیں تو فارمیسی بیک آفس کیسے اپڈیٹ ہوتا ہے؟",
+        "سسٹم ریئل ٹائم ایونٹ 'pharmacy.low_stock' سے جڑا ہوتا ہے اور کسی بھی دوا کا اسٹاک کم ہونے پر لسٹ خودکار ریفریش ہو جاتی ہے۔"
+      ]
+    ],
+  },
   billing_admin: {
     title: "Price & policy management",
     titleUr: "قیمتیں اور پالیسی انتظام",
