@@ -293,6 +293,7 @@ export function checkHelp({
       "IdCard",
       "DutyRosterHr",
       "SupportRoster",
+      "Attendance",
     ].map((n) => `src/screens/${n}.tsx`),
   ];
   const used = new Set(),

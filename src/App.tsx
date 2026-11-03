@@ -65,6 +65,7 @@ import { Badges } from './screens/Badges';
 import { IdCard } from './screens/IdCard';
 import { DutyRosterHr } from './screens/DutyRosterHr';
 import { SupportRoster } from './screens/SupportRoster';
+import { Attendance } from './screens/Attendance';
 import { LabAdmin } from './screens/LabAdmin';
 import { PharmacyStorageLog } from './screens/PharmacyStorageLog';
 import { PharmacyAdmin } from './screens/PharmacyAdmin';
@@ -849,6 +850,7 @@ export function App() {
       refund_waiver_credit: ["opd.ticket.view", "opd.queue.doctor"],
       cash_back_prompts: ["opd.ticket.view", "opd.queue.doctor"],
       id_card: ["hr.idcard.print"],
+      attendance: ["hr.attendance.view", "hr.attendance.manual", "hr.shift.manage", "attendance.roll_call"],
       duty_roster_hr: ["roster.manage.all", "roster.manage.nursing", "roster.manage.support", "roster.view.all"],
     };
     if (
@@ -1523,6 +1525,7 @@ export function App() {
               {screen === 'id_card' && <IdCard key={user.user_id} currentUser={user} establishment={est} permissions={user.permissions} onNavigateToStaff={(id) => navigate('staff_directory')} />}
               {screen === 'duty_roster_hr' && <DutyRosterHr key={user.user_id} user={user} establishment={est} connected={connected} timeZone={meta?.hospital_timezone} onNavigateScreen={(s) => navigate(s)} />}
               {screen === 'support_roster' && <SupportRoster key={user.user_id} user={user} establishment={est} connected={connected} timeZone={meta?.hospital_timezone} onNavigateScreen={(s) => navigate(s)} />}
+              {screen === 'attendance' && <Attendance key={user.user_id} user={user} establishment={est} connected={connected} userPermissions={user.permissions} />}
               {screen === 'owner_dashboard' && <OwnerDashboard key={user.user_id} user={user} establishment={est} connected={connected} timeZone={meta?.hospital_timezone} onNavigateScreen={(s) => navigate(s)} />}
               {screen === 'diagnostic_partners' && <DiagnosticPartners key={user.user_id} user={user} establishment={est} connected={connected} timeZone={meta?.hospital_timezone} onNavigateScreen={(s) => navigate(s)} />}
               {screen === 'lab_admin' && <LabAdmin key={user.user_id} user={user} establishment={est} connected={connected} timeZone={meta?.hospital_timezone} onNavigateScreen={(s) => navigate(s)} />}

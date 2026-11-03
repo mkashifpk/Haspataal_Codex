@@ -20,6 +20,7 @@ export const phase1Screens = [
 const approvalScreens = ["approval_queue", "charity_approvals"];
 // Coverage grows screen by screen; Phase 1 acceptance remains separate.
 export const deliveredHelpScreens = [
+  "attendance",
   "support_roster",
   "duty_roster_hr",
   "id_card",
@@ -159,6 +160,46 @@ const g = (
 // IDs are also attached to the actual controls. The build rejects missing
 // mappings and empty translations instead of treating a page as coverage.
 export const controlGuides: Record<string, ControlGuide> = {
+  // Screen 150: attendance (Staff attendance, punches & timecards)
+  "attendance.banner_dismiss_error": g(["attendance"], ["Dismiss error button", "خرابی کا بینر بند کریں"], ["Dismisses attendance error alert.", "حاضری کی خرابی کا بینر بند کرتا ہے۔"]),
+  "attendance.banner_dismiss_success": g(["attendance"], ["Dismiss success button", "کامیابی کا بینر بند کریں"], ["Dismisses operational success banner.", "کامیابی کا بینر بند کرتا ہے۔"]),
+  "attendance.btn_compute": g(["attendance"], ["Compute attendance button", "حاضری پروسیس کریں"], ["Recomputes daily flags (Present/Late/Absent) for the selected date (POST /hr/attendance/compute).", "منتخب تاریخ کے لیے روزانہ حاضری کے جھنڈے دوبارہ پروسیس کرتا ہے۔"]),
+  "attendance.btn_mark_roll_call": g(["attendance"], ["Mark roll call present button", "رول کال حاضری لگائیں"], ["Records arrival for selected unpunched staff on roll call (POST /rosters/roll-call).", "رول کال شیٹ سے منتخب عملے کی آمد درج کرتا ہے۔"]),
+  "attendance.btn_open_manual_punch": g(["attendance"], ["Add manual punch button", "دستی پنچ تصحیح"], ["Opens modal to record a reasoned manual punch adjustment (POST /hr/attendance/manual).", "دستی پنچ کے اندراج کا فارم کھولتا ہے۔"]),
+  "attendance.btn_open_shift_modal": g(["attendance"], ["Assign default shift button", "شفٹ تفویض کریں"], ["Opens dialog to set default shift and weekly rest days (POST /hr/employees/{id}/shift).", "ملازم کی مستقل شفٹ اور آرام کے دن منتخب کرنے کا فارم کھولتا ہے۔"]),
+  "attendance.btn_print_roll_call": g(["attendance"], ["Print roll call sheet button", "رول کال پرنٹ کریں"], ["Generates physical paper roll call sheet for manual staff arrival verification at gates.", "گیٹس پر دستی حاضری چیکنگ کے لیے پرنٹ کے قابل رول کال شیٹ تیار کرتا ہے۔"]),
+  "attendance.btn_refresh": g(["attendance"], ["Refresh timecards button", "ٹائم کارڈز تازہ کریں"], ["Reloads daily attendance timecards from server (GET /hr/attendance).", "سرور سے روزانہ حاضری ٹائم کارڈز دوبارہ لوڈ کرتا ہے۔"]),
+  "attendance.btn_refresh_roll_call": g(["attendance"], ["Refresh roll call button", "رول کال تازہ کریں"], ["Refreshes today's roll call arrival records (GET /rosters/roll-call).", "آج کی رول کال اور بیج آمد کی فہرست تازہ کرتا ہے۔"]),
+  "attendance.compute_date": g(["attendance"], ["Compute date input", "پروسیسنگ کی تاریخ"], ["Date to recompute daily flags against duty rosters and raw punches.", "ڈیوٹی روسٹر کے مطابق حاضری پروسیس کرنے کی تاریخ۔"]),
+  "attendance.drawer_btn_add_manual": g(["attendance"], ["Drawer add manual punch button", "دراز سے دستی پنچ"], ["Opens manual punch modal prefilled for the active employee.", "موجودہ ملازم کے لیے دستی پنچ تصحیح فارم کھولتا ہے۔"]),
+  "attendance.drawer_punches_close": g(["attendance"], ["Close punches drawer button", "دراز بند کریں"], ["Closes raw punches timeline drawer.", "خام پنچ لاگز کی دراز بند کرتا ہے۔"]),
+  "attendance.filter_date_from": g(["attendance"], ["Date from filter", "از تاریخ فلٹر"], ["Start date for attendance timecards query.", "ٹائم کارڈز کے استفسار کی ابتدائی تاریخ۔"]),
+  "attendance.filter_date_to": g(["attendance"], ["Date to filter", "تا تاریخ فلٹر"], ["End date for attendance timecards query.", "ٹائم کارڈز کے استفسار کی آخری تاریخ۔"]),
+  "attendance.filter_department": g(["attendance"], ["Department filter input", "شعبہ فلٹر"], ["Filters timecards by department name.", "شعبہ کے نام سے ٹائم کارڈز فلٹر کرتا ہے۔"]),
+  "attendance.filter_employee": g(["attendance"], ["Employee search input", "ملازم تلاش"], ["Quickly finds timecards by employee name or staff number.", "ملازم کے نام یا نمبر سے ٹائم کارڈز تلاش کرتا ہے۔"]),
+  "attendance.modal_punch_cancel": g(["attendance"], ["Cancel manual punch button", "منسوخ بٹن"], ["Closes manual punch correction dialog.", "دستی پنچ فارم منسوخ کرتا ہے۔"]),
+  "attendance.modal_punch_date": g(["attendance"], ["Duty date override input", "ڈیوٹی تاریخ تبدیلی"], ["Duty date that this punch counts for (rule:57ff2b4a55).", "ڈیوٹی تاریخ جس کے تحت یہ پنچ شمار ہوگا (قاعدہ 57ff2b4a55)۔"]),
+  "attendance.modal_punch_emp": g(["attendance"], ["Punch employee ID input", "ملازم آئی ڈی"], ["Selects employee for manual punch correction.", "دستی پنچ کے لیے ملازم کا انتخاب کرتا ہے۔"]),
+  "attendance.modal_punch_reason": g(["attendance"], ["Mandatory punch reason textarea", "لازمی وجہ کی تفصیل"], ["Audited justification for manual punch correction (rule:7e57360f0f).", "دستی پنچ تصحیح کی آڈٹ شدہ لازمی وجہ (قاعدہ 7e57360f0f)۔"]),
+  "attendance.modal_punch_submit": g(["attendance"], ["Save manual punch button", "پنچ محفوظ کریں"], ["Submits reasoned manual punch to server (POST /hr/attendance/manual).", "دستی پنچ تصحیح سرور پر محفوظ کرتا ہے۔"]),
+  "attendance.modal_punch_time": g(["attendance"], ["Punch timestamp input", "پنچ کا وقت"], ["Exact local timestamp of arrival or departure.", "آمد یا روانگی کا مقامی وقت اور تاریخ۔"]),
+  "attendance.roll_call_check_emp": g(["attendance"], ["Roll call employee checkbox", "ملازم رول کال چیک باکس"], ["Selects individual employee to mark present via roll call.", "رول کال پر ملازم کی حاضری لگانے کے لیے منتخب کرتا ہے۔"]),
+  "attendance.roll_call_date": g(["attendance"], ["Roll call date input", "رول کال تاریخ"], ["Date of the roll call duty roster sheet.", "رول کال ڈیوٹی روسٹر کی تاریخ۔"]),
+  "attendance.roll_call_select_all": g(["attendance"], ["Select all unpunched checkbox", "تمام منتخب کریں"], ["Toggles selection for all scheduled staff who have not punched in.", "تمام غیر پنچ شدہ شیڈول عملے کا انتخاب کرتا ہے۔"]),
+  "attendance.shift_modal_cancel": g(["attendance"], ["Cancel shift assignment button", "منسوخ بٹن"], ["Closes default shift assignment dialog.", "شفٹ تفویض فارم منسوخ کرتا ہے۔"]),
+  "attendance.shift_modal_effective_from": g(["attendance"], ["Effective from date input", "نافذ العمل تاریخ"], ["Date from which the shift assignment policy takes effect.", "جس تاریخ سے شفٹ پالیسی لاگو ہوگی۔"]),
+  "attendance.shift_modal_emp": g(["attendance"], ["Shift employee selector", "ملازم کا انتخاب"], ["Employee whose shift policy is being configured.", "ملازم جس کی شفٹ پالیسی ترتیب دی جا رہی ہے۔"]),
+  "attendance.shift_modal_mode_fixed": g(["attendance"], ["Fixed default shift mode button", "مستقل شفٹ موڈ"], ["Sets fixed standard shift with personal weekly rest days.", "مستقل معیاری شفٹ اور انفرادی ہفتہ وار آرام کے دن تفویض کرتا ہے۔"]),
+  "attendance.shift_modal_mode_roster": g(["attendance"], ["Roster-only mode button", "صرف روسٹر موڈ"], ["Sets staff as roster-only with no default shift (rule:edc1438113).", "ملازم کو بغیر ڈیفالٹ شفٹ کے صرف روسٹر پر مقرر کرتا ہے (قاعدہ edc1438113)۔"]),
+  "attendance.shift_modal_off_days": g(["attendance"], ["Weekly off days checkbox", "ہفتہ وار آرام کا دن"], ["Individual weekly rest days for this staff member (rule:e3a5ef53f8).", "اس ملازم کے ذاتی ہفتہ وار آرام کے دن (قاعدہ e3a5ef53f8)۔"]),
+  "attendance.shift_modal_pattern_id": g(["attendance"], ["Shift pattern ID input", "شفٹ پیٹرن آئی ڈی"], ["Identifier of the default shift pattern definition.", "ڈیفالٹ شفٹ پیٹرن کا شناختی نمبر۔"]),
+  "attendance.shift_modal_submit": g(["attendance"], ["Save shift assignment button", "شفٹ محفوظ کریں"], ["Submits shift policy to server (POST /hr/employees/{id}/shift).", "شفٹ پالیسی سرور پر محفوظ کرتا ہے۔"]),
+  "attendance.tab_roll_call": g(["attendance"], ["Roll call & holidays tab", "رول کال اور تعطیلات"], ["Live roll-call sheet and gazetted public holidays directory.", "لائیو رول کال حاضری اور سرکاری چھٹیوں کی فہرست۔"]),
+  "attendance.tab_shift_policy": g(["attendance"], ["Shift & roster policy tab", "شفٹ پالیسی ٹیب"], ["Default shift assignments and roster-only staff policy directory.", "ڈیفالٹ شفٹ تفویض اور روسٹر پر منحصر عملے کی پالیسی۔"]),
+  "attendance.tab_timecards": g(["attendance"], ["Daily timecards tab", "روزانہ ٹائم کارڈز"], ["Timecards directory showing worked hours, late minutes, and daily flags.", "روزانہ حاضری ٹائم کارڈز، کام کے اوقات، تاخیر اور حاضری کے جھنڈے۔"]),
+  "attendance.table_btn_manual": g(["attendance"], ["Table add manual punch button", "ٹیبل دستی پنچ بٹن"], ["Opens manual punch modal prefilled for this row's employee and date.", "اس قطار کے ملازم اور تاریخ کے لیے دستی پنچ فارم کھولتا ہے۔"]),
+  "attendance.table_btn_punches": g(["attendance"], ["Table view punches button", "خام پنچز دیکھیں"], ["Opens raw badge and roll call punches drawer for this duty date.", "اس ڈیوٹی تاریخ کے تمام خام پنچ لاگز کی دراز کھولتا ہے۔"]),
+
   // Screen 149: support_roster (Support-staff duty roster & roll call)
   "support_roster.btn_f1_help": g(["support_roster"], ["F1 Help button", "مدد کا بٹن"], ["Opens contextual handbook and role FAQs for support-staff duty rosters and roll call.", "معاون عملے کے ڈیوٹی روسٹر اور رول کال کی رہنمائی کھولتا ہے۔"]),
   "support_roster.tab_planner": g(["support_roster"], ["Weekly planner grid tab", "ہفتہ وار پلانر گرڈ"], ["7-day shift scheduling matrix for sweepers, janitors, and guards onto zones, wards, and gates.", "صفائی کارکن، سیکیورٹی گارڈز اور گیٹ اسٹاف کے لیے 7 روزہ شفٹ پلاننگ میٹرکس۔"]),

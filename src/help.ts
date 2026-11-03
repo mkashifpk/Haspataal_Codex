@@ -10,6 +10,76 @@ export type HelpPage = {
   faqUr: [string, string][];
 };
 export const help: Record<string, HelpPage> = {
+  attendance: {
+    title: "Staff attendance, punches & timecards",
+    titleUr: "عملے کی حاضری، پنچز اور ٹائم کارڈز",
+    purpose: "Staff daily attendance management, biometric punch processing, timecards, and shift policy governance: (1) Daily attendance flags (Present, Late, Absent, HalfDay, Leave, Holiday, Off) computed against scheduled roster shifts from badge scans, roll calls, and manual corrections (GET /hr/attendance); (2) Raw punch timeline inspection with source attribution (Badge, RollCall, Manual) per Rule rule:7e57360f0f; (3) Audited manual punch corrections carrying mandatory operational reasons (POST /hr/attendance/manual) per Rule rule:7e57360f0f; (4) Duty date attribution grouping night shift morning exits under the evening duty start date (Rule rule:57ff2b4a55); (5) On-demand and automated daily attendance flag recomputation (POST /hr/attendance/compute); (6) Default shift assignment and weekly off day configuration per Rule rule:e3a5ef53f8; (7) Roster-only staff governance ensuring rostered personnel have no default shift so rest days do not falsely flag as Absent (Rule rule:edc1438113); (8) Gazetted public holidays and weekly rest day handling as paid rest days (GET /holidays, Rule rule:e3a5ef53f8); (9) Live roll call arrival verification and batch attendance marking (GET /rosters/roll-call, POST /rosters/roll-call); and (10) Realtime reactive synchronization via attendance.flagged events.",
+    purposeUr: "عملے کی روزانہ حاضری، بائیومیٹرک پنچ پروسیسنگ، ٹائم کارڈز اور شفٹ پالیسی کا جامع انتظام: (1) آر ایف آئی ڈی بیجز، رول کال اور دستی تصحیحات سے شیڈول ڈیوٹیوں کے خلاف روزانہ حاضر/دیر/غیر حاضر کے جھنڈے (GET /hr/attendance)؛ (2) قاعدہ rule:7e57360f0f کے تحت ماخذ (بیج، رول کال، دستی) کے ساتھ خام پنچ لاگز کا معائنہ؛ (3) قاعدہ rule:7e57360f0f کے تحت لازمی آپریشنل وجہ کے ساتھ دستی پنچ تصحیح کا اندراج (POST /hr/attendance/manual)؛ (4) قاعدہ rule:57ff2b4a55 کے تحت نائٹ شفٹ کی صبح کی روانگی کو پچھلی شام کی ڈیوٹی تاریخ میں شمار کرنا؛ (5) روزانہ حاضری کے جھنڈوں کی فوری اور خودکار پروسیسنگ (POST /hr/attendance/compute)؛ (6) قاعدہ rule:e3a5ef53f8 کے تحت ڈیفالٹ شفٹ اور ہفتہ وار انفرادی چھٹیوں کا تعین؛ (7) قاعدہ rule:edc1438113 کے تحت روسٹر کے مطابق کام کرنے والے عملے کو بغیر ڈیفالٹ شفٹ رکھنا تاکہ ان کے آرام کے دن غیر حاضر نہ بنیں؛ (8) قاعدہ rule:e3a5ef53f8 کے تحت سرکاری تعطیلات اور ہفتہ وار آرام کو بامعاوضہ دن شمار کرنا (GET /holidays)؛ (9) لائیو رول کال آمد کی تصدیق اور حاضری لگانا (GET/POST /rosters/roll-call)؛ اور (10) حاضری ایونٹ کے تحت ریئل ٹائم ہم آہنگی۔",
+    steps: [
+      "Filter Attendance Horizon: Select the start and end dates (defaults to today) and optionally filter by hospital department or search by employee name or staff ID number.",
+      "Inspect Daily Timecards: Review employee timecard records displaying assigned department, computed status badge (Present, Late, Absent, HalfDay, Leave, Holiday, Off), first arrival punch, last departure punch, total worked duration (hours and minutes), and late arrival minutes.",
+      "Inspect Raw Punches Timeline: Click 'View Punches' on any timecard row to open the raw punch timeline drawer (GET /hr/attendance/punches). Review each punch's exact local timestamp, punch type (In/Out), badge code, terminal station ID, and punch source badge (Badge, RollCall, Manual per Rule rule:7e57360f0f).",
+      "Verify Night Shift Duty Date Attribution: Under Rule rule:57ff2b4a55, observe that morning exits following a night duty are automatically grouped under the evening date when the duty began.",
+      "Record Audited Manual Punch Correction: When an employee's badge failed or physical presence was verified, click '+ Manual Punch Correction' or the row '+ Punch' button (POST /hr/attendance/manual). Enter the employee ID, local timestamp, optional duty date override, and documented operational reason (minimum 3 characters, Rule rule:7e57360f0f).",
+      "Recompute Daily Flags: If punches were corrected or shifts modified, enter the duty date and click '(Re)compute' (POST /hr/attendance/compute). The system recalculates worked minutes, grace period thresholds, and daily status flags.",
+      "Configure Fixed Default Shifts & Rest Days: On the 'Shift & Roster Policy' tab, click 'Assign Default Shift' (POST /hr/employees/{id}/shift). Select 'Fixed Default Shift', specify the shift pattern ID, effective date, and check individual weekly off days (1=Monday ... 7=Sunday) per Rule rule:e3a5ef53f8.",
+      "Designate Roster-Only Staff Policy: For personnel whose schedules rotate weekly via the duty roster, select 'Roster-Only' (shift_pattern_id: null). Under Rule rule:edc1438113, this ensures that unrostered days count as paid rest days ('Off') rather than false absences ('Absent').",
+    ],
+    stepsUr: [
+      "حاضری کا دورانیہ فلٹر کریں: تاریخ کی شروعات اور اختتام منتخب کریں اور ضرورت کے مطابق شعبہ یا ملازم کے نام و نمبر سے فلٹر کریں۔",
+      "روزانہ ٹائم کارڈز کا معائنہ: ملازمین کے ٹائم کارڈز، شعبہ، حاضری حالت (حاضر، دیر، غیر حاضر، نصف دن، رخصت، تعطیل، آرام)، پہلا پنچ، آخری پنچ، کل کام کے گھنٹے اور تاخیر کا جائزہ لیں۔",
+      "خام پنچ لاگز کا معائنہ: کسی بھی ملازم کی قطار میں 'پنچز دیکھیں' دبا کر خام پنچ دراز کھولیں (GET /hr/attendance/punches)۔ ہر پنچ کا وقت، قسم (ان/آؤٹ)، بیج کوڈ، اسٹیشن اور ماخذ بیج (بیج، رول کال، دستی بمطابق قاعدہ rule:7e57360f0f) چیک کریں۔",
+      "نائٹ شفٹ کی ڈیوٹی تاریخ کی جانچ: قاعدہ rule:57ff2b4a55 کے تحت چیک کریں کہ نائٹ شفٹ کے بعد اگلی صبح کی روانگی اسی شام کی ڈیوٹی تاریخ کے تحت درج ہے۔",
+      "دستی پنچ تصحیح کا اندراج: کارڈ خراب ہونے یا سپروائزر کی تصدیق پر '+ دستی پنچ تصحیح' دبائیں (POST /hr/attendance/manual)۔ ملازم، پنچ کا وقت، اختیاری ڈیوٹی تاریخ اور آڈٹ شدہ لازمی وجہ درج کریں (کم از کم 3 حروف، قاعدہ rule:7e57360f0f)۔",
+      "حاضری کے جھنڈے دوبارہ پروسیس کریں: پنچز یا روسٹر میں تبدیلی کے بعد تاریخ منتخب کر کے '(دوبارہ) پروسیس کریں' دبائیں (POST /hr/attendance/compute) تاکہ کام کا وقت اور حاضری کی حالت دوبارہ پروسیس ہو جائے۔",
+      "ڈیفالٹ شفٹ اور آرام کے دن مقرر کریں: 'شفٹ پالیسی' ٹیب میں 'شفٹ تفویض کریں' دبائیں (POST /hr/employees/{id}/shift)۔ 'مستقل شفٹ' منتخب کریں، پیٹرن آئی ڈی، تاریخ اور انفرادی ہفتہ وار چھٹیاں منتخب کریں (قاعدہ rule:e3a5ef53f8)۔",
+      "روسٹر کے مطابق عملے کی پالیسی: جن ملازمین کی ڈیوٹیاں روسٹر پر طے ہوتی ہیں انہیں 'صرف روسٹر' پر سیٹ کریں (shift_pattern_id: null)۔ قاعدہ rule:edc1438113 کے تحت بغیر ڈیوٹی والے دن آرام ('Off') شمار ہوں گے نہ کہ غلط غیر حاضری ('Absent')۔",
+    ],
+    faq: [
+      [
+        "How are daily attendance status flags (Present, Late, Absent, HalfDay, Leave, Holiday, Off) determined?",
+        "Daily attendance flags are determined during nightly processing or on-demand recomputation (POST /hr/attendance/compute) by comparing an employee's arrival and departure punches against their scheduled roster shift or default shift. If punches meet standard shift hours, status is 'Present'; if arrival exceeds grace minutes, it flags as 'Late'; if worked duration is below the half-day threshold, it flags as 'HalfDay'; if no arrival punch exists on a scheduled duty date, it flags as 'Absent'. Approved statutory leave marks 'Leave', gazetted public holidays mark 'Holiday', and scheduled weekly rest days mark 'Off'.",
+      ],
+      [
+        "Why must staff planned on duty rosters have NO default shift assigned (Rule edc1438113)?",
+        "Under statutory Rule rule:edc1438113, rotating ward nurses, doctors, and support staff whose hours are scheduled dynamically on weekly duty rosters must have shift_pattern_id set to null (Roster-Only). If a default fixed shift was assigned to a rotating worker, the automated attendance engine would expect them to work every non-off day of that shift pattern, causing their legitimate rostered rest days to be falsely penalized as unexcused absences ('Absent').",
+      ],
+      [
+        "How does the system attribute night shift exits that occur the following morning (Rule 57ff2b4a55)?",
+        "Under statutory Rule rule:57ff2b4a55, raw punches are attributed by duty date (attendance_date) rather than purely calendar date. For an overnight shift starting at 20:00 on Monday and concluding at 08:00 on Tuesday morning, the Tuesday morning clock-out punch is automatically categorized under Monday's duty date. When making a manual punch correction where automated attribution was ambiguous, the HR administrator can explicitly supply the target duty date.",
+      ],
+      [
+        "What are the statutory requirements for recording manual punch corrections (Rule 7e57360f0f)?",
+        "Under statutory Rule rule:7e57360f0f, every punch displays its provenance source: 'Badge' (physical RFID tap), 'RollCall' (supervisor muster attendance), or 'Manual' (administrative override). Manual punch adjustments (POST /hr/attendance/manual) require an authorized HR administrative role (hr.attendance.manual) and strictly mandate an audited operational reason of at least 3 characters. All manual adjustments record the creating user ID and timestamp for statutory labor compliance inspections.",
+      ],
+      [
+        "How are weekly off days and gazetted public holidays treated as paid rest days (Rule e3a5ef53f8)?",
+        "Under statutory Rule rule:e3a5ef53f8, both 'Holiday' (gazetted public holidays) and 'Off' (weekly rest days) are paid rest days under hospital employment regulations. Because hospitals operate continuously 24/7/365, there is no single hospital-wide rest day; each employee has an individualized schedule of weekly off days assigned via POST /hr/employees/{id}/shift. When staff work on a gazetted holiday or their weekly off day as scheduled on the duty roster, they earn extra duty compensatory allowances.",
+      ],
+    ],
+    faqUr: [
+      [
+        "روزانہ حاضری کے جھنڈے (حاضر، دیر، غیر حاضر، نصف دن، رخصت، تعطیل، آرام) کیسے طے ہوتے ہیں؟",
+        "روزانہ حاضری کے جھنڈے رات کی خودکار پروسیسنگ یا فوری ری کمپیوٹ (POST /hr/attendance/compute) کے دوران ملازم کے پنچز کا تقابل اس کی شیڈول ڈیوٹی سے کر کے طے کیے جاتے ہیں۔ پورے اوقات پر 'حاضر'، رعایتی منٹوں کے بعد آمد پر 'دیر سے'، کم وقت پر 'نصف دن'، اور شیڈول کے باوجود غیر حاضری پر 'غیر حاضر' کا جھنڈا لگتا ہے۔ منظور شدہ رخصت پر 'رخصت'، سرکاری تعطیل پر 'تعطیل' اور آرام کے دن 'آرام' ظاہر ہوتا ہے۔",
+      ],
+      [
+        "ڈیوٹی روسٹر والے عملے کی کوئی ڈیفالٹ شفٹ کیوں نہیں ہونی چاہیے (قاعدہ edc1438113)؟",
+        "قانونی قاعدہ rule:edc1438113 کے مطابق، گھومتی شفٹوں والے وارڈ عملے، ڈاکٹرز اور معاون عملے کے لیے shift_pattern_id کو null (صرف روسٹر) رکھا جاتا ہے۔ اگر ان کی کوئی فکسڈ ڈیفالٹ شفٹ لگا دی جائے تو سسٹم سمجھے گا کہ انہوں نے ہر روز آنا ہے، اور جس دن روسٹر میں ان کی چھٹی ہوگی سسٹم اسے غلطی سے 'غیر حاضر' دکھائے گا۔",
+      ],
+      [
+        "رات کی شفٹ کے بعد اگلی صبح ہونے والی روانگی کو سسٹم کیسے شمار کرتا ہے (قاعدہ 57ff2b4a55)؟",
+        "قانونی قاعدہ rule:57ff2b4a55 کے تحت، پنچز کو کیلنڈر تاریخ کے بجائے ڈیوٹی تاریخ (attendance_date) کے تحت گروپ کیا جاتا ہے۔ پیر کی رات 8 بجے شروع ہونے والی اور منگل کی صبح 8 بجے ختم ہونے والی شفٹ کا روانگی پنچ خودکار طور پر پیر کی ڈیوٹی کے تحت شمار ہوتا ہے۔ دستی تصحیح میں ضرورت پڑنے پر ایچ آر مینیجر خود ڈیوٹی تاریخ درج کر سکتا ہے۔",
+      ],
+      [
+        "دستی پنچ تصحیح کے اندراج کی قانونی شرائط کیا ہیں (قاعدہ 7e57360f0f)؟",
+        "قانونی قاعدہ rule:7e57360f0f کے مطابق، ہر پنچ کا ماخذ دکھایا جاتا ہے: 'بیج' (آر ایف آئی ڈی ٹیپ)، 'رول کال' (سپروائزر حاضری)، یا 'دستی' (ایچ آر تصحیح)۔ دستی تصحیح کے لیے ایچ آر ایڈمن کی اجازت لازمی ہے اور کم از کم 3 حروف پر مشتمل باضابطہ آپریشنل وجہ درج کرنا ضروری ہے تاکہ لیبر آڈٹ میں شفافیت برقرار رہے۔",
+      ],
+      [
+        "ہفتہ وار چھٹیوں اور سرکاری تعطیلات کو بامعاوضہ آرام کا دن کیسے مانا جاتا ہے (قاعدہ e3a5ef53f8)؟",
+        "قانونی قاعدہ rule:e3a5ef53f8 کے مطابق، ہسپتال کے قوانین میں 'تعطیل' (سرکاری چھٹی) اور 'آرام' (ہفتہ وار چھٹی) دونوں بامعاوضہ آرام کے دن ہیں۔ چونکہ ہسپتال 24 گھنٹے کھلا رہتا ہے اس لیے پورے ہسپتال کی کوئی ایک مشترکہ چھٹی نہیں ہوتی بلکہ ہر ملازم کی ہفتہ وار چھٹی الگ مقرر ہوتی ہے۔ آرام کے دن کام کرنے پر ملازم اضافی ڈیوٹی الاؤنس کا حقدار ہوتا ہے۔",
+      ],
+    ],
+  },
   support_roster: {
     title: "Support-staff duty roster & roll call",
     titleUr: "معاون عملے کا ڈیوٹی روسٹر اور رول کال",

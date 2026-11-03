@@ -1,7 +1,7 @@
 # Haspataal checkpoint
 Last updated: 03 November 2026, Antigravity (Codex pair), Asia/Karachi.
 
-## Active request: Phase 8 Screen 150 `attendance` (Staff attendance, punches & timecards)
+## Active request: Phase 8 Screen 151 `holiday_calendar` (Holiday calendar)
 Executing the Haspataal HMS Roadmap in dependency order along with all tests and MCP progress reporting:
 - **Phase 7 ("Finance, billing and back offices")**: 100% COMPLETE (Screens 133–142, Proposals 286–295).
 - **Phase 8 ("People, facility and IT")**:
@@ -12,9 +12,58 @@ Executing the Haspataal HMS Roadmap in dependency order along with all tests and
   - Screen 147: **`id_card`** ("Staff ID card designer & print", Position 147, 33 points, workspace `hr`) — **COMPLETED** (Proposal **300** awaiting human review on `/docs -> My progress`).
   - Screen 148: **`duty_roster_hr`** ("Duty rosters (all staff)", Position 148, 94 points, workspace `hr`) — **COMPLETED** (Proposal **301** awaiting human review on `/docs -> My progress`).
   - Screen 149: **`support_roster`** ("Support-staff duty roster & roll call", Position 149, 94 points, workspace `ops_admin`) — **COMPLETED** (Proposal **302** awaiting human review on `/docs -> My progress`).
-  - Screen 150: **`attendance`** ("Staff attendance, punches & timecards", Position 150, 63 points, workspace `hr`) — **NEXT**.
-    - Scope: Attendance logs, punch review, biometric integration, manual punch adjustment, and timecards.
-    - Next Concrete Step: Retrieve `get_screen_bundle("attendance")`, save contract, generate typescript client, and begin implementation.
+  - Screen 150: **`attendance`** ("Staff attendance, punches & timecards", Position 150, 63 points, workspace `hr`) — **COMPLETED** (Proposal **303** awaiting human review on `/docs -> My progress`).
+  - Screen 151: **`holiday_calendar`** ("Holiday calendar", Position 151, 44 points, workspace `self_service`) — **NEXT**.
+    - Scope: Employee self-service view of gazetted and institutional holidays.
+    - Next Concrete Steps: Retrieve `get_screen_bundle("holiday_calendar")`, save contract, generate typescript client, and begin implementation.
+
+---
+
+### Completed Screen 150 (`attendance`) Checkpoint
+- **Workflow & Standards**: Staff attendance, biometric punch review, manual corrections, timecards, and shift policies (`attendance`, Workspace `hr`, Position 150, 63 points):
+  - **Daily Attendance Flags & Timecards (`GET /hr/attendance`):**
+    - Dynamic date horizon filtering (`date_from`, `date_to`) and department search.
+    - Daily status flag categorization: `Present` (green), `Late` (amber), `Absent` (red), `HalfDay` (yellow), `Leave` (blue), `Holiday` (purple), `Off` (grey).
+    - Accurate calculation and display of worked time (`worked_minutes`) and late arrival duration (`late_minutes`).
+  - **Raw Punches Timeline & Drawer (`GET /hr/attendance/punches`):**
+    - Drill-down drawer showing raw punch logs for an employee on a specific duty date.
+    - Displays arrival/departure punch times, punch types (`In`/`Out`), badge code, station ID, and punch source badge (`Badge`, `RollCall`, `Manual`) per Rule `rule:7e57360f0f`.
+    - Duty date attribution notice per Rule `rule:57ff2b4a55`: morning exits from overnight night shifts are grouped under the evening the shift started.
+  - **Audited Manual Punch Corrections (`POST /hr/attendance/manual`):**
+    - Reasoned manual punch adjustments with mandatory operational explanation (minimum 3 characters, Rule `rule:7e57360f0f`).
+    - Optional duty date override when shift boundary attribution needs manual assignment (`rule:57ff2b4a55`).
+    - Idempotent write safety and immediate timecard refresh.
+  - **On-Demand & Automated Flag Recomputation (`POST /hr/attendance/compute`):**
+    - Recomputes daily flags against scheduled roster shifts and grace periods.
+  - **Default Shift & Weekly Off Days Policy (`POST /hr/employees/{employee_id}/shift`):**
+    - Explains Rule `rule:edc1438113`: Staff planned on duty rosters have NO default shift (`shift_pattern_id: null`); otherwise rest days falsely flag as `Absent`.
+    - Explains Rule `rule:e3a5ef53f8`: `Holiday` and `Off` are paid rest days. Hospitals operate 24/7 without a hospital-wide rest day; each employee is assigned individual `weekly_off_days: number[]` (1=Monday ... 7=Sunday).
+    - Form to assign fixed default shifts or designate roster-only status.
+  - **Live Roll Call Attendance & Gazetted Holidays (`GET /rosters/roll-call`, `POST /rosters/roll-call`, `GET /holidays`):**
+    - Daily roll call sheet displaying scheduled staff and arrival punch provenance.
+    - Batch presence marking for rostered staff without badge terminals (`POST /rosters/roll-call`).
+    - Printable physical roll call sheet for manual staff attendance at perimeter gates.
+    - Directory of upcoming gazetted public holidays treated as paid rest days (`rule:e3a5ef53f8`).
+  - **Realtime Reactive Refresh (`ev:attendance.flagged`):**
+    - Realtime event listener re-fetches timecards and status flags automatically.
+  - **Service Capability Gating:**
+    - Resolves `full`, `records`, and `hidden` modes derived from server `GET /establishment views.screens` and user permissions.
+- **Contracts**: `contracts/attendance.json` (8 endpoints, 1 event, 4 statutory rules, 24 rubric items). Generated client: `src/generated/attendance.ts`.
+- **Domain Policies & Rules (`src/attendance-policy.ts`)**:
+  - `getAttendanceCapabilityView`, `validateManualPunch`, `validateShiftAssignment`, `formatAttendanceStatusBadge`, `formatPunchSourceBadge`, `formatWorkedMinutes`, `formatLateMinutes`, `formatPunchTime`, `ISO_WEEKDAY_NAMES`, and `ATTENDANCE_ERROR_MESSAGES`.
+- **UI Architecture (`src/screens/Attendance.tsx`)**:
+  - 3-tab layout: Daily Timecards & Punches, Default Shift & Roster Policy, and Live Roll Call & Holidays.
+  - Wired into `src/App.tsx`, `scripts/check-help.mjs`, `src/foundation-catalogue.json` (8 tasks), `src/foundation-task-map.json` (8 controls), and `src/foundation-help.ts` (38 interactive controls mapped with bilingual titles and guides).
+  - Authored comprehensive handbook entry and 5 role FAQs in `src/help.ts`; verified bundled screenshots in `public/handbook/attendance-en.png` and `attendance-ur.png`.
+- **Verification**:
+  - Automated unit tests: `tests/attendance.test.mjs` passed (10/10 tests).
+  - Help check: `node scripts/check-help.mjs` passed (149 screens, 3,832 controls, 2,804 groups, 69 FAQ seeds, 30 workspace guides).
+  - Full help coverage test: `node --test tests/help-coverage.test.mjs` passed (28/28 tests across 149 screens).
+  - Full test suite: `npm test` passed (783/783 tests across all 19 test suites).
+  - TypeScript compiler: `npx.cmd tsc --noEmit` passed with 0 errors.
+  - Production build: `npm.cmd run build` succeeded (`dist/assets/index-Dv-Ry34Y.js`).
+- **Proposal**:
+  - Proposal ID: **303** (status: `pending` on `/docs -> My progress`, build `index-Dv-Ry34Y.js`, 23 rubric items claimed, `q:fresh_data` left pending human review).
 
 ---
 
