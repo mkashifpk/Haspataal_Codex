@@ -295,6 +295,7 @@ export function checkHelp({
       "SupportRoster",
       "Attendance",
       "HolidayCalendar",
+      "HolidayCalendarAdmin",
     ].map((n) => `src/screens/${n}.tsx`),
   ];
   const used = new Set(),

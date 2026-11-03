@@ -67,6 +67,7 @@ import { DutyRosterHr } from './screens/DutyRosterHr';
 import { SupportRoster } from './screens/SupportRoster';
 import { Attendance } from './screens/Attendance';
 import { HolidayCalendar } from './screens/HolidayCalendar';
+import { HolidayCalendarAdmin } from './screens/HolidayCalendarAdmin';
 import { LabAdmin } from './screens/LabAdmin';
 import { PharmacyStorageLog } from './screens/PharmacyStorageLog';
 import { PharmacyAdmin } from './screens/PharmacyAdmin';
@@ -1528,6 +1529,7 @@ export function App() {
               {screen === 'support_roster' && <SupportRoster key={user.user_id} user={user} establishment={est} connected={connected} timeZone={meta?.hospital_timezone} onNavigateScreen={(s) => navigate(s)} />}
               {screen === 'attendance' && <Attendance key={user.user_id} user={user} establishment={est} connected={connected} userPermissions={user.permissions} />}
               {screen === 'holiday_calendar' && <HolidayCalendar key={user.user_id} user={user} establishment={est} connected={connected} userPermissions={user.permissions} />}
+              {screen === 'holiday_calendar_admin' && <HolidayCalendarAdmin key={user.user_id} user={user} establishment={est} connected={connected} userPermissions={user.permissions} currentUserRole={user.roles?.[0]} />}
               {screen === 'owner_dashboard' && <OwnerDashboard key={user.user_id} user={user} establishment={est} connected={connected} timeZone={meta?.hospital_timezone} onNavigateScreen={(s) => navigate(s)} />}
               {screen === 'diagnostic_partners' && <DiagnosticPartners key={user.user_id} user={user} establishment={est} connected={connected} timeZone={meta?.hospital_timezone} onNavigateScreen={(s) => navigate(s)} />}
               {screen === 'lab_admin' && <LabAdmin key={user.user_id} user={user} establishment={est} connected={connected} timeZone={meta?.hospital_timezone} onNavigateScreen={(s) => navigate(s)} />}
