@@ -10,6 +10,72 @@ export type HelpPage = {
   faqUr: [string, string][];
 };
 export const help: Record<string, HelpPage> = {
+  payroll: {
+    title: "Payroll (Staff payroll processing & payslips)",
+    titleUr: "پے رول (اسٹاف تنخواہیں اور سیلری سلپس)",
+    purpose: "Comprehensive hospital payroll management and salary disbursement system: (1) Monthly and periodic payroll generation (POST /hr/payroll-runs) calculating contractual base compensation, attendance deductions, internal credits, commissions, and extra duties; (2) Directory and status audit of payroll runs (GET /hr/payroll-runs); (3) Employee line items inspection with formula verification (Base − Unpaid Absences − Internal Credit + Commissions + Extra Duty = Net) under statutory Rule rule:0cf7ae94dd (GET /hr/payroll-runs/{run_id}); (4) Extra duty pay computation for scheduled shifts worked beyond the 7-day weekly allowance under statutory Rule rule:e846dec8a2; (5) Multi-stage lifecycle authorization: finalization locking calculations, consuming attendance/credits, and posting general ledger records (POST /hr/payroll-runs/{run_id}/finalize); (6) Cancellation of unfinalized runs with audited operational rationale (POST /hr/payroll-runs/{run_id}/cancel); (7) Disbursement recording via bank transfer or cash (POST /hr/payroll-runs/{run_id}/paid); and (8) Itemized payslip statements and printable earnings/deductions documentation (GET /hr/payslips/{payroll_item_id}).",
+    purposeUr: "ہسپتال میں عملے کی تنخواہوں کی تیاری، حساب کتاب اور تقسیم کا جامع نظام: (1) مخصوص مدت کے لیے پے رول رن تیار کرنا (POST /hr/payroll-runs) جس میں بنیادی تنخواہ، حاضری کٹوتیاں، اندرونی ادھار، کمیشن اور اضافی ڈیوٹی شامل ہیں؛ (2) تمام پے رول رن کی فہرست اور حالت کا جائزہ (GET /hr/payroll-runs)؛ (3) قاعدہ rule:0cf7ae94dd کے تحت ہر ملازم کے لیے قانونی فارمولا (بنیادی − غیر حاضریاں کٹوتی − اندرونی ادھار + کمیشن + اضافی ڈیوٹی = خالص قابل ادا رقم) کی جانچ (GET /hr/payroll-runs/{run_id})؛ (4) قاعدہ rule:e846dec8a2 کے تحت ہفتہ وار چھٹی سے زائد اضافی ڈیوٹیوں کا قانونی حساب اور تاریخوں کی تفصیل؛ (5) پے رول رن کو فائنل کرنا جس سے حسابات لاک ہوتے ہیں، حاضری/کریڈٹ خرچ ہوتے ہیں اور جنرل لیجر میں اندراج ہوتا ہے (POST /hr/payroll-runs/{run_id}/finalize)؛ (6) غیر فائنل شدہ رن کو باضابطہ وجہ کے ساتھ منسوخ کرنا (POST /hr/payroll-runs/{run_id}/cancel)؛ (7) بینک ٹرانسفر یا نقد ادائیگی کے ذریعے تنخواہیں ادا شدہ درج کرنا (POST /hr/payroll-runs/{run_id}/paid)؛ اور (8) ملازم کی تنخواہ کی تفصیلی اور پرنٹ ایبل رسید حاصل کرنا (GET /hr/payslips/{payroll_item_id})۔",
+    steps: [
+      "Generate Payroll Run: Click '+ Generate Payroll', enter period start and end dates (e.g. 1st to end of month), and submit. The server automatically ingests attendance punches, unpaid leaves, pharmacy/meal internal credits, commissions, and roster duties.",
+      "Audit Employee Formula & Line Items: Open the generated run details to verify every staff member's compensation. Inspect base salary, attendance deductions, internal credits, accrued commissions, and extra duty entitlements matching Rule rule:0cf7ae94dd.",
+      "Verify Extra Duty Calculations: Review scheduled shifts worked beyond the statutory weekly rest allowance under Rule rule:e846dec8a2, ensuring daily rates and specific worked dates are accurately captured.",
+      "Inspect Individual Payslips: Click 'View Slip' on any employee item to open the itemized payslip breakdown, displaying earnings, statutory deductions, net payable, and print-ready layout.",
+      "Finalize and Lock Ledger: Click 'Finalize Run'. Confirm the prompt to lock all calculations, permanently consume credits and commissions, and post accounting entries to the General Ledger.",
+      "Disburse Salaries & Mark Paid: Once salaries are disbursed through bank transfer or counter cash, click 'Mark Salaries Paid', select the payment method, and record the disbursement completion."
+    ],
+    stepsUr: [
+      "نیا پے رول تیار کریں: '+ Generate Payroll' پر کلک کریں، مدت کے آغاز اور اختتام کی تاریخیں درج کریں اور جمع کریں۔ سرور خودکار طور پر حاضری، غیر حاضریاں، اندرونی کریڈٹ اور ڈیوٹیاں اکٹھی کر کے حساب لگاتا ہے۔",
+      "فارمولا اور ملازمین کی تفصیلات جانچیں: تیار شدہ رن کھول کر ہر ملازم کی تنخواہ کا معائنہ کریں۔ بنیادی تنخواہ، کٹوتیاں، کمیشن اور اضافی ڈیوٹی قاعدہ rule:0cf7ae94dd کے مطابق چیک کریں۔",
+      "اضافی ڈیوٹی کی تصدیق: قاعدہ rule:e846dec8a2 کے تحت ہفتہ وار آرام سے زائد کی گئی ڈیوٹیوں، ان کی تاریخوں اور روزانہ شرح کے حساب کی تصدیق کریں۔",
+      "انفرادی پے سلپ دیکھیں: کسی بھی ملازم کی قطار میں 'View Slip' پر کلک کر کے تفصیلی تنخواہ سلپ، کٹوتیاں اور پرنٹ ایبل رسید دیکھیں۔",
+      "پے رول فائنل اور لاک کریں: 'Finalize Run' پر کلک کریں۔ تصدیق کریں تا کہ تمام حسابات لاک ہو جائیں، کریڈٹ مستقل طور پر درج ہو جائیں اور جنرل لیجر میں پوسٹنگ مکمل ہو۔",
+      "تنخواہیں ادا شدہ درج کریں: بینک ٹرانسفر یا نقد رقم کی ادائیگی کے بعد 'Mark Salaries Paid' پر کلک کریں اور طریقہ ادائیگی منتخب کر کے ریکارڈ مکمل کریں۔"
+    ],
+    faq: [
+      [
+        "How does the server compute net payable salaries under Rule rule:0cf7ae94dd?",
+        "The server enforces the statutory formula: Base Salary − Unpaid Absence Deductions − Internal Credit (staff pharmacy purchases, cafeteria charges) + Accrued Clinical/Consultation Commissions + Extra Duty Pay = Net Payable. All line items are itemized transparently on every payslip."
+      ],
+      [
+        "When are nurses and clinical staff entitled to extra duty compensation under Rule rule:e846dec8a2?",
+        "Under Rule rule:e846dec8a2, extra duty applies to scheduled duties worked beyond the weekly rest allowance (7 − weekly_rest_days, e.g. working a 7th shift in a 6-day roster week). Extra duty is compensated at regular daily rates and the exact dates worked are listed on the payslip."
+      ],
+      [
+        "What happens in accounting and General Ledger when a payroll run is finalized?",
+        "Finalizing (POST /hr/payroll-runs/{run_id}/finalize) permanently locks salary numbers, prevents further edits, consumes all internal credit debts and clinical commissions for the period, and automatically posts salary expense and liability journals to the General Ledger."
+      ],
+      [
+        "Can a payroll run be cancelled after it has been finalized or paid?",
+        "No. Cancellation (POST /hr/payroll-runs/{run_id}/cancel) is strictly restricted to Generated runs before finalization. Once finalized or paid, payroll runs are permanent financial records; any corrections must be handled as adjustments in the subsequent payroll cycle."
+      ],
+      [
+        "How can staff members view their salary slip once payroll is generated?",
+        "Staff members can view and print their salary slip directly from their personal Staff Self-Service portal (GET /self/payslips/{id}), or HR administrators can print verified payslips directly from the Payroll processing console."
+      ]
+    ],
+    faqUr: [
+      [
+        "قاعدہ rule:0cf7ae94dd کے تحت خالص تنخواہ کا حساب کس طرح لگایا جاتا ہے؟",
+        "سرور قانونی فارمولے پر عمل کرتا ہے: بنیادی تنخواہ − غیر حاضریوں کی کٹوتی − اندرونی ادھار (فارمیسی یا کینٹین کے اخراجات) + کلینیکل کمیشن + اضافی ڈیوٹی الاؤنس = خالص قابل ادا رقم۔ ہر سلپ پر ان تمام خانوں کی الگ الگ تفصیل درج ہوتی ہے۔"
+      ],
+      [
+        "نرسز اور کلینیکل عملہ قاعدہ rule:e846dec8a2 کے تحت اضافی ڈیوٹی الاؤنس کے کب حقدار ہوتے ہیں؟",
+        "قاعدہ rule:e846dec8a2 کے مطابق، اگر عملہ ہفتہ وار قانونی آرام سے زائد ڈیوٹی سرانجام دے (مثلاً 6 دن کی ڈیوٹی کے بعد 7ویں شفٹ)، تو اسے روزانہ بنیادی شرح پر اضافی معاوضہ ملتا ہے اور سلپ پر ان تمام تاریخوں کی تفصیل درج ہوتی ہے۔"
+      ],
+      [
+        "جب پے رول رن کو فائنل کیا جاتا ہے تو اکاؤنٹس اور جنرل لیجر میں کیا اثر ہوتا ہے؟",
+        "فائنل کرنے پر تنخواہ کے اعداد و شمار مستقل لاک ہو جاتے ہیں، اس مدت کے تمام فارمیسی/کینٹین ادھار اور کمیشن منہا ہو جاتے ہیں اور جنرل لیجر میں تنخواہ کے اخراجات اور واجبات کا آڈٹ شدہ اندراج ہو جاتا ہے۔"
+      ],
+      [
+        "کیا پے رول رن کو فائنل یا ادا ہونے کے بعد منسوخ کیا جا سکتا ہے؟",
+        "نہیں۔ منسوخی صرف اسی وقت ممکن ہے جب رن ابھی 'Generated' حالت میں ہو۔ فائنل یا ادا شدہ رن ہسپتال کا مستقل مالیاتی ریکارڈ بن جاتا ہے؛ کسی بھی تصحیح کو اگلے ماہ کے پے رول سائیکل میں ایڈجسٹ کیا جاتا ہے۔"
+      ],
+      [
+        "ملازمین اپنی تنخواہ کی سلپ کس طرح دیکھ اور پرنٹ کر سکتے ہیں؟",
+        "ملازمین اپنے ذاتی اسٹاف سیلف سروس پورٹل سے اپنی تصدیق شدہ تنخواہ کی سلپ دیکھ اور پرنٹ کر سکتے ہیں، یا ایچ آر ایڈمنسٹریٹر پے رول کنسول سے کسی بھی ملازم کی سلپ پرنٹ کر سکتا ہے۔"
+      ]
+    ]
+  },
   self_service: {
     title: "My workspace (Staff self-service portal)",
     titleUr: "میرا ورک اسپیس (اسٹاف سیلف سروس پورٹل)",

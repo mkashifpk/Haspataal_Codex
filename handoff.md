@@ -1,7 +1,7 @@
 # Haspataal checkpoint
 Last updated: 03 November 2026, Antigravity (Codex pair), Asia/Karachi.
 
-## Active request: Phase 8 Screen 155 `payroll` (Staff payroll processing)
+## Active request: Phase 8 Screen 156 `ops_console` (Operations administration console)
 Executing the Haspataal HMS Roadmap in dependency order along with all tests and MCP progress reporting:
 - **Phase 7 ("Finance, billing and back offices")**: 100% COMPLETE (Screens 133–142, Proposals 286–295).
 - **Phase 8 ("People, facility and IT")**:
@@ -17,9 +17,49 @@ Executing the Haspataal HMS Roadmap in dependency order along with all tests and
   - Screen 152: **`holiday_calendar_admin`** ("Holiday calendar admin", Position 152, 44 points, workspace `owner_dashboard` / `ops_admin`) — **COMPLETED** (Proposal **305** awaiting human review on `/docs -> My progress`).
   - Screen 153: **`leave_approvals`** ("Leave requests & manager approvals", Position 153, 40 points, workspace `head_nurse` / `hr`) — **COMPLETED** (Proposal **306** awaiting human review on `/docs -> My progress`).
   - Screen 154: **`self_service`** ("Staff self-service portal: timecards, leave requests, duty rosters & profile", Position 154, 84 points, workspace `self_service`) — **COMPLETED** (Proposal **307** awaiting human review on `/docs -> My progress`).
-  - Screen 155: **`payroll`** ("Staff payroll processing, salary slips, deductions & tax statements", Position 155, 54 points, workspace `hr` / `finance`) — **IN PROGRESS**.
-    - Scope: Monthly payroll runs, attendance integration, allowance/deduction line items, payslip generation, and tax statements.
-    - Contracts & files: Inspect `get_screen_bundle("payroll")`, retrieve endpoints, generate TypeScript client, create domain policy, build UI, register F1/handbook help, add unit tests, run verification, build, and propose progress.
+  - Screen 155: **`payroll`** ("Staff payroll processing, salary slips, deductions & tax statements", Position 155, 54 points, workspace `hr`) — **COMPLETED** (Proposal **308** awaiting human review on `/docs -> My progress`).
+  - Screen 156: **`ops_console`** ("Operations administration console", Position 156, 83 points, workspace `ops_admin`) — **IN PROGRESS**.
+    - Scope: Facility operations, maintenance work orders, breakdown triage, technician assignments, SLA monitoring, and facility assets.
+    - Contracts & files: Inspect `get_screen_bundle("ops_console")`, retrieve endpoints, generate TypeScript client, create domain policy, build UI, register F1/handbook help, add unit tests, run verification, build, and propose progress.
+
+---
+
+### Completed Screen 155 (`payroll`) Checkpoint
+- **Workflow & Standards**: Complete Staff Payroll Processing & Salary Slips (`payroll`, Workspace `hr`, Position 155, 54 points):
+  - **Payroll Run Generation & Date Horizons (`POST /hr/payroll-runs`, `GET /hr/payroll-runs`):**
+    - Generate period runs specifying start and end dates with automatic period validation (`validateGeneratePayrollForm`).
+    - Ingests staff attendance punches, unpaid leaves, internal credit debt (pharmacy purchases, cafeteria charges), consultation commissions, and scheduled roster duties.
+    - Idempotency-Key support guaranteeing safe duplicate-submit handling.
+  - **Audited Statutory Net Pay Formula (`rule:0cf7ae94dd`, `GET /hr/payroll-runs/{run_id}`):**
+    - Enforces and displays statutory formula per employee: Base − Unpaid absences − Internal credit + Commissions + Extra duty = Net.
+    - Balanced calculation verification with bilingual explanation text: `Rs. ... (Base) − Rs. ... (Unpaid) − Rs. ... (Credit) + Rs. ... (Commissions) + Rs. ... (Extra Duty) = Rs. ... (Net)`.
+  - **Extra Duty Compensation for Shifts Beyond Weekly Allowance (`rule:e846dec8a2`):**
+    - Computes extra duty pay for shifts worked beyond the statutory weekly rest allowance (7 − weekly_rest_days, e.g. 7th day without rest).
+    - Compensated at daily pay rate (`extra_duty_day_pay_rate × day's pay`), with specific worked dates detailed in the payslip statement line items.
+  - **Multi-Stage Lifecycle Governance (`POST /hr/payroll-runs/{run_id}/finalize`, `/paid`, `/cancel`):**
+    - `finalize`: Locks run calculations, consumes credit debts and clinical commissions, and automatically posts journal entries to General Ledger.
+    - `paid`: Marks salaries disbursed via `BankTransfer` or `Cash` with disbursement timestamp.
+    - `cancel`: Cancels unfinalized Generated runs with mandatory audited operational reason (minimum 3 characters, max 500).
+  - **Itemized Payslip Statements & Printing (`GET /hr/payslips/{payroll_item_id}`):**
+    - Detailed employee payslip statement drawer displaying employee details, run status, earnings/deductions table, audited formula card, and browser printing (`window.print()`).
+  - **Service Capability Gating:**
+    - Resolves `full` (for `hr.payroll.run` or `hr_admin`), `records` (view-only for `hr.payroll.view` or `accountant`), and `hidden` modes.
+- **Contracts**: `contracts/payroll.json` (7 endpoints, 2 rules, 20 rubric items). Generated client: `src/generated/payroll.ts`.
+- **Domain Policies & Rules (`src/payroll-policy.ts`)**:
+  - `getPayrollCapabilityView`, `calculateEmployeePayrollFormula`, `explainExtraDutyCalculation`, `validateGeneratePayrollForm`, `validateCancelRunForm`, `validateMarkPaidForm`, `formatPayrollRunStatusBadge`, and `PAYROLL_ERROR_MESSAGES`.
+- **UI Architecture (`src/screens/Payroll.tsx`)**:
+  - Responsive master-detail layout: runs list with status tabs and search; run detail view with KPI cards, statutory formula banner, staff table, and action buttons; modal dialogs for generation, cancellation, marking paid, and itemized payslip drawer.
+  - Wired into `src/App.tsx`, `scripts/check-help.mjs`, `src/foundation-catalogue.json` (7 tasks), `src/foundation-task-map.json` (7 controls), and `src/foundation-help.ts` (26 interactive controls mapped with bilingual titles and guides).
+  - Authored comprehensive handbook entry and 5 role FAQs in `src/help.ts`; verified bundled screenshots in `public/handbook/payroll-en.png` and `payroll-ur.png`.
+- **Verification**:
+  - Automated unit tests: `tests/payroll.test.mjs` passed (8/8 tests).
+  - Help check: `node scripts/check-help.mjs` passed (154 screens, 4,000 controls, 2,953 groups, 69 FAQ seeds, 30 workspace guides).
+  - Full help coverage test: `node --test tests/help-coverage.test.mjs` passed (28/28 tests across 154 screens).
+  - Full test suite: `npm test` passed (819/819 tests across all 19 test suites).
+  - TypeScript compiler: `npx.cmd tsc --noEmit` passed with 0 errors.
+  - Production build: `npm.cmd run build` succeeded (`dist/assets/index-DEcrK4PS.js`).
+- **Proposal**:
+  - Proposal ID: **308** (status: `pending` on `/docs -> My progress`, build `index-DEcrK4PS.js`, 19 rubric items claimed, `q:fresh_data` left pending human review).
 
 ---
 

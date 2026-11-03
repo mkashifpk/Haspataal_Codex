@@ -20,6 +20,7 @@ export const phase1Screens = [
 const approvalScreens = ["approval_queue", "charity_approvals"];
 // Coverage grows screen by screen; Phase 1 acceptance remains separate.
 export const deliveredHelpScreens = [
+  "payroll",
   "self_service",
   "leave_approvals",
   "holiday_calendar_admin",
@@ -164,6 +165,32 @@ const g = (
 // IDs are also attached to the actual controls. The build rejects missing
 // mappings and empty translations instead of treating a page as coverage.
 export const controlGuides: Record<string, ControlGuide> = {
+  "payroll.btn_back_home": g(["payroll"], ["Return home", "ہوم پر واپس جائیں"], ["Navigates back to main reception or landing dashboard.", "مرکزی ڈیش بورڈ پر واپس جاتا ہے۔"]),
+  "payroll.btn_back_to_runs": g(["payroll"], ["All runs list", "تمام پے رول رن"], ["Returns to the list of all monthly payroll runs.", "ماہانہ پے رول رن کی فہرست پر واپس لے جاتا ہے۔"]),
+  "payroll.btn_cancel_run": g(["payroll"], ["Cancel run", "رن منسوخ کریں"], ["Opens cancellation dialog to cancel an unfinalized payroll run.", "غیر حتمی پے رول رن منسوخ کرنے کا ڈائیلاگ کھولتا ہے۔"]),
+  "payroll.btn_close_modal": g(["payroll"], ["Close modal", "بند کریں"], ["Dismisses the generate payroll window without saving.", "پے رول تیار کرنے والی ونڈو کو بند کرتا ہے۔"]),
+  "payroll.btn_close_payslip": g(["payroll"], ["Close payslip", "سلپ بند کریں"], ["Closes the employee payslip statement drawer.", "ملازم کی تنخواہ کی سلپ بند کرتا ہے۔"]),
+  "payroll.btn_confirm_cancel": g(["payroll"], ["Confirm cancellation", "منسوخی کی تصدیق"], ["Confirms cancellation of the payroll run with documented reason.", "وجہ کے ساتھ پے رول رن منسوخ کرنے کی تصدیق کرتا ہے۔"]),
+  "payroll.btn_confirm_paid": g(["payroll"], ["Confirm paid", "ادائیگی کی تصدیق"], ["Records payment disbursement method and marks salaries paid.", "ادائیگی کا طریقہ درج کر کے تنخواہیں ادا شدہ کرتا ہے۔"]),
+  "payroll.btn_dismiss_alert": g(["payroll"], ["Dismiss notification", "اطلاع ہٹائیں"], ["Dismisses error or success message banner.", "غلطی یا کامیابی کا پیغام ہٹاتا ہے۔"]),
+  "payroll.btn_dismiss_cancel": g(["payroll"], ["Dismiss cancellation", "منسوخی واپس لیں"], ["Closes cancellation window without modifying the run.", "رن میں تبدیلی کے بغیر منسوخی ڈائیلاگ بند کرتا ہے۔"]),
+  "payroll.btn_dismiss_paid": g(["payroll"], ["Dismiss paid dialog", "ادائیگی ڈائیلاگ بند کریں"], ["Closes payment disbursement window without saving.", "ادائیگی کا ڈائیلاگ بغیر تبدیلی کے بند کرتا ہے۔"]),
+  "payroll.btn_finalize_run": g(["payroll"], ["Finalize payroll run", "پے رول حتمی کریں"], ["Locks payroll calculations, consumes credits/commissions, and posts GL entries.", "پے رول حسابات کو لاک کرتا ہے اور جنرل لیجر میں درج کرتا ہے۔"]),
+  "payroll.btn_generate": g(["payroll"], ["Generate payroll", "نیا پے رول تیار کریں"], ["Opens payroll generation dialog for specified date horizon.", "مخصوص مدت کے لیے نیا پے رول تیار کرنے کا ڈائیلاگ کھولتا ہے۔"]),
+  "payroll.btn_mark_paid": g(["payroll"], ["Mark salaries paid", "تنخواہیں ادا کریں"], ["Opens payment disbursement dialog to mark salaries as disbursed.", "تنخواہوں کی ادائیگی کا ریکارڈ درج کرنے کی ونڈو کھولتا ہے۔"]),
+  "payroll.btn_print_payslip": g(["payroll"], ["Print payslip", "سلپ پرنٹ کریں"], ["Opens browser print dialog for the employee salary statement.", "ملازم کی تنخواہ کی رسید پرنٹ کرتا ہے۔"]),
+  "payroll.btn_quick_period": g(["payroll"], ["Quick period selector", "مدت کا فوری انتخاب"], ["Sets period dates to current or previous calendar month.", "موجودہ یا پچھلے ماہ کی تاریخیں منتخب کرتا ہے۔"]),
+  "payroll.btn_refresh": g(["payroll"], ["Refresh runs", "تازہ کریں"], ["Reloads latest payroll runs and statuses from server.", "سرور سے پے رول رن کی تازہ ترین فہرست حاصل کرتا ہے۔"]),
+  "payroll.btn_submit_generate": g(["payroll"], ["Submit payroll generation", "پے رول رن تیار کریں"], ["Submits payroll generation request to calculate staff salaries.", "عملے کی تنخواہیں حساب کرنے کی درخواست بھیجتا ہے۔"]),
+  "payroll.btn_view_payslip": g(["payroll"], ["View payslip", "تنخواہ کی رسید دیکھیں"], ["Opens detailed itemized payslip breakdown for selected employee.", "منتخب ملازم کی تفصیلی تنخواہ کی سلپ دکھاتا ہے۔"]),
+  "payroll.btn_view_run": g(["payroll"], ["View run details", "تفصیلات دیکھیں"], ["Opens detailed staff breakdown for the selected payroll run.", "منتخب پے رول رن کے ملازمین کی تفصیلی فہرست کھولتا ہے۔"]),
+  "payroll.filter_status": g(["payroll"], ["Filter status", "حالت کے لحاظ سے فلٹر"], ["Filters payroll runs by lifecycle status.", "پے رول رن کو حالت کے لحاظ سے فلٹر کرتا ہے۔"]),
+  "payroll.input_cancel_reason": g(["payroll"], ["Cancellation reason", "منسوخی کی وجہ"], ["Mandatory explanation for cancelling unfinalized run.", "پے رول رن منسوخ کرنے کی لازمی وجہ۔"]),
+  "payroll.input_period_end": g(["payroll"], ["Period end date", "مدت کے اختتام کی تاریخ"], ["End date for the payroll calculation horizon.", "پے رول کے حساب کتاب کی آخری تاریخ۔"]),
+  "payroll.input_period_start": g(["payroll"], ["Period start date", "مدت کے آغاز کی تاریخ"], ["Start date for the payroll calculation horizon.", "پے رول کے حساب کتاب کے آغاز کی تاریخ۔"]),
+  "payroll.input_search": g(["payroll"], ["Search payroll runs", "پے رول تلاش کریں"], ["Filters runs by run number or period date.", "رن نمبر یا تاریخ سے پے رول تلاش کرتا ہے۔"]),
+  "payroll.input_search_items": g(["payroll"], ["Search staff items", "ملازم تلاش کریں"], ["Filters staff list by name, designation, or employee code.", "نام، عہدہ یا ملازم کوڈ سے تلاش کرتا ہے۔"]),
+  "payroll.select_paid_method": g(["payroll"], ["Disbursement method", "طریقہ ادائیگی"], ["Select disbursement method: Bank Transfer or Cash.", "ادائیگی کا طریقہ منتخب کریں: بینک ٹرانسفر یا نقد۔"]),
   // Screen 154: self_service (Staff self-service portal: timecards, leave requests, duty rosters & profile)
   "self_service.banner_dismiss_error": g(["self_service"], ["Dismiss error button", "خرابی کا بینر بند کریں"], ["Dismisses self-service error alert banner.", "سیلف سروس خرابی کا بینر بند کرتا ہے۔"]),
   "self_service.banner_dismiss_success": g(["self_service"], ["Dismiss success button", "کامیابی کا بینر بند کریں"], ["Dismisses operational confirmation banner.", "کامیابی کا تصدیقی بینر بند کرتا ہے۔"]),
