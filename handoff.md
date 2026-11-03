@@ -1,7 +1,7 @@
 # Haspataal checkpoint
 Last updated: 03 November 2026, Antigravity (Codex pair), Asia/Karachi.
 
-## Active request: Phase 8 Screen 157 `badge_station_kiosk` (Badge station kiosk)
+## Active request: Phase 8 Screen 158 `equipment_maintenance` (Medical equipment maintenance)
 Executing the Haspataal HMS Roadmap in dependency order along with all tests and MCP progress reporting:
 - **Phase 7 ("Finance, billing and back offices")**: 100% COMPLETE (Screens 133–142, Proposals 286–295).
 - **Phase 8 ("People, facility and IT")**:
@@ -19,25 +19,59 @@ Executing the Haspataal HMS Roadmap in dependency order along with all tests and
   - Screen 154: **`self_service`** ("Staff self-service portal: timecards, leave requests, duty rosters & profile", Position 154, 84 points, workspace `self_service`) — **COMPLETED** (Proposal **307** awaiting human review on `/docs -> My progress`).
   - Screen 155: **`payroll`** ("Staff payroll processing, salary slips, deductions & tax statements", Position 155, 54 points, workspace `hr`) — **COMPLETED** (Proposal **308** awaiting human review on `/docs -> My progress`).
   - Screen 156: **`ops_console`** ("Operations administration console", Position 156, 83 points, workspace `ops_admin`) — **COMPLETED** (Proposal **309** awaiting human review on `/docs -> My progress`).
-  - Screen 157: **`badge_station_kiosk`** ("Badge station kiosk", Position 157, 45 points, workspace `badge_station`) — **IN PROGRESS**.
-    - Scope: Full-screen kiosk page on PC/tablet with barcode scanner (or camera). Staff show badge; kiosk posts scan and flashes outcome. No login, no keyboard for the person scanning.
-    - Endpoints: `GET /badge-stations/me` (setup, station-authenticated with `X-Station-Key`), `POST /badge-stations/scans` (post scan result, idempotent with `gateway_event_id`).
-    - Statutory Rules:
-      - `rule:f98f89a7b6`: Configure once with station id and key (`X-Station-Key`); never show the key.
-      - `rule:141cb8255f`: USB scanner types code and Enter: keep invisible input focused, or decode camera stream.
-      - `rule:b2f4ebb077`: `needs_bed_code`: collect two scans (bed sticker `HMS-BED-…` and badge) within 60 s, then post them together.
-      - `rule:2554916922`: Big green / red result with outcome in words and sound; ready for next person after 3 s.
-      - `rule:438ca845ec`: Queue scans with `gateway_event_id` while server unreachable and resend (retries are idempotent).
+  - Screen 157: **`badge_station_kiosk`** ("Badge station kiosk", Position 157, 45 points, workspace `badge_station`) — **COMPLETED** (Proposal **310** awaiting human review on `/docs -> My progress`).
+  - Screen 158: **`equipment_maintenance`** ("Medical equipment maintenance", Position 158, 76 points, workspace `maintenance`) — **READY TO BEGIN**.
     - Next Concrete Steps:
-      1. Commit Screen 156 (`ops_console`) to git.
-      2. Fetch and review full contract for `badge_station_kiosk`.
-      3. Generate TypeScript API client in `src/generated/badge_station_kiosk.ts`.
-      4. Copy handbook reference screenshots `badge_station_kiosk-en.png` and `badge_station_kiosk-ur.png`.
-      5. Implement domain policies in `src/badge-station-kiosk-policy.ts`.
-      6. Implement kiosk UI component in `src/screens/BadgeStationKiosk.tsx`.
-      7. Integrate into `src/App.tsx`, `scripts/check-help.mjs`, `src/foundation-catalogue.json`, `src/foundation-task-map.json`, `src/foundation-help.ts`, `src/help.ts`.
-      8. Author unit tests `tests/badge-station-kiosk.test.mjs`.
-      9. Run verification: check-help, help coverage, tsc, npm test, production build, and submit proposal #310.
+      1. Commit Screen 157 (`badge_station_kiosk`) to git.
+      2. Call `get_screen_bundle("equipment_maintenance")` and save to `contracts/equipment_maintenance.json`.
+      3. Call `generate_typescript("equipment_maintenance")` and write to `src/generated/equipment_maintenance.ts`.
+      4. Copy reference screenshots `equipment_maintenance-en.png` and `equipment_maintenance-ur.png`.
+      5. Implement domain policies in `src/equipment-maintenance-policy.ts`.
+      6. Implement UI component in `src/screens/EquipmentMaintenance.tsx`.
+      7. Wire into `src/App.tsx`, `scripts/check-help.mjs`, catalogue, task-map, and help system.
+      8. Test, build, and submit proposal #311.
+
+---
+
+### Completed Screen 157 (`badge_station_kiosk`) Checkpoint
+- **Workflow & Standards**: Complete Unattended Badge Station Kiosk (`badge_station_kiosk`, Workspace `badge_station`, Position 157, 45 points):
+  - **Station Setup & Secure Authentication (`rule:f98f89a7b6`, `GET /badge-stations/me`):**
+    - One-time operator setup for Station ID and Station Secret Key (`X-Station-Key`).
+    - Key is masked (`••••••••`) and never displayed in cleartext on the public-facing kiosk screen.
+    - Loads station profile: location type (`Bed`, `Ward`, `Gate`, `StaffEntrance`), device type, action type (`AttendancePunch`, `BedCleaned`, `SecurityPass`, `Generic`), debounce seconds, and dirty beds list.
+  - **Focused Hardware Scanner Capture (`rule:141cb8255f`):**
+    - High-speed USB barcode scanner capture keeps an invisible input automatically focused, receiving code digits and Enter keystrokes with zero staff login or keyboard use.
+    - Accessible on-screen fallback input for manual typing and simulator buttons for testing.
+  - **Dual-Scan Bed Sanitization Workflow (`rule:b2f4ebb077`):**
+    - When `needs_bed_code: true`, collects both the bed QR sticker (`HMS-BED-…`) and staff badge in either order.
+    - 60-second visual countdown timer; auto-expires if second scan is missing.
+    - Combines both scans into `POST /badge-stations/scans`, instantaneously unlocking dirty beds into Available state.
+  - **Instant Visual Outcome & Audio Synthesizer (`rule:2554916922`):**
+    - High-contrast full-screen outcome flash: big green for success (`AttendanceIn`, `AttendanceOut`, `BedCleaned`, `SecurityPass`); amber for duplicate scans; prominent red for rejections (`UnknownBadge`, `InactiveBadge`, `Rejected`).
+    - Synthesizes clear audio tones (ascending chime for success, low buzz for error) via Web Audio API.
+    - 3-second visual countdown ring; automatically resets to ready state.
+  - **Resilient Offline Buffering & Idempotency (`rule:438ca845ec`, `POST /badge-stations/scans`):**
+    - When offline or server unreachable, buffers scans with unique per-station `gateway_event_id` in localStorage.
+    - Offline queue counter and drawer with "Sync Now" button.
+    - Retries are completely idempotent.
+  - **Debounce Enforcement:**
+    - Suppresses duplicate scans of the same card within `debounce_seconds`.
+- **Contracts**: `contracts/badge_station_kiosk.json` (2 endpoints, 5 rules, 17 rubric items). Generated client: `src/generated/badge_station_kiosk.ts`.
+- **Domain Policies & Rules (`src/badge-station-kiosk-policy.ts`)**:
+  - `validateStationSetup`, `maskStationKey`, `generateGatewayEventId`, `isBedCode`, `processDualScanInput`, `createInitialDualScanState`, `checkDebounce`, `formatScanOutcome`, `enqueueOfflineScan`, `dequeueOfflineScan`, `playOutcomeAudio`, and `BADGE_STATION_ERROR_MESSAGES`.
+- **UI Architecture (`src/screens/BadgeStationKiosk.tsx`)**:
+  - High-contrast dark kiosk theme, online/offline status indicator, dual-scan progress cards, on-screen simulator input, dirty beds quick action drawer, operator setup modal, and offline queue drawer.
+  - Wired into `src/App.tsx`, `scripts/check-help.mjs`, `src/foundation-catalogue.json` (2 tasks), `src/foundation-task-map.json` (2 controls), and `src/foundation-help.ts` (19 interactive controls mapped with bilingual titles and guides).
+  - Authored comprehensive handbook entry and 5 role FAQs in `src/help.ts`; verified bundled screenshots in `public/handbook/badge_station_kiosk-en.png` and `badge_station_kiosk-ur.png`.
+- **Verification**:
+  - Automated unit tests: `tests/badge-station-kiosk.test.mjs` passed (8/8 tests).
+  - Help check: `node scripts/check-help.mjs` passed (156 screens, 4,086 controls, 3,038 groups, 69 FAQ seeds, 30 workspace guides).
+  - Full help coverage test: `node --test tests/help-coverage.test.mjs` passed (28/28 tests across 156 screens).
+  - Full test suite: `npm test` passed (836/836 tests across all 19 test suites).
+  - TypeScript compiler: `npx.cmd tsc --noEmit` passed with 0 errors.
+  - Production build: `npm.cmd run build` succeeded (`dist/assets/index-Dv42CrDq.js`).
+- **Proposal**:
+  - Proposal ID: **310** (status: `pending` on `/docs -> My progress`, build `index-Dv42CrDq.js`, 17 rubric items claimed, `q:fresh_data` left pending human review).
 
 ---
 

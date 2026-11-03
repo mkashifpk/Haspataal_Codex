@@ -227,7 +227,7 @@ function apiPath(p) {
 function isCountedLabLabel(method, path) {
   return method === "GET" && /^\/lab\/samples\/[1-9]\d*\/label(?:\?|$)/.test(path);
 }
-async function raw(method, p, body, workspace, key, binary = false) {
+async function raw(method, p, body, workspace, key, binary = false, customHeaders = {}) {
   if (!server?.current) throw new Error("Connect to the hospital server first");
   const originalServer = server;
   const originalUrl = server.current;
@@ -238,6 +238,7 @@ async function raw(method, p, body, workspace, key, binary = false) {
       body,
       headers: {
         ...headers(workspace),
+        ...(customHeaders || {}),
         ...(key ? { "Idempotency-Key": key } : {}),
       },
       binary,
@@ -343,7 +344,7 @@ async function refresh() {
 function matchOperation(method, p) {
   return findOperation(operations, method, p);
 }
-async function api(method, p, body, workspace, key, retried = false) {
+async function api(method, p, body, workspace, key, retried = false, customHeaders = {}) {
   if (
     method === "POST" &&
     p === "/establishment/changes" &&
@@ -353,7 +354,7 @@ async function api(method, p, body, workspace, key, retried = false) {
   const op = matchOperation(method, p);
   if (!op && !["/health", "/health/live"].includes(p))
     throw new Error("Endpoint is outside the foundation contract");
-  if (auth?.recovery && op?.access.authentication !== "public")
+  if (auth?.recovery && op?.access.authentication !== "public" && op?.access.authentication !== "station_key")
     throw new Error(auth.recovery);
   if (auth && !auth.recovery && Date.now() > auth.expires - 60000)
     await refresh();
@@ -381,7 +382,7 @@ async function api(method, p, body, workspace, key, retried = false) {
       },
     };
   const requestSession = auth;
-  const r = await raw(method, p, body, workspace, key);
+  const r = await raw(method, p, body, workspace, key, false, customHeaders);
   if (requestSession && requestSession !== auth)
     return {
       ok: false,
@@ -393,7 +394,7 @@ async function api(method, p, body, workspace, key, retried = false) {
     };
   if (!retried && !isCountedLabLabel(method, p) && r.status === 401 && r.body?.error?.code === "TOKEN_EXPIRED") {
     await refresh();
-    if(mayReplayAfterRefresh(r))return api(method, p, body, workspace, key, true);
+    if(mayReplayAfterRefresh(r))return api(method, p, body, workspace, key, true, customHeaders);
     const refusal=errorResult(r);
     refusal.error.details={...refusal.error.details,session_refreshed:true};
     return refusal;
@@ -885,6 +886,8 @@ ipcMain.handle("terminal", async (event, action, args = {}) => {
         args.body,
         windows.get(win.id),
         args.key,
+        false,
+        args.headers,
       );
       return response;
     }

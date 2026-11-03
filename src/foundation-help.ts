@@ -20,6 +20,7 @@ export const phase1Screens = [
 const approvalScreens = ["approval_queue", "charity_approvals"];
 // Coverage grows screen by screen; Phase 1 acceptance remains separate.
 export const deliveredHelpScreens = [
+  "badge_station_kiosk",
   "ops_console",
   "payroll",
   "self_service",
@@ -166,6 +167,25 @@ const g = (
 // IDs are also attached to the actual controls. The build rejects missing
 // mappings and empty translations instead of treating a page as coverage.
 export const controlGuides: Record<string, ControlGuide> = {
+  "badge_station_kiosk.online_indicator": g(["badge_station_kiosk"], ["Online status indicator", "آن لائن اسٹیٹس انڈیکیٹر"], ["Displays live connectivity to the hospital server.", "ہسپتال سرور کے ساتھ لائیو رابطے کی کیفیت دکھاتا ہے۔"]),
+  "badge_station_kiosk.offline_queue_button": g(["badge_station_kiosk"], ["Offline queue counter", "آف لائن کیو بٹن"], ["Opens drawer of scans buffered locally while offline for idempotent sync (Rule 438ca845ec).", "آف لائن محفوظ شدہ اسکینز کی فہرست کھولتا ہے (قاعدہ 438ca845ec)۔"]),
+  "badge_station_kiosk.lang_toggle": g(["badge_station_kiosk"], ["Language toggle", "زبان کی تبدیلی"], ["Switches kiosk between English and Urdu.", "کیوسک کی زبان اردو اور انگریزی کے درمیان تبدیل کرتا ہے۔"]),
+  "badge_station_kiosk.f1_help_button": g(["badge_station_kiosk"], ["Help button", "مدد کا بٹن"], ["Opens kiosk operator job aid and F1 help.", "کیوسک آپریٹر کی مدد کا صفحہ کھولتا ہے۔"]),
+  "badge_station_kiosk.setup_button": g(["badge_station_kiosk"], ["Operator setup button", "آپریٹر ترتیبات بٹن"], ["Opens station configuration modal (Station ID and X-Station-Key, Rule f98f89a7b6).", "اسٹیشن تشکیل ونڈو کھولتا ہے (قاعدہ f98f89a7b6)۔"]),
+  "badge_station_kiosk.scanner_input_hardware": g(["badge_station_kiosk"], ["Hardware scanner receiver", "ہارڈویئر اسکینر وصول کنندہ"], ["Invisible input kept automatically focused for USB barcode scanners (Rule 141cb8255f).", "یو ایس بی اسکینر کے خودکار اندراج کے لیے فوکس رہنے والا غیر مرئی خانہ (قاعدہ 141cb8255f)۔"]),
+  "badge_station_kiosk.manual_code_input": g(["badge_station_kiosk"], ["Manual code input", "دستی کوڈ کا خانہ"], ["Accessible fallback input for typing badge or bed code manually.", "بیج یا بیڈ کوڈ ہاتھ سے درج کرنے کا متبادل خانہ۔"]),
+  "badge_station_kiosk.scan_submit_button": g(["badge_station_kiosk"], ["Submit scan button", "اسکین ارسال بٹن"], ["Posts scanned code to /badge-stations/scans.", "اسکین شدہ کوڈ کو سرور پر بھیجتا ہے۔"]),
+  "badge_station_kiosk.demo_badge_1": g(["badge_station_kiosk"], ["Demo badge EMP-1001", "ڈیمو بیج EMP-1001"], ["Quick test button to simulate scanning employee badge EMP-1001.", "ملازم بیج EMP-1001 کا نقلی اسکین۔"]),
+  "badge_station_kiosk.demo_badge_2": g(["badge_station_kiosk"], ["Demo badge CARD-SWEEP-1", "ڈیمو بیج CARD-SWEEP-1"], ["Quick test button to simulate scanning security/staff card CARD-SWEEP-1.", "سیکیورٹی بیج CARD-SWEEP-1 کا نقلی اسکین۔"]),
+  "badge_station_kiosk.demo_bed_1": g(["badge_station_kiosk"], ["Demo bed HMS-BED-1", "ڈیمو بیڈ HMS-BED-1"], ["Quick test button to simulate scanning bed sticker HMS-BED-1 (Rule b2f4ebb077).", "بیڈ اسٹیکر HMS-BED-1 کا نقلی اسکین (قاعدہ b2f4ebb077)۔"]),
+  "badge_station_kiosk.tap_bed_button": g(["badge_station_kiosk"], ["Tap bed to scan", "بیڈ منتخب کریں"], ["Tap dirty ward bed to register sanitization scan.", "صفائی کے منتظر بیڈ کو فوری اسکین کے لیے منتخب کریں۔"]),
+  "badge_station_kiosk.setup_station_id_input": g(["badge_station_kiosk"], ["Setup station ID input", "اسٹیشن آئی ڈی خانہ"], ["Input for station identifier (e.g. W2-KIOSK).", "اسٹیشن کی شناخت درج کرنے کا خانہ۔"]),
+  "badge_station_kiosk.setup_station_key_input": g(["badge_station_kiosk"], ["Setup station key input", "اسٹیشن خفیہ کلید خانہ"], ["Masked input for X-Station-Key (never shown on kiosk screen, Rule f98f89a7b6).", "اسٹیشن کی خفیہ کلید کا محفوظ خانہ (قاعدہ f98f89a7b6)۔"]),
+  "badge_station_kiosk.setup_cancel_button": g(["badge_station_kiosk"], ["Cancel setup button", "ترتیبات منسوخ بٹن"], ["Dismisses setup modal without saving.", "ترتیبات ونڈو بغیر محفوظ کیے بند کرتا ہے۔"]),
+  "badge_station_kiosk.setup_save_button": g(["badge_station_kiosk"], ["Save setup button", "ترتیبات محفوظ بٹن"], ["Saves station config and loads profile via GET /badge-stations/me.", "ترتیبات محفوظ کر کے سرور سے پروفائل لوڈ کرتا ہے۔"]),
+  "badge_station_kiosk.queue_clear_button": g(["badge_station_kiosk"], ["Clear offline queue", "کیو صاف کریں بٹن"], ["Clears buffered offline scans.", "آف لائن محفوظ شدہ اسکینز کو صاف کرتا ہے۔"]),
+  "badge_station_kiosk.queue_close_button": g(["badge_station_kiosk"], ["Close queue drawer", "کیو بند کریں بٹن"], ["Dismisses offline scans queue drawer.", "آف لائن اسکینز کیو ڈراور کو بند کرتا ہے۔"]),
+  "badge_station_kiosk.queue_sync_button": g(["badge_station_kiosk"], ["Sync offline queue", "ہم آہنگ کریں بٹن"], ["Flushes queued offline scans to server using original gateway_event_id (Rule 438ca845ec).", "آف لائن اسکینز کو اصل ایونٹ آئی ڈی کے ساتھ سرور پر بھیجتا ہے (قاعدہ 438ca845ec)۔"]),
   "ops_console.btn_assign_wo": g(["ops_console"], ["Assign work order", "ورک آرڈر تفویض کریں"], ["Opens modal to assign maintenance work to an internal employee or external contractor.", "کام کو اندرونی ملازم یا بیرونی ٹھیکیدار کے سپرد کرنے کا ڈائیلاگ کھولتا ہے۔"]),
   "ops_console.btn_back_home": g(["ops_console"], ["Return home", "ہوم پر واپس جائیں"], ["Navigates back to main operations home dashboard.", "مرکزی آپریشنز ڈیش بورڈ پر واپس جاتا ہے۔"]),
   "ops_console.btn_cancel_wo": g(["ops_console"], ["Cancel work order", "ورک آرڈر منسوخ کریں"], ["Opens cancellation dialog to cancel open work order with mandatory reason.", "لازمی وجہ کے ساتھ ورک آرڈر منسوخ کرنے کی ونڈو کھولتا ہے۔"]),

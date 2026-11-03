@@ -56,12 +56,20 @@ export async function call<T = any>(
   }
   return r.data as T;
 }
+let stationKey: string | null = null;
+export function setStationKey(key: string | null) {
+  stationKey = key;
+}
+export function getStationKey(): string | null {
+  return stationKey;
+}
+
 const pending = new Map<string, string>();
 export async function api<T = any>(
   method: string,
   path: string,
   body?: unknown,
-  options?: { idempotent?: boolean; key?: string; reconcilePath?: string },
+  options?: { idempotent?: boolean; key?: string; reconcilePath?: string; headers?: Record<string, string> },
 ): Promise<T> {
   if (body instanceof FormData) {
     const parts = [];
@@ -87,7 +95,17 @@ export async function api<T = any>(
     pending.set(signature, key);
   }
   try {
-    const data = await call<T>("api", { method, path, body, key });
+    const headers: Record<string, string> = {
+      ...(stationKey && path.startsWith("/badge-stations") ? { "X-Station-Key": stationKey } : {}),
+      ...(options?.headers || {}),
+    };
+    const data = await call<T>("api", {
+      method,
+      path,
+      body,
+      key,
+      headers: Object.keys(headers).length ? headers : undefined,
+    });
     pending.delete(signature);
     return data;
   } catch (e) {

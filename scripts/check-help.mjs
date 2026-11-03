@@ -300,6 +300,7 @@ export function checkHelp({
       "SelfService",
       "Payroll",
       "OpsConsole",
+      "BadgeStationKiosk",
     ].map((n) => `src/screens/${n}.tsx`),
   ];
   const used = new Set(),

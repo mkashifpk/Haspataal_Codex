@@ -10,6 +10,73 @@ export type HelpPage = {
   faqUr: [string, string][];
 };
 export const help: Record<string, HelpPage> = {
+  badge_station_kiosk: {
+    title: "Badge station kiosk",
+    titleUr: "بیج اسٹیشن کیوسک",
+    purpose: "Full-screen unattended kiosk terminal for PCs and tablets equipped with barcode or RFID scanners. Staff present their badge to punch attendance, verify security access, or confirm terminal bed cleaning without logging in or using a keyboard. (1) One-time setup: Configure once with the station id and its key (X-Station-Key); never show the key on screen (Rule rule:f98f89a7b6, GET /badge-stations/me); (2) Automatic scanner capture: A USB scanner types the code and Enter: keep an invisible input focused; or decode the camera stream (Rule rule:141cb8255f); (3) Dual scan workflow: Ward bed-cleaning stations (needs_bed_code) collect two scans (bed sticker HMS-BED-… and badge) within 60 s, then post them together (Rule rule:b2f4ebb077); (4) Big visual & audio result: Big green / red result with the outcome in words and a synthesized sound; ready for the next person after 3 s (Rule rule:2554916922); and (5) Resilient offline buffering: Queue scans with a gateway_event_id while the server is unreachable and resend them idempotently upon reconnect (Rule rule:438ca845ec, POST /badge-stations/scans).",
+    purposeUr: "بارکوڈ یا RFID اسکینر سے لیس پی سی اور ٹیبلٹ کے لیے فل اسکرین کیوسک ٹرمینل۔ عملہ لاگ اِن کیے بغیر یا کی بورڈ استعمال کیے بغیر صرف اپنا بیج دکھا کر حاضری، سیکیورٹی داخلہ یا فارغ شدہ بیڈ کی صفائی کی تصدیق کر سکتا ہے۔ (1) اسٹیشن تشکیل: اسٹیشن آئی ڈی اور خفیہ کلید (X-Station-Key) کے ساتھ ایک بار تشکیل دیں، کلید کو اسکرین پر کبھی ظاہر نہ کریں (قاعدہ rule:f98f89a7b6)؛ (2) خودکار اسکینر فوکس: یو ایس بی اسکینر خودکار طور پر کوڈ ٹائپ کر کے Enter دباتا ہے، غیر مرئی ان پٹ کو فوکس رکھیں (قاعدہ rule:141cb8255f)؛ (3) دوہرا اسکین طریقہ کار: وارڈ کے بیڈ کلیننگ اسٹیشنز پر بیڈ اسٹیکر (HMS-BED-…) اور بیج دونوں کو 60 سیکنڈ کے اندر جمع کر کے سرور پر بھیجا جاتا ہے (قاعدہ rule:b2f4ebb077)؛ (4) بڑا بصری اور صوتی نتیجہ: بڑے سبز یا سرخ بینر میں نتیجہ اور آواز پیدا کی جاتی ہے، اور 3 سیکنڈ بعد اگلا شخص اسکین کر سکتا ہے (قاعدہ rule:2554916922)؛ اور (5) آف لائن تحفظ: رابطہ منقطع ہونے پر اسکینز کو منفرد ایونٹ آئی ڈی کے ساتھ مقامی طور پر محفوظ کیا جاتا ہے اور سرور بحال ہونے پر خودکار ارسال کیا جاتا ہے (قاعدہ rule:438ca845ec)۔",
+    steps: [
+      "Configure Station Once (Operator): Click Setup (⚙️), enter the Station ID (e.g. W2-KIOSK, GATE-1) and Station Secret Key (X-Station-Key). The key is stored securely and masked per Rule rule:f98f89a7b6. The kiosk automatically loads the station profile (GET /badge-stations/me).",
+      "Present Badge to Scanner: Hold employee barcode badge or RFID card in front of the scanner. The focused scanner input captures the code and submits Enter immediately without requiring staff login (Rule rule:141cb8255f).",
+      "Dual-Scan Bed Sanitization (if required): For ward bed cleaning kiosks (needs_bed_code: true), scan either the bed QR sticker (HMS-BED-…) or staff badge first. A 60-second visual countdown opens. Scan the second code within 60 seconds; both are combined and submitted together (Rule rule:b2f4ebb077).",
+      "Review Instant Flash Outcome: The kiosk displays a high-contrast full-screen outcome banner (Green for AttendanceIn, AttendanceOut, BedCleaned, SecurityPass; Red for UnknownBadge, InactiveBadge, Rejected) with synthesized chime/buzz audio feedback (Rule rule:2554916922).",
+      "Automatic 3-Second Reset: A 3-second countdown ring counts down, and the kiosk automatically returns to the ready state for the next staff member.",
+      "Offline Buffering & Idempotent Resync: If hospital network disconnects, scans are safely buffered in the offline queue with unique gateway_event_id. Scans can be synced manually or will resend automatically upon reconnection without duplicate entries (Rule rule:438ca845ec)."
+    ],
+    stepsUr: [
+      "اسٹیشن کی تشکیل (آپریٹر): ترتیبات (⚙️) پر کلک کریں، اسٹیشن آئی ڈی اور خفیہ کلید درج کریں۔ کلید کو قاعدہ rule:f98f89a7b6 کے تحت محفوظ اور چھپا کر رکھا جاتا ہے اور پروفائل لوڈ ہو جاتی ہے۔",
+      "بیج اسکینر کے سامنے لائیں: ملازم اپنا بیج یا کارڈ اسکینر کے سامنے لاتا ہے۔ اسکینر خودکار طور پر کوڈ وصول کر کے بغیر لاگ اِن فوراً اندراج کر دیتا ہے (قاعدہ rule:141cb8255f)۔",
+      "بیڈ صفائی کا دوہرا اسکین: جن اسٹیشنز پر بیڈ کوڈ لازمی ہو، وہاں بیڈ کا کیو آر اسٹیکر یا عملے کا بیج پہلے اسکین کریں۔ 60 سیکنڈ کا ٹائمر شروع ہو جائے گا۔ دوسرا کوڈ 60 سیکنڈ کے اندر اسکین کریں تا کہ دونوں ساتھ جمع ہوں (قاعدہ rule:b2f4ebb077)۔",
+      "فوری نتیجہ اور آواز: کیوسک بڑی اسکرین پر فوری نتیجہ دکھاتا ہے (کامیابی پر سبز اور مسترد ہونے پر سرخ) اور آواز کے ساتھ تصدیق کرتا ہے (قاعدہ rule:2554916922)۔",
+      "3 سیکنڈ بعد خودکار واپسی: تین سیکنڈ کا الٹا گنتی کا ٹائمر مکمل ہونے پر اسکرین خودکار طور پر اگلے شخص کے اسکین کے لیے تیار ہو جاتی ہے۔",
+      "آف لائن کیو اور خودکار ارسال: انٹرنیٹ بند ہونے پر تمام اسکینز منفرد ایونٹ آئی ڈی کے ساتھ محفوظ رہتے ہیں اور سرور آن لائن ہونے پر بغیر کسی نقل کے خودکار ارسال ہو جاتے ہیں (قاعدہ rule:438ca845ec)۔"
+    ],
+    faq: [
+      [
+        "Why does the kiosk terminal never display the X-Station-Key under Rule rule:f98f89a7b6?",
+        "To protect hospital facility security and prevent spoofing of physical access checkpoints, the station secret key (X-Station-Key) is programmed once by authorized IT personnel and never revealed in cleartext on the public-facing kiosk display. The terminal only presents a masked indicator (••••••••) to confirm authentication credentials are securely installed."
+      ],
+      [
+        "How does the two-scan bed cleaning workflow operate under Rule rule:b2f4ebb077?",
+        "When a ward kiosk is configured with needs_bed_code: true, recording terminal bed cleaning requires proving physical presence at the bed and identifying the responsible staff member. Housekeeping scans the bed QR sticker (HMS-BED-…) and their staff badge in either order. The kiosk holds the first scan for up to 60 seconds; once the second code is scanned, both are bundled into POST /badge-stations/scans, instantaneously transitioning the bed from Dirty to Available."
+      ],
+      [
+        "What happens if staff badge scans occur while the hospital network is down under Rule rule:438ca845ec?",
+        "The kiosk buffers every scan locally in its encrypted offline queue, assigning each a unique gateway_event_id and capturing the exact timestamp (scanned_at). When network connectivity is restored, the queue flushes automatically. Because the backend recognizes gateway_event_id, repeat attempts are completely idempotent and cannot cause duplicate attendance punches or double cleaning records."
+      ],
+      [
+        "Why is an invisible focused input used for USB barcode scanners under Rule rule:141cb8255f?",
+        "Standard industrial USB barcode and RFID wand readers emulate a high-speed hardware keyboard that types the scanned digits followed by an Enter keystroke. By keeping an invisible input focused continuously and intercepting the Enter event, staff can walk up and scan their card in under one second without touching a mouse, clicking any buttons, or needing a physical keyboard."
+      ],
+      [
+        "What visual and audio indications accompany scan outcomes under Rule rule:2554916922?",
+        "Every scan triggers an immediate full-screen outcome flash: big high-contrast green with an ascending audio chime for successful attendance, bed cleaning, or gate pass; amber for duplicate scans; and prominent red with a low buzz tone for unknown, inactive, or rejected badges. After exactly 3 seconds, the flash automatically dismisses so the kiosk is ready for the next person in line."
+      ]
+    ],
+    faqUr: [
+      [
+        "قاعدہ rule:f98f89a7b6 کے تحت کیوسک اسکرین پر X-Station-Key کبھی کیوں ظاہر نہیں کی جاتی؟",
+        "ہسپتال کی سیکیورٹی کے تحفظ اور چیک پوائنٹس پر دھوکہ دہی کی روک تھام کے لیے، اسٹیشن کی خفیہ کلید کو آئی ٹی کا مجاز عملہ صرف ایک بار تشکیل دیتا ہے اور اسے عوامی کیوسک اسکرین پر کبھی ظاہر نہیں کیا جاتا۔ اسکرین پر صرف ماسک شدہ نشان (••••••••) دکھایا جاتا ہے تا کہ خفیہ کوڈ محفوظ رہے۔"
+      ],
+      [
+        "قاعدہ rule:b2f4ebb077 کے تحت بیڈ کی صفائی کا دوہرا اسکین کیسے کام کرتا ہے؟",
+        "جب وارڈ کیوسک پر needs_bed_code فعال ہو تو بیڈ کی صفائی کی تصدیق کے لیے بیڈ پر عملے کی جسمانی موجودگی اور شناخت دونوں ثابت کرنا لازمی ہے۔ صفائی کا عملہ بیڈ کے کیو آر اسٹیکر اور اپنے بیج کو 60 سیکنڈ کے اندر اسکین کرتا ہے۔ دونوں کوڈز کے موصول ہوتے ہی بیڈ فوری طور پر صاف اور دستیاب ہو جاتا ہے۔"
+      ],
+      [
+        "اگر انٹرنیٹ یا سرور بند ہو تو قاعدہ rule:438ca845ec کے تحت کیا ہوتا ہے؟",
+        "کیوسک تمام اسکینز کو منفرد gateway_event_id اور وقت کے ساتھ مقامی طور پر محفوظ کر لیتا ہے۔ سرور کے ساتھ رابطہ بحال ہوتے ہی یہ تمام اسکینز بغیر کسی نقل یا ڈپلیکیٹ حاضری کے سرور پر خودکار بھیج دیے جاتے ہیں۔"
+      ],
+      [
+        "قاعدہ rule:141cb8255f کے تحت یو ایس بی اسکینر کے لیے فوکسڈ ان پٹ کیوں ضروری ہے؟",
+        "صنعتی بارکوڈ اور آریف آئی ڈی اسکینرز ہارڈویئر کی بورڈ کی طرح کام کرتے ہیں جو کوڈ ٹائپ کر کے Enter دباتے ہیں۔ غیر مرئی ان پٹ کو مسلسل فوکس رکھنے سے عملہ بغیر ماؤس یا کی بورڈ کو ہاتھ لگائے ایک سیکنڈ میں اپنا کارڈ اسکین کر سکتا ہے۔"
+      ],
+      [
+        "قاعدہ rule:2554916922 کے تحت اسکین کے نتائج کا بصری اور صوتی طریقہ کار کیا ہے؟",
+        "ہر اسکین پر فوری فل اسکرین فلیش نظر آتا ہے: کامیاب حاضری، بیڈ صفائی یا گیٹ پاس پر بڑا سبز بینر اور خوشگوار ٹون؛ ڈپلیکیٹ پر زرد؛ اور نامعلوم یا مسترد بیج پر سرخ بینر اور بپ کی آواز آتی ہے۔ ٹھیک 3 سیکنڈ بعد کیوسک خودکار طور پر اگلے ملازم کے لیے تیار ہو جاتا ہے۔"
+      ]
+    ]
+  },
+
   ops_console: {
     title: "Facility operations (3 panes)",
     titleUr: "سہولیات اور دیکھ بھال کا آپریشنز کنسول (3 پین)",

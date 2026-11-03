@@ -56,7 +56,7 @@ function validate(value, schema, schemas, at = "$") {
 }
 function permissionAllows(op, user) {
   const access = op?.access;
-  if (access?.authentication === "public") return true;
+  if (access?.authentication === "public" || access?.authentication === "station_key") return true;
   if (!user) return false;
   const p = access?.permissions || [];
   return access?.permissions_mode === "any"
