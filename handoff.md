@@ -1,7 +1,7 @@
 # Haspataal checkpoint
 Last updated: 03 November 2026, Antigravity (Codex pair), Asia/Karachi.
 
-## Active request: Phase 8 Screen 154 `self_service` (Staff self-service portal)
+## Active request: Phase 8 Screen 155 `payroll` (Staff payroll processing)
 Executing the Haspataal HMS Roadmap in dependency order along with all tests and MCP progress reporting:
 - **Phase 7 ("Finance, billing and back offices")**: 100% COMPLETE (Screens 133–142, Proposals 286–295).
 - **Phase 8 ("People, facility and IT")**:
@@ -16,9 +16,56 @@ Executing the Haspataal HMS Roadmap in dependency order along with all tests and
   - Screen 151: **`holiday_calendar`** ("Holiday calendar", Position 151, 44 points, workspace `hr`) — **COMPLETED** (Proposal **304** awaiting human review on `/docs -> My progress`).
   - Screen 152: **`holiday_calendar_admin`** ("Holiday calendar admin", Position 152, 44 points, workspace `owner_dashboard` / `ops_admin`) — **COMPLETED** (Proposal **305** awaiting human review on `/docs -> My progress`).
   - Screen 153: **`leave_approvals`** ("Leave requests & manager approvals", Position 153, 40 points, workspace `head_nurse` / `hr`) — **COMPLETED** (Proposal **306** awaiting human review on `/docs -> My progress`).
-  - Screen 154: **`self_service`** ("Staff self-service portal: timecards, leave requests, duty rosters & profile", Position 154, 84 points, workspace `staff`) — **NEXT**.
-    - Scope: Personal staff portal for checking personal attendance punches, submitting leave applications, reviewing upcoming scheduled shifts, and profile consultation.
-    - Next Concrete Steps: Retrieve `get_screen_bundle("self_service")`, save contract, generate typescript client, and begin implementation.
+  - Screen 154: **`self_service`** ("Staff self-service portal: timecards, leave requests, duty rosters & profile", Position 154, 84 points, workspace `self_service`) — **COMPLETED** (Proposal **307** awaiting human review on `/docs -> My progress`).
+  - Screen 155: **`payroll`** ("Staff payroll processing, salary slips, deductions & tax statements", Position 155, 54 points, workspace `hr` / `finance`) — **IN PROGRESS**.
+    - Scope: Monthly payroll runs, attendance integration, allowance/deduction line items, payslip generation, and tax statements.
+    - Contracts & files: Inspect `get_screen_bundle("payroll")`, retrieve endpoints, generate TypeScript client, create domain policy, build UI, register F1/handbook help, add unit tests, run verification, build, and propose progress.
+
+---
+
+### Completed Screen 154 (`self_service`) Checkpoint
+- **Workflow & Standards**: Complete Staff Self-Service Portal (`self_service`, Workspace `self_service`, Position 154, 84 points):
+  - **Duty Roster & Statutory Paid Rest Days (`rule:907c770e92`, `GET /self/roster`):**
+    - Personal schedule queryable over active date horizon with start/end time, shift badge, department, and room/ward assignments.
+    - Automatically displays non-duty days as statutory paid rest days per `rule:907c770e92`.
+  - **"Ask a Colleague" Shift Cover & Swap Requests (`rule:9274755ac9`, `GET /self/roster/swap-options`, `POST /self/roster/swaps`):**
+    - Available on unstarted future duties; retrieves list of free colleagues of the same category with department matching priority.
+    - Cover mode: colleague works the requester's shift.
+    - Swap mode: mutual exchange where colleague works shift in exchange for their return duty marked `you_can_work_it: true`.
+    - Operational reason is strictly mandatory.
+  - **Colleague Response & Roster Governance Workflow (`rule:adfadf7120`, `POST /self/roster/swaps/{swap_id}/accept`, `/decline`, `/cancel`):**
+    - Colleagues can Accept or Decline swap requests directed to them.
+    - Requester may cancel pending unapproved requests.
+    - Unapproved requests expire automatically once duty starts. Roster modifications commit only upon managerial approval.
+  - **Leave Management & Realtime Balance Ledger (`POST /self/leave-requests`, `GET /self/leave-requests`, `POST .../cancel`, `GET /self/leave-balances`):**
+    - Submit leave requests with reason and dates; live history tracking with cancel action for pending submissions.
+    - Statutory leave balances ledger detailing Annual, Casual, Sick, Maternity, and Unpaid allowances.
+  - **Employee Profile & Monthly Payslip Statement (`GET /self/profile`, `GET /self/payslips/{payroll_item_id}`):**
+    - View employee credentials, designation, supervisor hierarchy, and qualifications.
+    - Detailed monthly payslip statement showing itemized earnings, statutory tax/deductions, and net pay.
+  - **Gazetted Holidays & Facility Work Order Issue Reporting (`GET /holidays`, `POST /ops/work-orders`):**
+    - Official public holidays directory grouped by month.
+    - Maintenance work order reporting with priority selection (Low, Medium, High, Critical) and location tracking.
+  - **Realtime Events & Capability Gating:**
+    - `ev:notification.created`: Live refresh of alerts and self-service inbox.
+    - `ev:roster.swap.updated`: Live refresh of shift swaps queue.
+    - Resolves `full`, `records`, and `hidden` capability views.
+- **Contracts**: `contracts/self_service.json` (15 endpoints, 3 rules, 2 events, 31 rubric items). Generated client: `src/generated/self_service.ts`.
+- **Domain Policies & Rules (`src/self-service-policy.ts`)**:
+  - `getSelfServiceCapabilityView`, `validateLeaveRequestForm`, `validateSwapRequestForm`, `validateWorkOrderForm`, `formatShiftSwapKindBadge`, `formatShiftSwapStatusBadge`, and `SELF_SERVICE_ERROR_MESSAGES`.
+- **UI Architecture (`src/screens/SelfService.tsx`)**:
+  - 4 tabs: Duties & Rest Days (roster cards, swap modals, swaps queue), Leave & Balances (balance ledger cards, request leave modal, history table), Payslips & Profile (credentials, payslip statement), Holidays & Report Issue (gazetted holidays list, ops work order modal).
+  - Wired into `src/App.tsx`, `scripts/check-help.mjs`, `src/foundation-catalogue.json` (15 tasks), `src/foundation-task-map.json` (15 controls), and `src/foundation-help.ts` (43 interactive controls mapped with bilingual titles and guides).
+  - Authored comprehensive handbook entry and 5 role FAQs in `src/help.ts`; verified bundled screenshots in `public/handbook/self_service-en.png` and `self_service-ur.png`.
+- **Verification**:
+  - Automated unit tests: `tests/self-service.test.mjs` passed (8/8 tests).
+  - Help check: `node scripts/check-help.mjs` passed (153 screens, 3,971 controls, 2,927 groups, 69 FAQ seeds, 30 workspace guides).
+  - Full help coverage test: `node --test tests/help-coverage.test.mjs` passed (28/28 tests across 153 screens).
+  - Full test suite: `npm test` passed (811/811 tests across all 19 test suites).
+  - TypeScript compiler: `npx.cmd tsc --noEmit` passed with 0 errors.
+  - Production build: `npm.cmd run build` succeeded (`dist/assets/index-B1iyS13i.js`).
+- **Proposal**:
+  - Proposal ID: **307** (status: `pending` on `/docs -> My progress`, build `index-B1iyS13i.js`, 30 rubric items claimed, `q:fresh_data` left pending human review).
 
 ---
 

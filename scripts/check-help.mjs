@@ -297,6 +297,7 @@ export function checkHelp({
       "HolidayCalendar",
       "HolidayCalendarAdmin",
       "LeaveApprovals",
+      "SelfService",
     ].map((n) => `src/screens/${n}.tsx`),
   ];
   const used = new Set(),

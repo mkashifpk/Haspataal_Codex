@@ -1,0 +1,3719 @@
+{
+  "screen_id": "self_service",
+  "contract_fingerprint": "f253171154eef6044fa2",
+  "knowledge_revision": "bbf3ad4e2e48dc00",
+  "delivery_gate": {
+    "required": true,
+    "status": "required",
+    "progress_reporting": {
+      "required": true,
+      "submit": "propose_progress",
+      "verify": "progress_proposals",
+      "when": "After each implemented screen, before switching workspace or handoff. Propose only tested items; identify the build and limitations. Do not duplicate unchanged pending/accepted work. Human approval still required."
+    },
+    "rule": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.",
+    "compulsory": [
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "what": "F1 opens the correct permitted help, including from fields/dialogs, preserves unsaved work and restores focus. Visible Help also works; login/locked/kiosk help exposes only public/operator guidance.",
+        "points": 2
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "what": "Every supported role task in this workspace, including shared screens and handovers, has a detailed reviewed English/Urdu FAQ. Follow get_handbook_outline; a generic FAQ or an unreviewed role journey is unfinished.",
+        "points": 3
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "what": "Ctrl++/Ctrl+=, Ctrl+- and Ctrl+0 (Command on macOS), Settings and all enabled zoom routes share one state clamped to 100-250%. Test both bounds, reset, persistence and usable English/Urdu layouts at 250%.",
+        "points": 2
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "what": "A named human follows guide 17 on this build: creates new synthetic records through the UI and verifies read, update/correction and permitted delete/cancel/deactivate paths, refusal paths and handovers. Read-only screens use fresh upstream records. Record IDs and evidence; pre-existing demo data alone is insufficient.",
+        "points": 4
+      }
+    ],
+    "zoom": {
+      "min_pct": 100,
+      "max_pct": 250,
+      "reset_pct": 100,
+      "keys": [
+        "Ctrl + or Ctrl = (zoom in)",
+        "Ctrl - (zoom out)",
+        "Ctrl 0 (reset to 100 %)",
+        "Command on macOS"
+      ],
+      "one_state": "The keys, the Settings slider and any menu, wheel or pinch zoom move ONE zoom state, clamped to 100.0-250.0 %, saved as ui_scale_pct (PUT /settings/me) and restored at login (/auth/me preferences). Electron: webContents.setZoomFactor(pct / 100)."
+    },
+    "workspace_done_when": "Every screen of the workspace has every compulsory item above, in addition to its endpoints, events and rules: F1 contextual Help, a detailed FAQ for every role of the workspace (English and Urdu), the bounded keyboard zoom and a named human's review with newly created data (get_guide('workspace-review-checklist')), signed on the portal. Missing any one, the workspace is NOT done: report it as pending, never as complete.",
+    "read": "get_ui_quality_brief(screen_id=...) or get_ui_quality_brief(workspace=...)"
+  },
+  "ui_quality": {
+    "source": "frontend-docs/guides/16-ui-quality.md",
+    "standard_revision": "7795bdfe5246755d",
+    "context": {
+      "workspace": "self_service",
+      "purpose": "My leave, balances, payslips, profile, duties and duty swaps; report an issue.",
+      "roles": [
+        "employee_self"
+      ],
+      "screens": [
+        {
+          "id": "self_service",
+          "title": "My workspace"
+        }
+      ],
+      "also_uses": [],
+      "handbook": "get_handbook_outline('self_service')",
+      "screen_id": "self_service",
+      "workflow": "§6.5",
+      "contract": "get_screen_bundle('self_service')"
+    },
+    "requirements": [
+      {
+        "id": "Q1",
+        "title": "Establish the purpose and staff context",
+        "instruction": "Before choosing a layout, state who is doing what, what starts the task, what success looks like and what could\nconfuse them. Use the screen's purpose, workspace, playbook and demo role. Distinguish a busy reception counter,\nbedside nursing, a laboratory scanner and an office review. Record the relevant input devices, interruptions,\nlanguage and display conditions. Keep the patient, visit, money or stock context clear throughout the task.\n\nWrite down why the proposed interaction fits this work. Use actual staff-task evidence and references approved by\nthe frontend lead; do not substitute an attractive generic dashboard for the job. Do not invent software screens\nfor staff whose specified interaction is a physical badge tap."
+      },
+      {
+        "id": "Q2",
+        "title": "Reuse intent through complete patterns",
+        "instruction": "Use the frontend team's approved design system and record its version and owner. Where no shared system has been\napproved, use the team's established components within the backend constraints and record the outstanding decision.\nReuse complete patterns: patient selection and identity, search and selection, a validated write and its result,\npending approval and handover, printing and recovery, corrections to finalized records. Follow the relevant\nplaybook; a template must preserve the permissions and transitions of this particular task.\n\nDocument the reason for a variation. Explore alternatives where they make a task clearer or reduce effort, then\nreview them in the whole journey. Do not introduce arbitrary colours, motion, alerts or different meanings for the\nsame control. Read the relevant standards when building or reviewing the flow; do not rely on an old chat summary."
+      },
+      {
+        "id": "Q3",
+        "title": "Complete the interaction and its recovery",
+        "instruction": "For every task show prerequisites, editable and read-only information, validation, the pending state, the confirmed\nresult and the next step. Distinguish loading, empty, unavailable, denied, stale and failed states. Explain disabled\nactions when the user needs to know how to proceed. Include keyboard and scanner interactions, focus after actions,\nconfirmation, cancellation and navigation with unsaved work.\n\nUse each endpoint's repeat rules, version checks and reconciliation instructions after an uncertain result. Never\nshow success merely because a button was pressed, queue clinical or money writes offline, or offer an unsupported\nundo. Follow the existing guides for printing, reconnects, sessions, realtime refreshes and in-memory form recovery.\nNever persist a co-signer's credentials. Distinguish server-owned rules from frontend presentation choices."
+      },
+      {
+        "id": "Q4",
+        "title": "Make the details work in the actual environment",
+        "instruction": "Review both Light and DarkHighContrast, 100-250 percent zoom, English and Urdu, right-to-left layout, mixed-direction\nidentifiers, long names and dense tables. Bundle the required Urdu font. Keep meaning available through text and\nicons, not colour alone. Verify labels, focus order, keyboard operation and readable status messages using the\nfrontend's accessibility tests and a person using the app.\n\nKeyboard zoom shortcuts are compulsory: Ctrl++ (including Ctrl+=) increases, Ctrl+- decreases, and Ctrl+0 resets\nto 100%; use Command on macOS. Clamp the application's zoom to **100% through 250%, inclusive**. Settings, keyboard,\nmenu and any enabled wheel/pinch zoom must share that bound and one zoom state. Persist `ui_scale_pct` through\n`PUT /settings/me` and restore it on login; do not layer CSS scaling over an independent browser zoom. Touch clients\nmust expose equivalent visible controls and handle shortcuts when a hardware keyboard is attached. Test both bounds,\nreset, intermediate values, reopened windows and dense forms/tables without clipped controls or lost data.\n\nUse the actual terminal workflow and supported devices: a scanner must not type into the wrong field, a printer\nproblem must leave the task understandable, and a realtime update must not silently change the selected patient.\nReview consistency across screens and helpful details such as an explicit selected date, shift or patient. Give\nthe product character through clarity, wording and care for staff, within the approved visual system. Any new\nperformance target or clinical presentation rule needs its designated owner's decision."
+      },
+      {
+        "id": "Q5",
+        "title": "Teach the delivered UI as part of building it",
+        "instruction": "Create or revise the screen handbook and the workspace guide with its role-specific FAQ in the same change as\nthe UI. Follow `get_end_user_handbook_brief` and `get_handbook_outline(workspace)` and the\n[end-user handbook contract](12-end-user-handbook.md). Explain every user-facing control and meaningful outcome,\nincluding frontend-only filters, navigation and dialogs that have no API call. Use actual labels and demo-data\nscreenshots in English and Urdu; flag translations awaiting human review.\n\nCover every supported job task in the role's workspace FAQ, including shared screens and handovers. A help page's\nexistence does not establish completeness. Kiosks also need an operator job aid available through the authorized\nstaff help or training material; do not add a login to the kiosk to deliver it."
+      },
+      {
+        "id": "Q6",
+        "title": "Require evidence before reporting completion",
+        "instruction": "A screen or workspace is unfinished until its working UI, F1 contextual help, English/Urdu screen handbook,\nworkspace guide and detailed FAQ for every supported role, bounded 100-250% keyboard zoom, frontend coverage checks,\nand named human review of fresh, newly created data and supported CRUD operations are complete. Follow the workspace review\nchecklist (guide 17). Missing evidence stays pending; seeded-demo browsing, API tests or screenshots alone do not\nestablish completion. Agents propose evidence; only authenticated human review accepts progress.\n\nThe frontend repository must make these checks part of its build or CI:\n\n- Maintain an inventory of implemented screens, workspaces, supported role tasks and interactive controls. Map each\n  to handbook pages and sections in both languages. Include frontend-only behaviour; catalogue tasks are a minimum.\n- Fail on missing or empty pages/sections, uncovered tasks or controls, broken help links or missing referenced\n  screenshots. Test F1, screen Help, workspace Help, offline help, deep links, search and permission filtering; changing\n  user or roles must not retain another user's navigation or search results.\n- Run the relevant API scenario and frontend interaction tests, including repeat submissions, concurrent edits,\n  uncertain outcomes and hardware failures. A non-applicable case needs a reason, not a silent omission.\n- Apply every section of the [human workspace acceptance checklist](17-workspace-review-checklist.md) to each role\n  and supported task. Create fresh synthetic records through the UI, then read, update and cancel/deactivate/delete\n  only as the API permits. Test refusal where deletion or editing is forbidden. Read-only roles inspect new records\n  created by an authorized upstream role. Record the actual new IDs and outcomes; never treat seeded records alone\n  or an agent's API calls as a human journey pass.\n- Record the standards revision, implemented scope, test results, guide paths, demo screenshots and outstanding\n  decisions in the change's review evidence. A named human reviewer must walk through a complete role journey using\n  only the handbook, check that it matches the UI and review translations. Revise misleading or incomplete details.\n\nThe frontend lead owns the component and flow patterns, the delivery checks and their maintenance. The designated\nclinical/language owners approve their wording and decisions. The backend supplies the contract and examples.\nMCP supplies requirements, not proof that a frontend file exists, that a build passed or that staff can use it.\nAn agent may critique the work and collect evidence; it cannot approve its own human review or award progress."
+      }
+    ],
+    "human_review": {
+      "source": "frontend-docs/guides/17-workspace-review-checklist.md",
+      "required": true,
+      "checklist": [
+        {
+          "id": "R1",
+          "title": "Identify the implementation and complete scope",
+          "instruction": "- [ ] Record implementation ID/name, repository, commit/build, backend/standards revision, workspace, roles,\n  reviewer, date, device/OS, languages and peripherals tested (the review's *Start* step: the portal fills in what it\n  knows).\n- [ ] Inventory each role's screens, tasks, controls, permissions and required handovers. Every task needs a test\n  result and matching FAQ answer. A read-only role or non-applicable operation needs a specific contract-based reason."
+        },
+        {
+          "id": "R2",
+          "title": "Create fresh data through the frontend",
+          "instruction": "- [ ] With the review code in your app's DEV settings, create new records through each applicable create form:\n  patient/visit, request/order, master record, transaction or register entry. The review lists them with their IDs as\n  the server sees them; where a free-text field permits it, you may type the code there too, to find them again.\n- [ ] Try required fields missing, invalid values, duplicate identifiers and cancellation before saving. Verify\n  the visible validation, server refusal and that no partial or duplicate business record is reported as saved.\n- [ ] Complete the valid path and check the generated number, defaults, ownership, patient/visit context and next step.\n  A seeded master may be a prerequisite; the transaction being accepted must be new. Do not create destructive test\n  masters on a shared server without coordinating with its backend team."
+        },
+        {
+          "id": "R3",
+          "title": "Read and retrieve those new records",
+          "instruction": "- [ ] Find each new record by its actual ID/number and relevant search/filter/sort controls. Open list and detail\n  views, refresh, navigate away/back and sign in again. Confirm persistence and exact values, units, dates and status.\n- [ ] Check empty/no-match results and pagination where applicable. A read-only role must read a fresh record created\n  by an authorized upstream role and demonstrate that write actions are unavailable/refused."
+        },
+        {
+          "id": "R4",
+          "title": "Update, correct and exercise permitted deletion",
+          "instruction": "- [ ] Edit each supported field on the new record, save and re-read it. Check cancellation, unsaved-work navigation,\n  stale versions and simultaneous edits from a second session; one user's changes must not silently replace another's.\n- [ ] Test the actual permitted lifecycle: delete a draft where supported, or cancel, deactivate, stop, reverse or\n  append a correction with the required reason/approval. Verify list/detail/history and downstream effects afterwards.\n- [ ] Where deletion or editing is forbidden (for example finalized clinical or financial records), verify the\n  frontend offers the permitted correction and the server refuses the forbidden action. Never invent hard deletion\n  to tick a CRUD box. Record an explicit not-applicable/refused result with the supporting contract."
+        },
+        {
+          "id": "R5",
+          "title": "Permissions, handovers and end-to-end outcomes",
+          "instruction": "- [ ] Test allowed and denied actions with the appropriate accounts, including separation of requester/approver,\n  sign-off, counter-signature and multi-role switching. Check patient and workspace context after every switch.\n- [ ] Follow the new record into the next role's queue and complete the supported journey. Verify live refresh,\n  balances/stock/bed state where relevant, notifications and printable output against the new record's values.\n- [ ] Shared task coverage belongs to every role that uses it; do not mark a workspace done with an unfinished handover."
+        },
+        {
+          "id": "R6",
+          "title": "F1 help and detailed role FAQs",
+          "instruction": "- [ ] Press **F1** on each screen and with a field/dialog focused. Correct contextual help must open without losing\n  input; closing it restores focus. Test visible Help, workspace help, offline reading, search and deep links.\n- [ ] Follow each role task's FAQ using only its instructions. Check prerequisites, actual labels, steps, outcomes,\n  errors, recovery and handovers in English and Urdu. Missing/generic answers fail acceptance.\n- [ ] Change user/permissions and verify restricted pages/search results disappear. Login/locked/kiosk help must\n  reveal only permitted public/operator guidance. Hardware keyboard shortcuts and touch Help must both work where supported."
+        },
+        {
+          "id": "R7",
+          "title": "Zoom, language and usable layouts",
+          "instruction": "- [ ] Test Ctrl++/Ctrl+=, Ctrl+-, Ctrl+0 (Command equivalents on macOS), Settings and any enabled wheel/pinch/menu\n  routes. Verify **100% minimum, 250% maximum**, reset to 100%, persistence and a single shared application zoom state.\n- [ ] Repeatedly try beyond both bounds. Test at 100%, 150%, 200% and 250%, in both themes and languages, including\n  Urdu reading direction, long labels, tables, dialogs, validation messages and Help. All actions remain reachable.\n- [ ] Check tab order, focus, scanner input and visible controls on touch clients. Do not confuse OS magnification\n  with the application's saved zoom preference."
+        },
+        {
+          "id": "R8",
+          "title": "Failures, retries and devices",
+          "instruction": "- [ ] Test double submit, lost reply, disconnect/reconnect, session expiry, stale data and refused operations on\n  the new records. Confirm honest pending/error messages, correct reconciliation and no duplicate writes.\n- [ ] Test required printers/scanners/cameras, denied device permission and unavailable hardware. Verify recovery\n  preserves appropriate form context and does not display success before the server confirms it.\n- [ ] Patient workflows: register and admit a new patient **without** a photo (the form must let you skip it with no\n  reason), then take one and see it on the patient and the admission; a PDF as the photo must be refused. Upload a\n  synthetic outside report with its facility and date, re-open it under the correct patient and check it is labelled\n  as an outside report, never shown as this hospital's result."
+        },
+        {
+          "id": "R9",
+          "title": "Keep reproducible evidence",
+          "instruction": "- [ ] The review on the portal is the evidence, kept on the DEV server: what the server saw your app do (records new\n  and existing, refusals, each operation by lifecycle step and screen), your answers and a note for every Fail and N/A\n  (what failed and how to reproduce it, or why it does not apply). Keep screenshots and longer test output with your\n  app; mention where in the note.\n- [ ] *Test in the app* is a to-do list that ticks itself: an operation turns **Done on a new record** when the server\n  sees your app do it with the code, **Done on existing records only** when it changed demo data alone (the inspectors\n  see that), **Refused** when you tested a refusal. Mark only what is not seen: *Not applicable* or *Fail*, with the note.\n- [ ] *Screens*: for each screen, F1 help, the role FAQs and zoom (one click passes a whole column; then mark the\n  exceptions). The **fresh-data** column is the server's: it passes where your app made new records with that screen's\n  own write operations (any new record, for a screen that only reads); you can only reject it.\n- [ ] *Export* gives the review as one Markdown file for your repository or review system, whenever you want it.\n- [ ] Accepting or reporting **F1 help, the role FAQs, zoom or the fresh-data review** (on a proposal, on *Save this\n  screen* or in the transfer of legacy work) needs **your signed review** of that screen's workspace. The portal\n  preselects the review that passes them and refuses, saying why (`details.field` = `review_id`), an item without a\n  signed review, on a review that does not cover the screen or one that does not pass it there. The backend team's\n  inspectors see the review beside your agent's proposals.\n- [ ] **Approve all reported progress** is one human declaration for the displayed selection; untick any untested items\n  first. Each proposal retains its build, the review it was accepted with and your decision."
+        },
+        {
+          "id": "R10",
+          "title": "Decide and report honestly",
+          "instruction": "- [ ] Every applicable task and mandatory quality check must pass. A blocker, missing FAQ, broken F1, out-of-bounds\n  zoom or untested fresh-data lifecycle keeps the screen/workspace pending. Partial item acceptance remains possible.\n- [ ] The named human signs the review for this build (its *Sign* step: every question answered or decided by the\n  server, the declaration that the writes with the code are theirs, not their agent's), clears the code from the app,\n  accepts only tested proposal items or reports them manually, and returns failures: the agent reads the signed\n  review's failures and notes (`progress_proposals` → `human_reviews`). Agents cannot start, fill or sign a review, nor\n  approve their own claims. Backend inspection can confirm or withdraw accepted claims; verified points are a subset of\n  completion, never an additional award.\n- [ ] Retest affected tasks after fixes or backend changes; stale evidence does not establish the new build's behavior."
+        }
+      ],
+      "workspace_checklist": "- [ ] **Create:** a leave request, a duty swap request to a colleague, a reported issue.\n- [ ] **Read:** my duties, my leave and my payslips.\n- [ ] **Update / correct:** as the colleague, accept one swap and decline another.\n- [ ] **Cancel / delete:** withdraw the pending leave request and the swap request.\n- [ ] **Hand over:** the leave reaches the supervisor; the issue reaches facility operations.",
+      "operations": {
+        "create": [
+          {
+            "call": "POST /self/leave-requests",
+            "summary": "Request leave (routes to my supervisor)",
+            "screen": "self_service"
+          },
+          {
+            "call": "POST /self/roster/swaps",
+            "summary": "Ask a colleague to work one of my duties (cover or swap)",
+            "screen": "self_service"
+          },
+          {
+            "call": "POST /ops/work-orders",
+            "summary": "\"Report Issue\" (staff with ops.workorder.report)",
+            "screen": "self_service"
+          }
+        ],
+        "update_or_correct": [],
+        "cancel_or_delete": [
+          {
+            "call": "POST /self/leave-requests/{leave_request_id}/cancel",
+            "summary": "Withdraw my pending request",
+            "screen": "self_service"
+          },
+          {
+            "call": "POST /self/roster/swaps/{swap_id}/cancel",
+            "summary": "Withdraw my swap request (before approval)",
+            "screen": "self_service"
+          }
+        ],
+        "other_actions": [
+          {
+            "call": "POST /self/roster/swaps/{swap_id}/accept",
+            "summary": "Agree to work a colleague's duty",
+            "screen": "self_service"
+          },
+          {
+            "call": "POST /self/roster/swaps/{swap_id}/decline",
+            "summary": "Say no to a colleague's request",
+            "screen": "self_service"
+          }
+        ]
+      },
+      "operations_rule": "Exercise each operation on records you create new in this review, through the app: create, then read them back, update or correct them, and cancel, withdraw or delete them where the contract allows (and see the refusal where it does not). The other_actions are the steps of the record's life (sign, approve, dispense ...).",
+      "portal_review": "The human tester records this review on the portal (My progress → the workspace → Start the review), with its code in the app's DEV settings: the server sees the operations the app did on new records, the tester answers the rest and signs. The four compulsory items need that signed review; fresh data needs the server's evidence. You build the Review code setting (dev_build_headers), never start, fill or sign a review; progress_proposals → human_reviews lists the failures to fix.",
+      "dev_build_headers": {
+        "send": [
+          "X-Haspataal-Developer: <portal username>",
+          "X-Haspataal-Implementation: <implementation id>",
+          "X-Haspataal-Review: <the DEV settings' Review code, while the tester has one set>"
+        ],
+        "review_code_setting": "One app-wide field, Review code, in Settings → This terminal (open before login too), empty by default; the shared API client adds the header. Not on any screen or the login form.",
+        "release_build": "The field and all three headers behind the DEV build flag (compiled out, never a runtime switch): the hospital's release build has neither (guide 19, I6 and I9).",
+        "never": "Never set a review code yourself, in tests or scripts: only the tester's writes with it count."
+      }
+    },
+    "verification": {
+      "frontend_files_inspected": false,
+      "progress_recorded": false,
+      "rule": "Requirements only. Frontend CI checks coverage; a named human reviews the working journey."
+    }
+  },
+  "screen": {
+    "id": "self_service",
+    "workspace": "self_service",
+    "title": "My workspace",
+    "purpose": "My leave, balances, payslips, profile, duties and duty swaps; report an issue.",
+    "workflow": "§6.5",
+    "rule_objects": [
+      {
+        "id": "rule:907c770e92",
+        "text": "My duties (GET /self/roster): the days without a duty are my rest days.",
+        "cites": []
+      },
+      {
+        "id": "rule:9274755ac9",
+        "text": "'Ask a colleague' on a duty that has not started: GET /self/roster/swap-options?roster_id=… lists colleagues free for it (same department first). Cover = they work it; Swap = pick one of their_duties with you_can_work_it true, which you work in return. A reason is required (e.g. a family emergency).",
+        "cites": []
+      },
+      {
+        "id": "rule:adfadf7120",
+        "text": "Requests to me (my_role Colleague, status Requested): Accept or Decline. Then the roster manager approves; the roster changes only then. I may withdraw my own request until it is approved; one still open when the duty starts expires.",
+        "cites": []
+      }
+    ],
+    "related_workflows": [
+      "duty-rosters-and-attendance",
+      "facility-and-it",
+      "finance-and-owner",
+      "hr-and-payroll"
+    ]
+  },
+  "rules_in_force": null,
+  "build_order": {
+    "screen": "self_service",
+    "title": "My workspace",
+    "workspace": "self_service",
+    "phase": "P8",
+    "position": 154,
+    "points": 84,
+    "capabilities": [
+      "realtime",
+      "idempotent_writes",
+      "f1_help",
+      "zoom"
+    ],
+    "depends_on": [
+      {
+        "from": "self_service",
+        "to": "holiday_calendar",
+        "kind": "data_candidate",
+        "evidence": "it reads holidays, which POST /holidays on holiday_calendar creates",
+        "ordering": false,
+        "forward": false
+      },
+      {
+        "from": "self_service",
+        "to": "holiday_calendar_admin",
+        "kind": "data_candidate",
+        "evidence": "it reads holidays, which POST /holidays on holiday_calendar_admin creates",
+        "ordering": false,
+        "forward": false
+      }
+    ],
+    "needed_by": [
+      {
+        "from": "leave_approvals",
+        "to": "self_service",
+        "kind": "data",
+        "evidence": "it receives leave.requested, which self_service's calls emitted in the tests",
+        "ordering": false
+      },
+      {
+        "from": "roll_call",
+        "to": "self_service",
+        "kind": "data",
+        "evidence": "it receives roster.changed, which self_service's calls emitted in the tests",
+        "ordering": false
+      }
+    ],
+    "go_live_setup": false,
+    "note": "`forward`: a dependency on a later phase; use the demo data or a scenario (sandbox_scenario) until that screen exists. `ordering: false`: a hand-off or a hint, not a reason to wait."
+  },
+  "definition_of_done": {
+    "points": 84,
+    "items": [
+      {
+        "id": "ep:POST /self/leave-requests",
+        "label": "POST /self/leave-requests",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:GET /self/leave-requests",
+        "label": "GET /self/leave-requests",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:POST /self/leave-requests/{leave_request_id}/cancel",
+        "label": "POST /self/leave-requests/{leave_request_id}/cancel",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:GET /self/leave-balances",
+        "label": "GET /self/leave-balances",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:GET /self/profile",
+        "label": "GET /self/profile",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:GET /self/payslips/{payroll_item_id}",
+        "label": "GET /self/payslips/{payroll_item_id}",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:GET /self/roster",
+        "label": "GET /self/roster",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:GET /holidays",
+        "label": "GET /holidays",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:GET /self/roster/swap-options",
+        "label": "GET /self/roster/swap-options",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:POST /self/roster/swaps",
+        "label": "POST /self/roster/swaps",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:GET /self/roster/swaps",
+        "label": "GET /self/roster/swaps",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:POST /self/roster/swaps/{swap_id}/accept",
+        "label": "POST /self/roster/swaps/{swap_id}/accept",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:POST /self/roster/swaps/{swap_id}/decline",
+        "label": "POST /self/roster/swaps/{swap_id}/decline",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:POST /self/roster/swaps/{swap_id}/cancel",
+        "label": "POST /self/roster/swaps/{swap_id}/cancel",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ep:POST /ops/work-orders",
+        "label": "POST /ops/work-orders",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "ev:notification.created",
+        "label": "notification.created",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "ev:roster.swap.updated",
+        "label": "roster.swap.updated",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "rule:907c770e92",
+        "label": "My duties (GET /self/roster): the days without a duty are my rest days.",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "rule:9274755ac9",
+        "label": "'Ask a colleague' on a duty that has not started: GET /self/roster/swap-options?roster_id=… lists colleagues free for it (same department first). Cover = they work it; Swap = pick one of their_duties with you_can_work_it true, which you work in return. A reason is required (e.g. a family emergency).",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "rule:adfadf7120",
+        "label": "Requests to me (my_role Colleague, status Requested): Accept or Decline. Then the roster manager approves; the roster changes only then. I may withdraw my own request until it is approved; one still open when the duty starts expires.",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:states",
+        "label": "Loading, empty and error states",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:permissions",
+        "label": "Actions by permission",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:writes",
+        "label": "Safe writes",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:tested",
+        "label": "Test plan passed",
+        "points": 4,
+        "claimed": false
+      },
+      {
+        "id": "q:handbook",
+        "label": "Handbook page",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "q:f1_help",
+        "label": "F1 contextual help",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:role_faq",
+        "label": "Complete role-specific FAQs",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "q:zoom",
+        "label": "Keyboard zoom: 100-250% only",
+        "points": 2,
+        "claimed": false
+      },
+      {
+        "id": "q:fresh_data",
+        "label": "Human review with newly created data",
+        "points": 4,
+        "claimed": false
+      },
+      {
+        "id": "q:character",
+        "label": "Design principles applied",
+        "points": 3,
+        "claimed": false
+      },
+      {
+        "id": "q:editor",
+        "label": "Editor's pass",
+        "points": 2,
+        "claimed": false
+      }
+    ],
+    "rule": "Agents MUST submit propose_progress after implementing this screen and verify it with progress_proposals. Only the developer accepts items on My progress for what this implementation does on the DEV server. No tool awards progress."
+  },
+  "realtime": {
+    "topics": [
+      "notification.created",
+      "roster.swap.updated",
+      "session.*",
+      "system.*",
+      "notification.created"
+    ],
+    "handlers": [
+      {
+        "event": "notification.created",
+        "priority": "normal",
+        "presentation": null,
+        "emitted_by_operations": [
+          "PATCH /rosters/{roster_id}",
+          "POST /admin/change-requests",
+          "POST /admissions/{admission_id}/transfer",
+          "POST /admissions/{admission_id}/treating-doctor",
+          "POST /approvals/{request_id}/approve",
+          "POST /approvals/{request_id}/cancel",
+          "POST /approvals/{request_id}/reject",
+          "POST /committee-meetings/{meeting_id}/actions",
+          "POST /complaints",
+          "POST /complaints/{complaint_id}/acknowledge",
+          "POST /complaints/{complaint_id}/actions",
+          "POST /complaints/{complaint_id}/appeal",
+          "POST /cssd/cycles/{cycle_id}/recall",
+          "POST /cssd/cycles/{cycle_id}/results",
+          "POST /deaths/{death_id}/autopsy",
+          "POST /deaths/{death_id}/autopsy/authorize",
+          "POST /deaths/{death_id}/certify",
+          "POST /drug-recalls",
+          "POST /facility/drills/{drill_id}/actions",
+          "POST /finance/cash-shifts/{shift_id}/cash-drop",
+          "POST /hr/employees/{employee_id}/status",
+          "POST /hr/employees/{employee_id}/submit",
+          "POST /hr/leave-requests/{leave_request_id}/decision",
+          "POST /imaging/orders/{order_id}/report",
+          "POST /incidents",
+          "POST /incidents/{incident_id}/actions",
+          "POST /incidents/{incident_id}/analysis/sign",
+          "POST /incidents/{incident_id}/review",
+          "POST /infection-cases",
+          "POST /infection/audits/{audit_id}/actions",
+          "POST /lab/results/{result_id}/verify",
+          "POST /lab/samples/{sample_id}/reject",
+          "POST /msds/interview-prep/mock-interviews",
+          "POST /opd-tickets/{ticket_id}/credit-request",
+          "POST /opd-tickets/{ticket_id}/refund-request",
+          "POST /opd-tickets/{ticket_id}/vip-waiver-post-consult",
+          "POST /opd-tickets/{ticket_id}/vip-waiver-request",
+          "POST /ot/bookings/{booking_id}/ssi-checks",
+          "POST /patient-feedback",
+          "POST /patient-feedback/{feedback_id}/actions",
+          "POST /personnel/qualifications/{qualification_id}/verify",
+          "POST /pharmacy/charity-override-request",
+          "POST /prescription-queries/{query_id}/answer",
+          "POST /prescriptions/{prescription_id}/queries",
+          "POST /qa/rounds/{round_id}/actions",
+          "POST /quality/record-review-items/{item_id}/assign",
+          "POST /quality/record-review-items/{item_id}/review",
+          "POST /quality/record-reviews/{cycle_id}/actions",
+          "POST /quality/record-reviews/{cycle_id}/start",
+          "POST /rosters",
+          "POST /rosters/copy",
+          "POST /rosters/swaps/{swap_id}/approve",
+          "POST /rosters/swaps/{swap_id}/reject",
+          "POST /rosters/{roster_id}/cancel",
+          "POST /self/leave-requests",
+          "POST /self/leave-requests/{leave_request_id}/cancel",
+          "POST /self/roster/swaps",
+          "POST /self/roster/swaps/{swap_id}/accept",
+          "POST /self/roster/swaps/{swap_id}/cancel",
+          "POST /self/roster/swaps/{swap_id}/decline",
+          "POST /wards/{ward_id}/indents"
+        ],
+        "refresh": [
+          "GET /self/leave-requests",
+          "GET /self/leave-balances",
+          "GET /self/profile",
+          "GET /self/roster",
+          "GET /holidays",
+          "GET /self/roster/swap-options",
+          "GET /self/roster/swaps"
+        ]
+      },
+      {
+        "event": "roster.swap.updated",
+        "priority": "normal",
+        "presentation": null,
+        "emitted_by_operations": [
+          "POST /rosters/swaps",
+          "POST /rosters/swaps/{swap_id}/approve",
+          "POST /rosters/swaps/{swap_id}/reject",
+          "POST /self/roster/swaps",
+          "POST /self/roster/swaps/{swap_id}/accept",
+          "POST /self/roster/swaps/{swap_id}/cancel",
+          "POST /self/roster/swaps/{swap_id}/decline"
+        ],
+        "refresh": [
+          "GET /self/leave-requests",
+          "GET /self/leave-balances",
+          "GET /self/profile",
+          "GET /self/roster",
+          "GET /holidays",
+          "GET /self/roster/swap-options",
+          "GET /self/roster/swaps"
+        ]
+      }
+    ],
+    "rule": "Refresh the listed reads when the event arrives (a list without a path id: every time; a detail read: when the payload names the same id). Never poll."
+  },
+  "handoffs": [
+    {
+      "call": "POST /self/leave-requests",
+      "emits": "leave.requested",
+      "audience": "the supervisor (or permission hr.leave.manage)",
+      "reaches_screens": [
+        "leave_approvals"
+      ]
+    },
+    {
+      "call": "POST /self/leave-requests",
+      "emits": "notification.created",
+      "audience": "the target user, or every holder of the target permission",
+      "reaches_screens": [
+        "my_investigations",
+        "my_complaint_investigations",
+        "my_actions",
+        "notifications",
+        "mlc_cases_doctor",
+        "er_board_doctor",
+        "mlc_cases",
+        "er_board",
+        "medication_orders_doctor",
+        "death_register",
+        "mlc_register",
+        "mortality_review",
+        "infection_cases",
+        "committees_quality",
+        "committees_owner",
+        "committees_ipc",
+        "qa_rounds",
+        "qa_rounds_owner",
+        "patient_feedback",
+        "action_register",
+        "facility_profile",
+        "record_review_worklist_doctor",
+        "record_review_worklist_nursing",
+        "record_deficiencies_doctor",
+        "record_deficiencies_nursing"
+      ]
+    },
+    {
+      "call": "POST /self/leave-requests/{leave_request_id}/cancel",
+      "emits": "notification.created",
+      "audience": "the target user, or every holder of the target permission",
+      "reaches_screens": [
+        "my_investigations",
+        "my_complaint_investigations",
+        "my_actions",
+        "notifications",
+        "mlc_cases_doctor",
+        "er_board_doctor",
+        "mlc_cases",
+        "er_board",
+        "medication_orders_doctor",
+        "death_register",
+        "mlc_register",
+        "mortality_review",
+        "infection_cases",
+        "committees_quality",
+        "committees_owner",
+        "committees_ipc",
+        "qa_rounds",
+        "qa_rounds_owner",
+        "patient_feedback",
+        "action_register",
+        "facility_profile",
+        "record_review_worklist_doctor",
+        "record_review_worklist_nursing",
+        "record_deficiencies_doctor",
+        "record_deficiencies_nursing"
+      ]
+    },
+    {
+      "call": "POST /self/roster/swaps",
+      "emits": "notification.created",
+      "audience": "the target user, or every holder of the target permission",
+      "reaches_screens": [
+        "my_investigations",
+        "my_complaint_investigations",
+        "my_actions",
+        "notifications",
+        "mlc_cases_doctor",
+        "er_board_doctor",
+        "mlc_cases",
+        "er_board",
+        "medication_orders_doctor",
+        "death_register",
+        "mlc_register",
+        "mortality_review",
+        "infection_cases",
+        "committees_quality",
+        "committees_owner",
+        "committees_ipc",
+        "qa_rounds",
+        "qa_rounds_owner",
+        "patient_feedback",
+        "action_register",
+        "facility_profile",
+        "record_review_worklist_doctor",
+        "record_review_worklist_nursing",
+        "record_deficiencies_doctor",
+        "record_deficiencies_nursing"
+      ]
+    },
+    {
+      "call": "POST /self/roster/swaps",
+      "emits": "roster.swap.updated",
+      "audience": "the requester and the colleague, and holders of roster.manage.all, roster.view.all and the scope permission of their staff category",
+      "reaches_screens": [
+        "duty_roster",
+        "duty_roster_hr",
+        "support_roster"
+      ]
+    },
+    {
+      "call": "POST /self/roster/swaps/{swap_id}/accept",
+      "emits": "notification.created",
+      "audience": "the target user, or every holder of the target permission",
+      "reaches_screens": [
+        "my_investigations",
+        "my_complaint_investigations",
+        "my_actions",
+        "notifications",
+        "mlc_cases_doctor",
+        "er_board_doctor",
+        "mlc_cases",
+        "er_board",
+        "medication_orders_doctor",
+        "death_register",
+        "mlc_register",
+        "mortality_review",
+        "infection_cases",
+        "committees_quality",
+        "committees_owner",
+        "committees_ipc",
+        "qa_rounds",
+        "qa_rounds_owner",
+        "patient_feedback",
+        "action_register",
+        "facility_profile",
+        "record_review_worklist_doctor",
+        "record_review_worklist_nursing",
+        "record_deficiencies_doctor",
+        "record_deficiencies_nursing"
+      ]
+    },
+    {
+      "call": "POST /self/roster/swaps/{swap_id}/accept",
+      "emits": "roster.changed",
+      "audience": "the rostered employee, and holders of roster.manage.all, roster.view.all and the scope permission of the employee's staff category (roster.manage.nursing / roster.manage.support)",
+      "reaches_screens": [
+        "duty_roster",
+        "roll_call",
+        "duty_roster_hr",
+        "support_roster"
+      ]
+    },
+    {
+      "call": "POST /self/roster/swaps/{swap_id}/accept",
+      "emits": "roster.swap.updated",
+      "audience": "the requester and the colleague, and holders of roster.manage.all, roster.view.all and the scope permission of their staff category",
+      "reaches_screens": [
+        "duty_roster",
+        "duty_roster_hr",
+        "support_roster"
+      ]
+    },
+    {
+      "call": "POST /self/roster/swaps/{swap_id}/decline",
+      "emits": "notification.created",
+      "audience": "the target user, or every holder of the target permission",
+      "reaches_screens": [
+        "my_investigations",
+        "my_complaint_investigations",
+        "my_actions",
+        "notifications",
+        "mlc_cases_doctor",
+        "er_board_doctor",
+        "mlc_cases",
+        "er_board",
+        "medication_orders_doctor",
+        "death_register",
+        "mlc_register",
+        "mortality_review",
+        "infection_cases",
+        "committees_quality",
+        "committees_owner",
+        "committees_ipc",
+        "qa_rounds",
+        "qa_rounds_owner",
+        "patient_feedback",
+        "action_register",
+        "facility_profile",
+        "record_review_worklist_doctor",
+        "record_review_worklist_nursing",
+        "record_deficiencies_doctor",
+        "record_deficiencies_nursing"
+      ]
+    },
+    {
+      "call": "POST /self/roster/swaps/{swap_id}/decline",
+      "emits": "roster.swap.updated",
+      "audience": "the requester and the colleague, and holders of roster.manage.all, roster.view.all and the scope permission of their staff category",
+      "reaches_screens": [
+        "duty_roster",
+        "duty_roster_hr",
+        "support_roster"
+      ]
+    },
+    {
+      "call": "POST /self/roster/swaps/{swap_id}/cancel",
+      "emits": "notification.created",
+      "audience": "the target user, or every holder of the target permission",
+      "reaches_screens": [
+        "my_investigations",
+        "my_complaint_investigations",
+        "my_actions",
+        "notifications",
+        "mlc_cases_doctor",
+        "er_board_doctor",
+        "mlc_cases",
+        "er_board",
+        "medication_orders_doctor",
+        "death_register",
+        "mlc_register",
+        "mortality_review",
+        "infection_cases",
+        "committees_quality",
+        "committees_owner",
+        "committees_ipc",
+        "qa_rounds",
+        "qa_rounds_owner",
+        "patient_feedback",
+        "action_register",
+        "facility_profile",
+        "record_review_worklist_doctor",
+        "record_review_worklist_nursing",
+        "record_deficiencies_doctor",
+        "record_deficiencies_nursing"
+      ]
+    },
+    {
+      "call": "POST /self/roster/swaps/{swap_id}/cancel",
+      "emits": "roster.swap.updated",
+      "audience": "the requester and the colleague, and holders of roster.manage.all, roster.view.all and the scope permission of their staff category",
+      "reaches_screens": [
+        "duty_roster",
+        "duty_roster_hr",
+        "support_roster"
+      ]
+    },
+    {
+      "call": "POST /ops/work-orders",
+      "emits": "work_order.updated",
+      "audience": "permissions ops.workorder.manage, ops.feed.view",
+      "reaches_screens": [
+        "ops_console"
+      ]
+    }
+  ],
+  "patient_context": null,
+  "value_lists": [
+    {
+      "values": [
+        "PendingApproval",
+        "Approved",
+        "PartiallySettled",
+        "Settled",
+        "Cancelled"
+      ],
+      "column": "accounts_payable.status",
+      "used_at": "POST /ops/work-orders.payable_status",
+      "labels": {
+        "PendingApproval": "Pending approval",
+        "Approved": "Approved",
+        "PartiallySettled": "Partially settled",
+        "Settled": "Settled",
+        "Cancelled": "Cancelled"
+      }
+    },
+    {
+      "values": [
+        "FixedFee",
+        "PercentGross",
+        "PercentNet"
+      ],
+      "column": "consultant_contracts.rule_type",
+      "used_at": "GET /self/profile.contract.rule_type",
+      "labels": {
+        "FixedFee": "Fixed fee",
+        "PercentGross": "Percent gross",
+        "PercentNet": "Percent net"
+      }
+    },
+    {
+      "values": [
+        "Ward",
+        "Department",
+        "Emergency",
+        "OT",
+        "Facility",
+        "Other"
+      ],
+      "column": "duty_rosters.duty_area",
+      "used_at": "GET /self/roster[].duty_area",
+      "labels": {
+        "Ward": "Ward",
+        "Department": "Department",
+        "Emergency": "Emergency",
+        "OT": "OT",
+        "Facility": "Facility",
+        "Other": "Other"
+      }
+    },
+    {
+      "values": [
+        "Active",
+        "Cancelled"
+      ],
+      "column": "duty_rosters.status",
+      "used_at": "GET /self/roster[].status",
+      "labels": {
+        "Active": "Active",
+        "Cancelled": "Cancelled"
+      }
+    },
+    {
+      "values": [
+        "Requested",
+        "Accepted",
+        "Approved",
+        "Declined",
+        "Rejected",
+        "Cancelled",
+        "Expired"
+      ],
+      "column": "duty_swaps.status",
+      "used_at": "POST /self/roster/swaps.status",
+      "labels": {
+        "Requested": "Requested",
+        "Accepted": "Accepted",
+        "Approved": "Approved",
+        "Declined": "Declined",
+        "Rejected": "Rejected",
+        "Cancelled": "Cancelled",
+        "Expired": "Expired"
+      },
+      "state_machine": "duty_swap",
+      "final_states": [
+        "Approved",
+        "Declined",
+        "Rejected",
+        "Cancelled",
+        "Expired"
+      ],
+      "transitions": {
+        "Requested": [
+          "Accepted",
+          "Declined",
+          "Cancelled",
+          "Expired"
+        ],
+        "Accepted": [
+          "Approved",
+          "Rejected",
+          "Cancelled",
+          "Expired"
+        ]
+      }
+    },
+    {
+      "values": [
+        "Education",
+        "Experience",
+        "License",
+        "Certification"
+      ],
+      "column": "employee_qualifications.qualification_type",
+      "used_at": "GET /self/profile.qualifications[].qualification_type",
+      "labels": {
+        "Education": "Education",
+        "Experience": "Experience",
+        "License": "License",
+        "Certification": "Certification"
+      }
+    },
+    {
+      "values": [
+        "Pending",
+        "Verified",
+        "Failed",
+        "NotRequired"
+      ],
+      "column": "employee_qualifications.verification_status",
+      "used_at": "GET /self/profile.qualifications[].verification_status",
+      "labels": {
+        "Pending": "Pending",
+        "Verified": "Verified",
+        "Failed": "Failed",
+        "NotRequired": "Not required"
+      }
+    },
+    {
+      "values": [
+        "Permanent",
+        "Contract",
+        "Visiting"
+      ],
+      "column": "employees.contract_type",
+      "used_at": "GET /self/profile.contract_type",
+      "labels": {
+        "Permanent": "Permanent",
+        "Contract": "Contract",
+        "Visiting": "Visiting"
+      }
+    },
+    {
+      "values": [
+        "Draft",
+        "Awaiting_IT_Provisioning",
+        "Active",
+        "Suspended",
+        "Resigned",
+        "Terminated"
+      ],
+      "column": "employees.employment_status",
+      "used_at": "GET /self/profile.employment_status",
+      "labels": {
+        "Draft": "Draft",
+        "Awaiting_IT_Provisioning": "Awaiting IT provisioning",
+        "Active": "Active",
+        "Suspended": "Suspended",
+        "Resigned": "Resigned",
+        "Terminated": "Terminated"
+      },
+      "state_machine": "employee",
+      "final_states": [],
+      "transitions": {
+        "Draft": [
+          "Awaiting_IT_Provisioning",
+          "Active"
+        ],
+        "Awaiting_IT_Provisioning": [
+          "Active",
+          "Suspended",
+          "Resigned",
+          "Terminated"
+        ],
+        "Active": [
+          "Suspended",
+          "Resigned",
+          "Terminated"
+        ],
+        "Suspended": [
+          "Active",
+          "Awaiting_IT_Provisioning",
+          "Resigned",
+          "Terminated"
+        ],
+        "Resigned": [
+          "Active",
+          "Awaiting_IT_Provisioning",
+          "Terminated"
+        ],
+        "Terminated": [
+          "Active",
+          "Awaiting_IT_Provisioning",
+          "Resigned"
+        ]
+      }
+    },
+    {
+      "values": [
+        "PMDC",
+        "PNC",
+        "Other"
+      ],
+      "column": "employees.license_type",
+      "used_at": "GET /self/profile.license_type",
+      "labels": {
+        "PMDC": "PMDC",
+        "PNC": "PNC",
+        "Other": "Other"
+      }
+    },
+    {
+      "values": [
+        "Clinical",
+        "Nursing",
+        "Administrative",
+        "Technical",
+        "SupportZeroInterface",
+        "Visiting"
+      ],
+      "column": "employees.staff_category",
+      "used_at": "GET /self/profile.staff_category",
+      "labels": {
+        "Clinical": "Clinical",
+        "Nursing": "Nursing",
+        "Administrative": "Administrative",
+        "Technical": "Technical",
+        "SupportZeroInterface": "Support zero interface",
+        "Visiting": "Visiting"
+      }
+    },
+    {
+      "values": [
+        "Annual",
+        "Casual",
+        "Sick",
+        "Maternity",
+        "Unpaid",
+        "Other"
+      ],
+      "column": "leave_requests.leave_type",
+      "used_at": "POST /self/leave-requests.leave_type",
+      "labels": {
+        "Annual": "Annual",
+        "Casual": "Casual",
+        "Sick": "Sick",
+        "Maternity": "Maternity",
+        "Unpaid": "Unpaid",
+        "Other": "Other"
+      }
+    },
+    {
+      "values": [
+        "A+",
+        "A-",
+        "B+",
+        "B-",
+        "AB+",
+        "AB-",
+        "O+",
+        "O-",
+        "Unknown"
+      ],
+      "column": "patients.blood_group",
+      "used_at": "GET /self/profile.blood_group",
+      "labels": {
+        "A+": "A",
+        "A-": "A",
+        "B+": "B",
+        "B-": "B",
+        "AB+": "AB",
+        "AB-": "AB",
+        "O+": "O",
+        "O-": "O",
+        "Unknown": "Unknown"
+      }
+    },
+    {
+      "values": [
+        "male",
+        "female",
+        "other",
+        "unknown"
+      ],
+      "column": "patients.gender",
+      "used_at": "GET /self/profile.gender",
+      "labels": {
+        "male": "Male",
+        "female": "Female",
+        "other": "Other",
+        "unknown": "Unknown"
+      }
+    },
+    {
+      "values": [
+        "UnpaidAbsence",
+        "InternalCredit",
+        "Commission",
+        "ExtraDuty",
+        "Advance",
+        "Bonus",
+        "Other"
+      ],
+      "column": "payroll_item_lines.category",
+      "used_at": "GET /self/payslips/{payroll_item_id}.lines[].category",
+      "labels": {
+        "UnpaidAbsence": "Unpaid absence",
+        "InternalCredit": "Internal credit",
+        "Commission": "Commission",
+        "ExtraDuty": "Extra duty",
+        "Advance": "Advance",
+        "Bonus": "Bonus",
+        "Other": "Other"
+      }
+    },
+    {
+      "values": [
+        "Addition",
+        "Deduction"
+      ],
+      "column": "payroll_item_lines.line_kind",
+      "used_at": "GET /self/payslips/{payroll_item_id}.lines[].line_kind",
+      "labels": {
+        "Addition": "Addition",
+        "Deduction": "Deduction"
+      }
+    },
+    {
+      "values": [
+        "Generated",
+        "Finalized",
+        "Paid",
+        "Cancelled"
+      ],
+      "column": "payroll_runs.status",
+      "used_at": "GET /self/profile.payslips[].status",
+      "labels": {
+        "Generated": "Generated",
+        "Finalized": "Finalized",
+        "Paid": "Paid",
+        "Cancelled": "Cancelled"
+      }
+    },
+    {
+      "values": [
+        "Employee",
+        "SupportStaff",
+        "Sweeper",
+        "Janitor",
+        "Security",
+        "Contractor"
+      ],
+      "column": "staff_badges.holder_type",
+      "used_at": "GET /self/profile.badges[].holder_type",
+      "labels": {
+        "Employee": "Employee",
+        "SupportStaff": "Support staff",
+        "Sweeper": "Sweeper",
+        "Janitor": "Janitor",
+        "Security": "Security",
+        "Contractor": "Contractor"
+      }
+    },
+    {
+      "values": [
+        "RFID",
+        "Barcode",
+        "Biometric"
+      ],
+      "column": "staff_badges.technology",
+      "used_at": "GET /self/profile.badges[].technology",
+      "labels": {
+        "RFID": "RFID",
+        "Barcode": "Barcode",
+        "Biometric": "Biometric"
+      }
+    },
+    {
+      "values": [
+        "Pending",
+        "Approved",
+        "Rejected",
+        "Cancelled"
+      ],
+      "column": "vip_waiver_requests.status",
+      "used_at": "POST /self/leave-requests.status",
+      "labels": {
+        "Pending": "Pending",
+        "Approved": "Approved",
+        "Rejected": "Rejected",
+        "Cancelled": "Cancelled"
+      }
+    },
+    {
+      "values": [
+        "Plumbing",
+        "Electrical",
+        "HVAC",
+        "Carpentry",
+        "Biomedical",
+        "IT",
+        "Civil",
+        "Cleaning",
+        "Other"
+      ],
+      "column": "work_orders.category",
+      "used_at": "POST /ops/work-orders.category",
+      "labels": {
+        "Plumbing": "Plumbing",
+        "Electrical": "Electrical",
+        "HVAC": "HVAC",
+        "Carpentry": "Carpentry",
+        "Biomedical": "Biomedical",
+        "IT": "IT",
+        "Civil": "Civil",
+        "Cleaning": "Cleaning",
+        "Other": "Other"
+      }
+    },
+    {
+      "values": [
+        "Low",
+        "Normal",
+        "High",
+        "Emergency"
+      ],
+      "column": "work_orders.priority",
+      "used_at": "POST /ops/work-orders.priority",
+      "labels": {
+        "Low": "Low",
+        "Normal": "Normal",
+        "High": "High",
+        "Emergency": "Emergency"
+      }
+    },
+    {
+      "values": [
+        "Reported",
+        "Assigned",
+        "InProgress",
+        "Completed",
+        "PendingPayment",
+        "Paid",
+        "Cancelled"
+      ],
+      "column": "work_orders.status",
+      "used_at": "POST /ops/work-orders.status",
+      "labels": {
+        "Reported": "Reported",
+        "Assigned": "Assigned",
+        "InProgress": "In progress",
+        "Completed": "Completed",
+        "PendingPayment": "Pending payment",
+        "Paid": "Paid",
+        "Cancelled": "Cancelled"
+      }
+    },
+    {
+      "values": [
+        "InternalAsset",
+        "ExternalContractor",
+        "Utility"
+      ],
+      "column": "work_orders.wo_type",
+      "used_at": "POST /ops/work-orders.wo_type",
+      "labels": {
+        "InternalAsset": "Internal asset",
+        "ExternalContractor": "External contractor",
+        "Utility": "Utility"
+      }
+    },
+    {
+      "values": [
+        "Cover",
+        "Swap"
+      ],
+      "column": null,
+      "used_at": "POST /self/roster/swaps.kind",
+      "labels": {
+        "Cover": "Cover",
+        "Swap": "Swap"
+      }
+    },
+    {
+      "values": [
+        "Requester",
+        "Colleague"
+      ],
+      "column": null,
+      "used_at": "GET /self/roster/swaps[].my_role",
+      "labels": {
+        "Requester": "Requester",
+        "Colleague": "Colleague"
+      }
+    }
+  ],
+  "states": [
+    {
+      "state": "loading",
+      "why": "every read"
+    },
+    {
+      "state": "error",
+      "why": "every call (show error.code's message)"
+    },
+    {
+      "state": "empty",
+      "why": "a list can be empty: say why and what to do next"
+    },
+    {
+      "state": "forbidden",
+      "why": "actions hidden or disabled by permission (GET /auth/me)"
+    },
+    {
+      "state": "stale / reconnecting",
+      "why": "realtime: show Live / Reconnecting, reload after a truncated replay"
+    },
+    {
+      "state": "submitting / outcome unknown",
+      "why": "a write in flight, or its answer lost: see each write's on_lost_answer"
+    }
+  ],
+  "scanner": [],
+  "copy": {
+    "workspace": {
+      "en": "My Workspace",
+      "ur": "میرا صفحہ"
+    },
+    "error_messages": {
+      "ACCOUNT_DISABLED": "This account is disabled.",
+      "FORBIDDEN": "You do not have permission to do this.",
+      "LEAVE_ALREADY_DECIDED": "The leave request was already decided or withdrawn (details.status).",
+      "LEAVE_INSUFFICIENT_BALANCE": "Not enough leave balance.",
+      "ROSTER_CONFLICT": "This duty overlaps another duty of the same employee.",
+      "ROSTER_ON_LEAVE": "The employee is on approved leave that day.",
+      "SWAP_COLLEAGUE_INELIGIBLE": "Choose an active colleague of the same staff category.",
+      "SWAP_DUTY_STARTED": "A duty is swapped before it starts.",
+      "SWAP_EXISTS": "This duty is already in an open swap request.",
+      "SWAP_TRANSITION_INVALID": "The duty swap cannot move to that state.",
+      "VALIDATION_ERROR": "The request is invalid."
+    },
+    "wording_quoted_in_rules": [
+      "Ask a colleague"
+    ],
+    "note": "Server-owned strings only: the error messages (English), the workspace labels (English and Urdu) and the wording the rules quote. The UI's own copy and its Urdu are yours (decision H08)."
+  },
+  "same_component_as": [],
+  "roles": {
+    "full": [
+      "receptionist",
+      "doctor",
+      "clinical_specialist",
+      "surgeon",
+      "anaesthetist",
+      "ot_nurse",
+      "ward_nurse",
+      "head_nurse",
+      "maintenance_admin",
+      "ops_admin",
+      "quality_officer",
+      "ipc_nurse",
+      "cssd_technician",
+      "employee_self"
+    ],
+    "partial": [
+      "super_admin",
+      "owner",
+      "hospital_admin",
+      "hospital_director",
+      "clinic_director",
+      "billing_admin",
+      "accountant",
+      "cashier",
+      "admissions_officer",
+      "triage_nurse",
+      "ot_admin",
+      "pharmacist",
+      "pharmacy_admin",
+      "lab_technician",
+      "lab_verifier",
+      "lab_admin",
+      "radiographer",
+      "radiologist",
+      "hr_admin",
+      "zakat_officer"
+    ],
+    "page_for": [
+      "receptionist",
+      "doctor",
+      "clinical_specialist",
+      "surgeon",
+      "anaesthetist",
+      "ot_nurse",
+      "ward_nurse",
+      "head_nurse",
+      "maintenance_admin",
+      "ops_admin",
+      "quality_officer",
+      "ipc_nurse",
+      "cssd_technician",
+      "employee_self"
+    ],
+    "note": "page_for: the roles whose GET /meta/handbook lists this screen (its menu entry and F1 page; for a user with that one role, every service Active). A partial role outside page_for only makes some of these calls from screens of its own: never offer it this screen. Build the menu from the logged-in user's GET /meta/handbook."
+  },
+  "workflows": [
+    {
+      "slug": "duty-rosters-and-attendance",
+      "title": "Duty rosters, roll call, badges & attendance",
+      "recipe": "get_workflow_recipe('duty-rosters-and-attendance')"
+    },
+    {
+      "slug": "facility-and-it",
+      "title": "Facility operations, badge stations & IT administration",
+      "recipe": "get_workflow_recipe('facility-and-it')"
+    },
+    {
+      "slug": "finance-and-owner",
+      "title": "Cash shifts, payables, receivables, owner dashboards & risk",
+      "recipe": "get_workflow_recipe('finance-and-owner')"
+    },
+    {
+      "slug": "hr-and-payroll",
+      "title": "HR onboarding, IT provisioning, attendance, leave & payroll",
+      "recipe": "get_workflow_recipe('hr-and-payroll')"
+    }
+  ],
+  "scenarios": [],
+  "unknowns": [
+    {
+      "what": "decision H02",
+      "owner": [
+        "vendor"
+      ],
+      "affects": [
+        "every screen in Urdu"
+      ]
+    },
+    {
+      "what": "decision H03",
+      "owner": [
+        "vendor",
+        "clinical_lead"
+      ],
+      "affects": [
+        "every screen"
+      ]
+    },
+    {
+      "what": "decision H04",
+      "owner": [
+        "vendor"
+      ],
+      "affects": [
+        "every screen with money"
+      ]
+    },
+    {
+      "what": "decision H08",
+      "owner": [
+        "vendor",
+        "translator",
+        "clinical_lead"
+      ],
+      "affects": [
+        "every screen in Urdu"
+      ]
+    },
+    {
+      "what": "decision H09",
+      "owner": [
+        "vendor",
+        "frontend_lead"
+      ],
+      "affects": [
+        "every screen"
+      ]
+    },
+    {
+      "what": "decision H10",
+      "owner": [
+        "clinical_lead",
+        "vendor"
+      ],
+      "affects": [
+        "every screen with realtime events"
+      ]
+    },
+    {
+      "what": "decision H12",
+      "owner": [
+        "vendor",
+        "backend"
+      ],
+      "affects": [
+        "my_cash_shift",
+        "registration",
+        "every screen that prints"
+      ]
+    },
+    {
+      "what": "decision H18",
+      "owner": [
+        "vendor",
+        "frontend_lead"
+      ],
+      "affects": [
+        "every table in Urdu"
+      ]
+    },
+    {
+      "what": "decision H19",
+      "owner": [
+        "clinical_lead",
+        "backend"
+      ],
+      "affects": [
+        "every screen with a patient banner"
+      ]
+    },
+    {
+      "what": "decision H20",
+      "owner": [
+        "vendor",
+        "hospital"
+      ],
+      "affects": [
+        "every form"
+      ]
+    },
+    {
+      "what": "decision H22",
+      "owner": [
+        "hospital",
+        "vendor"
+      ],
+      "affects": [
+        "every screen that prints"
+      ]
+    },
+    {
+      "what": "decision H24",
+      "owner": [
+        "vendor",
+        "clinical_lead"
+      ],
+      "affects": [
+        "every screen"
+      ]
+    }
+  ],
+  "omitted_sections": [
+    "endpoints",
+    "test_plan",
+    "handbook",
+    "decisions",
+    "examples",
+    "schemas"
+  ],
+  "next": "Request omitted sections separately with max_chars=200000; for an oversized endpoints/schemas section use get_endpoint / get_schema for each operation/type.",
+  "endpoints": [
+    {
+      "endpoint": "POST /self/leave-requests",
+      "summary": "Request leave (routes to my supervisor)",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "self.leave.request"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of self.leave.request",
+        "roles_allowed": [
+          "admissions_officer",
+          "anaesthetist",
+          "clinical_specialist",
+          "cssd_technician",
+          "doctor",
+          "employee_self",
+          "head_nurse",
+          "hr_admin",
+          "ipc_nurse",
+          "lab_admin",
+          "lab_technician",
+          "lab_verifier",
+          "maintenance_admin",
+          "ops_admin",
+          "ot_admin",
+          "ot_nurse",
+          "pharmacist",
+          "pharmacy_admin",
+          "quality_officer",
+          "radiographer",
+          "radiologist",
+          "receptionist",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": true,
+      "errors": [
+        {
+          "code": "LEAVE_INSUFFICIENT_BALANCE",
+          "http_status": 409,
+          "message": "Not enough leave balance.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "available",
+            "pending",
+            "requested"
+          ],
+          "details_from": "POST /api/v1/self/leave-requests"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "Idempotency-Key",
+          "in": "header",
+          "required": false,
+          "description": "Unique per logical action; retries return the first result",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Unique per logical action; retries return the first result",
+            "title": "Idempotency-Key"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/LeaveIn"
+            }
+          }
+        }
+      },
+      "responses": {
+        "201": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_LeaveRequestOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "application/json",
+        "model": "LeaveIn",
+        "fields": [
+          {
+            "pointer": "/leave_type",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "enum": [
+              "Annual",
+              "Casual",
+              "Sick",
+              "Maternity",
+              "Unpaid",
+              "Other"
+            ]
+          },
+          {
+            "pointer": "/from_date",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "format": "date"
+          },
+          {
+            "pointer": "/to_date",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "format": "date"
+          },
+          {
+            "pointer": "/half_day",
+            "type": "boolean",
+            "required": false,
+            "nullable": false,
+            "default": false
+          },
+          {
+            "pointer": "/reason",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "max_length": 500
+          }
+        ],
+        "cross_field_rules": {
+          "LeaveIn": [
+            "to_date must be on or after from_date"
+          ]
+        },
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "idempotency_key",
+        "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+        "reconcile_with": "GET /self/leave-requests",
+        "emits_events": [
+          "leave.requested",
+          "notification.created"
+        ],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "GET /self/leave-requests",
+      "summary": "My leave requests",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "self.leave.request"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of self.leave.request",
+        "roles_allowed": [
+          "admissions_officer",
+          "anaesthetist",
+          "clinical_specialist",
+          "cssd_technician",
+          "doctor",
+          "employee_self",
+          "head_nurse",
+          "hr_admin",
+          "ipc_nurse",
+          "lab_admin",
+          "lab_technician",
+          "lab_verifier",
+          "maintenance_admin",
+          "ops_admin",
+          "ot_admin",
+          "ot_nurse",
+          "pharmacist",
+          "pharmacy_admin",
+          "quality_officer",
+          "radiographer",
+          "radiologist",
+          "receptionist",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_LeaveRequestOut__"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "POST /self/leave-requests/{leave_request_id}/cancel",
+      "summary": "Withdraw my pending request",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "self.leave.request"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of self.leave.request",
+        "roles_allowed": [
+          "admissions_officer",
+          "anaesthetist",
+          "clinical_specialist",
+          "cssd_technician",
+          "doctor",
+          "employee_self",
+          "head_nurse",
+          "hr_admin",
+          "ipc_nurse",
+          "lab_admin",
+          "lab_technician",
+          "lab_verifier",
+          "maintenance_admin",
+          "ops_admin",
+          "ot_admin",
+          "ot_nurse",
+          "pharmacist",
+          "pharmacy_admin",
+          "quality_officer",
+          "radiographer",
+          "radiologist",
+          "receptionist",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "FORBIDDEN",
+          "http_status": 403,
+          "message": "You do not have permission to do this.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "any_of",
+            "required"
+          ],
+          "details_from": "POST /api/v1/admin/departments"
+        },
+        {
+          "code": "LEAVE_ALREADY_DECIDED",
+          "http_status": 409,
+          "message": "The leave request was already decided or withdrawn (details.status).",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "status"
+          ],
+          "details_from": "POST /api/v1/self/leave-requests/{leave_request_id}/cancel"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "leave_request_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Leave Request Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_LeaveRequestOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": null,
+      "write": {
+        "protection": "state_guard",
+        "on_lost_answer": "A repeat is refused with LEAVE_ALREADY_DECIDED: the request is decided already. The first call may have succeeded; this error does not replay its result. Never retry automatically; re-read the record, then offer the action again only if it is still needed.",
+        "reconcile_with": "GET /self/leave-requests",
+        "refused_with": "LEAVE_ALREADY_DECIDED",
+        "emits_events": [
+          "notification.created"
+        ],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "GET /self/leave-balances",
+      "summary": "My leave balances",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "self.profile.view"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of self.profile.view",
+        "roles_allowed": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier",
+          "clinic_director",
+          "clinical_specialist",
+          "cssd_technician",
+          "doctor",
+          "employee_self",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "hr_admin",
+          "ipc_nurse",
+          "lab_admin",
+          "lab_technician",
+          "lab_verifier",
+          "maintenance_admin",
+          "ops_admin",
+          "ot_admin",
+          "ot_nurse",
+          "owner",
+          "pharmacist",
+          "pharmacy_admin",
+          "quality_officer",
+          "radiographer",
+          "radiologist",
+          "receptionist",
+          "super_admin",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse",
+          "zakat_officer"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "year",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Year"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_LeaveBalanceOut__"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [],
+        "search": [],
+        "filters": [
+          {
+            "name": "year",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "GET /self/profile",
+      "summary": "My employee profile, payslips and attendance",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "self.profile.view"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of self.profile.view",
+        "roles_allowed": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier",
+          "clinic_director",
+          "clinical_specialist",
+          "cssd_technician",
+          "doctor",
+          "employee_self",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "hr_admin",
+          "ipc_nurse",
+          "lab_admin",
+          "lab_technician",
+          "lab_verifier",
+          "maintenance_admin",
+          "ops_admin",
+          "ot_admin",
+          "ot_nurse",
+          "owner",
+          "pharmacist",
+          "pharmacy_admin",
+          "quality_officer",
+          "radiographer",
+          "radiologist",
+          "receptionist",
+          "super_admin",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse",
+          "zakat_officer"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "ACCOUNT_DISABLED",
+          "http_status": 403,
+          "message": "This account is disabled.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "seen_in_tests"
+          ],
+          "details_fields": [],
+          "details_from": "POST /api/v1/auth/login"
+        }
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_SelfProfileOut_"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "object",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "GET /self/payslips/{payroll_item_id}",
+      "summary": "One of my payslips",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "self.profile.view"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of self.profile.view",
+        "roles_allowed": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier",
+          "clinic_director",
+          "clinical_specialist",
+          "cssd_technician",
+          "doctor",
+          "employee_self",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "hr_admin",
+          "ipc_nurse",
+          "lab_admin",
+          "lab_technician",
+          "lab_verifier",
+          "maintenance_admin",
+          "ops_admin",
+          "ot_admin",
+          "ot_nurse",
+          "owner",
+          "pharmacist",
+          "pharmacy_admin",
+          "quality_officer",
+          "radiographer",
+          "radiologist",
+          "receptionist",
+          "super_admin",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse",
+          "zakat_officer"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "payroll_item_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Payroll Item Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_PayslipOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "object",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "GET /self/roster",
+      "summary": "My duties (two weeks from today by default)",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "self.profile.view"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of self.profile.view",
+        "roles_allowed": [
+          "accountant",
+          "admissions_officer",
+          "anaesthetist",
+          "billing_admin",
+          "cashier",
+          "clinic_director",
+          "clinical_specialist",
+          "cssd_technician",
+          "doctor",
+          "employee_self",
+          "head_nurse",
+          "hospital_admin",
+          "hospital_director",
+          "hr_admin",
+          "ipc_nurse",
+          "lab_admin",
+          "lab_technician",
+          "lab_verifier",
+          "maintenance_admin",
+          "ops_admin",
+          "ot_admin",
+          "ot_nurse",
+          "owner",
+          "pharmacist",
+          "pharmacy_admin",
+          "quality_officer",
+          "radiographer",
+          "radiologist",
+          "receptionist",
+          "super_admin",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse",
+          "zakat_officer"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "date_from",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Date From"
+          }
+        },
+        {
+          "name": "date_to",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Date To"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_RosterEntryOut__"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [],
+        "search": [],
+        "filters": [
+          {
+            "name": "date_from",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "date_to",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "GET /holidays",
+      "summary": "Public holidays of a year (or a date range)",
+      "access": {
+        "authentication": "user",
+        "permissions": [],
+        "permissions_mode": "all",
+        "who": "any logged-in user"
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "year",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 2100,
+                "minimum": 2000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Year"
+          }
+        },
+        {
+          "name": "date_from",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Date From"
+          }
+        },
+        {
+          "name": "date_to",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Date To"
+          }
+        },
+        {
+          "name": "include_inactive",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "type": "boolean",
+            "default": false,
+            "title": "Include Inactive"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_HolidayOut__"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [],
+        "search": [],
+        "filters": [
+          {
+            "name": "year",
+            "required": false,
+            "type": "integer",
+            "minimum": 2000,
+            "maximum": 2100
+          },
+          {
+            "name": "date_from",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "date_to",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "include_inactive",
+            "required": false,
+            "type": "boolean",
+            "default": false
+          }
+        ],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "GET /self/roster/swap-options",
+      "summary": "Colleagues who could work one of my duties",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "self.roster.swap"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of self.roster.swap",
+        "roles_allowed": [
+          "admissions_officer",
+          "anaesthetist",
+          "clinical_specialist",
+          "cssd_technician",
+          "doctor",
+          "employee_self",
+          "head_nurse",
+          "hr_admin",
+          "ipc_nurse",
+          "lab_admin",
+          "lab_technician",
+          "lab_verifier",
+          "maintenance_admin",
+          "ops_admin",
+          "ot_admin",
+          "ot_nurse",
+          "pharmacist",
+          "pharmacy_admin",
+          "quality_officer",
+          "radiographer",
+          "radiologist",
+          "receptionist",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "SWAP_DUTY_STARTED",
+          "http_status": 409,
+          "message": "A duty is swapped before it starts.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "roster_date",
+            "roster_id"
+          ],
+          "details_from": "POST /api/v1/self/roster/swaps"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "roster_id",
+          "in": "query",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Roster Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_SwapOptionsOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "object",
+        "paging": [],
+        "search": [],
+        "filters": [
+          {
+            "name": "roster_id",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "POST /self/roster/swaps",
+      "summary": "Ask a colleague to work one of my duties (cover or swap)",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "self.roster.swap"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of self.roster.swap",
+        "roles_allowed": [
+          "admissions_officer",
+          "anaesthetist",
+          "clinical_specialist",
+          "cssd_technician",
+          "doctor",
+          "employee_self",
+          "head_nurse",
+          "hr_admin",
+          "ipc_nurse",
+          "lab_admin",
+          "lab_technician",
+          "lab_verifier",
+          "maintenance_admin",
+          "ops_admin",
+          "ot_admin",
+          "ot_nurse",
+          "pharmacist",
+          "pharmacy_admin",
+          "quality_officer",
+          "radiographer",
+          "radiologist",
+          "receptionist",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": true,
+      "errors": [
+        {
+          "code": "FORBIDDEN",
+          "http_status": 403,
+          "message": "You do not have permission to do this.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "any_of",
+            "required"
+          ],
+          "details_from": "POST /api/v1/admin/departments"
+        },
+        {
+          "code": "ROSTER_CONFLICT",
+          "http_status": 409,
+          "message": "This duty overlaps another duty of the same employee.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "employee_id",
+            "entry_index",
+            "roster_date",
+            "roster_id",
+            "shift_name"
+          ],
+          "details_from": "POST /api/v1/rosters"
+        },
+        {
+          "code": "ROSTER_ON_LEAVE",
+          "http_status": 409,
+          "message": "The employee is on approved leave that day.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "employee_id",
+            "entry_index",
+            "roster_date"
+          ],
+          "details_from": "POST /api/v1/rosters"
+        },
+        {
+          "code": "SWAP_COLLEAGUE_INELIGIBLE",
+          "http_status": 409,
+          "message": "Choose an active colleague of the same staff category.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "covering_employee_id",
+            "reason"
+          ],
+          "details_from": "POST /api/v1/self/roster/swaps"
+        },
+        {
+          "code": "SWAP_DUTY_STARTED",
+          "http_status": 409,
+          "message": "A duty is swapped before it starts.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "roster_date",
+            "roster_id"
+          ],
+          "details_from": "POST /api/v1/self/roster/swaps"
+        },
+        {
+          "code": "SWAP_EXISTS",
+          "http_status": 409,
+          "message": "This duty is already in an open swap request.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented",
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "roster_id"
+          ],
+          "details_from": "POST /api/v1/self/roster/swaps"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "Idempotency-Key",
+          "in": "header",
+          "required": false,
+          "description": "Unique per logical action; retries return the first result",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Unique per logical action; retries return the first result",
+            "title": "Idempotency-Key"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/SwapIn"
+            }
+          }
+        }
+      },
+      "responses": {
+        "201": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_DutySwapOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "application/json",
+        "model": "SwapIn",
+        "fields": [
+          {
+            "pointer": "/roster_id",
+            "type": "integer",
+            "required": true,
+            "nullable": false,
+            "description": "The duty to be worked by the colleague"
+          },
+          {
+            "pointer": "/covering_employee_id",
+            "type": "integer",
+            "required": true,
+            "nullable": false,
+            "description": "The colleague (same staff category): GET /self/roster/swap-options"
+          },
+          {
+            "pointer": "/return_roster_id",
+            "type": "integer",
+            "required": false,
+            "nullable": true,
+            "description": "For a swap: the colleague's duty the requester works in return; omit for a cover"
+          },
+          {
+            "pointer": "/reason",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "min_length": 3,
+            "max_length": 500
+          }
+        ],
+        "cross_field_rules": {},
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "idempotency_key",
+        "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+        "reconcile_with": "GET /self/roster/swaps",
+        "emits_events": [
+          "notification.created",
+          "roster.swap.updated"
+        ],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "GET /self/roster/swaps",
+      "summary": "Swap requests I made or was asked (open first)",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "self.roster.swap"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of self.roster.swap",
+        "roles_allowed": [
+          "admissions_officer",
+          "anaesthetist",
+          "clinical_specialist",
+          "cssd_technician",
+          "doctor",
+          "employee_self",
+          "head_nurse",
+          "hr_admin",
+          "ipc_nurse",
+          "lab_admin",
+          "lab_technician",
+          "lab_verifier",
+          "maintenance_admin",
+          "ops_admin",
+          "ot_admin",
+          "ot_nurse",
+          "pharmacist",
+          "pharmacy_admin",
+          "quality_officer",
+          "radiographer",
+          "radiologist",
+          "receptionist",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_list_MyDutySwapOut__"
+              }
+            }
+          }
+        }
+      },
+      "list": {
+        "returns": "list",
+        "paging": [],
+        "search": [],
+        "filters": [],
+        "note": null
+      }
+    },
+    {
+      "endpoint": "POST /self/roster/swaps/{swap_id}/accept",
+      "summary": "Agree to work a colleague's duty",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "self.roster.swap"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of self.roster.swap",
+        "roles_allowed": [
+          "admissions_officer",
+          "anaesthetist",
+          "clinical_specialist",
+          "cssd_technician",
+          "doctor",
+          "employee_self",
+          "head_nurse",
+          "hr_admin",
+          "ipc_nurse",
+          "lab_admin",
+          "lab_technician",
+          "lab_verifier",
+          "maintenance_admin",
+          "ops_admin",
+          "ot_admin",
+          "ot_nurse",
+          "pharmacist",
+          "pharmacy_admin",
+          "quality_officer",
+          "radiographer",
+          "radiologist",
+          "receptionist",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "FORBIDDEN",
+          "http_status": 403,
+          "message": "You do not have permission to do this.",
+          "retryable": false,
+          "ui_action": "Explain and hide the action (check x-permissions).",
+          "source": [
+            "seen_in_tests"
+          ],
+          "details_fields": [
+            "any_of",
+            "required"
+          ],
+          "details_from": "POST /api/v1/admin/departments"
+        },
+        {
+          "code": "ROSTER_CONFLICT",
+          "http_status": 409,
+          "message": "This duty overlaps another duty of the same employee.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "employee_id",
+            "entry_index",
+            "roster_date",
+            "roster_id",
+            "shift_name"
+          ],
+          "details_from": "POST /api/v1/rosters"
+        },
+        {
+          "code": "ROSTER_ON_LEAVE",
+          "http_status": 409,
+          "message": "The employee is on approved leave that day.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "employee_id",
+            "entry_index",
+            "roster_date"
+          ],
+          "details_from": "POST /api/v1/rosters"
+        },
+        {
+          "code": "SWAP_DUTY_STARTED",
+          "http_status": 409,
+          "message": "A duty is swapped before it starts.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "roster_date",
+            "roster_id"
+          ],
+          "details_from": "POST /api/v1/self/roster/swaps"
+        },
+        {
+          "code": "SWAP_TRANSITION_INVALID",
+          "http_status": 409,
+          "message": "The duty swap cannot move to that state.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "status"
+          ],
+          "details_from": "POST /api/v1/rosters/swaps/{swap_id}/reject"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "swap_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Swap Id"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/SwapNoteIn"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_DutySwapOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "application/json",
+        "model": "SwapNoteIn",
+        "fields": [
+          {
+            "pointer": "/note",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "max_length": 500
+          }
+        ],
+        "cross_field_rules": {},
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "state_guard",
+        "on_lost_answer": "A repeat is refused with SWAP_TRANSITION_INVALID: the swap is decided already. The first call may have succeeded; this error does not replay its result. Never retry automatically; re-read the record, then offer the action again only if it is still needed.",
+        "reconcile_with": "GET /self/roster/swaps",
+        "refused_with": "SWAP_TRANSITION_INVALID",
+        "emits_events": [
+          "notification.created",
+          "roster.changed",
+          "roster.swap.updated"
+        ],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "POST /self/roster/swaps/{swap_id}/decline",
+      "summary": "Say no to a colleague's request",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "self.roster.swap"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of self.roster.swap",
+        "roles_allowed": [
+          "admissions_officer",
+          "anaesthetist",
+          "clinical_specialist",
+          "cssd_technician",
+          "doctor",
+          "employee_self",
+          "head_nurse",
+          "hr_admin",
+          "ipc_nurse",
+          "lab_admin",
+          "lab_technician",
+          "lab_verifier",
+          "maintenance_admin",
+          "ops_admin",
+          "ot_admin",
+          "ot_nurse",
+          "pharmacist",
+          "pharmacy_admin",
+          "quality_officer",
+          "radiographer",
+          "radiologist",
+          "receptionist",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "SWAP_TRANSITION_INVALID",
+          "http_status": 409,
+          "message": "The duty swap cannot move to that state.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "status"
+          ],
+          "details_from": "POST /api/v1/rosters/swaps/{swap_id}/reject"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "swap_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Swap Id"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/SwapNoteIn"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_DutySwapOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "application/json",
+        "model": "SwapNoteIn",
+        "fields": [
+          {
+            "pointer": "/note",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "max_length": 500
+          }
+        ],
+        "cross_field_rules": {},
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "state_guard",
+        "on_lost_answer": "A repeat is refused with SWAP_TRANSITION_INVALID: the swap is decided already. The first call may have succeeded; this error does not replay its result. Never retry automatically; re-read the record, then offer the action again only if it is still needed.",
+        "reconcile_with": "GET /self/roster/swaps",
+        "refused_with": "SWAP_TRANSITION_INVALID",
+        "emits_events": [
+          "notification.created",
+          "roster.swap.updated"
+        ],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "POST /self/roster/swaps/{swap_id}/cancel",
+      "summary": "Withdraw my swap request (before approval)",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "self.roster.swap"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of self.roster.swap",
+        "roles_allowed": [
+          "admissions_officer",
+          "anaesthetist",
+          "clinical_specialist",
+          "cssd_technician",
+          "doctor",
+          "employee_self",
+          "head_nurse",
+          "hr_admin",
+          "ipc_nurse",
+          "lab_admin",
+          "lab_technician",
+          "lab_verifier",
+          "maintenance_admin",
+          "ops_admin",
+          "ot_admin",
+          "ot_nurse",
+          "pharmacist",
+          "pharmacy_admin",
+          "quality_officer",
+          "radiographer",
+          "radiologist",
+          "receptionist",
+          "surgeon",
+          "triage_nurse",
+          "ward_nurse"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": false,
+      "errors": [
+        {
+          "code": "SWAP_TRANSITION_INVALID",
+          "http_status": 409,
+          "message": "The duty swap cannot move to that state.",
+          "retryable": false,
+          "ui_action": "Show the message and refresh the affected data (another terminal changed it).",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [
+            "status"
+          ],
+          "details_from": "POST /api/v1/rosters/swaps/{swap_id}/reject"
+        },
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "swap_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "title": "Swap Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_DutySwapOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": null,
+      "write": {
+        "protection": "state_guard",
+        "on_lost_answer": "A repeat is refused with SWAP_TRANSITION_INVALID: the swap is decided already. The first call may have succeeded; this error does not replay its result. Never retry automatically; re-read the record, then offer the action again only if it is still needed.",
+        "reconcile_with": "GET /self/roster/swaps",
+        "refused_with": "SWAP_TRANSITION_INVALID",
+        "emits_events": [
+          "notification.created",
+          "roster.swap.updated"
+        ],
+        "prints": false,
+        "related_state_machine": null
+      }
+    },
+    {
+      "endpoint": "POST /ops/work-orders",
+      "summary": "\"Report Issue\" (staff with ops.workorder.report)",
+      "access": {
+        "authentication": "user",
+        "permissions": [
+          "ops.workorder.report"
+        ],
+        "permissions_mode": "all",
+        "who": "holders of ops.workorder.report",
+        "roles_allowed": [
+          "anaesthetist",
+          "clinical_specialist",
+          "cssd_technician",
+          "doctor",
+          "employee_self",
+          "head_nurse",
+          "ipc_nurse",
+          "maintenance_admin",
+          "ops_admin",
+          "ot_nurse",
+          "quality_officer",
+          "receptionist",
+          "super_admin",
+          "surgeon",
+          "ward_nurse"
+        ]
+      },
+      "service_gates": [],
+      "idempotency_key": true,
+      "errors": [
+        {
+          "code": "VALIDATION_ERROR",
+          "http_status": 422,
+          "message": "The request is invalid.",
+          "retryable": false,
+          "ui_action": "Show field errors from details.fields / the message.",
+          "source": [
+            "documented"
+          ],
+          "details_fields": [],
+          "details_from": "PUT /api/v1/admin/badge-stations/{station_id}"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "Idempotency-Key",
+          "in": "header",
+          "required": false,
+          "description": "Unique per logical action; retries return the first result",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Unique per logical action; retries return the first result",
+            "title": "Idempotency-Key"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/IssueIn"
+            }
+          }
+        }
+      },
+      "responses": {
+        "201": {
+          "description": "Successful Response",
+          "content": {
+            "application/json; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/Envelope_WorkOrderOut_"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "request": {
+        "content_type": "application/json",
+        "model": "IssueIn",
+        "fields": [
+          {
+            "pointer": "/category",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "enum": [
+              "Plumbing",
+              "Electrical",
+              "HVAC",
+              "Carpentry",
+              "Biomedical",
+              "IT",
+              "Civil",
+              "Cleaning",
+              "Other"
+            ]
+          },
+          {
+            "pointer": "/description",
+            "type": "string",
+            "required": true,
+            "nullable": false,
+            "min_length": 3,
+            "max_length": 2000
+          },
+          {
+            "pointer": "/priority",
+            "type": "string",
+            "required": false,
+            "nullable": false,
+            "enum": [
+              "Low",
+              "Normal",
+              "High",
+              "Emergency"
+            ],
+            "default": "Normal"
+          },
+          {
+            "pointer": "/location_text",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "max_length": 200
+          },
+          {
+            "pointer": "/ward_id",
+            "type": "integer",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "pointer": "/asset_id",
+            "type": "integer",
+            "required": false,
+            "nullable": true
+          },
+          {
+            "pointer": "/wo_type",
+            "type": "string",
+            "required": false,
+            "nullable": true,
+            "enum": [
+              "InternalAsset",
+              "ExternalContractor",
+              "Utility"
+            ]
+          },
+          {
+            "pointer": "/mark_asset_under_repair",
+            "type": "boolean",
+            "required": false,
+            "nullable": false,
+            "default": true
+          }
+        ],
+        "cross_field_rules": {},
+        "note": "Constraints come from the schema; cross_field_rules are the model validators' own messages (enforced by the server: validate them on screen too). Labels, widgets and masks are yours."
+      },
+      "write": {
+        "protection": "idempotency_key",
+        "on_lost_answer": "If the original call sent an Idempotency-Key, retry with the SAME key and payload within its 24-hour retention: the server answers the first result again (header Idempotent-Replay: true). A new key means a new action. Without the original key, or after retention, re-read first; never automatically resubmit.",
+        "reconcile_with": "GET /ops/work-orders",
+        "emits_events": [
+          "work_order.updated"
+        ],
+        "prints": false,
+        "related_state_machine": null
+      }
+    }
+  ]
+}

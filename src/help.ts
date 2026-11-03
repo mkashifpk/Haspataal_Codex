@@ -10,6 +10,76 @@ export type HelpPage = {
   faqUr: [string, string][];
 };
 export const help: Record<string, HelpPage> = {
+  self_service: {
+    title: "My workspace (Staff self-service portal)",
+    titleUr: "میرا ورک اسپیس (اسٹاف سیلف سروس پورٹل)",
+    purpose: "Comprehensive employee self-service portal for staff across all hospital roles, departments, and wards: (1) Personal duty schedule review and rest-day recognition over dynamic date horizons (GET /self/roster) per statutory Rule rule:907c770e92; (2) Peer-to-peer duty swap and cover requests on upcoming unstarted shifts (POST /self/roster/swaps) with free colleague discovery (GET /self/roster/swap-options) and mandatory operational justification per Rule rule:9274755ac9; (3) Multi-stage shift swap lifecycle and colleague response workflows (POST /self/roster/swaps/{id}/accept, decline, cancel) requiring final roster manager authorization before roster changes take effect per Rule rule:adfadf7120; (4) Statutory leave balance inspection across Annual, Casual, Sick, Maternity, and Unpaid categories (GET /self/leave-balances); (5) Leave request submission to reporting supervisor with half-day options and cancellation of unapproved requests (POST /self/leave-requests); (6) Verified monthly payslip review and printable statements (GET /self/payslips/{id}); (7) Gazetted public holidays schedule consultation (GET /holidays); and (8) Facility maintenance and equipment issue reporting (POST /ops/work-orders).",
+    purposeUr: "تمام شعبوں اور وارڈز کے ہسپتال عملے کے لیے جامع سیلف سروس پورٹل: (1) قاعدہ rule:907c770e92 کے تحت ذاتی ڈیوٹی روسٹر اور آرام کے دنوں کا معائنہ (GET /self/roster)؛ (2) قاعدہ rule:9274755ac9 کے تحت آنے والی ڈیوٹیوں کے لیے ساتھی عملے سے کور یا تبادلے کی درخواست (POST /self/roster/swaps, GET /self/roster/swap-options)؛ (3) قاعدہ rule:adfadf7120 کے تحت تبادلہ درخواستوں کی منظوری، استرداد یا تنسیخ کا ضابطہ جس میں روسٹر مینیجر کی حتمی منظوری سے قبل روسٹر تبدیل نہیں ہوتا؛ (4) سالانہ، اتفاقی، طبی اور زچگی رخصت کا لائیو بیلنس لیجر (GET /self/leave-balances)؛ (5) سپروائزر کو رخصت کی باضابطہ درخواست اور زیر التواء درخواست کی واپسی (POST /self/leave-requests)؛ (6) ماہانہ تنخواہ سلپ کا معائنہ اور پرنٹ ایبل اسٹیٹمنٹ (GET /self/payslips/{id})؛ (7) سرکاری اور قومی تعطیلات کی فہرست (GET /holidays)؛ اور (8) ہسپتال سہولیات اور آلات کی خرابی کی فوری رپورٹنگ (POST /ops/work-orders)۔",
+    steps: [
+      "Review Upcoming Shifts & Rest Days: Open 'My Duties & Rest Days' to inspect scheduled shifts. Under Rule rule:907c770e92, all calendar dates without an assigned shift are highlighted as statutory paid Rest Days.",
+      "Ask a Colleague for Shift Cover or Swap: For any upcoming unstarted duty, click 'Ask a Colleague'. Under Rule rule:9274755ac9, review colleagues of the same category free for that date, select Cover or Swap, enter a reason, and submit.",
+      "Respond to Requests from Colleagues: In the Swaps sub-panel, review shift cover requests made to you by colleagues. Click 'Accept' to agree or 'Decline' to refuse (Rule rule:adfadf7120).",
+      "Understand Roster Manager Final Approval: Note that under Rule rule:adfadf7120, colleague agreement is provisional; the duty roster only changes once the department roster manager formally approves the swap.",
+      "Check Statutory Leave Entitlements: Switch to 'Leave & Balances' to inspect accumulated Annual, Casual, Sick, Maternity, and Unpaid leave days before applying for absence.",
+      "Submit Leave Application: Click 'Apply for Leave', select category and date range, toggle half-day if applicable, add an optional note, and submit to your direct supervisor (POST /self/leave-requests).",
+      "Inspect Verified Monthly Payslips: Switch to 'Payslips & Profile' to review finalized monthly salary vouchers detailing base pay, additions, deductions, extra duty allowances, and printable statements.",
+      "Report Maintenance or IT Issues: Switch to 'Holidays & Report Issue' and click 'Report Facility Issue' (POST /ops/work-orders) to dispatch work orders to the hospital maintenance engineering team.",
+    ],
+    stepsUr: [
+      "آنے والی ڈیوٹیاں اور آرام کے دن دیکھیں: 'میری ڈیوٹیاں اور آرام کے دن' کھولیں۔ قاعدہ rule:907c770e92 کے تحت جس تاریخ کو ڈیوٹی نہ ہو وہ قانونی آرام کا دن ہے۔",
+      "ساتھی سے ڈیوٹی کور یا تبادلہ مانگیں: آنے والی ڈیوٹی پر 'ساتھی سے پوچھیں' دبائیں۔ قاعدہ rule:9274755ac9 کے تحت فارغ ہمکار کا انتخاب کریں، وجہ درج کریں اور درخواست بھیجیں۔",
+      "ساتھیوں کی درخواستوں کا جواب دیں: تبادلہ پینل میں موصول ہونے والی درخواستوں پر 'قبول کریں' یا 'انکار کریں' دبائیں (قاعدہ rule:adfadf7120)۔",
+      "روسٹر مینیجر کی حتمی منظوری: قاعدہ rule:adfadf7120 کے تحت یاد رکھیں کہ باہمی رضامندی کے بعد روسٹر مینیجر کی منظوری لازمی ہے جس کے بعد ہی روسٹر تبدیل ہوتا ہے۔",
+      "چھٹیوں کا دستیاب بیلنس دیکھیں: 'چھٹیاں اور بیلنس' ٹیب میں جا کر سالانہ، میڈیکل اور اتفاقی چھٹیوں کے دستیاب دن چیک کریں۔",
+      "رخصت کی باضابطہ درخواست دیں: 'نئی رخصت کی درخواست' پر کلک کریں، قسم اور تاریخیں منتخب کریں اور سپروائزر کو ارسال کریں (POST /self/leave-requests)۔",
+      "ماہانہ تنخواہ سلپ چیک اور پرنٹ کریں: 'پے سلپس اور پروفائل' میں جا کر بنیادی تنخواہ، کٹوتیوں اور اضافی الاؤنسز کی تفصیلی سلپ دیکھیں اور پرنٹ کریں۔",
+      "سہولیات یا آلات کی خرابی رپورٹ کریں: 'تعطیلات اور شکایات' میں 'خرابی کی شکایت درج کریں' دبا کر ہسپتال انجینئرنگ ٹیم کو ورک آرڈر بھیجیں۔",
+    ],
+    faq: [
+      [
+        "How are weekly rest days determined in continuous 24/7 hospital services (Rule 907c770e92)?",
+        "Under statutory Rule rule:907c770e92, hospital inpatient wards, surgical suites, and emergency facilities operate continuously around the clock without facility-wide closure. Staff rotating on duty rosters do not have a uniform Sunday holiday. Instead, the days without a scheduled shift in your roster horizon (GET /self/roster) are legally recognized as your statutory paid rest days.",
+      ],
+      [
+        "How does 'Ask a Colleague' work, and what is the difference between Cover and Swap (Rule 9274755ac9)?",
+        "Under Rule rule:9274755ac9, for any upcoming duty that has not yet started, you may request assistance: 'Cover' asks a free colleague of your staff category to work your shift without you working in return; 'Swap' selects one of their upcoming duties (where you_can_work_it is true) which you work in exchange. A documented operational reason (such as a family emergency or medical appointment) is strictly required.",
+      ],
+      [
+        "What happens after a colleague accepts my duty swap request (Rule adfadf7120)?",
+        "Under statutory Rule rule:adfadf7120, when a colleague clicks 'Accept', the swap moves to 'Accepted' status. However, the operational duty roster DOES NOT change immediately. The request moves to the department roster manager's approval queue. Only when the roster manager formally approves the swap do the duty assignments update. If the duty start time arrives while the request is still unapproved, it automatically expires.",
+      ],
+      [
+        "Can I withdraw a leave application or swap request that I previously submitted?",
+        "Yes. You can withdraw an unapproved leave request by clicking 'Withdraw' on the Leave & Balances tab (POST /self/leave-requests/{id}/cancel). Similarly, under Rule rule:adfadf7120, you may withdraw an open shift swap request by clicking 'Withdraw' in your Swaps queue at any point prior to final roster manager approval.",
+      ],
+      [
+        "How do I report a broken fixture, electrical fault, or medical device problem?",
+        "On the 'Holidays & Report Issue' tab, click 'Report Facility Issue' (POST /ops/work-orders). Select the relevant maintenance category (such as Biomedical, Electrical, Plumbing, HVAC, or IT), specify the ward or room location, choose urgency priority, and provide a clear description. The request generates a tracked facility work order for the engineering department.",
+      ],
+    ],
+    faqUr: [
+      [
+        "ہسپتال کی 24 گھنٹے سروسز میں ہفتہ وار آرام کے دن کا تعین کیسے ہوتا ہے (قاعدہ 907c770e92)؟",
+        "قانونی قاعدہ rule:907c770e92 کے تحت، چونکہ ہسپتال کے ان ڈور وارڈز اور ایمرجنسی 24 گھنٹے کام کرتے ہیں، اس لیے روسٹرڈ عملے کے لیے اتوار کی چھٹی مخصوص نہیں ہوتی۔ آپ کے ڈیوٹی شیڈول (GET /self/roster) میں جن تاریخوں پر کوئی شفٹ درج نہیں ہے، وہ دن قانوناً آپ کے بامعاوضہ ہفتہ وار آرام کے دن (Rest Days) ہیں۔",
+      ],
+      [
+        "ساتھی سے ڈیوٹی کور اور تبادلے میں کیا فرق ہے اور درخواست کیسے ہوتی ہے (قاعدہ 9274755ac9)؟",
+        "قاعدہ rule:9274755ac9 کے تحت، غیر شروع شدہ ڈیوٹی کے لیے 'کور' کا مطلب ہے کہ ہمکار آپ کی جگہ ڈیوٹی کرے گا اور آپ کو بدلے میں ڈیوٹی نہیں کرنی پڑے گی۔ جبکہ 'تبادلہ' (Swap) میں آپ ان کی آنے والی کسی ڈیوٹی کو بدلے میں کرنے کا انتخاب کرتے ہیں۔ اس کے لیے ٹھوس وجہ (جیسے گھریلو مجبوری) بیان کرنا لازمی ہے۔",
+      ],
+      [
+        "جب ہمکار میری تبادلہ درخواست قبول کر لے تو اس کے بعد کیا ہوتا ہے (قاعدہ adfadf7120)؟",
+        "قانونی قاعدہ rule:adfadf7120 کے مطابق، ہمکار کی رضامندی کے فوراً بعد روسٹر تبدیل نہیں ہوتا۔ یہ درخواست روسٹر مینیجر کے پاس منظوری کے لیے جاتی ہے۔ مینیجر کی باضابطہ منظوری کے بعد ہی ڈیوٹی روسٹر میں تبدیلی لاگو ہوتی ہے۔ اگر ڈیوٹی کا وقت شروع ہونے تک منظوری نہ ملے تو درخواست خودکار منقضی (Expire) ہو جاتی ہے۔",
+      ],
+      [
+        "کیا میں اپنی بھیجی ہوئی رخصت یا تبادلے کی درخواست واپس لے سکتا ہوں؟",
+        "جی ہاں۔ جب تک سپروائزر نے چھٹی منظور نہ کی ہو، آپ 'واپس لیں' (Withdraw) دبا کر درخواست منسوخ کر سکتے ہیں۔ اسی طرح قاعدہ rule:adfadf7120 کے تحت، تبادلہ کی درخواست کو بھی مینیجر کی حتمی منظوری سے پہلے کسی بھی وقت واپس لیا جا سکتا ہے۔",
+      ],
+      [
+        "وارڈ یا کمرے میں بجلی، پلمبنگ یا طبی آلات کی خرابی کی شکایت کیسے درج کریں؟",
+        "'تعطیلات اور شکایات' ٹیب میں 'خرابی کی شکایت درج کریں' دبائیں (POST /ops/work-orders)۔ متعلقہ زمرہ (جیسے بائیو میڈیکل، الیکٹریکل، آئی ٹی وغیرہ) منتخب کریں، وارڈ یا کمرہ نمبر لکھیں اور تفصیل درج کریں۔ اس سے فوری طور پر باضابطہ ورک آرڈر بن جاتا ہے۔",
+      ],
+    ],
+  },
   leave_approvals: {
     title: "Leave approvals (supervisor inbox)",
     titleUr: "چھٹیوں کی منظوری (سپروائزر ان باکس)",
