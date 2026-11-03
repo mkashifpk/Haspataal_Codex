@@ -1,7 +1,7 @@
 # Haspataal checkpoint
 Last updated: 03 November 2026, Antigravity (Codex pair), Asia/Karachi.
 
-## Active request: Phase 8 Screen 153 `leave_approvals` (Leave requests & manager approvals)
+## Active request: Phase 8 Screen 154 `self_service` (Staff self-service portal)
 Executing the Haspataal HMS Roadmap in dependency order along with all tests and MCP progress reporting:
 - **Phase 7 ("Finance, billing and back offices")**: 100% COMPLETE (Screens 133–142, Proposals 286–295).
 - **Phase 8 ("People, facility and IT")**:
@@ -15,9 +15,54 @@ Executing the Haspataal HMS Roadmap in dependency order along with all tests and
   - Screen 150: **`attendance`** ("Staff attendance, punches & timecards", Position 150, 63 points, workspace `hr`) — **COMPLETED** (Proposal **303** awaiting human review on `/docs -> My progress`).
   - Screen 151: **`holiday_calendar`** ("Holiday calendar", Position 151, 44 points, workspace `hr`) — **COMPLETED** (Proposal **304** awaiting human review on `/docs -> My progress`).
   - Screen 152: **`holiday_calendar_admin`** ("Holiday calendar admin", Position 152, 44 points, workspace `owner_dashboard` / `ops_admin`) — **COMPLETED** (Proposal **305** awaiting human review on `/docs -> My progress`).
-  - Screen 153: **`leave_approvals`** ("Leave requests & manager approvals", Position 153, 40 points, workspace `hr`) — **NEXT**.
-    - Scope: Employee leave application, balance tracking, coverage handover, and managerial approval/rejection workflows.
-    - Next Concrete Steps: Retrieve `get_screen_bundle("leave_approvals")`, save contract, generate typescript client, and begin implementation.
+  - Screen 153: **`leave_approvals`** ("Leave requests & manager approvals", Position 153, 40 points, workspace `head_nurse` / `hr`) — **COMPLETED** (Proposal **306** awaiting human review on `/docs -> My progress`).
+  - Screen 154: **`self_service`** ("Staff self-service portal: timecards, leave requests, duty rosters & profile", Position 154, 84 points, workspace `staff`) — **NEXT**.
+    - Scope: Personal staff portal for checking personal attendance punches, submitting leave applications, reviewing upcoming scheduled shifts, and profile consultation.
+    - Next Concrete Steps: Retrieve `get_screen_bundle("self_service")`, save contract, generate typescript client, and begin implementation.
+
+---
+
+### Completed Screen 153 (`leave_approvals`) Checkpoint
+- **Workflow & Standards**: Supervisor leave inbox and managerial approval/rejection workflows (`leave_approvals`, Workspace `head_nurse` / `hr`, Position 153, 40 points):
+  - **Supervisor Queue & Inbox (`GET /hr/leave-requests`):**
+    - Dynamic status filtering: `Pending` (with active unreviewed counter badge), `Approved`, `Rejected`, `Cancelled`, and `All`.
+    - Live text search filtering by employee name, employee number, or clinical designation.
+    - Full details display including leave type badge, date range, duration in days, reason for leave, and supervisor notes.
+  - **Employee Leave Balance Ledger (`GET /hr/employees/{employee_id}/leave-balances`):**
+    - Drill-down modal/drawer displaying comprehensive balance breakdown by calendar year.
+    - Breakdown covers all statutory categories: Annual, Casual, Sick, Maternity, and Unpaid leave.
+    - Audited ledger columns: Opening, Accrued, Carried Forward, Used, and Net Available days.
+  - **Managerial Decision Recording (`POST /hr/leave-requests/{leave_request_id}/decision`):**
+    - Dual decision options: `Approved` or `Rejected` with audited operational notes.
+    - Enforces mandatory rejection reason (minimum 3 characters) to ensure transparent communication with staff.
+    - Optional approval note for shift handover instructions or coverage reminders.
+  - **Segregation of Duties & Concurrency Rules:**
+    - `LEAVE_NOT_YOUR_REPORT`: Restricts decisions to the designated reporting supervisor or authorized HR administrator.
+    - `SELF_APPROVAL_FORBIDDEN`: Prohibits managers from self-approving their own leave applications.
+    - `LEAVE_ALREADY_DECIDED`: Guard against race conditions and concurrent decisions across multiple supervisor terminals.
+    - `LEAVE_INSUFFICIENT_BALANCE`: Alert when employee requests more paid days than their available entitlement.
+  - **Realtime Reactive Refresh (`ev:leave.requested`):**
+    - Automatically updates supervisor queue without polling when direct reports submit new leave requests.
+  - **Service Capability Gating:**
+    - Resolves `full` (approver with `hr.leave.approve` or `hr.leave.manage`), `records` (view-only), and `hidden` modes.
+- **Contracts**: `contracts/leave_approvals.json` (3 endpoints, 1 event, 15 rubric items). Generated client: `src/generated/leave_approvals.ts`.
+- **Domain Policies & Rules (`src/leave-approvals-policy.ts`)**:
+  - `getLeaveApprovalsCapabilityView`, `validateLeaveDecision`, `formatLeaveTypeBadge`, `formatLeaveStatusBadge`, `formatLeaveDateRange`, and `LEAVE_ERROR_MESSAGES`.
+- **UI Architecture (`src/screens/LeaveApprovals.tsx`)**:
+  - Structured supervisor table with status badges, date ranges, duration, and reason previews.
+  - Approval/Rejection decision dialog with validation.
+  - Employee balance ledger drawer with annual year selector and ledger table.
+  - Wired into `src/App.tsx`, `scripts/check-help.mjs`, `src/foundation-catalogue.json` (3 tasks), `src/foundation-task-map.json` (3 controls), and `src/foundation-help.ts` (18 interactive controls mapped with bilingual titles and guides).
+  - Authored comprehensive handbook entry and 5 role FAQs in `src/help.ts`; verified bundled screenshots in `public/handbook/leave_approvals-en.png` and `leave_approvals-ur.png`.
+- **Verification**:
+  - Automated unit tests: `tests/leave-approvals.test.mjs` passed (6/6 tests).
+  - Help check: `node scripts/check-help.mjs` passed (152 screens, 3,928 controls, 2,884 groups, 69 FAQ seeds, 30 workspace guides).
+  - Full help coverage test: `node --test tests/help-coverage.test.mjs` passed (28/28 tests across 152 screens).
+  - Full test suite: `npm test` passed (803/803 tests across all 19 test suites).
+  - TypeScript compiler: `npx.cmd tsc --noEmit` passed with 0 errors.
+  - Production build: `npm.cmd run build` succeeded (`dist/assets/index-B7e44oPN.js`).
+- **Proposal**:
+  - Proposal ID: **306** (status: `pending` on `/docs -> My progress`, build `index-B7e44oPN.js`, 14 rubric items claimed, `q:fresh_data` left pending human review).
 
 ---
 

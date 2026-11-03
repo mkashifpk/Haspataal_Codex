@@ -10,6 +10,76 @@ export type HelpPage = {
   faqUr: [string, string][];
 };
 export const help: Record<string, HelpPage> = {
+  leave_approvals: {
+    title: "Leave approvals (supervisor inbox)",
+    titleUr: "چھٹیوں کی منظوری (سپروائزر ان باکس)",
+    purpose: "Supervisor inbox and managerial approval/rejection workflows for employee leave requests across departments, wards, and clinical units: (1) Supervisor leave queue displaying direct reports' pending, approved, rejected, and cancelled applications (GET /hr/leave-requests); (2) Real-time update notifications when direct reports submit new leave applications (ev:leave.requested); (3) Employee leave balance ledger breakdown across statutory categories including Annual, Casual, Sick, Maternity, and Unpaid leave (GET /hr/employees/{employee_id}/leave-balances); (4) Dual-outcome decision recording allowing supervisors to approve or reject leave requests with audited operational notes (POST /hr/leave-requests/{leave_request_id}/decision); (5) Mandatory justification on rejection to communicate operational reasons for denied time off; (6) Enforcement of hierarchical supervisory authorization (LEAVE_NOT_YOUR_REPORT) and strict prohibition against approving one's own leave requests (SELF_APPROVAL_FORBIDDEN); (7) Protection against concurrent decisions (LEAVE_ALREADY_DECIDED) and insufficient entitlement guards (LEAVE_INSUFFICIENT_BALANCE); and (8) Downstream attendance and duty roster integration marking approved absences as Leave on staff timecards.",
+    purposeUr: "ملازمین کی رخصت کی درخواستوں کے لیے سپروائزر ان باکس اور انتظامی منظوری یا استرداد کا باضابطہ نظام: (1) ماتحت عملے کی زیر التواء، منظور، مسترد اور منسوخ درخواستوں کی تفصیلی فہرست (GET /hr/leave-requests)؛ (2) ملازم کی طرف سے نئی درخواست جمع کرانے پر بغیر پولنگ کے لائیو نوٹیفکیشن (ev:leave.requested)؛ (3) سالانہ، اتفاقی، طبی، زچگی اور بلا تنخواہ رخصت کا لائیو بیلنس لیجر مع ابتدائی، حاصل کردہ اور استعمال شدہ دنوں کی تفصیل (GET /hr/employees/{id}/leave-balances)؛ (4) آڈٹ شدہ نوٹس کے ساتھ منظوری یا استرداد کا باضابطہ فیصلہ (POST /hr/leave-requests/{id}/decision)؛ (5) رخصت مسترد کرنے کی صورت میں لازمی وضاحتی وجہ کا اندراج؛ (6) صرف نامزد سپروائزر کی طرف سے فیصلے کا نفاذ (LEAVE_NOT_YOUR_REPORT) اور اپنی چھٹی خود منظور کرنے کی سخت ممانعت (SELF_APPROVAL_FORBIDDEN)؛ (7) پہلے سے نمٹائی گئی درخواستوں کے تصادم سے تحفظ (LEAVE_ALREADY_DECIDED) اور ناکافی بیلنس کی نشاندہی (LEAVE_INSUFFICIENT_BALANCE)؛ اور (8) منظور شدہ رخصت پر حاضری ٹائم کارڈز اور ڈیوٹی روسٹر کے ساتھ خودکار رابطہ۔",
+    steps: [
+      "Review Supervisor Queue: Open the screen to inspect pending leave requests from direct reports. The top tab badge displays the count of unreviewed requests.",
+      "Filter by Status or Search: Switch between 'Pending', 'Approved', 'Rejected', 'Cancelled', and 'All' tabs, or search by staff member name, employee ID, or designation.",
+      "Check Leave Balances: Click 'Balances' on any request row to open the employee's live leave ledger (GET /hr/employees/{id}/leave-balances), displaying opening, accrued, used, and remaining days.",
+      "Evaluate Departmental Roster Coverage: Before approving, verify ward or clinic duty roster coverage to ensure minimum safe staffing thresholds are preserved during the requested dates.",
+      "Approve Leave Request: Click 'Approve' to open the approval dialog. Enter an optional handover instruction note and click 'Confirm Approval' (POST /hr/leave-requests/{id}/decision).",
+      "Reject Leave Request: Click 'Reject' to open the rejection modal. State a clear and documented operational reason (minimum 3 characters) and click 'Confirm Rejection'.",
+      "Observe Real-Time Event Refresh: When a staff member submits a new leave request, the system detects ev:leave.requested and refreshes the supervisor inbox automatically.",
+      "Verify Downstream Attendance: Once approved, the employee's duty days within the requested span automatically update to 'Leave' status on attendance and roll-call sheets.",
+    ],
+    stepsUr: [
+      "سپروائزر قطار کا جائزہ لیں: ماتحت عملے کی رخصت کی درخواستیں دیکھنے کے لیے صفحہ کھولیں۔ سب سے اوپر ٹیب پر زیر التواء درخواستوں کی تعداد دکھائی دیتی ہے۔",
+      "فلٹر یا تلاش کا استعمال: 'زیر التواء'، 'منظور شدہ'، 'مسترد'، 'منسوخ شدہ' یا 'تمام' کے درمیان سوئچ کریں، یا نام، ملازم کوڈ یا عہدے سے تلاش کریں۔",
+      "رخصت کا بیلنس چیک کریں: ملازم کے سالانہ، اتفاقی اور میڈیکل بیلنس دیکھنے کے لیے 'بیلنس دیکھیں' دبائیں تاکہ معلوم ہو سکے کہ کتنے دن دستیاب ہیں۔",
+      "وارڈ یا کلینک کی ڈیوٹی روسٹر کوریج دیکھیں: منظوری سے پہلے تصدیق کریں کہ ان تاریخوں میں مریضوں کی دیکھ بھال کے لیے عملے کی محفوظ تعداد موجود ہے۔",
+      "رخصت منظور کریں: 'منظور کریں' دبا کر اختیاری نوٹ درج کریں اور 'منظور کریں' بٹن دبا کر منظوری سرور پر محفوظ کریں۔",
+      "رخصت مسترد کریں: 'مسترد کریں' دبا کر مسترد کرنے کی ٹھوس وجہ (کم از کم 3 حروف) درج کریں اور تصدیق کریں۔",
+      "ریئل ٹائم لائیو نوٹیفکیشن: جب کوئی ملازم نئی چھٹی کی درخواست بھیجتا ہے تو ev:leave.requested کے تحت صفحہ خودکار تازہ ہو جاتا ہے۔",
+      "حاضری پر اثر کا معائنہ: منظوری کے بعد ملازم کے ان دنوں کے ٹائم کارڈز خودکار طور پر 'رخصت' (Leave) کے طور پر نشان زد ہو جاتے ہیں۔",
+    ],
+    faq: [
+      [
+        "The screen says 'Only the employee's supervisor can decide this leave.' (LEAVE_NOT_YOUR_REPORT). Why, and what do I do?",
+        "This error occurs when the logged-in user is not configured as the official reporting supervisor for this employee in the staff hierarchy, and does not hold executive HR management rights (hr.leave.manage). Line supervisors may only decide leave applications for direct reports. If management responsibilities have changed, contact Human Resources to update the supervisor assignment in the Staff Directory.",
+      ],
+      [
+        "The screen says 'The leave request was already decided or withdrawn.' (LEAVE_ALREADY_DECIDED). Why, and what do I do?",
+        "This error indicates optimistic concurrency: another supervisor or HR officer has already approved or rejected this application, or the employee cancelled the request from their personal portal. The frontend automatically refreshes the table to reflect the current status (Approved, Rejected, or Cancelled). No further decision is required.",
+      ],
+      [
+        "The screen says 'You cannot approve your own request.' (SELF_APPROVAL_FORBIDDEN). Why, and what do I do?",
+        "Under institutional segregation of duties and hospital HR governance, no employee or manager may approve their own leave request, even if they possess administrative privileges. Personal leave applications submitted by a supervisor or department head must be approved by their designated superior officer (e.g. Nursing Director, Medical Superintendent, or Hospital Administrator).",
+      ],
+      [
+        "The screen says 'Not enough leave balance.' (LEAVE_INSUFFICIENT_BALANCE). Why, and what do I do?",
+        "This error occurs when an employee requests more days of a paid leave type (such as Annual or Casual leave) than they have accumulated in their available balance. Supervisors can click 'Balances' to review the employee's ledger. If paid leave is exhausted, the supervisor should reject the request or request the employee to submit an application for Unpaid Leave.",
+      ],
+      [
+        "What do the states of a leave request mean (Pending, Approved, Rejected, Cancelled), and what moves it from one to the next?",
+        "A leave application starts in 'Pending' state when submitted by the employee (ev:leave.requested). A supervisor's decision moves it to 'Approved' (granting authorized absence and updating attendance timecards) or 'Rejected' (denying the absence with an explanation). The employee can withdraw a pending application, transitioning it to 'Cancelled'. Once decided, status changes are permanent and audited.",
+      ],
+    ],
+    faqUr: [
+      [
+        "اسکرین پر 'صرف براہ راست سپروائزر یا ایڈمن فیصلہ کر سکتا ہے' (LEAVE_NOT_YOUR_REPORT) کا پیغام کیوں آتا ہے اور کیا کریں؟",
+        "یہ خرابی اس وقت پیش آتی ہے جب لاگ ان صارف ملازم کے باضابطہ رپورٹنگ سپروائزر کے طور پر درج نہ ہو اور اس کے پاس مکمل ایچ آر اجازت (hr.leave.manage) نہ ہو۔ سپروائزر صرف اپنے ماتحت عملے کی چھٹیاں منظور کر سکتے ہیں۔ اگر ذمہ داریاں تبدیل ہوئی ہیں تو اسٹاف ڈائریکٹری میں سپروائزر کا ریکارڈ اپ ڈیٹ کرنے کے لیے ایچ آر سے رابطہ کریں۔",
+      ],
+      [
+        "اسکرین پر 'رخصت پہلے ہی نمٹائی جا چکی ہے' (LEAVE_ALREADY_DECIDED) کا پیغام کیوں آتا ہے اور کیا کریں؟",
+        "اس کا مطلب ہے کہ کسی دوسرے منتظم یا ایچ آر افسر نے پہلے ہی درخواست منظور یا مسترد کر دی ہے، یا ملازم نے خود درخواست واپس لے لی ہے۔ سسٹم خودکار طور پر ڈیٹا ریفریش کر کے موجودہ حالت دکھا دیتا ہے۔ اس پر مزید کارروائی کی ضرورت نہیں ہوتی۔",
+      ],
+      [
+        "اسکرین پر 'آپ اپنی ذاتی رخصت خود منظور نہیں کر سکتے' (SELF_APPROVAL_FORBIDDEN) کا پیغام کیوں آتا ہے؟",
+        "ہسپتال کے ضوابط اور شفافیت کے تحت کوئی بھی ملازم یا مینیجر اپنی چھٹی خود منظور نہیں کر سکتا، چاہے اس کے پاس ایڈمن کے اختیارات ہوں۔ سپروائزر یا وارڈ انچارج کی چھٹی اس کے متعلقہ اعلیٰ افسر (جیسے نرسنگ ڈائریکٹر، ایم ایس یا ہسپتال ایڈمنسٹریٹر) کی طرف سے منظور کی جانی ضروری ہے۔",
+      ],
+      [
+        "اسکرین پر 'رخصت کا ناکافی بیلنس' (LEAVE_INSUFFICIENT_BALANCE) کا پیغام کیوں آتا ہے اور کیا کریں؟",
+        "یہ اس وقت ہوتا ہے جب ملازم کی درخواست کردہ چھٹیوں کے دن اس کے دستیاب بیلنس سے زیادہ ہوں۔ سپروائزر 'بیلنس دیکھیں' پر کلک کر کے لیجر چیک کر سکتا ہے۔ اگر بامعاوضہ چھٹیاں ختم ہو چکی ہوں تو درخواست مسترد کر کے ملازم کو بلا تنخواہ رخصت (Unpaid Leave) جمع کرانے کی ہدایت دی جا سکتی ہے۔",
+      ],
+      [
+        "رخصت کی مختلف حالتوں (Pending, Approved, Rejected, Cancelled) کا کیا مطلب ہے؟",
+        "جب ملازم درخواست دیتا ہے تو یہ 'زیر التواء' (Pending) ہوتی ہے۔ سپروائزر کے فیصلے سے یہ 'منظور شدہ' (Approved) بن جاتی ہے جس سے حاضری کے ٹائم کارڈز پر رخصت درج ہو جاتی ہے، یا وضاحتی نوٹ کے ساتھ 'مسترد' (Rejected) ہو جاتی ہے۔ ملازم اپنی زیر التواء درخواست منسوخ بھی کر سکتا ہے جس سے یہ 'منسوخ شدہ' (Cancelled) ہو جاتی ہے۔ فیصلہ حتمی اور آڈٹ شدہ ہوتا ہے۔",
+      ],
+    ],
+  },
   holiday_calendar_admin: {
     title: "Holiday calendar admin",
     titleUr: "انتظامی تعطیلات کیلنڈر",

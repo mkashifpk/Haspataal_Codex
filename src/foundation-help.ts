@@ -20,6 +20,7 @@ export const phase1Screens = [
 const approvalScreens = ["approval_queue", "charity_approvals"];
 // Coverage grows screen by screen; Phase 1 acceptance remains separate.
 export const deliveredHelpScreens = [
+  "leave_approvals",
   "holiday_calendar_admin",
   "holiday_calendar",
   "attendance",
@@ -162,6 +163,26 @@ const g = (
 // IDs are also attached to the actual controls. The build rejects missing
 // mappings and empty translations instead of treating a page as coverage.
 export const controlGuides: Record<string, ControlGuide> = {
+  // Screen 153: leave_approvals (Leave requests & manager approvals)
+  "leave_approvals.balances_btn_close": g(["leave_approvals"], ["Close balances button", "بیلنس بند کریں"], ["Closes employee leave balances breakdown dialog.", "ملازم کی چھٹیوں کے بیلنس کا تفصیلی ڈائیلاگ بند کرتا ہے۔"]),
+  "leave_approvals.balances_btn_refresh": g(["leave_approvals"], ["Refresh balances button", "بیلنس تازہ کریں"], ["Reloads employee leave balance ledger from server (GET /hr/employees/{id}/leave-balances).", "سرور سے ملازم کا رخصت بیلنس لیجر دوبارہ حاصل کرتا ہے۔"]),
+  "leave_approvals.balances_year_select": g(["leave_approvals"], ["Balances year select", "بیلنس سال"], ["Selects calendar year for leave balance ledger inquiry.", "رخصت بیلنس کے استفسار کے لیے سال منتخب کرتا ہے۔"]),
+  "leave_approvals.banner_dismiss_error": g(["leave_approvals"], ["Dismiss error button", "خرابی کا بینر بند کریں"], ["Dismisses leave approvals error alert banner.", "چھٹیوں کی منظوری کی خرابی کا بینر بند کرتا ہے۔"]),
+  "leave_approvals.banner_dismiss_success": g(["leave_approvals"], ["Dismiss success button", "کامیابی کا بینر بند کریں"], ["Dismisses operational confirmation banner.", "کامیابی کا تصدیقی بینر بند کرتا ہے۔"]),
+  "leave_approvals.btn_refresh": g(["leave_approvals"], ["Refresh leave requests button", "درخواستیں تازہ کریں"], ["Reloads leave requests inbox from server (GET /hr/leave-requests).", "سرور سے چھٹیوں کی درخواستوں کا ان باکس دوبارہ لوڈ کرتا ہے۔"]),
+  "leave_approvals.decision_btn_cancel": g(["leave_approvals"], ["Cancel decision button", "منسوخ بٹن"], ["Cancels leave decision confirmation dialog.", "رخصت کے فیصلے کا تصدیقی ڈائیلاگ منسوخ کرتا ہے۔"]),
+  "leave_approvals.decision_btn_confirm": g(["leave_approvals"], ["Confirm decision button", "فیصلے کی تصدیق"], ["Submits supervisor approval or rejection decision to server (POST /hr/leave-requests/{id}/decision).", "سپروائزر کی منظوری یا استرداد کا حتمی فیصلہ سرور پر محفوظ کرتا ہے۔"]),
+  "leave_approvals.decision_note_input": g(["leave_approvals"], ["Decision note textarea", "فیصلے کی وضاحت"], ["Supervisor explanation note for approval handover or mandatory rejection reason.", "منظوری کی ہدایات یا استرداد کی لازمی وضاحتی وجوہات کا متن۔"]),
+  "leave_approvals.filter_search": g(["leave_approvals"], ["Search employee filter", "ملازم تلاش"], ["Filters leave requests by employee name, employee number, or designation.", "ملازم کے نام، ملازم نمبر یا عہدے سے درخواستیں فلٹر کرتا ہے۔"]),
+  "leave_approvals.filter_status_all": g(["leave_approvals"], ["All status filter tab", "تمام درخواستیں"], ["Shows all leave requests regardless of decision state.", "فیصلے کی تمام حالتوں کی رخصت درخواستیں دکھاتا ہے۔"]),
+  "leave_approvals.filter_status_approved": g(["leave_approvals"], ["Approved status filter tab", "منظور شدہ"], ["Filters leave requests to show approved applications.", "منظور شدہ رخصت کی درخواستیں دکھاتا ہے۔"]),
+  "leave_approvals.filter_status_cancelled": g(["leave_approvals"], ["Cancelled status filter tab", "منسوخ شدہ"], ["Filters leave requests to show withdrawn or cancelled applications.", "منسوخ یا واپس لی گئی رخصت کی درخواستیں دکھاتا ہے۔"]),
+  "leave_approvals.filter_status_pending": g(["leave_approvals"], ["Pending status filter tab", "زیر التواء"], ["Filters leave requests to show pending supervisor review queue.", "سپروائزر کے جائزے کے لیے زیر التواء درخواستیں دکھاتا ہے۔"]),
+  "leave_approvals.filter_status_rejected": g(["leave_approvals"], ["Rejected status filter tab", "مسترد شدہ"], ["Filters leave requests to show rejected applications.", "مسترد شدہ رخصت کی درخواستیں دکھاتا ہے۔"]),
+  "leave_approvals.table_btn_approve": g(["leave_approvals"], ["Approve request button", "منظور کریں"], ["Opens supervisor approval dialog for this leave request.", "اس درخواست کے لیے سپروائزر کی منظوری کا فارم کھولتا ہے۔"]),
+  "leave_approvals.table_btn_reject": g(["leave_approvals"], ["Reject request button", "مسترد کریں"], ["Opens supervisor rejection dialog requiring mandatory reason.", "لازمی وجہ درج کرنے کے ساتھ استرداد کا فارم کھولتا ہے۔"]),
+  "leave_approvals.table_btn_view_balances": g(["leave_approvals"], ["View balances button", "بیلنس دیکھیں"], ["Opens dialog showing employee's live annual, casual, and sick leave balances.", "ملازم کے سالانہ، اتفاقی اور طبی چھٹیوں کا لائیو بیلنس دکھاتا ہے۔"]),
+
   // Screen 152: holiday_calendar_admin (Holiday Calendar Admin & Governance)
   "holiday_calendar_admin.banner_dismiss_error": g(["holiday_calendar_admin"], ["Dismiss error button", "خرابی کا بینر بند کریں"], ["Dismisses executive holiday calendar error banner.", "انتظامی تعطیلات کیلنڈر کی خرابی کا بینر بند کرتا ہے۔"]),
   "holiday_calendar_admin.banner_dismiss_success": g(["holiday_calendar_admin"], ["Dismiss success button", "کامیابی کا بینر بند کریں"], ["Dismisses operational confirmation banner.", "کامیابی کا تصدیقی بینر بند کرتا ہے۔"]),
