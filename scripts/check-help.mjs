@@ -299,6 +299,7 @@ export function checkHelp({
       "LeaveApprovals",
       "SelfService",
       "Payroll",
+      "OpsConsole",
     ].map((n) => `src/screens/${n}.tsx`),
   ];
   const used = new Set(),

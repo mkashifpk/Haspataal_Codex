@@ -1,7 +1,7 @@
 # Haspataal checkpoint
 Last updated: 03 November 2026, Antigravity (Codex pair), Asia/Karachi.
 
-## Active request: Phase 8 Screen 156 `ops_console` (Operations administration console)
+## Active request: Phase 8 Screen 157 `badge_station_kiosk` (Badge station kiosk)
 Executing the Haspataal HMS Roadmap in dependency order along with all tests and MCP progress reporting:
 - **Phase 7 ("Finance, billing and back offices")**: 100% COMPLETE (Screens 133–142, Proposals 286–295).
 - **Phase 8 ("People, facility and IT")**:
@@ -18,9 +18,74 @@ Executing the Haspataal HMS Roadmap in dependency order along with all tests and
   - Screen 153: **`leave_approvals`** ("Leave requests & manager approvals", Position 153, 40 points, workspace `head_nurse` / `hr`) — **COMPLETED** (Proposal **306** awaiting human review on `/docs -> My progress`).
   - Screen 154: **`self_service`** ("Staff self-service portal: timecards, leave requests, duty rosters & profile", Position 154, 84 points, workspace `self_service`) — **COMPLETED** (Proposal **307** awaiting human review on `/docs -> My progress`).
   - Screen 155: **`payroll`** ("Staff payroll processing, salary slips, deductions & tax statements", Position 155, 54 points, workspace `hr`) — **COMPLETED** (Proposal **308** awaiting human review on `/docs -> My progress`).
-  - Screen 156: **`ops_console`** ("Operations administration console", Position 156, 83 points, workspace `ops_admin`) — **IN PROGRESS**.
-    - Scope: Facility operations, maintenance work orders, breakdown triage, technician assignments, SLA monitoring, and facility assets.
-    - Contracts & files: Inspect `get_screen_bundle("ops_console")`, retrieve endpoints, generate TypeScript client, create domain policy, build UI, register F1/handbook help, add unit tests, run verification, build, and propose progress.
+  - Screen 156: **`ops_console`** ("Operations administration console", Position 156, 83 points, workspace `ops_admin`) — **COMPLETED** (Proposal **309** awaiting human review on `/docs -> My progress`).
+  - Screen 157: **`badge_station_kiosk`** ("Badge station kiosk", Position 157, 45 points, workspace `badge_station`) — **IN PROGRESS**.
+    - Scope: Full-screen kiosk page on PC/tablet with barcode scanner (or camera). Staff show badge; kiosk posts scan and flashes outcome. No login, no keyboard for the person scanning.
+    - Endpoints: `GET /badge-stations/me` (setup, station-authenticated with `X-Station-Key`), `POST /badge-stations/scans` (post scan result, idempotent with `gateway_event_id`).
+    - Statutory Rules:
+      - `rule:f98f89a7b6`: Configure once with station id and key (`X-Station-Key`); never show the key.
+      - `rule:141cb8255f`: USB scanner types code and Enter: keep invisible input focused, or decode camera stream.
+      - `rule:b2f4ebb077`: `needs_bed_code`: collect two scans (bed sticker `HMS-BED-…` and badge) within 60 s, then post them together.
+      - `rule:2554916922`: Big green / red result with outcome in words and sound; ready for next person after 3 s.
+      - `rule:438ca845ec`: Queue scans with `gateway_event_id` while server unreachable and resend (retries are idempotent).
+    - Next Concrete Steps:
+      1. Commit Screen 156 (`ops_console`) to git.
+      2. Fetch and review full contract for `badge_station_kiosk`.
+      3. Generate TypeScript API client in `src/generated/badge_station_kiosk.ts`.
+      4. Copy handbook reference screenshots `badge_station_kiosk-en.png` and `badge_station_kiosk-ur.png`.
+      5. Implement domain policies in `src/badge-station-kiosk-policy.ts`.
+      6. Implement kiosk UI component in `src/screens/BadgeStationKiosk.tsx`.
+      7. Integrate into `src/App.tsx`, `scripts/check-help.mjs`, `src/foundation-catalogue.json`, `src/foundation-task-map.json`, `src/foundation-help.ts`, `src/help.ts`.
+      8. Author unit tests `tests/badge-station-kiosk.test.mjs`.
+      9. Run verification: check-help, help coverage, tsc, npm test, production build, and submit proposal #310.
+
+---
+
+### Completed Screen 156 (`ops_console`) Checkpoint
+- **Workflow & Standards**: Complete Facility Operations & Maintenance Console (`ops_console`, Workspace `ops_admin`, Position 156, 83 points):
+  - **Work Orders & Emergency Breakdown Triage (`GET /ops/work-orders`, `GET /ops/work-orders/{wo_id}`):**
+    - High-density work order queue prioritizing emergency breakdowns at the top.
+    - Comprehensive filtering by status (`Reported`, `Assigned`, `InProgress`, `Completed`, `Cancelled`), priority (`Low`, `Medium`, `High`, `Critical`), and text query.
+    - Status history timeline card detailing every lifecycle state transition with notes and timestamps.
+  - **Work Order Assignment & Maintenance Flow (`POST /ops/work-orders/{wo_id}/assign`, `/start`, `/cancel`):**
+    - Assign internal technician or external vendor with estimated cost and instruction note (`validateAssignForm`).
+    - Mark work started and in progress (`POST /ops/work-orders/{wo_id}/start`).
+    - Cancel work order with mandatory audited operational reason (`validateCancelForm`).
+  - **Segregation of Financial Duties & AP Routing (`rule:a7fc19b5fc`, `POST /ops/work-orders/{wo_id}/complete`):**
+    - Ops/maintenance can raise expenditure liabilities upon job completion, but can never disburse funds directly.
+    - Job completion automatically routes contractor payment requests directly to the Accountant AP queue with final cost, receipt/invoice reference, and payment routing summary.
+  - **Hospital Assets Directory & Overhead Utility Logging (`GET /ops/assets`, `POST /ops/assets`, `PUT /ops/assets/{asset_id}`, `GET /ops/utility-categories`, `POST /ops/utility-logs`, `GET /ops/utility-logs`):**
+    - Equipment and asset monitor list with categories, serial numbers, locations, and costs.
+    - Register new hospital asset and edit existing asset locations/costs (`validateAssetForm`).
+    - Overhead utility accounting: log utility bills (electricity, diesel, oxygen, water) creating AP liabilities with consumption and invoice details (`validateUtilityForm`).
+  - **Bed Sanitization & Discharge Clearance Stages (`POST /beds/{id}/mark-cleaned`, `POST /admissions/{id}/discharge/{stage}/clear`):**
+    - Clean Bed confirmation modal marking terminal sanitization complete and unlocking beds for admissions.
+    - Discharge stage clearance modal clearing ordered stages (`"OpsCleaning" | "PharmacyClearance" | "NursingMARVerification" | "BillingSettlement"`).
+  - **Live Facility Telemetry & Staff Lookup (`GET /ops/facility-feed`, `GET /staff/lookup`, `ev:ops.badge.scan`, `ev:work_order.updated`):**
+    - Live feed of badge scan events across hospital doors with auto-poll toggle.
+    - Quick staff credential and badge lookup directory (`{ q: string }`).
+  - **Service Capability Gating:**
+    - Resolves `full` (`ops_admin`, `super_admin`, `maintenance_admin`), `records` (view-only), and `hidden` modes.
+- **Contracts**: `contracts/ops_console.json` (16 endpoints, 1 rule `rule:a7fc19b5fc`, 2 events `ev:work_order.updated`, `ev:ops.badge.scan`, 30 rubric items). Generated client: `src/generated/ops_console.ts`.
+- **Domain Policies & Rules (`src/ops-console-policy.ts`)**:
+  - `getOpsConsoleCapabilityView`, `evaluatePayableRouting`, `validateAssignForm`, `validateCompleteForm`, `validateCancelForm`, `validateAssetForm`, `validateUtilityForm`, and `OPS_CONSOLE_ERROR_MESSAGES`.
+- **UI Architecture (`src/screens/OpsConsole.tsx`)**:
+  - 3-pane responsive layout:
+    - Pane 1: Work Orders & Triage with priority breakdown, drilldown card, and assign/start/complete/cancel modals.
+    - Pane 2: Assets Directory & Overhead Utility Bills with register/edit modal and utility log modal.
+    - Pane 3: Live Facility Badge Scan Feed with auto-poll and staff credential lookup directory.
+    - Additional quick actions: Clean Bed confirmation modal and Discharge stage clearance modal.
+  - Wired into `src/App.tsx`, `scripts/check-help.mjs`, `src/foundation-catalogue.json` (16 tasks), `src/foundation-task-map.json` (16 controls), and `src/foundation-help.ts` (66 interactive controls mapped with bilingual titles and guides).
+  - Authored comprehensive handbook entry and 5 role FAQs in `src/help.ts`; verified bundled screenshots in `public/handbook/ops_console-en.png` and `ops_console-ur.png`.
+- **Verification**:
+  - Automated unit tests: `tests/ops-console.test.mjs` passed (9/9 tests).
+  - Help check: `node scripts/check-help.mjs` passed (155 screens, 4,067 controls, 3,019 groups, 69 FAQ seeds, 30 workspace guides).
+  - Full help coverage test: `node --test tests/help-coverage.test.mjs` passed (28/28 tests across 155 screens).
+  - Full test suite: `npm test` passed (828/828 tests across all 19 test suites).
+  - TypeScript compiler: `npx.cmd tsc --noEmit` passed with 0 errors.
+  - Production build: `npm.cmd run build` succeeded (`dist/assets/index-D9YzrGc7.js`).
+- **Proposal**:
+  - Proposal ID: **309** (status: `pending` on `/docs -> My progress`, build `index-D9YzrGc7.js`, 29 rubric items claimed, `q:fresh_data` left pending human review).
 
 ---
 

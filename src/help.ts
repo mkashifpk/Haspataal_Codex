@@ -10,6 +10,74 @@ export type HelpPage = {
   faqUr: [string, string][];
 };
 export const help: Record<string, HelpPage> = {
+  ops_console: {
+    title: "Facility operations (3 panes)",
+    titleUr: "سہولیات اور دیکھ بھال کا آپریشنز کنسول (3 پین)",
+    purpose: "Comprehensive 3-pane facility command and control console: (1) Pane 1 manages open maintenance work orders, prioritizing emergency breakdowns (GET /ops/work-orders, GET .../{wo_id}), technician assignments (POST .../assign), progress tracking (POST .../start), cancellation (POST .../cancel), and job completion (POST .../complete); (2) Enforces statutory Rule rule:a7fc19b5fc: operations raises payables for external contractors upon job completion, but can never disburse funds directly—all contractor payments route automatically to the Accountant's Accounts Payable queue; (3) Pane 2 manages physical hospital equipment, biomedical assets, and lifecycle statuses (GET /ops/assets, POST /ops/assets, PUT .../{asset_id}); (4) Pane 2 logs monthly overhead utility bills (electricity, diesel, oxygen, water) linking directly to AP (POST /ops/utility-logs, GET ...); (5) Discharge turnaround and bed management: clears ordered facility discharge stages (POST /admissions/{id}/discharge/{stage}/clear) and confirms bed terminal cleaning (POST /beds/{id}/mark-cleaned); (6) Pane 3 provides live facility telemetry and access control feed from door badge readers (GET /ops/facility-feed, ev:ops.badge.scan) and quick staff credential lookup (GET /staff/lookup); and (7) Realtime reactive updates on work order lifecycle changes (ev:work_order.updated).",
+    purposeUr: "ہسپتال کی سہولیات، مشینری اور دیکھ بھال کے انتظام کے لیے 3 پین پر مشتمل جامع کمانڈ کنسول: (1) پہلا پین تمام ورک آرڈرز کا انتظام کرتا ہے جس میں ہنگامی خرابیوں کو اولین ترجیح دی جاتی ہے (GET /ops/work-orders, GET .../{wo_id})، ٹیکنیشن کی تفویض (POST .../assign)، پیش رفت کی نگرانی (POST .../start)، منسوخی (POST .../cancel) اور تکمیل (POST .../complete) شامل ہیں؛ (2) قانونی قاعدہ rule:a7fc19b5fc کا نفاذ: آپریشنز کا عملہ بیرونی ٹھیکیدار کے کام کی تکمیل پر بل واجب الادا تو بنا سکتا ہے لیکن براہ راست رقم ادا نہیں کر سکتا—ٹھیکیدار کی تمام ادائیگیاں خودکار طور پر اکاؤنٹنٹ کی اے پی قطار میں چلی جاتی ہیں؛ (3) دوسرا پین ہسپتال کے تمام اثاثوں اور بائیو میڈیکل آلات کا اندراج اور نگرانی کرتا ہے (GET /ops/assets, POST /ops/assets, PUT .../{asset_id})؛ (4) ماہانہ یوٹیلٹی بلز (بجلی، ڈیزل، آکسیجن) کا اندراج جو براہ راست مالیاتی کھاتوں سے جڑتے ہیں (POST /ops/utility-logs)؛ (5) ڈسچارج کے مراحل کی مرحلہ وار کلیئرنس اور فارغ شدہ بیڈز کی صفائی کی تصدیق (POST /beds/{id}/mark-cleaned)؛ اور (6) تیسرا پین ہسپتال کے دروازوں سے لائیو بیج اسکیننگ فیڈ اور عملے کی فوری تلاش فراہم کرتا ہے (GET /ops/facility-feed, GET /staff/lookup)۔",
+    steps: [
+      "Triage & Assign Work Orders: In Pane 1, inspect open work orders sorted with emergencies at the top. Click 'Assign' to allocate an internal technician or external vendor with estimated repair costs.",
+      "Track Progress & Mark Started: Once the technician arrives on site and begins work, click 'Start' to transition the work order from Assigned to In Progress.",
+      "Complete Work & Route to AP: When repairs conclude, click 'Complete', enter the final invoiced cost, and submit. Under Rule rule:a7fc19b5fc, contractor invoices route directly to the Accountant's Accounts Payable queue.",
+      "Manage Assets & Register Equipment: In Pane 2, monitor biomedical equipment, ward fixtures, and air-handling units. Click '+ Register Asset' to add new equipment with unique barcode tags and serial numbers.",
+      "Log Overhead Utilities: In Pane 2, record monthly utility bills (electricity, generator diesel, bulk oxygen cylinders) by selecting the overhead category and vendor, automatically generating accounts payable liabilities.",
+      "Clear Discharge & Confirm Bed Cleaned: Rapidly clear facility/linen discharge clearance stages for discharged inpatients, and record terminal bed sanitization so beds become instantly available for new admissions.",
+      "Monitor Facility Telemetry & Look Up Staff: In Pane 3, watch live badge scan events across hospital entryways and checkpoints, and verify employee credentials using the staff lookup search."
+    ],
+    stepsUr: [
+      "ورک آرڈرز کی ترجیح اور تفویض: پین 1 میں کھلے ورک آرڈرز کا معائنہ کریں جن میں ہنگامی خرابیاں سب سے اوپر ہوتی ہیں۔ 'Assign' پر کلک کر کے اندرونی ٹیکنیشن یا بیرونی ٹھیکیدار کو تخمینہ لاگت کے ساتھ کام تفویض کریں۔",
+      "پیش رفت کی نگرانی اور کام کا آغاز: جب ٹیکنیشن موقع پر پہنچ کر کام شروع کرے تو 'Start' پر کلک کریں تا کہ حالت 'In Progress' میں تبدیل ہو جائے۔",
+      "کام کی تکمیل اور بل کی منتقلی: مرمت مکمل ہونے پر 'Complete' پر کلک کریں اور حتمی لاگت درج کریں۔ قاعدہ rule:a7fc19b5fc کے تحت ٹھیکیدار کا بل خودکار طور پر اکاؤنٹنٹ کی اے پی قطار میں چلا جاتا ہے۔",
+      "اثاثہ جات کی نگرانی اور اندراج: پین 2 میں بائیو میڈیکل اور ہسپتال کے آلات کی فہرست دیکھیں۔ '+ Register Asset' پر کلک کر کے بارکوڈ ٹیگ اور سیریل نمبر کے ساتھ نیا آلہ رجسٹر کریں۔",
+      "یوٹیلٹی بلز کا اندراج: پین 2 میں بجلی، ڈیزل اور آکسیجن کے ماہانہ بل درج کریں تا کہ مالیاتی کھاتے میں ادائیگی کی ذمہ داری بن سکے۔",
+      "ڈسچارج کلیئرنس اور بیڈ صفائی: ڈسچارج ہونے والے مریضوں کے دیکھ بھال کے مراحل کلیئر کریں اور فارغ بیڈ کی صفائی کی تصدیق درج کریں تا کہ بیڈ فوراً نئے داخلے کے لیے تیار ہو جائے۔",
+      "لائیو بیج فیڈ اور عملے کی تلاش: پین 3 میں دروازوں سے ملازمین کی آمد و رفت کی لائیو اسکیننگ دیکھیں اور عملے کی تصدیق کے لیے سرچ کا استعمال کریں۔"
+    ],
+    faq: [
+      [
+        "Why can't facility operations staff mark contractor work orders as paid under Rule rule:a7fc19b5fc?",
+        "Under strict statutory segregation of financial duties (Rule rule:a7fc19b5fc), facility operations and maintenance personnel are authorized to raise expenditure liabilities and certify work completion, but they have zero disbursement authority. All contractor invoices automatically route to the Accountant's Accounts Payable queue, where dual-authorization and fund disbursements are strictly controlled."
+      ],
+      [
+        "What is the required lifecycle sequence for work orders in Pane 1?",
+        "Work orders must strictly follow the progression: Reported → Assigned → InProgress → Completed. A work order cannot be completed directly from Reported status without being assigned and started. Unneeded or duplicate work orders can be cancelled with an audited operational reason from Reported or Assigned status."
+      ],
+      [
+        "How are medical equipment write-offs and disposals handled in Pane 2?",
+        "Equipment is actively monitored with maintenance logs in Pane 2. If equipment is officially decommissioned or written off, it receives the terminal ASSET_DISPOSED status. Under hospital compliance policy, no further work orders or maintenance activities can be scheduled on disposed assets."
+      ],
+      [
+        "When should a bed be marked cleaned using POST /beds/{id}/mark-cleaned?",
+        "Following patient discharge or ward transfer, the bed enters a 'Dirty' state. Once environmental housekeeping completes full terminal disinfection and linen replacement, the housekeeping supervisor marks the bed cleaned. This immediately updates the Bed Matrix across Admissions and Reception, unlocking the bed for new patient allocation."
+      ],
+      [
+        "How does the live facility feed in Pane 3 assist with access control and safety drills?",
+        "Pane 3 receives live door badge telemetry from facility checkpoints and electronic turnstiles (ev:ops.badge.scan). During security sweeps, emergency code reds, or evacuation drills, security officers can verify real-time presence and query employee facts using staff lookup."
+      ]
+    ],
+    faqUr: [
+      [
+        "قاعدہ rule:a7fc19b5fc کے تحت آپریشنز عملہ ٹھیکیدار کے بلوں کو ادا شدہ کیوں نہیں کر سکتا؟",
+        "مالیاتی فرائض کی سخت تقسیم کے تحت، آپریشنز اور دیکھ بھال کے عملے کو اخراجات کا اندراج کرنے اور کام کی تکمیل کی تصدیق کا اختیار ہے، لیکن رقم ادا کرنے کا کوئی اختیار نہیں۔ تمام بل خودکار طور پر اکاؤنٹنٹ کی اے پی قطار میں جاتے ہیں جہاں ادائیگیوں کی سخت نگرانی ہوتی ہے۔"
+      ],
+      [
+        "پین 1 میں ورک آرڈرز کے مراحل کی ضروری ترتیب کیا ہے؟",
+        "ورک آرڈرز کو لازماً مرحلہ وار آگے بڑھایا جاتا ہے: درج شدہ → تفویض شدہ → جاری → مکمل۔ کسی بھی کام کو شروع کیے بغیر براہ راست مکمل نہیں کیا جا سکتا۔ غیر ضروری کام کو وجہ کے ساتھ منسوخ کیا جا سکتا ہے۔"
+      ],
+      [
+        "پین 2 میں ناکارہ طبی آلات کے اخراج اور ضائع کرنے کا کیا طریقہ ہے؟",
+        "پین 2 میں تمام آلات کی مکمل ہسٹری محفوظ ہوتی ہے۔ اگر کوئی مشین مستقل ناکارہ ہو جائے تو اسے ASSET_DISPOSED قرار دیا جاتا ہے، جس کے بعد اس پر مزید کوئی دیکھ بھال یا کام شیڈول نہیں ہو سکتا۔"
+      ],
+      [
+        "بیڈ کی صفائی کا ریکارڈ POST /beds/{id}/mark-cleaned کے ذریعے کب درج کرنا چاہیے؟",
+        "مریض کے ڈسچارج یا وارڈ ٹرانسفر کے بعد بیڈ گندی حالت میں چلا جاتا ہے۔ صفائی اور جراثیم کشی مکمل ہونے پر سپروائزر اسے صاف نشان زد کرتا ہے جس سے ایڈمیشن اور استقبالیہ پر یہ بیڈ فوری طور پر نئے مریض کے لیے دستیاب ہو جاتا ہے۔"
+      ],
+      [
+        "پین 3 کی لائیو فیڈ ہسپتال کے حفاظتی انتظامات میں کیسے مددگار ہے؟",
+        "پین 3 ہسپتال کے تمام دروازوں اور چیک پوائنٹس سے ملازمین کے بیج اسکین کی لائیو معلومات فراہم کرتا ہے۔ ہنگامی صورتحال یا ڈرلز کے دوران سیکیورٹی عملہ ہسپتال میں موجود عملے کی تصدیق کر سکتا ہے۔"
+      ]
+    ]
+  },
   payroll: {
     title: "Payroll (Staff payroll processing & payslips)",
     titleUr: "پے رول (اسٹاف تنخواہیں اور سیلری سلپس)",
