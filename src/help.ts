@@ -10,6 +10,76 @@ export type HelpPage = {
   faqUr: [string, string][];
 };
 export const help: Record<string, HelpPage> = {
+  holiday_calendar: {
+    title: "Holiday calendar",
+    titleUr: "سرکاری تعطیلات کا کیلنڈر",
+    purpose: "Management and institutional consultation of gazetted public holidays shared between Human Resources, Hospital Administration, and all facility staff: (1) Year horizon calendar view displaying public holidays grouped by month or structured table (GET /holidays); (2) Batch entry of the official gazetted holiday list all at once (POST /holidays) per Rule rule:748c506511; (3) Non-recurring holiday policy requiring yearly gazette entry because lunar Eids and gazetted observances shift each year (Rule rule:748c506511); (4) Statutory policy distinction ensuring fixed-schedule staff are off on paid holiday (flag Holiday) while rostered shift workers work as scheduled with compensatory overtime (Rule rule:e7b6fb1f5e); (5) Deletion prohibition policy enforcing version-controlled withdrawal (is_active: false) via PATCH /holidays/{holiday_id} with row_version concurrency protection (Rule rule:6b35ae8101); (6) Automatic attendance flag recomputation when modifying today or historical holiday dates without disrupting finalized payroll runs (Rule rule:6b35ae8101); (7) Date range filtering and historical/withdrawn holiday visibility toggles; and (8) Printable annual hospital holiday notice for public facility bulletin boards.",
+    purposeUr: "ہیومن ریسورسز، ہسپتال انتظامیہ اور تمام عملے کے لیے سرکاری و قومی تعطیلات کا باضابطہ مشترکہ نظام: (1) پورے سال کی سرکاری تعطیلات کا ماہانہ اور ٹیبل منظر (GET /holidays)؛ (2) قاعدہ rule:748c506511 کے تحت پورے سال کی گزٹڈ فہرست کا ایک ساتھ بیک وقت اندراج (POST /holidays)؛ (3) قمری عیدوں اور تاریخوں کی سالانہ تبدیلی کے باعث تعطیلات کے عدم تکرار کا ضابطہ (قاعدہ rule:748c506511)؛ (4) قاعدہ rule:e7b6fb1f5e کے تحت مستقل عملے کی بامعاوضہ چھٹی اور روسٹرڈ عملے کی معمول کے مطابق ڈیوٹی کا انتظام؛ (5) قاعدہ rule:6b35ae8101 کے تحت مستقل حذف کی ممانعت اور رو ورژن کے ساتھ واپسی/تنسیخ (is_active: false, PATCH /holidays/{id})؛ (6) آج یا ماضی کی تاریخ بدلنے پر پے رول کو چھیڑے بغیر حاضری کے جھنڈوں کی خودکار دوبارہ پروسیسنگ (قاعدہ rule:6b35ae8101)؛ (7) تاریخوں کے فلٹرز اور منسوخ شدہ تعطیلات کا معائنہ؛ اور (8) ہسپتال کے نوٹس بورڈز کے لیے پرنٹ کے قابل سالانہ شیٹ۔",
+    steps: [
+      "Select Operational Year & Horizon: Use the year dropdown or the previous/next year buttons to navigate to the target calendar year (defaults to the current operational year).",
+      "Switch Display Layouts: Toggle between the 12-month grouped cards view (highlighting holidays by month) and the detailed tabular list view showing exact dates, days of the week, occasion names, and notes.",
+      "Batch Enter Gazetted Holidays: As an HR administrator (hr.holiday.manage), click '+ Enter Gazetted Holidays' (POST /holidays). Under Rule rule:748c506511, enter the entire official government gazette list at once in the batch grid.",
+      "Preload Standard National Holidays: In the batch modal, click 'Preload National Holidays' to automatically seed fixed secular holidays (Pakistan Day, Labour Day, Independence Day, Quaid Day), then add the lunar religious holidays for the year.",
+      "Review Non-Recurring Observance Policy: Notice that holidays never automatically recur across consecutive years under Rule rule:748c506511 because Islamic lunar holidays (Eid ul-Fitr, Eid ul-Adha, Ashura) advance by roughly 11 days every solar year.",
+      "Edit or Reschedule a Public Holiday: Click 'Edit' on any holiday card or row to adjust the name, administrative notes, or moved date. The update submits via PATCH /holidays/{id} using optimistic concurrency control (expected_version).",
+      "Understand Attendance Recomputation on Past Dates: Under Rule rule:6b35ae8101, modifying today's date or a past holiday automatically triggers background attendance flag recalculation for affected employees, while existing finalized payroll runs remain safe and untouched.",
+      "Withdraw a Holiday Without Deletion: If an announced holiday is officially cancelled, click 'Withdraw' (Rule rule:6b35ae8101). Hard deletion is prohibited; the entry is deactivated (is_active: false) and can be viewed using the 'Include Withdrawn' toggle.",
+    ],
+    stepsUr: [
+      "آپریشنل سال اور دورانیہ منتخب کریں: سال کے ڈراپ ڈاؤن یا پچھلا/اگلا سال بٹنوں سے مطلوبہ کیلنڈر سال منتخب کریں (خودکار طور پر موجودہ سال منتخب ہوتا ہے)۔",
+      "ڈسپلے منظر تبدیل کریں: 12 ماہ کے کارڈز کے منظر اور تفصیلی ٹیبل منظر کے درمیان سوئچ کریں تاکہ تاریخیں، نام اور نوٹس دیکھے جا سکیں۔",
+      "سرکاری تعطیلات کا ایک ساتھ اندراج: ایچ آر ایڈمن کی حیثیت سے '+ سرکاری تعطیلات کا اندراج' دبائیں (POST /holidays)۔ قاعدہ rule:748c506511 کے تحت پورے سال کی گزٹڈ فہرست ایک ہی باری میں درج کریں۔",
+      "معیاری قومی تعطیلات لوڈ کریں: فارم میں 'معیاری تعطیلات لوڈ کریں' دبا کر مستقل قومی چھٹیاں (یوم پاکستان، یوم مزدور، یوم آزادی، قائداعظم ڈے) فوری بھریں اور سال کے مطابق قمری عیدیں شامل کریں۔",
+      "عدم تکرار کے ضابطے کا جائزہ: قاعدہ rule:748c506511 کے تحت نوٹ کریں کہ تعطیلات خودکار دہرائی نہیں جاتیں کیونکہ قمری تاریخیں (عید الفطر، عید الاضحی، عاشورہ) ہر سال تقریباً 11 دن آگے بڑھ جاتی ہیں۔",
+      "تعطیل میں ترمیم یا تاریخ کی تبدیلی: کارڈ یا قطار پر 'ترمیم' دبا کر نام، نوٹس یا تاریخ تبدیل کریں۔ یہ تبدیلی رو ورژن کے ساتھ PATCH /holidays/{id} کے ذریعے محفوظ ہوتی ہے۔",
+      "ماضی کی تاریخ بدلنے پر حاضری پروسیسنگ: قاعدہ rule:6b35ae8101 کے تحت، آج یا ماضی کی تاریخ میں تبدیلی حاضری کے جھنڈوں کو خودکار اپ ڈیٹ کرتی ہے جبکہ تیار شدہ پے رول محفوظ اور غیر تبدیل شدہ رہتے ہیں۔",
+      "حذف کے بغیر تعطیل واپس لیں: سرکاری چھٹی منسوخ ہونے پر 'واپس لیں' دبائیں (قاعدہ rule:6b35ae8101)۔ مستقل حذف ممنوع ہے، ریکارڈ غیر فعال (is_active: false) ہو جاتا ہے جسے فلٹر آن کر کے دیکھا جا سکتا ہے۔",
+    ],
+    faq: [
+      [
+        "Why does the system prohibit recurring holiday rules and require entering the gazetted list annually (Rule 748c506511)?",
+        "Under statutory Rule rule:748c506511, recurring annual holiday rules are prohibited because key gazetted public holidays in Pakistan follow the Hijri lunar calendar (Eid ul-Fitr, Eid ul-Adha, Eid Milad-un-Nabi, Ashura) and shift by approximately 10 to 12 Gregorian days each year, subject to official moon-sighting committee announcements. The HR department must enter the official gazetted holiday list afresh each year via POST /holidays as an all-or-nothing batch submission.",
+      ],
+      [
+        "How do public holidays affect fixed-schedule employees versus rotating rostered personnel (Rule e7b6fb1f5e)?",
+        "Under statutory Rule rule:e7b6fb1f5e, public holidays are statutory paid rest days. For administrative, billing, and outpatient staff with fixed default shifts, the attendance engine flags the day as 'Holiday' (paid rest day). However, hospital inpatient wards, intensive care units, and emergency departments operate 24/7 without closure. Clinical, nursing, and support personnel assigned to duties on the duty roster work as rostered and receive statutory extra duty compensatory allowances for holiday service.",
+      ],
+      [
+        "Why is hard deletion prohibited for public holidays, and how are cancellations handled (Rule 6b35ae8101)?",
+        "Under statutory Rule rule:6b35ae8101, hard deletion (DELETE) of public holiday records is strictly forbidden to preserve historical labor compliance and payroll audit trails. When a gazetted holiday is cancelled by the government or gazetted in error, the HR administrator withdraws the record using PATCH /holidays/{holiday_id} with is_active set to false and the current row_version supplied as expected_version. Withdrawn holidays remain queryable with include_inactive=true.",
+      ],
+      [
+        "What happens to attendance timecards and payroll runs when a past or current holiday date is modified (Rule 6b35ae8101)?",
+        "Under statutory Rule rule:6b35ae8101, modifying or withdrawing a holiday on today's date or a historical past date causes the attendance computation worker to automatically recalculate worked hours, late minutes, and attendance flags for that date across all hospital staff. However, any formal payroll run that has already been generated and finalized by finance remains locked and frozen, ensuring that accounting ledger balances and disbursed bank transfers are never silently invalidated.",
+      ],
+      [
+        "How does the batch creation endpoint handle duplicate holiday date collisions (Rule 748c506511)?",
+        "Under statutory Rule rule:748c506511, POST /holidays operates on an all-or-nothing transactional basis. If any proposed holiday date in the batch is already occupied by an active public holiday, the backend rejects the entire submission with HTTP 409 and error code HOLIDAY_DATE_TAKEN. The server error details provide details.entry_index indicating the exact row in the submission that caused the conflict, allowing the frontend to highlight the offending row for immediate correction.",
+      ],
+    ],
+    faqUr: [
+      [
+        "سسٹم تعطیلات کے خودکار تکرار کو کیوں روکتا ہے اور ہر سال نیا اندراج کیوں مانگتا ہے (قاعدہ 748c506511)؟",
+        "قانونی قاعدہ rule:748c506511 کے تحت، سالانہ تکرار کے خودکار قواعد اس لیے ممنوع ہیں کیونکہ پاکستان میں اہم سرکاری تعطیلات قمری ہجری کیلنڈر کے تابع ہیں (عید الفطر، عید الاضحی، عید میلاد النبی، عاشورہ) اور ہر سال شمسی تاریخوں کے لحاظ سے 10 سے 12 دن تبدیل ہوتی ہیں۔ اسی لیے ایچ آر ایڈمن کو ہر سال کی باضابطہ گزٹڈ فہرست POST /holidays کے ذریعے ایک ہی بار درج کرنا لازمی ہے۔",
+      ],
+      [
+        "سرکاری تعطیلات مستقل شفٹ والے اور روسٹر والے عملے پر کس طرح اثر انداز ہوتی ہیں (قاعدہ e7b6fb1f5e)؟",
+        "قانونی قاعدہ rule:e7b6fb1f5e کے تحت، سرکاری تعطیلات بامعاوضہ آرام کے دن ہیں۔ انتظامی، بلنگ اور او پی ڈی عملے کے لیے جن کی فکسڈ شفٹ ہے، سسٹم خودکار 'تعطیل' (چھٹی بمع تنخواہ) کا جھنڈا لگاتا ہے۔ جبکہ ہسپتال کے ان ڈور وارڈز، آئی سی یو اور ایمرجنسی 24 گھنٹے کھلتے ہیں، اس لیے روسٹرڈ نرسیں، ڈاکٹرز اور معاون عملہ روسٹر کے مطابق معمول پر کام کرتے ہیں اور انہیں سرکاری چھٹی پر کام کرنے کا اضافی ڈیوٹی الاؤنس دیا جاتا ہے۔",
+      ],
+      [
+        "سرکاری تعطیلات کو مستقل حذف کرنا کیوں ممنوع ہے اور تنسیخ کیسے ہوتی ہے (قاعدہ 6b35ae8101)؟",
+        "قانونی قاعدہ rule:6b35ae8101 کے تحت، آڈٹ اور لیبر قوانین کے ریکارڈ کے تحفظ کے لیے تعطیلات کا مستقل حذف (DELETE) ممنوع ہے۔ جب کوئی تعطیل واپس لینی ہو تو ایچ آر ایڈمن PATCH /holidays/{id} کے ذریعے is_active کو false سیٹ کرتا ہے اور موجودہ row_version بھیجتا ہے۔ منسوخ شدہ تعطیلات ریکارڈ میں محفوظ رہتی ہیں اور انہیں دیکھا جا سکتا ہے۔",
+      ],
+      [
+        "جب آج یا ماضی کی کسی تعطیل کی تاریخ تبدیل کی جائے تو حاضری اور پے رول پر کیا اثر ہوتا ہے (قاعدہ 6b35ae8101)؟",
+        "قانونی قاعدہ rule:6b35ae8101 کے تحت، آج یا ماضی کی کسی تاریخ کی تعطیل میں ترمیم یا تنسیخ سے اس دن کے عملے کی حاضری کے ریکارڈز خودکار طور پر دوبارہ پروسیس ہوتے ہیں۔ البتہ فنانس ڈپارٹمنٹ کی طرف سے پہلے سے تیار اور منظور شدہ پے رول منجمد رہتا ہے اور اس میں کوئی خودکار ردوبدل نہیں ہوتا تاکہ مالیاتی توازن خراب نہ ہو۔",
+      ],
+      [
+        "جب بیچ اندراج میں کسی تاریخ کا ٹکراؤ ہو تو سسٹم اس سے کیسے نمٹتا ہے (قاعدہ 748c506511)؟",
+        "قانونی قاعدہ rule:748c506511 کے مطابق، POST /holidays سب یا کچھ نہیں کی بنیاد پر کام کرتا ہے۔ اگر بیچ میں کسی بھی تعطیل کی تاریخ پہلے سے موجود چھٹی سے ٹکراتی ہے تو سرور پورا بیچ مسترد کر دیتا ہے اور HOLIDAY_DATE_TAKEN ایرر میں details.entry_index واپس کرتا ہے، جس سے اسکرین پر اس مخصوص قطار کو فوری واضح کر دیا جاتا ہے۔",
+      ],
+    ],
+  },
   attendance: {
     title: "Staff attendance, punches & timecards",
     titleUr: "عملے کی حاضری، پنچز اور ٹائم کارڈز",

@@ -20,6 +20,7 @@ export const phase1Screens = [
 const approvalScreens = ["approval_queue", "charity_approvals"];
 // Coverage grows screen by screen; Phase 1 acceptance remains separate.
 export const deliveredHelpScreens = [
+  "holiday_calendar",
   "attendance",
   "support_roster",
   "duty_roster_hr",
@@ -160,6 +161,39 @@ const g = (
 // IDs are also attached to the actual controls. The build rejects missing
 // mappings and empty translations instead of treating a page as coverage.
 export const controlGuides: Record<string, ControlGuide> = {
+  // Screen 151: holiday_calendar (Public & Gazetted Holiday Calendar)
+  "holiday_calendar.banner_dismiss_error": g(["holiday_calendar"], ["Dismiss error button", "خرابی کا بینر بند کریں"], ["Dismisses holiday calendar error banner.", "تعطیلات کیلنڈر کی خرابی کا بینر بند کرتا ہے۔"]),
+  "holiday_calendar.banner_dismiss_success": g(["holiday_calendar"], ["Dismiss success button", "کامیابی کا بینر بند کریں"], ["Dismisses operational confirmation banner.", "کامیابی کا تصدیقی بینر بند کرتا ہے۔"]),
+  "holiday_calendar.batch_btn_add_row": g(["holiday_calendar"], ["Add row button", "نئی قطار بٹن"], ["Adds another holiday row to the batch entry table.", "تعطیلات کی فہرست میں مزید ایک نئی قطار شامل کرتا ہے۔"]),
+  "holiday_calendar.batch_btn_cancel": g(["holiday_calendar"], ["Cancel batch modal button", "منسوخ بٹن"], ["Closes gazetted holidays batch entry dialog.", "تعطیلات کے اندراج کا فارم منسوخ کرتا ہے۔"]),
+  "holiday_calendar.batch_btn_preload_gazetted": g(["holiday_calendar"], ["Preload gazetted holidays button", "معیاری تعطیلات لوڈ کریں"], ["Populates standard gazetted national holidays for the selected year.", "منتخب سال کے لیے معیاری قومی اور سرکاری تعطیلات خودکار لوڈ کرتا ہے۔"]),
+  "holiday_calendar.batch_btn_remove_row": g(["holiday_calendar"], ["Remove row button", "قطار خارج کریں"], ["Removes this holiday row from the batch entry list.", "فہرست سے اس قطار کو خارج کرتا ہے۔"]),
+  "holiday_calendar.batch_btn_submit": g(["holiday_calendar"], ["Submit batch holidays button", "تعطیلات محفوظ کریں"], ["Submits full gazetted holiday list at once to server (POST /holidays, rule:748c506511).", "پورے سال کی سرکاری تعطیلات ایک ساتھ سرور پر محفوظ کرتا ہے۔"]),
+  "holiday_calendar.batch_input_date": g(["holiday_calendar"], ["Batch holiday date input", "تعطیل کی تاریخ"], ["Date of the gazetted holiday in YYYY-MM-DD format.", "سرکاری تعطیل کی تاریخ۔"]),
+  "holiday_calendar.batch_input_name": g(["holiday_calendar"], ["Batch holiday name input", "تعطیل کا نام"], ["Title or occasion of the public holiday.", "سرکاری تعطیل کا عنوان یا نام۔"]),
+  "holiday_calendar.batch_input_notes": g(["holiday_calendar"], ["Batch holiday notes input", "تعطیل کے نوٹس"], ["Optional administrative description or notes.", "اختیاری انتظامی وضاحتی نوٹس۔"]),
+  "holiday_calendar.btn_next_year": g(["holiday_calendar"], ["Next year button", "اگلا سال"], ["Advances calendar to the subsequent calendar year.", "کیلنڈر کو اگلے سال پر منتقل کرتا ہے۔"]),
+  "holiday_calendar.btn_open_batch_modal": g(["holiday_calendar"], ["Enter gazetted holidays button", "سرکاری تعطیلات کا اندراج"], ["Opens modal to batch enter gazetted holidays (rule:748c506511).", "پورے سال کی سرکاری تعطیلات درج کرنے کا فارم کھولتا ہے۔"]),
+  "holiday_calendar.btn_prev_year": g(["holiday_calendar"], ["Previous year button", "پچھلا سال"], ["Navigates calendar to the preceding calendar year.", "کیلنڈر کو پچھلے سال پر لے جاتا ہے۔"]),
+  "holiday_calendar.btn_print_calendar": g(["holiday_calendar"], ["Print calendar button", "کیلنڈر پرنٹ کریں"], ["Prints annual public holiday schedule for hospital notice boards.", "ہسپتال کے نوٹس بورڈز کے لیے سالانہ تعطیلات کی پرنٹ ایبل فہرست تیار کرتا ہے۔"]),
+  "holiday_calendar.btn_refresh": g(["holiday_calendar"], ["Refresh calendar button", "تازہ کریں"], ["Reloads public holidays list from server (GET /holidays).", "سرور سے تعطیلات کی فہرست دوبارہ لوڈ کرتا ہے۔"]),
+  "holiday_calendar.btn_view_months": g(["holiday_calendar"], ["Months view button", "ماہانہ منظر"], ["Switches to monthly grouped cards view.", "12 ماہ کے کارڈز کے منظر پر تبدیل کرتا ہے۔"]),
+  "holiday_calendar.btn_view_table": g(["holiday_calendar"], ["Table view button", "ٹیبل منظر"], ["Switches to structured tabular list view.", "تفصیلی ٹیبل منظر پر تبدیل کرتا ہے۔"]),
+  "holiday_calendar.edit_btn_cancel": g(["holiday_calendar"], ["Cancel edit modal button", "منسوخ بٹن"], ["Closes holiday edit dialog.", "ترمیم کا فارم منسوخ کرتا ہے۔"]),
+  "holiday_calendar.edit_btn_submit": g(["holiday_calendar"], ["Save holiday changes button", "تبدیلی محفوظ کریں"], ["Submits holiday updates via PATCH /holidays/{id} (rule:6b35ae8101).", "تعطیل میں تبدیلی سرور پر محفوظ کرتا ہے۔"]),
+  "holiday_calendar.edit_input_date": g(["holiday_calendar"], ["Edit holiday date input", "تاریخ تبدیلی"], ["Updated date for the public holiday (YYYY-MM-DD).", "تعطیل کی نئی تاریخ۔"]),
+  "holiday_calendar.edit_input_name": g(["holiday_calendar"], ["Edit holiday name input", "نام تبدیلی"], ["Updated title or occasion of the holiday.", "تعطیل کا نیا نام۔"]),
+  "holiday_calendar.edit_input_notes": g(["holiday_calendar"], ["Edit holiday notes input", "نوٹس تبدیلی"], ["Updated administrative notes for the holiday.", "تعطیل کے نئے نوٹس۔"]),
+  "holiday_calendar.filter_date_from": g(["holiday_calendar"], ["Filter date from input", "از تاریخ فلٹر"], ["Start date for holiday range query.", "تعطیلات کے استفسار کی ابتدائی تاریخ۔"]),
+  "holiday_calendar.filter_date_to": g(["holiday_calendar"], ["Filter date to input", "تا تاریخ فلٹر"], ["End date for holiday range query.", "تعطیلات کے استفسار کی آخری تاریخ۔"]),
+  "holiday_calendar.table_btn_edit": g(["holiday_calendar"], ["Table edit holiday button", "ترمیم بٹن"], ["Opens dialog to rename or move this public holiday.", "اس تعطیل میں ترمیم یا تاریخ بدلنے کا فارم کھولتا ہے۔"]),
+  "holiday_calendar.table_btn_reactivate": g(["holiday_calendar"], ["Reactivate holiday button", "دوبارہ فعال کریں"], ["Restores a previously withdrawn holiday (PATCH /holidays/{id} with is_active: true).", "منسوخ شدہ تعطیل کو دوبارہ فعال کرتا ہے۔"]),
+  "holiday_calendar.table_btn_withdraw": g(["holiday_calendar"], ["Withdraw holiday button", "تعطیل واپس لیں"], ["Opens confirmation to withdraw holiday (rule:6b35ae8101, is_active: false).", "تعطیل کی تنسیخ کا تصدیقی فارم کھولتا ہے۔"]),
+  "holiday_calendar.toggle_inactive": g(["holiday_calendar"], ["Include inactive checkbox", "منسوخ شدہ دیکھیں"], ["Includes withdrawn holidays in calendar display.", "کیلنڈر میں منسوخ شدہ تعطیلات بھی دکھاتا ہے۔"]),
+  "holiday_calendar.withdraw_btn_cancel": g(["holiday_calendar"], ["Cancel withdrawal button", "منسوخ بٹن"], ["Cancels holiday withdrawal dialog.", "تعطیل واپسی منسوخ کرتا ہے۔"]),
+  "holiday_calendar.withdraw_btn_confirm": g(["holiday_calendar"], ["Confirm withdrawal button", "واپسی کی تصدیق"], ["Confirms holiday withdrawal on server (PATCH /holidays/{id}, rule:6b35ae8101).", "تعطیل کی واپسی سرور پر لاگو کرتا ہے۔"]),
+  "holiday_calendar.year_select": g(["holiday_calendar"], ["Year selector", "سال کا انتخاب"], ["Selects operational year for holiday calendar.", "تعطیلات کے سال کا انتخاب کرتا ہے۔"]),
+
   // Screen 150: attendance (Staff attendance, punches & timecards)
   "attendance.banner_dismiss_error": g(["attendance"], ["Dismiss error button", "خرابی کا بینر بند کریں"], ["Dismisses attendance error alert.", "حاضری کی خرابی کا بینر بند کرتا ہے۔"]),
   "attendance.banner_dismiss_success": g(["attendance"], ["Dismiss success button", "کامیابی کا بینر بند کریں"], ["Dismisses operational success banner.", "کامیابی کا بینر بند کرتا ہے۔"]),

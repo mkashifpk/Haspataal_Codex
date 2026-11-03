@@ -1,7 +1,7 @@
 # Haspataal checkpoint
 Last updated: 03 November 2026, Antigravity (Codex pair), Asia/Karachi.
 
-## Active request: Phase 8 Screen 151 `holiday_calendar` (Holiday calendar)
+## Active request: Phase 8 Screen 152 `holiday_calendar_admin` (Holiday calendar admin)
 Executing the Haspataal HMS Roadmap in dependency order along with all tests and MCP progress reporting:
 - **Phase 7 ("Finance, billing and back offices")**: 100% COMPLETE (Screens 133–142, Proposals 286–295).
 - **Phase 8 ("People, facility and IT")**:
@@ -13,9 +13,47 @@ Executing the Haspataal HMS Roadmap in dependency order along with all tests and
   - Screen 148: **`duty_roster_hr`** ("Duty rosters (all staff)", Position 148, 94 points, workspace `hr`) — **COMPLETED** (Proposal **301** awaiting human review on `/docs -> My progress`).
   - Screen 149: **`support_roster`** ("Support-staff duty roster & roll call", Position 149, 94 points, workspace `ops_admin`) — **COMPLETED** (Proposal **302** awaiting human review on `/docs -> My progress`).
   - Screen 150: **`attendance`** ("Staff attendance, punches & timecards", Position 150, 63 points, workspace `hr`) — **COMPLETED** (Proposal **303** awaiting human review on `/docs -> My progress`).
-  - Screen 151: **`holiday_calendar`** ("Holiday calendar", Position 151, 44 points, workspace `self_service`) — **NEXT**.
-    - Scope: Employee self-service view of gazetted and institutional holidays.
-    - Next Concrete Steps: Retrieve `get_screen_bundle("holiday_calendar")`, save contract, generate typescript client, and begin implementation.
+  - Screen 151: **`holiday_calendar`** ("Holiday calendar", Position 151, 44 points, workspace `hr`) — **COMPLETED** (Proposal **304** awaiting human review on `/docs -> My progress`).
+  - Screen 152: **`holiday_calendar_admin`** ("Holiday calendar admin", Position 152, 44 points, workspace `ops_admin`) — **NEXT**.
+    - Scope: Operations administration view of gazetted public holidays and facility closure exceptions.
+    - Next Concrete Steps: Retrieve `get_screen_bundle("holiday_calendar_admin")`, save contract, generate typescript client, and begin implementation.
+
+---
+
+### Completed Screen 151 (`holiday_calendar`) Checkpoint
+- **Workflow & Standards**: Gazetted public holiday calendar governance shared across HR, Hospital Administration, and staff (`holiday_calendar`, Workspace `hr`, Position 151, 44 points):
+  - **Annual Horizon & Months View (`GET /holidays`):**
+    - Full year selection (2000–2100) with quick previous/next year controls and date range filters.
+    - Dual display modes: 12-month grouped cards view and structured tabular directory.
+    - Public holidays treated as statutory paid rest days per Rule `rule:e7b6fb1f5e`.
+  - **Batch Entry of Official Gazetted Calendar (`POST /holidays`):**
+    - All-or-nothing batch submission per Rule `rule:748c506511` ensuring entire annual gazette is registered at once.
+    - Quick preloading of statutory national holidays (Pakistan Day, Labour Day, Independence Day, Quaid Day).
+    - Detailed row collision highlighting if server returns `HOLIDAY_DATE_TAKEN` with `details.entry_index`.
+  - **Non-Recurring Holiday Policy (`rule:748c506511`):**
+    - Prohibits recurring annual holiday templates: lunar Islamic holidays (Eid ul-Fitr, Eid ul-Adha, Ashura) shift 10–12 days each year, requiring verified annual gazette entry.
+  - **Versioned Rescheduling & Deletion Prohibition (`PATCH /holidays/{holiday_id}`):**
+    - Deletion is prohibited per Rule `rule:6b35ae8101`: cancellations withdraw entries via `is_active: false`.
+    - Concurrency protection sending current `row_version` as `expected_version` (`VERSION_CONFLICT` guard).
+    - Modifying today or past holidays triggers attendance flag recomputation while preserving finalized payroll runs.
+  - **Service Capability Gating:**
+    - Resolves `full` (with `hr.holiday.manage`), `records` (view-only for regular staff), and `hidden` modes.
+- **Contracts**: `contracts/holiday_calendar.json` (3 endpoints, 3 statutory rules, 17 rubric items). Generated client: `src/generated/holiday_calendar.ts`.
+- **Domain Policies & Rules (`src/holiday-calendar-policy.ts`)**:
+  - `getHolidayCalendarCapabilityView`, `validateBatchHolidays`, `validateHolidayPatch`, `isPastOrTodayHoliday`, `groupHolidaysByMonth`, `MONTH_NAMES_BILINGUAL`, and `HOLIDAY_ERROR_MESSAGES`.
+- **UI Architecture (`src/screens/HolidayCalendar.tsx`)**:
+  - 12-month card and table layouts with year navigator, batch entry modal, edit/move modal, and withdrawal dialog.
+  - Wired into `src/App.tsx`, `scripts/check-help.mjs`, `src/foundation-catalogue.json` (3 tasks), `src/foundation-task-map.json` (3 controls), and `src/foundation-help.ts` (31 interactive controls mapped with bilingual titles and guides).
+  - Authored comprehensive handbook entry and 5 role FAQs in `src/help.ts`; verified bundled screenshots in `public/handbook/holiday_calendar-en.png` and `holiday_calendar-ur.png`.
+- **Verification**:
+  - Automated unit tests: `tests/holiday-calendar.test.mjs` passed (7/7 tests).
+  - Help check: `node scripts/check-help.mjs` passed (150 screens, 3,870 controls, 2,835 groups, 69 FAQ seeds, 30 workspace guides).
+  - Full help coverage test: `node --test tests/help-coverage.test.mjs` passed (28/28 tests across 150 screens).
+  - Full test suite: `npm test` passed (790/790 tests across all 19 test suites).
+  - TypeScript compiler: `npx.cmd tsc --noEmit` passed with 0 errors.
+  - Production build: `npm.cmd run build` succeeded (`dist/assets/index-CP0sBRX8.js`).
+- **Proposal**:
+  - Proposal ID: **304** (status: `pending` on `/docs -> My progress`, build `index-CP0sBRX8.js`, 16 rubric items claimed, `q:fresh_data` left pending human review).
 
 ---
 
